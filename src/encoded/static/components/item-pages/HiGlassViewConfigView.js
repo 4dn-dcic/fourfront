@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, DropdownItem, Dropdown, Button } from 'react-bootstrap';
+import { DropdownButton, DropdownItem, Dropdown, Button, Modal } from 'react-bootstrap';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
@@ -65,16 +65,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         super(props);
         this.fullscreenButton = this.fullscreenButton.bind(this);
         this.saveButton = this.saveButton.bind(this);
-        this.cloneButton = this.cloneButton.bind(this);
+        this.cloneButton = this.cloneButton.bind(this);       
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
-        this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
+        this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });        
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
-
+        
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
          * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
@@ -91,11 +91,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'saveLoading'           : false,
             'cloneLoading'          : false,
             'releaseLoading'        : false,
-            'addFileLoading'        : false
+            'addFileLoading'        : false,
+            'modal'                 : null
         };
 
         this.higlassRef = React.createRef();
-    }
+    }     
 
 
     /**
@@ -185,13 +186,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     */
     handleSave(evt){
         const { href, context } = this.props;
-        const { genome_assembly } = this.state;
+        const { genome_assembly, modal } = this.state;
         evt.preventDefault();
 
         const hgc = this.getHiGlassComponent();
         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);   
+            
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
@@ -201,11 +202,36 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
-        if(context.status && typeof context.status === 'string' && (context.status === 'released' || context.status === 'released_to_project')) {
-            if(!confirm('You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?\r\n\r\nNote that you can also clone this display and share the new copy.'))
-                return;
+        if (modal === null && context.status && typeof context.status === 'string' && (context.status === 'released' || context.status === 'released_to_project')) {
+            this.setState(function (prevState, props) {
+                return {
+                    modal: (
+                        <Modal show onHide={this.hideModal}>
+                            <Modal.Header closeButton>
+                                <Modal.Title>Confirm Save</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                                You are overwriting a HiGlass Display Item that was previously shared with public.&nbsp;
+                        <strong>Are you sure?</strong>
+                                <br /><em>Note that you can also clone this display and share the new copy. </em>
+                            </Modal.Body>
+                            <Modal.Footer>
+                                <button onClick={this.handleSave} className="btn btn-success">
+                                    <i className={"icon icon-fw icon-check"} />OK
+                        </button>
+                                <button onClick={() => { this.setState({ 'modal': null }); }} className="btn btn-default">
+                                    <i className={"icon icon-fw icon-times"} />Cancel
+                        </button>
+                            </Modal.Footer>
+                        </Modal>
+                    )
+                }
+            });
+            /*if(!confirm('You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?\r\n\r\nNote that you can also clone this display and share the new copy.'))
+            return;*/ //default window.confirm dialog
+            return;
         }
-
+        
         // We're updating this object's view conf and the genome assembly.
         const payload = { 'viewconfig' : currentViewConf };
 
@@ -216,7 +242,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             payload.genome_assembly = genome_assembly;
         }
 
-        this.setState({ 'saveLoading' : true }, ()=>{
+        this.setState({ 'saveLoading' : true, 'modal': null }, ()=>{
             ajax.load(
                 href,
                 (resp)=>{
@@ -348,7 +374,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
         );
 
-    }
+    }    
 
     /**
     * Update the current Viewconf to add a new view with the file with the given uuid.
@@ -562,7 +588,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
             </button>
         );
-    }
+    }    
 
     cloneButton(){
         const { session } = this.props;
@@ -630,7 +656,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         const { isFullscreen, windowWidth, windowHeight, width, session } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig } = this.state;
+        const { addFileLoading, genome_assembly, viewConfig, modal } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
 
@@ -666,7 +692,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
-                        { this.statusChangeButton() }
+                        { this.statusChangeButton() }                        
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
@@ -678,6 +704,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>
+                { modal }
             </div>
         );
     }
