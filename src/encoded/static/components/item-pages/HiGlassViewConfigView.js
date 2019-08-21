@@ -65,16 +65,17 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         super(props);
         this.fullscreenButton = this.fullscreenButton.bind(this);
         this.saveButton = this.saveButton.bind(this);
-        this.cloneButton = this.cloneButton.bind(this);       
+        this.cloneButton = this.cloneButton.bind(this);
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
-        this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });        
+        this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
+        this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
-        
+
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
          * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
@@ -96,7 +97,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         };
 
         this.higlassRef = React.createRef();
-    }     
+    }
 
 
     /**
@@ -191,8 +192,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         const hgc = this.getHiGlassComponent();
         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);   
-            
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
@@ -202,36 +203,22 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
-        if (modal === null && context.status && typeof context.status === 'string' && (context.status === 'released' || context.status === 'released_to_project')) {
-            this.setState(function (prevState, props) {
-                return {
-                    modal: (
-                        <Modal show onHide={this.hideModal}>
-                            <Modal.Header closeButton>
-                                <Modal.Title>Confirm Save</Modal.Title>
-                            </Modal.Header>
-                            <Modal.Body>
-                                You are overwriting a HiGlass Display Item that was previously shared with public.&nbsp;
+        if(modal == null && context.status && typeof context.status === 'string' &&
+            (context.status === 'released' || context.status === 'released_to_project')) {
+            this.setState({
+                'modal':
+                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel} confirmButtonText="OK" cancelButtonText="Cancel" modalTitle="Confirm Save">
+                        You are overwriting a HiGlass Display Item that was previously shared with public.&nbsp;
                         <strong>Are you sure?</strong>
-                                <br /><em>Note that you can also clone this display and share the new copy. </em>
-                            </Modal.Body>
-                            <Modal.Footer>
-                                <button onClick={this.handleSave} className="btn btn-success">
-                                    <i className={"icon icon-fw icon-check"} />OK
-                        </button>
-                                <button onClick={() => { this.setState({ 'modal': null }); }} className="btn btn-default">
-                                    <i className={"icon icon-fw icon-times"} />Cancel
-                        </button>
-                            </Modal.Footer>
-                        </Modal>
-                    )
-                }
+                        <br /><em>Note that you can also clone this display and share the new copy.</em>
+                    </ConfirmModal>
             });
-            /*if(!confirm('You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?\r\n\r\nNote that you can also clone this display and share the new copy.'))
-            return;*/ //default window.confirm dialog
             return;
         }
-        
+        //default window.confirm dialog
+        /*if(!confirm('You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?\r\n\r\nNote that you can also clone this display and share the new copy.'))
+            return;*/
+
         // We're updating this object's view conf and the genome assembly.
         const payload = { 'viewconfig' : currentViewConf };
 
@@ -374,7 +361,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
         );
 
-    }    
+    }
+    /**
+    * Cancel/hide modal popup
+    * @returns {void}
+    */
+    handleModalCancel() {
+        this.setState({ 'modal': null });
+    }
 
     /**
     * Update the current Viewconf to add a new view with the file with the given uuid.
@@ -588,7 +582,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
             </button>
         );
-    }    
+    }
 
     cloneButton(){
         const { session } = this.props;
@@ -830,3 +824,35 @@ class CollapsibleViewConfOutput extends React.PureComponent {
         );
     }
 }
+
+/**
+ * Generic modal dialog popup. Customizable title, confirm/cancel button's text.
+ * TODO: this component can be moved to another file for generic use in portal.
+ */
+export const ConfirmModal = React.memo(function (props) {
+    const { handleConfirm, handleCancel, modalTitle, confirmButtonText, cancelButtonText } = props;
+    return (
+        <Modal show onHide={handleCancel}>
+            <Modal.Header closeButton>
+                <Modal.Title>{modalTitle || 'Confirm'}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {props.children || ''}
+            </Modal.Body>
+            <Modal.Footer>
+                <button type="button" onClick={handleConfirm} className="btn btn-success">
+                    <i className={"icon icon-fw icon-check"} />{confirmButtonText || 'OK'}
+                </button>
+                <button type="button" onClick={handleCancel} className="btn btn-default">
+                    <i className={"icon icon-fw icon-times"} />{cancelButtonText || 'Cancel'}
+                </button>
+            </Modal.Footer>
+        </Modal>);
+});
+ConfirmModal.PropTypes = {
+    'handleConfirm' : PropTypes.func.isRequired,
+    'handleCancel': PropTypes.func.isRequired,
+    'modalTitle': PropTypes.string,
+    'confirmButtonText': PropTypes.string,
+    'cancelButtonText': PropTypes.string
+};
