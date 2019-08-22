@@ -10,8 +10,8 @@ ORDER = [
     'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
     'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
     'treatment_agent', 'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck',
-    'quality_metric_bamqc', 'quality_metric_pairsqc',
-    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq',
+    'quality_metric_bamqc', 'quality_metric_pairsqc', 'quality_metric_margi',
+    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq', 'quality_metric_workflowrun',
     'quality_metric_atacseq', 'microscope_setting_d1', 'microscope_setting_d2',
     'microscope_setting_a1', 'microscope_setting_a2', 'file_fastq',
     'file_processed', 'file_reference', 'file_calibration', 'file_microscopy',
@@ -23,8 +23,7 @@ ORDER = [
     'data_release_update', 'software', 'analysis_step', 'workflow',
     'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
     'sysinfo', 'tracking_item', 'quality_metric_flag',
-    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run',
-    'quality_metric_margi'
+    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
 ]
 
 
