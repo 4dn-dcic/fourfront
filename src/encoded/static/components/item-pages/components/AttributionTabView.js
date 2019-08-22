@@ -71,7 +71,12 @@ export class AttributionTabView extends React.PureComponent {
     static getTabObject(props){
         var context = props.context;
         return {
-            tab : <span><i className="icon fas icon-users icon-fw"/> Attribution</span>,
+            tab : (
+                <React.Fragment>
+                    <i className="icon icon-users fas icon-fw"/>
+                    <span>Attribution</span>
+                </React.Fragment>
+            ),
             key : "attribution",
             disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (

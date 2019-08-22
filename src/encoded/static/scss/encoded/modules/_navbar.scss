@@ -113,7 +113,8 @@ div#top-nav.navbar-fixed-top {
         position: fixed;
         background-color: rgba(255,255,255,0.933);
         body.scrolled-past-top &,
-        body.is-full-screen .navbar-container & {
+        body.is-full-screen .navbar-container &,
+        body.is-item-view .navbar-container & {
             border-color: darken($navbar-background-color, 10%);
             box-shadow: 0 0 3px rgba(0,0,0,0.2);
         }
@@ -145,7 +146,7 @@ div#top-nav.navbar-fixed-top {
         //}
 
         @include navbar-fixed-position {
-            padding: 0 10px;
+            padding: 0;
             min-height: $navbar-small-height;
             height: $navbar-full-height;
             line-height: $navbar-full-height;
@@ -161,7 +162,8 @@ div#top-nav.navbar-fixed-top {
                 border-color $navbar-transition-length */;
 
             body.scrolled-past-top &,
-            body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) .navbar-container & {
+            body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) .navbar-container &,
+            body.is-item-view .navbar-container & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
                 //border-color: #d4d4d4;
@@ -237,7 +239,9 @@ div#top-nav.navbar-fixed-top {
 
                 @include navbar-fixed-position {
                     float: left; // To decrease width
-                    body.scrolled-past-top & {
+                    body.scrolled-past-top &,
+                    body.is-full-screen &,
+                    body.is-item-view & {
                         padding-left: 0px; // To offset logo shrinkage & keeping its min-width
                         > svg#logo_svg {
                                 margin-right: -18px;
@@ -267,7 +271,9 @@ div#top-nav.navbar-fixed-top {
                     }
         
                     @include navbar-fixed-position {
-                        body.scrolled-past-top & {
+                        body.scrolled-past-top &,
+                        body.is-full-screen &,
+                        body.is-item-view & {
                             font-size: 1.25rem;
                             transform: translate3d(-5px,0,0);
                         }
@@ -788,7 +794,8 @@ div#top-nav.navbar-fixed-top {
         }
 
         body.scrolled-past-top &,
-        body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) & {
+        body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) &,
+        body.is-item-view & {
             //height: $navbar-small-height;
             top: $navbar-small-height;
         }

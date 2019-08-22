@@ -39,27 +39,32 @@ export const Term = {
         var name = null;
 
         switch (field) {
-            case 'experimentset_type':
-                name = capitalizeSentence(term);
-                break;
             case 'type':
-                name = getTitleForType(term);
-                break;
+                return getTitleForType(term);
             case 'status':
-                name = capitalizeSentence(term);
-                break;
+                if (allowJSXOutput){
+                    return <React.Fragment><i className="item-status-indicator-dot mr-07" data-status="released"/>{ capitalizeSentence(term) }</React.Fragment>;
+                }
+                return capitalizeSentence(term);
             case 'date_created':
             case 'public_release':
             case 'project_release':
-                if (allowJSXOutput) name = <LocalizedTime timestamp={term} />;
-                else name = dateFormat(term);
-                break;
+                if (allowJSXOutput) return <LocalizedTime timestamp={term} />;
+                return dateFormat(term);
+            case 'accession':
+                //if (allowJSXOutput) {
+                //    return <span className="accession text-small">{ term }</span>;
+                //}
+                return term;
+            case 'description':
+                if (allowJSXOutput) {
+                    return <span className="mono-text text-small">{ term }</span>;
+                }
+                return term;
             default:
-                name = null;
                 break;
         }
 
-        if (typeof name === 'string') return name;
 
         // Remove 'experiments_in_set' and test as if an experiment field. So can work for both ?type=Experiment, ?type=ExperimentSet.
         field = field.replace('experiments_in_set.', '');

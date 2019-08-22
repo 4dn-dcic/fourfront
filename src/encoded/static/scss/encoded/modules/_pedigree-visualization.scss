@@ -43,6 +43,14 @@ $pedigree-disease-colors :
     background: $pedigree-viz-bg-color;
     overflow: auto;
 
+    // We make this almost full width.
+    // - IMPORTANT -
+    // Equivalent of this is performed in JS in PedigreeViz, for browsers
+    // which do not yet support calc().
+    // If change size of footer, header, navbar, sub-navbar, etc. then this 216px must
+    // be adjusted here and in JS
+    min-height: calc(100vh - 216px) !important;
+
     > .viz-area {
 
         > .individuals-layer {
@@ -220,6 +228,13 @@ $pedigree-disease-colors :
                             @include color-cycle-fill;
                         }
                     }
+
+                    g.text-box {
+                        rect.bg-rect {
+                            stroke: none;
+                            fill: $pedigree-viz-bg-color;
+                        }
+                    }
                 }
 
             }
@@ -233,6 +248,15 @@ $pedigree-disease-colors :
                         stroke: #7d0000;
                         //stroke: orange;
                     }
+                }
+            }
+
+            > g.selected-node-identifier {
+                transition: transform .3s;
+                > path {
+                    stroke: #0005;
+                    stroke-width: 7px;
+                    fill: none;
                 }
             }
         }
@@ -263,59 +287,15 @@ $pedigree-disease-colors :
     }
 }
 
-#pedigree-detail-pane-container {
+#slide-in-pane-container.pedigree-viz-detail-pane-container {
 
-    > .overlay-bg {
+    .overlay-bg {
+        // Allow to click thru the thing to navigate around more nodes.
+        pointer-events: none;
         display: none;
-        @include media-breakpoint-up(md){
-            display: block;
-            position: fixed;
-            z-index: 100;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: transparent;
-            pointer-events: none;
-            transition: background-color .4s ease-out;
-            transform: translate3d(0,0,0);
-        }
     }
-
-    > .detail-pane-outer {
-        position: relative;
-        width: 100%;
-
-        @include media-breakpoint-up(md){
-            
-            position: fixed;
-            z-index: 100;
-            top: 0;
-            bottom: 0;
-            right: -33%; //0;
-            width: 33%;
-            opacity: 0;
-            overflow-y: auto;
-            transform: translate3d(0,0,0);
-            //border-left: 1px solid #333;
-            box-shadow: 0 0 4px -1px #000;
-
-            /** Very portal-specific **/
-            transition:
-                padding-top $navbar-transition-length $navbar-transition-easing,
-                right .4s ease-out,
-                opacity .3s ease-out;
-            padding-top: 81px; // Offset re: fixed navbar
-            padding-bottom: 50px;
-            body.test-warning-visible & {
-                padding-top: 133px;
-            }
-            body.scrolled-past-top & {
-                padding-top: 41px;
-            }
-        }
-
-        background-color: #fff;
+    
+    > .slide-in-pane-outer {
 
         > .detail-pane-inner {
 
@@ -323,18 +303,29 @@ $pedigree-disease-colors :
                 padding: 12px 18px;
                 border-bottom: 1px solid #ccc;
                 box-shadow: inset 0 -2px 5px -5px #000;
-                > label {
+                
+                label {
                     font-weight: 400;
                     margin-bottom: 1px;
                     color: #777;
                 }
-                > h3 {
+
+                h3 {
                     font-weight: 300;
                     margin: 0;
                     white-space: nowrap;
-                    overflow-x: hidden;
+                    overflow: hidden;
                     text-overflow: ellipsis;
                     @include partner-links;
+                }
+
+                i.icon.icon-times {
+                    font-size: 1.25rem;
+                    color: #777;
+                    padding-top: 7px;
+                    &:hover {
+                        color: #000;
+                    }
                 }
             }
             > .details {
@@ -359,16 +350,4 @@ $pedigree-disease-colors :
 
     }
 
-    /** Transition in/out **/
-    @include media-breakpoint-up(md){
-        &.pedigree-detail-pane-transition-enter-done {
-            > .overlay-bg {
-                background-color: #0003;
-            }
-            > .detail-pane-outer {
-                right: 0%;
-                opacity: 1;
-            }
-        }
-    }
 }

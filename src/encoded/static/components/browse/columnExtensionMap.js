@@ -65,7 +65,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             return (
                 <React.Fragment>
                     <i className="item-status-indicator-dot mr-07" data-status={result.status}/>
-                    { statusFormatted }
+                    <span className="value">{ statusFormatted }</span>
                 </React.Fragment>
             );
         }

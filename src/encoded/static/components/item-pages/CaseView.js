@@ -32,24 +32,43 @@ return (
     </CollapsibleItemViewButtonToolbar>
 );
 */
+
 export const PedigreeTabView = React.memo(function PedigreeTabView(props){
     const { context, schemas, windowWidth, windowHeight, innerOverlaysContainer } = props;
-    const width = layout.gridContainerWidth(windowWidth);
-    const height = null;// Math.max(Math.floor(windowHeight / 2), 600);
+
+    // ONGOING - INCOMPLETE
+
+    // Hardcoded to avoid trying to measure heights of DOM elems and whatnot.
+    // This is duplicated in CSS3 using calc() for more modern browsers. If changing,
+    // make sure is changing in both places.
+    let surroundingComponentsHeight = 216; // 215 = footer (50) + navbar (41) + tab-section-title (78) + hr (1) + item page nav (46)
+    const rgs = layout.responsiveGridState(windowWidth);
+    if (rgs === 'sm' || rgs === 'xs') {
+        // At this breakpoint(s) we have full height navbar, so add 40px.
+        surroundingComponentsHeight += 44;
+    }
+    const height = Math.max(windowHeight - surroundingComponentsHeight, 600);
     return (
         <div className="overflow-hidden">
-            <h3 className="tab-section-title">
-                <span>Pedigree</span>
-            </h3>
+            <div className="container-wide">
+                <h3 className="tab-section-title">
+                    <span>Pedigree</span>
+                </h3>
+            </div>
             <hr className="tab-section-title-horiz-divider"/>
-            <PedigreeViz {...{ width, height }} overlaysContainer={innerOverlaysContainer} />
+            <PedigreeViz width={windowWidth} overlaysContainer={innerOverlaysContainer} containerStyle={/*{ minHeight: height }*/ null} />
         </div>
     );
 });
 
 PedigreeTabView.getTabObject = function(props){
     return {
-        'tab' : <span><i className="icon icon-sitemap fas icon-fw"/> Pedigree</span>,
+        'tab' : (
+            <React.Fragment>
+                <i className="icon icon-sitemap fas icon-fw"/>
+                <span>Pedigree</span>
+            </React.Fragment>
+        ),
         'key' : 'pedigree',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : <PedigreeTabView {...props} />

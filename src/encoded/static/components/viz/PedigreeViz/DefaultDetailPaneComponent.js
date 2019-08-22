@@ -1,6 +1,7 @@
 import React from 'react';
 import memoize from 'memoize-one';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { SlideInPane } from './../SlideInPane';
 
 
 
@@ -10,64 +11,29 @@ function getIndividualDisplayTitle(individual){
 }
 
 
-export class DefaultDetailPaneComponent extends React.PureComponent {
+export const DefaultDetailPaneComponent = React.memo(function DefaultDetailPaneComponent(props){
+    const { unselectNode, memoized, objectGraph, currSelectedNodeId, overlaysContainer } = props;
+    const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
 
-    static getDerivedStateFromProps(props, state){
-        if (props.currSelectedNodeId && props.currSelectedNodeId !== state.selectedNodeId){
-            return { 'selectedNodeId' : props.currSelectedNodeId };
-        }
-        return null;
+    let body;
+    if (!currSelectedNodeId){
+        body = null;
+    } else if (currSelectedNodeId.slice(0,13) === 'relationship:'){
+        body = <RelationshipBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
+    } else {
+        body = <IndividualBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
     }
 
-    constructor(props){
-        super(props);
-        this.onExited = this.onExited.bind(this);
-        this.state = {
-            'transitioningOut' : false,
-            'selectedNodeId' : props.currSelectedNodeId || null
-        };
-    }
-
-    componentDidUpdate(pastProps){
-        const { currSelectedNodeId } = this.props;
-        if (!currSelectedNodeId && pastProps.currSelectedNodeId){
-            // Transition out
-            this.setState({ 'transitioningOut' : true });
-        }
-    }
-
-    onExited(){
-        this.setState({ 'transitioningOut' : false, 'selectedNodeId' : null });
-    }
-
-    render(){
-        const { unselectNode, memoized, objectGraph } = this.props;
-        const { transitioningOut, selectedNodeId } = this.state;
-        if (!selectedNodeId && !transitioningOut){
-            return null;
-        }
-        console.log('TTT', this.props, this.state);
-        const selectedNode = selectedNodeId && memoized.findNodeWithId(objectGraph, selectedNodeId);
-        let body;
-        if (selectedNodeId.slice(0,13) === 'relationship:'){
-            body = <RelationshipBody {...this.props} {...{ selectedNode }} />;
-        } else {
-            body = <IndividualBody {...this.props} {...{ selectedNode }} />;
-        }
-        return (
-            <CSSTransition classNames="pedigree-detail-pane-transition" appear in={selectedNode && !transitioningOut}
-                unmountOnExit timeout={{ enter: 10, exit: 400 }} onExited={this.onExited}>
-                <div id="pedigree-detail-pane-container">
-                    <div className="overlay-bg" onClick={unselectNode} />
-                    <div className="detail-pane-outer">{ body }</div>
-                </div>
-            </CSSTransition>
-        );
-    }
-}
+    return (
+        <SlideInPane overlaysContainer={overlaysContainer} in={!!(selectedNode)}
+            onClose={unselectNode} className="pedigree-viz-detail-pane-container">
+            { body }
+        </SlideInPane>
+    );
+});
 
 function IndividualBody(props){
-    const { selectedNode: individual, onNodeClick } = props;
+    const { selectedNode: individual, onNodeClick, onClose } = props;
     const {
         id, name,
         _parentReferences : parents = [],
@@ -76,9 +42,16 @@ function IndividualBody(props){
     const showTitle = getIndividualDisplayTitle(individual);
     return (
         <div className="detail-pane-inner">
-            <div className="title-box">
-                <label>Individual</label>
-                <h3>{ showTitle }</h3>
+            <div className="title-box row">
+                <div className="col">
+                    <label>Individual</label>
+                    <h3>{ showTitle }</h3>
+                </div>
+                { onClose ?
+                    <div className="col-auto">
+                        <i className="icon icon-times fas clickable" onClick={onClose}/>
+                    </div>
+                    : null }
             </div>
             <div className="details">
                 <div className="detail-row row" data-describing="parents">

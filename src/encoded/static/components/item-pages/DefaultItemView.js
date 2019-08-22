@@ -5,16 +5,19 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import url from 'url';
 import _ from 'underscore';
+import queryString from 'query-string';
 
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { console, object, layout, ajax, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, layout, ajax, commonFileUtil, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FileDownloadButton';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
 import { Schemas, fileUtil, typedefs } from './../util';
 
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
-import { TabbedView } from './components/TabbedView';
+import { SlideInPane } from './../viz/SlideInPane';
+import { TabView } from './components/TabView';
 import { Publications } from './components/Publications';
 import { AttributionTabView } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
@@ -32,6 +35,48 @@ const { TabObject, Item } = typedefs;
  */
 
 
+
+/**
+ * Additional props we pass into ItemDetailList in all ItemViews.
+ * Project-specific.
+ */
+export const propsForDetailList = {
+    stickyKeys : ['accession', 'status', 'description'],
+    excludedKeys : ['@id', 'principals_allowed', 'actions', '@context', 'display_title', 'title'],
+    alwaysCollapsibleKeys : ['@type', 'schema_version', 'uuid', 'external_references', 'aggregated-items', 'validation-errors'],
+    termTransformFxn : function(field, term, allowJSX){
+        // Relatively special cases for when on Item PageViews
+        if (field === 'accession'){
+            return (
+                <object.CopyWrapper value={term} className="accession text-small inline-block" wrapperElement="span"
+                    iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -3 } }}>
+                    { term }
+                </object.CopyWrapper>
+            );
+        }
+        if (field === 'description'){
+            return (
+                <FlexibleDescriptionBox
+                    description={ term || <em>No description provided.</em> }
+                    className="item-page-heading"
+                    textClassName="text-medium"
+                    defaultExpanded={term.length < 600}
+                    fitTo="self"
+                    lineHeight={23}
+                    dimensions={{
+                        'paddingWidth' : 0,
+                        'paddingHeight' : 0, // Padding-top + border-top
+                        'buttonWidth' : 30,
+                        //'initialHeight' : 42
+                    }}
+                />
+            );
+        }
+        return Schemas.Term.toName(field, term, typeof allowJSX === 'boolean' ? allowJSX : true);
+    }
+};
+
+
 /**
  * The DefaultItemView class extends React.Component to provide some helper functions to be used from an Item View page.
  *
@@ -44,7 +89,7 @@ export default class DefaultItemView extends React.PureComponent {
         const classes = [
             'view-detail',
             'item-page-container',
-            'container'
+            //'container'
         ];
 
         _.forEach((context['@type'] || []), function (type) {
@@ -75,7 +120,7 @@ export default class DefaultItemView extends React.PureComponent {
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.getTabViewWidth = this.getTabViewWidth.bind(this);
         this.setTabViewKey = this.setTabViewKey.bind(this);
-        this.itemHeader = this.itemHeader.bind(this);
+        //this.onItemActionsTabClick = this.onItemActionsTabClick.bind(this);
 
         /**
          * Empty state object. May be extended by sub-classes.
@@ -86,6 +131,7 @@ export default class DefaultItemView extends React.PureComponent {
         this.state = {};
 
         this.tabbedViewRef = React.createRef();
+        this.itemActionsTabRef = React.createRef();
     }
 
     /**
@@ -135,7 +181,9 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * Calls `maybeSetReplacedRedirectedAlert`. May be extended by sub-classes.
+     * Calls `maybeSetReplacedRedirectedAlert`.
+     * Sets body to full screen mode.
+     * May be extended by sub-classes.
      *
      * @public
      * @returns {void}
@@ -161,7 +209,7 @@ export default class DefaultItemView extends React.PureComponent {
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
 
-        returnArr.push(ItemDetailList.getTabObject(this.props));
+        returnArr.push(DetailsTabView.getTabObject(this.props));
 
         // Badges, if any
         const badges = BadgesTabView.getBadgesList(context);
@@ -182,7 +230,9 @@ export default class DefaultItemView extends React.PureComponent {
     getDefaultTabs(){
         const { context } = this.props;
         const returnArr = [];
-        returnArr.push(ItemDetailList.getTabObject(this.props));
+
+        returnArr.push(DetailsTabView.getTabObject(this.props));
+
         if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
@@ -233,33 +283,6 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * Returns object with `title` and `description` (used for tooltip) to show detailed or base type info at top left of page, under title.
-     * Extendable.
-     *
-     * @returns {null} Nothing. Must be extended per item type.
-     */
-    typeInfo(){
-        return null;
-    }
-
-    /**
-     * Returns Item header, including description, status label/color, view json links, etc.
-     * This function may be extended and customized in order to add/change contents as needed.
-     *
-     * @returns {JSX.Element} Nothing. Must be extended per item type.
-     * @todo Maybe simplify CSS styling around these. Or get rid of these components and use plain HTML elements.
-     */
-    itemHeader(){
-        return (
-            <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
-                <TopRow typeInfo={this.typeInfo()} />
-                <MiddleRow />
-                <BottomRow />
-            </ItemHeaderWrapper>
-        );
-    }
-
-    /**
      * Returns list of elements to be rendered between Item header and the list of properties (or Tabs).
      * May be extended/customized.
      *
@@ -278,19 +301,6 @@ export default class DefaultItemView extends React.PureComponent {
     }
 
     /**
-     * Renders the TabbedView component. Do not extend.
-     *
-     * @protected
-     * @returns {JSX.Element}
-     */
-    renderTabbedView(){
-        return (
-            <TabbedView {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
-                contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView" />
-        );
-    }
-
-    /**
      * Renders footer for the ItemView (if any).
      *
      * @returns {null} Nothing returned by default unless extended.
@@ -298,6 +308,33 @@ export default class DefaultItemView extends React.PureComponent {
     itemFooter(){
         return null; /*<ItemFooterRow context={context} schemas={schemas} />*/
     }
+
+    /**
+     * Somewhat hacky/anti-pattern - calls function of a child component.
+     * Is kept this way to simplify code and avoid putting more logic into
+     * or above this top-level component.
+     */
+    /*
+    onItemActionsTabClick(evt){
+        const childOnClickFxn = (this.itemActionsTabRef.current && this.itemActionsTabRef.current.toggleOpen) || null;
+        if (!childOnClickFxn) {
+            console.error("No function or ref available");
+            return;
+        }
+
+        // React bubbles click events up to outer tab including clicks
+        // within the React.createPortal render tree (unless propagation stopped).
+        // So we check evt.target to ensure we're being called from
+        // menu btn click and nowhere else.
+        // Not super ideal structure but simplifies some other stuff
+        // so keeping this for now.
+        if (!layout.isDOMElementChildOfElementWithClass(evt.target, 'menu-tab')){
+            return;
+        }
+
+        childOnClickFxn(evt);
+    }
+    */
 
     /**
      * The render method which puts the above method outputs together.
@@ -310,12 +347,25 @@ export default class DefaultItemView extends React.PureComponent {
      */
     render() {
         const { context } = this.props;
+        const titleTabObj = {
+            'className' : "title-tab",
+            'tab' : <TitleTab {..._.pick(this.props, 'schemas', 'href', 'context')} />,
+            'key' : 'item-title'
+        };
+        const menuTabObj = {
+            'className' : "menu-tab",
+            'tab' : <ItemActionsTab {..._.pick(this.props, 'schemas', 'href', 'context', 'innerOverlaysContainer', 'session')}/>,
+            'key' : 'item-actions-menu',
+            //'onClick' : this.onItemActionsTabClick
+        };
         return (
             <div className={DefaultItemView.className(context)} id="content">
-                { this.itemHeader() }
-                { this.itemMidSection() }
-                { this.renderTabbedView() }
-                <br/>
+                {/* this.itemHeader() */}
+                {/* this.itemMidSection() */}
+                <TabView
+                    contents={this.getTabViewContents()} ref={this.tabbedViewRef} key="tabbedView"
+                    {..._.pick(this.props, 'windowWidth', 'windowHeight', 'href', 'context')}
+                    prefixTabs={[ titleTabObj ]} suffixTabs={[ menuTabObj ]} />
                 { this.itemFooter() }
             </div>
         );
@@ -330,6 +380,217 @@ export default class DefaultItemView extends React.PureComponent {
 /*******************************************
  ****** Helper Components & Functions ******
  *******************************************/
+
+/** Show as first 'tab' of TabView Tabs. Not clickable. */
+const TitleTab = React.memo(function TitleTab({ context, schemas }){
+    const { display_title, accession } = context;
+    const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
+    let itemTitle = null;
+
+    if (display_title && display_title !== accession) {
+        itemTitle = <div className="col item-title">{ display_title }</div>;
+    } else if (accession) {
+        itemTitle = <div className="col item-title accession text-small">{ accession }</div>;
+    }
+
+    return (
+        <div className="row">
+            <div className="col-auto item-type-title" data-tip="Item Type" data-place="right">
+                { itemTypeTitle }
+            </div>
+            { itemTitle ?
+                <div className="col-auto icon-col">
+                    <i className="icon icon-angle-right fas"/>
+                </div>
+                : null
+            }
+            { itemTitle }
+        </div>
+    );
+});
+
+
+/** Show as last 'tab' of TabView Tabs */
+export class ItemActionsTab extends React.PureComponent {
+
+    static defaultProps = {
+        'itemActionsExtras': {
+            'edit'      : {
+                description: 'Edit the properties of this Item.',
+                icon: "pencil fas"
+            },
+            'create'    : {
+                description: 'Create a blank new Item of the same type.',
+                icon: "plus fas"
+            },
+            'clone'     : {
+                description: 'Create and edit a copy of this Item.',
+                icon: "copy fas"
+            }
+        }
+    };
+
+    constructor(props){
+        super(props);
+        this.toggleOpen = this.toggleOpen.bind(this);
+        this.state = {
+            open: false
+        };
+    }
+
+    toggleOpen(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.setState(function({ open }){
+            return { 'open' : !open };
+        });
+    }
+
+    render(){
+        const { innerOverlaysContainer, ...passProps } = this.props;
+        const { context : { actions = [] }, session, href, itemActionsExtras } = passProps;
+        const { open } = this.state;
+
+        if (!session){
+            // No context.actions available except to see JSON (hardcoded)
+            // might change in future.
+            // So just show view JSON action and no menu.
+            return (
+                <ViewJSONAction href={href}>
+                    <div className="icon-container clickable" onClick={this.toggleOpen} data-tip="Open window showing this Item in raw JSON format.">
+                        <i className="icon icon-fw fas icon-file-code"/>
+                        <span className="text-monospace text-smaller">JSON</span>
+                    </div>
+                </ViewJSONAction>
+            );
+        }
+
+        // Only keep actions that are defined in the descriptions
+        const filteredActions = _.filter(actions, function(action){
+            return typeof itemActionsExtras[action.name] !== 'undefined';
+        });
+
+        return (
+            <React.Fragment>
+                <div className="icon-container clickable" onClick={this.toggleOpen}>
+                    <i className="icon icon-fw fas icon-bars"/>
+                    <span>Actions</span>
+                </div>
+                <SlideInPane in={open} overlaysContainer={innerOverlaysContainer} onClose={this.toggleOpen}>
+                    <ItemActionsTabMenu {...passProps} actions={filteredActions} onClose={this.toggleOpen} />
+                </SlideInPane>
+            </React.Fragment>
+        );
+    }
+
+}
+
+
+const ItemActionsTabMenu = React.memo(function ItemActionsTabMenu(props){
+    const { actions, itemActionsExtras, href: currentPageHref, onClose } = props;
+
+    const renderedActions = actions.map(function({ name, title, profile, href }, idx){
+        const { description, icon } = itemActionsExtras[name];
+        let innerTitle = (
+            <React.Fragment>
+                <h5>{ title || name }</h5>
+                <span className="description">{ description }</span>
+            </React.Fragment>
+        );
+        if (icon){
+            innerTitle = (
+                <div className="row">
+                    <div className="col-auto icon-container">
+                        <i className={"icon icon-fw icon-" + icon}/>
+                    </div>
+                    <div className="col title-col">{ innerTitle }</div>
+                </div>
+            );
+        }
+        return (
+            <a className="menu-option" key={name || idx} href={href}>
+                { innerTitle }
+            </a>
+        );
+    });
+
+    // Extend with some hardcoded actions
+    // Currently only the view JSON btn.
+    renderedActions.unshift(<ViewJSONMenuOption href={currentPageHref} />);
+
+    return (
+        <div className="item-page-actions-menu">
+            <div className="title-box row">
+                <h4 className="col">Actions</h4>
+                <div className="col-auto close-btn-container clickable" onClick={onClose}>
+                    <i className="icon icon-times fas"/>
+                </div>
+            </div>
+            <div className="menu-inner">{ renderedActions }</div>
+        </div>
+    );
+});
+
+function ViewJSONAction({ href, children }){
+    const urlParts = url.parse(href, true);
+    urlParts.search = '?' + queryString.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
+    const viewUrl = url.format(urlParts);
+    const onClick = (e) => {
+        if (window && window.open){
+            e.preventDefault();
+            window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
+        }
+    };
+    return React.cloneElement(children, { onClick });
+}
+
+const ViewJSONMenuOption = React.memo(function ViewJSONMenuOption({ href }){
+    return (
+        <ViewJSONAction href={href}>
+            <a className="menu-option" href="#">
+                <div className="row">
+                    <div className="col-auto icon-container">
+                        <i className="icon icon-fw fas icon-code"/>
+                    </div>
+                    <div className="col title-col">
+                        <h5>View as JSON</h5>
+                        <span className="description">Open raw JSON in new window.</span>
+                    </div>
+                </div>
+            </a>
+        </ViewJSONAction>
+    );
+});
+
+
+function tabViewTermTransformFxn(field, term, allowJSX){
+    return Schemas.Term.toName(field, term, typeof allowJSX === 'boolean' ? allowJSX : true);
+}
+
+const DetailsTabView = React.memo(function DetailsTabView(props){
+    return (
+        <div className="container-wide">
+            <h3 className="tab-section-title">
+                <span>Details</span>
+            </h3>
+            <hr className="tab-section-title-horiz-divider mb-05"/>
+            <ItemDetailList {..._.pick(props, 'context', 'schemas', 'href')} termTransformFxn={tabViewTermTransformFxn}  />
+        </div>
+    );
+});
+
+DetailsTabView.getTabObject = function(props){
+    return {
+        tab : (
+            <React.Fragment>
+                <i className="icon fas icon-list icon-fw"/>
+                <span>Details</span>
+            </React.Fragment>
+        ),
+        key : 'details',
+        content : <DetailsTabView {...props} />
+    };
+};
 
 
 /**

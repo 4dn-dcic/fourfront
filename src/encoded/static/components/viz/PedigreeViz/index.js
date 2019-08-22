@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
+import { path as d3Path } from 'd3-path';
 import {
     standardizeObjectsInList, findNodeWithId,
     createObjectGraph, createRelationships, getRelationships
@@ -407,14 +408,20 @@ export class VizContainer extends React.PureComponent {
     render(){
         const {
             width: containerWidth, height, objectGraph, dims, order, memoized,
-            overlaysContainer, detailPaneComponent, ...passProps
+            overlaysContainer, detailPaneComponent, containerStyle, ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
         const diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
         const containerHeight = height || graphHeight;
-        const containerStyle = { width: containerWidth, height: height || "auto", position: "relative", overflow: "auto" };
+        const useContainerStyle = {
+            width: containerWidth,
+            height: height || "auto",
+            position: "relative",
+            overflow: "auto",
+            ...containerStyle
+        };
         const commonChildProps = {
             objectGraph, graphHeight, graphWidth, dims, memoized, diseaseToIndex,
             containerHeight, containerWidth,
@@ -426,25 +433,20 @@ export class VizContainer extends React.PureComponent {
 
         let selectedNodePane = null;
 
-        if (detailPaneComponent && overlaysContainer){
-            // Depending on container/parent layout+logic,
-            // the pane could appear below, above, overlayed, anywhere, etc.
-            selectedNodePane = ReactDOM.createPortal(
-                React.createElement(detailPaneComponent, {
-                    objectGraph,
-                    currSelectedNodeId,
-                    memoized,
-                    diseaseToIndex,
-                    'unselectNode' : this.handleUnselectNode,
-                    'onNodeClick' : this.handleNodeClick,
-                }),
+        if (detailPaneComponent){
+            selectedNodePane = React.createElement(detailPaneComponent, {
+                objectGraph,
+                currSelectedNodeId,
+                memoized,
+                diseaseToIndex,
                 overlaysContainer,
-                "detail-pane"
-            );
+                'unselectNode' : this.handleUnselectNode,
+                'onNodeClick' : this.handleNodeClick,
+            });
         }
 
         return (
-            <div className="pedigree-viz-container" style={containerStyle}>
+            <div className="pedigree-viz-container" style={useContainerStyle}>
                 <div className="viz-area" style={{ 'width': graphWidth, 'height': graphHeight }}
                     onClick={this.handleContainerClick}>
                     <ShapesLayer {...commonChildProps} />
@@ -465,11 +467,84 @@ const ShapesLayer = React.memo(function ShapesLayer(props){
     return (
         <svg className="shapes-layer" viewBox={"0 0 " + graphWidth + " " + graphHeight} style={svgStyle}>
             <EdgesLayer {...props} />
+            <SelectedNodeIdentifier {...props} />
             <IndividualNodeShapeLayer {...props} />
         </svg>
     );
 });
 
+
+/**
+ * @todo _Maybe_
+ * Make into instantiable component and if currSelectedNodeId change then use d3 transition
+ * to adjust transform attribute as some browsers won't transition attribute using CSS3.
+ * **BUT** Using CSS transition for SVG transform is part of newer spec so browsers should ideally
+ * support it, can likely just wait for (more) browsers to implement?
+ */
+const SelectedNodeIdentifier = React.memo(function SelectedNodeIdentifier(props){
+    const { memoized, currSelectedNodeId, objectGraph, dims } = props;
+    const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
+    if (!selectedNode){
+        return null;
+    }
+    const { id, _drawing: { xCoord, yCoord } } = selectedNode;
+
+    let useHeight = dims.individualHeight;
+    let useWidth = dims.individualWidth;
+
+    if (id.slice(0,13) === "relationship:"){ // Is relationship node.
+        useHeight = dims.relationshipSize;
+        useWidth = dims.relationshipSize;
+    }
+
+    const topLeftX = dims.graphPadding + xCoord - (useWidth / 2);
+    const topLeftY = dims.graphPadding + yCoord - (useHeight / 2);
+    const transform = "translate(" + topLeftX + ", " + topLeftY + ")";
+
+    return (
+        <g className="selected-node-identifier" transform={transform}>
+            <SelectedNodeIdentifierShape height={useHeight} width={useWidth} />
+        </g>
+    );
+});
+
+/**
+ * @todo Move segmentLength to dims?
+ * @todo Make into instantiable component and if detect width change, height change, etc, then use d3 transition.
+ */
+const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape({ height, width, segmentLength = 30, offset = 18 }){
+    const cornerPaths = [];
+
+    const topLeft = d3Path();
+    topLeft.moveTo(-offset, -offset + segmentLength);
+    topLeft.lineTo(-offset, -offset);
+    topLeft.lineTo(-offset + segmentLength, -offset);
+    cornerPaths.push(topLeft.toString());
+
+    const topRight = d3Path();
+    topRight.moveTo(width - segmentLength + offset, -offset);
+    topRight.lineTo(width + offset, -offset);
+    topRight.lineTo(width + offset, -offset + segmentLength);
+    cornerPaths.push(topRight.toString());
+
+    const bottomRight = d3Path();
+    bottomRight.moveTo(width + offset, height + offset - segmentLength);
+    bottomRight.lineTo(width + offset, height + offset);
+    bottomRight.lineTo(width + offset - segmentLength, height + offset);
+    cornerPaths.push(bottomRight.toString());
+
+    const bottomLeft = d3Path();
+    bottomLeft.moveTo(-offset + segmentLength, height + offset);
+    bottomLeft.lineTo(-offset, height + offset);
+    bottomLeft.lineTo(-offset, height + offset - segmentLength);
+    cornerPaths.push(bottomLeft.toString());
+
+    const cornerPathsJSX = cornerPaths.map(function(pathStr, idx){
+        return <path d={pathStr} key={idx} />;
+    });
+
+    return <React.Fragment>{ cornerPathsJSX }</React.Fragment>;
+});
 
 
 

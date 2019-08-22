@@ -1192,7 +1192,7 @@ export default class App extends React.PureComponent {
                     <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
                     <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" />
                     <SEO.CurrentContext {...{ context, hrefParts, baseDomain }} />
-                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
+                    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,300i,400i,600i|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
                     <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <script async type="application/javascript" src="//www.google-analytics.com/analytics.js" />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
@@ -1258,51 +1258,48 @@ class HTMLTitle extends React.PureComponent {
 
 }
 
-class ContentRenderer extends React.PureComponent {
-    render(){
-        const { canonical, status, currentAction, context, routeLeaf, contentViews } = this.props;
-        const contextAtID     = object.itemUtil.atId(context);
-        const key             = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
+const ContentRenderer = React.memo(function ContentRenderer(props){
+    const { canonical, status, currentAction, context, routeLeaf, contentViews, href } = props;
+    const contextAtID = object.itemUtil.atId(context);
+    const key = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
+    let content; // Output
 
-        let content; // Output
+    // Object of common props passed to all content_views.
+    const commonContentViewProps = _.pick(props,
+        // Props from App:
+        'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
+        'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
+        // Props from BodyElement:
+        'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
+        'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen',
+        'overlaysContainer', 'innerOverlaysContainer'
+    );
 
-        // Object of common props passed to all content_views.
-        const commonContentViewProps = _.pick(this.props,
-            // Props from App:
-            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
-            'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
-            // Props from BodyElement:
-            'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
-            'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen',
-            'overlaysContainer', 'innerOverlaysContainer'
-        );
-
-        if (canonical === "about:blank"){   // first case is fallback
-            content = null;
-        } else if (status) {                // error catching
-            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
-        } else if (context) {               // What should occur (success)
-            const ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
-            if (!ContentView){ // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
-            } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-                const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
-                // see if desired actions is not allowed for current user
-                if (!_.contains(contextActionNames, currentAction)){
-                    content = <ErrorPage status="forbidden" />;
-                }
+    if (canonical === "about:blank"){   // first case is fallback
+        content = null;
+    } else if (status) {                // error catching
+        content = <ErrorPage currRoute={routeLeaf} status={status}/>;
+    } else if (context) {               // What should occur (success)
+        const ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
+        if (!ContentView){ // Handle the case where context is not loaded correctly
+            content = <ErrorPage status={null}/>;
+        } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
+            const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
+            // see if desired actions is not allowed for current user
+            if (!_.contains(contextActionNames, currentAction)){
+                content = <ErrorPage status="forbidden" />;
             }
-
-            if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
-                content = <ContentView key={key} {...commonContentViewProps} />;
-            }
-        } else {
-            throw new Error('No context is available. Some error somewhere.');
         }
 
-        return <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>;
+        if (!content) { // No overriding cases encountered. Proceed to render appropriate view for our context.
+            content = <ContentView key={key} {...commonContentViewProps} />;
+        }
+    } else {
+        throw new Error('No context is available. Some error somewhere.');
     }
-}
+
+    return <ContentErrorBoundary canonical={canonical} href={href}>{ content }</ContentErrorBoundary>;
+});
 
 /**
  * This component provides some extra layout properties to certain components.
@@ -1354,6 +1351,7 @@ class BodyElement extends React.PureComponent {
         this.addToBodyClassList         = this.addToBodyClassList.bind(this);
         this.removeFromBodyClassList    = this.removeFromBodyClassList.bind(this);
         this.toggleFullScreen           = this.toggleFullScreen.bind(this);
+        this.bodyClassName              = this.bodyClassName.bind(this);
 
         /**
          * State object for BodyElement.
@@ -1703,26 +1701,47 @@ class BodyElement extends React.PureComponent {
         );
     }
 
-    /** Renders out the body layout of the application. */
-    render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, isLoading, slowLoad, mounted } = this.props;
-        const { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen, testWarningPresent } = this.state;
-        const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
-        const appClass = slowLoad ? 'communicating' : 'done';
+    bodyClassName(){
+        const { isLoading, context } = this.props;
+        const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
         const bodyClassList = (classList && classList.slice(0)) || [];
-        const overlaysContainer = this.overlaysContainerRef.current;
-        const innerOverlaysContainer = this.innerOverlaysContainerRef.current;
 
-        if (hasError) return this.renderErrorState();
-
-        if (isLoading)          bodyClassList.push('loading-request');
-        if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
-        if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
+        // Common UI
+        if (isLoading)          bodyClassList.push("loading-request");
+        if (scrolledPastTop)    bodyClassList.push("scrolled-past-top");
+        if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
         if (isFullscreen){
             bodyClassList.push("is-full-screen");
         } else if (testWarningPresent) {
             bodyClassList.push("test-warning-visible");
         }
+
+        // If is a typical ItemView, we want to show a full-width view.
+        // StaticPages, unless on ItemView for them, _do not_ contain "Item"
+        // in their @type field and instead have Portal, StaticPage, etc.
+        if (Array.isArray(context['@type'])){
+            if (context['@type'].indexOf('Item') > -1){
+                bodyClassList.push("is-item-view");
+            }
+        }
+
+        if (bodyClassList.length > 0){
+            return bodyClassList.join(' ');
+        } else {
+            return null;
+        }
+    }
+
+    /** Renders out the body layout of the application. */
+    render(){
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, slowLoad, mounted, href } = this.props;
+        const { windowWidth, windowHeight, classList, hasError, isFullscreen, testWarningPresent } = this.state;
+        const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
+        const appClass = slowLoad ? 'communicating' : 'done';
+        const overlaysContainer = this.overlaysContainerRef.current;
+        const innerOverlaysContainer = this.innerOverlaysContainerRef.current;
+
+        if (hasError) return this.renderErrorState();
 
         let innerContainerMinHeight;
         if (mounted && windowHeight){
@@ -1738,7 +1757,7 @@ class BodyElement extends React.PureComponent {
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={(bodyClassList.length > 0 && bodyClassList.join(' ')) || null}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
@@ -1766,7 +1785,7 @@ class BodyElement extends React.PureComponent {
 
                                 <PageTitleSection {...this.props} windowWidth={windowWidth} />
 
-                                <ContentErrorBoundary canonical={canonical}>
+                                <ContentErrorBoundary canonical={canonical} href={href}>
                                     <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                         registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
                                         overlaysContainer, innerOverlaysContainer } } />

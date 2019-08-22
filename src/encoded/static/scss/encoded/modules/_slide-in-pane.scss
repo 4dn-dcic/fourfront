@@ -1,0 +1,108 @@
+
+
+#slide-in-pane-container {
+
+    > .overlay-bg {
+        display: none;
+        @include media-breakpoint-up(md){
+            display: block;
+            position: fixed;
+            z-index: 100;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            // pointer-events: none;
+            transition: background-color .4s ease-out;
+            transform: translate3d(0,0,0);
+        }
+    }
+
+    > .slide-in-pane-outer {
+        background-color: #fff;
+        position: relative;
+        width: 100%;
+        right: -100%;
+
+        position: absolute;
+        z-index: 100;
+        top: 0;
+        bottom: 0;
+        opacity: 0;
+
+        transition:
+            padding-top $navbar-transition-length $navbar-transition-easing,
+            right .4s ease-out,
+            opacity .3s ease-out;
+
+        //#inner-overlays-container & {
+        //    padding-top: 41px; // Offset re: static navbar
+        //}
+
+        @include media-breakpoint-up(md){
+            
+            position: fixed;
+            //z-index: 100;
+            //top: 0;
+            //bottom: 0;
+            right: -320px; //0;
+            width: 320px;
+            //opacity: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transform: translate3d(0,0,0);
+            //border-left: 1px solid #333;
+            box-shadow: 0 0 4px -1px #000;
+
+            /** Very portal-specific **/
+            transition:
+                padding-top $navbar-transition-length $navbar-transition-easing,
+                right .4s ease-out,
+                opacity .3s ease-out;
+
+            // TODO incl rule for when within outer overlays container (?)
+            #inner-overlays-container & {
+                padding-top: 41px; // Offset re: fixed navbar
+                padding-bottom: 50px;
+            }
+
+            body.test-warning-visible & {
+                padding-top: 92px;
+            }
+
+            //body.scrolled-past-top & {
+            //    padding-top: 41px;
+            //}
+
+        }
+
+        @include media-breakpoint-up(xl){
+            right: -400px; //0;
+            width: 400px;
+        }
+
+    }
+
+    /** Transition in/out **/
+    // Mobile
+    &.slide-in-pane-transition-enter-done {
+        > .slide-in-pane-outer {
+            right: 0%;
+            opacity: 1;
+        }
+    }
+
+    // Desktop adjustments
+    @include media-breakpoint-up(md){
+        &.slide-in-pane-transition-enter-done {
+            > .overlay-bg {
+                background-color: #0003;
+            }
+            > .slide-in-pane-outer {
+                right: 0px;
+            }
+        }
+    }
+
+}
