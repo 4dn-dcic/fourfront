@@ -207,10 +207,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             (context.status === 'released' || context.status === 'released_to_project')) {
             this.setState({
                 'modal':
-                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel} confirmButtonText="OK" cancelButtonText="Cancel" modalTitle="Confirm Save">
-                        You are overwriting a HiGlass Display Item that was previously shared with public.&nbsp;
-                        <strong>Are you sure?</strong>
-                        <br /><em>Note that you can also clone this display and share the new copy.</em>
+                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel} confirmButtonText="Save" cancelButtonText="Cancel" modalTitle="Confirm Save">
+                        You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?
+                        <br />Note that you can also clone this display and share the new copy.
                     </ConfirmModal>
             });
             return;
@@ -841,10 +840,10 @@ export const ConfirmModal = React.memo(function (props) {
             </Modal.Body>
             <Modal.Footer>
                 <button type="button" onClick={handleConfirm} className="btn btn-success">
-                    <i className={"icon icon-fw icon-check"} />{confirmButtonText || 'OK'}
+                    <i className="icon icon-fw icon-check mr-08" />{confirmButtonText || 'OK'}
                 </button>
-                <button type="button" onClick={handleCancel} className="btn btn-default">
-                    <i className={"icon icon-fw icon-times"} />{cancelButtonText || 'Cancel'}
+                <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
+                    <i className="icon icon-fw icon-times mr-08" />{cancelButtonText || 'Cancel'}
                 </button>
             </Modal.Footer>
         </Modal>);
