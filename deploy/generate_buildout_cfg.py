@@ -21,10 +21,8 @@ create_tables = true
 load_test_data = encoded.loadxl:{load_function}
 mpindexer = {should_index}
 indexer = {should_index}
-indexer_processes = {procs}
 structlog.dir = {log_dir}
 '''
-# TODO: add in indexer.processes
 
 
 def dbconn_from_env():
@@ -50,7 +48,6 @@ def build_cfg_file():
 
     data['should_index'] = 'true'
     data['load_function'] = 'load_test_data'
-    data['procs'] = str(multiprocessing.cpu_count())
     data['es_server'] = os.environ.get("ES_URL")
     data['log_dir'] = '/var/log/'
     if os.environ.get("LOAD_FUNCTION"):
