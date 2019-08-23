@@ -19,24 +19,102 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .tab-section-title {
 	font-weight: 300;
 	margin: 0;
+	min-height: 78px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+/*
+.tab-section-title {
+	font-weight: 300;
+	margin: 0;
 	//padding: 27px 0 16px; // 67px height
 	padding: 27px 0 27px; // 78px height (24px line height)
 }
+*/
 
 h3.tab-section-title {
 	line-height: 24px;
 }
-
+/*
 h4.tab-section-title {
   padding-top: 36px;
   padding-bottom: 12px;
 }
-
-.tab-section-title-horiz-divider {
+*/
+hr.tab-section-title-horiz-divider {
 	/* Use classes 'mb-0', 'mb-1', etc. to set margins */
 	margin-top: 0;
 	margin-bottom: 0;
 	border-top-color: #ccc;
+}
+
+.tabview-title-controls-container {
+    font-size: 1rem;
+	padding-left: 5px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+
+    // For mobile/smaller widths.
+    button.toggle-open-button {
+        @include button-no-focus-outline;
+    }
+
+    > .toolbar-wrapper > .btn-toolbar {
+		justify-content: flex-end;
+        
+        button,
+        .dropdown > button {
+            margin-left: 5px;
+        }
+
+        > .btn-group {
+            float: none;
+        }
+    }
+
+    .checkbox-container {
+        margin-right: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+        display: block;
+        padding-top: 7px;
+        padding-bottom: 5px;
+        font-size: 0.95rem;
+        @include user-select(none);
+        &.disabled{
+            color: #999;
+        }
+        > label {
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+    }
+
+    button#rowspacingtype-select {
+        min-width: 120px;
+    }
+
+    /** Only shown/visible at smaller sizes **/
+    > .inner-panel:first-child {
+        min-width: 200px;
+        padding-left: 10px;
+        padding-bottom: 10px;
+        > hr {
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+        > .mobile-size-elem {
+            > .dropdown.btn-group,
+            > .dropdown.btn-group > button.btn,
+            > button.btn {
+                width: 100%;
+                text-align: left;
+            }
+        }
+    }
 }
 
 /*************************
@@ -97,6 +175,10 @@ $tabbar-height: 46px;
 					color: $tabbar-text-active-color;
 					border-bottom-color: transparent;
 					box-shadow: 0.5px -3px 3px -1px #000;
+				}
+
+				&.disabled {
+					color: transparentize($tabbar-text-color, 0.5);
 				}
 
 				i.icon + span {

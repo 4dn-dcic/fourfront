@@ -14,6 +14,8 @@
  */
 export function standardizeObjectsInList(jsonList){
 
+    const idObjMap = {};
+
     // Clone each object into a new one before proceeding to avoid changing props in place.
     // New list, also.
     let nextList = jsonList.map(function(indv){
@@ -26,7 +28,29 @@ export function standardizeObjectsInList(jsonList){
                 nextIndv[k] = nextIndv[k].slice(0);
             }
         });
+
+        idObjMap[indv.id] = nextIndv;
         return nextIndv;
+    });
+
+    // Standardize ids to strings if not already.
+    // Standardize gender/sex to "gender" as key & one of "male", "female", "undetermined" as value.
+    nextList.forEach(function(indv){
+        indv.id = indv.id.toString();
+        // Ensure we store strings instd of numbers for type-safety.
+        indv.parents = (indv.parents || []).map(function(parentID){
+            return parentID.toString();
+        });
+        indv.children = (indv.children || []).map(function(childID){
+            return childID.toString();
+        });
+
+        indv.gender = individualGender(indv);
+        delete indv.sex;
+        const probandVal = !!(indv.isProband || indv.proband || indv.is_proband);
+        delete indv.proband;
+        delete indv.isProband; // Leave as undefined for remaining Individuals
+        indv.isProband = probandVal || false;
     });
 
 
@@ -35,31 +59,23 @@ export function standardizeObjectsInList(jsonList){
      * reduce into only parents[] and children[].
      */
     function standardizeFamilialIdentifiers(listOfIndividuals){
-        const idObjMap = {};
+
+        // Merge father and mother to 'parents'
         listOfIndividuals.forEach(function(indv){
-            idObjMap[indv.id] = indv = Object.assign({}, indv);
-            indv.id = indv.id.toString();
-            // Ensure we store strings instd of numbers for type-safety.
-            indv.parents = (indv.parents || []).map(function(parentID){
-                return parentID.toString();
-            });
-            indv.children = (indv.children || []).map(function(childID){
-                return childID.toString();
-            });
-            if (indv.mother){
-                indv.mother = indv.mother.toString();
-                if (indv.parents.indexOf(indv.mother) === -1){
-                    indv.parents.push(indv.mother);
-                }
-                delete indv.mother;
-            }
             if (indv.father){
                 indv.father = indv.father.toString();
                 if (indv.parents.indexOf(indv.father) === -1){
                     indv.parents.push(indv.father);
                 }
-                delete indv.father;
             }
+            delete indv.father;
+            if (indv.mother){
+                indv.mother = indv.mother.toString();
+                if (indv.parents.indexOf(indv.mother) === -1){
+                    indv.parents.push(indv.mother);
+                }
+            }
+            delete indv.mother;
         });
 
         function sortIDByAge(indvIdA, indvIdB){
@@ -70,9 +86,8 @@ export function standardizeObjectsInList(jsonList){
             return sortByGender(idObjMap[indvIdA], idObjMap[indvIdB]);
         }
 
-        const allIds = Object.keys(idObjMap);
-        allIds.forEach(function(indvID){
-            const indv = idObjMap[indvID];
+        listOfIndividuals.forEach(function(indv){
+            const { id: indvID } = indv;
             const { parents = [], children = [] } = indv;
             parents.forEach(function(parentID){
                 const parentIndv = idObjMap[parentID];
@@ -91,25 +106,15 @@ export function standardizeObjectsInList(jsonList){
                 childIndv.parents.push(indvID);
             });
         });
-        return allIds.map(function(indvID){
-            const indv = idObjMap[indvID];
-            indv.parents = (indv.parents || []).sort(sortIDByGender);
+        return listOfIndividuals.map(function(indv){
+            indv.parents = (indv.parents || []);//.sort(sortIDByGender);
             indv.children = (indv.children || []).sort(sortIDByAge);
             return indv;
         });
     }
 
-    nextList = standardizeFamilialIdentifiers(nextList);
 
-    // Standardize gender/sex to "gender" as key & one of "male", "female", "undetermined" as value.
-    nextList.forEach(function(indv){
-        indv.gender = individualGender(indv);
-        delete indv.sex;
-        const probandVal = !!(indv.isProband || indv.proband || indv.is_proband);
-        delete indv.proband;
-        delete indv.isProband; // Leave as undefined for remaining Individuals
-        indv.isProband = probandVal || false;
-    });
+    nextList = standardizeFamilialIdentifiers(nextList);
 
     // Ensure proband is at start of list.
     const [ proband, probandIndex ] = findProband(nextList, true);
@@ -158,8 +163,9 @@ export function standardizeObjectsInList(jsonList){
                 // todo check for duplicates
             }
         });
-        indv.deceased = indv.deceased || false;
-        indv.consultand = indv.consultand || false;
+        // todo - maybe change to be isDeceased (bool) and add another property for notes
+        indv.deceased = indv.deceased || indv.isDeceased || false;
+        indv.consultand = indv.consultand || indv.isConsultand || false;
         indv.isStillBirth = indv.isStillBirth || false;
         indv.isPregnancy = indv.isPregnancy || false;
         indv.isSpontaneousAbortion = indv.isSpontaneousAbortion || false;

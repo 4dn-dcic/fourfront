@@ -153,9 +153,15 @@ blockquote {
 	padding-bottom: 0px;
 
 	// This is replicated in JS for older browsers. If changing, make sure to make adjustment in BodyElement in App.js as well.
-	min-height: 100vh !important;
-	.test-warning-visible & {
-		min-height: calc(100vh - 52px) !important;
+	@include navbar-static-position {
+		min-height: calc(100vh - 134px) !important;
+	}
+
+	@include navbar-fixed-position {
+		min-height: 100vh !important;
+		.test-warning-visible & {
+			min-height: calc(100vh - 52px) !important;
+		}
 	}
 
 

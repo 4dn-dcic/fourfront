@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
@@ -256,10 +256,13 @@ export class TabView extends React.PureComponent {
             // Already on tab or could not find content with hash -
             console.error('Could not find or already on tab');
             return false;
-        } else {
-            this.setActiveKey(foundContent.key); // Same as `hash`
-            return true;
         }
+        if (foundContent.disabled){
+            console.error('Tab is disabled', foundContent);
+            return false;
+        }
+        this.setActiveKey(foundContent.key); // Same as `hash`
+        return true;
     }
 
     additionalTabs(){
@@ -308,16 +311,20 @@ export class TabView extends React.PureComponent {
 }
 
 const TabsBar = React.memo(function TabsBar({ tabs, currentTab, onTabClick, prefixTabs = [], suffixTabs = [] }){
-    const { key: currentTabKey, content } = currentTab;
+    const { key: currentTabKey } = currentTab;
     const renderedTabs = tabs.map(function(tabObj, idx){
-        const { tab: children, key } = tabObj;
-        const cls = "tab-item clickable" + (key === currentTabKey ? " active" : "");
+        const { tab: children, key, disabled = false } = tabObj;
+        const cls = (
+            "tab-item" +
+            (key === currentTabKey ? " active" : "") +
+            (disabled ? " disabled" : " clickable")
+        );
         const onClick = function(e){
             e.stopPropagation();
             onTabClick(key);
         };
         return (
-            <div className={cls} key={key} data-tab-for={key} data-tab-index={idx} onClick={onClick}>
+            <div className={cls} key={key} data-tab-for={key} data-tab-index={idx} onClick={!disabled && onClick}>
                 { children }
             </div>
         );

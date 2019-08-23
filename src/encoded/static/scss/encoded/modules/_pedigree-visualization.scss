@@ -35,21 +35,25 @@ $pedigree-disease-colors :
     }
 }
 
-
+// PORTAL-SPECIFIC STUFF
+// TODO: Move out if making this viz re-usable
+.pedigree-viz-container {
+    // We make this almost full height.
+    // - IMPORTANT -
+    // Equivalent of this is performed in JS in PedigreeViz, for browsers
+    // which do not yet support calc().
+    // If change size of footer, header, navbar, sub-navbar, etc. then this 216px must
+    // be adjusted here and in JS
+    @include navbar-fixed-position {
+        min-height: calc(100vh - 216px) !important;
+    }
+}
 
 
 .pedigree-viz-container {
     transform: translate3d(0,0,0);
     background: $pedigree-viz-bg-color;
     overflow: auto;
-
-    // We make this almost full width.
-    // - IMPORTANT -
-    // Equivalent of this is performed in JS in PedigreeViz, for browsers
-    // which do not yet support calc().
-    // If change size of footer, header, navbar, sub-navbar, etc. then this 216px must
-    // be adjusted here and in JS
-    min-height: calc(100vh - 216px) !important;
 
     > .viz-area {
 

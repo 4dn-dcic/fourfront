@@ -5,7 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
 import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { PedigreeJSLibContainer } from './../../libs/pedigreejs';
+//import { PedigreeJSLibContainer } from './../../libs/pedigreejs';
+
+import { PedigreeTabViewBody, parseFamilyIntoDataset } from './CaseView';
 
 
 export default class IndividualView extends DefaultItemView {
@@ -18,31 +20,40 @@ export default class IndividualView extends DefaultItemView {
 
 }
 
-
-export const PedigreeTabView = React.memo(function PedigreeTabView({ context, schemas, windowWidth, windowHeight }){
-    const width = layout.gridContainerWidth(windowWidth);
-    const height = Math.max(Math.floor(windowHeight / 2), 600);
+// TODO: Create endpoint to trace family of individual?
+export const PedigreeTabView = React.memo(function PedigreeTabView(props){
+    const { context, innerOverlaysContainer, windowWidth, windowHeight } = props;
+    const family = [ context ];
+    if (context.father){
+        family.push(context.father);
+    }
+    if (context.mother){
+        family.push(context.mother);
+    }
+    const dataset = parseFamilyIntoDataset({ members: family, proband: context });
     return (
-        <div>
-            <PedigreeJSLibContainer width={width} height={height} />
+        <div className="overflow-hidden">
+            <h3 className="tab-section-title container-wide">
+                <span>Pedigree</span>
+            </h3>
+            <hr className="tab-section-title-horiz-divider"/>
+            <PedigreeTabViewBody {...{ dataset, innerOverlaysContainer, windowWidth, windowHeight }} />
         </div>
     );
 });
 
 PedigreeTabView.getTabObject = function(props){
+    const { context: { father, mother, children = [] } } = props;
     return {
-        'tab' : <span><i className="icon icon-sitemap fas icon-fw"/> Pedigree</span>,
-        'key' : 'document-info',
-        //'disabled' : !Array.isArray(context.experiments),
-        'content' : (
-            <div className="overflow-hidden">
-                <h3 className="tab-section-title">
-                    <span>Pedigree</span>
-                </h3>
-                <hr className="tab-section-title-horiz-divider"/>
-                <PedigreeTabView {...props} />
-            </div>
-        )
+        'tab' : (
+            <React.Fragment>
+                <i className="icon icon-sitemap fas icon-fw"/>
+                <span>Pedigree</span>
+            </React.Fragment>
+        ),
+        'key' : 'pedigree',
+        'disabled' : (!father || !mother) && children.length === 0,
+        'content' : <PedigreeTabView {...props} />
     };
 };
 

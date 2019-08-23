@@ -390,7 +390,11 @@ const TitleTab = React.memo(function TitleTab({ context, schemas }){
     if (display_title && display_title !== accession) {
         itemTitle = <div className="col item-title">{ display_title }</div>;
     } else if (accession) {
-        itemTitle = <div className="col item-title accession text-small">{ accession }</div>;
+        itemTitle = (
+            <div className="col item-title">
+                <span className="accession text-small">{ accession }</span>
+            </div>
+        );
     }
 
     return (

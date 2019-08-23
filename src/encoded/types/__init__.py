@@ -36,7 +36,12 @@ class Individual(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/individual.json')
 
-    embedded_list = []
+    embedded_list = [
+        'father.life_status',
+        'father.sex',
+        'mother.life_status',
+        'mother.sex'
+    ]
 
     # rev = {
     #     'cases_proband': ('Case', 'proband'),
@@ -85,6 +90,10 @@ class Individual(Item):
         return title
 
 
+def trace_parents(request, members, individual):
+    pass
+
+
 @collection(
     name='cases',
     unique_key='accession',
@@ -97,6 +106,12 @@ class Case(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/case.json')
     embedded_list = [
+        "families.members.sex",
+        "families.members.father",
+        "families.members.mother",
+        "families.members.status",
+        "families.members.accession",
+        "families.members.life_status"
     ]
 
     # @calculated_property(schema={

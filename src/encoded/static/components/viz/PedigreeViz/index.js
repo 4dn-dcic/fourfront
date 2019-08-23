@@ -47,8 +47,8 @@ const POSITION_DEFAULTS = {
     individualWidth: 80,
     individualXSpacing: 80,
     individualHeight: 80,
-    individualYSpacing: 80,
-    graphPadding: 50,
+    individualYSpacing: 120,
+    graphPadding: 60,
     relationshipSize: 40,
     edgeLedge: 40,
     edgeCornerDiameter: 10
@@ -176,7 +176,7 @@ export class PedigreeViz extends React.PureComponent {
          *
          * @required
          */
-        "width" : 600,
+        //"width" : 600,
 
         /**
          * NOT YET SUPPORTED.
@@ -251,9 +251,9 @@ export class PedigreeViz extends React.PureComponent {
     }
 
     render(){
+        const { dataset, ...passProps } = this.props;
         const { history, currCounter } = this.state;
         const jsonList = history[currCounter];
-        const { dataset, ...passProps } = this.props;
         return (
             <GraphTransformer jsonList={jsonList} {...passProps} />
         );
@@ -307,23 +307,37 @@ class GraphTransformer extends React.PureComponent {
     }
 
     render(){
-        const { jsonList, dimensionOpts, ...passProps } = this.props;
-        const dims              = this.memoized.getFullDims(dimensionOpts);
-        const objectGraph       = this.memoized.createObjectGraph(jsonList);
-        const relationships     = this.memoized.createRelationships(objectGraph);
-
-        this.memoized.assignTreeHeightIndices(objectGraph);
-        const order = this.memoized.orderObjectGraph(objectGraph, this.memoized);
+        const { jsonList, children, dimensionOpts, filterUnrelatedIndividuals, ...passProps } = this.props;
+        const dims                  = this.memoized.getFullDims(dimensionOpts);
+        const objectGraph           = this.memoized.createObjectGraph(jsonList);
+        const relationships         = this.memoized.createRelationships(objectGraph);
+        const anyUnrelatedIndvs     = this.memoized.assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals);
+        const order                 = this.memoized.orderObjectGraph(objectGraph, this.memoized);
         this.memoized.positionObjectGraph(objectGraph, order, dims);
-        const graphHeight = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
+        const graphHeight           = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const edges = this.memoized.createEdges(objectGraph, dims, graphHeight);
         console.log('TTT2', objectGraph, relationships, edges);
-        return <VizContainer {...{ objectGraph, relationships, dims, order, edges, ...passProps }} memoized={this.memoized} />;
+
+        const viewProps = {
+            ...passProps,
+            objectGraph, relationships, dims, order, edges,
+            memoized: this.memoized
+        };
+
+        if (children){
+            return React.Children.map(children, (child) => React.cloneElement(child, viewProps));
+        } else {
+            return <PedigreeVizView {...viewProps} memoized={this.memoized} />;
+        }
     }
 }
 
 
-export class VizContainer extends React.PureComponent {
+export class PedigreeVizView extends React.PureComponent {
+
+    static defaultProps = {
+        'width': 600
+    };
 
     constructor(props){
         super(props);
@@ -356,7 +370,6 @@ export class VizContainer extends React.PureComponent {
     }
 
     handleNodeMouseLeave(evt){
-        const { windowWidth = null } = this.props;
         const { currHoverNodeId = null } = this.state;
         if (!currHoverNodeId){
             return false;
@@ -366,7 +379,6 @@ export class VizContainer extends React.PureComponent {
     }
 
     handleNodeClick(id){
-        const { windowWidth = null } = this.props;
         if (!id){
             return false;
         }
@@ -407,21 +419,39 @@ export class VizContainer extends React.PureComponent {
 
     render(){
         const {
-            width: containerWidth, height, objectGraph, dims, order, memoized,
-            overlaysContainer, detailPaneComponent, containerStyle, ...passProps
+            width: containerWidth,
+            height: propHeight,
+            objectGraph, dims, order, memoized,
+            overlaysContainer, detailPaneComponent, containerStyle,
+            ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
         const diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
-        const containerHeight = height || graphHeight;
+        const containerHeight = propHeight || graphHeight;
+
         const useContainerStyle = {
             width: containerWidth,
-            height: height || "auto",
+            height: "auto",
+            minHeight : containerHeight || "none",
             position: "relative",
             overflow: "auto",
             ...containerStyle
         };
+
+        const vizAreaStyle = {
+            'width': graphWidth,
+            'height': graphHeight
+        };
+
+        if (graphWidth < containerWidth || graphHeight < containerHeight){
+            vizAreaStyle.position = 'relative';
+            vizAreaStyle.left = Math.max((containerWidth - graphWidth) / 2, 0);
+            // Less top margin than bottom due to more labels at bottom.
+            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 3, 0);
+        }
+
         const commonChildProps = {
             objectGraph, graphHeight, graphWidth, dims, memoized, diseaseToIndex,
             containerHeight, containerWidth,
@@ -446,9 +476,8 @@ export class VizContainer extends React.PureComponent {
         }
 
         return (
-            <div className="pedigree-viz-container" style={useContainerStyle}>
-                <div className="viz-area" style={{ 'width': graphWidth, 'height': graphHeight }}
-                    onClick={this.handleContainerClick}>
+            <div className="pedigree-viz-container" style={useContainerStyle} onClick={this.handleContainerClick}>
+                <div className="viz-area" style={vizAreaStyle}>
                     <ShapesLayer {...commonChildProps} />
                     <RelationshipsLayer {...commonChildProps} />
                     <IndividualsLayer {...commonChildProps} />

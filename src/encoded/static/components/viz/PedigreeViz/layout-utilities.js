@@ -4,65 +4,108 @@ import { getRelationships } from './data-utilities';
 
 
 /** Should already have relationships */
-export function assignTreeHeightIndices(objectGraph){
-    const visited = {};
+export function assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals = false){
+
+    const unassignedIDs = new Set(objectGraph.map(function(og){ return og.id; })); // Will return this
     const visitedRelationships = new Set();
+
+    function performAssignments(q){
+        while (q.length) {
+            const individual = q.shift();
+            const {
+                _parentalRelationship = null,
+                _maritalRelationships = [],
+                _drawing : { heightIndex },
+                id
+            } = individual;
+            if (!unassignedIDs.has(id)){
+                continue;
+            }
+            unassignedIDs.delete(id);
+            //individual._drawing = individual._drawing || {};
+            //individual._drawing.heightIndex = heightIndex;
+
+            if (_parentalRelationship && !visitedRelationships.has(_parentalRelationship)){
+                visitedRelationships.add(_parentalRelationship);
+                _parentalRelationship._drawing = { heightIndex : heightIndex + 1 };
+                _parentalRelationship.children.forEach(function(sibling){
+                    if (sibling === individual || !unassignedIDs.has(sibling.id)) return;
+                    sibling._drawing = { heightIndex }; // Same as that of individual
+                    q.push(sibling);
+                });
+                _parentalRelationship.partners.forEach(function(parent){
+                    if (!unassignedIDs.has(parent.id)) return;
+                    parent._drawing = { heightIndex: heightIndex + 1 };
+                    q.push(parent);
+                });
+            }
+
+            _maritalRelationships.forEach(function(maritalRelationship){
+                if (visitedRelationships.has(maritalRelationship)) return;
+                visitedRelationships.add(maritalRelationship);
+                maritalRelationship._drawing = { heightIndex }; // Same as that of individual
+                maritalRelationship.children.forEach(function(child){
+                    if (!unassignedIDs.has(child.id)) return;
+                    child._drawing = { heightIndex: heightIndex - 1 };
+                    q.push(child);
+                });
+                maritalRelationship.partners.forEach(function(partner){
+                    if (partner === individual || !unassignedIDs.has(partner.id)) return;
+                    partner._drawing = { heightIndex };
+                    q.push(partner);
+                });
+            });
+
+        }
+    }
 
     const proband = objectGraph[0];
     proband._drawing = { heightIndex : 0 };
 
-    const q = [ proband ];
+    // Step 1 - assign to individuals starting from proband (1st item in list)
+    performAssignments([ proband ]);
 
-    // Step 1 - assign to individuals
-    while (q.length) {
-        const individual = q.shift();
-        const {
-            _parentalRelationship = null,
-            _maritalRelationships = [],
-            _drawing : { heightIndex },
-            id
-        } = individual;
-        if (visited[id]){
-            continue;
+    // Step 2 - Handly any unattached-to-proband-items
+    const unassignedIDsOrigArr = [...unassignedIDs];
+    console.log("UNASSIGNED", unassignedIDsOrigArr, objectGraph, objectGraph.map(function(indv){ return indv._drawing; }));
+    if (unassignedIDs.size > 0){
+        if (filterUnrelatedIndividuals){
+            // Remove any unattached-to-proband-items
+            const removedIndividuals = [];
+            let i = 0;
+            while (i < objectGraph.length){
+                const checkIndv = objectGraph[i];
+                if (typeof (checkIndv._drawing && checkIndv._drawing.heightIndex) !== 'number'){
+                    console.error(checkIndv.id + " is not related to proband, removing.");
+                    objectGraph.splice(i, 1);
+                    removedIndividuals.push(checkIndv);
+                    continue;
+                }
+                i++;
+            }
+            if (removedIndividuals.length > 0){
+                console.error("Found individuals which are not related to proband, removing:", removedIndividuals);
+            }
+        } else {
+            // Assign any unattached-to-proband-items
+            while (unassignedIDs.size > 0){
+                // This shouldn't happen a lot so we iterate over obj graph instead
+                // of making lookup dict of id:individual
+                for (let i = 0; i < objectGraph.length; i++){
+                    if (unassignedIDs.has(objectGraph[i].id)){
+                        const nextUnassignedIndv = objectGraph[i];
+                        console.error("FOUND AN INDIVIDUAL NOT RELATED TO PROBAND", nextUnassignedIndv);
+                        nextUnassignedIndv._drawing = { heightIndex : 0 };
+                        performAssignments([ nextUnassignedIndv ]);
+                        break;
+                    }
+                }
+            }
         }
-        visited[id] = true;
-        //individual._drawing = individual._drawing || {};
-        //individual._drawing.heightIndex = heightIndex;
-
-        if (_parentalRelationship && !visitedRelationships.has(_parentalRelationship)){
-            visitedRelationships.add(_parentalRelationship);
-            _parentalRelationship._drawing = { heightIndex : heightIndex + 1 };
-            _parentalRelationship.children.forEach(function(sibling){
-                if (sibling === individual || visited[sibling.id]) return;
-                sibling._drawing = { heightIndex }; // Same as that of individual
-                q.push(sibling);
-            });
-            _parentalRelationship.partners.forEach(function(parent){
-                if (visited[parent.id]) return;
-                parent._drawing = { heightIndex: heightIndex + 1 };
-                q.push(parent);
-            });
-        }
-
-        _maritalRelationships.forEach(function(maritalRelationship){
-            if (visitedRelationships.has(maritalRelationship)) return;
-            visitedRelationships.add(maritalRelationship);
-            maritalRelationship._drawing = { heightIndex }; // Same as that of individual
-            maritalRelationship.children.forEach(function(child){
-                if (visited[child.id]) return;
-                child._drawing = { heightIndex: heightIndex - 1 };
-                q.push(child);
-            });
-            maritalRelationship.partners.forEach(function(partner){
-                if (partner === individual || visited[partner.id]) return;
-                partner._drawing = { heightIndex };
-                q.push(partner);
-            });
-        });
-
     }
 
-    // Step 2 -
+
+    // Step 3 -
     // ensure each relationship is on same height index as lowest heightIndex of partners
     // Then that all children are at that index or lower.
 
@@ -185,6 +228,8 @@ export function assignTreeHeightIndices(objectGraph){
     //
     // }
 
+
+    // Shift heightIndices so 0 is smallest.
     let smallestHeightIndex = 0;
     objectGraph.forEach(function(indv){
         smallestHeightIndex = Math.min(smallestHeightIndex, indv._drawing.heightIndex);
@@ -200,21 +245,7 @@ export function assignTreeHeightIndices(objectGraph){
         });
     }
 
-    return objectGraph;
-
-
-
-    /*
-    const origLen = object.length;
-    const q = objectGraph.slice(0);
-    let probandIndex = 0; // By default assume first item in graph is proband.
-    let currItem = null;
-    const proband = q[probandIndex];
-    q.splice(probandIndex, 1);
-    for (let i = 0; i < origLen; i++){ // Exit condition vs while loop
-        currItem = q.shift();
-    }
-    */
+    return unassignedIDsOrigArr;
 }
 
 
