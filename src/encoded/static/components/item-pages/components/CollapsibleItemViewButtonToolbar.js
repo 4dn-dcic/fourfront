@@ -50,7 +50,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
         const { mounted, open } = this.state;
         if (!mounted) {
             return (
-                <div className="pull-right pt-23 text-medium" key="loading-indicator">
+                <div className="pt-23 text-medium" key="loading-indicator">
                     <i className="icon icon-fw icon-circle-notch fas icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
             );
@@ -62,7 +62,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
         const isOpen = !isMobileSize || open;
 
         return (
-            <div className="pull-right tabview-title-controls-container">
+            <div className="tabview-title-controls-container">
                 { isMobileSize ?
                     <Collapse in={isOpen} data-tip={tooltip}>
                         <div className="inner-panel" key="inner-collapsible-panel">
@@ -71,15 +71,15 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
                         </div>
                     </Collapse>
                     : null }
-                <div className="toolbar-wrapper pull-right" key="toolbar">
-                    <ButtonToolbar data-tip={ isMobileSize ? null : tooltip }>
+                <div className="toolbar-wrapper" key="toolbar">
+                    <div className="btn-toolbar" role="toolbar" data-tip={ isMobileSize ? null : tooltip }>
                         { !isMobileSize && children }
                         <button className="btn btn-outline-dark d-lg-none d-xl-none toggle-open-button"
                             onClick={this.toggleOpenMenu} key="collapse-toggle-btn" type="button">
                             { typeof collapseButtonTitle === 'function' ? collapseButtonTitle(isOpen) : collapseButtonTitle }
                         </button>
                         { constantButtons }
-                    </ButtonToolbar>
+                    </div>
                 </div>
             </div>
         );

@@ -6,15 +6,19 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import Tabs from 'rc-tabs';
-import TabContent from 'rc-tabs/lib/TabContent';
-import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
-
-import { navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
 
+/**
+ * Notes:
+ * We memoize the global/static functions because we only expect a single
+ * TabView to exist per Page view.
+ */
+
+
+/** Choose FontAwesome Icon for a given custom tabName. Hardcoded. */
 export function getIconForCustomTab(tabName){
     switch(tabName){
         case 'summary':
@@ -34,6 +38,7 @@ export function getIconForCustomTab(tabName){
     }
 }
 
+/** Choose pretty title for a given tabName. Hardcoded. */
 export function getTitleForCustomTab(tabName){
     switch(tabName){
         case 'experiment-summaries':
@@ -48,13 +53,9 @@ export function getTitleForCustomTab(tabName){
 }
 
 
+export class TabView extends React.PureComponent {
 
-/**
- * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
- */
-
-export class TabbedView extends React.PureComponent {
-
+    /** Returns key of first item with `isDefault: true` or first item. */
     static getDefaultActiveKeyFromContents(contents){
         var defaultActiveTab = _.findWhere(contents, { 'isDefault' : true });
         if (typeof defaultActiveTab !== 'undefined' && typeof defaultActiveTab.key !== 'undefined'){
@@ -64,20 +65,6 @@ export class TabbedView extends React.PureComponent {
             return contents[0].key;
         }
         return null;
-    }
-
-    static renderTabPane(tabObj, tabIndex = 0){
-        return (
-            <Tabs.TabPane
-                key={tabObj.key || tabObj.tab || tabIndex}
-                data-tab-key={tabObj.key}
-                id={'tab:' + tabObj.key}
-                tab={<span className="tab" data-tab-key={tabObj.key}>{ tabObj.tab }</span>}
-                placeholder={tabObj.placeholder || <TabPlaceHolder/> }
-                disabled={tabObj.disabled} style={tabObj.style}>
-                { tabObj.content }
-            </Tabs.TabPane>
-        );
     }
 
     static createTabObject(key, title, icon, tabContent, extraProps = {}){
@@ -148,7 +135,7 @@ export class TabbedView extends React.PureComponent {
 
             icon = contentForTab.icon || getIconForCustomTab(tabKey);
 
-            resultArr.push(TabbedView.createTabObject(tabKey, tabTitle, icon, contentForTab));
+            resultArr.push(TabView.createTabObject(tabKey, tabTitle, icon, contentForTab));
         });
 
         //
@@ -156,18 +143,15 @@ export class TabbedView extends React.PureComponent {
         // Content with position : 'tab' gets its own tab.
         //
 
-        var staticTabContentSingles = _.filter(staticContentList, function(s){
+        const staticTabContentSingles = _.filter(staticContentList, function(s){
             return s.content && !s.content.error && s.location === 'tab';
         });
 
-
         _.forEach(staticTabContentSingles, function(s, idx){
-            var content = s.content,
-                title   = content.title || 'Custom Tab ' + (idx + 1),
-                tabKey  = title.toLowerCase().split(' ').join('_'),
-                icon    = (content.options && content.options.title_icon) || null;
-
-            resultArr.push(TabbedView.createTabObject(tabKey, title, icon, [s], { 'hideTitles' : true }));
+            const { content: { title = null, options : { title_icon = null } } } = s;
+            const showTitle = title || 'Custom Tab ' + (idx + 1);
+            const tabKey = title.toLowerCase().split(' ').join('_');
+            resultArr.push(TabView.createTabObject(tabKey, showTitle, title_icon, [s], { 'hideTitles' : true }));
         });
 
         return resultArr;
@@ -215,13 +199,20 @@ export class TabbedView extends React.PureComponent {
         super(props);
         this.getActiveKey = this.getActiveKey.bind(this);
         this.setActiveKey = this.setActiveKey.bind(this);
+        this.getTabByHref = this.getTabByHref.bind(this);
         this.maybeSwitchTabAccordingToHref = this.maybeSwitchTabAccordingToHref.bind(this);
         this.onTabClick = this.onTabClick.bind(this);
+
+        this.state = {
+            currentTabKey : (props.contents && TabView.getDefaultActiveKeyFromContents(props.contents)) || null
+        };
 
         this.tabsRef = React.createRef();
     }
 
     componentDidMount(){
+        // We don't get hash in URL until we're clientside so
+        // we defer until are mounted before setting/switching-to a currentTabKey.
         this.maybeSwitchTabAccordingToHref();
     }
 
@@ -232,99 +223,156 @@ export class TabbedView extends React.PureComponent {
     }
 
     getActiveKey(){
-        var tabsInstance = this.tabsRef.current,
-            currKey = tabsInstance && tabsInstance.state.activeKey;
-
-        return currKey;
+        return this.state.currentTabKey;
     }
 
     setActiveKey(nextKey){
-        var tabsInstance = this.tabsRef.current;
-        if (typeof tabsInstance.setActiveKey === 'function'){
-            return tabsInstance.setActiveKey(nextKey);
-        } else {
-            console.error('Manually setting active tab key not currently supported...');
-            return false;
-        }
+        this.setState({ 'currentTabKey' : nextKey });
     }
 
-    maybeSwitchTabAccordingToHref(props = this.props){
-        var { contents, href } = props,
-            hrefParts       = url.parse(href),
-            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            currKey         = this.getActiveKey();
+    getTabByHref(){
+        const { contents, href } = this.props;
+        const hrefParts = url.parse(href);
+        const hash = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1);
+        const currKey = this.getActiveKey();
 
         if (currKey === hash){
-            console.log('Already on tab', hash);
-            return false;
+            return null;
         }
 
-        var allContentObjs  = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
-            foundContent    = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
+        const allContentObjs = hash && TabView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
+        const foundContent = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
 
         if (!foundContent){
-            console.error('Could not find', hash);
-            return false;
+            return null;
         }
 
+        return foundContent;
+    }
+
+    maybeSwitchTabAccordingToHref(){
+        const foundContent = this.getTabByHref();
+        if (!foundContent){
+            // Already on tab or could not find content with hash -
+            console.error('Could not find or already on tab');
+            return false;
+        }
+        if (foundContent.disabled){
+            console.error('Tab is disabled', foundContent);
+            return false;
+        }
         this.setActiveKey(foundContent.key); // Same as `hash`
         return true;
     }
 
+    additionalTabs(){
+        const { context : { static_content = [] }, contents } = this.props;
+
+        if (static_content.length === 0) return []; // No content defined for Item.
+
+        return TabView.calculateAdditionalTabs(static_content, contents);
+    }
+
     onTabClick(tabKey, evt){
-        var { onTabClick } = this.props;
+        const { onTabClick } = this.props;
 
         // We add 'replace: true' to replace current Browser History entry with new entry.
         // Entry will refer to same pathname but different hash.
         // This is so people don't need to click 'back' button 10 times to get to previous /search/ or /browse/ page for example,
         // since they might browse around tabs for some time.
-        navigate('#' + tabKey, { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true });
+        navigate(
+            '#' + tabKey, // Change replace to `false` to save in browser history.
+            { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true }
+        );
 
         if (typeof onTabClick === 'function'){
             return onTabClick(tabKey, evt);
         }
     }
 
-    additionalTabs(){
-        const { context, contents } = this.props;
-        const staticContentList = (Array.isArray(context.static_content) && context.static_content.length > 0 && context.static_content) || [];
-
-        if (staticContentList.length === 0) return []; // No content defined for Item.
-
-        return TabbedView.calculateAdditionalTabs(staticContentList, contents);
-    }
-
     render(){
-        const { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
+        const { contents, windowWidth, prefixTabs = [], suffixTabs = [] } = this.props;
+        const { currentTabKey } = this.state;
 
-        var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
-            tabsProps = {
-                onChange, destroyInactiveTabPane,
-                'renderTabBar'          : () => (
-                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
-                        className="extra-style-2" tabBarGutter={0} />
-                ),
-                'renderTabContent'      : () => <TabContent animated={animated} />,
-                'ref'                   : this.tabsRef,
-                'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents),
-                'children'              : _.map(allTabs, TabbedView.renderTabPane)
-            };
+        const allTabs = TabView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
+        const currentTab = _.findWhere(allTabs, { key : currentTabKey });
 
-        if (activeKey) tabsProps.activeKey = activeKey;
+        if (!currentTab) {
+            throw new Error("Tab not available in list of tabs -", currentTabKey);
+        }
 
-        return <Tabs {...tabsProps} key="tabs" />;
-    }
-
-}
-
-class TabPlaceHolder extends React.PureComponent {
-    render(){
         return (
-            <div>
-                <h3 className="text-400 mb-5 mt-5">
-                    <i className="icon icon-spin icon-circle-notch fas"/>
-                </h3>
-            </div>
+            <React.Fragment>
+                <TabsBar tabs={allTabs} onTabClick={this.onTabClick} {...{ currentTab, prefixTabs, suffixTabs }} />
+                <TabPane currentTab={currentTab} />
+            </React.Fragment>
         );
     }
 }
+
+const TabsBar = React.memo(function TabsBar({ tabs, currentTab, onTabClick, prefixTabs = [], suffixTabs = [] }){
+    const { key: currentTabKey } = currentTab;
+    const renderedTabs = tabs.map(function(tabObj, idx){
+        const { tab: children, key, disabled = false } = tabObj;
+        const cls = (
+            "tab-item" +
+            (key === currentTabKey ? " active" : "") +
+            (disabled ? " disabled" : " clickable")
+        );
+        const onClick = function(e){
+            e.stopPropagation();
+            onTabClick(key);
+        };
+        return (
+            <div className={cls} key={key} data-tab-for={key} data-tab-index={idx} onClick={!disabled && onClick}>
+                { children }
+            </div>
+        );
+    });
+
+    // Rendered, probably static tabs (or controlled externally)
+    prefixTabs.forEach(function({ tab, key = null, className = null, onClick = null }, idx){
+        let cls = "tab-item tab-prefix";
+        if (className) {
+            cls += " " + className;
+        }
+        renderedTabs.unshift(
+            <div className={cls} key={key || "prefix-" + idx} onClick={onClick}>
+                { tab }
+            </div>
+        );
+    });
+    suffixTabs.forEach(function({ tab, key = null, className = null, onClick = null }, idx){
+        let cls = "tab-item tab-suffix";
+        if (className) {
+            cls += " " + className;
+        }
+        if (typeof onClick === 'function'){
+            cls += " clickable";
+        }
+        renderedTabs.push(
+            <div className={cls} key={key || "suffix-" + idx} onClick={onClick}>
+                { tab }
+            </div>
+        );
+    });
+
+    return (
+        <div className="tabs-bar-outer">
+            <div className="tabs-bar">
+                { renderedTabs }
+            </div>
+        </div>
+    );
+});
+
+
+const TabPane = React.memo(function TabsBar({ currentTab }){
+    const { key, content } = currentTab;
+    return (
+        <div className="tab-pane-outer" data-tab-key={key} id={key}>
+            { content }
+        </div>
+    );
+});
+

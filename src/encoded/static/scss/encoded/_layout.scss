@@ -27,7 +27,8 @@ body {
 }
 
 #application {
-    height: 100%;
+	min-height: 100%;
+	min-height: 100vh;
     background-color: $appBackgroundColor;
 }
 
@@ -66,11 +67,6 @@ blockquote {
     min-height: 100%;
 	background-color: $appBackgroundColor;
 	overflow-x: hidden;
-}
-
-.homepage-main-box {
-	min-height: 400px;
-	background: url('/static/img/encode-bg-gray.png') no-repeat center;
 }
 
 .project-info {
@@ -127,7 +123,7 @@ blockquote {
 #content {
 
 	padding-top: 0px;
-	padding-bottom: 20px;
+	padding-bottom: 0px;
 	position: relative;
 
 	> .alerts {
@@ -156,11 +152,29 @@ blockquote {
 	padding-top: 0px;
 	padding-bottom: 0px;
 
+	// This is replicated in JS for older browsers. If changing, make sure to make adjustment in BodyElement in App.js as well.
+	@include navbar-static-position {
+		min-height: calc(100vh - 134px) !important;
+	}
+
+	@include navbar-fixed-position {
+		min-height: 100vh !important;
+		.test-warning-visible & {
+			min-height: calc(100vh - 52px) !important;
+		}
+	}
+
 
 	/* top padding for small & large screens re: fixed nav & sticky footer */
 	@include media-breakpoint-up(md) {
 		padding-top: 81px;
 		padding-bottom: 50px;
+		body.scolled-past-top &,
+		body.is-full-screen &,
+		body.is-item-view & {
+			padding-top: 41px;
+		}
+
 	}
 
 	#inner-overlays-container {
@@ -172,6 +186,30 @@ blockquote {
 
 /*************** BODY STYLES RE: FULL-SCREEN THINGS ***************/
 
+@mixin make-wide-container {
+	width: auto;
+	padding-left: 12px;
+	padding-right: 12px;
+	@include media-breakpoint-between(md, lg) {
+		width: auto;
+		max-width: none;
+		padding-left: 24px;
+		padding-right: 24px;
+	}
+	@include media-breakpoint-up(xl) {
+		width: auto;
+		max-width: none;
+		padding-left: 36px;
+		padding-right: 36px;
+	}
+}
+
+/* Like .container-fluid, but slightly more padding; for full browser width */
+.container-wide {
+	@include make-wide-container;
+}
+
+/* Potentially deprecated in this project */
 body.is-full-screen {
 
 	/** Make body non-scrollable for pages which aren't search. **/
@@ -198,7 +236,8 @@ body.is-full-screen {
 ************************************************************/
 
 #page-title-container {
-	> h1.page-title {
+
+	h1.page-title {
 
 		font-weight: 200;
 

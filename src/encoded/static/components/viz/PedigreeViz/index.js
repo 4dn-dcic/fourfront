@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
+import { path as d3Path } from 'd3-path';
 import {
     standardizeObjectsInList, findNodeWithId,
     createObjectGraph, createRelationships, getRelationships
@@ -46,8 +47,8 @@ const POSITION_DEFAULTS = {
     individualWidth: 80,
     individualXSpacing: 80,
     individualHeight: 80,
-    individualYSpacing: 80,
-    graphPadding: 50,
+    individualYSpacing: 120,
+    graphPadding: 60,
     relationshipSize: 40,
     edgeLedge: 40,
     edgeCornerDiameter: 10
@@ -175,7 +176,7 @@ export class PedigreeViz extends React.PureComponent {
          *
          * @required
          */
-        "width" : 600,
+        //"width" : 600,
 
         /**
          * NOT YET SUPPORTED.
@@ -250,9 +251,9 @@ export class PedigreeViz extends React.PureComponent {
     }
 
     render(){
+        const { dataset, ...passProps } = this.props;
         const { history, currCounter } = this.state;
         const jsonList = history[currCounter];
-        const { dataset, ...passProps } = this.props;
         return (
             <GraphTransformer jsonList={jsonList} {...passProps} />
         );
@@ -306,23 +307,37 @@ class GraphTransformer extends React.PureComponent {
     }
 
     render(){
-        const { jsonList, dimensionOpts, ...passProps } = this.props;
-        const dims              = this.memoized.getFullDims(dimensionOpts);
-        const objectGraph       = this.memoized.createObjectGraph(jsonList);
-        const relationships     = this.memoized.createRelationships(objectGraph);
-
-        this.memoized.assignTreeHeightIndices(objectGraph);
-        const order = this.memoized.orderObjectGraph(objectGraph, this.memoized);
+        const { jsonList, children, dimensionOpts, filterUnrelatedIndividuals, ...passProps } = this.props;
+        const dims                  = this.memoized.getFullDims(dimensionOpts);
+        const objectGraph           = this.memoized.createObjectGraph(jsonList);
+        const relationships         = this.memoized.createRelationships(objectGraph);
+        const anyUnrelatedIndvs     = this.memoized.assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals);
+        const order                 = this.memoized.orderObjectGraph(objectGraph, this.memoized);
         this.memoized.positionObjectGraph(objectGraph, order, dims);
-        const graphHeight = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
+        const graphHeight           = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const edges = this.memoized.createEdges(objectGraph, dims, graphHeight);
         console.log('TTT2', objectGraph, relationships, edges);
-        return <VizContainer {...{ objectGraph, relationships, dims, order, edges, ...passProps }} memoized={this.memoized} />;
+
+        const viewProps = {
+            ...passProps,
+            objectGraph, relationships, dims, order, edges,
+            memoized: this.memoized
+        };
+
+        if (children){
+            return React.Children.map(children, (child) => React.cloneElement(child, viewProps));
+        } else {
+            return <PedigreeVizView {...viewProps} memoized={this.memoized} />;
+        }
     }
 }
 
 
-export class VizContainer extends React.PureComponent {
+export class PedigreeVizView extends React.PureComponent {
+
+    static defaultProps = {
+        'width': 600
+    };
 
     constructor(props){
         super(props);
@@ -355,7 +370,6 @@ export class VizContainer extends React.PureComponent {
     }
 
     handleNodeMouseLeave(evt){
-        const { windowWidth = null } = this.props;
         const { currHoverNodeId = null } = this.state;
         if (!currHoverNodeId){
             return false;
@@ -365,7 +379,6 @@ export class VizContainer extends React.PureComponent {
     }
 
     handleNodeClick(id){
-        const { windowWidth = null } = this.props;
         if (!id){
             return false;
         }
@@ -406,15 +419,39 @@ export class VizContainer extends React.PureComponent {
 
     render(){
         const {
-            width: containerWidth, height, objectGraph, dims, order, memoized,
-            overlaysContainer, detailPaneComponent, ...passProps
+            width: containerWidth,
+            height: propHeight,
+            objectGraph, dims, order, memoized,
+            overlaysContainer, detailPaneComponent, containerStyle,
+            ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
         const diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
-        const containerHeight = height || graphHeight;
-        const containerStyle = { width: containerWidth, height: height || "auto", position: "relative", overflow: "auto" };
+        const containerHeight = propHeight || graphHeight;
+
+        const useContainerStyle = {
+            width: containerWidth,
+            height: "auto",
+            minHeight : containerHeight || "none",
+            position: "relative",
+            overflow: "auto",
+            ...containerStyle
+        };
+
+        const vizAreaStyle = {
+            'width': graphWidth,
+            'height': graphHeight
+        };
+
+        if (graphWidth < containerWidth || graphHeight < containerHeight){
+            vizAreaStyle.position = 'relative';
+            vizAreaStyle.left = Math.max((containerWidth - graphWidth) / 2, 0);
+            // Less top margin than bottom due to more labels at bottom.
+            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 3, 0);
+        }
+
         const commonChildProps = {
             objectGraph, graphHeight, graphWidth, dims, memoized, diseaseToIndex,
             containerHeight, containerWidth,
@@ -426,27 +463,21 @@ export class VizContainer extends React.PureComponent {
 
         let selectedNodePane = null;
 
-        if (detailPaneComponent && overlaysContainer){
-            // Depending on container/parent layout+logic,
-            // the pane could appear below, above, overlayed, anywhere, etc.
-            selectedNodePane = ReactDOM.createPortal(
-                React.createElement(detailPaneComponent, {
-                    objectGraph,
-                    currSelectedNodeId,
-                    memoized,
-                    diseaseToIndex,
-                    'unselectNode' : this.handleUnselectNode,
-                    'onNodeClick' : this.handleNodeClick,
-                }),
+        if (detailPaneComponent){
+            selectedNodePane = React.createElement(detailPaneComponent, {
+                objectGraph,
+                currSelectedNodeId,
+                memoized,
+                diseaseToIndex,
                 overlaysContainer,
-                "detail-pane"
-            );
+                'unselectNode' : this.handleUnselectNode,
+                'onNodeClick' : this.handleNodeClick,
+            });
         }
 
         return (
-            <div className="pedigree-viz-container" style={containerStyle}>
-                <div className="viz-area" style={{ 'width': graphWidth, 'height': graphHeight }}
-                    onClick={this.handleContainerClick}>
+            <div className="pedigree-viz-container" style={useContainerStyle} onClick={this.handleContainerClick}>
+                <div className="viz-area" style={vizAreaStyle}>
                     <ShapesLayer {...commonChildProps} />
                     <RelationshipsLayer {...commonChildProps} />
                     <IndividualsLayer {...commonChildProps} />
@@ -465,11 +496,84 @@ const ShapesLayer = React.memo(function ShapesLayer(props){
     return (
         <svg className="shapes-layer" viewBox={"0 0 " + graphWidth + " " + graphHeight} style={svgStyle}>
             <EdgesLayer {...props} />
+            <SelectedNodeIdentifier {...props} />
             <IndividualNodeShapeLayer {...props} />
         </svg>
     );
 });
 
+
+/**
+ * @todo _Maybe_
+ * Make into instantiable component and if currSelectedNodeId change then use d3 transition
+ * to adjust transform attribute as some browsers won't transition attribute using CSS3.
+ * **BUT** Using CSS transition for SVG transform is part of newer spec so browsers should ideally
+ * support it, can likely just wait for (more) browsers to implement?
+ */
+const SelectedNodeIdentifier = React.memo(function SelectedNodeIdentifier(props){
+    const { memoized, currSelectedNodeId, objectGraph, dims } = props;
+    const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
+    if (!selectedNode){
+        return null;
+    }
+    const { id, _drawing: { xCoord, yCoord } } = selectedNode;
+
+    let useHeight = dims.individualHeight;
+    let useWidth = dims.individualWidth;
+
+    if (id.slice(0,13) === "relationship:"){ // Is relationship node.
+        useHeight = dims.relationshipSize;
+        useWidth = dims.relationshipSize;
+    }
+
+    const topLeftX = dims.graphPadding + xCoord - (useWidth / 2);
+    const topLeftY = dims.graphPadding + yCoord - (useHeight / 2);
+    const transform = "translate(" + topLeftX + ", " + topLeftY + ")";
+
+    return (
+        <g className="selected-node-identifier" transform={transform}>
+            <SelectedNodeIdentifierShape height={useHeight} width={useWidth} />
+        </g>
+    );
+});
+
+/**
+ * @todo Move segmentLength to dims?
+ * @todo Make into instantiable component and if detect width change, height change, etc, then use d3 transition.
+ */
+const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape({ height, width, segmentLength = 30, offset = 18 }){
+    const cornerPaths = [];
+
+    const topLeft = d3Path();
+    topLeft.moveTo(-offset, -offset + segmentLength);
+    topLeft.lineTo(-offset, -offset);
+    topLeft.lineTo(-offset + segmentLength, -offset);
+    cornerPaths.push(topLeft.toString());
+
+    const topRight = d3Path();
+    topRight.moveTo(width - segmentLength + offset, -offset);
+    topRight.lineTo(width + offset, -offset);
+    topRight.lineTo(width + offset, -offset + segmentLength);
+    cornerPaths.push(topRight.toString());
+
+    const bottomRight = d3Path();
+    bottomRight.moveTo(width + offset, height + offset - segmentLength);
+    bottomRight.lineTo(width + offset, height + offset);
+    bottomRight.lineTo(width + offset - segmentLength, height + offset);
+    cornerPaths.push(bottomRight.toString());
+
+    const bottomLeft = d3Path();
+    bottomLeft.moveTo(-offset + segmentLength, height + offset);
+    bottomLeft.lineTo(-offset, height + offset);
+    bottomLeft.lineTo(-offset, height + offset - segmentLength);
+    cornerPaths.push(bottomLeft.toString());
+
+    const cornerPathsJSX = cornerPaths.map(function(pathStr, idx){
+        return <path d={pathStr} key={idx} />;
+    });
+
+    return <React.Fragment>{ cornerPathsJSX }</React.Fragment>;
+});
 
 
 

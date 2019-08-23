@@ -107,10 +107,12 @@ export class IndividualDiv extends IndividualNodeBase {
         onNodeClick(id);
     }
 
+    /** Not used atm */
     onAddBtnClick(evt){
         this.setState({ "currentOption" : "add" });
     }
 
+    /** Not used atm */
     handleAddNewIndividual(evt){
         evt.persist();
         console.log('EEE', evt);
@@ -166,10 +168,11 @@ export class IndividualDiv extends IndividualNodeBase {
                 { currentOption === 'add' ? /** TODO */
                     <NodeOptionsPanel {...this.props} onAddSelect={this.handleAddNewIndividual} /> : null
                 }
-                {/* TODO: make below a cuztomizable prop */}
+                {/*
                 <div className="detail-text" style={detailStyle}>
                     <span className="name line-item">{ name }</span>
                 </div>
+                */}
             </div>
         );
     }

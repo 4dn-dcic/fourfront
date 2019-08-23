@@ -36,7 +36,12 @@ class Individual(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/individual.json')
 
-    embedded_list = []
+    embedded_list = [
+        'father.life_status',
+        'father.sex',
+        'mother.life_status',
+        'mother.sex'
+    ]
 
     # rev = {
     #     'cases_proband': ('Case', 'proband'),

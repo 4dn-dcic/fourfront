@@ -1,72 +1,7 @@
 
 
 
-.tabview-title-controls-container {
-    font-size: 1rem;
-    margin-bottom: 8px;
-    padding-left: 5px;
-    float: right;
-    padding-top: 17px;
 
-    // For mobile/smaller widths.
-    button.toggle-open-button {
-        @include button-no-focus-outline;
-    }
-
-    > .toolbar-wrapper > .btn-toolbar {
-        
-        button,
-        .dropdown > button {
-            margin-left: 5px;
-        }
-
-        > .btn-group {
-            float: none;
-        }
-    }
-
-    .checkbox-container {
-        margin-right: 15px;
-        margin-top: 0;
-        margin-bottom: 0;
-        line-height: 1.5rem;
-        display: block;
-        padding-top: 7px;
-        padding-bottom: 5px;
-        font-size: 0.95rem;
-        @include user-select(none);
-        &.disabled{
-            color: #999;
-        }
-        > label {
-            margin-bottom: 0;
-            font-weight: 400;
-        }
-    }
-
-    button#rowspacingtype-select {
-        min-width: 120px;
-    }
-
-    /** Only shown/visible at smaller sizes **/
-    > .inner-panel:first-child {
-        min-width: 200px;
-        padding-left: 10px;
-        padding-bottom: 12px;
-        > hr {
-            margin-top: 12px;
-            margin-bottom: 0;
-        }
-        > .mobile-size-elem {
-            > .dropdown.btn-group,
-            > .dropdown.btn-group > button.btn,
-            > button.btn {
-                width: 100%;
-                text-align: left;
-            }
-        }
-    }
-}
 
 
 

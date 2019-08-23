@@ -92,16 +92,20 @@ export default class SearchView extends React.PureComponent {
     }
 
     render(){
-        const { isFullscreen } = this.props;
+        const passProps = _.omit(this.props, 'isFullscreen', 'toggleFullScreen'); // We don't need full screen btn on CGAP as already full width.
         const facets = this.transformedFacets();
-        const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+        const tableColumnClassName = "col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-9" : "");
+        const facetColumnClassName = "col-12" + (facets.length > 0 ? " col-sm-5 col-lg-4 col-xl-3" : "");
         return (
-            <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
-                termTransformFxn={Schemas.Term.toName} />
+            <div className="container-wide" id="content">
+                <CommonSearchView {...passProps} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
+                    termTransformFxn={Schemas.Term.toName} />
+            </div>
         );
     }
 }
+
+
 
 const SearchViewPageTitle = React.memo(function SearchViewPageTitle({ context, schemas, currentAction, alerts }){
     if (currentAction === 'selection') {
@@ -119,7 +123,7 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle({ context, s
     ) : null;
 
     return (
-        <PageTitleContainer alerts={alerts}>
+        <PageTitleContainer alerts={alerts} className="container-wide">
             <TitleAndSubtitleBeside subtitle={subtitle}>
                 Search
             </TitleAndSubtitleBeside>

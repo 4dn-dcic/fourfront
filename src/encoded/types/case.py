@@ -30,8 +30,14 @@ class Case(Item):
     item_type = 'case'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/case.json')
-    embedded_list = []
-
+    embedded_list = [
+        "families.members.sex",
+        "families.members.father",
+        "families.members.mother",
+        "families.members.status",
+        "families.members.accession",
+        "families.members.life_status"
+    ]
 
     @calculated_property(schema={
         "title": "Display Title",

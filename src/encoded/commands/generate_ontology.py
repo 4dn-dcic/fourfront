@@ -631,8 +631,11 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
 
 
 def _is_deprecated(class_, data):
-    if list(data.rdfGraph.objects(class_, Deprecated)):
-        return True
+    dep = list(data.rdfGraph.objects(class_, Deprecated))
+    if dep:
+        for d in dep:
+            if d.datatype and d.datatype.endswith('boolean') and d.value:
+                return True
     return False
 
 

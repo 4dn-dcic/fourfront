@@ -19,165 +19,111 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .tab-section-title {
 	font-weight: 300;
 	margin: 0;
-	padding: 27px 0 16px; // 67px height
+	min-height: 78px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	/*
+	@include media-breakpoint-only(xs){
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: center;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+	*/
 }
 
 h3.tab-section-title {
 	line-height: 24px;
 }
-
+/*
 h4.tab-section-title {
   padding-top: 36px;
   padding-bottom: 12px;
 }
-
-.tab-section-title-horiz-divider {
+*/
+hr.tab-section-title-horiz-divider {
 	/* Use classes 'mb-0', 'mb-1', etc. to set margins */
 	margin-top: 0;
 	margin-bottom: 0;
 	border-top-color: #ccc;
 }
 
-body .rc-tabs-top {
+.tabview-title-controls-container {
+    font-size: 1rem;
+	padding-left: 5px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 
-	box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
-	border-bottom: none;
+    // For mobile/smaller widths.
+    button.toggle-open-button {
+        @include button-no-focus-outline;
+    }
 
-	.rc-tabs-bar.extra-style-2 {
-		border-top: none;
-		border-bottom: none;
-		background: $brand-primary-dark;
+    > .toolbar-wrapper > .btn-toolbar {
+		justify-content: flex-end;
 
-		.rc-tabs-nav {
-			padding: 4px 0px 4px;
-		}
-	}
+        > .btn-group {
+            float: none;
+        }
+    }
+
+    .checkbox-container {
+        margin-right: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+        display: block;
+        padding-top: 7px;
+        padding-bottom: 5px;
+        font-size: 0.95rem;
+        @include user-select(none);
+        &.disabled{
+            color: #999;
+        }
+        > label {
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+    }
+
+    button#rowspacingtype-select {
+        min-width: 120px;
+    }
+
+    /** Only shown/visible at smaller sizes **/
+    > .inner-panel:first-child {
+        min-width: 200px;
+        padding-left: 10px;
+        padding-bottom: 10px;
+        > hr {
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+        > .mobile-size-elem {
+            > .dropdown.btn-group,
+            > .dropdown.btn-group > button.btn,
+            > button.btn {
+                width: 100%;
+                text-align: left;
+            }
+        }
+    }
 }
 
-.rc-tabs-bar {
+/*************************
+    TABVIEW
+**************************/
 
-	.rc-tabs-tab {
-		padding-left: 18px;
-		padding-right: 18px;
-		margin-right: 0px;
-		height: 38px;
-		line-height: 36px;
-		padding-top: 0px;
-		padding-bottom: 0px;
-		border-bottom: 1px solid transparent;
-		position: relative;
-		z-index: 10;
-		transition : border-color .1s ease-out;
-		color : #fff;
+$tabbar-bg-color : #ececec !default;
+$tabbar-text-color : #333 !default;
+$tabbar-text-active-color: #000 !default;
+$tabbar-bg-active-color: #fff !default;
+// If override this, check e.g. CaseView Pedigree Tab height dimensioning (JS) since this 46px is accounted for in calculations
+$tabbar-height: 46px;
 
-		&:not(:nth-child(1)) {
-			border-left: 1px solid rgba(255,255,255,0.33);
-		}
 
-		//&:last-child {
-		//  border-right: 1px solid rgba(255,255,255,0.2);
-		//}
-
-		&:hover:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled) {
-			color: #fff;
-			transition: none;
-			//background-color: #fafafa;
-			border-color: rgba(255, 255, 255, 0.33);
-			border-bottom-color: transparent;
-			border-top-color: transparent;
-			//border-bottom-color: rgba(255, 255, 255, 0.2);
-			background-color: rgba(255,255,255,0.1);
-		}
-
-		&.rc-tabs-tab-disabled {
-			color: rgba(255,255,255,0.66) !important;
-			//pointer-events: none;
-			//cursor: none;
-		}
-
-		&:hover.rc-tabs-tab-active {
-			transition:
-				border-color .6s ease-out,
-				color .3s .1s ease-out,
-				background-color .3s .2s ease-out;
-		}
-
-		&.rc-tabs-tab-active {
-			border-color: transparent;
-			color: #000;
-		}
-
-		&:hover:not(.rc-tabs-tab-disabled) + .rc-tabs-tab:not(.rc-tabs-tab-active) {
-			border-left-color: rgba(255,255,255,0.33);
-		}
-
-		&.rc-tabs-tab-active + .rc-tabs-tab:not(:hover) {
-			border-left-color: transparent;
-		}
-
-		.tab {
-
-			user-select: none;
-			font-weight: 500;
-			font-size: 1.05rem;
-
-			i.icon {
-				margin-right: 3px;
-
-				&.icon-th,
-				&.icon-list,
-				&.icon-warning,
-				&.icon-microchip,
-				&.icon-leaf {
-					position: relative;
-					top: 1px;
-				}
-
-				&.icon-warning {
-					color: $badge-color-warning;
-				}
-
-				&.icon-ban, &.icon-exclamation-circle {
-					color : $badge-color-warning;
-					//color: #ff5757;
-				}
-
-			}
-
-		}
-	}
-
-	.rc-tabs-tab-next,
-	.rc-tabs-tab-prev {
-
-		display: none;
-
-		&.rc-tabs-tab-arrow-show {
-			display: block;
-			color: #fff;
-
-			> span.rc-tabs-tab-prev-icon,
-			> span.rc-tabs-tab-next-icon {
-				top: 3px;
-			}
-
-			&.rc-tabs-tab-btn-disabled {
-				opacity: 0.25;
-			}
-
-			> .rc-tabs-tab-next-icon:before {
-				font-family: FontAwesome;
-				content: "\f105";
-			}
-			> .rc-tabs-tab-prev-icon:before {
-				font-family: FontAwesome;
-				content: "\f104";
-			}
-
-		}
-	}
-
-}
 
 
 .rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
@@ -189,6 +135,207 @@ body .rc-tabs-top {
 	border-left: none;
 	border-right: none;
 	background-color: #fff;
+}
+
+.item-page-container {
+
+	.tabs-bar-outer {
+		display: block;
+		position: sticky;
+		top: 40px;
+		div.tabs-bar {
+			display: flex;
+			background-color: $tabbar-bg-color;
+			height: $tabbar-height;
+			align-items: center;
+			> .tab-item {
+				display: flex;
+    			align-items: center;
+				padding-left: 16px;
+				padding-right: 16px;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				max-width: 200px;
+				color: $tabbar-text-color;
+				height: inherit;
+				border-bottom: 1px solid darken($tabbar-bg-color, 10%);
+
+				&:not(:first-child){
+					border-left: 1px solid darken($tabbar-bg-color, 20%);
+				}
+
+				&.active {
+					background-color: $tabbar-bg-active-color;
+					color: $tabbar-text-active-color;
+					border-bottom-color: transparent;
+					box-shadow: 0.5px -3px 3px -1px #000;
+				}
+
+				&.disabled {
+					color: transparentize($tabbar-text-color, 0.5);
+				}
+
+				i.icon + span {
+					margin-left: 8px;
+				}
+
+				// Title shown at left (prefix)
+				&.title-tab {
+					max-width: 320px;
+					background-color: lighten($tabbar-bg-color, 5%);
+					> div.row {
+						max-width: inherit;
+						flex-wrap: nowrap;
+						> .item-type-title {
+							font-weight: 600;
+							+ .item-title:before {
+								/** Emulate FontAwesome Icon styling **/
+								display: inline-block;
+								content: "\f105"; // "\f054" - chevron
+								font-family: $fa-font-family;
+								font-weight: 900;
+								line-height: 1;
+								position: relative;
+								left: -10px;
+								vertical-align: middle;
+							}
+						}
+						> .icon-col {
+							padding: 0;
+							> i.icon {
+								vertical-align: middle;
+							}
+						}
+						> .item-title {
+							overflow: hidden;
+							text-overflow: ellipsis;
+						}
+					}
+				}
+
+				// Menu icon shown at right
+				&.menu-tab {
+					max-width: none;
+					flex-grow: 1;
+					justify-content: flex-end;
+					padding: 0; // Child of tab will have padding
+					.icon-container {
+						padding-left: 16px;
+						padding-right: 16px;
+						height: 100%;
+						display: flex;
+						align-items: center;
+						//i.icon-bars:only-child {
+						//	margin: 0;
+						//}
+					}
+				}
+			}
+		}
+
+		/** For smaller screen sizes, we make this menu stack instead of horizontal row **/
+		@include navbar-static-position {
+			position: relative;
+			top: 0;
+			div.tabs-bar {
+				flex-direction: column;
+				height: auto;
+				align-items: stretch;
+				> .tab-item {
+					height: $tabbar-height;
+					max-width: none !important;
+					&.active {
+						border-bottom-color: darken($tabbar-bg-color, 10%);
+						box-shadow: none;
+					}
+					&.menu-tab {
+						justify-content: flex-start;
+						> .icon-container {
+							flex-grow: 1;
+						}
+					}
+				}
+			}
+		}
+
+	}
+
+}
+
+/** Styling right pane menu which comes out upon ItemActionsTab click **/
+
+#slide-in-pane-container {
+    > .slide-in-pane-outer {
+        > .item-page-actions-menu {
+			// Maybe make this more reusable (?)
+            > .title-box {
+                padding: 12px 18px;
+                border-bottom: 1px solid #ccc;
+                box-shadow: inset 0 -2px 5px -5px #000;
+                
+                label {
+                    font-weight: 400;
+                    margin-bottom: 1px;
+                    color: #777;
+                }
+                h4, h3 {
+                    font-weight: 300;
+                    margin: 0;
+                    white-space: nowrap;
+                    overflow-x: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                i.icon.icon-times {
+                    font-size: 1.25rem;
+                    color: #777;
+                    padding-top: 7px;
+                    &:hover {
+                        color: #000;
+                    }
+                }
+			}
+
+			> .menu-inner {
+				> .menu-option {
+					padding: 12px 18px;
+					border-bottom: 1px solid #eee;
+					display: block;
+					h4, h5, h6 {
+						font-weight: 500;
+						margin: 0;
+						+ .description {
+							font-size: 0.925rem;
+							white-space: nowrap;
+                    		overflow-x: hidden;
+                    		text-overflow: ellipsis;
+						}
+					}
+					&:hover {
+						background-color: #f8f8f8;
+					}
+					.icon-container {
+						display: flex;
+						align-items: center;
+					}
+					// Show to right of icon-container, if 1 present, else not present
+					.title-col {
+						white-space: nowrap;
+						overflow-x: hidden;
+						text-overflow: ellipsis;
+					}
+				}
+				> a.menu-option {
+					color: $body-color;
+					&:hover {
+						text-decoration: none;
+					}
+				}
+			}
+			
+        }
+    }
 }
 
 
@@ -515,16 +662,6 @@ i.item-status-indicator-dot {
 		//border-bottom: 1px solid #ddd;
 		padding-bottom: 7px;
     }
-
-	.rc-tabs-content {
-		.rc-tabs-tabpane {
-			overflow-x: hidden;
-			.info-area {
-				overflow: hidden;
-				border-bottom: none;
-			}
-		}
-	}
 
 
     .item-info-area {

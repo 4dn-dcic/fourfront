@@ -145,6 +145,7 @@ export class IndividualNodeShape extends IndividualNodeBase {
                 <UnderlayMarkers {...{ width, height, individual, shape, diseaseToIndex }} />
                 { fgShape }
                 <OverlayMarkers {...{ width, height, individual, shape, diseaseToIndex }} />
+                <UnderNodeText {...{ width, height, individual, shape, dims }} />
             </g>
         );
     }
@@ -354,6 +355,22 @@ function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
 
     return (
         <React.Fragment>{ colOfRects }</React.Fragment>
+    );
+}
+
+/** @todo Implement things like age, stillBirth, isEctopic, etc. */
+function UnderNodeText({ individual, width, height, shape, dims }){
+    const { id, name } = individual;
+    const textYStart = 19;
+    const showTitle = name || id;
+
+    // todo maybe make an array of 'rows' to map to <text>s with incremented y coord.
+
+    return (
+        <g className="text-box" transform={"translate(" + 0 + ", " + (height + 4) + ")"}>
+            <rect width={width + 8} x={-4} height={dims.individualYSpacing / 3} className="bg-rect" rx={5} />
+            <text y={textYStart}>{ showTitle }</text>
+        </g>
     );
 }
 

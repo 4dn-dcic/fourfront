@@ -30,11 +30,16 @@ const DocumentViewOverview = React.memo(function DocumentViewOverview({ context,
 });
 DocumentViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
-        'key' : 'document-info',
+        'tab' : (
+            <React.Fragment>
+                <i className="icon icon-file-text fas icon-fw"/>
+                <span>Overview</span>
+            </React.Fragment>
+        ),
+        'key' : 'overview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (
-            <div className="overflow-hidden">
+            <div className="overflow-hidden container-wide">
                 <h3 className="tab-section-title">
                     <span>Overview</span>
                 </h3>

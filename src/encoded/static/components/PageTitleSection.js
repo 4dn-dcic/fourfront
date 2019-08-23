@@ -58,8 +58,9 @@ export const PageTitleSection = React.memo(function PageTitle(props){
         return <StaticPageTitle {...{ context, schemas, currentAction, alerts, session, href }} />;
     }
 
-    if (object.itemUtil.isAnItem(context)){
-        return <GenericItemPageTitle {...{ context, schemas, alerts }}/>;
+    if (isAnItem(context)){
+        return null; // Item Pages show titles themselves
+        //return <GenericItemPageTitle {...{ context, schemas, alerts }}/>;
     }
 
     return (
@@ -133,12 +134,14 @@ const StaticPageTitle = React.memo(function StaticPageTitle(props){
     );
     const commonCls = "col-12" + hasToc ? " col-lg-9" : '';
     return (
-        <PageTitleContainer alerts={alerts} className="container row" alertsContainerClassName={commonCls}>
-            { !breadCrumbsVisible ?
-                <StaticPageBreadcrumbs {...{ context, session, href }}
-                    key="breadcrumbs" className={commonCls}/>
-                : null }
-            <OnlyTitle className={commonCls}>{ children }</OnlyTitle>
+        <PageTitleContainer alerts={alerts} className="container" alertsContainerClassName={commonCls}>
+            <div className="row">
+                { !breadCrumbsVisible ?
+                    <StaticPageBreadcrumbs {...{ context, session, href }}
+                        key="breadcrumbs" className={commonCls}/>
+                    : null }
+                <OnlyTitle className={commonCls}>{ children || context.display_title }</OnlyTitle>
+            </div>
         </PageTitleContainer>
     );
 });
@@ -215,6 +218,15 @@ const isStaticPage = memoize(function(context){
     if (Array.isArray(context['@type'])){
         if (context['@type'][context['@type'].length - 1] === 'Portal' && context['@type'][context['@type'].length - 2] === 'StaticPage'){
             if (context['@type'].indexOf('HomePage') > -1) return false; // Exclude home page
+            return true;
+        }
+    }
+    return false;
+});
+
+const isAnItem = memoize(function(context){
+    if (object.itemUtil.isAnItem(context) && Array.isArray(context['@type'])){
+        if (context['@type'].indexOf('Item') > -1){
             return true;
         }
     }
