@@ -114,7 +114,9 @@ export class PedigreeTabView extends React.PureComponent {
                 <div className="container-wide">
                     <h3 className="tab-section-title">
                         <span>Pedigree</span>
-                        <FamilySelectionDropdown {...{ families, currentFamilyIdx }} onSelect={this.handleFamilySelect} />
+                        <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}>
+                            <FamilySelectionDropdown {...{ families, currentFamilyIdx }} onSelect={this.handleFamilySelect} />
+                        </CollapsibleItemViewButtonToolbar>
                     </h3>
                 </div>
                 <hr className="tab-section-title-horiz-divider"/>

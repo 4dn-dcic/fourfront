@@ -23,16 +23,16 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	/*
+	@include media-breakpoint-only(xs){
+		flex-direction: column;
+		align-items: flex-start;
+		justify-content: center;
+		padding-top: 10px;
+		padding-bottom: 10px;
+	}
+	*/
 }
-
-/*
-.tab-section-title {
-	font-weight: 300;
-	margin: 0;
-	//padding: 27px 0 16px; // 67px height
-	padding: 27px 0 27px; // 78px height (24px line height)
-}
-*/
 
 h3.tab-section-title {
 	line-height: 24px;
@@ -63,11 +63,6 @@ hr.tab-section-title-horiz-divider {
 
     > .toolbar-wrapper > .btn-toolbar {
 		justify-content: flex-end;
-        
-        button,
-        .dropdown > button {
-            margin-left: 5px;
-        }
 
         > .btn-group {
             float: none;

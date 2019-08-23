@@ -94,8 +94,8 @@ export default class SearchView extends React.PureComponent {
     render(){
         const passProps = _.omit(this.props, 'isFullscreen', 'toggleFullScreen'); // We don't need full screen btn on CGAP as already full width.
         const facets = this.transformedFacets();
-        const tableColumnClassName = "col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-10" : "");
-        const facetColumnClassName = "col-12" + (facets.length > 0 ? " col-sm-5 col-lg-4 col-xl-2" : "");
+        const tableColumnClassName = "col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-9" : "");
+        const facetColumnClassName = "col-12" + (facets.length > 0 ? " col-sm-5 col-lg-4 col-xl-3" : "");
         return (
             <div className="container-wide" id="content">
                 <CommonSearchView {...passProps} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
