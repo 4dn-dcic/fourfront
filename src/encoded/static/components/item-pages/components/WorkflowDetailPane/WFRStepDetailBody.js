@@ -3,9 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Fade } from 'react-bootstrap';
-import { console, object, ajax } from './../../../util';
-import { ItemDetailList } from './../ItemDetailList';
+
+import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { WorkflowStepDetailPurposesBox, WorkflowStepTitleBox } from './StepDetailBody';
 
 function tipIfLongString(tip){
@@ -15,84 +16,75 @@ function tipIfLongString(tip){
     return tip;
 }
 
+const WorkflowDetailsForWorkflowNodeRow = React.memo(function WorkflowDetailsForWorkflowNodeRow({ workflow, workflow_run }){
+    let title;
+    let innerContent;
 
-class WorkflowDetailsForWorkflowNodeRow extends React.PureComponent {
-
-    render(){
-        var { workflow, workflow_run } = this.props;
-        var title, innerContent;
-
-        if (workflow) {
-            var link = object.atIdFromObject(workflow);
-            title = workflow.display_title || workflow.title || workflow.name;
-            innerContent = <a href={link}>{ title }</a>;
-        } else {
-            innerContent = <em>N/A</em>;
-        }
-
-        console.log('WORKFLOW', workflow);
-
-        var workflowSteps = workflow.steps || workflow_run.steps || workflow.workflow_steps;
-        if (Array.isArray(workflowSteps) && workflowSteps.length > 0){
-            workflowSteps = _.uniq(_.map(workflowSteps, function(step){
-                return step.name;
-            })).join(', ');
-        } else {
-            workflowSteps = <em>N/A</em>;
-        }
-
-        return (
-            <div className="row">
-
-                <div className="col-sm-6 box">
-                    <span className="text-600">Workflow</span>
-                    <h4 className="text-400 text-ellipsis-container" data-tip={tipIfLongString(title)}>
-                        { innerContent }
-                    </h4>
-                </div>
-
-                <div className="col-sm-6 box steps-in-workflow">
-                    <span className="text-600">Steps in Workflow</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        { workflowSteps }
-                    </h5>
-                </div>
-
-            </div>
-        );
+    if (workflow) {
+        var link = object.atIdFromObject(workflow);
+        title = workflow.display_title || workflow.title || workflow.name;
+        innerContent = <a href={link}>{ title }</a>;
+    } else {
+        innerContent = <em>N/A</em>;
     }
-}
 
-class SoftwareDetailsForWorkflowNodeRow extends React.Component {
-    render(){
-        var softwareList = this.props.software, softwareElements;
+    console.log('WORKFLOW', workflow);
 
-        if (Array.isArray(softwareList) && softwareList.length > 0){
-            softwareElements = _.map(softwareList, function(sw){
-                var atId = object.atIdFromObject(sw);
-                return <a href={atId} key={atId}>{ sw.display_title }</a>;
-            });
-        } else {
-            softwareElements = <em>N/A</em>;
-        }
-
-        return (
-            <div className="row">
-
-                <div className="col-sm-12 box steps-in-workflow">
-                    <span className="text-600">Software Used in Workflow</span>
-                    <h5 className="text-400 text-ellipsis-container">
-                        { softwareElements }
-                    </h5>
-                </div>
-
-            </div>
-        );
+    var workflowSteps = workflow.steps || workflow_run.steps || workflow.workflow_steps;
+    if (Array.isArray(workflowSteps) && workflowSteps.length > 0){
+        workflowSteps = _.uniq(_.map(workflowSteps, function(step){
+            return step.name;
+        })).join(', ');
+    } else {
+        workflowSteps = <em>N/A</em>;
     }
-}
+
+    return (
+        <div className="row">
+
+            <div className="col col-sm-6 box">
+                <span className="text-600">Workflow</span>
+                <h4 className="text-400 text-ellipsis-container" data-tip={tipIfLongString(title)}>
+                    { innerContent }
+                </h4>
+            </div>
+
+            <div className="col col-sm-6 box steps-in-workflow">
+                <span className="text-600">Steps in Workflow</span>
+                <h5 className="text-400 text-ellipsis-container">
+                    { workflowSteps }
+                </h5>
+            </div>
+
+        </div>
+    );
+});
 
 
+const SoftwareDetailsForWorkflowNodeRow = React.memo(function SoftwareDetailsForWorkflowNodeRow({ software: softwareList = [] }){
+    let softwareElements;
+    if (Array.isArray(softwareList) && softwareList.length > 0){
+        softwareElements = _.map(softwareList, function(sw){
+            var atId = object.atIdFromObject(sw);
+            return <a href={atId} key={atId}>{ sw.display_title }</a>;
+        });
+    } else {
+        softwareElements = <em>N/A</em>;
+    }
 
+    return (
+        <div className="row">
+            <div className="col col-sm-12 box steps-in-workflow">
+                <span className="text-600">Software Used in Workflow</span>
+                <h5 className="text-400 text-ellipsis-container">
+                    { softwareElements }
+                </h5>
+            </div>
+        </div>
+    );
+});
+
+/** @todo: cleanup re: linting */
 export class WFRStepDetailBody extends React.PureComponent {
     constructor(props){
         super(props);
@@ -196,14 +188,12 @@ export class WFRStepDetailBody extends React.PureComponent {
                                 minHeight={this.props.minHeight}
                                 keyTitleDescriptionMap={this.props.keyTitleDescriptionMap}
                             />
-                        : null }
+                            : null }
                     </div>
                 </Fade>
                 { typeof this.state.wfr === 'string' ?
                     <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
-                : null }
-
-
+                    : null }
             </div>
         );
     }

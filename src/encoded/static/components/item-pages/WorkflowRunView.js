@@ -2,11 +2,13 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { DropdownButton, MenuItem } from 'react-bootstrap';
-import { ItemPageTitle, ItemHeader, ItemDetailList, TabbedView, WorkflowDetailPane } from './components';
+
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+
+import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import DefaultItemView from './DefaultItemView';
-import { console, object, DateUtility, Filters, isServerSide } from './../util';
-import Graph from './../viz/Workflow';
+
 import { commonGraphPropsFromProps, doValidAnalysisStepsExist, WorkflowGraphSection } from './WorkflowView';
 
 // Test/Debug Data
@@ -94,7 +96,6 @@ export default class WorkflowRunView extends DefaultItemView {
 
     constructor(props){
         super(props);
-        this.render = this.render.bind(this);
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.state = {
             'mounted' : false
@@ -106,31 +107,29 @@ export default class WorkflowRunView extends DefaultItemView {
     }
 
     getTabViewContents(){
-
-        var { context, windowHeight } = this.props,
-            width   = this.getTabViewWidth(),
-            tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
-                {
-                    tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
-                    key : 'graph',
-                    content : <GraphSection {...this.props} mounted={this.state.mounted} width={width} />
-                }
-            ];
+        const { context, windowHeight } = this.props;
+        const width   = this.getTabViewWidth();
+        const tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+            {
+                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
+                key : 'graph',
+                content : <GraphSection {...this.props} mounted={this.state.mounted} width={width} />
+            }
+        ];
 
         tabs.push(ItemDetailList.getTabObject(this.props));
 
-        return _.map(tabs, (tabObj) =>{ // Common properties
-            return _.extend(tabObj, {
+        return _.map(tabs, (tabObj) => // Common properties
+            _.extend(tabObj, {
                 'style' : { 'minHeight' : Math.max((this.state.mounted && windowHeight - 300) || 0, 600) }
-            });
-        });
+            })
+        );
     }
 
     typeInfo(){
         // TODO: Get rid of this and show a link + maybe more info inside the page body / midsection?
-        var context = this.props.context,
-            workflow = context.workflow,
-            topRightTitle = (workflow && (workflow.title || workflow.display_title)) || null;
+        const { context : { workflow = {} } } = this.props;
+        let topRightTitle = (workflow.title || workflow.display_title) || null;
 
         if (topRightTitle && Array.isArray(workflow.category) && workflow.category.length > 0){
             topRightTitle = (
@@ -164,9 +163,9 @@ class GraphSection extends WorkflowGraphSection {
     }
 
     commonGraphProps(){
-        var graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
+        const graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
 
-        var legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
         // Remove Items which aren't relevant for this context.
         delete legendItems['Current Context'];
         delete legendItems['Group of Similar Files'];

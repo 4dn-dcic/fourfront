@@ -3,9 +3,10 @@
 import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 import { barplot_color_cycler } from './../ColorCycler';
-import { console, isServerSide, Schemas, object } from './../../util';
+import { console, isServerSide, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas } from './../../util';
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
 
@@ -20,7 +21,7 @@ import ReactTooltip from 'react-tooltip';
 
 /**
  * React component which represents a Term item.
- * 
+ *
  * @class Term
  * @prop {string} field - Name of field to which this term belongs, in object-dot-notation.
  * @prop {string} term - Name of term.
@@ -37,22 +38,22 @@ class Term extends React.Component {
         this.onClick = this.onClick.bind(this);
     }
 
+    componentWillUnmount(){
+        const { hoverTerm, selectedTerm, term } = this.props;
+        if (hoverTerm === term || selectedTerm === term){
+            this.onMouseLeave();
+        }
+    }
+
     generateNode(){
-        return {
-            'field' : this.props.field,
-            'term' : this.props.term,
-            'color' : this.props.color,
-            'position' : this.props.position,
-            'experiment_sets' : this.props.experiment_sets,
-            'experiments' : this.props.experiments,
-            'files' : this.props.files
-        };
+        return _.pick(this.props, 'field', 'term', 'color', 'position', 'experiment_sets', 'experiments', 'files');
     }
 
     onMouseEnter(e){
-        vizUtil.highlightTerm(this.props.field, this.props.term, this.props.color);
-        if (typeof this.props.onNodeMouseEnter === 'function'){
-            this.props.onNodeMouseEnter(this.generateNode(), e);
+        const { field, term, color, onNodeMouseEnter } = this.props;
+        vizUtil.highlightTerm(field, term, color);
+        if (typeof onNodeMouseEnter === 'function'){
+            onNodeMouseEnter(this.generateNode(), e);
         }
     }
 
@@ -95,48 +96,28 @@ class Term extends React.Component {
 }
 
 /**
- * React component which represents a "Field", which might have multiple terms.
- * 
- * @class Field
+ * May have multiple terms.
+ *
  * @prop {string} field - Field name, in object-dot-notation.
  * @prop {boolean} includeFieldTitle - Whether field title should be included at the top of list of terms.
- * @prop {Object[]} terms - Terms which belong to this field, in the form of objects. 
- * @type {Component}
+ * @prop {Object[]} terms - Terms which belong to this field, in the form of objects.
  */
-class Field extends React.Component {
-
-    static defaultProps = {
-        'includeFieldTitle' : true
-    }
-
-    /**
-     * @returns {Element} Div element containing props.title, .name, or .field if supplied along with props.includeFieldTitle == true, and list of terms & their colors.
-     * @instance
-     */
-    render(){
-        return (
-            <div className="field" data-field={this.props.field} onMouseLeave={vizUtil.unhighlightTerms.bind(this, this.props.field)}>
-                { this.props.includeFieldTitle ? 
-                    <h5 className="text-500 legend-field-title">{ this.props.title || this.props.name || this.props.field }</h5>
+const Field = React.memo(function Field(props){
+    const { field, title, name, includeFieldTitle, terms } = props;
+    return (
+        <div className="field" data-field={field} onMouseLeave={vizUtil.unhighlightTerms.bind(this, field)}>
+            { includeFieldTitle ?
+                <h5 className="text-500 legend-field-title">{ title || name || field }</h5>
                 : null }
-                { this.props.terms.map((term, i) =>
-                    <Legend.Term
-                        {...term}
-                        field={this.props.field}
-                        key={term.term}
-                        onNodeMouseEnter={this.props.onNodeMouseEnter}
-                        onNodeMouseLeave={this.props.onNodeMouseLeave}
-                        onNodeClick={this.props.onNodeClick}
-                        selectedTerm={this.props.selectedTerm}
-                        hoverTerm={this.props.hoverTerm}
-                        position={i}
-                        aggregateType={this.props.aggregateType}
-                    />
-                )}
-            </div>
-        );
-    }
-}
+            { _.map(terms, (term, i) =>
+                <Legend.Term {...term} field={field} key={term.term} position={i}
+                    {..._.pick(props, 'onNodeMouseEnter', 'onNodeMouseLeave', 'onNodeClick',
+                        'selectedTerm', 'hoverTerm', 'aggregateType')} />
+            )}
+        </div>
+    );
+});
+Field.defaultProps = { 'includeFieldTitle' : true };
 
 
 class LegendViewContainer extends React.Component {
@@ -201,7 +182,7 @@ class LegendViewContainer extends React.Component {
 
 /**
  * Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
- * 
+ *
  * @class Legend
  * @type {Component}
  * @prop {FieldObject} field - Object containing at least 'field', in object dot notation, and 'terms'.
@@ -210,7 +191,7 @@ class LegendViewContainer extends React.Component {
  * @prop {number} width - How wide should the legend container element (<div>) be.
  * @prop {string|Element|Component} title - Optional title to display at top of legend.
  */
-export class Legend extends React.Component {
+export class Legend extends React.PureComponent {
 
     static Term = Term;
     static Field = Field;
@@ -259,7 +240,7 @@ export class Legend extends React.Component {
 
     /**
      * @param {FieldObject} field - Field object containing at least a title, name, or field.
-     * @param {{Object}} schemas - Schemas object passed down from app.state. 
+     * @param {{Object}} schemas - Schemas object passed down from app.state.
      * @returns {FieldObject} Modified field object.
      */
     static parseFieldName(field, schemas = null){

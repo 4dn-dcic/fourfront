@@ -2,10 +2,10 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { ajax, object } from './../../../util';
-import { HiGlassPlainContainer, HiGlassLoadingIndicator } from './HiGlassPlainContainer';
 import memoize from 'memoize-one';
-import { deepClone } from "../../../util/object";
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { HiGlassPlainContainer, HiGlassLoadingIndicator } from './HiGlassPlainContainer';
+
 
 /**
  * Accepts `higlassItem` (HiglassViewConfig Item JSON) as a prop and loads in the full
@@ -22,7 +22,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
      * @returns {object}
      */
     static scaleViewconfToHeight = memoize(function(originalViewconf, givenHeight){
-        var viewconf = deepClone(originalViewconf);
+        const viewconf = object.deepClone(originalViewconf);
 
         // Check parameters.
         if (!("views" in viewconf)) { return viewconf; }

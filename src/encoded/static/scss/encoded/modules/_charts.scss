@@ -34,7 +34,7 @@
 
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(sm){
     .facet-charts {
         height : auto !important;
         margin-top: 20px;
@@ -74,6 +74,7 @@
 }
 
 /** Common Breadcrumbs **/
+/** Used by QuickInfoBar -> ActiveFiltersBar **/
 
 .chart-breadcrumbs-container {
     .crumbs-title {
@@ -611,7 +612,7 @@
 
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(sm){
     .bar-plot-chart {
         position: relative;
     }
@@ -622,7 +623,7 @@
     position: relative;
 
     .dropdown-heading {
-        margin-bottom: 4px;
+        margin-bottom: 2px;
         margin-top: 10px;
         font-weight: 400;
         &:first-child {
@@ -654,18 +655,15 @@
                 }
                 > div:last-child {
                     padding-left: 3px;
-                    .dropdown.btn-group {
+                    .dropdown-toggle.btn.btn-xs {
                         width: 100%;
-                        .dropdown-toggle.btn.btn-xs {
-                            width: 100%;
-                            padding-right: 20px;
-                            text-align: left;
-                            padding-left: 10px;
+                        padding-right: 20px;
+                        text-align: left;
+                        padding-left: 10px;
 
-                            span.caret {
-                                position: absolute;
-                                right: 10px;
-                            }
+                        span.caret {
+                            position: absolute;
+                            right: 10px;
                         }
                     }
                 }
@@ -677,14 +675,16 @@
                 white-space: nowrap;
                 text-align: right;
             }
-
+            /*
             .dropdown-toggle.btn.btn-xs {
                 padding-left: 8px;
                 padding-right: 8px;
             }
+            */
 
             .dropdown-menu {
-                transform: rotate3d(0,0,1,90deg);
+                /* Manually set this re: rotated parent */
+                transform: rotate3d(0, 0, 1, 90deg) translate3d(50px, -30px, 0px) !important;
                 top: 54px;
                 left: 10px;
                 z-index: 100;
@@ -824,7 +824,7 @@
     }
 }
 
-@media screen and (max-width : $screen-xs-max){
+@include media-breakpoint-down(sm){
     .bar-plot-chart-controls-wrapper {
         position: relative;
 
@@ -1770,20 +1770,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
         .node-type-input-file-reference { background-color: $workflow-node-color-type-input-file-reference; }
         .node-type-global-context { background-color: $workflow-node-color-type-global-context; }
         .node-disabled { background-color: $workflow-node-color-disabled; opacity: 0.5; }
-        
-        /*
-        @media screen and (min-width: $screen-lg-min){
-            display: table;
-            width: 100%;
-            > .legend-item {
-                display: table-cell;
-                
-                &:not(:first-child), &:not(:nth-child(2)) {
-                    padding-left: 10px;
-                }
-            }
-        }
-        */
 
         .node {
             @include workflow-node;
@@ -1809,6 +1795,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
     }
 
     > .toolbar-wrapper > .btn-toolbar {
+        
+        button,
+        .dropdown > button {
+            margin-left: 5px;
+        }
+
         > .btn-group {
             float: none;
         }
@@ -1822,40 +1814,36 @@ $workflow-node-color-type-global-context: #ffb3b3;
         display: block;
         padding-top: 7px;
         padding-bottom: 5px;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         @include user-select(none);
         &.disabled{
             color: #999;
+        }
+        > label {
+            margin-bottom: 0;
+            font-weight: 400;
         }
     }
 
     button#rowspacingtype-select {
         min-width: 120px;
     }
-    
-    @media screen and (min-width: $screen-lg-min){
 
-        .checkbox-container {
-            float: left;
+    /** Only shown/visible at smaller sizes **/
+    > .inner-panel:first-child {
+        min-width: 200px;
+        padding-left: 10px;
+        padding-bottom: 12px;
+        > hr {
+            margin-top: 12px;
+            margin-bottom: 0;
         }
-
-    }
-    @media screen and (max-width: $screen-md-max){
-        > .inner-panel:first-child {
-            min-width: 200px;
-            padding-left: 10px;
-            padding-bottom: 12px;
-            > hr {
-                margin-top: 12px;
-                margin-bottom: 0;
-            }
-            > .mobile-size-elem {
-                > .dropdown.btn-group,
-                > .dropdown.btn-group > button.btn,
-                > button.btn {
-                    width: 100%;
-                    text-align: left;
-                }
+        > .mobile-size-elem {
+            > .dropdown.btn-group,
+            > .dropdown.btn-group > button.btn,
+            > button.btn {
+                width: 100%;
+                text-align: left;
             }
         }
     }
@@ -1879,7 +1867,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 padding-bottom: 15px;
                 display: block;
                 transition: border-color .25s ease-in-out, background-color .25s ease-in-out, color .25s ease-in-out;
-                background-color: #22656d;
+                background-color: $brand-primary-dark;
                 color: #fff;
                 border-radius: 3px;
                 line-height: 1.35rem;
@@ -1912,6 +1900,11 @@ $workflow-node-color-type-global-context: #ffb3b3;
 .stats-charts-container {
 
     min-height: 1400px;
+
+    .dropdown-container {
+        display: flex;
+        align-items: center;
+    }
 
     .area-chart-inner-container {
         position: relative;
@@ -2346,15 +2339,13 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     background-color: #f7f7f7;
                     border-radius: 0 10px 0 0;
                     border-top: 3px solid #eee;
-                    @include gradient-vertical($start-color: #f7f7f7, $end-color: #fff);
+                    @include gradient-y($start-color: #f7f7f7, $end-color: #fff);
                 }
             }
 
         }
 
-        
-
-        @media screen and (min-width: $screen-md-min){
+        @include media-breakpoint-up(lg){
             .grouping-row > .label-section > .label-container > small {
                 color: #ddd;
                 transition: color .33s;
@@ -2580,17 +2571,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 }
             }
         }
-        
-        /* Disabled as we now align text to right */
-        //@media screen and (min-width: $screen-sm-min){
-        //    @for $i from 1 through 5 {
-        //        &.depth-#{$i} {
-        //            > .row > .label-section {
-        //                padding-left: 10px + (27px * $i);
-        //            }
-        //        }
-        //    }
-        //}
 
     }
 
@@ -2599,21 +2579,23 @@ $workflow-node-color-type-global-context: #ffb3b3;
 // The popover for matrix is rendered outside of viz container -- 
 
 #jap-popover {
-    h3.popover-title {
+    .popover-header {
         div.matrix-popover-title {
+            font-size: 1.075rem;
+            display: flex;
             .x-axis-title {
-                width: 40%;
+                flex: 0 0 40%;
                 text-align: right;
             }
             .mid-icon {
-                width: 20%;
+                flex: 0 0 20%;
                 text-align: center;
                 padding-top: 8px;
                 font-size: 1.5rem;
                 opacity: 0.33;
             }
             .y-axis-title {
-                width: 40%;
+                flex: 0 0 40%;
                 text-align: left;
                 //padding-left: 10px;
             }

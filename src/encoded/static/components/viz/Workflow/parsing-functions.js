@@ -2,7 +2,7 @@
 
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console } from './../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /** @module parsing-functions */
 
@@ -118,7 +118,7 @@ var ParsingOptions;
 
 
 
- /** @type ParsingOptions */
+/** @type ParsingOptions */
 export const DEFAULT_PARSING_OPTIONS = {
     'direction'                 : 'output',
     'skipSortOnColumns'         : [1],
@@ -149,7 +149,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
     /** @type Node[] */
     let nodes = [];
     /** @type Edge[] */
-    let edges = [];
+    const edges = [];
 
     /*************
      * Temp Vars *
@@ -159,7 +159,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
      * Keep track of IO arg node ids used, via keys; prevent duplicates by incrementing int val.
      * @type {Object.<string, number>}
      */
-    let ioIdsUsed = {};
+    const ioIdsUsed = {};
 
     /**
      * Keep track of steps already processed & added to graph.
@@ -168,7 +168,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
      *
      * @type {Object.<string, Node>}
      */
-    let processedSteps = {};
+    const processedSteps = {};
 
     /***************
      ** Functions **
@@ -511,13 +511,16 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
         _.forEach(step[ioNodeType + 's'], function(stepIO){
             if (!Array.isArray(stepIO[stepIOTargetType])) return;
 
-            var isGlobalInputArg = stepIO[stepIOTargetType].length === 1 && typeof stepIO[stepIOTargetType][0].step === 'undefined' && !(stepIO.meta && stepIO.meta.cardinality === 'array');
+            const isGlobalInputArg = (
+                stepIO[stepIOTargetType].length === 1 &&
+                typeof stepIO[stepIOTargetType][0].step === 'undefined' &&
+                !(stepIO.meta && stepIO.meta.cardinality === 'array')
+            );
 
             // Step 1a. Associate existing input nodes from prev. steps if same argument/name as for this one.
-            var ioNodeIDsMatched = {  };
+            const ioNodeIDsMatched = {};
 
-
-            var currentIONodesMatched = (
+            const currentIONodesMatched = (
                 _.filter(nodes, function(n){
 
                     // Ignore any step nodes
@@ -534,6 +537,7 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
                                 return true;
                             }
                         }
+
                     } else if (!isGlobalInputArg && _.any(stepIO[stepIOTargetType], function(s){ // Compare IO nodes against step input arg sources
 
                         // Match nodes by source step & name, check that they target this step.
@@ -588,7 +592,9 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
                 })
             );
 
-            //console.log('MATCHED', stepIO.name, currentIONodesMatched, nodes, ioNodeIDsMatched);
+            //if (step.name === "/workflow-runs-awsem/024503ed-3820-4f99-aedf-6757c04a395a/"){
+            //    console.log('MATCHED', step.name, stepIO, currentIONodesMatched, nodes, ioNodeIDsMatched);
+            //}
 
             // Step 1b. Create input nodes we need to add, and extend our matched node with its fake-new-node-counterpart's data.
             var ioNodesToCreate = expandIONodes(stepIO, column, stepNode, ioNodeType, true);
@@ -721,7 +727,9 @@ export const parseAnalysisSteps = memoize(function(analysis_steps, parsingOption
                 );
                 nodes = nodes.concat(unmatchedIONodesToCreate); // <- Add new nodes to list of all nodes.
                 ioNodesCreated = ioNodesCreated.concat(unmatchedIONodesToCreate);
-                //console.log('NEW NODES CREATED', unmatchedIONodesToCreate, unmatchedIONodesToCreate[0].column, stepNode.column, stepNode.id);
+                //if (step.name === "/workflow-runs-awsem/024503ed-3820-4f99-aedf-6757c04a395a/"){
+                //    console.log('NEW NODES CREATED', unmatchedIONodesToCreate, unmatchedIONodesToCreate[0].column, stepNode.column, stepNode.id);
+                //}
             }
 
             //console.log('CREATED', inputNodesCreated, ioNodeIDsMatched);

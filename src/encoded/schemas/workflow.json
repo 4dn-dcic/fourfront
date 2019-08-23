@@ -265,6 +265,60 @@
                             "other"
                         ]
                     },
+                    "argument_to_be_attached_to": {
+                        "title": "Argument To Be Attached To",
+                        "description": "Argument to be attached to, for qc files and input extra files",
+                        "type": "string"
+                    },
+                    "qc_zipped": {
+                        "title": "QC Zipped",
+                        "description": "Name of QC file if in .zip format",
+                        "type": "boolean"
+                    },
+                    "qc_html": {
+                        "title": "QC Html",
+                        "description": "Name of QC file if in .html format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_json": {
+                        "title": "QC Json",
+                        "description": "Name of QC file if in .json format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_table": {
+                        "title": "QC table",
+                        "description": "Name of QC file if in a tab-delimited text format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_zipped_html": {
+                        "title": "QC Zipped Html",
+                        "description": "Name of QC html file in the zipped file",
+                        "type": "string"
+                    },
+                    "qc_zipped_tables": {
+                        "title": "QC Zipped Tables",
+                        "description": "Names or suffices of QC table files in the zipped file",
+                        "type": "array",
+                        "items": {
+                             "title": "QC Datafile",
+                             "description": "Name or suffix of QC table file in the zipped file",
+                             "type": "string"
+                        }
+                    },
+                    "qc_type": {
+                        "title": "QC Type",
+                        "description": "QC object type inherited from quality_metric to be used to represent QC",
+                        "type": "string"
+                    },
+                    "to_be_unzippped": {
+                        "title": "to_be_unzipped",
+                        "description": "unzip program if the file must be unzipped before workflow run",
+                        "type": "string",
+                        "enum": [
+                            "gzip",
+                            "bz2"
+                        ]
+                    },
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",

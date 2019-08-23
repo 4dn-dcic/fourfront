@@ -4,12 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import url from 'url';
-import queryString from 'query-string';
-import { Button } from 'react-bootstrap';
-import { ItemPageTable, ItemPageTableLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
-import { ExperimentSetDetailPane, defaultColumnExtensionMap } from './../../../browse/components';
-import { console } from './../../../util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
+import { columnExtensionMap } from './../../../browse/columnExtensionMap';
+import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
+
 
 
 export class ExperimentSetTables extends React.PureComponent {
@@ -20,7 +19,9 @@ export class ExperimentSetTables extends React.PureComponent {
         'title' : PropTypes.string,
         'href' : PropTypes.string,
         'results' : PropTypes.arrayOf(PropTypes.object),
-        'experiment_sets' : PropTypes.arrayOf(PropTypes.object)
+        'experiment_sets' : PropTypes.arrayOf(PropTypes.object),
+        'countTotalResults' : PropTypes.number,
+        'hrefWithoutLimit' : PropTypes.string
     };
 
     static defaultProps = {
@@ -36,13 +37,13 @@ export class ExperimentSetTables extends React.PureComponent {
         const { windowWidth, href } = this.props;
         return (
             <ExperimentSetDetailPane result={es} href={href} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
-                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47
+                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
             }} />
         );
     }
 
     render(){
-        const { loading, title, experiment_sets, results } = this.props;
+        const { loading, title, experiment_sets, results, countTotalResults, hrefWithoutLimit } = this.props;
         const expSets = experiment_sets || results;
 
         if (loading || !Array.isArray(expSets)){
@@ -59,9 +60,25 @@ export class ExperimentSetTables extends React.PureComponent {
             );
         }
 
+        let viewMoreAppend;
+        if (typeof countTotalResults === 'number'){
+            const visibleResultCount = expSets.length;
+            if (countTotalResults > visibleResultCount){
+                if (hrefWithoutLimit){
+                    viewMoreAppend = (
+                        <a type="button" className="mt-2 btn btn-lg btn-primary" href={hrefWithoutLimit}>
+                            View all Experiment Sets ({ countTotalResults - visibleResultCount + ' more' })
+                        </a>
+                    );
+                } else {
+                    viewMoreAppend = (countTotalResults - visibleResultCount) + ' more Experiment Sets';
+                }
+            }
+        }
+
         return (
             <div className="file-part-of-experiment-sets-container">
-                <h3 className="tab-section-title">{ title }</h3>
+                { title && <h3 className="tab-section-title">{ title }</h3> }
                 <ItemPageTable
                     results={expSets}
                     renderDetailPane={this.renderDetailPane}
@@ -71,10 +88,11 @@ export class ExperimentSetTables extends React.PureComponent {
                         "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
                         "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
                         "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-                        "experiments_in_set.experiment_categorizer.combined" : defaultColumnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
+                        "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
                     }}
                     {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')}
                 />
+                { viewMoreAppend }
             </div>
         );
     }
@@ -83,9 +101,9 @@ export class ExperimentSetTables extends React.PureComponent {
 
 export const ExperimentSetTablesLoaded = React.memo(function ExperimentSetTablesLoaded({ experimentSetUrls, id, ...props }){
     return (
-        <ItemPageTableLoader itemUrls={experimentSetUrls} key={id}>
+        <ItemPageTableIndividualUrlLoader itemUrls={experimentSetUrls} key={id}>
             <ExperimentSetTables {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
-        </ItemPageTableLoader>
+        </ItemPageTableIndividualUrlLoader>
     );
 });
 ExperimentSetTablesLoaded.propTypes = {
@@ -100,6 +118,7 @@ export const ExperimentSetTablesLoadedFromSearch = React.memo(function Experimen
         </ItemPageTableSearchLoader>
     );
 });
+
 
 export class ExperimentSetTableTabView extends React.PureComponent {
 
@@ -122,36 +141,6 @@ export class ExperimentSetTableTabView extends React.PureComponent {
         };
     }
 
-    /** We set the default number of results to get here to be 7, unless is overriden in href */
-    static getLimit = memoize(function(href){
-        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
-        const { query : { limit = 0 } = { limit : 0 } } = url.parse(href, true);
-        return (limit && parseInt(limit)) || 7;
-    });
-
-    static hrefWithoutLimit = memoize(function(href){
-        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
-        const hrefParts = url.parse(href, true);
-        const { query = {} } = hrefParts;
-        delete query.limit;
-        hrefParts.search = '?' + queryString.stringify(query);
-        return url.format(hrefParts);
-    });
-
-    static hrefWithLimit = memoize(function(href, limit=null){
-        // TODO: get rid of ItemPageTableSearchLoaderPageController since we no longer plan to paginate results at all ever in future
-        // instead direvtly use ItemPageTableSearchLoader
-        // ALSO: Refactor ItemPageTableSearchLoader to latest standards & for performance (React.PureComponent instd of React.COmponent)
-        // ALSO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
-        // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
-
-        const hrefParts = url.parse(href, true);
-        const { query = {} } = hrefParts;
-        query.limit = query.limit || limit || ExperimentSetTableTabView.getLimit(href);
-        hrefParts.search = '?' + queryString.stringify(query);
-        return url.format(hrefParts);
-    });
-
     static defaultProps = {
         'requestHref' : function(props, state){
             return "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&publications_of_set.display_title=" + props.context.display_title;
@@ -168,7 +157,9 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     constructor(props){
         super(props);
         this.getCountCallback = this.getCountCallback.bind(this);
-        this.state = { 'totalCount' : null };
+        this.state = {
+            'totalCount' : null
+        };
     }
 
     getCountCallback(resp){
@@ -178,25 +169,15 @@ export class ExperimentSetTableTabView extends React.PureComponent {
     }
 
     render(){
-        var { windowWidth, href : currentPageHref } = this.props;
+        const { windowWidth, href : currentPageHref } = this.props;
         let { requestHref, title } = this.props;
-        const { totalCount } = this.state;
 
         if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
         if (typeof title === 'function')        title = title(this.props, this.state);
 
-        const limit = ExperimentSetTableTabView.getLimit(requestHref);
-        const hrefWithLimit = ExperimentSetTableTabView.hrefWithLimit(requestHref, limit);
-        const hrefWithoutLimit = ExperimentSetTableTabView.hrefWithoutLimit(requestHref, limit);
-
         return (
             <div>
-                <ExperimentSetTablesLoadedFromSearch {...{ 'requestHref' : hrefWithLimit, windowWidth, title, 'href' : currentPageHref }} onLoad={this.getCountCallback} />
-                { totalCount && totalCount > limit ?
-                    <Button className="mt-2" href={hrefWithoutLimit} bsStyle="primary" bsSize="lg">
-                        View all Experiment Sets ({ totalCount - limit + ' more' })
-                    </Button>
-                    : null }
+                <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, 'href' : currentPageHref }} onLoad={this.getCountCallback} />
             </div>
         );
     }

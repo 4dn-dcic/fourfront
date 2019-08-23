@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, MenuItem, Checkbox, Button } from 'react-bootstrap';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
 import { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 
 
@@ -35,11 +36,12 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      * @prop {function} onChangeShowChartType - Callback accepting key of new chart type.
      */
     rowSpacingTypeDropdown(){
-        if (typeof this.props.rowSpacingType !== 'string' || typeof this.props.onChangeRowSpacingType !== 'function') {
+        const { rowSpacingType, onChangeRowSpacingType } = this.props;
+        if (typeof rowSpacingType !== 'string' || typeof onChangeRowSpacingType !== 'function') {
             return null;
         }
         return (
-            <RowSpacingTypeDropdown currentKey={this.props.rowSpacingType} onSelect={this.props.onChangeRowSpacingType} key="row-spacing-type"/>
+            <RowSpacingTypeDropdown currentKey={rowSpacingType} onSelect={onChangeRowSpacingType} key="row-spacing-type"/>
         );
     }
 
@@ -52,13 +54,14 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      * @prop {function} onToggleFullScreenView - Callback to toggle full screen state. Should be passed from BodyElement.
      */
     fullScreenButton(){
-        var { isFullscreen, onToggleFullScreenView } = this.props;
+        const { isFullscreen, onToggleFullScreenView } = this.props;
         if (typeof isFullscreen === 'boolean' && typeof onToggleFullScreenView === 'function'){
             return (
-                <Button onClick={onToggleFullScreenView} className="for-state-fullscreenViewEnabled"
-                    data-tip={!isFullscreen ? 'Expand to full screen' : null} key="full-screen-btn">
+                <button type="button" onClick={onToggleFullScreenView} key="full-screen-btn"
+                    className="btn btn-outline-dark for-state-fullscreenViewEnabled"
+                    data-tip={!isFullscreen ? 'Expand to full screen' : null}>
                     <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
-                </Button>
+                </button>
             );
         }
         return null;
@@ -118,17 +121,17 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      * @prop {function} onChangeShowChartType - Callback accepting key of new chart type.
      */
     chartTypeDropdown(){
-        var { context, showChartType, onChangeShowChartType } = this.props;
-        var detail = WorkflowGraphSectionControls.analysisStepsSet(context) ? (
-            <MenuItem eventKey='detail' active={showChartType === 'detail'}>
+        const { context, showChartType, onChangeShowChartType } = this.props;
+        const detail = WorkflowGraphSectionControls.analysisStepsSet(context) ? (
+            <DropdownItem eventKey="detail" active={showChartType === 'detail'}>
                 Analysis Steps
-            </MenuItem>
+            </DropdownItem>
         ) : null;
-    
-        var basic = (
-            <MenuItem eventKey='basic' active={showChartType === 'basic'}>
+
+        const basic = (
+            <DropdownItem eventKey="basic" active={showChartType === 'basic'}>
                 Basic Inputs & Outputs
-            </MenuItem>
+            </DropdownItem>
         );
 
         return (
@@ -172,10 +175,9 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
      */
     wrapper(elems){
         return (
-            <CollapsibleItemViewButtonToolbar
-                children={elems}
-                constantButtons={this.fullScreenButton()}
-                windowWidth={this.props.windowWidth} />
+            <CollapsibleItemViewButtonToolbar constantButtons={this.fullScreenButton()} windowWidth={this.props.windowWidth}>
+                { elems }
+            </CollapsibleItemViewButtonToolbar>
         );
     }
 
@@ -185,32 +187,32 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
     }
 }
 
+const RowSpacingTypeDropdown = React.memo(function RowSpacingTypeDropdown({ currentKey, id, onSelect, titleMap }){
+    const menuItems = _.map(_.keys(titleMap), function(k){
+        return (
+            <DropdownItem key={k} eventKey={k} active={currentKey === k}>
+                { titleMap[k] }
+            </DropdownItem>
+        );
+    });
 
-class RowSpacingTypeDropdown extends React.Component {
-
-    static propTypes = {
-        'onSelect' : PropTypes.func.isRequired,
-        'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ])
-    };
-
-    static titleMap = {
+    return (
+        <DropdownButton id={id || "rowspacingtype-select"} variant="outline-dark"
+            onSelect={onSelect} title={titleMap[currentKey]}>
+            { menuItems }
+        </DropdownButton>
+    );
+});
+RowSpacingTypeDropdown.propTypes = {
+    'onSelect' : PropTypes.func.isRequired,
+    'currentKey' : PropTypes.oneOf([ 'compact', 'wide', 'stacked' ]),
+    'id' : PropTypes.string,
+    'titleMap' : PropTypes.objectOf(PropTypes.string).isRequired
+};
+RowSpacingTypeDropdown.defaultProps = {
+    'titleMap' : {
         'stacked' : 'Stack Nodes',
         'compact' : 'Center Nodes',
         'wide' : 'Spread Nodes'
-    };
-
-    render(){
-        var currentKey = this.props.currentKey,
-            menuItems = _.map(_.keys(RowSpacingTypeDropdown.titleMap), function(k){
-                return  <MenuItem key={k} eventKey={k} active={currentKey === k} children={RowSpacingTypeDropdown.titleMap[k]} />;
-            });
-
-        return (
-            <DropdownButton id={this.props.id || "rowspacingtype-select"}
-                pullRight onSelect={this.props.onSelect} title={RowSpacingTypeDropdown.titleMap[currentKey]}>
-                { menuItems }
-            </DropdownButton>
-        );
     }
-
-}
+};

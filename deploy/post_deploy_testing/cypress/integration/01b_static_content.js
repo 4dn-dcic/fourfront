@@ -1,4 +1,7 @@
 
+// todo: Ensure we're selecting right 1 incase later add more -- test for `a.id-help-menu-item` once in place upstream.
+const helpNavBarItemSelectorStr = '#top-nav div.navbar-collapse .navbar-nav a.id-help-menu-item';
+
 describe('Static Page & Content Tests', function () {
 
     before(function(){
@@ -20,8 +23,9 @@ describe('Static Page & Content Tests', function () {
             return false;
         });
 
-        // Wait until help menu has loaded via AJAX and has 'span' child w/ caret.
-        cy.get('#help-menu-item').should('have.descendants', 'span').click().wait(500).then(()=>{
+        // Wait until help menu has loaded via AJAX and is a dropdown.
+        // todo: Ensure we're selecting right 1 incase later add more -- test for `a.id-help-menu-item` once in place upstream.
+        cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').wait(100).click().wait(500).then(()=>{
             cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{
                 console.log(listItems);
 
@@ -45,7 +49,7 @@ describe('Static Page & Content Tests', function () {
                                 'message' : 'Visited page with title "' + titleText + '".'
                             });
                             if (count < listItems.length){
-                                cy.get('#help-menu-item').click().wait(500).then(()=>{
+                                cy.get(helpNavBarItemSelectorStr).click().wait(500).then(()=>{
                                     cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().wait(300).then((nextListItem)=>{
                                         doVisit(nextListItem);
                                     });
@@ -53,7 +57,7 @@ describe('Static Page & Content Tests', function () {
                             }
                         }
 
-                        cy.wait(300).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                        cy.get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                             var titleText = t.text();
                             expect(titleText).to.have.length.above(0);
                             cy.title().should('equal', titleText + ' – 4DN Data Portal').end(); // Ensure <head>...<title>TITLE</title>...</head> matches.
@@ -91,7 +95,7 @@ describe('Static Page & Content Tests', function () {
 
     it('Every help page has links which return success status codes - SAMPLING', function(){
 
-        cy.get('#help-menu-item').click().then(()=>{
+        cy.get(helpNavBarItemSelectorStr).click().then(()=>{
 
             // Get all links to _level 2_ static pages. Exclude directory pages for now. Do directory pages in later test.
             cy.get('.big-dropdown-menu.is-open a.level-2-title').then((listItems)=>{
@@ -119,12 +123,12 @@ describe('Static Page & Content Tests', function () {
 
                         if (itemIndicesToVisit.length > 0){
                             var nextIndexToVisit = itemIndicesToVisit.shift();
-                            cy.get('#help-menu-item').click().wait(100).then(()=>{
+                            cy.get(helpNavBarItemSelectorStr).click().wait(100).then(()=>{
                                 cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(doVisit);
                             });
                         }
                     }
-                    cy.wait(100).get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                    cy.get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
                         var titleText = t.text();
                         expect(titleText).to.have.length.above(0);
                         prevTitle = titleText;

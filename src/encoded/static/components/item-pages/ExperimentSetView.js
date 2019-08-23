@@ -4,19 +4,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Collapse } from 'react-bootstrap';
-import { console, object, isServerSide, expFxn, layout, Schemas, fileUtil, typedefs } from './../util';
-import {
-    HiGlassAjaxLoadContainer, HiGlassPlainContainer, isHiglassViewConfigItem,
-    FlexibleDescriptionBox, AdjustableDividerRow, OverviewHeadingContainer
-} from './components';
+
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { console, object, isServerSide, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn, Schemas, typedefs } from './../util';
+
+import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
+import { HiGlassPlainContainer, isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
+import { AdjustableDividerRow } from './components/AdjustableDividerRow';
+import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { QCMetricFromSummary } from './FileView';
-import {
-    RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton,
-    SelectedFilesController, SelectedFilesDownloadButton, uniqueFileCountNonMemoized
-} from './../browse/components';
+
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components/file-tables';
+import { SelectedFilesController, uniqueFileCountNonMemoized } from './../browse/components/SelectedFilesController';
+import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
 // eslint-disable-next-line no-unused-vars
@@ -164,7 +168,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             <React.Fragment>
                 { super.itemMidSection() }
                 <OverviewHeading context={context} schemas={schemas} key="overview" className="with-background mb-2 mt-1"
-                    title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={OverviewHeading.prependTitleIcon} />
+                    title="Experiment Set Properties" prependTitleIcon prependTitleIconFxn={prependOverviewHeadingTitleIcon} />
             </React.Fragment>
         );
     }
@@ -173,7 +177,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
 const OverviewHeading = React.memo(function OverviewHeading(props){
     const { context, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const tips = object.tipsFromSchema(schemas, context);
     const commonProps = { 'result' : context, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
     return (
         <OverviewHeadingContainer {...props}>
@@ -190,7 +194,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
                 titleRenderFxn={OverviewHeading.expCategorizerTitle} wrapInColumn="col-sm-6 col-md-3 pull-right" />
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
-                wrapInColumn="col-xs-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                wrapInColumn="col-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} hideIfNoValue />
 
         </OverviewHeadingContainer>
@@ -198,11 +202,11 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
 });
 
 // eslint-disable-next-line react/display-name
-OverviewHeading.prependTitleIcon = function(open, props){
+function prependOverviewHeadingTitleIcon(open, props){
     return <i className="expand-icon icon icon-th-list" />;
-};
+}
 
-OverviewHeading.expCategorizerTitle = memoize(function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+const expCategorizerTitleRenderFxn = memoize(function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
     let expCatObj = _.uniq(object.getNestedProperty(fullObject, 'experiments_in_set.experiment_categorizer'), false, 'combined');
     expCatObj = (Array.isArray(expCatObj) && expCatObj.length === 1 && expCatObj[0]) || expCatObj;
     if (expCatObj && expCatObj.combined && expCatObj.field && typeof expCatObj.value !== 'undefined'){
@@ -229,9 +233,9 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-raw-files-download-files-btn">
                             <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
-                            <span className="hidden-xs hidden-sm">Download </span>
+                            <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-                            <span className="hidden-xs hidden-sm text-400"> Raw Files</span>
+                            <span className="d-none d-sm-inline text-400"> Raw Files</span>
                         </SelectedFilesDownloadButton>
                     </div>
                     : null }
@@ -241,7 +245,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
 
     render(){
         const { context, files } = this.props;
-        const anyFilesWithMetrics = !!(fileUtil.filterFilesWithEmbeddedMetricItem(files, true));
+        const anyFilesWithMetrics = !!(commonFileUtil.filterFilesWithEmbeddedMetricItem(files, true));
         return (
             <div className="overflow-hidden">
                 { this.renderHeader() }
@@ -329,7 +333,7 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        const { mounted, width, renderRightPanel, minOpenHeight, leftPanelCollapseWidth, higlassItem } = this.props;
+        const { mounted, width, renderRightPanel, minOpenHeight, leftPanelCollapseWidth, higlassItem, windowWidth } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
         if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
@@ -338,9 +342,11 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
         // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
         const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
+        const rgs = layout.responsiveGridState(windowWidth);
+        const leftPanelDefaultWidth = rgs === 'xl' ? 400 : 300;
 
         return (
-            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel"
+            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel" leftPanelDefaultWidth={leftPanelDefaultWidth}
                 leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
                 renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
         );
@@ -403,16 +409,16 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     renderQCMetricsTablesRow(){
         const { width, files, windowWidth, href } = this.props;
-        const filesWithMetrics = fileUtil.filterFilesWithQCSummary(files);
+        const filesWithMetrics = commonFileUtil.filterFilesWithQCSummary(files);
         const filesWithMetricsLen = filesWithMetrics.length;
 
         if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
-        const filesByTitles = fileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
 
         return (
             <div className="row">
-                <div className="exp-table-container col-xs-12">
+                <div className="exp-table-container col-12">
                     <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
                         <span>Quality Metrics</span>
                     </h3>
@@ -463,9 +469,9 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-processed-files-download-files-btn">
                             <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
-                            <span className="hidden-xs hidden-sm">Download </span>
+                            <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-                            <span className="hidden-xs hidden-sm text-400"> Processed Files</span>
+                            <span className="d-none d-sm-inline text-400"> Processed Files</span>
                         </SelectedFilesDownloadButton>
                     </div>
                     : null }

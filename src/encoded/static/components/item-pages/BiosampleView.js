@@ -3,8 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object, Schemas, layout } from './../util';
-import { ItemPageTable, ExperimentSetTableTabView } from './components';
+
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+
+import { ItemPageTable } from './components/tables/ItemPageTable';
+import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 
@@ -18,7 +21,8 @@ export default class BiosampleView extends DefaultItemView {
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
 
-        const expSetTableProps = _.extend({}, this.props, {
+        const expSetTableProps = {
+            ...this.props,
             'requestHref' : (
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
@@ -27,7 +31,7 @@ export default class BiosampleView extends DefaultItemView {
             'title' : function(props, { totalCount }){
                 return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
             }
-        });
+        };
 
         initTabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
 
@@ -118,7 +122,7 @@ class BiosampleViewOverview extends React.PureComponent {
 
 const OverViewBody = React.memo(function OverViewBody(props) {
     const { context, schemas } = props;
-    const tips = object.tipsFromSchema(schemas || Schemas.get(), context);
+    const tips = object.tipsFromSchema(schemas, context);
     const commonProps = {
         'result' : context, tips,
         'wrapInColumn' : true,
@@ -129,7 +133,7 @@ const OverViewBody = React.memo(function OverViewBody(props) {
 
     return (
         <div className="row">
-            <div className="col-md-12 col-xs-12">
+            <div className="col-12">
                 <div className="row overview-blocks">
 
                     <OverViewBodyItem {...commonProps} property="modifications" fallbackTitle="Stable Genomic Modifications" />
@@ -152,8 +156,8 @@ const CellCultureInfoBody = React.memo(function CellCultureInfoBody(props){
 
     if (cell_cultures.length === 0) return null;
 
-    const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), context);
-    const tipsForCellCulture = object.tipsFromSchema(schemas || Schemas.get(), cell_cultures[0]);
+    const tipsForBiosample = object.tipsFromSchema(schemas, context);
+    const tipsForCellCulture = object.tipsFromSchema(schemas, cell_cultures[0]);
 
     let body = null;
 
@@ -205,8 +209,8 @@ const BiosourceInfoBody = React.memo(function BiosourceInfoBody(props){
     }
 
     if (biosources.length === 1){
-        const tipsForBiosample = object.tipsFromSchema(schemas || Schemas.get(), context);
-        const tipsForBiosource = object.tipsFromSchema(schemas || Schemas.get(), biosources[0]);
+        const tipsForBiosample = object.tipsFromSchema(schemas, context);
+        const tipsForBiosource = object.tipsFromSchema(schemas, biosources[0]);
         title = "Biosource";
         body = (
             <div className="row overview-blocks">

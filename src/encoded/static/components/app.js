@@ -4,6 +4,7 @@ import React from 'react';
 import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
@@ -11,18 +12,20 @@ import jsonScriptEscape from '../libs/jsonScriptEscape';
 import * as globals from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
-import { Footer } from './footer';
+import { Footer } from './Footer';
 import { store } from './../store';
-import * as origin from '../libs/origin';
-import { ajax, JWT, console, isServerSide, navigate, analytics, object, Schemas, layout, SEO, typedefs } from './util';
-import Alerts from './alerts';
+
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { ajax, JWT, console, isServerSide, object, layout, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Schemas, SEO, typedefs, navigate } from './util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
 import { FacetCharts } from './browse/components/FacetCharts';
-import { requestAnimationFrame } from './viz/utilities';
 import { ChartDataController } from './viz/chart-data-controller';
 import PageTitle from './PageTitle';
 
 // eslint-disable-next-line no-unused-vars
-var { NavigateOpts } = typedefs;
+const { NavigateOpts } = typedefs;
 
 
 /**
@@ -56,6 +59,26 @@ const portal = {
         }
     ]
 };
+
+const getGoogleAnalyticsTrackingID = memoize(function(href){
+    if (!href && !isServerSide()){
+        href = window.location.href;
+    }
+    const { host } = url.parse(href);
+    if (host.indexOf('testportal.4dnucleome') > -1){
+        return 'UA-86655305-2';
+    }
+    if (host.indexOf('data.4dnucleome') > -1){
+        return 'UA-86655305-1';
+    }
+    if (host.indexOf('localhost') > -1){
+        return 'UA-86655305-3';
+    }
+    if (host.indexOf('4dn-web-alex') > -1){
+        return 'UA-86655305-4';
+    }
+    return null;
+});
 
 
 /**
@@ -170,7 +193,7 @@ export default class App extends React.PureComponent {
      */
     constructor(props){
         super(props);
-        _.bindAll(this, 'listActionsFor', 'currentAction', 'loadSchemas',
+        _.bindAll(this, 'currentAction', 'loadSchemas',
             'setIsSubmitting', 'stayOnSubmissionsPage', 'authenticateUser',
             'updateUserInfo', 'confirmNavigation', 'navigate',
             // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
@@ -178,6 +201,8 @@ export default class App extends React.PureComponent {
         );
 
         const { context, initialSession } = props;
+
+        Alerts.setStore(store);
 
         /**
          * Whether HistoryAPI is supported in current browser.
@@ -252,7 +277,11 @@ export default class App extends React.PureComponent {
         }
 
         // Load up analytics
-        analytics.initializeGoogleAnalytics(analytics.getTrackingId(href), context);
+        // Load up analytics & perform initial pageview track
+        const analyticsID = getGoogleAnalyticsTrackingID(href);
+        if (analyticsID){
+            analytics.initializeGoogleAnalytics(analyticsID, context);
+        }
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
         this.authenticateUser();
@@ -399,31 +428,6 @@ export default class App extends React.PureComponent {
     }
 
     /**
-     * Calculates some actions available, given a category.
-     * Potentially deprecated-ish.
-     *
-     * @todo Potentially remove. Or document more.
-     * @public
-     * @param {string} category - Usually one of "user", "context", "global_sections".
-     * @returns {{ href: string }[]} - List of actions available for category.
-     */
-    listActionsFor(category) {
-        const { context } = this.props;
-        const { mounted } = this.state;
-        if (category === 'context') {
-            return (context && context.actions) || [];
-        }
-        if (category === 'user') {
-            if (!mounted) return [];
-            const userInfo = JWT.getUserInfo();
-            return (userInfo && userInfo.user_actions) || [];
-        }
-        if (category === 'global_sections') {
-            return portal.global_sections;
-        }
-    }
-
-    /**
      * Calculates current action, if any, from URL hash.
      *
      * @public
@@ -521,7 +525,7 @@ export default class App extends React.PureComponent {
         if (targetHref.indexOf('javascript:') === 0) return false;
 
         // Skip external links
-        if (!origin.same(targetHref)) return false;
+        if (!navigate.sameOrigin(targetHref)) return false;
 
         // Skip links with a different target
         if (target.getAttribute('target')) return false;
@@ -582,7 +586,7 @@ export default class App extends React.PureComponent {
         if (target.getAttribute('data-bypass')) return;
 
         // Skip external forms
-        if (!origin.same(target.action)) return;
+        if (!navigate.sameOrigin(target.action)) return;
 
         const actionUrlParts  = url.parse(url.resolve(href, target.action));
         const currentAction   = this.currentAction();
@@ -1211,7 +1215,6 @@ export default class App extends React.PureComponent {
             hrefParts,
             'updateUploads'  : this.updateUploads,
             'updateUserInfo' : this.updateUserInfo,
-            'listActionsFor' : this.listActionsFor,
             'setIsSubmitting': this.setIsSubmitting,
             'onBodyClick'    : this.handleClick,
             'onBodySubmit'   : this.handleSubmit,
@@ -1227,7 +1230,7 @@ export default class App extends React.PureComponent {
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
-                    <HTMLTitle {...{ context, currentAction, canonical, status }} listActionsFor={this.listActionsFor} />
+                    <HTMLTitle {...{ context, currentAction, canonical, status }} />
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
@@ -1265,7 +1268,7 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-        var { canonical, currentAction, context, listActionsFor, status, contentViews } = this.props,
+        var { canonical, currentAction, context, status, contentViews } = this.props,
             title;
 
         if (canonical === "about:blank"){   // first case is fallback
@@ -1288,8 +1291,7 @@ class HTMLTitle extends React.PureComponent {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 title = 'Error';
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-
-                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     title = 'Action not permitted';
@@ -1306,7 +1308,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        const { canonical, status, currentAction, listActionsFor, context, routeLeaf, contentViews } = this.props;
+        const { canonical, status, currentAction, context, routeLeaf, contentViews, href } = this.props;
         const contextAtID     = object.itemUtil.atId(context);
         const key             = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
 
@@ -1315,7 +1317,7 @@ class ContentRenderer extends React.PureComponent {
         // Object of common props passed to all content_views.
         const commonContentViewProps = _.pick(this.props,
             // Props from App:
-            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'listActionsFor',
+            'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
             'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
             // Props from BodyElement:
             'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
@@ -1333,8 +1335,7 @@ class ContentRenderer extends React.PureComponent {
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
-
-                var contextActionNames = _.filter(_.pluck(listActionsFor('context'), 'name'));
+                const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
                     content = <ErrorPage status="forbidden" />;
@@ -1348,7 +1349,7 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>;
+        return <ContentErrorBoundary canonical={canonical} href={href}>{ content }</ContentErrorBoundary>;
     }
 }
 
@@ -1694,7 +1695,7 @@ class BodyElement extends React.PureComponent {
         };
 
         // We add as property of class instance so we can remove event listener on unmount, for example.
-        this.throttledScrollHandler = _.throttle(requestAnimationFrame.bind(window, handleScroll), 10);
+        this.throttledScrollHandler = _.throttle(raf.bind(window, handleScroll), 10);
 
         window.addEventListener("scroll", this.throttledScrollHandler);
         setTimeout(this.throttledScrollHandler, 100, null);
@@ -1726,25 +1727,50 @@ class BodyElement extends React.PureComponent {
         );
     }
 
+    bodyClassName(){
+        const { isLoading, context } = this.props;
+        const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
+        const bodyClassList = (classList && classList.slice(0)) || [];
+
+        // Common UI
+        if (isLoading)          bodyClassList.push("loading-request");
+        if (scrolledPastTop)    bodyClassList.push("scrolled-past-top");
+        if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
+        if (isFullscreen){
+            bodyClassList.push("is-full-screen");
+        }
+
+        // TODO migrate test-warning-visible class to here from NavBar (done on CGAP already).
+
+        // If is a typical ItemView, we want to show a full-width view.
+        // StaticPages, unless on ItemView for them, _do not_ contain "Item"
+        // in their @type field and instead have Portal, StaticPage, etc.
+        if (Array.isArray(context['@type'])){
+            if (context['@type'].indexOf('Item') > -1){
+                bodyClassList.push("is-item-view");
+            }
+        }
+
+        if (bodyClassList.length > 0){
+            return bodyClassList.join(' ');
+        } else {
+            return null;
+        }
+    }
+
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, isLoading, slowLoad } = this.props;
-        const { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad } = this.props;
+        const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
-        const bodyClassList = (classList && classList.slice(0)) || [];
         const overlaysContainer = this.overlaysContainerRef.current;
 
         if (hasError) return this.renderErrorState();
 
-        if (isLoading)          bodyClassList.push('loading-request');
-        if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
-        if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
-        if (isFullscreen)       bodyClassList.push('is-full-screen');
-
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={(bodyClassList.length > 0 && bodyClassList.join(' ')) || null}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
@@ -1764,7 +1790,7 @@ class BodyElement extends React.PureComponent {
                         <div id="layout">
                             <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
                                 {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo', 'listActionsFor')} />
+                                    'context', 'updateUserInfo')} />
 
                             <div id="pre-content-placeholder"/>
 
@@ -1775,7 +1801,7 @@ class BodyElement extends React.PureComponent {
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <ContentErrorBoundary canonical={canonical}>
+                            <ContentErrorBoundary canonical={canonical} href={href}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                     registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
                                     overlaysContainer } } />

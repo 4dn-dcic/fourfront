@@ -4,10 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import * as vizUtil from './../utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { barplot_color_cycler } from './../ColorCycler';
 import { CursorViewBounds } from './../ChartDetailCursor';
-import { console, isServerSide, analytics } from './../../util';
+
 
 
 /**
@@ -20,6 +21,7 @@ class BarSection extends React.PureComponent {
 
     constructor(props){
         super(props);
+        _.bindAll(this, 'mouseEnter', 'mouseLeave', 'click');
         this.barSectionElemRef = React.createRef();
     }
 
@@ -36,14 +38,28 @@ class BarSection extends React.PureComponent {
         }
     }
 
+    mouseEnter(e){
+        const { onMouseEnter, node } = this.props;
+        return onMouseEnter && onMouseEnter(node, e);
+    }
+
+    mouseLeave(e){
+        const { onMouseLeave, node } = this.props;
+        return onMouseLeave && onMouseLeave(node, e);
+    }
+
+    click(e){
+        const { onClick, node } = this.props;
+        return onClick && onClick(node, e);
+    }
+
     /**
      * @returns {Element} - A div element representing a bar section.
      */
     render(){
-        var d               = this.props.node,
-            color           = d.color || barplot_color_cycler.colorForNode(d),
-            { isSelected, isHoveredOver, canBeHighlighted, onMouseEnter, onMouseLeave, onClick } = this.props,
-            className = "bar-part";
+        const { node: d, isSelected, isHoveredOver, canBeHighlighted } = this.props;
+        const color           = d.color || barplot_color_cycler.colorForNode(d);
+        let className = "bar-part";
 
         if (d.parent)           className += ' multiple-parts';
         if (isSelected)         className += ' selected';
@@ -69,9 +85,7 @@ class BarSection extends React.PureComponent {
                 data-key={this.props['data-key'] || null} data-term={d.parent ? d.term : null}
                 data-count={d.count} data-color={color} data-target-height={d.attr.height}
                 key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
-                onMouseEnter={(e)=>{ typeof onMouseEnter === 'function' && onMouseEnter(d, e); }}
-                onMouseLeave={(e)=>{ typeof onMouseLeave === 'function' && onMouseLeave(d, e); }}
-                onClick={(e)=>{ typeof onClick === 'function' && onClick(d, e); }}
+                onMouseEnter={this.mouseEnter} onMouseLeave={this.mouseLeave} onClick={this.click}
             />
         );
     }
@@ -371,7 +385,7 @@ export class PopoverViewContainer extends React.PureComponent {
 
     render(){
         return (
-            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href')}
+            <CursorViewBounds {..._.pick(this.props, 'height', 'width', 'cursorContainerMargin', 'actions', 'href', 'context', 'schemas')}
                 eventCategory="BarPlot" // For Analytics events
                 highlightTerm={false} clickCoordsFxn={this.getCoordsCallback}>
                 <ViewContainer {...this.props} />

@@ -3,8 +3,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import * as vizUtil from '../utilities';
-import { console, object, isServerSide, layout } from './../../util';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, isServerSide, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 /**
  * @typedef {Object} Offset
@@ -15,7 +15,7 @@ import { console, object, isServerSide, layout } from './../../util';
  */
 
 
-class CursorContent extends React.Component {
+class CursorContent extends React.PureComponent {
 
     static defaultProps = {
         'scale'     : 2,
@@ -35,18 +35,17 @@ class CursorContent extends React.Component {
     }
 
     render(){
-        if (!this.props.isVisible || !this.props.children) return null;
-
+        const { isVisible, children, className, sticky, width, height, x, y, cursorOffset, onRightSide, pointerStyle } = this.props;
+        if (!isVisible || !children) return null;
+        const cls = 'cursor-component-container ' + (className || '') + (sticky ? ' sticky' : '');
         return (
-            <div
-                className={'cursor-component-container ' + (this.props.className || '') + (this.props.sticky ? ' sticky' : '')}
+            <div className={cls}
                 style={{
-                    display: this.props.isVisible ? 'block' : 'none',
-                    width: this.props.width,
-                    height: this.props.height,
-                    transform : vizUtil.style.translate3d(this.props.x, this.props.y),
-                    marginLeft: -(this.props.width / 2) + ((this.props.onRightSide ? -1 : 1) * this.props.cursorOffset.x),
-                    marginTop: -(this.props.height / 2) + this.props.cursorOffset.y,
+                    width, height,
+                    display: isVisible ? 'block' : 'none',
+                    transform : vizUtil.style.translate3d(x, y),
+                    marginLeft: -(width / 2) + ((onRightSide ? -1 : 1) * cursorOffset.x),
+                    marginTop: -(height / 2) + cursorOffset.y,
                     opacity : 0
                 }}
                 ref={function(r){
@@ -56,17 +55,8 @@ class CursorContent extends React.Component {
                     }, 0);
                 }}
             >
-                { this.props.pointerStyle && 
-                    <div
-                        className={'cursor-zoom-pointer'}
-                        style={this.props.pointerStyle}
-                    />
-                }
-
-                <div className={'inner' + (this.props.className ? ' ' + this.props.className : '')}>
-                    { this.props.children }
-                </div>
-
+                { pointerStyle && <div className="cursor-zoom-pointer" style={pointerStyle} /> }
+                <div className="inner">{ children }</div>
             </div>
 
         );
@@ -92,9 +82,9 @@ export default class CursorComponent extends React.Component {
         'containingWidth'   : 200,
         'containingHeight'  : 200,
         'offsetLeft'        : 0,
-        'offsetTop'         : 0
-    }
-
+        'offsetTop'         : 0,
+        'debugStyle'        : false
+    };
 
     constructor(props){
         super(props);
@@ -121,17 +111,16 @@ export default class CursorComponent extends React.Component {
     }
 
 
-    /** 
+    /**
      * @return {Offset} Offsets or margins from SVG for visibility. Defaults to 5 for top, right, bottom, & left unless set in props.
      */
     visibilityMargin(){
-        var def = { 'top' : 0, 'right' : 0, 'bottom' : 0, 'left' : 0 };
-        if        (typeof this.props.visibilityMargin === 'number'){
-            return _.extend(def, {
-                'left'   : this.props.visibilityMargin
-            });
-        } else if (typeof this.props.visibilityMargin === 'object' && this.props.visibilityMargin){
-            return _.extend(def, this.props.visibilityMargin);
+        const { visibilityMargin : vm } = this.props;
+        const def = { 'top' : 0, 'right' : 0, 'bottom' : 0, 'left' : 0 };
+        if (typeof vm === 'number'){
+            return _.extend(def, { 'left' : vm });
+        } else if (typeof vm === 'object' && vm){
+            return _.extend(def, vm);
         }
         return def;
     }
@@ -164,60 +153,62 @@ export default class CursorComponent extends React.Component {
         this.overlaysRoot.removeChild(this.portalElement);
         this.portalElement = null;
 
-        this.setState({ 'mounted' : false });   
+        this.setState({ 'mounted' : false });
     }
 
     getHoverComponentDimensions(){
+        const { style, width, height } = this.props;
         return {
-            'width'  : (this.props.style && this.props.style.width)  || this.props.width,
-            'height' : (this.props.style && this.props.style.height) || this.props.height
+            'width'  : (style && style.width)  || width,
+            'height' : (style && style.height) || height
         };
     }
 
     getCursorContainmentDimensions(){
-        if (this.props.containingElement && typeof this.props.containingElement.clientHeight === 'number'){
+        const { containingElement, containingWidth, containingHeight } = this.props;
+        if (containingElement && typeof containingElement.clientHeight === 'number'){
             return {
-                width : this.props.containingElement.clientWidth,
-                height : this.props.containingElement.clientHeight
+                width : containingElement.clientWidth,
+                height : containingElement.clientHeight
             };
         }
         return {
-            width : this.props.containingWidth,
-            height : this.props.containingHeight
+            width : containingWidth,
+            height : containingHeight
         };
     }
 
     isVisible(cursorContainmentDims = null, visibilityMargin = null){
-        if (typeof this.props.isVisible === 'boolean') return this.props.isVisible;
-        if (this.props.sticky) return true;
-        if (this.props.debugStyle) return true;
+        const { isVisible, sticky, debugStyle } = this.props;
+        const { offsetX, offsetY } = this.state;
+        if (typeof isVisible === 'boolean') return isVisible;
+        if (sticky) return true;
+        if (debugStyle) return true;
         if (!cursorContainmentDims) cursorContainmentDims = this.getCursorContainmentDimensions();
         if (!visibilityMargin) visibilityMargin = this.visibilityMargin();
         return (
-            this.state.offsetY - visibilityMargin.bottom < cursorContainmentDims.height &&
-            this.state.offsetX - visibilityMargin.right < cursorContainmentDims.width &&
-            this.state.offsetY + visibilityMargin.top > 0 &&
-            this.state.offsetX + visibilityMargin.left > 0
+            offsetY - visibilityMargin.bottom < cursorContainmentDims.height &&
+            offsetX - visibilityMargin.right < cursorContainmentDims.width &&
+            offsetY + visibilityMargin.top > 0 &&
+            offsetX + visibilityMargin.left > 0
         );
     }
 
     _onMouseMove(e){
-        if (this.props.sticky) return;
+        const { containingElement, offsetLeft, offsetRight, sticky, horizontalAlign, debugStyle } = this.props;
+        if (sticky) return;
 
-        var { containingElement, offsetLeft, offsetRight } = this.props;
+        const offset = layout.getElementOffset(containingElement) || { 'left' : offsetLeft || 0, 'top' : offsetRight || 0 };
+        const scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
+        const scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-        var offset = layout.getElementOffset(this.props.containingElement) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
-
-        var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
-        var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
-        
-        var onRightSide = this.props.horizontalAlign === 'auto' && e.clientX + scrollX > (
-            //(this.props.containingElement && this.props.containingElement.clientWidth) || 
+        const onRightSide = horizontalAlign === 'auto' && e.clientX + scrollX > (
+            //(this.props.containingElement && this.props.containingElement.clientWidth) ||
             (document && document.body && document.body.clientWidth) ||
             (window && window.innerWidth)
         ) / 2;
 
-        if (this.props.debugStyle){
+        if (debugStyle){
             this.setState({
                 x : offset.left + 100,
                 y : offset.top + 100,
@@ -245,14 +236,14 @@ export default class CursorComponent extends React.Component {
     render(){
         if (!this.state.mounted || !this.portalElement) return null;
 
-        var isVisible                   = this.isVisible(),
-            hoverComponentDimensions    = this.getHoverComponentDimensions(),
-            passedProps = _.extend(
-                _.pick(this.props, 'sticky', 'schemas', 'children', 'style', 'className', 'onMouseLeave', 'pointerStyle', 'cursorOffset'),
-                _.pick(hoverComponentDimensions, 'width', 'height'),
-                { isVisible, 'onClick' : this._handleClick },
-                this.state
-            );
+        const isVisible = this.isVisible();
+        const hoverComponentDimensions = this.getHoverComponentDimensions();
+        const passedProps = _.extend(
+            _.pick(this.props, 'sticky', 'schemas', 'children', 'style', 'className', 'onMouseLeave', 'pointerStyle', 'cursorOffset'),
+            _.pick(hoverComponentDimensions, 'width', 'height'),
+            { isVisible, 'onClick' : this._handleClick },
+            this.state
+        );
 
         if (typeof this.props.xCoordOverride === 'number'){
             passedProps.x = this.props.xCoordOverride;

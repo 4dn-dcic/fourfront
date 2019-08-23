@@ -3,9 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Thumbnail, Button } from 'react-bootstrap';
-import { console, object, expFxn, Schemas, isServerSide } from './../util';
-import { ExperimentSetTablesLoaded } from './components';
+import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { expFxn } from './../util';
+import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock, QualityControlResults } from './FileView';
 
@@ -27,7 +27,7 @@ export default class FileMicroscopyView extends FileView {
 
 class FileMicroscopyViewOverview extends React.Component {
 
-    static getTabObject({context, schemas, windowWidth }, width){
+    static getTabObject({ context, schemas, windowWidth }, width){
         return {
             'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
@@ -44,6 +44,7 @@ class FileMicroscopyViewOverview extends React.Component {
         };
     }
 
+    /** @todo Maybe create common set of proptypes to import into places to avoid redundancy */
     static propTypes = {
         'context' : PropTypes.shape({
             'experiments' : PropTypes.arrayOf(PropTypes.shape({
@@ -63,7 +64,7 @@ class FileMicroscopyViewOverview extends React.Component {
                 <FileMicOverViewBody {...{ context, schemas, windowWidth }} />
                 { experimentSetUrls && experimentSetUrls.length > 0 ?
                     <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                : null }
+                    : null }
             </div>
         );
 
@@ -74,56 +75,61 @@ class FileMicroscopyViewOverview extends React.Component {
 /**
  * Adds a Thumbnail item to FileOverViewBody.
  */
-class FileMicOverViewBody extends React.PureComponent {
-    render(){
-        const { context, schemas, windowWidth } = this.props;
-        const file = context;
+const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
+    const { context, schemas, windowWidth } = props;
+    const file = context;
 
-        const parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
+    const parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
 
-        const parentExperimentWithImagingPaths = _.find(parentExperimentsReversed, function(exp){
-            return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path;
-        }) || parentExperimentsReversed[0] || null;
+    const parentExperimentWithImagingPaths = _.find(parentExperimentsReversed, function(exp){
+        return Array.isArray(exp.imaging_paths) && exp.imaging_paths.length > 0 && typeof exp.imaging_paths[0].channel === 'string' && exp.imaging_paths[0].path;
+    }) || parentExperimentsReversed[0] || null;
 
-        let thumbnailSrc = typeof file.thumbnail === 'string' && file.thumbnail;
-        let thumbnailLink = null;
+    let thumbnailSrc = typeof file.thumbnail === 'string' && file.thumbnail;
+    let thumbnailLink = null;
 
-        if (thumbnailSrc){
-            if (thumbnailSrc.slice(-5) === '/100/') {
-                thumbnailSrc = thumbnailSrc.slice(0, -5) + '/360/';
-            }
+    if (thumbnailSrc){
+        if (thumbnailSrc.slice(-5) === '/100/') {
+            thumbnailSrc = thumbnailSrc.slice(0, -5) + '/360/';
+        }
+        if (file.omerolink){
             thumbnailLink = (
-                <Thumbnail href={ file.omerolink || null } className="inline-block" alt="OMERO Thumbnail" target="_blank"
-                    src={thumbnailSrc} style={{ margin : '12px 0px 0px 0px' }} data-tip={ file.omerolink ? "View in OMERO" : null} />
+                <a href={file.omerolink} className="image-wrapper inline-block img-thumbnail" target="_blank"
+                    data-tip="View in OMERO" rel="noopener noreferrer">
+                    <img className="embedded-item-image" src={thumbnailSrc} alt="OMERO Thumbnail" />
+                </a>
             );
-        } else if (file.omerolink){
+        } else {
             thumbnailLink = (
-                <Button className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
-                    View in OMERO
-                </Button>
+                <img className="embedded-item-image image-wrapper inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
             );
         }
+    } else if (file.omerolink){
+        thumbnailLink = (
+            <a className="btn btn-primary btn-block mt-2" href={file.omerolink} target="_blank" rel="noopener noreferrer">
+                View in OMERO
+            </a>
+        );
+    }
 
-        return (
-            <React.Fragment>
-                <div className="row overview-blocks">
+    return (
+        <React.Fragment>
+            <div className="row overview-blocks">
 
-                    { thumbnailLink ? <div className="col-sm-4">{ thumbnailLink }</div> : null }
+                { thumbnailLink ? <div className="col-sm-4">{ thumbnailLink }</div> : null }
 
-                    { parentExperimentWithImagingPaths ?
-                        <OverViewBodyItem
-                            result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas || Schemas.get(), parentExperimentWithImagingPaths)}
-                            wrapInColumn={"col-xs-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} property='imaging_paths' fallbackTitle="Imaging Paths"
-                            listItemElement='div' listWrapperElement='div' singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+                { parentExperimentWithImagingPaths ?
+                    <OverViewBodyItem
+                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas, parentExperimentWithImagingPaths)}
+                        wrapInColumn={"col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} property="imaging_paths" fallbackTitle="Imaging Paths"
+                        listItemElement="div" listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
                     : null }
 
-                </div>
-                <div className="row overview-blocks">
-                    <QualityControlResults file={file} wrapInColumn="col-md-6" schemas={schemas} hideIfNoValue />
-                    <RelatedFilesOverViewBlock file={file} property="related_files" wrapInColumn="col-md-6" schemas={schemas} hideIfNoValue />
-                </div>
-            </React.Fragment>
-        );
-
-    }
-}
+            </div>
+            <div className="row overview-blocks">
+                <QualityControlResults file={file} wrapInColumn="col-md-6" schemas={schemas} hideIfNoValue />
+                <RelatedFilesOverViewBlock file={file} property="related_files" wrapInColumn="col-md-6" schemas={schemas} hideIfNoValue />
+            </div>
+        </React.Fragment>
+    );
+});
