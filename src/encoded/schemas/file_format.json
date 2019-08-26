@@ -4,7 +4,7 @@
     "id": "/profiles/file_format.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["file_format", "standard_file_extension", "award", "lab"],
+    "required": ["file_format", "standard_file_extension","project", "institution"],
     "identifyingProperties": ["uuid", "file_format"],
     "additionalProperties": false,
     "mixinProperties": [
