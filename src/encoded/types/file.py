@@ -26,7 +26,7 @@ from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
     get_item_if_you_can,
-    lab_award_attribution_embed_list
+    # lab_award_attribution_embed_list
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -160,70 +160,6 @@ def property_closure(request, propname, root_uuid):
     return seen
 
 
-@collection(
-    name='file-sets',
-    unique_key='accession',
-    properties={
-        'title': 'File Sets',
-        'description': 'Listing of File Sets',
-    })
-class FileSet(Item):
-    """Collection of files stored under fileset."""
-    item_type = 'file_set'
-    schema = load_schema('encoded:schemas/file_set.json')
-    name_key = 'accession'
-
-
-@collection(
-    name='file-set-calibrations',
-    unique_key='accession',
-    properties={
-        'title': 'Calibration File Sets',
-        'description': 'Listing of File Sets',
-    })
-class FileSetCalibration(FileSet):
-    """Collection of files stored under fileset."""
-    base_types = ['FileSet'] + Item.base_types
-    item_type = 'file_set_calibration'
-    schema = load_schema('encoded:schemas/file_set_calibration.json')
-    name_key = 'accession'
-    embedded_list = Item.embedded_list + [
-        'files_in_set.submitted_by.job_title',
-        'files_in_set.lab.title',
-        'files_in_set.accession',
-        'files_in_set.href',
-        'files_in_set.file_size',
-        'files_in_set.upload_key',
-        'files_in_set.file_format.file_format',
-        'files_in_set.file_classification'
-    ]
-
-
-@collection(
-    name='file-set-microscope-qcs',
-    unique_key='accession',
-    properties={
-        'title': 'Microscope QC File Sets',
-        'description': 'Listing of File Sets',
-    })
-class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
-    """Collection of files stored under fileset."""
-    base_types = ['FileSet'] + Item.base_types
-    item_type = 'file_set_microscope_qc'
-    schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
-    name_key = 'accession'
-    embedded_list = Item.embedded_list + [
-        'files_in_set.submitted_by.job_title',
-        'files_in_set.lab.title',
-        'files_in_set.accession',
-        'files_in_set.href',
-        'files_in_set.file_size',
-        'files_in_set.upload_key',
-        'files_in_set.file_format.file_format',
-        'files_in_set.file_classification'
-    ]
-
-
 @abstract_collection(
     name='files',
     unique_key='accession',
@@ -237,44 +173,14 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # 'experiments.display_title',
-        'experiments.accession',
-        'experiments.experiment_type.display_title',
-        'experiments.experiment_sets.accession',
-        'experiments.experiment_sets.experimentset_type',
-        'experiments.experiment_sets.@type',
-        'experiments.biosample.biosource.display_title',
-        'experiments.biosample.biosource.biosource_type',
-        'experiments.biosample.biosource_summary',
-        'experiments.biosample.modifications_summary',
-        'experiments.biosample.treatments_summary',
-        'experiments.biosample.biosource.individual.organism.name',
-        'experiments.digestion_enzyme.name',
-        'experiments.last_modified.date_modified',
+    embedded_list = Item.embedded_list + [
         'file_format.file_format',
         'related_files.relationship_type',
         'related_files.file.accession',
         'quality_metric.display_title',
         'quality_metric.@type'
-    ]
+    ]  # + lab_award_attribution_embed_list
     name_key = 'accession'
-    rev = {
-        'experiments': ('Experiment', 'files'),
-    }
-
-    @calculated_property(schema={
-        "title": "Experiments",
-        "description": "Experiments that this file is associated with",
-        "type": "array",
-        "items": {
-            "title": "Experiments",
-            "type": ["string", "object"],
-            "linkTo": "Experiment"
-        }
-    })
-    def experiments(self, request):
-        return self.rev_link_atids(request, "experiments")
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -305,20 +211,20 @@ class File(Item):
             pass
         return outString
 
-    def generate_track_title(self, track_info, props):
-        if not props.get('higlass_uid'):
-            return None
-        exp_type = track_info.get('experiment_type', None)
-        if exp_type is None:
-            return None
-        bname = track_info.get('biosource_name', 'unknown sample')
-        ftype = props.get('file_type', 'unspecified type')
-        assay = track_info.get('assay_info', '')
-
-        title = '{ft} for {bs} {et} {ai}'.format(
-            ft=ftype, ai=assay, et=exp_type, bs=bname
-        )
-        return title.replace('  ', ' ').rstrip()
+    # def generate_track_title(self, track_info, props):
+    #     if not props.get('higlass_uid'):
+    #         return None
+    #     exp_type = track_info.get('experiment_type', None)
+    #     if exp_type is None:
+    #         return None
+    #     bname = track_info.get('biosource_name', 'unknown sample')
+    #     ftype = props.get('file_type', 'unspecified type')
+    #     assay = track_info.get('assay_info', '')
+    #
+    #     title = '{ft} for {bs} {et} {ai}'.format(
+    #         ft=ftype, ai=assay, et=exp_type, bs=bname
+    #     )
+    #     return title.replace('  ', ' ').rstrip()
 
     def _get_file_expt_bucket(self, request, item2check):
         fatid = self.jsonld_id(request)
@@ -335,161 +241,6 @@ class File(Item):
                 return obucket.get('title')
         return None
 
-    def _get_ds_cond_from_repset(self, repset):
-        return (repset.get('dataset_label', None), repset.get('condition', None))
-
-    def _get_file_experiment_info(self, request, currinfo):
-        """
-        Get info about an experiment that a file belongs given a File.
-        A file may also be linked to an experiment set only
-        Checks the rev_linked experiments and experiment_sets
-        """
-        info = {}
-        expid = None
-        repsetid = None
-        rev_exps = self.experiments(request)
-        if rev_exps:
-            if len(rev_exps) != 1:
-                # most files with experiments revlinks linked to only one
-                # edge case eg. sci-Hi-C -- punt and add info 'manually'
-                return info
-            expid = rev_exps[0]
-        elif hasattr(self, 'experiment_sets'):  # FileProcessed only
-            rev_exp_sets = self.experiment_sets(request)
-            if rev_exp_sets:
-                repset = [rs for rs in rev_exp_sets if 'replicate' in rs]
-                if len(repset) != 1:
-                    # some microscopy files linked to multiple repsets
-                    # for these edge cases add info 'manually'
-                    return info
-                repsetid = repset[0]
-        else:
-            return info
-
-        # here we have either an expid or a repsetid
-        if repsetid:  # get 2 fields and get an expt to get other info
-            rep_set_info = get_item_if_you_can(request, repsetid)
-            if not rep_set_info:
-                return info
-            # pieces of info to get from the repset if there is one
-            ds, c = self._get_ds_cond_from_repset(rep_set_info)
-            info['dataset'] = ds
-            info['condition'] = c
-            expts_in_set = rep_set_info.get('experiments_in_set', [])
-            if not expts_in_set:
-                return info
-            elif len(expts_in_set) == 1:
-                info['replicate_info'] = 'unreplicated'
-            else:
-                info['replicate_info'] = 'merged replicates'
-            info['experiment_bucket'] = self._get_file_expt_bucket(request, rep_set_info)
-
-            # get the first experiment of set and set to experiment of file shared info
-            expid = expts_in_set[0]
-
-        if expid:
-            exp_info = get_item_if_you_can(request, expid)
-            if not exp_info:  # sonmethings fishy - abort
-                return info
-            exp_type = get_item_if_you_can(request, exp_info.get('experiment_type'))
-            if exp_type is not None:
-                info['experiment_type'] = exp_type.get('title')
-            if 'experiment_bucket' not in info:  # did not get it from rep_set
-                info['experiment_bucket'] = self._get_file_expt_bucket(request, exp_info)
-            assay_info = exp_info.get('experiment_categorizer')
-            if assay_info:
-                info['assay_info'] = assay_info.get('value')
-            if 'replicate_info' not in info:
-                # we did not get repinfo from a repset so rep nos for an expt are relevant
-                possible_repsets = exp_info.get('experiment_sets', [])
-                # only check experiment-set-replicate items for replicate_exps
-                repset = [rs for rs in possible_repsets if 'replicate' in rs]
-                if repset:
-                    repset = repset[0]
-                    rep_set_info = get_item_if_you_can(request, repset)
-                    if rep_set_info is not None:
-                        ds, c = self._get_ds_cond_from_repset(rep_set_info)
-                        info['dataset'] = ds
-                        info['condition'] = c
-                        rep_exps = rep_set_info.get('replicate_exps', [])
-                        for rep in rep_exps:
-                            if rep.get('replicate_exp') == expid:
-                                repstring = 'Biorep ' + str(rep.get('bio_rep_no')) + ', Techrep ' + str(rep.get('tec_rep_no'))
-                                info['replicate_info'] = repstring
-            if 'biosource_name' not in currinfo:
-                sample_id = exp_info.get('biosample')
-                if sample_id is not None:
-                    sample = get_item_if_you_can(request, sample_id)
-                    if sample is not None:
-                        info['biosource_name'] = sample.get('biosource_summary')
-        return {k: v for k, v in info.items() if v is not None}
-
-    @calculated_property(schema={
-        "title": "Track and Facet Info",
-        "description": "Useful faceting and visualization info",
-        "type": "object",
-        "properties": {
-            "experiment_type": {
-                "type": "string"
-            },
-            "assay_info": {
-                "type": "string"
-            },
-            "lab_name": {
-                "type": "string"
-            },
-            "biosource_name": {
-                "type": "string"
-            },
-            "replicate_info": {
-                "type": "string"
-            },
-            "experiment_bucket": {
-                "type": "string"
-            },
-            "dataset": {
-                "type": "string"
-            },
-            "condition": {
-                "type": "string"
-            },
-            "track_title": {
-                "type": "string"
-            }
-        }
-    })
-    def track_and_facet_info(self, request, biosource_name=None):
-        props = self.upgrade_properties()
-        fields = ['experiment_type', 'assay_info', 'lab_name', 'dataset', 'condition',
-                  'biosource_name', 'replicate_info', 'experiment_bucket']
-        # look for existing _props
-        track_info = {field: props.get('override_' + field) for field in fields}
-        track_info = {k: v for k, v in track_info.items() if v is not None}
-
-        # vistrack only pass in biosource_name because _biosource_name is
-        # a calc prop of vistrack - from linked Biosource
-        if biosource_name and 'biosource_name' not in track_info:
-            track_info['biosource_name'] = biosource_name
-
-        if len(track_info) != 8:  # if length==6 we have everything we need
-            if not (len(track_info) == 7 and 'lab_name' not in track_info):
-                # only if everything but lab exists can we avoid getting expt
-                einfo = self._get_file_experiment_info(request, track_info)
-                track_info.update({k: v for k, v in einfo.items() if k not in track_info})
-            # if 'experiment_type' not in track_info:
-                # avoid more unnecessary work if we don't have key piece
-                # return
-
-            if 'lab_name' not in track_info:
-                labid = props.get('lab')
-                lab = get_item_if_you_can(request, labid)
-                if lab is not None:
-                    track_info['lab_name'] = lab.get('display_title')
-
-        track_title = self.generate_track_title(track_info, props)
-        if track_title is not None:
-            track_info['track_title'] = track_title
-        return track_info
 
     def _update(self, properties, sheets=None):
         if not properties:
@@ -624,7 +375,6 @@ class File(Item):
                     curr_txn.addAfterCommitHook(add_to_indexing_queue,
                                                 args=(curr_request, to_queue, 'edit'))
 
-
     @property
     def __name__(self):
         properties = self.upgrade_properties()
@@ -757,12 +507,12 @@ class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
-    embedded_list = File.embedded_list + file_workflow_run_embeds + [
+    embedded_list = File.embedded_list + [
         "quality_metric.overall_quality_status",
         "quality_metric.Total Sequences",
         "quality_metric.Sequence length",
         "quality_metric.url"
-    ]
+    ]  # + file_workflow_run_embeds
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
@@ -807,22 +557,18 @@ class FileProcessed(File):
     """Collection for individual processed files."""
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
-    embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+    embedded_list = File.embedded_list + [
         'experiment_sets.last_modified.date_modified',
         "quality_metric.Total reads",
         "quality_metric.Trans reads",
         "quality_metric.Cis reads (>20kb)",
         "quality_metric.Short cis reads (<20kb)",
         "quality_metric.url"
-    ]
+    ]  # + file_workflow_run_embeds_processed
     name_key = 'accession'
     rev = dict(File.rev, **{
         'workflow_run_inputs': ('WorkflowRun', 'input_files.value'),
         'workflow_run_outputs': ('WorkflowRun', 'output_files.value'),
-        'experiments': ('Experiment', 'processed_files'),
-        'experiment_sets': ('ExperimentSet', 'processed_files'),
-        'other_experiments': ('Experiment', 'other_processed_files.files'),
-        'other_experiment_sets': ('ExperimentSet', 'other_processed_files.files')
     })
     aggregated_items = {
         "last_modified": [
@@ -864,39 +610,6 @@ class FileProcessed(File):
     def workflow_run_outputs(self, request):
         return self.rev_link_atids(request, "workflow_run_outputs")
 
-    @calculated_property(schema={
-        "title": "Experiment Sets",
-        "description": "All Experiment Sets that this file belongs to",
-        "type": "array",
-        "items": {
-            "title": "Experiment Set",
-            "type": "string",
-            "linkTo": "ExperimentSet"
-        }
-    })
-    def experiment_sets(self, request):
-        return list(set(self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")))
-
-    @calculated_property(schema={
-        "title": "Experiments",
-        "description": "Experiments that this file belongs to",
-        "type": "array",
-        "items": {
-            "title": "Experiment",
-            "type": "string",
-            "linkTo": "Experiment"
-        }
-    })
-    def experiments(self, request):
-        return list(set(self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")))
-
-    # processed files don't want md5 as unique key
-    def unique_keys(self, properties):
-        keys = super(FileProcessed, self).unique_keys(properties)
-        if keys.get('alias'):
-            keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
-        return keys
-
 
 @collection(
     name='files-reference',
@@ -904,131 +617,12 @@ class FileProcessed(File):
     properties={
         'title': 'Reference Files',
         'description': 'Listing of Reference Files',
-    })
+        })
 class FileReference(File):
     """Collection for individual reference files."""
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded_list = File.embedded_list
-    name_key = 'accession'
-
-
-@collection(
-    name='files-vistrack',
-    unique_key='accession',
-    properties={
-        'title': 'Visualization Track Files',
-        'description': 'Listing of External Files available as HiGlass visualization tracks',
-    })
-class FileVistrack(File):
-    """Collection for individual visualization track files."""
-    item_type = 'file_vistrack'
-    schema = load_schema('encoded:schemas/file_vistrack.json')
-    embedded_list = File.embedded_list
-    name_key = 'accession'
-
-    @classmethod
-    def get_bucket(cls, registry):
-        return registry.settings['file_wfout_bucket']
-
-    @calculated_property(schema={
-        "title": "Track and Facet Info",
-        "description": "Useful faceting and visualization info",
-        "type": "object",
-        "properties": {
-            "experiment_type": {
-                "type": "string"
-            },
-            "assay_info": {
-                "type": "string"
-            },
-            "lab_name": {
-                "type": "string"
-            },
-            "biosource_name": {
-                "type": "string"
-            },
-            "replicate_info": {
-                "type": "string"
-            },
-            "experiment_bucket": {
-                "type": "string"
-            },
-            "track_title": {
-                "type": "string"
-            }
-        }
-    })
-    def track_and_facet_info(self, request, biosource_name=None, biosource=None):
-        return super().track_and_facet_info(request, biosource_name=self.override_biosource_name(request, biosource))
-
-    @calculated_property(schema={
-        "title": "Biosource Name",
-        "type": "string"
-    })
-    def override_biosource_name(self, request, biosource=None):
-        if biosource:
-            return request.embed(biosource, '@@object').get('biosource_name')
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "Name of this File",
-        "type": "string"
-    })
-    def display_title(self, request, file_format, accession=None, external_accession=None, dbxrefs=None):
-        if dbxrefs:
-            acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
-            if acclist:
-                accession = acclist[0]
-        if not accession:
-            accession = accession or external_accession
-        file_format_item = get_item_if_you_can(request, file_format, 'file-formats')
-        try:
-            file_extension = '.' + file_format_item.get('standard_file_extension')
-        except AttributeError:
-            file_extension = ''
-        return '{}{}'.format(accession, file_extension)
-
-
-@collection(
-    name='files-calibration',
-    unique_key='accession',
-    properties={
-        'title': 'Calibration Files',
-        'description': 'Listing of Calibration Files',
-    })
-class FileCalibration(ItemWithAttachment, File):
-    """Collection for individual calibration files."""
-    item_type = 'file_calibration'
-    schema = load_schema('encoded:schemas/file_calibration.json')
-    embedded_list = File.embedded_list
-    name_key = 'accession'
-
-
-@collection(
-    name='files-microscopy',
-    unique_key='accession',
-    properties={
-        'title': 'Microscopy Files',
-        'description': 'Listing of Microscopy Files',
-    })
-class FileMicroscopy(ItemWithAttachment, File):
-    """Collection for individual microscopy files."""
-    item_type = 'file_microscopy'
-    schema = load_schema('encoded:schemas/file_microscopy.json')
-    embedded_list = File.embedded_list + [
-        "experiments.@type",
-        "experiments.imaging_paths.channel",
-        "experiments.imaging_paths.path",
-        "experiments.files.microscope_settings.ch00_light_source_center_wl",
-        "experiments.files.microscope_settings.ch01_light_source_center_wl",
-        "experiments.files.microscope_settings.ch02_light_source_center_wl",
-        "experiments.files.microscope_settings.ch03_light_source_center_wl",
-        "experiments.files.microscope_settings.ch00_lasers_diodes",
-        "experiments.files.microscope_settings.ch01_lasers_diodes",
-        "experiments.files.microscope_settings.ch02_lasers_diodes",
-        "experiments.files.microscope_settings.ch03_lasers_diodes"
-    ]
     name_key = 'accession'
 
 
@@ -1198,14 +792,14 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
-    tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    # create a tracking_item to track this download
-    tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
-                     'download_tracking': tracking_values}
-    try:
-        TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
-    except Exception as e:
-        log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
+    # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
+    # # create a tracking_item to track this download
+    # tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
+    #                  'download_tracking': tracking_values}
+    # try:
+    #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
+    # except Exception as e:
+    #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
@@ -1237,45 +831,6 @@ def download(context, request):
 
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
-
-
-def get_file_experiment_type(request, context, properties):
-    """
-    Get the string experiment_type value given a File context and properties.
-    Checks the source_experiments, rev_linked experiments and experiment_sets
-    """
-    # identify which experiments to use
-    experiments_using_file = []
-    if properties.get('source_experiments'):
-        experiments_using_file = properties['source_experiments']
-    else:
-        rev_exps = context.experiments(request)
-        if rev_exps:
-            experiments_using_file = rev_exps
-        elif hasattr(context, 'experiment_sets'):  # FileProcessed only
-            rev_exp_sets = context.experiment_sets(request)
-            if rev_exp_sets:
-                for exp_set in rev_exp_sets:
-                    exp_set_info = get_item_if_you_can(request, exp_set)
-                    if exp_set_info:
-                        experiments_using_file.extend(exp_set_info.get('experiments_in_set', []))
-    found_experiment_type = 'None'
-    for file_experiment in experiments_using_file:
-        exp_info = get_item_if_you_can(request, file_experiment)
-        if exp_info is None:
-            continue
-        exp_type = exp_info.get('experiment_type')
-        if found_experiment_type == 'None' or found_experiment_type == exp_type:
-            found_experiment_type = exp_type
-        else:  # multiple experiment types
-            return 'Integrative analysis'
-    if found_experiment_type != 'None':
-        found_item = get_item_if_you_can(request, found_experiment_type)
-        if found_item is None:
-            found_experiment_type = 'None'
-        else:
-            found_experiment_type = found_item.get('title')
-    return found_experiment_type
 
 
 def validate_file_format_validity_for_file_type(context, request):
