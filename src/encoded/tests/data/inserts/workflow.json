@@ -1,492 +1,124 @@
 [
     {
-        "arguments": [
+      "docker_image_name": "duplexa/4dn-hic:v42",
+      "category": [
+        "processing"
+      ],
+      "steps": [
+        {
+          "meta": {
+            "software_used": [
+              "10adeb1b-c46c-4ba8-b191-56036ddcd544"
+            ],
+            "analysis_step_types": [
+              "alignment"
+            ]
+          },
+          "name": "bwa-mem",
+          "inputs": [
             {
-                "argument_type": "Input file",
-                "workflow_argument_name": "input_fastq2"
+              "meta": {
+                "file_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+                "cardinality": "single",
+                "global": true,
+                "type": "data file"
+              },
+              "name": "fastq1",
+              "source": [
+                {
+                  "name": "fastq1"
+                }
+              ]
             },
             {
-                "argument_type": "Input file",
-                "workflow_argument_name": "input_fastq1"
+              "meta": {
+                "file_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+                "cardinality": "single",
+                "global": true,
+                "type": "data file"
+              },
+              "name": "fastq2",
+              "source": [
+                {
+                  "name": "fastq2"
+                }
+              ]
             },
             {
-                "argument_type": "Input file",
-                "workflow_argument_name": "bowtie_index"
-            },
-            {
-                "argument_type": "Input file",
-                "workflow_argument_name": "RE_bed"
-            },
-            {
-                "argument_type": "Input file",
-                "workflow_argument_name": "chrlen_file"
-            },
-            {
-                "argument_type": "parameter",
-                "workflow_argument_name": "contact_matrix_binsize"
-            },
-            {
-                "argument_type": "parameter",
-                "workflow_argument_name": "chromosome"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "sorted_bam_pe"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "HiC_project_object_hdf5"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "HiC_distance_function_hdf5"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "normalized_fend_contact_matrix"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "normalized_enrich_contact_matrix"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "expected_enrich_contact_matrix"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "observed_contact_matrix"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "expected_fend_contact_matrix"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "HiC_norm_binning_hdf5"
-            },
-            {
-                "argument_type": "Output processed file",
-                "workflow_argument_name": "HiC_data_object_hdf5"
+              "meta": {
+                "cardinality": "single",
+                "global": true,
+                "type": "parameter"
+              },
+              "name": "nThreads",
+              "source": [
+                {
+                  "name": "nThreads"
+                }
+              ]
             }
-        ],
-        "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0",
-        "experiment_types": [
-            "Hi-C"
-        ],
-        "description": "GITAR Hi-C data processing pipeline",
-        "name": "gitar",
-        "steps": [
+          ],
+          "outputs": [
             {
-                "inputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "fastq",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "input_fastq2",
-                        "source": [
-                            {
-                                "name": "input_fastq2"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "fastq",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "input_fastq1",
-                        "source": [
-                            {
-                                "name": "input_fastq1"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "reference file"
-                        },
-                        "name": "bowtie_index",
-                        "source": [
-                            {
-                                "name": "bowtie_index"
-                            }
-                        ]
-                    }
-                ],
-                "meta": {
-                    "analysis_step_types": [
-                        "alignment"
-                    ],
-                    "description": "Alignment according to the GITAR pipeline",
-                    "software_used": [
-                        "/softwares/10fb6080-1c08-11e4-8c21-0800200c9a66/"
-                    ]
-                },
-                "name": "hictool_fastq2bam",
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bam",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "sorted_bam_pe",
-                        "target": [
-                            {
-                                "name": "sorted_bam_pe"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bam",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "split_bam2",
-                        "target": [
-                            {
-                                "name": "input_bam2",
-                                "step": "hictool_bam2hdf5"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bam",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "split_bam1",
-                        "target": [
-                            {
-                                "name": "input_bam1",
-                                "step": "hictool_bam2hdf5"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "inputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bed",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "RE_bed",
-                        "source": [
-                            {
-                                "name": "RE_bed"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bam",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "split_bam2",
-                        "source": [
-                            {
-                                "name": "split_bam2",
-                                "step": "hictool_fastq2bam"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bam",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "split_bam1",
-                        "source": [
-                            {
-                                "name": "split_bam1",
-                                "step": "hictool_fastq2bam"
-                            }
-                        ]
-                    }
-                ],
-                "meta": {
-                    "analysis_step_types": [
-                        "file format conversion"
-                    ],
-                    "description": "Converting bam to hdf5 according to the GITAR pipeline",
-                    "software_used": [
-                        "/softwares/10fb6080-1c08-11e4-8c21-0800200c9a66/"
-                    ]
-                },
-                "name": "hictool_bam2hdf5",
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "HiC_project_object_hdf5",
-                        "target": [
-                            {
-                                "name": "HiC_project_object_hdf5"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "HiC_distance_function_hdf5",
-                        "target": [
-                            {
-                                "name": "HiC_distance_function_hdf5"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "fend_object_hdf5",
-                        "target": [
-                            {
-                                "name": "fend_object_hdf5",
-                                "step": "hictool_hdf52matrix"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "HiC_norm_binning_hdf5",
-                        "target": [
-                            {
-                                "name": "HiC_norm_binning_hdf5",
-                                "step": "hictool_hdf52matrix"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "HiC_data_object_hdf5",
-                        "target": [
-                            {
-                                "name": "HiC_data_object_hdf5",
-                                "step": "hictool_hdf52matrix"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "inputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "reference file"
-                        },
-                        "name": "chrlen_file",
-                        "source": [
-                            {
-                                "name": "chrlen_file"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "matrix",
-                            "global": true,
-                            "type": "parameter"
-                        },
-                        "name": "contact_matrix_binsize",
-                        "source": [
-                            {
-                                "name": "contact_matrix_binsize"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "global": true,
-                            "type": "parameter"
-                        },
-                        "name": "chromosome",
-                        "source": [
-                            {
-                                "name": "chromosome"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "fend_object_hdf5",
-                        "source": [
-                            {
-                                "name": "fend_object_hdf5",
-                                "step": "hictool_bam2hdf5"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "HiC_norm_binning_hdf5",
-                        "source": [
-                            {
-                                "name": "HiC_norm_binning_hdf5",
-                                "step": "hictool_bam2hdf5"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "hdf5",
-                            "global": false,
-                            "type": "data file"
-                        },
-                        "name": "HiC_data_object_hdf5",
-                        "source": [
-                            {
-                                "name": "HiC_data_object_hdf5",
-                                "step": "hictool_bam2hdf5"
-                            }
-                        ]
-                    }
-                ],
-                "meta": {
-                    "analysis_step_types": [
-                        "normalization"
-                    ],
-                    "description": "Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
-                    "software_used": [
-                        "/softwares/10fb6080-1c08-11e4-8c21-0800200c9a66/"
-                    ]
-                },
-                "name": "hictool_hdf52matrix",
-                "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "matrix",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "normalized_fend_contact_matrix",
-                        "target": [
-                            {
-                                "name": "normalized_fend_contact_matrix"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "matrix",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "normalized_enrich_contact_matrix",
-                        "target": [
-                            {
-                                "name": "normalized_enrich_contact_matrix"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "matrix",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "expected_enrich_contact_matrix",
-                        "target": [
-                            {
-                                "name": "expected_enrich_contact_matrix"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "matrix",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "observed_contact_matrix",
-                        "target": [
-                            {
-                                "name": "observed_contact_matrix"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "matrix",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "expected_fend_contact_matrix",
-                        "target": [
-                            {
-                                "name": "expected_fend_contact_matrix"
-                            }
-                        ]
-                    }
-                ]
+              "meta": {
+                "file_format": "bam",
+                "cardinality": "single",
+                "global": true,
+                "type": "data file"
+              },
+              "target": [
+                {
+                  "name": "out_bam"
+                }
+              ],
+              "name": "out_bam"
             }
-        ],
-        "title": "GITAR",
-        "uuid": "10a60edf-49e5-4c33-afab-9ec90d65faf3",
-        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
-        "institution": "hms-dbmi",
-        "submitted_by": "koray_kirli@hms.harvard.edu"
+          ]
+        }
+      ],
+      "uuid": "10eedadc-50f9-4bb4-919b-09a8b731d0cc",
+      "description": "Creating a lossless alignment bam file from a pair of fastq files",
+      "version_upgrade_log": "use of official release of bwa",
+      "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+      "arguments": [
+        {
+          "workflow_argument_name": "fastq1",
+          "argument_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+          "description": "",
+          "argument_type": "Input file"
+        },
+        {
+          "workflow_argument_name": "fastq2",
+          "argument_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+          "description": "",
+          "argument_type": "Input file"
+        },
+        {
+          "workflow_argument_name": "nThreads",
+          "argument_type": "parameter"
+        },
+        {
+          "workflow_argument_name": "out_bam",
+          "argument_format": "103d06cf-218e-4f61-aaf0-91f226248b3c",
+          "argument_type": "Output processed file"
+        }
+      ],
+
+      "workflow_language": "CWL",
+      "app_version": "0.2.6",
+      "title": "Alignment for Hi-C using bwa-mem 0.2.6",
+      "docker_registry_url": "https://hub.docker.com/",
+      "accession": "GAPWF84NFOQP",
+      "name": "bwa-mem",
+      "schema_version": "7",
+      "app_name": "bwa-mem",
+      "cwl_pointer": "",
+      "cwl_directory_url_draft3": "",
+      "cwl_main_filename": "bwa-mem.cwl",
+      "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+      "status": "released",
+      "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+      "institution": "hms-dbmi",
+      "submitted_by": "koray_kirli@hms.harvard.edu"
     }
 ]

@@ -1,29 +1,49 @@
 [
-{
-    "uuid": "10a60edf-50e6-4c33-afab-1ec10d65faf4",
-    "run_platform":"AWSEM",
-    "run_status":"complete",
-    "output_files": [
+    {
+      "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+      "institution": "hms-dbmi",
+      "submitted_by": "koray_kirli@hms.harvard.edu",
+      "status": "released",
+      "title": "bwa-mem 0.2.6 run 2019-08-22 21:03:51.321318",
+      "run_platform": "AWSEM",
+      "parameters": [
         {
-            "workflow_argument_name": "normalized_fend_contact_matrix",
-            "value": "10002377-49e5-4c33-afab-9ec90d65faf3"
+          "workflow_argument_name": "nThreads",
+          "ordinal": 1,
+          "dimension": "0",
+          "value": "16"
         }
-    ],
-    "input_files": [
+      ],
+      "schema_version": "3",
+      "awsem_job_id": "7vycNIiSxQEx",
+      "output_files": [
         {
-            "workflow_argument_name": "input_fastq1",
-            "value": "10e82a90-49e5-4c33-afab-9ec90d65faa0"
+          "workflow_argument_name": "out_bam",
+          "upload_key": "10002377-49e5-4c33-afab-9ec90d65faf3/GAPFIFYGNO9R.bam",
+          "value": "10002377-49e5-4c33-afab-9ec90d65faf3",
+          "type": "Output processed file",
+          "format": "/file-formats/bam/"
+        }
+      ],
+      "metadata_only": false,
+      "workflow": "3feedadc-50f9-4bb4-919b-09a8b731d0cc",
+      "awsem_postrun_json": "https://s3.amazonaws.com/tibanna-output/7vycNIiSxQEx.postrun.json",
+      "run_status": "complete",
+      "uuid": "102c722e-ac0d-43b5-8f24-70b353cb7de5",
+      "awsem_app_name": "bwa-mem",
+      "input_files": [
+        {
+          "workflow_argument_name": "fastq1",
+          "ordinal": 1,
+          "dimension": "0",
+          "value": "10e82a90-49e5-4c33-afab-9ec90d65faa0"
         },
         {
-            "workflow_argument_name": "input_fastq2",
-            "value": "10e82a90-49e5-4c33-afab-9ec90d65faa1"
+          "workflow_argument_name": "fastq2",
+          "ordinal": 1,
+          "dimension": "0",
+          "value": "10e82a90-49e5-4c33-afab-9ec90d65faa1"
         }
-    ],
-    "workflow": "10a60edf-49e5-4c33-afab-9ec90d65faf3",
-    "awsem_job_id": "aleuryvaieuyv",
-    "awsem_app_name": "gitar",
-    "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
-    "institution": "hms-dbmi",
-    "submitted_by": "koray_kirli@hms.harvard.edu"
-}
+      ]
+    }
 ]
