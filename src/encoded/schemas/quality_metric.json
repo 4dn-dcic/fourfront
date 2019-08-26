@@ -1,0 +1,39 @@
+{
+    "title" : "Quality Metric",
+    "description": "Schema for reporting the specific calculation of an quality metrics",
+    "id": "/profiles/quality_metric.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases"],
+    "properties": {
+        "overall_quality_status": {
+            "description": "Overall QC decision",
+            "title" : "Overall Quality",
+            "type": "string",
+            "enum": [
+                "PASS",
+                "FAIL",
+                "WARN"
+            ],
+            "default": "PASS"
+        },
+        "url": {
+            "type": "string",
+            "title" : "Link to Report",
+            "description": "Location of the main html file",
+            "format": "uri"
+        }
+    },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
+    "columns": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    }
+}
