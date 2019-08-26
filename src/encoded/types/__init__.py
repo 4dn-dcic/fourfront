@@ -241,9 +241,7 @@ class Phenotype(Item):
         'associated_disorders': ('Disorder', 'associated_phenotypes')
     }
     embedded_list = [
-        'associated_disorders.term_name',
-        'associated_disorders.term_id',
-        'associated_disorders.associated_genes'
+        'associated_disorders.disorder_id'
     ]
 
     @calculated_property(schema={

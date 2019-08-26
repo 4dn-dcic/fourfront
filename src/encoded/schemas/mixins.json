@@ -71,7 +71,7 @@
             "title": "Status",
             "exclude_from": ["submit4dn"],
             "type": "string",
-            "default": "in review by lab",
+            "default": "in review",
             "permission": "import_items",
             "enum": [
                 "current",
