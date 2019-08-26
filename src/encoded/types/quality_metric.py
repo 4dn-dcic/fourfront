@@ -21,19 +21,6 @@ qc class, and update the value. If you implement it for a class with existing it
 to trigger the update with empty patches."""
 
 
-@collection(
-    name='quality-metric-flags',
-    properties={
-        'title': 'Quality Metric Flags'
-    })
-class QualityMetricFlag(Item):
-    """Quality Metrics Flag class."""
-
-    item_type = 'quality_metric_flag'
-    schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded_list = ['award.project', 'quality_metrics.overall_quality_status']
-
-
 @abstract_collection(
     name='quality-metrics',
     acl=ALLOW_SUBMITTER_ADD,
@@ -88,89 +75,6 @@ class QualityMetricBamcheck(QualityMetric):
         # set name based on what is entered into title
         properties['overall_quality_status'] = overall
         super(QualityMetricBamcheck, self)._update(properties, sheets)
-
-
-@collection(
-    name='quality-metrics-bamqc',
-    properties={
-        'title': 'BamQC Quality Metrics',
-        'description': 'Listing of BamQC Quality Metrics',
-    })
-class QualityMetricBamqc(QualityMetric):
-    """Subclass of quality matrics for bam files."""
-
-    item_type = 'quality_metric_bamqc'
-    schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
-    embedded_list = QualityMetric.embedded_list
-
-
-@collection(
-    name='quality-metrics-pairsqc',
-    properties={
-        'title': 'PairsQC Quality Metrics',
-        'description': 'Listing of PairsQC Quality Metrics',
-    })
-class QualityMetricPairsqc(QualityMetric):
-    """Subclass of quality matrics for pairs files."""
-
-    item_type = 'quality_metric_pairsqc'
-    schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
-    embedded_list = QualityMetric.embedded_list
-
-
-@collection(
-    name='quality-metrics-dedupqc-repliseq',
-    properties={
-        'title': 'Dedup QC Quality Metrics for Repli-seq',
-        'description': 'Listing of Dedup QC Quality Metrics for Repli-seq',
-    })
-class QualityMetricDedupqcRepliseq(QualityMetric):
-    """Subclass of quality matrics for repli-seq dedup."""
-
-    item_type = 'quality_metric_dedupqc_repliseq'
-    schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
-    embedded_list = QualityMetric.embedded_list
-
-
-@collection(
-    name='quality-metrics-chipseq',
-    properties={
-        'title': 'QC Quality Metrics for ChIP-seq',
-        'description': 'Listing of QC Quality Metrics for ChIP-seq',
-    })
-class QualityMetricChipseq(QualityMetric):
-    """Subclass of quality matrics for chip-seq"""
-
-    item_type = 'quality_metric_chipseq'
-    schema = load_schema('encoded:schemas/quality_metric_chipseq.json')
-    embedded_list = QualityMetric.embedded_list
-
-
-@collection(
-    name='quality-metrics-atacseq',
-    properties={
-        'title': 'QC Quality Metrics for ATAC-seq',
-        'description': 'Listing of QC Quality Metrics for ATAC-seq',
-    })
-class QualityMetricAtacseq(QualityMetric):
-    """Subclass of quality matrics for atac-seq"""
-
-    item_type = 'quality_metric_atacseq'
-    schema = load_schema('encoded:schemas/quality_metric_atacseq.json')
-    embedded_list = QualityMetric.embedded_list
-
-
-@collection(
-    name='quality-metrics-margi',
-    properties={
-        'title': 'QC Quality metrics for MARGI',
-        'description': 'Listing of QC Quality Metrics for MARGI.',
-    })
-class QualityMetricMargi(QualityMetric):
-    """Subclass of quality matrics for MARGI"""
-    item_type = 'quality_metric_margi'
-    schema = load_schema('encoded:schemas/quality_metric_margi.json')
-    embedded_list = QualityMetric.embedded_list
 
 
 @collection(

@@ -14,6 +14,7 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "mixinFacets" : [

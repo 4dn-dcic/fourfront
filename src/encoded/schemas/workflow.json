@@ -4,7 +4,7 @@
     "id": "/profiles/workflow.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "name",  "project", "institution"],
+    "required": ["title", "name", "project", "institution"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "accession"],
     "mixinProperties": [
@@ -16,6 +16,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "mixins.json#/accession" }
     ],
     "mixinFacets" : [

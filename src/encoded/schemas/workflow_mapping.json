@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "mixins.json#/status" }
     ],
     "properties": {
