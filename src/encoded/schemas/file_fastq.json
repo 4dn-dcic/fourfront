@@ -1,0 +1,143 @@
+{
+    "title": "FASTQ file",
+    "description": "Raw DNA sequncing file details and file in fastq.gz format.",
+    "id": "/profiles/file_fastq.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["file_format", "award", "lab"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/badges" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "file.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"},
+        { "$ref": "mixins.json#/facets_common" },
+        { "$ref": "mixins.json#/facets_aggregated_badges"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "2"
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "default": "reads",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": [
+                "reads",
+                "genomic reads",
+                "iPCR reads",
+                "cDNA reads"
+            ]
+        },
+        "file_classification": {
+            "title": "General Classification",
+            "type": "string",
+            "default": "raw file",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": [
+                "raw file"
+              ]
+        },
+        "extra_files": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "read_length": {
+            "title": "Sequencing Read Length (bp)",
+            "description": "Length of sequencing reads in base pairs for fastq files",
+            "type": "integer",
+            "lookup": 40
+        },
+        "instrument": {
+            "title": "Sequencer",
+            "description": "Instrument used for sequencing",
+            "type": "string",
+            "lookup": 50,
+            "internal_comment": "should this be a controlled CV with enum, or another object?"
+        },
+        "paired_end": {
+            "title": "Paired End Identifier",
+            "description": "Which pair the file belongs to (if paired end library)",
+            "type": "string",
+            "lookup": 30,
+            "enum": [
+                "1",
+                "2"
+            ]
+        },
+        "flowcell_details": {
+            "title": "Flowcells",
+            "description": "For high-throughput sequencing, the flowcells used for the sequencing of the replicate.",
+            "type": "array",
+            "items": {
+                "title": "Flowcell details",
+                "type": "object",
+                "required": ["machine"],
+                "additionalProperties": true,
+                "properties": {
+                    "machine": {
+                        "title": "Machine Name",
+                        "description": "The lab specific name of the machine used.",
+                        "type": "string",
+                        "lookup": 61
+                    },
+                    "flowcell": {
+                        "title": "Flowcell ID",
+                        "type": "string",
+                        "lookup": 62
+                    },
+                    "lane": {
+                        "title": "Lane",
+                        "type": "string",
+                        "lookup": 63
+                    },
+                    "barcode": {
+                        "title": "Barcode",
+                        "type": "string",
+                        "lookup": 64
+                    },
+                    "barcode_in_read": {
+                        "title": "Barcode in Read",
+                        "description": "The read the barcode is located on.",
+                        "type": "string",
+                        "lookup": 65,
+                        "enum": [
+                            "1",
+                            "2"
+                        ]
+                    },
+                    "barcode_position": {
+                        "title": "Barcode Position",
+                        "description": "The 1-based start position of the barcode in 5->3 orientation.",
+                        "type": "integer",
+                        "lookup": 66
+                    },
+                    "chunk": {
+                        "title": "Chunk",
+                        "description": "The file chunk label as assigned by Illumina software when splitting up a fastq into specified chunk sizes.",
+                        "comment": "This label is used to re-assemble the chunks into the original file in the correct order.",
+                        "type": "string",
+                        "lookup": 67
+                    }
+                }
+            }
+        }
+    }
+}

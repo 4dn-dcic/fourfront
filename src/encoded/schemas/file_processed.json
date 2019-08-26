@@ -1,0 +1,131 @@
+{
+    "title": "Processed file from workflow runs",
+    "description": "Files produced by 4DN pipelines.",
+    "id": "/profiles/file_processed.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["file_format", "award", "lab"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "file.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "3"
+        },
+        "higlass_uid": {
+            "title": "Higlass UID",
+            "type": "string"
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "suggested_enum": [
+                "read pairs",
+                "alignments",
+                "unfiltered alignments",
+                "contact list",
+                "contact list-replicate",
+                "contact list-combined",
+                "contact matrix",
+                "normalized contact matrix",
+                "long range chromatin interactions",
+                "intensity values",
+                "peaks",
+                "image",
+                "locus distances, submitter format",
+                "dot calls",
+                "compartments",
+                "insulation score - diamond",
+                "insulation score - potential",
+                "other",
+                "domains",
+                "boundaries",
+                "loci distances",
+                "counts",
+                "normalized counts",
+                "lads",
+                "coordinates",
+                "juicebox norm vector",
+                "read positions",
+                "spt results",
+                "conservative peaks",
+                "signal fold change",
+                "segregation table"
+            ]
+        },
+        "file_classification": {
+            "title": "General Classification",
+            "type": "string",
+            "default": "processed file",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": ["processed file"]
+        },
+         "source_experiments": {
+             "title": "Source Experiments",
+             "description": "Experiments that this file is associated with",
+             "type": "array",
+             "lookup": 40,
+             "exclude_from": ["submit4dn"],
+             "items": {
+                 "title": "Source Experiment",
+                 "type": "string"
+             }
+        },
+        "genome_assembly": {
+            "title": "Genome Assembly",
+            "description": "The genome assembly associated with the file - for processing or reference",
+            "type": "string",
+            "lookup": 30,
+            "enum": [
+                "GRCh38",
+                "GRCm38",
+                "dm6",
+                "galGal5"
+            ]
+        },
+        "produced_from": {
+            "title": "Produced From",
+            "description": "Files that were input in a software or pipeline to produce this file",
+            "type": "array",
+            "lookup": 35,
+            "items": {
+                "title": "Input File",
+                "type": "string"
+            }
+        },
+        "disable_wfr_inputs": {
+            "title": "Disable wfr inputs field",
+            "description": "Do not compute workflow_run_inputs field for files used as control",
+            "type": "boolean",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        }
+     },
+    "facets" : {
+        "workflow_run_inputs.workflow.title" : {
+            "title" : "Input of Workflow"
+        },
+        "workflow_run_outputs.workflow.title" : {
+            "title" : "Output of Workflow"
+        }
+    }
+}

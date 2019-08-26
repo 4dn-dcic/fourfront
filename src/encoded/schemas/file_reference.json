@@ -1,0 +1,75 @@
+{
+    "title": "Reference file",
+    "description": "Files used in pipelines as references.",
+    "id": "/profiles/file_reference.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["file_format", "award", "lab"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/tags" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "file.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "file.json#/facets"}
+    ],
+    "mixinColumns": [
+        { "$ref": "file.json#/columns"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "2"
+        },
+        "higlass_uid": {
+            "title": "Higlass UID",
+            "type": "string"
+        },
+        "file_type": {
+            "title": "File Type",
+            "description": "The type of file based on the information in the file.",
+            "enum": [
+                "genome reference",
+                "genome index",
+                "index",
+                "barcodes",
+                "oligo sequences",
+                "restriction sites",
+                "blacklisted regions",
+                "repeats",
+                "spike-in",
+                "other"
+            ]
+        },
+        "file_classification": {
+            "title": "General Classification",
+            "type": "string",
+            "default": "ancillary file",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "enum": ["ancillary file"]
+        },
+        "genome_assembly": {
+            "title": "Genome Assembly",
+            "description": "The genome assembly associated with the file - for processing or reference",
+            "type": "string",
+            "lookup": 30,
+            "enum": [
+                "GRCh38",
+                "GRCm38",
+                "dm6",
+                "galGal5"
+            ]
+        }
+    }
+}
