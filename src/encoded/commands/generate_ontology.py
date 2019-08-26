@@ -575,7 +575,8 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
 
         for tid, term in use_terms.items():
             if tid not in terms:
-                if not term.get('source_ontologies') or not [o in term['source_ontologies'] for o in ontids]:
+                source_onts = [so.get('uuid') for so in term['source_ontologies']]
+                if not source_onts or not [o for o in ontids if o in source_onts]:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
                 dbuid = term['uuid']
