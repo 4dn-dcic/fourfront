@@ -11,14 +11,10 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
-        { "$ref": "mixins.json#/release_dates" },
-        { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/static_embeds" }
+        { "$ref": "mixins.json#/attribution" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" }
