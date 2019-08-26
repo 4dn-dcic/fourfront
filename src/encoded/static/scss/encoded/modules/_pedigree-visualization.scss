@@ -236,7 +236,7 @@ $pedigree-disease-colors :
                     g.text-box {
                         rect.bg-rect {
                             stroke: none;
-                            fill: $pedigree-viz-bg-color;
+                            fill: transparentize($pedigree-viz-bg-color, 0.25);
                         }
                     }
                 }

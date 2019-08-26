@@ -614,20 +614,23 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
         );
     });
     const relativeMidpoint = Math.floor(dims.individualWidth / 2);
+    const idMap = {};
 
-    function slideChildren(children, diff){
+    function slideChildren(children, diff, seenIndvs=null, skipPRs=null){
         const q = [...children];
-        const seen = {};
-        const seenPRs = {};
+        const seen = (seenIndvs && Object.assign({}, seenIndvs)) || {};
+        const seenPRs = (skipPRs && Object.assign({}, skipPRs)) || {};
         while (q.length){
             const child = q.shift();
             const { id, _drawing, _parentalRelationship, _childReferences } = child;
             if (seen[id]) continue;
             seen[id] = true;
             _drawing.xCoord += diff;
+            console.log("SLID", id, child.name, diff, _drawing.xCoord);
             if (_parentalRelationship && !seenPRs[_parentalRelationship.id]){
                 if (typeof _parentalRelationship._drawing.xCoord === 'number' && !seenPRs[_parentalRelationship.id]){
                     _parentalRelationship._drawing.xCoord += diff;
+                    console.log("SLID", _parentalRelationship.id, diff, _parentalRelationship._drawing.xCoord);
                 }
                 seenPRs[_parentalRelationship.id] = true;
             }
@@ -641,6 +644,7 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
                 q.push(ch);
             });
         }
+        return seen;
     }
 
     function boundsOfNodes(nodes){
@@ -678,10 +682,11 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
 
         individualsInRow.reduce(function(prevIndv, individual){
             const { _childReferences, _maritalRelationships, _drawing, id, name } = individual;
+            idMap[id] = individual;
             let offsetFromPrevIndv = null;
             if (prevIndv === null){
                 _drawing.xCoord = relativeMidpoint;
-                offsetFromPrevIndv = relativeMidpoint + dims.individualWidth + dims.individualXSpacing;
+                offsetFromPrevIndv = _drawing.xCoord;// + dims.individualWidth + dims.individualXSpacing;
                 console.log('DDD2', name, relativeMidpoint);
             } else {
                 // Stack to left
@@ -717,6 +722,8 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
 
                 console.log('DDD3', name, _drawing.xCoord, offsetFromPrevIndv, prevIndv);
             }
+            let prevNodeXCoord = _drawing.xCoord;
+            const seenChildren = {};
             _maritalRelationships.forEach(function(relationship){
                 const { children = [], partners = [] } = relationship;
                 if (typeof relationship._drawing.xCoord === 'number'){
@@ -737,7 +744,7 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
                     return;
                 }
 
-                relationship._drawing.xCoord = offsetFromPrevIndv;
+                relationship._drawing.xCoord = prevNodeXCoord + dims.individualWidth + dims.individualXSpacing; //offsetFromPrevIndv;
                 relationship._drawing.yCoord = yCoordByHeightIndex[_drawing.heightIndex];
 
                 if (isNaN(relationship._drawing.xCoord)){
@@ -753,23 +760,45 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
                 }
 
                 if (childrenWithAssignedXCoord.length > 0){
-                    relationship._drawing.xCoord = calculateMedianOfNodes(childrenWithAssignedXCoord);
+                    const median = calculateMedianOfNodes(childrenWithAssignedXCoord);
+                    relationship._drawing.xCoord = median;
+
+                    // Include extra dummy partner in calculation to make room for relationship node
+                    const partnerLen = Math.max(partners.length + 1, 3);
                     const leftParentMinXCoord = (
-                        relationship._drawing.xCoord
-                        - ((((partners.length + 1) * dims.individualWidth) + (partners.length * dims.individualXSpacing)) / 2)
+                        median
+                        - (((partnerLen * dims.individualWidth) + ((partnerLen - 1) * dims.individualXSpacing)) / 2)
                         + relativeMidpoint
                     );
                     if (leftParentMinXCoord >= _drawing.xCoord){
-                        // Move self up
+                        // Move self (individual) up
                         _drawing.xCoord = leftParentMinXCoord;
                     } else {
                         // We haven't moved, move children up.
                         const diff = _drawing.xCoord - leftParentMinXCoord;
-                        slideChildren(children, diff);
-                        // Gets handled in `slideChildren`: relationship._drawing.xCoord = calculateMedianOfNodes(children);
+                        // Skip children of relationships encountered in this loop before,
+                        // instead offset them a smaller amount - median + right bound
+                        const prevSeenChildren = Object.keys(seenChildren).map(function(id){
+                            return idMap[id];
+                        });
+                        if (prevSeenChildren.length > 0){
+                            const childRightBound = (
+                                // median +
+                                (((prevSeenChildren.length * dims.individualWidth) + ((prevSeenChildren.length - 1) * dims.individualXSpacing)) / 2)
+                            );
+                            slideChildren(prevSeenChildren, childRightBound, null, null);
+                        }
+                        Object.assign(
+                            seenChildren,
+                            slideChildren(children, diff, seenChildren, null)
+                        );
+                        //slideChildren(children, diff, null);
+                        // Gets handled in `slideChildren`: relationship._drawing.xCoord = median + diff;
                     }
                     console.log(leftParentMinXCoord);
                 }
+
+                prevNodeXCoord = relationship._drawing.xCoord;
 
                 console.log('DDD5', name, children.map(c => c._drawing.xCoord), relationship._drawing.xCoord,
                     _drawing.xCoord, calculateMedianOfNodes(children), offsetFromPrevIndv);

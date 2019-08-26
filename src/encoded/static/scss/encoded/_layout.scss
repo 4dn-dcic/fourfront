@@ -818,23 +818,7 @@ body .__react_component_tooltip {
     display: block;
     text-align: center;
 }
-.text-box {
-    padding: 12px 20px;
-    margin: 8px 0 8px;
-    box-sizing: border-box;
-    width: 70%;
-    border: 2px solid #b3b3b3 !important;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 14px;
-	font-family: $font-family-sans-serif;
-}
 
-.text-box:hover, .text-box:focus{
-	outline: none;
-	border: 2px solid #000000 !important;
-}
 
 .title{
     text-align: center;

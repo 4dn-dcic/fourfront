@@ -207,12 +207,10 @@ class AttachmentInputBtn extends React.PureComponent {
     render(){
         return(
             <React.Fragment>
-                <input id="test_pedigree" type="file" onChange={this.handleChange} className="d-none" accept="*/*"/>
-                <button type="button" className="btn btn-outline-dark" htmlFor="test_pedigree">
-                    <label className="text-400 mb-0" htmlFor="test_pedigree">
-                        Upload new pedigree
-                    </label>
-                </button>
+                <input id="test_pedigree" type="file" onChange={this.handleChange} className="d-none" accept="*/*" />
+                <label className="text-400 mb-0 btn btn-outline-dark" htmlFor="test_pedigree" tabIndex={0}>
+                    Upload new pedigree
+                </label>
             </React.Fragment>
         );
     }

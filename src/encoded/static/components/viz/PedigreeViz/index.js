@@ -51,7 +51,7 @@ const POSITION_DEFAULTS = {
     graphPadding: 60,
     relationshipSize: 40,
     edgeLedge: 40,
-    edgeCornerDiameter: 10
+    edgeCornerDiameter: 20
 };
 
 /**
@@ -149,6 +149,8 @@ export class PedigreeViz extends React.PureComponent {
             //{ id: 14, name: "Sally", gender: "f", parents: [12, 9] },
             //{ id: 15, name: "Sally2", gender: "f" },
             //{ id: 16, name: "Silly", gender: "m", parents: [15, 12] },
+            //{ id: 17, name: "Silly2", gender: "m", parents: [15, 12] },
+            //{ id: 18, name: "Silly3", gender: "f", parents: [16, 14] },
         ],
 
         /**
@@ -315,7 +317,7 @@ class GraphTransformer extends React.PureComponent {
         const order                 = this.memoized.orderObjectGraph(objectGraph, this.memoized);
         this.memoized.positionObjectGraph(objectGraph, order, dims);
         const graphHeight           = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
-        const edges = this.memoized.createEdges(objectGraph, dims, graphHeight);
+        const edges                 = this.memoized.createEdges(objectGraph, dims, graphHeight);
         console.log('TTT2', objectGraph, relationships, edges);
 
         const viewProps = {
@@ -449,7 +451,7 @@ export class PedigreeVizView extends React.PureComponent {
             vizAreaStyle.position = 'relative';
             vizAreaStyle.left = Math.max((containerWidth - graphWidth) / 2, 0);
             // Less top margin than bottom due to more labels at bottom.
-            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 3, 0);
+            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 2 - (dims.graphPadding / 2), 0);
         }
 
         const commonChildProps = {

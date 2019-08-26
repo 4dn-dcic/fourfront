@@ -221,28 +221,30 @@ export function createEdges(objectGraph, dims, graphHeight){
         edge.vertices = [edge.fromVertex, edge.toVertex];
     });
 
-    function trySubdivisions(subdivisions = 1){
-        if (subdivisions >= 2){
+    let visibilityGraph = computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, true);
+    let subdivisions = 1;
+    function trySubdivisions(){
+        if (subdivisions >= 3){
             console.error("Could not build a connecting path");
             //throw new Error("Could not build a connecting path");
             return;
         }
-        //try {
-            const visibilityGraph = computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, false, subdivisions);
+        try {
+            visibilityGraph = computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, false, subdivisions);
             tracePaths(adjustableEdges, visibilityGraph);
-        //} catch (e){
-        //    trySubdivisions(subdivisions + 1);
-        //}
+        } catch (e){
+            subdivisions++;
+            trySubdivisions();
+        }
     }
 
-    const visibilityGraphInitial = computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, true);
     try {
-        tracePaths(adjustableEdges, visibilityGraphInitial);
+        tracePaths(adjustableEdges, visibilityGraph);
     } catch (e){
         trySubdivisions();
     }
 
-    return { adjustableEdges, directEdges };
+    return { adjustableEdges, directEdges, visibilityGraph, subdivisions };
 }
 
 function manhattanDistance(fromV, toV){
@@ -254,9 +256,11 @@ function manhattanDistance(fromV, toV){
 
 /** Needs work - maybe along w. computeVisibilityGraph **/
 function tracePaths(adjustableEdges, visibilityGraph){
-    const { hSegments, vSegments } = visibilityGraph;
+    const {
+        hSegments,//: hSegmentQ,
+        vSegments//: vSegmentQ
+    } = visibilityGraph;
 
-    //const vertexQ = vertices.slice(0);
     const hSegmentQ = hSegments.slice(0);
     const vSegmentQ = vSegments.slice(0);
 
@@ -295,63 +299,6 @@ function tracePaths(adjustableEdges, visibilityGraph){
         throw new Error("No viable edges found.");
     }
 
-    /** @deprecated? */
-    function getNextEdgeFromQPriority(currV, targetV, skip=null, direction=null){
-        const hLen = hSegmentQ.length;
-        const vLen = vSegmentQ.length;
-        let i = 0;
-        let checkQ;
-        let bestEdgeFromQ = null;
-        let bestEdgePriorityCost = Infinity;
-        let bestV = null;
-        for (i = 0; i < (hLen + vLen); i++){
-            let checkIdx = i;
-            checkQ = hSegmentQ;
-            if (checkIdx >= hLen){
-                checkIdx -= hLen;
-                checkQ = vSegmentQ;
-            }
-            const edge = checkQ[checkIdx];
-            const v = getEdgeTargetV(currV, edge);
-            if (!v) continue;
-            if (skip && skip.has(edge)) continue;
-            const ownEdgeCost = manhattanDistance(...edge);
-            if (v[0] === targetV[0] && v[1] === targetV[1]){
-                return {
-                    costEst: ownEdgeCost,
-                    edge, v
-                };
-            }
-
-            const distCostEstimate = manhattanDistance(v, targetV) + ownEdgeCost;
-            let priorityCost = distCostEstimate; // TODO finish/fix
-            if (direction){
-                const edgeIsVertical = (edge[0][0] === edge[1][0]);
-                if (edgeIsVertical && direction === 'v') {
-                    priorityCost = distCostEstimate - (ownEdgeCost * 2);
-                } else if (!edgeIsVertical && direction === 'h'){
-                    priorityCost = distCostEstimate - (ownEdgeCost * 2);
-                }
-            }
-            //console.log('TTT', priorityCost, distCostEstimate, direction);
-
-            if (priorityCost < bestEdgePriorityCost){
-                bestEdgePriorityCost = priorityCost;
-                bestEdgeFromQ = edge;
-                bestV = v;
-            }
-        }
-        if (bestEdgeFromQ === null){
-            throw new Error("No viable edges found.");
-        }
-        return {
-            'costEst': bestEdgePriorityCost,
-            'edge': bestEdgeFromQ,
-            'v': bestV
-        };
-    }
-
-
     function computeDistance(initCurrV, targetV, edgeIndex=0){
 
         const vQueue = [{
@@ -378,14 +325,22 @@ function tracePaths(adjustableEdges, visibilityGraph){
                 const prevEdge2 = searchPath[searchPath.length - 2];
                 if (prevEdge1 && prevEdge2){
                     if (!(
-                        (prevEdge1[0][0] === prevEdge1[1][0] && prevEdge2[0][0] === prevEdge2[1][0])
-                        || (prevEdge1[0][1] === prevEdge1[1][1] && prevEdge2[0][1] === prevEdge2[1][1])
+                        (
+                            (prevEdge1[0][0] === v[0] || prevEdge1[1][0] === v[0]) &&
+                            prevEdge1[0][0] === prevEdge1[1][0] &&
+                            prevEdge2[0][0] === prevEdge2[1][0]
+                        ) || (
+                            (prevEdge1[0][1] === v[1] || prevEdge1[1][1] === v[1]) &&
+                            prevEdge1[0][1] === prevEdge1[1][1] &&
+                            prevEdge2[0][1] === prevEdge2[1][1]
+                        )
                     )){ // If not both vertical or horizontal
-                        costToTargetEstimate += 100;
+                        costToTargetEstimate = costToTargetEstimate * 1.5;
                     }
                 }
 
-                /* //todo ?
+                //todo ?
+                /*
                 let intersected = false;
                 for (let j = 0; j < edgeIndex; j++){
                     const prevAdjEdge = adjustableEdges[j];
@@ -393,7 +348,7 @@ function tracePaths(adjustableEdges, visibilityGraph){
                         const prevAdjEdgeV = prevAdjEdge.vertices[j2];
                         if (prevAdjEdgeV[0] === v[0] && prevAdjEdgeV[1] === v[1]){
                             // Intersection
-                            console.log("INTERSECTED", v);
+                            //console.log("INTERSECTED", v);
                             intersected = true;
                             break;
                         }
@@ -401,7 +356,7 @@ function tracePaths(adjustableEdges, visibilityGraph){
                     if (intersected) break;
                 }
                 if (intersected){
-                    costToTargetEstimate += 200;
+                    costToTargetEstimate += 1000;
                 }
                 */
 
@@ -418,7 +373,12 @@ function tracePaths(adjustableEdges, visibilityGraph){
         let iterations = 0;
         while (vQueue.length){
             const currArgs = getNextVQueueSet();
-            const { v: currV, searchPath: currSearchPath, pathLengthCost: currPathLengthCost, skip } = currArgs;
+            const {
+                v: currV,
+                searchPath: currSearchPath,
+                pathLengthCost: currPathLengthCost,
+                skip
+            } = currArgs;
 
             // TODO see if remembered dist <= than new, & update
 
@@ -497,149 +457,6 @@ function tracePaths(adjustableEdges, visibilityGraph){
         return { 'path': bestPathTotal, 'cost': bestPathTotalCost };
 
     }
-
-
-    function computeDistanceOld(currV, targetV, currSearchPath = [], currPathLengthCost = 0, maxCost = Infinity, skip = null, vPathsFound = null){
-        
-        skip = skip || new Set(currSearchPath);
-        vPathsFound = vPathsFound || new Map();
-        const cacheRes = vPathsFound.get(currV);
-        if (cacheRes){
-            return {
-                cost: currPathLengthCost + cacheRes.costToTarget,
-                path: cacheRes.costToTarget !== Infinity ? [].concat(currSearchPath).concat(cacheRes.pathToTarget) : null
-            };
-        }
-        if (currPathLengthCost > maxCost){
-            return {
-                cost: Infinity
-            };
-        }
-
-        if (currV[0] === 560 && currV[1] === 160){
-            console.log(
-                "GOTNEWWW", currV,
-                '\nDEPTH', currSearchPath.length,
-                '\nCOSTNOW', currPathLengthCost,
-                '\nOWNPATH', currSearchPath.map(function(e){ return e[0].join(',') + '-' + e[1].join(','); }),
-                '\nSKIP', [...skip.values()]
-            );
-        }
-
-        let bestPath = null;
-        let bestCost = Infinity;
-        let counter = 0;
-
-        while (true){
-            counter++;
-            if (counter > 3){ // Should go in 3 directions @ most (not away from target)
-                //console.log('PAST 100');
-                return { path: bestPath, cost: bestCost };
-            }
-            let prevDirection = null;
-            const prevEdge = currSearchPath[currSearchPath.length - 1];
-            if (prevEdge){
-                if (prevEdge[0][0] === prevEdge[1][0]){
-                    prevDirection = 'v';
-                } else {
-                    prevDirection = 'h';
-                }
-            }
-            let nextArgs;
-            try {
-                nextArgs = getNextEdgeFromQ(currV, targetV, skip, prevDirection);
-            } catch (e) {
-                //console.log('BREAK', counter);
-                break;
-            }
-            const { edge, v, costEst } = nextArgs;
-            if (v[0] === targetV[0] && v[1] === targetV[1]){
-                const retObj = {
-                    cost: currPathLengthCost + manhattanDistance(...edge),
-                    path: [].concat(currSearchPath).concat([edge])
-                };
-                console.log('Computed', retObj.cost, retObj.path);
-                return retObj;
-            }
-            skip.add(edge);
-            const foundShortest = computeDistance(
-                v,
-                targetV,
-                [].concat(currSearchPath).concat([edge]),
-                currPathLengthCost + manhattanDistance(...edge),
-                bestCost === Infinity ? manhattanDistance((currSearchPath[0] && currSearchPath[0][0]) || currV, targetV) * 3 : bestCost, //depth + 1,
-                new Set(skip),
-                vPathsFound
-            );
-            if (currV[0] === 560 && currV[1] === 160){
-                console.log(
-                    "GOT", currV,
-                    "\nTO", v,
-                    '\nDEPTH', currSearchPath.length,
-                    '\nGRAPHTRAVELCOST', foundShortest.cost,
-                    '\nESTCOST', costEst,
-                    '\nCOSTNOW', currPathLengthCost,
-                    '\nFOUNDPATH', foundShortest.path,
-                    '\nFUTUREPATH', foundShortest.path ? foundShortest.path.slice(currSearchPath.length) : null,
-                    '\nOWNPATH', currSearchPath,
-                    '\nSKIP', [...skip.values()]
-                );
-            }
-            if (foundShortest.path){
-                //console.log("got", foundShortest.cost, foundShortest.path, bestCost, currSearchPath.length);
-                if (foundShortest.cost < bestCost){
-                    bestCost = foundShortest.cost;
-                    bestPath = foundShortest.path;
-                }/* else if (foundShortest.cost === bestCost){
-                    let prevDirection = null;
-                    const prevEdge = currSearchPath[currSearchPath.length - 1];
-                    console.log('PREV', prevEdge, currV, v);
-                    if (prevEdge){
-                        if (prevEdge[0][0] === prevEdge[1][0]){
-                            prevDirection = 'v';
-                        } else {
-                            prevDirection = 'h';
-                        }
-                    }
-                    if (prevDirection) {
-                        const nextDirection = (currV[0] === v[0]) ? 'v' : 'h';
-                        if (nextDirection === prevDirection){
-                            bestCost = foundShortest.cost;
-                            bestPath = foundShortest.path;
-                        }
-                    }
-                }*/
-            }
-            //if (currV[0] === 240 && currV[1] === 320){
-            //    console.log("DIDD", edge, costEst);
-            //}
-        }
-        //console.log("SET", currV, bestCost - currPathLengthCost)
-        if (currV[0] === 560 && currV[1] === 160){
-            console.log(
-                "SET", currV,
-                '\nDEPTH', currSearchPath.length,
-                '\nGRAPHTRAVELCOST', bestCost,
-                //'\nESTCOST', costEst,
-                '\nCOSTNOW', currPathLengthCost,
-                '\nPATH', bestPath,
-                '\nFUTUREPATH', bestPath ? bestPath.slice(currSearchPath.length) : null,
-                '\nOWNPATH', currSearchPath,
-                '\nSKIP', [...skip.values()]
-            );
-        }
-        //if (bestCost !== Infinity){
-            vPathsFound.set(currV, {
-                'path': bestPath,
-                'cost': bestCost,
-                'pathToTarget' : bestCost !== Infinity ? bestPath.slice(currSearchPath.length) : null,
-                'costToTarget' : bestCost - currPathLengthCost
-            });
-        //}
-        //console.log('Returned', bestCost, bestPath, bestPath && bestPath.length);
-        return { 'path': bestPath, 'cost': bestCost };
-    }
-
 
     adjustableEdges.forEach(function(edge, edgeIndex){
         // We have 4 pts min in each due to edgeLedge
@@ -743,6 +560,8 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     const partIndXSpacing = dims.individualXSpacing / divCount;
     const partIndYSpacing = dims.individualYSpacing / divCount;
 
+    console.log('PART', partIndHeight, partIndYSpacing);
+
     graphHeight = graphHeight - (dims.graphPadding * 2);
     const graphWidth = getGraphWidth(objectGraph, dims) - (dims.graphPadding * 2);
 
@@ -760,6 +579,8 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
             [ xCoord + halfIndvWidth, yCoord - halfIndvHeight ], // TR
             [ xCoord + halfIndvWidth, yCoord + halfIndvHeight ]  // BR
         ];
+        // Hacky - arrays are instances of object.
+        indvVertices.obstacleType = "individual";
         boundingBoxes.push(indvVertices);
         const relationships = _maritalRelationships.slice(0);
         if (_parentalRelationship){
@@ -777,6 +598,7 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
                 [ xCoord + halfRelationSize, relationYCoord - halfRelationSize ], // TR
                 [ xCoord + halfRelationSize, relationYCoord + halfRelationSize ]  // BR
             ];
+            relationShipVertices.obstacleType = "relationship";
             boundingBoxes.push(relationShipVertices);
             //vertices = vertices.concat(relationShipVertices);
         });
@@ -861,9 +683,8 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     }
 
     const vertlineXCoords = [];
-    let xCoordToSave = 0;
-    let counter = 0;
-    let odd = true;
+    let xCoordToSave = -partIndWidth;
+    let counter = -1;
     while (xCoordToSave < graphWidth){
         // Make vert lines, split them into pieces
         if (counter % (2 * divCount) < divCount){ // Even
@@ -875,9 +696,9 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
         counter++;
     }
 
-    let yCoord = 0;
+    let yCoord = -partIndHeight;
     const horizLineYCoords = [];
-    counter = 0;
+    counter = -1;
     while (yCoord < graphHeight){
         // Make horiz lines, split them into pieces
         if (counter % (2 * divCount) < divCount){ // Even
@@ -886,7 +707,6 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
             yCoord += partIndYSpacing;
         }
         horizLineYCoords.push(yCoord);
-        odd = !odd;
         console.log('Y-', yCoord);
         let splits = new Set();
         const splitArrs = [];
@@ -918,13 +738,15 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
                     splits.add(bb[0][0]);
                     splits.add(bb[3][0]);
                 }
-                // Add edgeLedge splits
-                if (bb[0][0] - dims.edgeLedge >= 0){
-                    splits.add(bb[0][0] - dims.edgeLedge);
-                }
-                if (bb[3][0] + dims.edgeLedge <= graphHeight){
-                    splits.add(bb[3][0] + dims.edgeLedge);
-                }
+                // Add edgeLedge splits - somewhat custom logic indv vs relationship:
+                //if (bb.obstacleType === "individual"){
+                    if (bb[0][0] - dims.edgeLedge >= 0){
+                        splits.add(bb[0][0] - dims.edgeLedge);
+                    }
+                    if (bb[3][0] + dims.edgeLedge <= graphWidth){
+                        splits.add(bb[3][0] + dims.edgeLedge);
+                    }
+                //}
             }
         });
         //console.log('SPLITS1', splits, splitArrs);
@@ -955,6 +777,7 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
                 [graphWidth, yCoord]
             ]);
         }
+        counter++;
     }
 
     vertlineXCoords.forEach(function(xCoord){
