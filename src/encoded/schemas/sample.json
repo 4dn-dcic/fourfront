@@ -4,7 +4,7 @@
     "id": "/profiles/sample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": [ "project", "institution"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
