@@ -1,0 +1,20 @@
+[
+    {
+        "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+        "documentation_url": "https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf",
+        "name": "STAR",
+        "purpose": [
+            "Hi-C"
+        ],
+        "software_type": [
+            "aligner"
+        ],
+        "source_url": "https://github.com/alexdobin/STAR/releases",
+        "title": "STAR_2.5.1b",
+        "uuid": "10fb6080-1c08-11e4-8c21-0800200c9a66",
+        "version": "2.5.1b",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]

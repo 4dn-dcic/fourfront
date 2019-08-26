@@ -1,0 +1,29 @@
+[
+{
+    "uuid": "108c5e-4c52-4e51-bebe-8981b5855b6f",
+    "run_platform":"AWSEM",
+    "run_status":"complete",
+    "output_files": [
+        {
+            "workflow_argument_name": "normalized_fend_contact_matrix",
+            "value": "10002377-49e5-4c33-afab-9ec90d65faf3"
+        }
+    ],
+    "input_files": [
+        {
+            "workflow_argument_name": "input_fastq1",
+            "value": "10e82a90-49e5-4c33-afab-9ec90d65faa0"
+        },
+        {
+            "workflow_argument_name": "input_fastq2",
+            "value": "10e82a90-49e5-4c33-afab-9ec90d65faa1"
+        }
+    ],
+    "workflow": "10a60edf-49e5-4c33-afab-9ec90d65faf3",
+    "awsem_job_id": "aleuryvaieuyv",
+    "awsem_app_name": "gitar",
+    "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+    "institution": "hms-dbmi",
+    "submitted_by": "koray_kirli@hms.harvard.edu"
+}
+]

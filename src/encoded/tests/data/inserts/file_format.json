@@ -1,0 +1,36 @@
+[
+    {
+        "file_format": "fastq",
+        "standard_file_extension": "fastq.gz",
+        "other_allowed_extensions": ["fq.gz"],
+        "description": "This format is used for short read sequence data - more information can be found here https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/#fastq-files",
+        "uuid": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "released",
+        "valid_item_types": ["FileFastq"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "file_format": "bam",
+        "standard_file_extension": "bam",
+        "description": "This format is used for aligned reads",
+        "uuid": "103d06cf-218e-4f61-aaf0-91f226248b3c",
+        "status": "released",
+        "valid_item_types": ["FileProcessed"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "file_format": "txt",
+        "standard_file_extension": "txt",
+        "description": "This format is used for aligned reads",
+        "uuid": "103d06cf-218e-4f61-aaf0-91f226248b3d",
+        "status": "released",
+        "valid_item_types": ["FileProcessed", "FileReference"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]

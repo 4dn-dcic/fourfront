@@ -1,0 +1,11 @@
+[
+    {
+        "uuid": "10238bd1-7236-40b9-b2f3-80ca73e500e9",
+        "url": "someurl",
+        "Max CPU utilization": "99.8",
+        "overall_quality_status": "PASS",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]
