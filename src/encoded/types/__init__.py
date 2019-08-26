@@ -179,7 +179,7 @@ class Sample(Item):
 
 
 @collection(
-    name='disorderss',
+    name='disorders',
     properties={
         'title': 'Disorders',
         'description': 'Listing of Disorders',
@@ -188,9 +188,9 @@ class Disorder(Item):
     item_type = 'disorder'
     schema = load_schema('encoded:schemas/disorder.json')
     embedded_list = [
-        'associated_phenotypes.term_name',
-        'associated_phenotypes.term_id',
-        'associated_phenotypes.definition'
+        'associated_phenotypes.phenotype.term_name',
+        'associated_phenotypes.phenotype.term_id',
+        'associated_phenotypes.phenotype.definition'
     ]
 
     @calculated_property(schema={
