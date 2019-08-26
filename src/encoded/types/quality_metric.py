@@ -9,7 +9,7 @@ from snovault import (
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
-    lab_award_attribution_embed_list
+    # lab_award_attribution_embed_list
 )
 
 """OVERALL QAULITY SCORE INFO
@@ -46,7 +46,7 @@ class QualityMetric(Item):
     item_type = 'quality_metric'
     base_types = ['QualityMetric'] + Item.base_types
     schema = load_schema('encoded:schemas/quality_metric.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    embedded_list = Item.embedded_list  # + lab_award_attribution_embed_list
 
 
 @collection(
