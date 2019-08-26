@@ -8,7 +8,7 @@
         {
           "meta": {
             "software_used": [
-              "10adeb1b-c46c-4ba8-b191-56036ddcd544"
+              "02d636b9-d82d-4da9-950c-2ca994a13209"
             ],
             "analysis_step_types": [
               "alignment"
@@ -18,7 +18,7 @@
           "inputs": [
             {
               "meta": {
-                "file_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+                "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
                 "cardinality": "single",
                 "global": true,
                 "type": "data file"
@@ -32,7 +32,7 @@
             },
             {
               "meta": {
-                "file_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+                "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
                 "cardinality": "single",
                 "global": true,
                 "type": "data file"
@@ -83,13 +83,13 @@
       "arguments": [
         {
           "workflow_argument_name": "fastq1",
-          "argument_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+          "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
           "description": "",
           "argument_type": "Input file"
         },
         {
           "workflow_argument_name": "fastq2",
-          "argument_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+          "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
           "description": "",
           "argument_type": "Input file"
         },
@@ -99,7 +99,7 @@
         },
         {
           "workflow_argument_name": "out_bam",
-          "argument_format": "103d06cf-218e-4f61-aaf0-91f226248b3c",
+          "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
           "argument_type": "Output processed file"
         }
       ],
