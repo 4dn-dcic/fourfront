@@ -4,7 +4,7 @@
     "id": "/profiles/workflow_mapping.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-        "required": ["award", "lab"],
+        "required": [ "project", "institution"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
@@ -15,9 +15,7 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/static_embeds" }
+        { "$ref": "mixins.json#/status" }
     ],
     "properties": {
         "schema_version": {

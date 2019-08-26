@@ -20,7 +20,7 @@ from snovault import (
 )
 from .base import (
     Item,
-    lab_award_attribution_embed_list
+    # lab_award_attribution_embed_list
 )
 import cProfile
 import pstats
@@ -31,33 +31,33 @@ from time import sleep
 
 
 steps_run_data_schema = {
-    "type" : "object",
-    "properties" : {
-        "file" : {
-            "type" : "array",
-            "title" : "File(s)",
-            "description" : "File(s) for this step input/output argument.",
-            "items" : {
-                "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
-                "linkTo" : "File" # TODO: (Med/High Priority) Make this work. Will likely wait until after embedding edits b.c. want to take break from WF stuff and current solution works.
+    "type": "object",
+    "properties": {
+        "file": {
+            "type": "array",
+            "title": "File(s)",
+            "description": "File(s) for this step input/output argument.",
+            "items": {
+                "type": ["string", "object"],  # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
+                "linkTo": "File"  # TODO: (Med/High Priority) Make this work. Will likely wait until after embedding edits b.c. want to take break from WF stuff and current solution works.
             }
         },
-        "meta" : {
-            "type" : "array",
-            "title" : "Additional metadata for input/output file(s)",
-            "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal.",
-            "items" : {
-                "type" : "object"
+        "meta": {
+            "type": "array",
+            "title": "Additional metadata for input/output file(s)",
+            "description": "List of additional info that might be related to file, but not part of File Item itself, such as ordinal.",
+            "items": {
+                "type": "object"
             }
         },
-        "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
-            "title" : "Value",
-            "type" : "string",
-            "description" : "Value used for this output argument."
+        "value": {  # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
+            "title": "Value",
+            "type": "string",
+            "description": "Value used for this output argument."
         },
-        "type" : {
-            "type" : "string",
-            "title" : "I/O Type"
+        "type": {
+            "type": "string",
+            "title": "I/O Type"
         }
     }
 }
@@ -79,11 +79,11 @@ def get_unique_key_from_at_id(at_id):
 
 
 DEFAULT_TRACING_OPTIONS = {
-    'max_depth_history' : 9,
-    'max_depth_future' : 9,
-    "group_similar_workflow_runs" : True,
-    "track_performance" : False,
-    "trace_direction" : ["history"]
+    'max_depth_history': 9,
+    'max_depth_future': 9,
+    "group_similar_workflow_runs": True,
+    "track_performance": False,
+    "trace_direction": ["history"]
 }
 
 
@@ -173,19 +173,19 @@ def common_props_from_file(file_obj):
         if k in file_obj:
             ret_obj[k] = file_obj[k]
 
-    # For experiments and experiment sets, carry only the terminal expset @ids in as they are AJAXed in clientside.
-    # We don't need full representation
-    if 'experiment_sets' in file_obj:
-        ret_obj['experiment_sets'] = [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in file_obj['experiment_sets'] ]
-
-    if 'experiments' in file_obj:
-        ret_obj['experiments'] = []
-        for exp in file_obj['experiments']:
-            ret_obj['experiments'].append({
-                '@id' : exp['@id'],
-                'uuid' : exp['uuid'],
-                'experiment_sets' : [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in exp['experiment_sets'] ]
-            })
+    # # For experiments and experiment sets, carry only the terminal expset @ids in as they are AJAXed in clientside.
+    # # We don't need full representation
+    # if 'experiment_sets' in file_obj:
+    #     ret_obj['experiment_sets'] = [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in file_obj['experiment_sets'] ]
+    #
+    # if 'experiments' in file_obj:
+    #     ret_obj['experiments'] = []
+    #     for exp in file_obj['experiments']:
+    #         ret_obj['experiments'].append({
+    #             '@id' : exp['@id'],
+    #             'uuid' : exp['uuid'],
+    #             'experiment_sets' : [ { '@id' : es['@id'], 'uuid' : es['uuid'] } for es in exp['experiment_sets'] ]
+    #         })
 
     return ret_obj
 
@@ -662,7 +662,7 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = workflow_schema
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + [
         'steps.name',
         'steps.inputs',
         'steps.outputs',
@@ -673,7 +673,7 @@ class Workflow(Item):
         'arguments.argument_type',
         'arguments.argument_format',
         'arguments.workflow_argument_name'
-    ]
+    ]  # + lab_award_attribution_embed_list
     rev = {
         'newer_versions': ('Workflow', 'previous_version')
     }
@@ -704,9 +704,9 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+    embedded_list = Item.embedded_list + [
         'workflow.category',
-        'workflow.experiment_types',
+        # 'workflow.experiment_types',
         'workflow.app_name',
         'workflow.title',
         'workflow.steps.name',
@@ -740,7 +740,7 @@ class WorkflowRun(Item):
         'output_files.value.status',
         'output_files.value_qc.url',
         'output_files.value_qc.overall_quality_status'
-    ]
+    ]  # + lab_award_attribution_embed_list
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
     def steps(self, request):
@@ -817,7 +817,7 @@ class WorkflowRun(Item):
                     # Contains things like dimension, ordinal, file_format, and so forth.
                     meta_dict = { k:v for (k,v) in io_dict.items() if k not in [ 'value', 'value_qc', 'type', 'workflow_argument_name' ] }
                     # There is a chance we do not have the file_format in the input_files list. Most often this would occur if multiple
-                    # files in input argument list 
+                    # files in input argument list
                     meta_list.append(meta_dict)
 
                 step_io_arg['run_data'] = {
@@ -903,7 +903,7 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    embedded_list = Item.embedded_list  # + lab_award_attribution_embed_list
 
 
 def validate_input_json(context, request):
