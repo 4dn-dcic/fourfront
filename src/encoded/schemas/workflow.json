@@ -1,0 +1,521 @@
+{
+    "title": "Workflow",
+    "description": "Schema for submitting a computational analysis workflow that is composed of analysis step(s).",
+    "id": "/profiles/workflow.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["title", "name", "award", "lab"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases", "accession"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/static_embeds" }
+    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "7"
+        },
+        "accession": {
+            "accessionType": "WF"
+        },
+        "title": {
+            "title": "Title",
+            "description": "The preferred viewable name of the workflow.",
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "description": "The name and version of the workflow used by either SBG or Tibanna, in the format of name/version",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short text description of the workflow.",
+            "type": "string",
+            "formInput": "textarea"
+        },
+        "experiment_types": {
+            "title": "Experiment types",
+            "description": "Types of the experiment that the workflow is applied to.",
+            "type": "array",
+            "items": {
+                "title": "Experiment type",
+                "description": "type of experiment that the workflow is applied to",
+                "type": "string"
+            }
+        },
+        "category": {
+            "title": "Category",
+            "description": "A short text description of the workflow's category.",
+            "type": "array",
+            "items": {
+                "title": "Category",
+                "description": "the workflow's category",
+                "type": "string",
+                "enum" : [
+                    "processing",
+                    "QC",
+                    "format conversion",
+                    "feature calling",
+                    "miscellaneous",
+                    "provenance"
+                ],
+                "default": "processing"
+            }
+        },
+        "cwl_pointer": {
+            "title": "SBG CWL Path",
+            "description": "Path to the SBG CWL file for the workflow - URL or directory path",
+            "type": "string"
+        },
+        "app_name": {
+            "title": "App name",
+            "description": "The name of the workflow app.",
+            "type": "string"
+        },
+        "app_version": {
+            "title": "App version",
+            "description": "The version of the workflow app.",
+            "type": "string"
+        },
+        "previous_version": {
+            "title": "Previous versions",
+            "description": "Link to the previous versions of the workflow.",
+            "type": "array",
+            "items": {
+                "title": "Previous version",
+                "description": "Link to a previous version of the workflow.",
+                "type": "string",
+                "linkTo": "Workflow"
+            }
+        },
+        "version_upgrade_log": {
+            "title": "Version upgrade log",
+            "description": "Version upgrade log",
+            "type": "string"
+        },
+        "cwl_directory_url": {
+            "title": "CWL directory url",
+            "description": "URL of the directory that contains main and other CWL files needed for the workflow",
+            "type": "string"
+        },
+        "cwl_directory_url_draft3": {
+            "title": "CWL directory url for CWL draft3",
+            "description": "URL of the directory that contains main and other CWL files needed for the workflow",
+            "type": "string"
+        },
+        "cwl_directory_url_v1": {
+            "title": "CWL directory url for CWL v1.0",
+            "description": "URL of the directory that contains main and other CWL files needed for the workflow",
+            "type": "string"
+        },
+        "cwl_main_filename": {
+            "title": "CWL main file name",
+            "description": "Name of the main CWL file for the workflow",
+            "type": "string"
+        },
+        "cwl_child_filenames": {
+            "title": "CWL child file names",
+            "description": "Names of the other CWL files used by the main CWL file for the workflow",
+            "type": "array",
+            "items": {
+                "title": "CWL child file name",
+                "description": "name of a cwl file",
+                "type": "string"
+            }
+        },
+        "wdl_directory_url": {
+            "title": "WDL directory url",
+            "description": "URL of the directory that contains main and other WDL files needed for the workflow",
+            "type": "string"
+        },
+        "wdl_main_filename": {
+            "title": "WDL main file name",
+            "description": "Name of the main WDL file for the workflow",
+            "type": "string"
+        },
+        "wdl_child_filenames": {
+            "title": "WDL child file names",
+            "description": "Names of the other WDL files used by the main WDL file for the workflow",
+            "type": "array",
+            "items": {
+                "title": "WDL child file name",
+                "description": "name of a wdl file",
+                "type": "string"
+            }
+        },
+        "workflow_language": {
+            "title": "Workflow language",
+            "description": "Language used to describe workflow, either CWL or WDL",
+            "type": "string",
+            "enum": [
+                "CWL",
+                "WDL"
+            ],
+            "default": "CWL"
+        },
+        "docker_registry_url": {
+            "title": "Docker Registry URL",
+            "description": "Docker Hub or 7 bridges registry URL.",
+            "type": "string",
+            "format": "uri"
+        },
+        "docker_image_name": {
+            "title": "Image Name",
+            "description": "The name of the image that is downloaded",
+            "type": "string"
+        },
+        "arguments": {
+            "title": "Workflow Arguments",
+            "description": "arguments of the workflow.",
+            "type": "array",
+            "exclude_from": ["FFedit-create"],
+            "items": {
+                "title": "argument",
+                "description": "An argument of the workflow.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Name",
+                        "description": "Name of the argument of the workflow.",
+                        "type": "string"
+                    },
+                    "alternative_conditional_argument_names": {
+                        "title": "Alternative Conditional Argument Names",
+                        "description": "Alternative argument names, in case argument names may vary depending on condition",
+                        "type": "array",
+                        "items": {
+                             "title": "Alternative Conditional Argument Name",
+                             "description": "An alternative argument name, in case argument names may vary depending on condition",
+                             "type": "string"
+                        }
+                    },
+                    "secondary_file_formats": {
+                        "title": "secondary file formats",
+                        "description": "formats for secondary files",
+                        "type": "array",
+                        "items": {
+                             "title": "secondary_file_format",
+                             "description": "formats for secondary file",
+                             "type": "string",
+                             "linkTo": "FileFormat"
+                        }
+                    },
+                    "is_primaryfile": {
+                        "title": "Is Primary File",
+                        "description": "Flag indicating whether the argument is a primary or secondary file. Not applicable for types other than Input file and Output processed file.",
+                        "type": "boolean"
+                    },
+                    "linkto_primaryfile": {
+                        "title": "Primary File",
+                        "description": "Primary file that is related to this argument. Applicable only for Input file and Output processed file that is not a primary file.",
+                        "type": "string",
+                        "linkTo": "File"
+                    },
+                    "argument_type":{
+                        "title": "Type",
+                        "description": "Argument Type",
+                        "type": "string",
+                        "suggested_enum" : [
+                            "Input file",
+                            "Output processed file",
+                            "Output QC file",
+                            "Output report file",
+                            "Output to-be-extra-input file",
+                            "parameter",
+                            "NA"
+                        ]
+                    },
+                    "argument_format":{
+                        "title": "Format",
+                        "description": "Argument Format",
+                        "type": "string",
+                        "linkTo": "FileFormat",
+                        "suggested_enum" : [
+                            "fastq",
+                            "bam",
+                            "bai",
+                            "pairs",
+                            "pairsam",
+                            "pairs_px2",
+                            "pairsam_px2",
+                            "cool",
+                            "mcool",
+                            "hic",
+                            "bwaIndex",
+                            "chromsizes",
+                            "reference_fasta",
+                            "juicer_format_restriction_site_file",
+                            "normvector_juicerformat",
+                            "zip",
+                            "other"
+                        ]
+                    },
+                    "argument_to_be_attached_to": {
+                        "title": "Argument To Be Attached To",
+                        "description": "Argument to be attached to, for qc files and input extra files",
+                        "type": "string"
+                    },
+                    "qc_zipped": {
+                        "title": "QC Zipped",
+                        "description": "Name of QC file if in .zip format",
+                        "type": "boolean"
+                    },
+                    "qc_html": {
+                        "title": "QC Html",
+                        "description": "Name of QC file if in .html format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_json": {
+                        "title": "QC Json",
+                        "description": "Name of QC file if in .json format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_table": {
+                        "title": "QC table",
+                        "description": "Name of QC file if in a tab-delimited text format, either as it is or in the zipped file",
+                        "type": "boolean"
+                    },
+                    "qc_zipped_html": {
+                        "title": "QC Zipped Html",
+                        "description": "Name of QC html file in the zipped file",
+                        "type": "string"
+                    },
+                    "qc_zipped_tables": {
+                        "title": "QC Zipped Tables",
+                        "description": "Names or suffices of QC table files in the zipped file",
+                        "type": "array",
+                        "items": {
+                             "title": "QC Datafile",
+                             "description": "Name or suffix of QC table file in the zipped file",
+                             "type": "string"
+                        }
+                    },
+                    "qc_type": {
+                        "title": "QC Type",
+                        "description": "QC object type inherited from quality_metric to be used to represent QC",
+                        "type": "string"
+                    },
+                    "to_be_unzippped": {
+                        "title": "to_be_unzipped",
+                        "description": "unzip program if the file must be unzipped before workflow run",
+                        "type": "string",
+                        "enum": [
+                            "gzip",
+                            "bz2"
+                        ]
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Argument Description",
+                        "type": "string"
+                    },
+                    "notes": {
+                        "description": "internal notes",
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "steps" : {
+            "title": "Workflow Steps",
+            "type": "array",
+            "exclude_from": ["FFedit-create"],
+            "items": {
+                "title": "Step",
+                "type": "object",
+                "additionalProperties": true,
+                "properties": {
+                    "name" : {
+                        "title" : "Step Name",
+                        "description" : "Unique name (or other identifier) of step within this Workflow.",
+                        "type" : "string"
+                    },
+                    "inputs" : {
+                        "title" : "Step Inputs",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Input Name",
+                                    "type" : "string"
+                                },
+                                "meta" : {
+                                    "type" : "object",
+                                    "title" : "Additional metadata for input argument",
+                                    "description" : "Additional info that might be relavent to the input argument itself, such as argument_cardinality.",
+                                    "additionalProperties": true,
+                                    "properties": {
+                                        "type" : {
+                                            "title" : "Input Type",
+                                            "type" : "string",
+                                            "enum": [
+                                                "data file",
+                                                "report",
+                                                "QC",
+                                                "parameter",
+                                                "reference file"
+                                            ]
+                                        },
+                                        "file_format" : {
+                                            "title" : "File Format",
+                                            "type" : "string",
+                                            "linkTo": "FileFormat"
+                                        },
+                                        "cardinality" : {
+                                            "title" : "Cardinality",
+                                            "type" : "string",
+                                            "enum" : ["single", "array"]
+                                        },
+                                        "global" : {
+                                            "title" : "Global Argument",
+                                            "type" : "boolean"
+                                        },
+                                        "notes": {
+                                            "description": "internal notes",
+                                            "type": "string"
+                                        }
+                                    }
+                                },
+                                "source" : {
+                                    "title" : "Source Step",
+                                    "description" : "Where this input file came from.",
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : { "type" : "string" },
+                                            "type" : { "type" : "string" },
+                                            "step" : { "type" : "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "outputs" : {
+                        "title" : "Step Outputs",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "name" : {
+                                    "title" : "Output Name",
+                                    "type" : "string"
+                                },
+                                "meta" : {
+                                    "type" : "object",
+                                    "title" : "Additional metadata for output argument",
+                                    "description" : "Additional info that might be relavent to the output argument itself, such as argument_cardinality."
+                                },
+                                "target" : {
+                                    "title" : "Target Step",
+                                    "description" : "Where this output file should go next.",
+                                    "type" : "array",
+                                    "items" : {
+                                        "type" : "object",
+                                        "properties" : {
+                                            "name" : { "type" : "string" },
+                                            "type" : { "type" : "string" },
+                                            "step" : { "type" : "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "meta" : {
+                        "type" : "object",
+                        "title" : "Step Metadata",
+                        "description" : "Various properties which might be a subset of the Item represented by this step, e.g. uuid, @type, workflow, etc.",
+                        "additionalProperties" : true,
+                        "properties" : {
+                            "software_used": {
+                                "title": "Software Used",
+                                "description": "List of References to Software Used",
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "title": "Software Used",
+                                  "description": "Reference to Software Used",
+                                  "linkTo" : "Software"
+                                }
+                            },
+                            "@id" : {
+                                "title" : "Unique identifier of Item in database represented by this step node. If present, will be loaded in via AJAX upon node click.",
+                                "type" : "string"
+                            },
+                            "analysis_step_types" : {
+                                "title" : "Step Purposes",
+                                "description": "List of step purposes which may be shown above the Node in Workflow graphs.",
+                                "type" : "array",
+                                "items" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "facets" : {
+        "category": {
+            "title": "Workflow Category"
+        },
+        "experiment_types": {
+            "title": "Experiment Type",
+            "comment" : "TODO: Update to `experiment_types.display_title` once becomes a linkTo"
+        },
+        "steps.meta.analysis_step_types" : {
+            "title" : "Analysis Step Type"
+        },
+        "steps.inputs.meta.file_format.display_title" : {
+            "title" : "Input File Format"
+        },
+        "steps.outputs.meta.file_format.display_title" : {
+            "title" : "Output File Format"
+        },
+        "workflow_language" : {
+            "title" : "Workflow Language"
+        }
+    },
+    "columns" : {
+        "category": {
+            "title": "Workflow Category",
+            "colTitle": "Category",
+            "default_hidden" : true
+        },
+        "experiment_types": {
+            "title": "Experiment Types",
+            "comment" : "TODO: Update to `experiment_types.display_title` once becomes a linkTo"
+        },
+        "app_name": {
+            "title": "App Name"
+        },
+        "app_version": {
+            "title": "App Version",
+            "colTitle" : "App Ver."
+        },
+        "workflow_language" : {
+            "title" : "Workflow Language",
+            "colTitle" : "Lang.",
+            "default_hidden" : true
+        }
+    }
+}

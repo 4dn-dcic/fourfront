@@ -1,0 +1,152 @@
+{
+    "title": "Workflow Mapping",
+    "description": "A mapping table used for creating workflow run from workflow.",
+    "id": "/profiles/workflow_mapping.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+        "required": ["award", "lab"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/static_embeds" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "name": {
+            "title": "Mapping Table name",
+            "description": "Name of the workflow table.",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the workflow table.",
+            "type": "string",
+            "formInput": "textarea"
+        },
+        "workflow_name": {
+            "title": "Mapping Table name",
+            "description": "Name of the workflow table.",
+            "type": "string"
+        },
+        "workflow": {
+            "title": "Workflow ID",
+            "description": "uuid or alias for workflow",
+            "type": "string",
+            "linkTo": "Workflow"
+        },
+        "data_input_type": {
+            "title": "Type of input data",
+            "type": "string",
+            "enum" : [
+                "file",
+                "fileset",
+                "experiment",
+                "experimentset"
+            ]
+        },
+        "workflow_parameters": {
+            "title": "Workflow Parameters",
+            "description": "The parameters that are used by the workflow",
+            "type": "array",
+            "items": {
+                "title": "Workflow Parameter",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "parameter": {
+                        "title": "Parameter name",
+                        "description": "the name of the parameter",
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Short description of the parameter",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "a specified value for the specified parameter",
+                        "type": "string"
+                    },
+                    "file_link": {
+                        "title": "File link",
+                        "description": "Link to file object",
+                        "type": "string",
+                        "linkTo": "File"
+                    }
+                }
+            }
+        },
+        "experiment_parameters": {
+            "title": "Experiment Parameters",
+            "description": "The experiment parameters that are defining the input data",
+            "type": "array",
+            "items": {
+                "title": "Experiment Parameter",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "parameter": {
+                        "title": "Parameter name",
+                        "description": "the name of the parameter",
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Short description of the parameter",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "a specified value for the specified parameter",
+                        "type": "string"
+                    },
+                    "file_link": {
+                        "title": "File link",
+                        "description": "Link to file object",
+                        "type": "string",
+                        "linkTo": "File"
+                    }
+                }
+            }
+        },
+        "additional_workflow_mapping_details": {
+            "title": "Additional worflow mapping table details",
+            "description": "Additional metadata for the mapping table",
+            "type": "array",
+            "items": {
+                "title": "Extra Parameter",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "parameter": {
+                        "title": "Parameter name",
+                        "description": "the name of the parameter",
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Short description of the parameter",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "a specified value for the specified parameter",
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    }
+}
