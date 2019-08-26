@@ -10,7 +10,7 @@ def workflow_run_1():
         "award": "1U01CA200059-01",
         "workflow": "c77a117b-9a58-477e-aaa5-291a109a99f6",
         "run_status": "complete",
-        "status": "in review by lab",
+        "status": "in review",
         "metadata_only": True,
         "input_files": [
             {
@@ -69,7 +69,7 @@ def workflow_run_2(quality_metric_fastqc, file_fastq):
         "award": "1U01CA200059-01",
         "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
         "run_status": "complete",
-        "status": "in review by lab",
+        "status": "in review",
         "metadata_only": True,
         "input_files": [
             {

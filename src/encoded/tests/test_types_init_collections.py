@@ -195,7 +195,7 @@ def download_tracking(testapp, download_tracking_item_data):
 @pytest.fixture
 def jupyterhub_session_tracking_data():
     return {
-        "status": "in review by lab",
+        "status": "in review",
         "tracking_type": "jupyterhub_session",
         "jupyterhub_session": {
             "date_initialized": "2019-05-09T05:11:56.389876+00:00",

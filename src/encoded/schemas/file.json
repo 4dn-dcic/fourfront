@@ -121,21 +121,22 @@
                     "status": {
                         "title": "Status",
                         "type": "string",
-                        "exclude_from": ["submit4dn"],
                         "default": "uploading",
                         "enum" : [
                             "uploading",
                             "uploaded",
                             "upload failed",
-                            "deleted",
-                            "replaced",
-                            "revoked",
-                            "archived",
-                            "pre-release",
+                            "to be uploaded by workflow",
+                            "current",
                             "released",
+                            "replaced",
                             "released to project",
-                            "archived to project",
-                            "to be uploaded by workflow"
+                            "released to institution",
+                            "in public review",
+                            "in review",
+                            "obsolete",
+                            "inactive",
+                            "deleted"
                         ]
                     }
                 }
