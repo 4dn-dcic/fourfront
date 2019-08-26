@@ -13,7 +13,7 @@ def custom_experiment_set_data(lab, award):
         'award': award['@id'],
         'description': 'test experiment set',
         'experimentset_type': 'custom',
-        'status': 'in review by lab'
+        'status': 'in review'
     }
 
 
@@ -29,7 +29,7 @@ def replicate_experiment_set_data(lab, award):
         'award': award['@id'],
         'description': 'test replicate set',
         'experimentset_type': 'replicate',
-        'status': 'in review by lab'
+        'status': 'in review'
     }
 
 
@@ -164,7 +164,7 @@ def test_experiment_set_default_embedded_list(registry, exp_types):
     from snovault import TYPES
     exp_data = {
         'experiment_type': exp_types['microc']['uuid'],
-        'status': 'in review by lab'
+        'status': 'in review'
     }
     # create experimentHiC obj; _update (and by extension, add_default_embeds)
     # are called automatically

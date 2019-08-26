@@ -1,0 +1,32 @@
+[
+    {
+        "aliases": ["cgap:testfq1"],
+        "accession":"GAPFIO67APU1",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "file_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+        "uuid": "10e82a90-49e5-4c33-afab-9ec90d65faa0",
+        "status": "released",
+        "filename": "test_file1.fastq.gz",
+        "paired_end": "1",
+        "content_md5sum": "4012ee7a157cd60a9969dcf68d4a5732",
+        "md5sum": "bc80aabb3ad8264da7307185dfe9fab1",
+        "quality_metric": "109dabc6-61d6-4054-a951-c4fdd0023800",
+        "file_size" : 23523523
+    },
+    {
+        "aliases": ["cgap:testfq2"],
+        "accession":"GAPFIO67APT1",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "file_format": "103d06cf-218e-4f61-aaf0-91f226248b2c",
+        "uuid": "10e82a90-49e5-4c33-afab-9ec90d65faa1",
+        "status": "released",
+        "filename": "test_file2.fastq.gz",
+        "related_files": [{"relationship_type": "paired with", "file": "cgap:testfq1"}],
+        "paired_end": "2",
+        "file_size" : 5434000534634
+    }
+]

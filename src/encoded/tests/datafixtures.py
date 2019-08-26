@@ -395,7 +395,7 @@ def experiment_set(testapp, lab, award):
         'lab': lab['@id'],
         'award': award['@id'],
         'experimentset_type': 'replicates',
-        'status': 'in review by lab'
+        'status': 'in review'
     }
     return testapp.post_json('/experiment_set', item).json['@graph'][0]
 
@@ -415,7 +415,7 @@ def experiment_data(lab, award, human_biosample, mboI, exp_types):
         'biosample': human_biosample['@id'],
         'experiment_type': exp_types['hic']['@id'],
         'digestion_enzyme': mboI['@id'],
-        'status': 'in review by lab'
+        'status': 'in review'
     }
 
 
@@ -763,7 +763,7 @@ def human_biosample(testapp, human_biosource, lab, award):
     item = {
         "description": "GM12878 prepared for Hi-C",
         "biosource": [human_biosource['@id'], ],
-        "status": "in review by lab",
+        "status": "in review",
         'award': award['@id'],
         'lab': lab['@id']
         # "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],

@@ -4,7 +4,7 @@
     "id": "/profiles/sample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": [ "project", "institution"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -14,6 +14,8 @@
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/supplementary_files" },
+        { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "mixins.json#/accession"}
     ],
     "properties": {
@@ -61,6 +63,50 @@
         "sequence_id": {
             "title": "Sequence Identifier",
             "type": "string"
+        },
+        "protocol": {
+            "title": "Reference Protocol",
+            "description": "Reference Protocol Document.",
+            "type": "string",
+            "lookup": 50,
+            "linkTo": "Protocol"
+        },
+        "files": {
+            "title": "Data Files",
+            "description": "Information about the data files associated with the experiment.",
+            "type": "array",
+            "lookup": 13,
+            "items": {
+                "title": "File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "File"
+            }
+        },
+        "processed_files": {
+            "title": "Processed Files",
+            "description": "Processed files that are derived from files in this experiment.",
+            "type": "array",
+            "lookup": 400,
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "items": {
+                "title": "Processed File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileProcessed"
+            }
+        },
+        "reference_files": {
+            "title": "Reference Files",
+            "description": "Reference files associated with this experiment (ex. file of sequencing barcodes).",
+            "type": "array",
+            "lookup": 415,
+            "items": {
+                "title": "Reference File",
+                "description": "File metadata.",
+                "type": "string",
+                "linkTo": "FileReference"
+            }
         }
     }
 }

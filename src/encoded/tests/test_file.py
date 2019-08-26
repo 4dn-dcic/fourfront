@@ -191,7 +191,7 @@ def test_range_download(testapp, registry, proc_file_json):
     tracking_items = [ti_coll.get(id) for id in ti_coll]
     # ensure some basic fields are on the tracking items
     for ti in tracking_items:
-        assert ti.properties['status'] == 'in review by lab'
+        assert ti.properties['status'] == 'in review'
         assert 'schema_version' in ti.properties
         assert 'date_created' in ti.properties
     tracked_rng_filenames = [ti.properties.get('download_tracking', {}).get('filename') for ti in tracking_items
@@ -1067,7 +1067,7 @@ def custom_experiment_set_data(lab, award):
         'award': award['@id'],
         'description': 'test experiment set',
         'experimentset_type': 'custom',
-        'status': 'in review by lab'
+        'status': 'in review'
     }
 
 
