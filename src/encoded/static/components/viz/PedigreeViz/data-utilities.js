@@ -254,18 +254,28 @@ export function findNodeWithId(objectGraph, id){
     return null;
 }
 
+export function isRelationship(node){
+    const { partners, children, _maritalRelationships, _parentalRelationship } = node;
+    if (!_maritalRelationships && !_parentalRelationship && (Array.isArray(partners) || Array.isArray(children))) {
+        return true;
+    }
+    return false;
+}
+
 /**
  * Assumes a perfectly correct bidirectional graph/tree with all related IDs present.
  * First item in `jsonList` param assumed to be the proband.
+ * Re-orders list to be proband-centric.
  * Maybe in future support 'limbs' to non-present relative(s)?
  *
  * @param {{ id: string, children: string[], parents: string[] }[]} jsonList List of individuals to connect.
  */
-export function createObjectGraph(jsonList){
+export function createObjectGraph(jsonList, filterUnrelatedIndividuals = false){
+    const individualsLength = jsonList.length;
     const idObjMap = {};
     const resultList = [];
 
-    jsonList.forEach(function(indvidual){
+    const remainingIndividuals = new Set(jsonList.map(function(indvidual){
         const { id } = indvidual;
         // Using number isn't advisable as JS obj key (gets converted to str anyway) but is likely..
         if (typeof id !== 'string' && typeof id !== 'number'){
@@ -274,32 +284,87 @@ export function createObjectGraph(jsonList){
         if (idObjMap[id]){
             throw new Error("ID already encountered - " + id);
         }
-        idObjMap[id] = Object.assign({}, indvidual); // Clone
-    });
+        // Clone new references, save to idObjMap for faster lookups.
+        idObjMap[id] = Object.assign({}, indvidual);
+        return idObjMap[id];
+    }));
 
-    Object.keys(idObjMap).forEach(function(id){
-        const individual = idObjMap[id];
-        const { parents: parentIDs = [], children: childIDs = [] } = individual;
-        individual._parentReferences = [];
-        parentIDs.forEach(function(parentID){
-            const parentObj = idObjMap[parentID];
-            if (!parentObj){
-                throw new Error("Parent with ID \"" + parentID + "\" not found on individual \"" + id + "\".");
+    function getNextRemainingIndividual(){
+        for (let i = 0; i < individualsLength; i++){
+            const { id } = jsonList[i];
+            const individual = idObjMap[id];
+            if (remainingIndividuals.has(individual)){
+                return individual;
             }
-            individual._parentReferences.push(parentObj);
-        });
-        individual._childReferences = [];
-        childIDs.forEach(function(childID){
-            const childObj = idObjMap[childID];
-            if (!childObj){
-                throw new Error("Child with ID \"" + childID + "\" not found on individual \"" + id + "\".");
-            }
-            individual._childReferences.push(childObj);
-        });
-        resultList.push(individual);
-    });
+        }
+        return null;
+    }
 
-    return resultList;
+
+    const currIndvQ = [];
+    let disconnectedIndividuals = null;
+    let counter = 0;
+
+    while (remainingIndividuals.size > 0){
+        // Start with proband (first item in list)
+        // or first remaining item after proband b added.
+        currIndvQ.push(getNextRemainingIndividual());
+        if (counter > 100) {
+            throw new Error("Found 100+ disconnected-from-proband individuals. Exiting.");
+        }
+        if (counter > 0) {
+            disconnectedIndividuals = [...remainingIndividuals];
+            if (filterUnrelatedIndividuals){
+                // Remove/note any unattached-to-proband-items & exit.
+                console.error("Found " + disconnectedIndividuals.length + " disconnected-from-proband individuals.", disconnectedIndividuals);
+                break;
+            }
+        }
+        counter++;
+        while (currIndvQ.length > 0){
+            const individual = currIndvQ.shift();
+
+            // Already seen/added
+            if (!remainingIndividuals.has(individual)){
+                continue;
+            }
+            remainingIndividuals.delete(individual);
+
+            const { parents: parentIDs = [], children: childIDs = [] } = individual;
+
+            individual._parentReferences = [];
+            parentIDs.forEach(function(parentID){
+                const parentObj = idObjMap[parentID];
+                if (!parentObj){
+                    throw new Error("Parent with ID \"" + parentID + "\" not found on individual \"" + id + "\".");
+                }
+                individual._parentReferences.push(parentObj);
+                currIndvQ.unshift(parentObj);
+            });
+
+            individual._childReferences = [];
+            childIDs.forEach(function(childID){
+                const childObj = idObjMap[childID];
+                if (!childObj){
+                    throw new Error("Child with ID \"" + childID + "\" not found on individual \"" + id + "\".");
+                }
+                individual._childReferences.push(childObj);
+                currIndvQ.push(childObj);
+            });
+
+
+            // Add to return list in order encountered when tracing from proband.
+            resultList.push(individual);
+        }
+
+        console.log("RESULT B", resultList, jsonList, disconnectedIndividuals);
+    }
+
+    return {
+        objectGraph: resultList,
+        disconnectedIndividuals,
+        connectedGroupCount: counter
+    };
 }
 
 
@@ -313,7 +378,9 @@ export function createRelationships(objectGraph, sepVal = '\t'){
         idMap[id] = individual;
 
         if (_parentReferences.length === 1){
-            throw new Error("Expected 2(+) parents for individual " + id);
+            const errorMsg = "Expected 2(+) parents for individual " + id;
+            //throw new Error(errorMsg);
+            console.error(errorMsg);
         }
 
         individual._maritalRelationships = [];

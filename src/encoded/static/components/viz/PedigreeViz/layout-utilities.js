@@ -1,12 +1,14 @@
 import { getGraphHeight } from './layout-utilities-drawing';
-import { getRelationships } from './data-utilities';
+import { getRelationships, isRelationship } from './data-utilities';
 
 
 
 /** Should already have relationships */
 export function assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals = false){
 
-    const unassignedIDs = new Set(objectGraph.map(function(og){ return og.id; })); // Will return this
+    const unassignedIDs = new Set(objectGraph.map(function(og){
+        return og.id;
+    }));
     const visitedRelationships = new Set();
 
     function performAssignments(q){
@@ -18,6 +20,7 @@ export function assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals 
                 _drawing : { heightIndex },
                 id
             } = individual;
+
             if (!unassignedIDs.has(id)){
                 continue;
             }
@@ -59,54 +62,22 @@ export function assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals 
         }
     }
 
-    const proband = objectGraph[0];
-    proband._drawing = { heightIndex : 0 };
-
-    // Step 1 - assign to individuals starting from proband (1st item in list)
-    performAssignments([ proband ]);
-
-    // Step 2 - Handly any unattached-to-proband-items
-    const unassignedIDsOrigArr = [...unassignedIDs];
-    console.log("UNASSIGNED", unassignedIDsOrigArr, objectGraph, objectGraph.map(function(indv){ return indv._drawing; }));
-    if (unassignedIDs.size > 0){
-        if (filterUnrelatedIndividuals){
-            // Remove any unattached-to-proband-items
-            const removedIndividuals = [];
-            let i = 0;
-            while (i < objectGraph.length){
-                const checkIndv = objectGraph[i];
-                if (typeof (checkIndv._drawing && checkIndv._drawing.heightIndex) !== 'number'){
-                    console.error(checkIndv.id + " is not related to proband, removing.");
-                    objectGraph.splice(i, 1);
-                    removedIndividuals.push(checkIndv);
-                    continue;
-                }
-                i++;
-            }
-            if (removedIndividuals.length > 0){
-                console.error("Found individuals which are not related to proband, removing:", removedIndividuals);
-            }
-        } else {
-            // Assign any unattached-to-proband-items
-            while (unassignedIDs.size > 0){
-                // This shouldn't happen a lot so we iterate over obj graph instead
-                // of making lookup dict of id:individual
-                for (let i = 0; i < objectGraph.length; i++){
-                    if (unassignedIDs.has(objectGraph[i].id)){
-                        const nextUnassignedIndv = objectGraph[i];
-                        console.error("FOUND AN INDIVIDUAL NOT RELATED TO PROBAND", nextUnassignedIndv);
-                        nextUnassignedIndv._drawing = { heightIndex : 0 };
-                        performAssignments([ nextUnassignedIndv ]);
-                        break;
-                    }
-                }
+    // Assign to individuals starting from proband (1st item in list)
+    // Handle any lingering-unattached-to-proband individuals by assigning them 0.
+    while (unassignedIDs.size > 0){
+        let nextUnassignedIndv;
+        for (let i = 0; i < objectGraph.length; i++){
+            if (unassignedIDs.has(objectGraph[i].id)){
+                nextUnassignedIndv = objectGraph[i];
+                break;
             }
         }
+        nextUnassignedIndv._drawing = { heightIndex : 0 };
+        performAssignments([ nextUnassignedIndv ]);
     }
 
 
-    // Step 3 -
-    // ensure each relationship is on same height index as lowest heightIndex of partners
+    // Ensure each relationship is on same height index as lowest heightIndex of partners
     // Then that all children are at that index or lower.
 
     function moveLower(rel, maxHeightIdx = null, seen = null){
@@ -245,7 +216,7 @@ export function assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals 
         });
     }
 
-    return unassignedIDsOrigArr;
+    return objectGraph;
 }
 
 
@@ -426,32 +397,73 @@ export function getMaxHeightIndex(objectGraph){
 }
 
 
-function initOrdering(objectGraph, startIndividuals = null, nextProperty = "_childReferences", stack = false, memoized = {}){
+function initOrdering(objectGraph, startIndividuals = null, direction = "children", stack = false, memoized = {}){
     const q = startIndividuals.slice(0);
     if (!stack){
         q.reverse();
     }
+
     const orderByHeightIndex = []; // 2D
     const maxHeightIndex = (memoized.getMaxHeightIndex || getMaxHeightIndex)(objectGraph);
     for (let i = 0; i <= maxHeightIndex; i++){
         orderByHeightIndex[i] = [];
     }
-    const seenOrderInIndex = {};
-    while (q.length){
-        const individual = q.pop();
-        const { id, _drawing : { heightIndex } } = individual;
-        if (typeof seenOrderInIndex[id] !== "undefined") continue;
+
+    function addToQ(indv){
+        if (stack){
+            q.push(indv);
+        } else {
+            q.unshift(indv);
+        }
+    }
+
+    function assignOrder(node){
+        const { id, _drawing : { heightIndex } } = node;
         const orderAssignedInIndex = orderByHeightIndex[heightIndex].length;
         seenOrderInIndex[id] = orderAssignedInIndex;
-        orderByHeightIndex[heightIndex].push(individual);
-        const nextIndvsToQueue = individual[nextProperty];
-        nextIndvsToQueue.forEach(function(nextIndv){
-            if (stack){
-                q.push(nextIndv);
-            } else {
-                q.unshift(nextIndv);
+        orderByHeightIndex[heightIndex].push(node);
+    }
+
+    const seenOrderInIndex = {};
+    const seenIndvs = [];
+    while (true){
+        while (q.length){
+            const individual = q.pop();
+            const {
+                id,
+                _drawing : { heightIndex },
+                _maritalRelationships = [],
+                _parentalRelationship = null
+            } = individual;
+            if (typeof seenOrderInIndex[id] !== "undefined") continue;
+            assignOrder(individual);
+            seenIndvs.push(individual);
+
+            if (direction === "parents" && _parentalRelationship){
+                if (typeof seenOrderInIndex[_parentalRelationship.id] === "undefined"){
+                    assignOrder(_parentalRelationship);
+                    _parentalRelationship.partners.forEach(addToQ);
+                }
+            } else if (direction === "children" && _maritalRelationships){
+                _maritalRelationships.forEach(function(mr){
+                    if (typeof seenOrderInIndex[mr.id] !== "undefined") return;
+                    assignOrder(mr);
+                    mr.children.forEach(addToQ);
+                });
             }
-        });
+        }
+        if (seenIndvs.length === objectGraph.length){
+            break;
+        } else {
+            // Have Individuals not connected to proband
+            console.error("Unconnected individuals found", seenOrderInIndex, objectGraph);
+            for (let i = 0; i < objectGraph.length; i++){
+                if (typeof seenOrderInIndex[objectGraph[i].id] === 'undefined'){
+                    q.push(objectGraph[i]);
+                    break;
+                }
+            }
+        }
     }
     return { orderByHeightIndex, seenOrderInIndex };
 }
@@ -459,18 +471,17 @@ function initOrdering(objectGraph, startIndividuals = null, nextProperty = "_chi
 function countNodesInBetween(order, heightIndex, orderFrom, orderTo){
     const { orderByHeightIndex, seenOrderInIndex } = order;
     let num = 0;
-    const minor = Math.min(orderFrom, orderTo) + 1;
-    const major = Math.max(orderFrom, orderTo) - 1;
-    for (let ord = minor; ord <= major; ord++){
+    const begin = Math.min(orderFrom, orderTo) + 1;
+    const end = Math.max(orderFrom, orderTo) - 1;
+    for (let ord = begin; ord <= end; ord++){
         const indv = orderByHeightIndex[heightIndex][ord];
         indv._parentReferences.forEach(function(parent){
-            //if (parent._parentReferences.length >)
             if (parent._drawing.heightIndex !== heightIndex){
                 num++;
                 return;
             }
             const parentOrder = seenOrderInIndex[parent.id];
-            if (parentOrder < (minor - 1) || parentOrder > (major + 1)){
+            if (parentOrder < (begin - 1) || parentOrder > (end + 1)){
                 num++;
             }
         });
@@ -478,22 +489,42 @@ function countNodesInBetween(order, heightIndex, orderFrom, orderTo){
     return num;
 }
 
-function countEdgeCrossingInstance(order, fromIndv, toIndv){
+function countEdgeCrossingInstance(order, fromNode, toNode){
     const { orderByHeightIndex, seenOrderInIndex } = order;
-    const orderFrom = seenOrderInIndex[fromIndv.id];
-    const orderTo = seenOrderInIndex[toIndv.id];
-    if (fromIndv._drawing.heightIndex === toIndv._drawing.heightIndex){
-        return countNodesInBetween(order, fromIndv._drawing.heightIndex, orderFrom, orderTo);
+    const orderFrom = seenOrderInIndex[fromNode.id];
+    const orderTo = seenOrderInIndex[toNode.id];
+    const hiFrom = fromNode._drawing.heightIndex;
+    const hiTo = toNode._drawing.heightIndex;
+
+    if (hiFrom === hiTo){
+        return (Math.abs(orderFrom - orderTo) - 1) * 2;
+        //return countNodesInBetween(order, hiFrom, orderFrom, orderTo);
     }
+
     let crossings = 0;
 
-    const subsequentSiblingsInIndex = orderByHeightIndex[fromIndv._drawing.heightIndex].slice(orderTo);
+    function checkAndCount(node){
+        if (fromNode === node) return;
+        if (seenOrderInIndex[node.id] < orderTo){
+            crossings++;
+        }
+    }
+
+    const subsequentSiblingsInIndex = orderByHeightIndex[hiFrom].slice(orderTo);
     subsequentSiblingsInIndex.forEach(function(siblingInIndex){
-        siblingInIndex._childReferences.forEach(function(siblingChild){
-            if (seenOrderInIndex[siblingChild.id] < orderTo){
-                crossings++;
+        const { id, partners, children, _maritalRelationships, _parentalRelationship } = siblingInIndex;
+        if (isRelationship(siblingInIndex)) {
+            if (hiTo < hiFrom){
+                children.forEach(checkAndCount);
             }
-        });
+        } else {
+            if (hiTo > hiFrom){
+                if (_parentalRelationship){
+                    checkAndCount(_parentalRelationship);
+                }
+            }
+        }
+        //siblingInIndex._childReferences.forEach(checkAndCount);
     });
 
     return crossings;
@@ -503,12 +534,28 @@ function countEdgeCrossings(objectGraph, order, memoized = {}){
     const { orderByHeightIndex, seenOrderInIndex } = order;
     let crossings = 0;
 
-    orderByHeightIndex.forEach(function(indvsInRow, hi){
-        indvsInRow.forEach(function(individual){
-            const { _childReferences = [] } = individual;
-            _childReferences.forEach(function(child){
-                crossings += countEdgeCrossingInstance(order, individual, child);
-            });
+    orderByHeightIndex.forEach(function(nodesInRow, hi){ // going up
+        nodesInRow.forEach(function(node){
+            const { id, partners, children, _maritalRelationships, _parentalRelationship } = node;
+            if (isRelationship(node)) {
+                partners.forEach(function(indv){
+                    crossings += countEdgeCrossingInstance(order, node, indv);
+                });
+                children.forEach(function(indv){
+                    crossings += countEdgeCrossingInstance(order, node, indv);
+                });
+            } else {
+                _maritalRelationships.forEach(function(mr){
+                    crossings += countEdgeCrossingInstance(order, node, mr);
+                });
+                if (_parentalRelationship){
+                    crossings += countEdgeCrossingInstance(order, node, _parentalRelationship);
+                }
+            }
+            //const { _childReferences = [] } = individual;
+            //_childReferences.forEach(function(child){
+            //    crossings += countEdgeCrossingInstance(order, individual, child);
+            //});
         });
     });
 
@@ -559,29 +606,31 @@ export function orderObjectGraph(objectGraph, memoized = {}){
     let bestCrossings = Infinity;
     let i;
 
+
     function checkCrossings(order){
         const edgeCrossings = countEdgeCrossings(objectGraph, order, memoized);
+        console.log("ORDER", order, edgeCrossings);
         if (edgeCrossings < bestCrossings){
-            bestOrder = copyOrder(order, objectGraph, memoized);
+            bestOrder = order;//copyOrder(order, objectGraph, memoized);
             bestCrossings = edgeCrossings;
         }
     }
 
     for (i = 0; i < rootPermutations.length; i++){
-        const orderBFS = initOrdering(objectGraph, parentlessIndividuals, "_childReferences", false);
+        const orderBFS = initOrdering(objectGraph, parentlessIndividuals, "children", false);
         checkCrossings(orderBFS);
         if (bestCrossings === 0) break;
-        const orderDFS = initOrdering(objectGraph, parentlessIndividuals, "_childReferences", true);
+        const orderDFS = initOrdering(objectGraph, parentlessIndividuals, "children", true);
         checkCrossings(orderDFS);
         if (bestCrossings === 0) break;
     }
 
     if (bestCrossings !== 0){
         for (i = 0; i < leafPermutations.length; i++){
-            const orderBFS = initOrdering(objectGraph, leafChildren, "_parentReferences", false);
+            const orderBFS = initOrdering(objectGraph, leafChildren, "parents", false);
             checkCrossings(orderBFS);
             if (bestCrossings === 0) break;
-            const orderDFS = initOrdering(objectGraph, leafChildren, "_parentReferences", true);
+            const orderDFS = initOrdering(objectGraph, leafChildren, "parents", true);
             checkCrossings(orderDFS);
             if (bestCrossings === 0) break;
         }
@@ -593,7 +642,7 @@ export function orderObjectGraph(objectGraph, memoized = {}){
         indv._drawing.orderInHeightIndex = seenOrderInIndex[indv.id];
     });
 
-    console.log(bestOrder, bestCrossings, objectGraph);
+    console.log("BEST ORDER", bestOrder, bestCrossings, objectGraph);
 
     //console.log('TTT-ORDER', parentlessIndividuals, parentlessPartners, rootPermutations, leafSiblings, leafPermutations);
     return bestOrder;
@@ -622,11 +671,13 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
         const seenPRs = (skipPRs && Object.assign({}, skipPRs)) || {};
         while (q.length){
             const child = q.shift();
-            const { id, _drawing, _parentalRelationship, _childReferences } = child;
+            const { id, _drawing, _parentalRelationship, children } = child;
             if (seen[id]) continue;
             seen[id] = true;
+            console.log("b4SLID", id, child.name, child, diff);
             _drawing.xCoord += diff;
             console.log("SLID", id, child.name, diff, _drawing.xCoord);
+            /*
             if (_parentalRelationship && !seenPRs[_parentalRelationship.id]){
                 if (typeof _parentalRelationship._drawing.xCoord === 'number' && !seenPRs[_parentalRelationship.id]){
                     _parentalRelationship._drawing.xCoord += diff;
@@ -634,15 +685,18 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
                 }
                 seenPRs[_parentalRelationship.id] = true;
             }
-            // Right-er sibling-level indvs
+            */
+            // Right-er sibling-level nodes
             const orderPlace = seenOrderInIndex[id];
             orderByHeightIndex[_drawing.heightIndex].slice(orderPlace + 1).forEach(function(ch){
                 q.push(ch);
             });
             // Own children
-            _childReferences.forEach(function(ch){
-                q.push(ch);
-            });
+            if (isRelationship(child)){
+                (children || []).forEach(function(ch){
+                    q.push(ch);
+                });
+            }
         }
         return seen;
     }
@@ -675,18 +729,20 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
         });
     }
 
+    console.log('TTTT', orderByHeightIndex, seenOrderInIndex);
+
     // Init coords
-    orderByHeightIndex.forEach(function(individualsInRow, hi){
+    orderByHeightIndex.forEach(function(nodesInRow, hi){
         if (orderByHeightIndex[hi].length === 0) return;
         //const [ firstIndv, ...remainingIndvs ] = individualsInRow;
 
-        individualsInRow.reduce(function(prevIndv, individual){
-            const { _childReferences, _maritalRelationships, _drawing, id, name } = individual;
-            idMap[id] = individual;
-            let offsetFromPrevIndv = null;
-            if (prevIndv === null){
+        nodesInRow.reduce(function(prevNode, currNode){
+            const { _maritalRelationships, _drawing, children, id, name } = currNode;
+            idMap[id] = currNode;
+            let offsetFromPrevNode = null;
+            if (prevNode === null){
                 _drawing.xCoord = relativeMidpoint;
-                offsetFromPrevIndv = _drawing.xCoord;// + dims.individualWidth + dims.individualXSpacing;
+                offsetFromPrevNode = _drawing.xCoord; // + dims.individualWidth + dims.individualXSpacing;
                 console.log('DDD2', name, relativeMidpoint);
             } else {
                 // Stack to left
@@ -698,58 +754,86 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
                     return mr._drawing.xCoord;
                 });
                 */
+
+
+                
+
+
+                /*
                 const commonRowPrevRelationMedians = getPositionedRelationshipsAtHeightIndex(hi).map(function(mr){
                     return mr._drawing.xCoord;
                 });
 
                 console.log(commonRowPrevRelationMedians, getPositionedRelationshipsAtHeightIndex(hi));
+                */
 
-                offsetFromPrevIndv = prevIndv._drawing.xCoord + dims.individualWidth + dims.individualXSpacing;
-                _drawing.xCoord = offsetFromPrevIndv;
+                offsetFromPrevNode = prevNode._drawing.xCoord + dims.individualWidth + dims.individualXSpacing;
+                _drawing.xCoord = offsetFromPrevNode;
 
+                if (isRelationship(currNode)){
+                    const childrenWithAssignedXCoord = children.filter(function(c){
+                        return typeof c._drawing.xCoord === 'number';
+                    });
+                    if (childrenWithAssignedXCoord.length !== children.length){
+                        console.error("Some children of " + ( name || id ) + " have not been assigned positions yet:", children.slice());
+                    }
+                    const childrenMedian = calculateMedianOfNodes(childrenWithAssignedXCoord);
+                    if (_drawing.xCoord < childrenMedian){ // Move self (relationship node) to right
+                        _drawing.xCoord = childrenMedian;
+                        console.log("MOVED", currNode, "TO", childrenMedian);
+                    } else { // Move children up
+                        const diff = _drawing.xCoord - childrenMedian;
+                        console.log("SLIDING CHILDREN OF", currNode, "BY", diff);
+                        slideChildren(children, diff, null, null);
+                    }
+                }
+
+                /*
                 if (commonRowPrevRelationMedians.length > 0){
                     const maxPrevRelationMedian = Math.max(...commonRowPrevRelationMedians);
-                    if (maxPrevRelationMedian > (offsetFromPrevIndv - relativeMidpoint)) {
+                    if (maxPrevRelationMedian > (offsetFromPrevNode - relativeMidpoint)) {
                         _drawing.xCoord = (maxPrevRelationMedian + (dims.individualWidth + dims.individualXSpacing));
                     } else {
                         console.log('DDD4 - directly right of prev individual', name, _drawing.xCoord, prevIndv._drawing.xCoord);
                     }
                     console.log('DDD4 - has prev relation median', name,
-                        maxPrevRelationMedian, offsetFromPrevIndv, _drawing.xCoord, prevIndv._drawing.xCoord);
+                        maxPrevRelationMedian, offsetFromPrevNode, _drawing.xCoord, prevIndv._drawing.xCoord);
                 } else {
                     console.log('DDD4 - NO prev relation median', name, _drawing.xCoord, prevIndv._drawing.xCoord);
                 }
+                */
 
-                console.log('DDD3', name, _drawing.xCoord, offsetFromPrevIndv, prevIndv);
+                console.log('DDD3', name, _drawing.xCoord, offsetFromPrevNode, prevNode);
             }
+
+            /*
             let prevNodeXCoord = _drawing.xCoord;
             const seenChildren = {};
+
             _maritalRelationships.forEach(function(relationship){
                 const { children = [], partners = [] } = relationship;
                 if (typeof relationship._drawing.xCoord === 'number'){
                     // Seen - we will always be coming to the right from left parent
                     // Make sure individual is to the right of any previously-assigned
                     // parents' xcoord. Case might be if on different heightIndex
-                    /*
-                    const prevXCoords = partners.filter(function(p){
-                        return p.id !== id && p._drawing.xCoord;
-                    }).map(function(p){
-                        return p._drawing.xCoord;
-                    });
-                    const minXCoord = Math.max(...prevXCoords) + relativeMidpoint + dims.individualXSpacing;
-                    if (minXCoord > _drawing.xCoord){
-                        _drawing.xCoord = minXCoord;
-                    }
-                    */
+                    // const prevXCoords = partners.filter(function(p){
+                    //     return p.id !== id && p._drawing.xCoord;
+                    // }).map(function(p){
+                    //     return p._drawing.xCoord;
+                    // });
+                    // const minXCoord = Math.max(...prevXCoords) + relativeMidpoint + dims.individualXSpacing;
+                    // if (minXCoord > _drawing.xCoord){
+                    //     _drawing.xCoord = minXCoord;
+                    // }
                     return;
                 }
 
                 relationship._drawing.xCoord = prevNodeXCoord + dims.individualWidth + dims.individualXSpacing; //offsetFromPrevIndv;
                 relationship._drawing.yCoord = yCoordByHeightIndex[_drawing.heightIndex];
 
-                if (isNaN(relationship._drawing.xCoord)){
-                    // If 
-                }
+                //if (isNaN(relationship._drawing.xCoord)){
+                //
+                //}
 
                 const childrenWithAssignedXCoord = children.filter(function(c){
                     return typeof c._drawing.xCoord === 'number';
@@ -803,15 +887,16 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
                 console.log('DDD5', name, children.map(c => c._drawing.xCoord), relationship._drawing.xCoord,
                     _drawing.xCoord, calculateMedianOfNodes(children), offsetFromPrevIndv);
             });
+            */
 
-            // Set yCoord for faster future transforms:
+            // Set yCoord
             _drawing.yCoord = yCoordByHeightIndex[_drawing.heightIndex];
 
-            return individual;
+            return currNode;
         }, null);
 
         /*
-        individualsInRow.forEach(function(individual){
+        nodesInRow.forEach(function(individual){
             const { _childReferences, _maritalRelationships, _drawing, id } = individual;
             const commonRowMaritalRelationships = _maritalRelationships.filter(function(mr){
                 return mr._drawing.heightIndex === _drawing.heightIndex;
@@ -832,7 +917,7 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
         */
 
         // Recursively center above child nodes, slide them down if needed.
-        //individualsInRow.forEach(function(individual){
+        //nodesInRow.forEach(function(individual){
         //    console.log('TT', indv);
         //    const { _childReferences, _maritalRelationships } = individual;
         //    

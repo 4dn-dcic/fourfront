@@ -86,7 +86,11 @@ export function createEdges(objectGraph, dims, graphHeight){
             const {
                 children,
                 partners,
-                _drawing : { xCoord : relationXCoord, heightIndex : relationHeightIndex, yCoord: relationYCoord }
+                _drawing : {
+                    xCoord : relationXCoord,
+                    yCoord: relationYCoord,
+                    heightIndex : relationHeightIndex
+                }
             } = parentRelation;
 
             let midPoint = null;
@@ -257,12 +261,12 @@ function manhattanDistance(fromV, toV){
 /** Needs work - maybe along w. computeVisibilityGraph **/
 function tracePaths(adjustableEdges, visibilityGraph){
     const {
-        hSegments,//: hSegmentQ,
-        vSegments//: vSegmentQ
+        hSegments: hSegmentQ,
+        vSegments: vSegmentQ
     } = visibilityGraph;
 
-    const hSegmentQ = hSegments.slice(0);
-    const vSegmentQ = vSegments.slice(0);
+    //const hSegmentQ = hSegments.slice(0);
+    //const vSegmentQ = vSegments.slice(0);
 
 
     function getEdgeTargetV(otherV, edge){
@@ -323,20 +327,17 @@ function tracePaths(adjustableEdges, visibilityGraph){
 
                 const prevEdge1 = searchPath[searchPath.length - 1];
                 const prevEdge2 = searchPath[searchPath.length - 2];
-                if (prevEdge1 && prevEdge2){
-                    if (!(
-                        (
-                            (prevEdge1[0][0] === v[0] || prevEdge1[1][0] === v[0]) &&
-                            prevEdge1[0][0] === prevEdge1[1][0] &&
-                            prevEdge2[0][0] === prevEdge2[1][0]
-                        ) || (
-                            (prevEdge1[0][1] === v[1] || prevEdge1[1][1] === v[1]) &&
-                            prevEdge1[0][1] === prevEdge1[1][1] &&
-                            prevEdge2[0][1] === prevEdge2[1][1]
-                        )
-                    )){ // If not both vertical or horizontal
-                        costToTargetEstimate = costToTargetEstimate * 1.5;
-                    }
+
+                if (prevEdge2 && !(
+                    (
+                        prevEdge1[0][0] === prevEdge1[1][0] &&
+                        prevEdge2[0][0] === prevEdge2[1][0]
+                    ) || (
+                        prevEdge1[0][1] === prevEdge1[1][1] &&
+                        prevEdge2[0][1] === prevEdge2[1][1]
+                    )
+                )){ // If not both vertical or horizontal
+                    costToTargetEstimate = costToTargetEstimate * 2;
                 }
 
                 //todo ?
@@ -356,17 +357,19 @@ function tracePaths(adjustableEdges, visibilityGraph){
                     if (intersected) break;
                 }
                 if (intersected){
-                    costToTargetEstimate += 1000;
+                    costToTargetEstimate * 3;
                 }
                 */
 
                 if (costToTargetEstimate < bestCostEstimate){
                     bestCostEstimate = costToTargetEstimate;
                     bestIdx = i;
+                    if (initCurrV[0] === 560 && initCurrV[1] === 240) console.log("BEST", costToTargetEstimate);
                 }
             }
             const result = vQueue[bestIdx];
             vQueue.splice(bestIdx, 1);
+            result.heuristicCostTotal = (result.heuristicCostTotal || 0) + bestCostEstimate;
             return result;
         }
 
@@ -377,17 +380,17 @@ function tracePaths(adjustableEdges, visibilityGraph){
                 v: currV,
                 searchPath: currSearchPath,
                 pathLengthCost: currPathLengthCost,
-                skip
+                skip,
+                heuristicCostTotal
             } = currArgs;
 
             // TODO see if remembered dist <= than new, & update
 
             const existingRes = bestResultsPerVertex.get(currV);
-            if (existingRes && existingRes.pathLengthCost <= currPathLengthCost){
+            if (existingRes && (existingRes.pathLengthCost < currPathLengthCost || existingRes.heuristicCostTotal < heuristicCostTotal)){
                 continue;
-            } else {
-                bestResultsPerVertex.set(currV, currArgs);
             }
+            bestResultsPerVertex.set(currV, currArgs);
 
             if (currV[0] === 560 && currV[1] === 160){
                 console.log(
@@ -437,7 +440,8 @@ function tracePaths(adjustableEdges, visibilityGraph){
                     v,
                     searchPath: [].concat(currSearchPath).concat([edge]),
                     pathLengthCost: currPathLengthCost + manhattanDistance(...edge),
-                    skip: new Set(skip)
+                    skip: new Set(skip),
+                    heuristicCostTotal
                 });
             });
 
@@ -506,7 +510,6 @@ function tracePaths(adjustableEdges, visibilityGraph){
 
             const lastAdded = m[m.length - 1];
             let nextToAdd;
-            //const lastItem2 = m[m.length - 2];
 
             if (lastAdded[0] === edgePart[0][0] && lastAdded[1] === edgePart[0][1]){
                 nextToAdd = edgePart[1];

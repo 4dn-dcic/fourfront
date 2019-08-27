@@ -8,6 +8,7 @@ import { DropdownButton, DropdownItem } from 'react-bootstrap';
 import DefaultItemView from './DefaultItemView';
 import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { PedigreeViz } from './../viz/PedigreeViz';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import url from 'url';
@@ -35,21 +36,20 @@ export function parseFamilyIntoDataset(family){
         const {
             "@id": id,
             display_title: name,
-            life_status = null,
             sex: gender = "undetermined",
             father = {},
-            mother = {}
+            mother = {},
+            is_deceased = false
         } = individual;
 
         // TODO throw error if some expected values not present
-        if (typeof life_status !== 'string') throw new Error("Expected type string for life_status property");
 
         return {
             id, gender, name,
             'father' : father['@id'] || null,
             'mother' : mother['@id'] || null,
             'isProband' : probandID && probandID === id,
-            'deceased' : life_status !== 'alive',
+            'deceased' : !!(is_deceased),
             'data' : {
                 // Keep non-proband-viz specific data here. TODO: Define/document.
                 'individualItem' : individual
@@ -77,14 +77,22 @@ export class PedigreeTabView extends React.PureComponent {
         };
     }
 
+    static getDerivedStateFromProps(props, state){
+        return null;
+    }
+
     constructor(props){
         super(props);
         this.handleFamilySelect = this.handleFamilySelect.bind(this);
         this.memoized = {
             parseFamilyIntoDataset : memoize(parseFamilyIntoDataset)
         };
+        if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
+            throw new Error("Expected props.context.families to be a non-empty Array.");
+        }
         this.state = {
-            currentFamilyIdx : 0
+            currentFamilyIdx : 0,
+            families: props.context.families
         };
     }
 
@@ -94,11 +102,11 @@ export class PedigreeTabView extends React.PureComponent {
 
     render(){
         const { context, schemas, windowWidth, windowHeight, innerOverlaysContainer, href } = this.props;
-        const { families = [] } = context;
-        const { currentFamilyIdx } = this.state;
+        const { currentFamilyIdx, families = [] } = this.state;
         const currentFamily = families[currentFamilyIdx];
 
         const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
+
         console.log('DDD', dataset);
         return (
             <div className="overflow-hidden">
@@ -170,47 +178,97 @@ class AttachmentInputBtn extends React.PureComponent {
     constructor(props){
         super(props);
         this.handleChange = this.handleChange.bind(this);
+        this.state = {
+            loading: false
+        };
     }
 
     handleChange(e){
         const file = e.target.files[0];
-        const attachment_props = {};
-        const { context: { uuid: case_uuid }, href } = this.props;
-        const { host } = url.parse(href);
-        let config_uri;
-        if (host.indexOf('localhost') > -1){
-            config_uri = 'development.ini';
-        } else {
-            config_uri = 'production.ini';
-        }
-        attachment_props.type = file.type;
-        attachment_props.download = file.name;
-        if (file.size) {
-            attachment_props.size = file.size;
-        }
-        const fileReader = new window.FileReader();
-        fileReader.readAsText(file);
-        fileReader.onloadend = (e) => {
-            if (e.target.result) {
-                attachment_props.href = e.target.result;
-                ajax.promise('/' + case_uuid + '/process-pedigree?config_uri=' + config_uri,
-                    'PATCH', {}, JSON.stringify(attachment_props)).then((data) => {
-                    console.log(data);
-                });
+        this.setState({ loading: true }, ()=>{
+            const attachment_props = {};
+            const { context: { uuid: case_uuid }, href } = this.props;
+            const { host } = url.parse(href);
+            let config_uri;
+            if (host.indexOf('localhost') > -1){
+                config_uri = 'development.ini';
             } else {
-                alert('There was a problem reading the given file.');
-                return;
+                config_uri = 'production.ini';
             }
-        };
+            attachment_props.type = file.type;
+            attachment_props.download = file.name;
+            if (file.size) {
+                attachment_props.size = file.size;
+            }
+            const fileReader = new window.FileReader();
+            fileReader.readAsText(file);
+            fileReader.onloadend = (e) => {
+                if (e.target.result) {
+                    attachment_props.href = e.target.result;
+                    ajax.promise(
+                        '/' + case_uuid + '/process-pedigree?config_uri=' + config_uri,
+                        'PATCH',
+                        {},
+                        JSON.stringify(attachment_props)
+                    ).then((data) => {
+                        // TODO test if anything else wrong with response and throw if so.
+                        if (!data || data.status === "error"){
+                            throw data;
+                        }
+                        return data;
+                    }).then((data)=>{
+                        // todo
+                        this.setState({ loading: false }, function(){
+                            Alerts.queue({
+                                "title" : "Error reading pedigree file",
+                                "message" : "Check your file and try again.",
+                            });
+                        });
+                        return data;
+                    }).catch((data)=>{
+                        this.setState({ loading: false }, function(){
+                            Alerts.queue({
+                                "title" : "Error parsing pedigree file",
+                                "message" : "Check your file and try again.",
+                            });
+                        });
+                        console.error(data);
+                    });
+                } else {
+                    this.setState({ loading: false }, function(){
+                        Alerts.queue({
+                            "title" : "Error reading pedigree file",
+                            "message" : "Check your file and try again.",
+                        });
+                    });
+                    return;
+                }
+            };
+        });
     }
 
     render(){
+        const { context : { actions = [] } } = this.props;
+        const { loading } = this.state;
+        const hasEditPermission = _.find(actions, { 'name' : 'edit' });
+        if (!hasEditPermission){
+            return null;
+        }
+        const innerLabel = (
+            loading ? (
+                <label className="text-400 mb-0 btn btn-outline-dark disabled" tabIndex={0}>
+                    <i className="icon icon-fw fas icon-circle-notch icon-spin"/>
+                </label>
+            ) : (
+                <label className="text-400 mb-0 btn btn-outline-dark clickable" htmlFor="test_pedigree" tabIndex={0}>
+                    Upload new pedigree
+                </label>
+            )
+        );
         return(
             <React.Fragment>
                 <input id="test_pedigree" type="file" onChange={this.handleChange} className="d-none" accept="*/*" />
-                <label className="text-400 mb-0 btn btn-outline-dark" htmlFor="test_pedigree" tabIndex={0}>
-                    Upload new pedigree
-                </label>
+                { innerLabel }
             </React.Fragment>
         );
     }

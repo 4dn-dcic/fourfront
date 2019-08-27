@@ -1267,7 +1267,7 @@ const ContentRenderer = React.memo(function ContentRenderer(props){
     // Object of common props passed to all content_views.
     const commonContentViewProps = _.pick(props,
         // Props from App:
-        'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
+        'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads', 'alerts',
         'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
         // Props from BodyElement:
         'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
@@ -1788,7 +1788,7 @@ class BodyElement extends React.PureComponent {
                                 <ContentErrorBoundary canonical={canonical} href={href}>
                                     <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                         registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
-                                        overlaysContainer, innerOverlaysContainer } } />
+                                        overlaysContainer, innerOverlaysContainer, alerts } } />
                                 </ContentErrorBoundary>
 
                                 <div id="inner-overlays-container" ref={this.innerOverlaysContainerRef} />

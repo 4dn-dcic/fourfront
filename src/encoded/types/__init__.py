@@ -37,9 +37,9 @@ class Individual(Item):
     schema = load_schema('encoded:schemas/individual.json')
 
     embedded_list = [
-        'father.life_status',
+        'father.is_deceased',
         'father.sex',
-        'mother.life_status',
+        'mother.is_deceased',
         'mother.sex'
     ]
 

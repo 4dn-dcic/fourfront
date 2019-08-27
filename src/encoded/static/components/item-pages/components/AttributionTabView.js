@@ -80,7 +80,7 @@ export class AttributionTabView extends React.PureComponent {
             key : "attribution",
             disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (
-                <div className="overflow-hidden">
+                <div className="overflow-hidden container-wide">
                     <h3 className="tab-section-title">
                         <span>Attribution</span>
                     </h3>

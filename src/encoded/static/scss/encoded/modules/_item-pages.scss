@@ -113,7 +113,7 @@ hr.tab-section-title-horiz-divider {
 }
 
 /*************************
-    TABVIEW
+    TABVIEW + Alerts
 **************************/
 
 $tabbar-bg-color : #ececec !default;
@@ -122,20 +122,6 @@ $tabbar-text-active-color: #000 !default;
 $tabbar-bg-active-color: #fff !default;
 // If override this, check e.g. CaseView Pedigree Tab height dimensioning (JS) since this 46px is accounted for in calculations
 $tabbar-height: 46px;
-
-
-
-
-.rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
-	height: 48px;
-	background: none;
-	border: 2px solid $brand-primary-dark;
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-	border-bottom: none;
-	border-left: none;
-	border-right: none;
-	background-color: #fff;
-}
 
 .item-page-container {
 
@@ -261,6 +247,27 @@ $tabbar-height: 46px;
 
 	}
 
+}
+
+/*************************
+    Alerts - Shown differently on ItemPages than others
+**************************/
+
+#item-page-alerts-container {
+	position: relative;
+	z-index: 3;
+	> .alerts {
+		> .alert {
+			margin-bottom: 0px;
+			border-radius: 0;
+			border-left: none;
+			border-right: none;
+			border-top: none;
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
 }
 
 /** Styling right pane menu which comes out upon ItemActionsTab click **/
