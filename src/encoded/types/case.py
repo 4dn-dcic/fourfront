@@ -70,7 +70,7 @@ def process_pedigree(context, request):
     Returns:
         dict: reponse, including 'status', and 'case' and 'family' on success
 
-    Raise:
+    Raises:
         HTTPUnprocessableEntity: on an error. Extra information may be logged
     """
     import mimetypes
@@ -174,41 +174,50 @@ def process_pedigree(context, request):
 ### Pedigree processing functions ###
 #####################################
 
-# in form: <proband field>: <cgap field>
-# fields unused by CGAP use 'corresponds_to': None
-# extract @ref values for connected objects in the first round
-PROBAND_MAPPING = {
-    'Individual': {
-        'sex': {
-            'corresponds_to': 'sex',
-            'value': lambda v: v['sex'].upper()
-        },
-        'deceased': {
-            'corresponds_to': 'is_deceased',
-            'value': lambda v: True if v['deceased'] == '1' else False
-        },
-        # TODO: fix. This is NOT right, need timestamp from XML
-        'age': {
-            'corresponds_to': 'birth_year',
-            'value': lambda v: datetime.utcnow().year - int(v['age']) if v['age'] and v['ageUnits'] == 'Y' else 9999
-        },
-        'stillBirth': {
-            'corresponds_to': 'is_still_birth',
-            'value': lambda v: True if v['stillBirth'] == '1' else False
-        },
-        # TODO: can you have more than one of these fields?
-        'explicitlySetBiologicalFather': {
-            'corresponds_to': 'father',
-            'value': lambda v: v['explicitlySetBiologicalFather']['@ref'] if v['explicitlySetBiologicalFather'] else None,
-            'linked': True
-        },
-        'explicitlySetBiologicalMother': {
-            'corresponds_to': 'mother',
-            'value': lambda v: v['explicitlySetBiologicalMother']['@ref'] if v['explicitlySetBiologicalMother'] else None,
-            'linked': True
-        }
-    }
-}
+
+def descendancy_xml_ref_to_parents(ref_id, refs, case, uuids_by_ref):
+    """
+    This is a `xml_ref_fxn`, so it must take the correpsonding args in the
+    standardized way and return a dictionary that is used to update the
+    object to be POSTed/PATCHed.
+
+    Helper function to use specifically with `descendacy` object reference
+    in input XML. Uses the string reference id and input dictionary of refs
+    to find the object, look up parents based off of gender, and return
+    them in a standardized way.
+
+    Args:
+        ref_id (str): value for the reference field of the relevant xml obj
+        refs: (dict): reference-based parsed XML data
+        case (str): identifier of the case
+        uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
+
+    Returns:
+        dict: results used to update the Fourfront metadata in progress
+    """
+    result = {'mother': None, 'father': None}
+    error_msg = None
+    relationship = refs[ref_id]
+    parents = relationship.get('members', [])
+    if len(parents) != 2:
+        error_msg = ('Case %s: Failure to parse two parents from relationship '
+                     'ref %s in process-pedigree. Contents: %s'
+                     % (case, ref_id, relationship))
+    for parent in parents:
+        parent_obj = refs[parent['@ref']]
+        if parent_obj['sex'].lower() == 'm':
+            result['father'] = uuids_by_ref[parent['@ref']]
+        elif parent_obj['sex'].lower() == 'f':
+            result['mother'] = uuids_by_ref[parent['@ref']]
+    if error_msg is None and (not result['mother'] or not result['father']):
+        error_msg = ('Case %s: Failure to get valid mother and father from XML'
+                     'for relationship ref %s in process-pedigree. Parent refs: %s'
+                     % (case, ref_id, parents))
+    if error_msg:
+        log.error(error_msg)
+        raise HTTPUnprocessableEntity(error_msg)
+    return result
+
 
 
 def etree_to_dict(ele, ref_container=None, ref_field=''):
@@ -322,7 +331,11 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
                     if converted.get('linked', False) is False:
                         continue
                     ref_val = converted['value'](xml_obj)
-                    if ref_val:
+                    # more complex function based on xml refs needed
+                    if 'xml_ref_fxn' in converted and ref_val:
+                        result = converted['xml_ref_fxn'](ref_val, refs, case, uuids_by_ref)
+                        data.update(result)
+                    elif ref_val:
                         data[converted['corresponds_to']] = uuids_by_ref[ref_val]
             # POST if first round
             if round == 'first':
@@ -374,3 +387,45 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
     else:
         log.error('Case %s: No proband found for family %s' % family)
     return family
+
+
+# in form: <proband field>: <cgap field>
+# fields unused by CGAP use 'corresponds_to': None
+# extract @ref values for connected objects in the first round
+PROBAND_MAPPING = {
+    'Individual': {
+        'sex': {
+            'corresponds_to': 'sex',
+            'value': lambda v: v['sex'].upper()
+        },
+        'deceased': {
+            'corresponds_to': 'is_deceased',
+            'value': lambda v: True if v['deceased'] == '1' else False
+        },
+        # TODO: fix. This is NOT right, need timestamp from XML
+        'age': {
+            'corresponds_to': 'birth_year',
+            'value': lambda v: datetime.utcnow().year - int(v['age']) if v['age'] and v['ageUnits'] == 'Y' else 9999
+        },
+        'stillBirth': {
+            'corresponds_to': 'is_still_birth',
+            'value': lambda v: True if v['stillBirth'] == '1' else False
+        },
+        # TODO: can you have more than one of these fields?
+        'explicitlySetBiologicalFather': {
+            'corresponds_to': 'father',
+            'value': lambda v: v['explicitlySetBiologicalFather']['@ref'] if v['explicitlySetBiologicalFather'] else None,
+            'linked': True
+        },
+        'explicitlySetBiologicalMother': {
+            'corresponds_to': 'mother',
+            'value': lambda v: v['explicitlySetBiologicalMother']['@ref'] if v['explicitlySetBiologicalMother'] else None,
+            'linked': True
+        },
+        'descendancy': {
+            'xml_ref_fxn': descendancy_xml_ref_to_parents,
+            'value': lambda v: v['descendancy']['@ref'] if v.get('descendancy') else None,
+            'linked': True
+        }
+    }
+}
