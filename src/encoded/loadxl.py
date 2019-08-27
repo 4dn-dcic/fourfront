@@ -12,17 +12,18 @@ from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
 from pyramid.response import Response
-from datetime import datetime
 from base64 import b64encode
 from PIL import Image
 
 text = type(u'')
 logger = structlog.getLogger(__name__)
 
+
 def includeme(config):
     # provide an endpoint to do bulk uploading that just uses loadxl
     config.add_route('load_data', '/load_data')
     config.scan(__name__)
+
 
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
@@ -30,8 +31,8 @@ ORDER = [
     'institution',
     'project',
     'disease',
-    'individual',
     'case',
+    'individual',
     'sample'
 ]
 

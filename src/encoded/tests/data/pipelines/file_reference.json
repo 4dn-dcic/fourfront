@@ -1,0 +1,138 @@
+[
+    {
+        "extra_files": [
+            {
+                "uuid": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf",
+                "file_format": "106199e5-5a85-4817-9a55-7b31698e1fda",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIYU3FC57/@@download/4DNFIYU3FC57.ann",
+                "accession": "4DNFIYU3FC57",
+                "filename": "4DNFIYU3FC57",
+                "upload_key": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf/4DNFIYU3FC57.ann"
+            },
+            {
+                "uuid": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf",
+                "file_format": "8db70ed6-0121-4fe1-a72e-d91dc5aa6cd3",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIYU3FC57/@@download/4DNFIYU3FC57.amb",
+                "accession": "4DNFIYU3FC57",
+                "filename": "4DNFIYU3FC57",
+                "upload_key": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf/4DNFIYU3FC57.amb"
+            },
+            {
+                "uuid": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf",
+                "file_format": "11f2fc36-9a65-4d60-9365-d8ff241df4f7",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIYU3FC57/@@download/4DNFIYU3FC57.sa",
+                "accession": "4DNFIYU3FC57",
+                "filename": "4DNFIYU3FC57",
+                "upload_key": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf/4DNFIYU3FC57.sa"
+            },
+            {
+                "uuid": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf",
+                "file_format": "7373ca48-0b3e-467b-967a-80870846f89b",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIYU3FC57/@@download/4DNFIYU3FC57.pac",
+                "accession": "4DNFIYU3FC57",
+                "filename": "4DNFIYU3FC57",
+                "upload_key": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf/4DNFIYU3FC57.pac"
+            }
+        ],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "description": "hg38 bwa genome index for CGAP, untarred, uncompressed",
+        "file_classification": "ancillary file",
+        "file_size": 3217347004,
+        "status": "in review",
+        "uuid": "b24ed5ed-a037-48a0-a938-3fecfb90d0cf",
+        "file_format": "813b0001-5f3f-4e28-9203-4cdf261e19c4",
+        "aliases": [
+            "cgap:hg38-bwt"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "file_classification": "ancillary file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "description": "hg38 full reference fasta plus decoy for CGAP",
+        "extra_files": [
+            {
+                "uuid": "1936f246-22e1-45dc-bb5c-9cfd55537fe7",
+                "file_format": "4ed9f7e0-2b2f-4aca-9533-a0a652b43442",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIBH13WES/@@download/4DNFIBH13WES.dict",
+                "accession": "4DNFIBH13WES",
+                "filename": "4DNFIBH13WES",
+                "upload_key": "1936f246-22e1-45dc-bb5c-9cfd55537fe7/4DNFIBH13WES.dict"
+            },
+            {
+                "uuid": "1936f246-22e1-45dc-bb5c-9cfd55537fe7",
+                "file_format": "fb728bb4-bc56-46d5-8df5-a05562826b9a",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIBH13WES/@@download/4DNFIBH13WES.fa.fai",
+                "accession": "4DNFIBH13WES",
+                "filename": "4DNFIBH13WES",
+                "upload_key": "1936f246-22e1-45dc-bb5c-9cfd55537fe7/4DNFIBH13WES.fa.fai"
+            }
+        ],
+        "file_size": 3263683042,
+        "status": "in review",
+        "uuid": "1936f246-22e1-45dc-bb5c-9cfd55537fe7",
+        "file_format": "5ced774b-a73e-4d1b-8186-d7fbbde7a3c2",
+        "aliases": [
+            "cgap:hg38-plus-decoy-fasta"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "extra_files": [
+            {
+                "uuid": "8ed35691-0af4-467a-adbc-81eb088549f0",
+                "file_format": "f84f1922-7f4e-4afc-922f-bec620969bf1",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFI2RDOLUQ/@@download/4DNFI2RDOLUQ.vcf.gz.tbi",
+                "accession": "4DNFI2RDOLUQ",
+                "filename": "4DNFI2RDOLUQ",
+                "upload_key": "8ed35691-0af4-467a-adbc-81eb088549f0/4DNFI2RDOLUQ.vcf.gz.tbi"
+            }
+        ],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "description": "hg38 dbsnp_b151",
+        "file_classification": "ancillary file",
+        "file_size": 1595848625,
+        "status": "in review",
+        "uuid": "8ed35691-0af4-467a-adbc-81eb088549f0",
+        "file_format": "1b8f525f-aecb-4211-9ae5-a2c998b05599",
+        "aliases": [
+            "cgap:hg38-dbsnp-b151"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "extra_files": [
+            {
+                "uuid": "55ac5044-f927-4df7-afa2-bf713764ee57",
+                "file_format": "ec96f95a-cf13-4633-ab0d-c4a5138bbe0b",
+                "status": "uploaded",
+                "href": "/files-reference/4DNFIBN3576F/@@download/4DNFIBN3576F.vcf.idx",
+                "accession": "4DNFIBN3576F",
+                "filename": "4DNFIBN3576F",
+                "upload_key": "55ac5044-f927-4df7-afa2-bf713764ee57/4DNFIBN3576F.vcf.idx"
+            }
+        ],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "institution": "hms-dbmi",
+        "description": "hg38 Mills_and_1000G_gold_standard_indels",
+        "file_classification": "ancillary file",
+        "file_size": 90155308,
+        "status": "in review",
+        "uuid": "55ac5044-f927-4df7-afa2-bf713764ee57",
+        "file_format": "fcc2647d-301b-4888-8d9d-83ea4270309c",
+        "aliases": [
+            "cgap:hg38-Mills-and-1000G-gold-standard-indels"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]

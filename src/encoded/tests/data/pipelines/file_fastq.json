@@ -1,0 +1,2452 @@
+[
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 16915555172,
+        "uuid": "fee9ff95-a5cf-48c5-b373-17a564f8ae18",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN306815_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a3ecc657-8a10-4269-ab0c-20756dc13fff",
+        "related_files": [
+            {
+                "file": "e23b264e-ae8a-43e8-b840-c53604d1691b",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN306815-HJWGMCCXY_s4_1_GSLv3-7_10_SL323145.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "cc512674ee525e284d1630cd6c770a3d",
+        "content_md5sum": "a491c60a5a5c8c21ec78939b6a0b16cd",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 15504301247,
+        "uuid": "fd23c400-5b1f-4cbb-8487-9dc8ff5aeb5e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641048_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "74a92c5b-9f94-4f14-868d-663fa2bc6c4a",
+        "related_files": [
+            {
+                "file": "01b2d59c-5298-458a-b814-9e2aacfeb96d",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641048-HJWGMCCXY_s4_1_GSLv3-7_09_SL323144.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "94aeac6b1ca1bf2e444d5fd86b98dfeb",
+        "content_md5sum": "f8623c6855a30a837c24dda5a7632b3d",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 18301895679,
+        "uuid": "f8e515fd-fdcb-4f84-8615-d70b6343842d",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN688695_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "bd937580-79a6-48fe-b4a9-91fab8b8c26b",
+        "related_files": [
+            {
+                "file": "1beec2e6-1625-42f3-923b-8e462e68f940",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN688695-HMJ2KCCXY_s7_2_GSLv3-7_55_SL338604.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "a4a2fbb619a160e9d2b9ec5a05da36de",
+        "content_md5sum": "9e9caec7d7f36acc38d14beb20ef0060",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47542661974,
+        "uuid": "f606f6c4-da5a-4320-a1f2-6407cb6a0333",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN050112_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "b23d43ae-b808-4c76-87ea-0c441e6c3222",
+        "related_files": [
+            {
+                "file": "cbef5d5d-141a-4f13-a271-69b28177a072",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN050112-HL3FFALXX_s4_2_GSLv3-7_57_SL258369.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "e9693029946609b4cf52d530adda2542",
+        "content_md5sum": "9ce2f8b49a9c0e91536dbb25c32686ea",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 15323936907,
+        "uuid": "f1ddcbbe-ac46-46b3-adeb-4e32a06577be",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN930725_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "0b888d44-afc7-4584-9c12-e448c95074d6",
+        "related_files": [
+            {
+                "file": "2bb68f01-4916-4982-94d5-4c43381a3676",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN930725-HMJ2KCCXY_s6_1_GSLv3-7_54_SL338603.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "4e87e1fb432cf8ecdce6603e8530ff70",
+        "content_md5sum": "9d5d205883eb1dc19491b04b578b78c1",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 34646525571,
+        "uuid": "f011c990-d71f-4bca-a7ef-2a813907016b",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN588380_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a1f40088-b614-4cbf-b4b7-fd2520027591",
+        "related_files": [
+            {
+                "file": "e9af912f-8b42-450b-9712-cf5a6a036b84",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN588380-HMGGTCCXY_s4_2_GSLv3-7_88_SL342870.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "3f7886ddb53df00938e53c67afa79c23",
+        "content_md5sum": "91dbe865b7edfe4ee6b8412d78de57da",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 32482387173,
+        "uuid": "e9af912f-8b42-450b-9712-cf5a6a036b84",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN588380_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "345fb7d3-27de-4f10-8218-9dfc38fb291a",
+        "related_files": [
+            {
+                "file": "f011c990-d71f-4bca-a7ef-2a813907016b",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN588380-HMGGTCCXY_s4_1_GSLv3-7_88_SL342870.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "8fb547ebd44bbd1d7baa6c08060c90a0",
+        "content_md5sum": "21d31167b076cf749d0b5faa34e4c95b",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 62789031049,
+        "uuid": "e63e3595-744b-44c0-922a-d8edd28ade27",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN452807_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "c32b9d71-d1a3-4658-9802-cfa68da67f12",
+        "related_files": [
+            {
+                "file": "621f17da-d596-40f7-af97-dcfb80ba6167",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "887701-UDN452807-P_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "e959c574094b521e598279add51b5e8d",
+        "content_md5sum": "15940d5d1a1899feb389cbcb2accca38",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14672237162,
+        "uuid": "e4df5724-de25-4e28-bc36-b74181bdf710",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "b8ff6eb0-521c-4df2-9e45-d5ef0f2ea324",
+        "related_files": [
+            {
+                "file": "886e0d0a-da09-4b41-938e-bb313c64a818",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L001_R2_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "d31a85febb46a514d6f386ebdd12779f",
+        "content_md5sum": "847807e2bf463c347548a5e689f85ad3",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 8237214957,
+        "uuid": "e46e909d-d1a4-41fd-bcda-e2305698d2ae",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN208658_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "4287ef9d-465a-4598-afc1-534d3e5bf869",
+        "related_files": [
+            {
+                "file": "387255a7-54c7-4173-9e10-3f0818c9dbe2",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN208658-HJM5YCCXY_s7_1_GSLv3-7_04_SL321814.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "81a2c41fa3883b132c66acddf854758b",
+        "content_md5sum": "d98b283d45aeaca5253fa3b97477a768",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 18141067060,
+        "uuid": "e23b264e-ae8a-43e8-b840-c53604d1691b",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN306815_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "8e071fc9-0c40-47de-a632-b07f483dbecb",
+        "related_files": [
+            {
+                "file": "fee9ff95-a5cf-48c5-b373-17a564f8ae18",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN306815-HJWGMCCXY_s4_2_GSLv3-7_10_SL323145.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "521df4a1f8899de03dc24b2b8abb907e",
+        "content_md5sum": "404da2b0293ffeb387bdfd4cc63bb8c0",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14883199107,
+        "uuid": "db9b7eb6-cf5e-4ecd-ab53-62cb25866f13",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN926702_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "89b804a2-8502-42a0-bdb0-5865b660f531",
+        "related_files": [
+            {
+                "file": "0fd5d52c-3b0b-4b80-867d-2d745e07e771",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN926702-HMGMHCCXY_s6_2_GSLv3-7_87_SL342869.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "dd8c21532a6d7929b5535b668877ce40",
+        "content_md5sum": "887d792b51b53070e8a72cb96650f51a",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 43050576503,
+        "uuid": "db32bd0e-6fb6-4f56-b3cd-03c4405d0179",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN208658_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a9931d27-a7c8-4cbb-a6cf-e4e14c9ddc41",
+        "related_files": [
+            {
+                "file": "02aa93d1-a9c7-40c4-8560-fc141b4dddcf",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN208658-HJL27CCXY_s1_2_GSLv3-7_04_SL321814.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "ab7a26cd7903c71143c5ed054bcf8d66",
+        "content_md5sum": "9cf0db9827703133c18154da69530578",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 44555680093,
+        "uuid": "da089abd-23f7-4d49-9e93-876584312b52",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN010067_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "0b78c0df-5181-45e8-87fa-19c01b1d935b",
+        "related_files": [
+            {
+                "file": "3f76448e-7c98-4a1a-934a-2d9e606463b8",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888969-UDN010067-M_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "2c73a7f895cd1ebb4d61b4e7e3c69061",
+        "content_md5sum": "cc9e0e92bdf95b04ded42d4f24f519f6",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 13613735512,
+        "uuid": "cf37589c-25de-40b7-b2e5-32140397d9a9",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a4f83b44-5e6b-47f9-bffd-8bde875f6005",
+        "related_files": [
+            {
+                "file": "62d7e2a0-0592-435b-80a2-0e2bfd28e873",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L002_R1_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "2f8772f8df5b8bfa5414048cc3c050d4",
+        "content_md5sum": "c31f95598bb57e11f31fab707aaa301c",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 43163370105,
+        "uuid": "cbef5d5d-141a-4f13-a271-69b28177a072",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN050112_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "2acea316-64d9-44a3-af65-2242ed3c7a80",
+        "related_files": [
+            {
+                "file": "f606f6c4-da5a-4320-a1f2-6407cb6a0333",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN050112-HL3FFALXX_s4_1_GSLv3-7_57_SL258369.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "7ab608b0ead44ac41b7207bee31c6455",
+        "content_md5sum": "6e008a8f83e9c8f59c94c6c3c672229f",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14573218920,
+        "uuid": "c150f940-bbce-4438-8d3a-56bf1c70a685",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S4_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "4bf8ccff-9fba-4f3d-97f9-ddb09cda7727",
+        "related_files": [
+            {
+                "file": "8ed5b1dc-3379-4750-ba86-d42182773904",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L004_R2_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "915ccc8e47391eb7e59b9e79181e6790",
+        "content_md5sum": "37c8b4852f14b3fc135a76a1e0763cdd",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 18212635412,
+        "uuid": "bc6da45a-88cf-4f1c-8e41-d04c8ccffcec",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN208658_S3_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "c6c9b3ad-9043-4f0c-b56e-f3bab280cb02",
+        "related_files": [
+            {
+                "file": "82f66368-69a0-403f-b0dd-7e2588d33324",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN208658-HJWGMCCXY_s7_2_GSLv3-7_04_SL321814.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "20e12661a85ca0016f6f0e9e225fddb3",
+        "content_md5sum": "0e9760d04ac2b5b251878c03182b8c2b",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 50952154225,
+        "uuid": "99293633-b611-4c9a-bd78-7de6c574ef2e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN365000_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "10e76f8c-525b-42ee-9ebc-04ec0c2f4e86",
+        "related_files": [
+            {
+                "file": "970fb148-961b-49ba-9da2-227380894fb8",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "886791-UDN365000-P_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "b34e8abf2a726d595cb2c9672065b5e3",
+        "content_md5sum": "2f0505692699221c14476a7cc7c8675b",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 52417956714,
+        "uuid": "9821b06b-4389-46e5-8998-26105f6e03e4",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN837717_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "f38b9882-62ad-49f7-84ad-914f30462463",
+        "related_files": [
+            {
+                "file": "62addf7c-681b-499e-afa8-33a2827ad12a",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "898059-UDN837717-M_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9ed684e4989056a5e90a63aa91193cce",
+        "content_md5sum": "2a9101df7ee7d82596e82df2e7db65b9",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 42182324530,
+        "uuid": "971bf99f-9099-4dd8-a18f-f62d22f77e71",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN306815_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "862e8419-1446-49ee-a7e0-fc5901dc78ef",
+        "related_files": [
+            {
+                "file": "26ec35b2-5734-4cfa-9be6-e26f46c1cdfb",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN306815-HJWGNCCXY_s2_2_GSLv3-7_10_SL323145.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "a7c204e81ca2e3d0a74b31a964d05548",
+        "content_md5sum": "b393217ee7e11dbdfd597ff59275b18f",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 48723803301,
+        "uuid": "970fb148-961b-49ba-9da2-227380894fb8",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN365000_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "7002f8f1-e464-4dec-8fef-d5923500844f",
+        "related_files": [
+            {
+                "file": "99293633-b611-4c9a-bd78-7de6c574ef2e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "886791-UDN365000-P_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "0af4f2dcac6b27f96052384006ce3e57",
+        "content_md5sum": "1a1a549d0f490b20d11e7583c6b6f46e",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47564848078,
+        "uuid": "94a76279-15a4-40fa-9e53-8efab5ca83f4",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN191434_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "1e0f1366-2264-4e71-abed-2c3ea07b282f",
+        "related_files": [
+            {
+                "file": "346e2366-b9c8-4de8-a3c2-923151bf37c3",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "887703-UDN191434-M_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "c0c1235d3df90b090a95e174172344b0",
+        "content_md5sum": "11912ac9b4ab90426f7d600a0674fbe3",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 18768419646,
+        "uuid": "94808b66-e521-48d3-9f39-8da604db5db1",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641765_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a9b0ba49-88e2-4779-a4b9-a2cb16f085a7",
+        "related_files": [
+            {
+                "file": "13ea544c-010f-48b0-a188-1e05f92908cc",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641765-HL3FVALXX_s2_2_GSLv3-7_56_SL258368.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "b7d5815bfd31189e5bd98509596015de",
+        "content_md5sum": "f776ce05a51121832edc0eb2ca2d8dd1",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 53851318677,
+        "uuid": "8ffbaf3f-52ea-4150-a2f5-8fb2823d7f3c",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN909615_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "2587d3ec-47c0-4e94-a2ea-f156494ecb59",
+        "related_files": [
+            {
+                "file": "6de9110a-bc49-4f35-af90-b9cb73f7d435",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888321-UDN909615-P_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "68f65ca3890228c2ce1439644a611050",
+        "content_md5sum": "76d5f0a326cbb6e4a381db5a07ee59f3",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 13664758475,
+        "uuid": "8ed5b1dc-3379-4750-ba86-d42182773904",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S4_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "88a93085-f43f-400a-a36b-6dfd25b9ef72",
+        "related_files": [
+            {
+                "file": "c150f940-bbce-4438-8d3a-56bf1c70a685",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L004_R1_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "7398bc4ae8aaee3d6857c395805197f4",
+        "content_md5sum": "07efe9dc8ced4dfe479da2340241562d",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47805800470,
+        "uuid": "8cda5c27-da1e-4da0-8464-0a579bfbb228",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN609185_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "118fc12e-298e-4963-9793-3ddcb49cbe65",
+        "related_files": [
+            {
+                "file": "00f8174c-dc3b-410f-a3f7-9c203cf7a8a1",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888322-UDN609185-M_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9c0903db6d8fdfbda4043c1e800a39d3",
+        "content_md5sum": "3ae739e7c782cf3908ce9eaab19ae360",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 13704647834,
+        "uuid": "886e0d0a-da09-4b41-938e-bb313c64a818",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "62f34555-cacd-4178-ad07-0c4a5e750bbf",
+        "related_files": [
+            {
+                "file": "e4df5724-de25-4e28-bc36-b74181bdf710",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L001_R1_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "d0b96b66b2b58cb92e47894524619323",
+        "content_md5sum": "5286ded32e13e85b3c706a145e2245f2",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 20440826601,
+        "uuid": "8692e085-1935-4070-9037-2c638b822357",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN588380_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "4a9b7fa1-9e7e-4217-8651-d8096e4523e3",
+        "related_files": [
+            {
+                "file": "0a3f4e1c-2036-4992-bdf5-9b04820e4b1d",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN588380-HMGW3CCXY_s7_2_GSLv3-7_88_SL342870.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "4ca4c4e36eae2bea783122820437420b",
+        "content_md5sum": "8e0fdb7ec1e3d75d7f4c65eb4a6b8dff",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 40413164302,
+        "uuid": "85cac47d-06bd-4877-8eb9-4e97cb019c7e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN688695_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "901fc54d-4dfd-4b6f-a77f-18107509372d",
+        "related_files": [
+            {
+                "file": "185c59f1-1075-4e70-9934-6800d32280e7",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN688695-HLW7TCCXY_s7_2_GSLv3-7_55_SL338604.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "632d5e2c129659ee89317bc657433b8f",
+        "content_md5sum": "5483f508a44b86a23e23c4263c38cab6",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 39263330819,
+        "uuid": "84e38d67-d10c-4521-a575-e2b35e1b03b2",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN248313_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "44637eec-ec51-49dd-a2b4-3ac52bd63e44",
+        "related_files": [
+            {
+                "file": "6d42b2ee-2be4-4bbe-be44-b89a8a25538b",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN248313-HLW7TCCXY_s5_1_GSLv3-7_53_SL338602.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "dbd5cc5bae1c02c34b6faa7f21cc21aa",
+        "content_md5sum": "3c839735160b6d3fb86a1d5dce16a04d",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 16095133463,
+        "uuid": "82f66368-69a0-403f-b0dd-7e2588d33324",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN208658_S3_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d9d0fdb9-599b-4f51-b5d8-686d20e85be9",
+        "related_files": [
+            {
+                "file": "bc6da45a-88cf-4f1c-8e41-d04c8ccffcec",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN208658-HJWGMCCXY_s7_1_GSLv3-7_04_SL321814.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "71a952c77d303b50b8d0ca86e2f50138",
+        "content_md5sum": "61799edd290695262dd66a1aaf62a841",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 41932833292,
+        "uuid": "7879f047-a717-4d2d-9cdf-d1857af14bf2",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN739388_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "3ae8fceb-e57b-413c-ae10-a027be41a7f5",
+        "related_files": [
+            {
+                "file": "1f4e2475-dd63-4a4e-95b1-0d9a95ddc0fe",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN739388-HJKVVCCXY_s7_1_GSLv3-7_02_SL321812.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "0cd95587466e98d9511a540557f9a0e2",
+        "content_md5sum": "50e3c21fbd174a55b2d2309e53be6e93",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 26594039590,
+        "uuid": "774ae973-c913-418e-8551-602646c08c3e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN233469_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "69f93a61-8bf6-4925-bdeb-cfe8ea8c1fc9",
+        "related_files": [
+            {
+                "file": "1691d531-ec33-441b-86e2-a21307c41070",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN233469-HMGGTCCXY_s5_2_GSLv3-7_89_SL342871.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "b52d728bb995a50fdf6adedce572703a",
+        "content_md5sum": "d26c1c2c40297e48e13c634a62bc72a3",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47634221818,
+        "uuid": "73f157d9-2d8e-4af1-9391-1218c160abae",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN898020_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "44148d6f-23d0-4373-9659-d32ac5ca2e40",
+        "related_files": [
+            {
+                "file": "fd4bcc61-02f4-4a13-bae3-1350c1695cc3",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN898020-HL3FFALXX_s5_2_GSLv3-7_58_SL258370.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "da107ae4637538cf31274a8bcbe2dea4",
+        "content_md5sum": "daff5e3233658105d7e179316faa03c9",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 35910176082,
+        "uuid": "7111397e-648a-4fbf-98e5-49f722c8cce3",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN378613_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "ab3a7a9f-fe8d-407e-b72c-3f9bdc9e54cd",
+        "related_files": [
+            {
+                "file": "23420317-547f-4caa-a9f7-112609ceed9a",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN378613-HLK7KCCXY_s8_1_GSLv3-7_08_SL323143.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "0c4a3e1d62bf3bece8685e5b963489ec",
+        "content_md5sum": "76c2e1783ae55b847306577e611267b1",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 55422287584,
+        "uuid": "6de9110a-bc49-4f35-af90-b9cb73f7d435",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN909615_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "2ee4a1ee-a966-4c62-a039-027018eddec0",
+        "related_files": [
+            {
+                "file": "8ffbaf3f-52ea-4150-a2f5-8fb2823d7f3c",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888321-UDN909615-P_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "d1c15d8cc3cef4aa6d112c1ffd774354",
+        "content_md5sum": "9f5c0abf37c3342789d36071bb48d941",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 42330387871,
+        "uuid": "6d42b2ee-2be4-4bbe-be44-b89a8a25538b",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN248313_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "e0ad905c-788a-4d17-8337-e34a58f6c562",
+        "related_files": [
+            {
+                "file": "84e38d67-d10c-4521-a575-e2b35e1b03b2",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN248313-HLW7TCCXY_s5_2_GSLv3-7_53_SL338602.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "514403a73e233a97de35b574237575b3",
+        "content_md5sum": "4872b6a7db856f82f9050e06955fc7d4",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 44479169538,
+        "uuid": "6d115201-1fcd-4a6f-a62a-f8c9277e887e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN563654_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "745e911f-7272-409c-96ec-ffe5d5f23fae",
+        "related_files": [
+            {
+                "file": "510e1737-411d-4ef3-b53f-c01d733e2199",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "886793-UDN563654-M_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "b12324b106169c0ebd2cfd9fc2faadfd",
+        "content_md5sum": "2f0994b2cfd780f66cf34be7dfcd92c6",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 46413512355,
+        "uuid": "681fa9d0-8378-41b4-b6d4-5006b6f51721",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN907962_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "68f7a06e-0768-48f9-943c-78087165e196",
+        "related_files": [
+            {
+                "file": "a16e74ad-01a7-4a21-a7c0-6c9fa3b1a423",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "898060-UDN907962-D_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "5430edb05cef3483b19eb43a3fc06a47",
+        "content_md5sum": "b92458bef549fe814a6825c7c1002aa2",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 39536825876,
+        "uuid": "656ad556-b1f3-4e7c-95cd-2c052fb49b85",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN648117_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a607544a-66e3-4c13-9832-d1672064e897",
+        "related_files": [
+            {
+                "file": "a8bd009b-aafe-4188-86af-628a304a8cfe",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN648117-HJKVVCCXY_s8_1_GSLv3-7_03_SL321813.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "734e6eae79cf3ee74a0d03aa4aaf2d0f",
+        "content_md5sum": "67b2de121e809d75bdbeb032b683c322",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14480913430,
+        "uuid": "62d7e2a0-0592-435b-80a2-0e2bfd28e873",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "afef4981-7be9-4e31-b611-3d8bee53f2a7",
+        "related_files": [
+            {
+                "file": "cf37589c-25de-40b7-b2e5-32140397d9a9",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L002_R2_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9474768c51d0b19507c07bbb1d79171b",
+        "content_md5sum": "e4a797389f6445b1d00436f8ec81aecc",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 43313937405,
+        "uuid": "62b46cfd-e354-4a1a-a999-f6d4152cf26d",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN926702_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "63829d35-c7ed-4d76-be11-fd1c6c92e2c4",
+        "related_files": [
+            {
+                "file": "c3786be6-eb8b-4023-a8dd-25538ab051eb",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN926702-HMGGTCCXY_s3_1_GSLv3-7_87_SL342869.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "f2d5aa4729e0aa952e83552fb2e492d4",
+        "content_md5sum": "66e9b12e7382dd2af5726fe9e41e6172",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 50386385904,
+        "uuid": "62addf7c-681b-499e-afa8-33a2827ad12a",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN837717_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "230f9d04-88d4-47ed-9187-e43a768e1c3f",
+        "related_files": [
+            {
+                "file": "9821b06b-4389-46e5-8998-26105f6e03e4",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "898059-UDN837717-M_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "8ebb1ab088bf194f8300fb0da5574320",
+        "content_md5sum": "00041fbb689c429361cdb4dff9718b26",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 60502675710,
+        "uuid": "621f17da-d596-40f7-af97-dcfb80ba6167",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN452807_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "038f5eeb-3bac-44c3-9b91-c8aebeefc2cc",
+        "related_files": [
+            {
+                "file": "e63e3595-744b-44c0-922a-d8edd28ade27",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "887701-UDN452807-P_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9fc948a37f40e8b7ef8aa526e4f87c78",
+        "content_md5sum": "4b13922992d876f6c030b18d1ba3188e",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 41199949354,
+        "uuid": "5dc96b6c-86d4-4ec5-946d-460f05694a6d",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641048_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "ad081e04-f6b8-42d1-a923-a460103d8cfc",
+        "related_files": [
+            {
+                "file": "1ef205fb-71fc-493c-84b0-1800238d366d",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641048-HJWGNCCXY_s1_1_GSLv3-7_09_SL323144.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "386d37dfaf2ff7a831ee732003fd1844",
+        "content_md5sum": "dcea9d050a62beb4d9416b63f249e26f",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 75137372363,
+        "uuid": "557a0497-e24f-44b8-9c9b-0aae5a54d1f9",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN992716_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "33882bdd-0656-4fd7-a987-efc65b72eb97",
+        "related_files": [
+            {
+                "file": "37eb8e13-8052-4e6f-9fcc-46058865aa05",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "886794-UDN992716-D_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "fe0b7af4fd954983a76c1d756e78a968",
+        "content_md5sum": "58faf59d73c25acd780bbd8872e0ea23",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 42417324752,
+        "uuid": "510e1737-411d-4ef3-b53f-c01d733e2199",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN563654_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "332f5b0d-c132-413c-a033-35d704bb92c1",
+        "related_files": [
+            {
+                "file": "6d115201-1fcd-4a6f-a62a-f8c9277e887e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "886793-UDN563654-M_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "63f187bddbe46b86f1e4341522acc310",
+        "content_md5sum": "aab8494c4e5bf70e6bec2d85c0e85845",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 11477805328,
+        "uuid": "41982f9b-00f9-49f1-a2e1-9efc1b2bcf69",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN648117_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "f76e3bbc-cf96-4249-98de-94d43d8a5b88",
+        "related_files": [
+            {
+                "file": "0b508028-dd1c-4650-80ff-94514005eccc",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN648117-HJM5YCCXY_s6_1_GSLv3-7_03_SL321813.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9f5b9fb4ecb77f2d22c074a6f2610da7",
+        "content_md5sum": "0c81cb89f7a68c671763993944ed515c",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47416752083,
+        "uuid": "3f76448e-7c98-4a1a-934a-2d9e606463b8",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN010067_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d72dcafd-9ae8-4c21-911a-3a2a665fd5aa",
+        "related_files": [
+            {
+                "file": "da089abd-23f7-4d49-9e93-876584312b52",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888969-UDN010067-M_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "42e304efb352a5ab6743499175f2e087",
+        "content_md5sum": "10b37bae1092e2bf2de80643b9d7eb00",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 40362703718,
+        "uuid": "3c64f6c2-8312-40d5-bd32-4622197fbc64",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN930725_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "935a7aaf-95c0-44da-bbd2-aae2c351c651",
+        "related_files": [
+            {
+                "file": "c769c5a6-2899-4e11-9e44-366967e3ec90",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN930725-HLW7TCCXY_s6_2_GSLv3-7_54_SL338603.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "6d0700e11deedc88f524c148d6d1f712",
+        "content_md5sum": "fd01b8b54b3b7cf422c046ffed399ddb",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 8631998866,
+        "uuid": "387255a7-54c7-4173-9e10-3f0818c9dbe2",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN208658_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "5a31f57c-3d66-41b9-8498-8f6f50a1e646",
+        "related_files": [
+            {
+                "file": "e46e909d-d1a4-41fd-bcda-e2305698d2ae",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN208658-HJM5YCCXY_s7_2_GSLv3-7_04_SL321814.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "28ef74ce4463ec5bf28d3155f34189a1",
+        "content_md5sum": "75a8a9179f109116c5ebc64c9a4c7749",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 49631759341,
+        "uuid": "346e2366-b9c8-4de8-a3c2-923151bf37c3",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN191434_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "5949cce7-58e4-4af2-846d-7525fac0834e",
+        "related_files": [
+            {
+                "file": "94a76279-15a4-40fa-9e53-8efab5ca83f4",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "887703-UDN191434-M_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "4d6055f12fcac186b9b1fb4a8d4f1709",
+        "content_md5sum": "dcd08d23a73cb5a3fa26a0efb5ed4e2f",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 38733370948,
+        "uuid": "2cc8b0c7-17d7-4666-8468-d60ac0081e77",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN287108_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "76a4885f-29d5-49c5-b740-b12b969ebc8e",
+        "related_files": [
+            {
+                "file": "bd082eb8-4c87-418d-88fd-97b38cade26a",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "887704-UDN287108-D_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9ce4b074a76dea0b1a60a88be3511374",
+        "content_md5sum": "1fd8ba4d5003f59d49a63d2cebb0a0a4",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 16381421901,
+        "uuid": "2bb68f01-4916-4982-94d5-4c43381a3676",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN930725_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "193c5d85-7f93-489a-b6f4-b41f39448134",
+        "related_files": [
+            {
+                "file": "f1ddcbbe-ac46-46b3-adeb-4e32a06577be",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN930725-HMJ2KCCXY_s6_2_GSLv3-7_54_SL338603.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "20ce3b2a1e2b248a00141f9a7a8b9131",
+        "content_md5sum": "4ec21ed5d59b04c47c103281a8abca49",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 17903314713,
+        "uuid": "2b71b784-8237-4bda-be0f-acde37cb1f2f",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN050112_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d68844ec-67e1-4cf1-bf0e-352e7230e2d9",
+        "related_files": [
+            {
+                "file": "cc3f87d5-28d9-43c1-b531-53b8c4eaa319",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN050112-HL3FVALXX_s3_2_GSLv3-7_57_SL258369.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "f3a0444dc5109cb6fa6128daeaef1d6f",
+        "content_md5sum": "40646968c96cc963cf412590db41aff0",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 12175294570,
+        "uuid": "28bb5a84-4fdb-4a6f-a56e-e5853d6dd19f",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN378613_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "7fd882d3-9aa8-4e46-adc1-f874f7b34823",
+        "related_files": [
+            {
+                "file": "354f8952-8ff4-422e-8fe7-1ac08929e01e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN378613-HJWGMCCXY_s4_2_GSLv3-7_08_SL323143.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "fad09fd1140e3cecce7ffff2d620da95",
+        "content_md5sum": "68cb2aa1b86ec2041e4949b0ba106f33",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 39586411892,
+        "uuid": "26ec35b2-5734-4cfa-9be6-e26f46c1cdfb",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN306815_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "f531b285-48e5-4509-869c-854b4ef59f25",
+        "related_files": [
+            {
+                "file": "971bf99f-9099-4dd8-a18f-f62d22f77e71",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN306815-HJWGNCCXY_s2_1_GSLv3-7_10_SL323145.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "a07e22e0de4fc1900683672483720a34",
+        "content_md5sum": "f6749edfd8424ff430cb0d8e70e270e5",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 39000913116,
+        "uuid": "23420317-547f-4caa-a9f7-112609ceed9a",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN378613_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "c9d8261f-47d0-49fb-ab4d-8fca3d3ed044",
+        "related_files": [
+            {
+                "file": "7111397e-648a-4fbf-98e5-49f722c8cce3",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN378613-HLK7KCCXY_s8_2_GSLv3-7_08_SL323143.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "c429ab5462829adf1359eab83f4ff68b",
+        "content_md5sum": "6affb64c5b46895c0b069b62d7518abb",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 15689382847,
+        "uuid": "1fcb3272-2e0e-4f78-a1e2-cc018e74ea53",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN248313_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "27ce76d9-36a1-42cb-a9fe-7705e498aae1",
+        "related_files": [
+            {
+                "file": "1d633222-45f1-42e0-973b-9ec4287630f2",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN248313-HMJ2KCCXY_s6_2_GSLv3-7_53_SL338602.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "fecbf77a464e43cb1cfbc52fc209c1b7",
+        "content_md5sum": "152f8ae1b486cd830fd5a3786e98970e",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 44400004960,
+        "uuid": "1ef205fb-71fc-493c-84b0-1800238d366d",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641048_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "47fda407-62c6-4246-b2c0-cb01a40821e3",
+        "related_files": [
+            {
+                "file": "5dc96b6c-86d4-4ec5-946d-460f05694a6d",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641048-HJWGNCCXY_s1_2_GSLv3-7_09_SL323144.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "e2d264931a3038d76f5e9c44e2bd26b9",
+        "content_md5sum": "0d39b1f291fc97216585687b912b18b3",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 20676952566,
+        "uuid": "1de95193-9719-453f-9165-2c665a2d5c2a",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN233469_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "128ec7c0-2373-4c89-9ec7-6b94560fb2c4",
+        "related_files": [
+            {
+                "file": "e74700d2-b13e-4aef-8e72-8c00d1da68aa",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN233469-HMGW3CCXY_s7_2_GSLv3-7_89_SL342871.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "de3b56462a4cc9268a27a4fcd5d2d6b1",
+        "content_md5sum": "87e6809ec7cd2fc8f44e4e45176a592f",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14714033234,
+        "uuid": "1d633222-45f1-42e0-973b-9ec4287630f2",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN248313_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "74fc61f7-6b39-4737-b377-2a37ef4745d0",
+        "related_files": [
+            {
+                "file": "1fcb3272-2e0e-4f78-a1e2-cc018e74ea53",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN248313-HMJ2KCCXY_s6_1_GSLv3-7_53_SL338602.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "a11fcf9c303c62ee9091a957e4a4ad6c",
+        "content_md5sum": "c27281bd899efb2aa9bb14747671aec6",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 17075995573,
+        "uuid": "1beec2e6-1625-42f3-923b-8e462e68f940",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN688695_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "69c672de-72b0-40f1-8fa3-3bc21d8e394d",
+        "related_files": [
+            {
+                "file": "f8e515fd-fdcb-4f84-8615-d70b6343842d",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN688695-HMJ2KCCXY_s7_1_GSLv3-7_55_SL338604.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "1a39684dd20c67913eb0cb050eaf93be",
+        "content_md5sum": "d5cbe9f2f0a216673857ca5d63f803fb",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 13436472719,
+        "uuid": "183b0705-7f8f-49a8-9e00-7ca344a0a571",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN739388_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "f4eaa1b1-668b-45b0-a9e5-bc955da7f902",
+        "related_files": [
+            {
+                "file": "5a932983-d439-4b9b-9b5f-0efaf7c41a52",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN739388-HJM5YCCXY_s6_1_GSLv3-7_02_SL321812.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "28fee1f9080a4f9d5b7a66205789d0de",
+        "content_md5sum": "f92103e6d6b99d76d67898f054c154ac",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 25184742273,
+        "uuid": "1691d531-ec33-441b-86e2-a21307c41070",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN233469_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "66eb60ac-b0f4-4b22-97af-c5f51a06f027",
+        "related_files": [
+            {
+                "file": "774ae973-c913-418e-8551-602646c08c3e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN233469-HMGGTCCXY_s5_1_GSLv3-7_89_SL342871.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "94e4001f880319afb52465eadf02e843",
+        "content_md5sum": "bec43041508cfd89cc72b7adf07b5f4e",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 16840204330,
+        "uuid": "13ea544c-010f-48b0-a188-1e05f92908cc",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641765_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "7a1bf4fc-a81a-4b0a-97a3-6c80d921990b",
+        "related_files": [
+            {
+                "file": "94808b66-e521-48d3-9f39-8da604db5db1",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641765-HL3FVALXX_s2_1_GSLv3-7_56_SL258368.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "65bc1a36b56028a122838ece0c376893",
+        "content_md5sum": "ef49667762ea9d6abcba9d2802448729",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 45612307405,
+        "uuid": "0d6544a7-7f40-4cd2-a234-4dadf5a5c5d8",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN193590_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "c6f754d0-1ff1-4f4f-a3d5-e5029382474f",
+        "related_files": [
+            {
+                "file": "376ee6fc-7236-404b-90da-62e835119eb4",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888968-UDN193590-P_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "654abe87ded3934966e5a59b015a346d",
+        "content_md5sum": "1e982b32484c1f5546cb3ba673f013ab",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 19161598936,
+        "uuid": "0a3f4e1c-2036-4992-bdf5-9b04820e4b1d",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN588380_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "09db4c31-415d-4823-8e65-735dccc6beee",
+        "related_files": [
+            {
+                "file": "8692e085-1935-4070-9037-2c638b822357",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN588380-HMGW3CCXY_s7_1_GSLv3-7_88_SL342870.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "d97314f95a26cddec1471cfeff870134",
+        "content_md5sum": "caf5bad1817d49842bac88aa0267f725",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 17470423753,
+        "uuid": "08e57c82-c641-44ae-ac5f-358cc1f909b1",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN898020_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a317d2b9-3dfa-4f7b-af08-05bbfda0bf55",
+        "related_files": [
+            {
+                "file": "904b1ebf-fcf2-440e-ab89-9c9bdb243f0e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN898020-HL3FVALXX_s3_2_GSLv3-7_58_SL258370.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "89e5b766be59ee96080c7ae0850e6a45",
+        "content_md5sum": "826a73c4eb06dd699932c958f4de6c3d",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 59689314696,
+        "uuid": "0470c236-fdac-460b-8cc3-127ce19ecf94",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN110060_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "665e8fed-de51-4c69-93f1-71344e9a9859",
+        "related_files": [
+            {
+                "file": "08347ff4-2b68-438c-9dbf-9249855fefda",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "898055-UDN110060-P_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "24867cd96669000224a16d3c545cdf0b",
+        "content_md5sum": "035a9acc126524b6d2dc18c3cd62fda2",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 37904490705,
+        "uuid": "02aa93d1-a9c7-40c4-8560-fc141b4dddcf",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN208658_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "60826f5b-62bb-4f45-aa36-9296d7e6d2e1",
+        "related_files": [
+            {
+                "file": "db32bd0e-6fb6-4f56-b3cd-03c4405d0179",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN208658-HJL27CCXY_s1_1_GSLv3-7_04_SL321814.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "617ac7bc551b89e873a103ce2af88ed2",
+        "content_md5sum": "a529bb1a494c87f24eb25a1ab3d31db0",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 16525157411,
+        "uuid": "01b2d59c-5298-458a-b814-9e2aacfeb96d",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641048_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "74aae0ff-487c-4287-bcad-462b89c9fad7",
+        "related_files": [
+            {
+                "file": "fd23c400-5b1f-4cbb-8487-9dc8ff5aeb5e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641048-HJWGMCCXY_s4_2_GSLv3-7_09_SL323144.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "9014e67d348ecb05f2a113d6055cb817",
+        "content_md5sum": "9451aba083415b171a20783dfe9841e6",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 49269674406,
+        "uuid": "00f8174c-dc3b-410f-a3f7-9c203cf7a8a1",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN609185_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "727ffc9d-888f-44dd-be63-225160d6e9ab",
+        "related_files": [
+            {
+                "file": "8cda5c27-da1e-4da0-8464-0a579bfbb228",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888322-UDN609185-M_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "79d39510d6cb0bf81aea39d0a2b745bf",
+        "content_md5sum": "ce160f00c313c739510fdbdefe03986a",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 43142519285,
+        "uuid": "fd4bcc61-02f4-4a13-bae3-1350c1695cc3",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN898020_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "8d427465-6363-48eb-8748-58931004e72a",
+        "related_files": [
+            {
+                "file": "73f157d9-2d8e-4af1-9391-1218c160abae",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN898020-HL3FFALXX_s5_1_GSLv3-7_58_SL258370.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "fa4fb6251f927e481a8650340e748ad5",
+        "content_md5sum": "412e6d2f145310cf165cc13a3de35396",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14885764021,
+        "uuid": "eafe8f40-c310-4603-b01c-4e78b25885b0",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S3_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "83752855-3ac4-4611-9c2d-0e743bca6798",
+        "related_files": [
+            {
+                "file": "3974049b-9f31-4143-86b3-a3907e45b9f3",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L003_R2_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "14dad666ba9653caccf943db9f411aec",
+        "content_md5sum": "4fa90bf6aaed94671bfce547ade06cd9",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 19375984735,
+        "uuid": "e74700d2-b13e-4aef-8e72-8c00d1da68aa",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN233469_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "f3def96f-35a9-4f57-a5ab-a15ef2b9f98b",
+        "related_files": [
+            {
+                "file": "1de95193-9719-453f-9165-2c665a2d5c2a",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN233469-HMGW3CCXY_s7_1_GSLv3-7_89_SL342871.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "b8f5fbf73316593fca4ac683c9465414",
+        "content_md5sum": "a5e5a17969c3c3b840823db4cd2312c8",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47509209692,
+        "uuid": "e3959f80-77cf-411d-b51e-8f5c93cccc1a",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN564326_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "09feebbf-3aa4-424b-a5a4-43dffbafbf52",
+        "related_files": [
+            {
+                "file": "a8a538b7-0305-454f-a9f0-ab25d4efaa05",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888323-UDN564326-D_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "c195b2f738c16b6ec8ac6fa735765b8c",
+        "content_md5sum": "c0c100315931522c189214e2bbed0cc9",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 42838060918,
+        "uuid": "e019c332-b648-4986-b2d6-eb6a55440b05",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641765_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d0bc9027-15f8-40e0-87eb-c330513d7812",
+        "related_files": [
+            {
+                "file": "492647a7-41b5-42ae-a35a-91de63867d4e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641765-HL3FFALXX_s3_1_GSLv3-7_56_SL258368.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "90ae57605b604aaebb28b9ac098c1a65",
+        "content_md5sum": "8aa3d6470540f31ad59fe75151bf4902",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 16193515813,
+        "uuid": "cc3f87d5-28d9-43c1-b531-53b8c4eaa319",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN050112_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "7dd1c098-fcea-44a3-9ec9-5df3bd9d4fc5",
+        "related_files": [
+            {
+                "file": "2b71b784-8237-4bda-be0f-acde37cb1f2f",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN050112-HL3FVALXX_s3_1_GSLv3-7_57_SL258369.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "786f807da82ab8cc269adc3181b40544",
+        "content_md5sum": "c2828782528cfb143fb340db8fbabacf",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 37768410140,
+        "uuid": "c769c5a6-2899-4e11-9e44-366967e3ec90",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN930725_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "5e6d7032-c74d-4551-ba43-fff882627144",
+        "related_files": [
+            {
+                "file": "3c64f6c2-8312-40d5-bd32-4622197fbc64",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN930725-HLW7TCCXY_s6_1_GSLv3-7_54_SL338603.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "6adc1b641e2e6b9e1607f293be465f53",
+        "content_md5sum": "9843350a735eeb675983b9b62011186b",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 46827084086,
+        "uuid": "c3786be6-eb8b-4023-a8dd-25538ab051eb",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN926702_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "0bfc208f-07e7-4f83-babd-12f2ee3b395a",
+        "related_files": [
+            {
+                "file": "62b46cfd-e354-4a1a-a999-f6d4152cf26d",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN926702-HMGGTCCXY_s3_2_GSLv3-7_87_SL342869.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "2cb47a853589d49ffa2ab47de624f442",
+        "content_md5sum": "6984ebbcde42ed1e4239b4be946c17d1",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 37235775185,
+        "uuid": "bd082eb8-4c87-418d-88fd-97b38cade26a",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN287108_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d348b746-49c8-46d7-a618-0af0983dd498",
+        "related_files": [
+            {
+                "file": "2cc8b0c7-17d7-4666-8468-d60ac0081e77",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "887704-UDN287108-D_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "92833ce3d26f7063fb67fc4ddbd5e528",
+        "content_md5sum": "3afd1b0d138411183e5548ec4c04faf1",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 43422872720,
+        "uuid": "a8bd009b-aafe-4188-86af-628a304a8cfe",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN648117_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d134a644-0127-47c5-b03e-518f4b5e0fdf",
+        "related_files": [
+            {
+                "file": "656ad556-b1f3-4e7c-95cd-2c052fb49b85",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN648117-HJKVVCCXY_s8_2_GSLv3-7_03_SL321813.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "042b8c8fb49e24e6bfd0337de4ee38c7",
+        "content_md5sum": "86af07c2ff70e889ee2b461836b16e15",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 46106413743,
+        "uuid": "a8a538b7-0305-454f-a9f0-ab25d4efaa05",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN564326_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "cf3d77fa-f5c2-4510-bb44-b74de68142db",
+        "related_files": [
+            {
+                "file": "e3959f80-77cf-411d-b51e-8f5c93cccc1a",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888323-UDN564326-D_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "19a523869a32122838f0f178bcdd2574",
+        "content_md5sum": "0795cb6211c192404d5575efbce3316f",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 44503310958,
+        "uuid": "a16e74ad-01a7-4a21-a7c0-6c9fa3b1a423",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN907962_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "8c54101c-aa75-4d6b-a88b-8dec6ac98c4a",
+        "related_files": [
+            {
+                "file": "681fa9d0-8378-41b4-b6d4-5006b6f51721",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "898060-UDN907962-D_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "f0d3230842eb1378d182d296cd4be9e7",
+        "content_md5sum": "d6731ba15a9c935cc84d568f2d285945",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 15663445416,
+        "uuid": "904b1ebf-fcf2-440e-ab89-9c9bdb243f0e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN898020_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "e73bbc28-0fb0-49c2-a288-d0eac5cc2942",
+        "related_files": [
+            {
+                "file": "08e57c82-c641-44ae-ac5f-358cc1f909b1",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN898020-HL3FVALXX_s3_1_GSLv3-7_58_SL258370.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "154043985ff48d288ffa7b5feb5f6573",
+        "content_md5sum": "5b143838dfd7418f2c111d46fe80e691",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 13695535172,
+        "uuid": "5a932983-d439-4b9b-9b5f-0efaf7c41a52",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN739388_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "95be38bd-ef5a-436a-9c85-3b8fbc482505",
+        "related_files": [
+            {
+                "file": "183b0705-7f8f-49a8-9e00-7ca344a0a571",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN739388-HJM5YCCXY_s6_2_GSLv3-7_02_SL321812.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "21cd864c6a2571d3b5c151602daaff05",
+        "content_md5sum": "929efa4f2232cc4fc21a3f76ba27b72b",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 47198617972,
+        "uuid": "492647a7-41b5-42ae-a35a-91de63867d4e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN641765_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "59330eca-b8f8-4f7c-ad46-32d2b90108a3",
+        "related_files": [
+            {
+                "file": "e019c332-b648-4986-b2d6-eb6a55440b05",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN641765-HL3FFALXX_s3_2_GSLv3-7_56_SL258368.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "5d4878d171dfb3c812588f786da90167",
+        "content_md5sum": "47b1afcda84fcbf06331d5f7ea09f573",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 13798727992,
+        "uuid": "3974049b-9f31-4143-86b3-a3907e45b9f3",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN644598_S3_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "d7763b9e-cdcd-4fd7-9481-973bb74c6883",
+        "related_files": [
+            {
+                "file": "eafe8f40-c310-4603-b01c-4e78b25885b0",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "891111-UDN644598-D_S11_L003_R1_001.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "904b34fe421eeb24f2ddb1906338ca83",
+        "content_md5sum": "c71792b61aa44eb547023dc3337ceb02",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 78445497678,
+        "uuid": "37eb8e13-8052-4e6f-9fcc-46058865aa05",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN992716_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "fd4ce90a-b78b-4cb3-81ad-75be415f9b35",
+        "related_files": [
+            {
+                "file": "557a0497-e24f-44b8-9c9b-0aae5a54d1f9",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "886794-UDN992716-D_R2.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "5c03582f5d7bd7115308c52b38c17454",
+        "content_md5sum": "78ac53b00e6fed49a10d2368d507cc49",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 43104663531,
+        "uuid": "376ee6fc-7236-404b-90da-62e835119eb4",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN193590_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "39cffa5b-172c-48ea-a47c-5c2d42534a68",
+        "related_files": [
+            {
+                "file": "0d6544a7-7f40-4cd2-a234-4dadf5a5c5d8",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "888968-UDN193590-P_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "6c93994624d0962d09e1e8101ebda5f6",
+        "content_md5sum": "c71c0346bad22cc4de0d1116e787c169",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 11337052266,
+        "uuid": "354f8952-8ff4-422e-8fe7-1ac08929e01e",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN378613_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "1f1c9e6f-abcf-4106-825e-337e0a19d042",
+        "related_files": [
+            {
+                "file": "28bb5a84-4fdb-4a6f-a56e-e5853d6dd19f",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN378613-HJWGMCCXY_s4_1_GSLv3-7_08_SL323143.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "8a723e4aac8e84fa77a9804d067a589f",
+        "content_md5sum": "406b00a04bc7ae31d352196fe5b77b6c",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 44688492248,
+        "uuid": "1f4e2475-dd63-4a4e-95b1-0d9a95ddc0fe",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN739388_S1_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "7f3647fd-4071-4193-a96c-60c6d51dca99",
+        "related_files": [
+            {
+                "file": "7879f047-a717-4d2d-9cdf-d1857af14bf2",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN739388-HJKVVCCXY_s7_2_GSLv3-7_02_SL321812.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "361c69b631291d074aa6d2c2ba5de804",
+        "content_md5sum": "e98980f3575f30c9112a88e0fcae98e2",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 37644533147,
+        "uuid": "185c59f1-1075-4e70-9934-6800d32280e7",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN688695_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "67f7b6ce-0d5f-48fa-9a09-aafd0840b12a",
+        "related_files": [
+            {
+                "file": "85cac47d-06bd-4877-8eb9-4e97cb019c7e",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN688695-HLW7TCCXY_s7_1_GSLv3-7_55_SL338604.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "c6b5960ba2d1b15b99272eee16f4c138",
+        "content_md5sum": "97f9426e640e7c0a8c45bde5ea3dc8a6",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 14052464999,
+        "uuid": "0fd5d52c-3b0b-4b80-867d-2d745e07e771",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN926702_S2_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "69bba432-603c-4ea7-9955-f25223bb31c1",
+        "related_files": [
+            {
+                "file": "db9b7eb6-cf5e-4ecd-ab53-62cb25866f13",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN926702-HMGMHCCXY_s6_1_GSLv3-7_87_SL342869.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "81fd931a03dcd178d20654ec275beb88",
+        "content_md5sum": "42249ee16ff6caa53fb9eea3fa5cc6f0",
+        "paired_end": "1"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 11642834853,
+        "uuid": "0b508028-dd1c-4650-80ff-94514005eccc",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN648117_S2_R2"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "b0010c27-23b7-4253-a7f6-79b419478d42",
+        "related_files": [
+            {
+                "file": "41982f9b-00f9-49f1-a2e1-9efc1b2bcf69",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "UDN648117-HJM5YCCXY_s6_2_GSLv3-7_03_SL321813.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "482652f8fda61162bec9bdc1100e1358",
+        "content_md5sum": "af9b61299d67808f7d740841c88c413c",
+        "paired_end": "2"
+    },
+    {
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "file_size": 57247881726,
+        "uuid": "08347ff4-2b68-438c-9dbf-9249855fefda",
+        "file_type": "reads",
+        "aliases": [
+            "cgap:UDN110060_S1_R1"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "quality_metric": "a4fb7a90-7e2b-4ce7-af71-9922e63e26a0",
+        "related_files": [
+            {
+                "file": "0470c236-fdac-460b-8cc3-127ce19ecf94",
+                "relationship_type": "paired with"
+            }
+        ],
+        "filename": "898055-UDN110060-P_R1.fastq.gz",
+        "file_classification": "raw file",
+        "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "status": "in review",
+        "md5sum": "5d971168590cbb7d1bfde31c218c22fb",
+        "content_md5sum": "bad6b0902d300fac627047671ea62379",
+        "paired_end": "1"
+    }
+]
