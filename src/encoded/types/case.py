@@ -36,7 +36,7 @@ class Case(Item):
         "families.members.mother",
         "families.members.status",
         "families.members.accession",
-        "families.members.life_status"
+        "families.members.is_deceased"
     ]
 
     @calculated_property(schema={

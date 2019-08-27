@@ -346,7 +346,7 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element}
      */
     render() {
-        const { context } = this.props;
+        const { context, alerts } = this.props;
         const titleTabObj = {
             'className' : "title-tab",
             'tab' : <TitleTab {..._.pick(this.props, 'schemas', 'href', 'context')} />,
@@ -360,6 +360,9 @@ export default class DefaultItemView extends React.PureComponent {
         };
         return (
             <div className={DefaultItemView.className(context)} id="content">
+                <div id="item-page-alerts-container">
+                    <Alerts alerts={alerts} className="alerts" />
+                </div>
                 {/* this.itemHeader() */}
                 {/* this.itemMidSection() */}
                 <TabView
