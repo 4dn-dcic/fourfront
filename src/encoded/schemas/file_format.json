@@ -13,22 +13,12 @@
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
-        },
-        "status": {
-            "title": "Status",
-            "type": "string",
-            "permission": "import_items",
-            "default": "in review by lab",
-            "enum" : [
-                "in review by lab",
-                "released",
-                "deleted"
-            ]
         },
         "file_format": {
             "title": "File Format",
