@@ -44,6 +44,14 @@
                 "tissue"
             ]
         },
+        "completed_processes": {
+            "title": "Completed data processing",
+            "type": "array",
+            "items": {
+                "title": "Completed process",
+                "type": "string"
+            }
+        },
         "specimen_accession_date": {
             "title": "Specimen Accession Date",
             "description": "Date of specimen accessioning by sequencing lab",
