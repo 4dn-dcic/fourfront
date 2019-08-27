@@ -28,12 +28,14 @@ def includeme(config):
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
     'user',
+    'file_format'
     'institution',
     'project',
     'disease',
     'case',
     'individual',
-    'sample'
+    'sample',
+    'workflow'
 ]
 
 IS_ATTACHMENT = [
