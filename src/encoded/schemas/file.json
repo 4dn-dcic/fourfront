@@ -191,16 +191,17 @@
                 "uploading",
                 "uploaded",
                 "upload failed",
-                "deleted",
-                "replaced",
-                "revoked",
-                "archived",
-                "pre-release",
-                "released",
-                "released to project",
-                "archived to project",
                 "to be uploaded by workflow",
-                "restricted"
+                "current",
+                "released",
+                "replaced",
+                "released to project",
+                "released to institution",
+                "in public review",
+                "in review",
+                "obsolete",
+                "inactive",
+                "deleted"
             ]
         },
         "quality_metric": {

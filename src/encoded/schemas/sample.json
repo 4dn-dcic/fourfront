@@ -68,8 +68,7 @@
             "title": "Reference Protocol",
             "description": "Reference Protocol Document.",
             "type": "string",
-            "lookup": 50,
-            "linkTo": "Protocol"
+            "lookup": 50
         },
         "files": {
             "title": "Data Files",
