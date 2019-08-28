@@ -92,7 +92,37 @@
             "linkTo": "Construct",
             "lookup": 95,
             "use_for": ["TRIP"]
-        }
+        },
+        "digestion_enzyme": {
+            "title": "Digestion Enzyme",
+            "description": "The enzyme used for digestion of the DNA.",
+            "comment": "See Enzymes sheet or collection for existing items.",
+            "type": "string",
+            "lookup": 110,
+            "linkTo": "Enzyme",
+            "use_for": ["MARGI"]
+        },
+        "enzyme_lot_number": {
+            "title": "Digestion Enzyme Lot Number",
+            "description": "Lot number of batch of enzyme used to digest DNA",
+            "type": "string",
+            "lookup": 111,
+            "use_for": ["MARGI"]
+        },
+        "digestion_time": {
+            "title": "Digestion Time (min)",
+            "description": "Time of digestion step in minutes",
+            "type": "number",
+            "lookup": 112,
+            "use_for": ["MARGI"]
+        },
+        "digestion_temperature": {
+            "title": "Digestion Temperature (°C)",
+            "description": "Temperature of digestion step in degrees Celsius",
+            "type": "number",
+            "lookup": 113,
+            "use_for": ["MARGI"]
+        },
     },
     "columns": {
         "experiment_summary":{
