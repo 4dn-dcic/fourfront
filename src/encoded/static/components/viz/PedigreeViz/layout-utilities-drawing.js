@@ -252,10 +252,9 @@ export function createEdges(objectGraph, dims, graphHeight){
 }
 
 function manhattanDistance(fromV, toV){
-    // Manhattan distance
     const xDiff = Math.abs(fromV[0] - toV[0]);
     const yDiff = Math.abs(fromV[1] - toV[1]);
-    return (yDiff + xDiff);
+    return yDiff + xDiff;
 }
 
 /** Needs work - maybe along w. computeVisibilityGraph **/
@@ -282,9 +281,10 @@ function tracePaths(adjustableEdges, visibilityGraph){
         return edge[connectsAt];
     }
 
-    function getNextEdgeFromQ(currV, targetV, skip=null){
+    function getNextAvailableEdgeSegments(currV, skip=null){
         const hLen = hSegmentQ.length;
         const vLen = vSegmentQ.length;
+        const resultList = [];
         let i = 0;
         let checkQ;
         for (i = 0; i < (vLen + hLen); i++){
@@ -298,16 +298,16 @@ function tracePaths(adjustableEdges, visibilityGraph){
             const v = getEdgeTargetV(currV, edge);
             if (!v) continue;
             if (skip && skip.has(edge)) continue;
-            return { edge, v };
+            resultList.push({ edge, v });
         }
-        throw new Error("No viable edges found.");
+        return resultList;
     }
 
-    function computeDistance(initCurrV, targetV, edgeIndex=0){
+    function computeDistance(initCurrV, targetV, initSearchPath = []){
 
         const vQueue = [{
             v: initCurrV,
-            searchPath: [],
+            searchPath: initSearchPath,
             pathLengthCost: 0,
             skip: new Set()
         }];
@@ -323,43 +323,48 @@ function tracePaths(adjustableEdges, visibilityGraph){
             let i;
             for (i = 0; i < vQueue.length; i++){
                 const { v, pathLengthCost, searchPath } = vQueue[i];
-                let costToTargetEstimate = manhattanDistance(v, targetV) + pathLengthCost;
 
+                const distToTargetEst = manhattanDistance(v, targetV);
                 const prevEdge1 = searchPath[searchPath.length - 1];
                 const prevEdge2 = searchPath[searchPath.length - 2];
+                const isVertical = prevEdge1[0][0] === prevEdge1[1][0];
+                let costToTargetEstimate = distToTargetEst + pathLengthCost;
 
                 if (prevEdge2 && !(
                     (
-                        prevEdge1[0][0] === prevEdge1[1][0] &&
-                        prevEdge2[0][0] === prevEdge2[1][0]
+                        isVertical && prevEdge2[0][0] === prevEdge2[1][0]
                     ) || (
-                        prevEdge1[0][1] === prevEdge1[1][1] &&
-                        prevEdge2[0][1] === prevEdge2[1][1]
+                        !isVertical && prevEdge2[0][1] === prevEdge2[1][1]
                     )
                 )){ // If not both vertical or horizontal
-                    costToTargetEstimate = costToTargetEstimate * 2;
+                    costToTargetEstimate = costToTargetEstimate * 3;
                 }
 
                 //todo ?
-                /*
-                let intersected = false;
-                for (let j = 0; j < edgeIndex; j++){
-                    const prevAdjEdge = adjustableEdges[j];
-                    for (let j2 = 0; j2 < prevAdjEdge.vertices.length; j2++){
-                        const prevAdjEdgeV = prevAdjEdge.vertices[j2];
-                        if (prevAdjEdgeV[0] === v[0] && prevAdjEdgeV[1] === v[1]){
-                            // Intersection
-                            //console.log("INTERSECTED", v);
-                            intersected = true;
-                            break;
+                ///*
+                let intersected = 0;
+                adjustableEdges.forEach(function(edge){
+                    if (typeof edge._tempNextVertices === 'undefined') return;
+                    for (let j2 = 1; j2 < edge._tempNextVertices.length; j2++){
+                        const prevAdjEdge = [ edge._tempNextVertices[j2-1], edge._tempNextVertices[j2] ];
+                        if (isVertical && prevAdjEdge[0][1] === prevAdjEdge[1][1] && v[1] === prevAdjEdge[0][1]){
+                            if ((prevAdjEdge[0][0] >= v[0] && prevAdjEdge[1][0] <= v[0]) || (prevAdjEdge[0][0] <= v[0] && prevAdjEdge[1][0] >= v[0])){
+                                intersected++;
+                                break;
+                            }
+                        }
+                        if (!isVertical && prevAdjEdge[0][0] === prevAdjEdge[1][0] && v[0] === prevAdjEdge[0][0]){
+                            if ((prevAdjEdge[0][1] >= v[1] && prevAdjEdge[1][1] <= v[1]) || (prevAdjEdge[0][1] <= v[1] && prevAdjEdge[1][1] >= v[1])){
+                                intersected++;
+                                break;
+                            }
                         }
                     }
-                    if (intersected) break;
-                }
+                });
                 if (intersected){
-                    costToTargetEstimate * 3;
+                    costToTargetEstimate = costToTargetEstimate * ((intersected / 4) + 1);
                 }
-                */
+                //*/
 
                 if (costToTargetEstimate < bestCostEstimate){
                     bestCostEstimate = costToTargetEstimate;
@@ -383,73 +388,51 @@ function tracePaths(adjustableEdges, visibilityGraph){
                 heuristicCostTotal
             } = currArgs;
 
-            // TODO see if remembered dist <= than new, & update
-
             const existingRes = bestResultsPerVertex.get(currV);
-            if (existingRes && (existingRes.pathLengthCost < currPathLengthCost || existingRes.heuristicCostTotal < heuristicCostTotal)){
+            if (existingRes && existingRes.pathLengthCost < currPathLengthCost){
+                continue;
+            }
+            if (existingRes && existingRes.heuristicCostTotal <= heuristicCostTotal){
                 continue;
             }
             bestResultsPerVertex.set(currV, currArgs);
 
-            if (currV[0] === 560 && currV[1] === 160){
+            if (currV[0] === 600 && currV[1] === 40){
                 console.log(
                     "GOTNEWWW", currV,
                     '\nDEPTH', currSearchPath.length,
-                    '\nCOSTNOW', currPathLengthCost,
+                    '\nCOSTNOW', currPathLengthCost, heuristicCostTotal,
                     '\nOWNPATH', currSearchPath.map(function(e){ return e[0].join(',') + '-' + e[1].join(','); }),
                     //'\nSKIP', [...skip.values()]
                 );
             }
 
-            const nextArgSets = [];
-            while (true){ // Collect viable next edges
-                try {
-                    const nextArgs = getNextEdgeFromQ(currV, targetV, skip);
-                    nextArgSets.push(nextArgs);
-                    skip.add(nextArgs.edge);
-                } catch (e) {
-                    //console.error(e);
+            if (currV[0] === targetV[0] && currV[1] === targetV[1]){
+                if (currPathLengthCost < bestPathTotalCost){
+                    bestPathTotalCost = currPathLengthCost;
+                    bestPathTotal = currSearchPath;
+                    console.info("FOUND after", iterations);
                     break;
                 }
             }
 
-            //console.log('VV', currV, targetV, currPathLengthCost, nextArgSets, [...skip], iterations);
+            const nextAvailableSegments = getNextAvailableEdgeSegments(currV, skip);
 
-            let found = false;
-            nextArgSets.forEach(function({ edge, v, costEst }){
-                if (v[0] === targetV[0] && v[1] === targetV[1]){
-                    const resultToCache = {
-                        costToTarget: manhattanDistance(...edge),
-                        pathToTarget: [edge]
-                    };
-                    const retObj = {
-                        cost: currPathLengthCost + resultToCache.costToTarget,
-                        path: [].concat(currSearchPath).concat(resultToCache.pathToTarget)
-                    };
-                    if (retObj.cost < bestPathTotalCost){
-                        bestPathTotalCost = retObj.cost;
-                        bestPathTotal = retObj.path;
-                    }
-                    bestResultsPerVertex.set(currV, resultToCache);
-                    console.log('Computed', retObj.cost, retObj.path, retObj.cost < bestPathTotalCost);
-                    found = true;
-                    return;
-                }
+            //console.log('VV', currV, targetV, currPathLengthCost, nextEdgesAndVs, [...skip], iterations);
+
+            nextAvailableSegments.forEach(function({ edge, v }){
+                const nextSkip = new Set(skip);
+                nextSkip.add(edge);
                 vQueue.push({
                     v,
                     searchPath: [].concat(currSearchPath).concat([edge]),
                     pathLengthCost: currPathLengthCost + manhattanDistance(...edge),
-                    skip: new Set(skip),
+                    skip: nextSkip,
                     heuristicCostTotal
                 });
             });
 
             iterations++;
-
-            if (found){
-                console.info("FOUND after", iterations);
-                break;
-            }
 
             if (iterations > 20000){
                 console.error("PAST 20k!!!");
@@ -468,7 +451,7 @@ function tracePaths(adjustableEdges, visibilityGraph){
         const toV = edge.vertices[edgeVLen - 2];
 
         console.log('Orig', edge, edge.vertices.slice(0));
-        const { cost, path } = computeDistance(fromV, toV, edgeIndex);
+        const { cost, path } = computeDistance(fromV, toV, [ edge.vertices.slice(0,2) ]);
 
         console.log("COST", cost);
 
@@ -478,13 +461,13 @@ function tracePaths(adjustableEdges, visibilityGraph){
 
         // Remove edges from queues
         let pathIdx;
-        for (pathIdx = 0; pathIdx < path.length; pathIdx++){
-            const e = path[pathIdx];
-            const useQ = e[0][0] === e[1][0] ? vSegmentQ : hSegmentQ;
-            let i;
-            let found = false;
-            for (i = 0; i < useQ.length; i++){
-                if (useQ[i] === e){
+        for (pathIdx = 1; pathIdx < path.length; pathIdx++){ // Skip first edge segment (edge ledge)
+            const edgeSegmentToRemove = path[pathIdx];
+            const useQ = (edgeSegmentToRemove[0][0] === edgeSegmentToRemove[1][0] ? vSegmentQ : hSegmentQ);
+            const useQLen = useQ.length;
+            let found = false, i;
+            for (i = 0; i < useQLen; i++){
+                if (useQ[i] === edgeSegmentToRemove){
                     found = true;
                     break;
                 }
@@ -492,39 +475,60 @@ function tracePaths(adjustableEdges, visibilityGraph){
             if (found){
                 useQ.splice(i, 1);
             } else {
-                console.error("couldnt delete", e);
+                console.error("couldnt delete", edgeSegmentToRemove);
             }
         }
 
-        const newPoints = path.reduce(function(m, edgePart){
-            if (m.length === 0){
-                if (edge.vertices[1][0] === edgePart[0][0] && edge.vertices[1][1] === edgePart[0][1]){
-                    // Make sure connect edges at right vertex
-                    m.push(edgePart[1]);
-                } else {
-                    m.push(edgePart[0]);
-                }
-                return m;
-            }
-
+        edge._tempNextVertices = path.reduce(function(m, edgePart){
             const lastAdded = m[m.length - 1];
-            let nextToAdd;
-
             if (lastAdded[0] === edgePart[0][0] && lastAdded[1] === edgePart[0][1]){
-                nextToAdd = edgePart[1];
+                m.push(edgePart[1]);
             } else {
-                nextToAdd = edgePart[0];
+                m.push(edgePart[0]);
             }
-
-            m.push(nextToAdd);
-
             return m;
-        }, []);
+        }, [ edge.vertices[0] ]);
 
-        const removeLen = edge.vertices.length - 3;
-        edge._tempNextVertices = edge.vertices.slice();
-        edge._tempNextVertices.splice(2, removeLen, ...newPoints);
-        console.log('New', removeLen, newPoints, edge._tempNextVertices.slice(0), path);
+        // Last edgeLedge
+        edge._tempNextVertices.push(edge.vertices[edge.vertices.length - 1]);
+        edge._visibilityGraphVertices = edge._tempNextVertices.slice(0);
+
+        // Flatten joining vertical + horizontal segments into bigger segments to simplify DOM
+        // path 'd' attribute as well as improve intersection checking performance.
+        const { prevV: lastV, vertices: flattenedVertices } = edge._tempNextVertices.reduce(function(m, v){
+            if (!m.prevV){
+                m.vertices.push(v);
+                return { prevV: v, vertices: m.vertices, currDir: "any" };
+            }
+            let nextDir = m.currDir;
+            if (m.currDir === "any"){
+                if (v[0] === m.prevV[0]){
+                    nextDir = "horizontal";
+                } else {
+                    nextDir = "vertical";
+                }
+            } else if (m.currDir === "horizontal"){
+                if (v[0] !== m.prevV[0]){
+                    m.vertices.push(m.prevV);
+                    nextDir = "vertical";
+                }
+            } else if (m.currDir === "vertical"){
+                if (v[1] !== m.prevV[1]){
+                    m.vertices.push(m.prevV);
+                    nextDir = "horizontal";
+                }
+            }
+            return { prevV: v, vertices: m.vertices, currDir: nextDir };
+        }, { prevV : null, vertices: [], currDir : null });
+
+        if (flattenedVertices[flattenedVertices.length - 1] !== lastV){
+            flattenedVertices.push(lastV);
+        }
+
+        edge._tempNextVertices = flattenedVertices;
+
+        console.log('New', edge._tempNextVertices.slice(0), path);
+
 
     });
 
@@ -535,15 +539,6 @@ function tracePaths(adjustableEdges, visibilityGraph){
     });
 }
 
-/**
- * @todo
- * Performance esp. can be improved by getting rid of the incremental xCoord and yCoord
- * which are used to define lines (before they get broken up into line segments)
- * and instead traversing the graph and collecting all x coords and y coords of interest to
- * use as lines which then break up into segments. If this is is done, the graph automatically
- * becomes a little less pretty, so would need to add a subsequent step (maybe dif function) where
- * normalize paths to go down center of 'alleys'.
- */
 export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, countDirectEdges = true, divCount = 2){
 
     const hSegments = [];
@@ -895,10 +890,10 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
  * Make sure only 1 object reference exists for each
  * vertex (array of [x,y]) for simpler comparisons.
  */
-function uniquifyVertices(...pathLists){
+function uniquifyVertices(...edgeSegmentsList){
     const uniqueVertices = new Set();
-    const allPaths = pathLists.reduce(function(m, paths){
-        m = m.concat(paths);
+    const allPaths = edgeSegmentsList.reduce(function(m, verticesList){
+        m = m.concat(verticesList);
         return m;
     }, []);
     allPaths.forEach(function(pathSegment){
