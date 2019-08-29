@@ -745,12 +745,20 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
                 if (bb[0][1] <= yCoord && bb[3][1] >= yCoord){
                     splitArrs.push([ bb[0][0], bb[3][0] ]);
                     // Add edgeLedge splits
-                    if (bb.obstacleType !== 'edge'){
+                    if (bb.obstacleType === 'individual'){
                         if (bb[0][0] - dims.edgeLedge >= 0){
                             splits.add(bb[0][0] - dims.edgeLedge);
                         }
                         if (bb[3][0] + dims.edgeLedge <= graphWidth){
                             splits.add(bb[3][0] + dims.edgeLedge);
+                        }
+                    } else if (bb.obstacleType === 'relationship'){
+                        const centerPt = bb[0][0] + ((bb[3][0] - bb[0][0]) / 2);
+                        if (centerPt - dims.edgeLedge >= 0){
+                            splits.add(centerPt - dims.edgeLedge);
+                        }
+                        if (centerPt + dims.edgeLedge <= graphWidth){
+                            splits.add(centerPt + dims.edgeLedge);
                         }
                     }
                 } else {
