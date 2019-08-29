@@ -1,0 +1,442 @@
+[
+    {
+        "uuid": "93fdd533-e24f-43d3-9aed-ab06017875f2",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "a4cecf10-5eee-4f78-b094-3ea8a55a5a3b"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN452807"
+        ],
+        "sex": "unknown",
+        "father": "02647a21-684a-47f2-833d-6a0a1e25b53d",
+        "mother": "a68e06ad-a407-4d65-a600-a1c094cfaffe",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "a68e06ad-a407-4d65-a600-a1c094cfaffe",
+        "institution": "hms-dbmi",
+        "samples": [
+            "cacc5929-216c-4bbd-9686-aad111d81561"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN191434"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "02647a21-684a-47f2-833d-6a0a1e25b53d",
+        "institution": "hms-dbmi",
+        "samples": [
+            "0e06e761-bc1b-498c-a82a-9a4aa1fffc48"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN287108"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "37902b41-71cc-4559-b456-8447201dcccb",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "b2d1d0f6-cc3f-4261-b7fb-c462d0194b1f"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN110060"
+        ],
+        "sex": "unknown",
+        "father": "c44764e0-3697-45b9-9ef3-7bcbe2f343a8",
+        "mother": "94ac4013-b103-47b0-a0fd-59df382d77dc",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "94ac4013-b103-47b0-a0fd-59df382d77dc",
+        "institution": "hms-dbmi",
+        "samples": [
+            "a2ac5d55-c9f8-4fba-916e-25375e7b0fd4"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN837717"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "c44764e0-3697-45b9-9ef3-7bcbe2f343a8",
+        "institution": "hms-dbmi",
+        "samples": [
+            "1f13090a-c94d-4774-8075-81cc9afd85b4"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN907962"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "e807f97f-7fdb-4e42-8f5b-61b778e65206",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "c5562f36-08f5-44ca-ae82-9980a5f7a2b7"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN378613"
+        ],
+        "sex": "unknown",
+        "father": "ef3d2591-9b01-4572-a1ad-ea33b9c9b92c",
+        "mother": "a48ad8fb-45cf-40f9-8cfb-d3e0c50a541d",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "ef3d2591-9b01-4572-a1ad-ea33b9c9b92c",
+        "institution": "hms-dbmi",
+        "samples": [
+            "2a99f7bd-0953-49dd-bef7-6cf7f42109ec"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN306815"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "a48ad8fb-45cf-40f9-8cfb-d3e0c50a541d",
+        "institution": "hms-dbmi",
+        "samples": [
+            "eb3eb780-b937-419d-b1c3-8a1c9b51f264"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN641048"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "5ff06a8b-06ae-4d96-86a2-a916ce61521f",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "aa2f89a8-8f18-421e-9545-e0714dad1610"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN365000"
+        ],
+        "sex": "unknown",
+        "father": "cd049338-8856-4a37-b2ca-4c81aaf52903",
+        "mother": "e175f23c-52ef-497d-abbb-cd0e1722dbfb",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "e175f23c-52ef-497d-abbb-cd0e1722dbfb",
+        "institution": "hms-dbmi",
+        "samples": [
+            "d9341bc9-612f-45d4-b82e-71df65c0b4e8"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN563654"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "cd049338-8856-4a37-b2ca-4c81aaf52903",
+        "institution": "hms-dbmi",
+        "samples": [
+            "1f8859d3-95fe-46ea-865a-a84863e32978"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN992716"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "d94de448-8cf6-49d7-ae48-84feb86d30c9",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "e0fe9b73-e4e6-4a84-b030-3da6673fee46"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN739388"
+        ],
+        "sex": "unknown",
+        "father": "c1f77048-729c-402d-b2a3-1bbc8760dd5e",
+        "mother": "f7482293-c581-485b-83cb-b940a6809783",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "f7482293-c581-485b-83cb-b940a6809783",
+        "institution": "hms-dbmi",
+        "samples": [
+            "940144b0-8d10-4290-976e-809eb7c58159"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN648117"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "c1f77048-729c-402d-b2a3-1bbc8760dd5e",
+        "institution": "hms-dbmi",
+        "samples": [
+            "c30642a6-b0f4-45ff-97c1-3584d4502eba"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN208658"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "5edc3f00-e59e-4add-a2da-3083c1b4b15b",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "f1d2cb7f-3200-4cbd-867c-8baf0302d9e3"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN926702"
+        ],
+        "sex": "unknown",
+        "father": "0549e4b7-0818-407c-a2e4-464f769cab5d",
+        "mother": "5b691159-8171-4417-89a7-5edb56622b86",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "5b691159-8171-4417-89a7-5edb56622b86",
+        "institution": "hms-dbmi",
+        "samples": [
+            "2a1bf187-f13e-44b7-8828-d56cc6826d98"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN233469"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "0549e4b7-0818-407c-a2e4-464f769cab5d",
+        "institution": "hms-dbmi",
+        "samples": [
+            "f64696f6-48d4-44b8-963a-8a218f210cc1"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN588380"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "3def7bdf-8514-45c2-9211-2a259cd5ec84",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "d2461ff0-9df3-4075-9237-832664b27550"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN909615"
+        ],
+        "sex": "unknown",
+        "father": "29f35693-a300-407e-9046-2784b7d2199f",
+        "mother": "7d07b647-ebb4-4447-99ce-2ac573068d0c",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "7d07b647-ebb4-4447-99ce-2ac573068d0c",
+        "institution": "hms-dbmi",
+        "samples": [
+            "3d7d111f-d57a-4ea4-8497-fccff02c7061"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN609185"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "29f35693-a300-407e-9046-2784b7d2199f",
+        "institution": "hms-dbmi",
+        "samples": [
+            "799d6034-e45d-47cb-9928-250c0d378d76"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN564326"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "e8495b67-07e4-4de0-99fb-4c59d4d03c0e",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "2b1c5784-3f79-4f9b-8a8c-6af9faa4c69d"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN248313"
+        ],
+        "sex": "unknown",
+        "father": "1cba983a-7b2e-4eba-bbe0-3eb75f04166c",
+        "mother": "53bd2de4-f416-414b-a256-85bfa065f131",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "53bd2de4-f416-414b-a256-85bfa065f131",
+        "institution": "hms-dbmi",
+        "samples": [
+            "ba8b3c0a-4564-4b67-83b4-562c4edbec26"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN688695"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "1cba983a-7b2e-4eba-bbe0-3eb75f04166c",
+        "institution": "hms-dbmi",
+        "samples": [
+            "ccec2192-d399-4c68-9a11-86795fa6109d"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN930725"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "58f198c8-a2e5-4259-834d-2e38c5c2a70a",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "c1b88fd2-03db-454d-a518-a9ad9b0769e2"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN641765"
+        ],
+        "sex": "unknown",
+        "father": "c1f460ab-35d5-443f-a9c1-a88c01eaa48b",
+        "mother": "ada763a4-1540-4022-b137-bee0c2e57101",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "ada763a4-1540-4022-b137-bee0c2e57101",
+        "institution": "hms-dbmi",
+        "samples": [
+            "cdb1994c-f0b8-41b6-848c-4c1ae284d78c"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN898020"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "c1f460ab-35d5-443f-a9c1-a88c01eaa48b",
+        "institution": "hms-dbmi",
+        "samples": [
+            "7d316456-82f8-4217-9185-af72afd8e44a"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN050112"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "db40f905-3a69-4af5-9e10-8a55e9098f6d",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "samples": [
+            "d5e4b1c1-2341-4a38-aa3a-20d0c64eb570"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN193590"
+        ],
+        "sex": "unknown",
+        "father": "b820ef62-3a44-4085-944c-72359ce4fc2f",
+        "mother": "db904433-b80a-4cb1-bbec-3b3f3ff73dcb",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "db904433-b80a-4cb1-bbec-3b3f3ff73dcb",
+        "institution": "hms-dbmi",
+        "samples": [
+            "d2ad7be8-6b5c-4779-9939-dc10486392d3"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN010067"
+        ],
+        "sex": "female",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "b820ef62-3a44-4085-944c-72359ce4fc2f",
+        "institution": "hms-dbmi",
+        "samples": [
+            "a8d2bb32-36cd-4598-b7d6-5b449dc0012d"
+        ],
+        "life_status": "alive",
+        "aliases": [
+            "cgap:UDN644598"
+        ],
+        "sex": "male",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]

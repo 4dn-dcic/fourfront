@@ -1,0 +1,124 @@
+[
+    {
+      "docker_image_name": "duplexa/4dn-hic:v42",
+      "category": [
+        "processing"
+      ],
+      "steps": [
+        {
+          "meta": {
+            "software_used": [
+              "02d636b9-d82d-4da9-950c-2ca994a13209"
+            ],
+            "analysis_step_types": [
+              "alignment"
+            ]
+          },
+          "name": "bwa-mem",
+          "inputs": [
+            {
+              "meta": {
+                "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "cardinality": "single",
+                "global": true,
+                "type": "data file"
+              },
+              "name": "fastq1",
+              "source": [
+                {
+                  "name": "fastq1"
+                }
+              ]
+            },
+            {
+              "meta": {
+                "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "cardinality": "single",
+                "global": true,
+                "type": "data file"
+              },
+              "name": "fastq2",
+              "source": [
+                {
+                  "name": "fastq2"
+                }
+              ]
+            },
+            {
+              "meta": {
+                "cardinality": "single",
+                "global": true,
+                "type": "parameter"
+              },
+              "name": "nThreads",
+              "source": [
+                {
+                  "name": "nThreads"
+                }
+              ]
+            }
+          ],
+          "outputs": [
+            {
+              "meta": {
+                "file_format": "bam",
+                "cardinality": "single",
+                "global": true,
+                "type": "data file"
+              },
+              "target": [
+                {
+                  "name": "out_bam"
+                }
+              ],
+              "name": "out_bam"
+            }
+          ]
+        }
+      ],
+      "uuid": "10eedadc-50f9-4bb4-919b-09a8b731d0cc",
+      "description": "Creating a lossless alignment bam file from a pair of fastq files",
+      "version_upgrade_log": "use of official release of bwa",
+      "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+      "arguments": [
+        {
+          "workflow_argument_name": "fastq1",
+          "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+          "description": "",
+          "argument_type": "Input file"
+        },
+        {
+          "workflow_argument_name": "fastq2",
+          "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+          "description": "",
+          "argument_type": "Input file"
+        },
+        {
+          "workflow_argument_name": "nThreads",
+          "argument_type": "parameter"
+        },
+        {
+          "workflow_argument_name": "out_bam",
+          "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+          "argument_type": "Output processed file"
+        }
+      ],
+
+      "workflow_language": "CWL",
+      "app_version": "0.2.6",
+      "title": "Alignment for Hi-C using bwa-mem 0.2.6",
+      "docker_registry_url": "https://hub.docker.com/",
+      "accession": "GAPWF84NFOQP",
+      "name": "bwa-mem",
+      "schema_version": "7",
+      "app_name": "bwa-mem",
+      "cwl_pointer": "",
+      "cwl_directory_url_draft3": "",
+      "cwl_main_filename": "bwa-mem.cwl",
+      "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+      "status": "released",
+      "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+      "institution": "hms-dbmi",
+      "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]

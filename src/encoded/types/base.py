@@ -361,7 +361,6 @@ class Item(snovault.Item):
 
         super(Item, self)._update(properties, sheets)
 
-
     @snovault.calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",

@@ -1,0 +1,158 @@
+{
+    "title": "Software",
+    "description": "Schema for submitting analysis software.",
+    "id": "/profiles/software.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["name", "software_type", "project", "institution"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "alias", "title", "aliases"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/attribution" }
+    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "name": {
+            "title": "Name",
+            "description": "The name of the software.",
+            "type": "string"
+        },
+        "version": {
+            "title": "Version",
+            "description": "The software version number.",
+            "type": "string"
+        },
+        "commit": {
+            "title": "Commit",
+            "description": "The software commit hash.",
+            "type": "string"
+        },
+        "title": {
+            "title": "Name_Version",
+            "description": "Do Not Submit - unique name version combination that is automatically generated",
+            "type": "string"
+        },
+        "software_type": {
+            "title": "Types",
+            "description": "The classification of the software",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Type",
+                "type": "string",
+                "suggested_enum": [
+                    "docker container",
+                    "aligner",
+                    "aggregator",
+                    "normalizer",
+                    "indexer",
+                    "quality metric generator",
+                    "peak caller",
+                    "filter",
+                    "file format converter",
+                    "matrix generator",
+                    "database",
+                    "variant annotator",
+                    "genome segmentator",
+                    "qualification",
+                    "assembler",
+                    "other"
+                ]
+            }
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the software.",
+            "type": "string",
+            "formInput": "textarea"
+        },
+        "source_url": {
+            "title": "Source URL",
+            "description": "An external resource to the code base.",
+            "type": "string",
+            "format": "uri"
+        },
+        "binary_url": {
+            "title": "Binary URL",
+            "description": "An external resource to a compiled download of the software.",
+            "type": "string",
+            "format": "uri"
+        },
+        "documentation_url": {
+            "title": "About URL",
+            "description": "An external resource to addiitonal information about the software.",
+            "internal_comment": "Use of this is discouraged as documentation should be included in github repo (source_url) or binary_url",
+            "type": "string",
+            "format": "uri"
+        },
+        "purpose": {
+            "title": "Purpose in project",
+            "description": "The purpose that the software was used for in the project.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Purpose",
+                "type": "string",
+                "suggested_enum": [
+                    "Hi-C",
+                    "Imaging",
+                    "Data QC",
+                    "Visualization",
+                    "Community Resource"
+                ]
+            }
+        },
+        "software_relation": {
+              "title": "Related Softwares",
+              "description": "All related software",
+              "ff_flag": "second round",
+              "type": "array",
+              "items": {
+                  "title": "Related Software",
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["relationship_type", "software"],
+                  "properties": {
+                      "relationship_type": {
+                          "type": "string",
+                          "description": "A controlled term specifying the type of relationship between the 'parent' software and the one listed here.",
+                          "title": "Relationship Type",
+                          "enum": [
+                              "parent of",
+                              "derived from",
+                              "container for",
+                              "contained in"
+                          ]
+                      },
+                      "software": {
+                      "type": "string",
+                      "description": "The related software",
+                      "linkTo": "Software"
+                    }
+                }
+            }
+        }
+    },
+    "facets": {
+        "software_type": {
+            "title": "Types"
+        }
+    },
+    "columns": {
+        "software_type": {
+            "title": "Types"
+        }
+    }
+}

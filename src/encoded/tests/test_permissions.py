@@ -485,7 +485,7 @@ def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangl
 def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_testapp,
                                                remc_member_testapp, wrangler_testapp):
     statuses = ['released', 'revoked', 'archived', 'released to project',
-                'archived to project', 'in review by lab', 'submission in progress', 'planned']
+                'archived to project', 'in review', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -496,7 +496,7 @@ def test_contributing_lab_member_can_view_item(expt_w_cont_lab_item, submitter_t
 def test_contributing_lab_member_cannot_patch(expt_w_cont_lab_item, submitter_testapp,
                                               remc_member_testapp, wrangler_testapp):
     statuses = ['released', 'revoked', 'archived', 'released to project', 'archived to project',
-                'in review by lab', 'submission in progress', 'planned']
+                'in review', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/experiment_hi_c', expt_w_cont_lab_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -504,7 +504,7 @@ def test_contributing_lab_member_cannot_patch(expt_w_cont_lab_item, submitter_te
 
 
 def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'archived to project', 'in review', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -581,7 +581,7 @@ def test_submitter_can_not_add_to_alternate_accession_if_not_replaced(ind_human_
     new = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     # patch old one wih status
     statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
-                'archived to project', 'in review by lab', 'submission in progress', 'planned']
+                'archived to project', 'in review', 'submission in progress', 'planned']
     for status in statuses:
         wrangler_testapp.patch_json(old.json['@graph'][0]['@id'], {"status": status}, status=200)
         # try adding the accession to alternate accessions
@@ -599,7 +599,7 @@ def test_submitter_cannot_patch_statuses(ind_human_item, submitter_testapp, wran
 
 
 def test_submitter_can_patch_statuses(ind_human_item, submitter_testapp, wrangler_testapp):
-    statuses = ['in review by lab', 'submission in progress', 'planned']
+    statuses = ['in review', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -640,7 +640,7 @@ def test_labmember_cannot_view_submitter_item(ind_human_item, submitter_testapp,
 
 
 def test_labmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab',
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review',
                 'archived', 'archived to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
@@ -673,7 +673,7 @@ def test_labmember_can_view_submitter_item_replaced_uuid(ind_human_item, submitt
 # Submitter created item and lab member wants to patch
 def test_labmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
     statuses = ['current', 'released', 'revoked', 'archived', 'released to project',
-                'archived to project', 'in review by lab', 'submission in progress', 'planned']
+                'archived to project', 'in review', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -701,7 +701,7 @@ def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testap
 
 
 def test_awardmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab', 'pre-release']
+    statuses = ['current', 'released', 'revoked', 'archived', 'in review', 'pre-release']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -716,7 +716,7 @@ def test_awardmember_cannot_view_submitter_item_replaced(ind_human_item, submitt
 
 # Submitter created item and lab member wants to patch
 def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review by lab',
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review',
                 'submission in progress', 'planned', 'archived to project', 'pre-release']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
@@ -726,7 +726,7 @@ def test_awardmember_cannot_patch_submitter_item(ind_human_item, submitter_testa
 
 # Submitter created item and project member wants to view
 def test_viewing_group_member_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['deleted', 'in review by lab', 'submission in progress', 'planned']
+    statuses = ['deleted', 'in review', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -775,7 +775,7 @@ def test_viewing_group_member_cannot_view_submitter_item_replaced_with_accession
 
 # Submitter created item and viewing group member wants to patch
 def test_viewing_group_member_cannot_patch_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review by lab',
+    statuses = ['current', 'released', 'revoked', 'archived', 'released to project', 'in review',
                 'archived to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
@@ -810,7 +810,7 @@ def test_non_member_can_view_submitter_file(file_item, submitter_testapp, wrangl
 
 def test_non_member_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
     statuses = ['released to project', 'archived to project', 'submission in progress',
-                'in review by lab', 'deleted', 'planned']
+                'in review', 'deleted', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -881,7 +881,7 @@ def test_wrangler_can_edit_lab_name_or_title(lab, submitter_testapp, wrangler_te
 def test_ac_local_roles_for_lab(registry):
     from encoded.types.lab import Lab
     lab_data = {
-        'status': 'in review by lab',
+        'status': 'in review',
         'award': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b',
         'uuid': '828cd4fe-aaaa-4b36-a94a-d2e3a36aa989'
     }
@@ -946,7 +946,7 @@ def test_planned_item_status_can_be_updated_by_admin(
         submitter_testapp, wrangler_testapp, planned_experiment_set_data):
         # submitter cannot change status so wrangler needs to patch
     res1 = submitter_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
-    assert res1['status'] == 'in review by lab'
+    assert res1['status'] == 'in review'
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'planned'}).json['@graph'][0]
     assert res2['status'] == 'planned'
 
@@ -975,7 +975,7 @@ def test_planned_item_status_is_changed_on_submitter_patch(
 def test_unreleased_item_does_not_get_release_date(
         wrangler_testapp, planned_experiment_set_data, status2date):
     res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
-    assert res1['status'] == 'in review by lab'
+    assert res1['status'] == 'in review'
     for datefield in status2date.values():
         assert datefield not in res1
 
@@ -996,7 +996,7 @@ def test_update_of_item_to_released_status_adds_release_date(
         wrangler_testapp, planned_experiment_set_data, status2date):
     for status, datefield in status2date.items():
         res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
-        assert res1['status'] == 'in review by lab'
+        assert res1['status'] == 'in review'
         assert datefield not in res1
         res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
         assert res2['status'] == status
@@ -1009,11 +1009,11 @@ def test_update_of_item_to_released_status_adds_release_date(
 
 def test_update_of_item_to_non_released_status_does_not_add_release_date(
         wrangler_testapp, planned_experiment_set_data):
-    statuses = ["planned", "revoked", "deleted", "obsolete", "replaced", "in review by lab", "submission in progress"]
+    statuses = ["planned", "revoked", "deleted", "obsolete", "replaced", "in review", "submission in progress"]
     datefields = ['public_release', 'project_release']
     for status in statuses:
         res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
-        assert res1['status'] == 'in review by lab'
+        assert res1['status'] == 'in review'
         res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
         assert res2['status'] == status
         for datefield in datefields:
@@ -1027,7 +1027,7 @@ def test_update_of_item_that_has_release_date_does_not_change_release_date(
     for status, datefield in status2date.items():
         planned_experiment_set_data[datefield] = test_date
         res1 = wrangler_testapp.post_json('/experiment_set', planned_experiment_set_data).json['@graph'][0]
-        assert res1['status'] == 'in review by lab'
+        assert res1['status'] == 'in review'
         assert res1[datefield] == test_date
         res2 = wrangler_testapp.patch_json(res1['@id'], {'status': status}, status=200).json['@graph'][0]
         assert res2['status'] == status
@@ -1090,7 +1090,7 @@ def replicate_experiment_set_data(lab, award):
 def test_ready_to_process_set_status_admin_can_edit(
         submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
     res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
-    assert res1['status'] == 'in review by lab'
+    assert res1['status'] == 'in review'
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
     assert res2['status'] == 'pre-release'
     # admin can Edit
@@ -1101,7 +1101,7 @@ def test_ready_to_process_set_status_admin_can_edit(
 def test_ready_to_process_set_status_submitter_can_view(
         submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
     res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
-    assert res1['status'] == 'in review by lab'
+    assert res1['status'] == 'in review'
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
     assert res2['status'] == 'pre-release'
     # submitter can view
@@ -1112,7 +1112,7 @@ def test_ready_to_process_set_status_submitter_can_view(
 def test_ready_to_process_set_status_submitter_can_not_edit(
         submitter_testapp, wrangler_testapp, replicate_experiment_set_data):
     res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
-    assert res1['status'] == 'in review by lab'
+    assert res1['status'] == 'in review'
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
     assert res2['status'] == 'pre-release'
     # submitter can not edit
@@ -1122,7 +1122,7 @@ def test_ready_to_process_set_status_submitter_can_not_edit(
 def test_ready_to_process_set_status_others_can_not_view(
         submitter_testapp, wrangler_testapp, viewing_group_member_testapp, replicate_experiment_set_data):
     res1 = submitter_testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
-    assert res1['status'] == 'in review by lab'
+    assert res1['status'] == 'in review'
     res2 = wrangler_testapp.patch_json(res1['@id'], {'status': 'pre-release'}).json['@graph'][0]
     assert res2['status'] == 'pre-release'
     # others can not view

@@ -106,7 +106,7 @@ class Sample(Item):
 
 
 @collection(
-    name='disorderss',
+    name='disorders',
     properties={
         'title': 'Disorders',
         'description': 'Listing of Disorders',
@@ -115,9 +115,9 @@ class Disorder(Item):
     item_type = 'disorder'
     schema = load_schema('encoded:schemas/disorder.json')
     embedded_list = [
-        'associated_phenotypes.term_name',
-        'associated_phenotypes.term_id',
-        'associated_phenotypes.definition'
+        'associated_phenotypes.phenotype.term_name',
+        'associated_phenotypes.phenotype.term_id',
+        'associated_phenotypes.phenotype.definition'
     ]
 
     @calculated_property(schema={
@@ -168,9 +168,7 @@ class Phenotype(Item):
         'associated_disorders': ('Disorder', 'associated_phenotypes')
     }
     embedded_list = [
-        'associated_disorders.term_name',
-        'associated_disorders.term_id',
-        'associated_disorders.associated_genes'
+        'associated_disorders.disorder_id'
     ]
 
     @calculated_property(schema={
@@ -219,6 +217,30 @@ class Document(ItemWithAttachment, Item):
         if attachment:
             return attachment.get('download')
         return Item.display_title(self)
+
+
+@collection(
+    name='file-formats',
+    unique_key='file_format:file_format',
+    lookup_key='file_format',
+    properties={
+        'title': 'File Formats',
+        'description': 'Listing of file formats used by 4DN'
+    }
+)
+class FileFormat(Item, ItemWithAttachment):
+    """The class to store information about 4DN file formats"""
+    item_type = 'file_format'
+    schema = load_schema('encoded:schemas/file_format.json')
+    name_key = 'file_format'
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title",
+        "type": "string"
+    })
+    def display_title(self, file_format):
+        return file_format
 
 
 @collection(

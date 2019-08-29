@@ -1,0 +1,1801 @@
+[
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_index-sorted-bam_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Index sorted bam input file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "index-sorted-bam",
+                "outputs": [
+                    {
+                        "meta": {
+                            "file_format": "bai",
+                            "type": "data file",
+                            "global": true,
+                            "cardinality": "single"
+                        },
+                        "name": "bam_index",
+                        "target": [
+                            {
+                                "name": "bam_index"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "type": "data file",
+                            "global": true,
+                            "cardinality": "single"
+                        },
+                        "name": "bam",
+                        "source": [
+                            {
+                                "name": "bam"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "uuid": "502e4846-a4ab-4da1-a5a3-d835442004a3",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "bam_index",
+                "argument_format": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output to-be-extra-input file",
+                "argument_to_be_attached_to": "bam"
+            }
+        ],
+        "app_version": "v9",
+        "workflow_language": "CWL",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_index-sorted-bam_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "index-sorted-bam.cwl",
+        "institution": "hms-dbmi",
+        "status": "in review",
+        "cwl_child_filenames": [],
+        "app_name": "workflow_index-sorted-bam",
+        "title": "Index sorted bam file",
+        "description": "Index sorted bam input file.",
+        "category": [
+            "processing"
+        ]
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_gatk-ApplyBQSR-check_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Run gatk ApplyBQSR"
+                    ],
+                    "software_used": [
+                        "4ae88fb4-23f2-4939-8852-4644069d14d9"
+                    ]
+                },
+                "name": "ApplyBQSR",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "bam"
+                        },
+                        "name": "recalibrated_bam",
+                        "target": [
+                            {
+                                "name": "recalibrated_bam",
+                                "step": "integrity-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "source": [
+                            {
+                                "name": "input_bam"
+                            }
+                        ],
+                        "name": "input_bam"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "0cd4e777-a596-4927-95c8-b07716121aa3"
+                        },
+                        "source": [
+                            {
+                                "name": "recalibration_report"
+                            }
+                        ],
+                        "name": "recalibration_report"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "reference file",
+                            "global": true,
+                            "file_format": "5ced774b-a73e-4d1b-8186-d7fbbde7a3c2"
+                        },
+                        "source": [
+                            {
+                                "name": "reference"
+                            }
+                        ],
+                        "name": "reference"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "static-quantized-quals_1"
+                            }
+                        ],
+                        "name": "static-quantized-quals_1"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "static-quantized-quals_2"
+                            }
+                        ],
+                        "name": "static-quantized-quals_2"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "static-quantized-quals_3"
+                            }
+                        ],
+                        "name": "static-quantized-quals_3"
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Check integrity of output file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "integrity-check",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "QC",
+                            "global": true
+                        },
+                        "name": "recalibrated_bam-check",
+                        "target": [
+                            {
+                                "name": "recalibrated_bam-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": false,
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "source": [
+                            {
+                                "name": "recalibrated_bam",
+                                "step": "ApplyBQSR"
+                            }
+                        ],
+                        "name": "recalibrated_bam"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "count"
+                            }
+                        ],
+                        "name": "count"
+                    }
+                ]
+            }
+        ],
+        "uuid": "6c9c6f49-f954-4e76-8dfb-d385cddcebd6",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "reference",
+                "argument_format": "5ced774b-a73e-4d1b-8186-d7fbbde7a3c2",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "recalibration_report",
+                "argument_format": "0cd4e777-a596-4927-95c8-b07716121aa3",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "recalibrated_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output processed file",
+                "secondary_file_formats": [
+                    "d13d06c1-218e-4f61-aaf0-91f226248b3c"
+                ]
+            },
+            {
+                "qc_html": false,
+                "qc_json": false,
+                "qc_zipped": false,
+                "qc_type": "quality_metric_bamcheck",
+                "argument_to_be_attached_to": "recalibrated_bam",
+                "workflow_argument_name": "recalibrated_bam-check",
+                "qc_table": true,
+                "argument_type": "Output QC file"
+            },
+            {
+                "workflow_argument_name": "static-quantized-quals_1",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "static-quantized-quals_2",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "static-quantized-quals_3",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "count",
+                "argument_type": "parameter"
+            }
+        ],
+        "app_version": "v9",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_gatk-ApplyBQSR-check_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "workflow_gatk-ApplyBQSR_plus_integrity-check.cwl",
+        "institution": "hms-dbmi",
+        "app_name": "workflow_gatk-ApplyBQSR-check",
+        "cwl_child_filenames": [
+            "gatk-ApplyBQSR.cwl",
+            "integrity-check.cwl"
+        ],
+        "workflow_language": "CWL",
+        "category": [
+            "processing"
+        ],
+        "status": "in review",
+        "description": "Run gatk ApplyBQSR on bam input file. Produce a recalibrated bam file. An integrity check is performed on the output file",
+        "title": "Run gatk ApplyBQSR plus output integrity-check"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_bwa-mem_no_unzip-check_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Align paired-end reads to reference genome"
+                    ],
+                    "software_used": [
+                        "42adeb1b-c46c-4ba8-b191-56036ddcd544"
+                    ]
+                },
+                "name": "bwa-mem",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "bam"
+                        },
+                        "name": "raw_bam",
+                        "target": [
+                            {
+                                "name": "raw_bam",
+                                "step": "integrity-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c"
+                        },
+                        "source": [
+                            {
+                                "name": "fastq_R1"
+                            }
+                        ],
+                        "name": "fastq_R1"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c"
+                        },
+                        "source": [
+                            {
+                                "name": "fastq_R2"
+                            }
+                        ],
+                        "name": "fastq_R2"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "813b0001-5f3f-4e28-9203-4cdf261e19c4"
+                        },
+                        "source": [
+                            {
+                                "name": "reference"
+                            }
+                        ],
+                        "name": "reference"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ],
+                        "name": "nthreads"
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Check integrity of output file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "integrity-check",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "raw_bam-check",
+                        "target": [
+                            {
+                                "name": "raw_bam-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": false,
+                            "type": "data file",
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "source": [
+                            {
+                                "name": "raw_bam",
+                                "step": "bwa-mem"
+                            }
+                        ],
+                        "name": "raw_bam"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "source": [
+                            {
+                                "name": "count"
+                            }
+                        ],
+                        "name": "count"
+                    }
+                ]
+            }
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "uuid": "9e094699-561b-4396-8d6a-ffc45f98c5e1",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "fastq_R1",
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "fastq_R2",
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "reference",
+                "argument_format": "813b0001-5f3f-4e28-9203-4cdf261e19c4",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "raw_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output processed file"
+            },
+            {
+                "qc_html": false,
+                "qc_json": false,
+                "qc_type": "quality_metric_bamcheck",
+                "workflow_argument_name": "raw_bam-check",
+                "qc_zipped": false,
+                "qc_table": true,
+                "argument_to_be_attached_to": "raw_bam",
+                "argument_type": "Output QC file"
+            },
+            {
+                "workflow_argument_name": "nthreads",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "outdir",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "prefix",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "count",
+                "argument_type": "parameter"
+            }
+        ],
+        "app_version": "v9",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_bwa-mem_no_unzip-check_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "workflow_bwa-mem-to-bam_no_unzip_plus_integrity-check.cwl",
+        "institution": "hms-dbmi",
+        "workflow_language": "CWL",
+        "cwl_child_filenames": [
+            "bwa-mem-to-bam_no_unzip.cwl",
+            "integrity-check.cwl"
+        ],
+        "app_name": "workflow_bwa-mem_no_unzip-check",
+        "status": "in review",
+        "category": [
+            "processing"
+        ],
+        "description": "Align paired-end reads to reference genome. Processing from fastq input files to bam output file. An integrity check is performed on the output file",
+        "title": "Paired-end reads alignment to reference plus output integrity-check"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "institution": "hms-dbmi",
+        "description": "md5 on uncompressed file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                },
+                "name": "md5",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "The MD5 checksum generated.",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "report",
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "File on which MD5 calculation is run on.",
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c"
+                        },
+                        "name": "input_file",
+                        "source": [
+                            {
+                                "name": "input_file"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "uuid": "c77a117b-9a58-477e-aaa5-291a109a99f6",
+        "docker_image_name": "duplexa/md5:v2",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_file",
+                "description": "File on which MD5 calculation is run on.",
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "report",
+                "description": "The MD5 checksum generated.",
+                "argument_type": "Output report file"
+            }
+        ],
+        "app_version": "0.2.6",
+        "previous_version": [
+            "d3f25cd3-e726-4b3c-a022-48f844474b41"
+        ],
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "aliases": [
+            "4dn-dcic-lab:wf-md5-0.2.6"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "md5.cwl",
+        "name": "md5",
+        "version_upgrade_log": "calculating md5 for both compressed and uncompressed files",
+        "app_name": "md5",
+        "experiment_types": [
+            "Hi-C",
+            "Capture Hi-C",
+            "Repli-seq"
+        ],
+        "workflow_language": "CWL",
+        "cwl_directory_url_draft3": "",
+        "category": [
+            "QC"
+        ],
+        "status": "in review",
+        "cwl_child_filenames": [],
+        "title": "md5 0.2.6"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0",
+        "name": "fastqc-0-11-4-1",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "alternate_accessions": [],
+        "steps": [
+            {
+                "meta": {
+                    "description": "FastQC QC for fastq files",
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ],
+                    "software_used": [
+                        "02d636b9-d82d-4da9-950c-2ca994a13131"
+                    ]
+                },
+                "name": "FastQC",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "report",
+                            "file_format": "zip"
+                        },
+                        "name": "report_zip",
+                        "target": [
+                            {
+                                "name": "report_zip"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "0cd4e777-a596-4927-95c8-b07716121aa3"
+                        },
+                        "source": [
+                            {
+                                "name": "limits_file"
+                            }
+                        ],
+                        "name": "limits_file"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c"
+                        },
+                        "source": [
+                            {
+                                "name": "input_fastq"
+                            }
+                        ],
+                        "name": "input_fastq"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "0cd4e777-a596-4927-95c8-b07716121aa3"
+                        },
+                        "source": [
+                            {
+                                "name": "contaminants_file"
+                            }
+                        ],
+                        "name": "contaminants_file"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "reference file",
+                            "file_format": "0cd4e777-a596-4927-95c8-b07716121aa3"
+                        },
+                        "source": [
+                            {
+                                "name": "adapters_file"
+                            }
+                        ],
+                        "name": "adapters_file"
+                    }
+                ]
+            }
+        ],
+        "cwl_directory_url_draft3": "",
+        "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
+        "documents": [],
+        "arguments": [
+            {
+                "workflow_argument_name": "limits_file",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "input_fastq",
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "contaminants_file",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "adapters_file",
+                "argument_type": "Input file"
+            },
+            {
+                "qc_html": true,
+                "qc_json": false,
+                "qc_zipped_tables": [
+                    "summary.txt",
+                    "fastqc_data.txt"
+                ],
+                "qc_type": "quality_metric_fastqc",
+                "workflow_argument_name": "report_zip",
+                "qc_zipped": true,
+                "qc_table": true,
+                "argument_to_be_attached_to": "input_fastq",
+                "argument_type": "Output QC file",
+                "qc_zipped_html": "fastqc_report.html"
+            }
+        ],
+        "app_version": "0.2.0",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "aliases": [],
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.2.6/cwl_awsem_v1/",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "fastqc-0-11-4-1.cwl",
+        "institution": "hms-dbmi",
+        "workflow_language": "CWL",
+        "cwl_child_filenames": [
+            "fastqc-0-11-4.cwl"
+        ],
+        "app_name": "fastqc-0-11-4-1",
+        "docker_image_name": "duplexa/4dn-hic:v32",
+        "experiment_types": [
+            "Hi-C",
+            "Capture Hi-C",
+            "Repli-seq"
+        ],
+        "status": "in review",
+        "category": [
+            "QC"
+        ],
+        "description": "FastQC quality control step for fastq files",
+        "title": "FastQC 0.2.0"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "description": "Sort bam input file. An integrity check is performed on the output file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Sort bam input file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "sort",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "bam"
+                        },
+                        "name": "sorted_bam",
+                        "target": [
+                            {
+                                "name": "sorted_bam",
+                                "step": "integrity-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "source": [
+                            {
+                                "name": "input_bam"
+                            }
+                        ],
+                        "name": "input_bam"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "max_memory"
+                            }
+                        ],
+                        "name": "max_memory"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ],
+                        "name": "nthreads"
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Check integrity of output file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "integrity-check",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "QC",
+                            "global": true
+                        },
+                        "name": "sorted_bam-check",
+                        "target": [
+                            {
+                                "name": "sorted_bam-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": false,
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "source": [
+                            {
+                                "name": "sorted_bam",
+                                "step": "sort"
+                            }
+                        ],
+                        "name": "sorted_bam"
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "source": [
+                            {
+                                "name": "count"
+                            }
+                        ],
+                        "name": "count"
+                    }
+                ]
+            }
+        ],
+        "uuid": "560f5194-cd3a-4799-9b1a-6a2d2c371c89",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "sorted_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output processed file"
+            },
+            {
+                "qc_html": false,
+                "qc_json": false,
+                "workflow_argument_name": "sorted_bam-check",
+                "argument_to_be_attached_to": "sorted_bam",
+                "qc_zipped": false,
+                "qc_table": true,
+                "argument_type": "Output QC file",
+                "qc_type": "quality_metric_bamcheck"
+            },
+            {
+                "workflow_argument_name": "max_memory",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "nthreads",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "count",
+                "argument_type": "parameter"
+            }
+        ],
+        "app_version": "v9",
+        "workflow_language": "CWL",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_sort-bam-check_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "workflow_sort-bam_plus_integrity-check.cwl",
+        "institution": "hms-dbmi",
+        "status": "in review",
+        "cwl_child_filenames": [
+            "sort-bam.cwl",
+            "integrity-check.cwl"
+        ],
+        "app_name": "workflow_sort-bam-check",
+        "title": "Sort bam file plus output integrity-check",
+        "name": "workflow_sort-bam-check_v9",
+        "category": [
+            "processing"
+        ]
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_add-readgroups-check_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Add read groups to bam input file"
+                    ],
+                    "software_used": [
+                        "d7ac4c75-e133-4a8e-a19e-b7e87873cc16"
+                    ]
+                },
+                "name": "add-readgroups",
+                "outputs": [
+                    {
+                        "meta": {
+                            "file_format": "bam",
+                            "type": "data file",
+                            "global": true,
+                            "cardinality": "single"
+                        },
+                        "name": "bam_w_readgroups",
+                        "target": [
+                            {
+                                "name": "bam_w_readgroups",
+                                "step": "integrity-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "type": "data file",
+                            "global": true,
+                            "cardinality": "single"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "input_bam"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "sample_name",
+                        "source": [
+                            {
+                                "name": "sample_name"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "nthreads",
+                        "source": [
+                            {
+                                "name": "nthreads"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Check integrity of output file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "integrity-check",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "QC",
+                            "global": true
+                        },
+                        "name": "bam_w_readgroups-check",
+                        "target": [
+                            {
+                                "name": "bam_w_readgroups-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "type": "data file",
+                            "global": false,
+                            "cardinality": "single"
+                        },
+                        "name": "bam_w_readgroups",
+                        "source": [
+                            {
+                                "name": "bam_w_readgroups",
+                                "step": "add-readgroups"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "count",
+                        "source": [
+                            {
+                                "name": "count"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "uuid": "548e63a4-1936-4f68-8e8d-8e4658767911",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "bam_w_readgroups",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output processed file"
+            },
+            {
+                "workflow_argument_name": "bam_w_readgroups-check",
+                "qc_json": false,
+                "qc_html": false,
+                "qc_type": "quality_metric_bamcheck",
+                "argument_to_be_attached_to": "bam_w_readgroups",
+                "qc_zipped": false,
+                "qc_table": true,
+                "argument_type": "Output QC file"
+            },
+            {
+                "workflow_argument_name": "sample_name",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "nthreads",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "count",
+                "argument_type": "parameter"
+            }
+        ],
+        "app_version": "v9",
+        "workflow_language": "CWL",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_add-readgroups-check_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "workflow_add-readgroups_plus_integrity-check.cwl",
+        "institution": "hms-dbmi",
+        "status": "in review",
+        "app_name": "workflow_add-readgroups-check",
+        "title": "Add read groups plus output integrity-check",
+        "description": "Add read groups to bam input file. An integrity check is performed on the output file",
+        "cwl_child_filenames": [
+            "add-readgroups.cwl",
+            "integrity-check.cwl"
+        ],
+        "category": [
+            "processing"
+        ]
+    },
+    {
+        "institution": "hms-dbmi",
+        "name": "md5",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "alternate_accessions": [],
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ]
+                },
+                "name": "md5",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "The MD5 checksum generated.",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "report",
+                        "target": [
+                            {
+                                "name": "report"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "description": "File on which MD5 calculation is run on.",
+                            "global": true,
+                            "type": "data file",
+                            "file_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c"
+                        },
+                        "source": [
+                            {
+                                "name": "input_file"
+                            }
+                        ],
+                        "name": "input_file"
+                    }
+                ]
+            }
+        ],
+        "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_file",
+                "description": "File on which MD5 calculation is run on.",
+                "argument_format": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "report",
+                "description": "The MD5 checksum generated.",
+                "argument_type": "Output report file"
+            }
+        ],
+        "app_version": "0.0.4",
+        "workflow_language": "CWL",
+        "aliases": [],
+        "cwl_directory_url_draft3": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+        "cwl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/pipelines-cwl/0.0.4/cwl_awsem/",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "md5.cwl",
+        "documents": [],
+        "app_name": "md5",
+        "cwl_child_filenames": [],
+        "status": "in review",
+        "experiment_types": [
+            "Hi-C",
+            "Capture Hi-C",
+            "Repli-seq"
+        ],
+        "category": [
+            "QC"
+        ],
+        "description": "md5 on uncompressed file",
+        "title": "md5 0.0.4"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_gatk-BaseRecalibrator_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Run gatk BaseRecalibrator"
+                    ],
+                    "software_used": [
+                        "4ae88fb4-23f2-4939-8852-4644069d14d9"
+                    ]
+                },
+                "name": "BaseRecalibrator",
+                "outputs": [
+                    {
+                        "meta": {
+                            "file_format": "txt",
+                            "global": true,
+                            "type": "data file",
+                            "cardinality": "single"
+                        },
+                        "name": "recalibration_report",
+                        "target": [
+                            {
+                                "name": "recalibration_report"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "global": true,
+                            "type": "data file",
+                            "cardinality": "single"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "input_bam"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "file_format": "5ced774b-a73e-4d1b-8186-d7fbbde7a3c2",
+                            "global": true,
+                            "type": "reference file",
+                            "cardinality": "single"
+                        },
+                        "name": "reference",
+                        "source": [
+                            {
+                                "name": "reference"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "file_format": "1b8f525f-aecb-4211-9ae5-a2c998b05599",
+                            "global": true,
+                            "type": "reference file",
+                            "cardinality": "single"
+                        },
+                        "name": "known-sites-snp",
+                        "source": [
+                            {
+                                "name": "known-sites-snp"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "file_format": "fcc2647d-301b-4888-8d9d-83ea4270309c",
+                            "global": true,
+                            "type": "reference file",
+                            "cardinality": "single"
+                        },
+                        "name": "known-sites-indels",
+                        "source": [
+                            {
+                                "name": "known-sites-indels"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "uuid": "455b3056-64ca-4a9b-b546-294b01c9ca92",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "reference",
+                "argument_format": "5ced774b-a73e-4d1b-8186-d7fbbde7a3c2",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "known-sites-snp",
+                "argument_format": "1b8f525f-aecb-4211-9ae5-a2c998b05599",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "known-sites-indels",
+                "argument_format": "fcc2647d-301b-4888-8d9d-83ea4270309c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "recalibration_report",
+                "argument_format": "0cd4e777-a596-4927-95c8-b07716121aa3",
+                "argument_type": "Output processed file"
+            }
+        ],
+        "app_version": "v9",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_gatk-BaseRecalibrator_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "gatk-BaseRecalibrator.cwl",
+        "institution": "hms-dbmi",
+        "app_name": "workflow_gatk-BaseRecalibrator",
+        "description": "Run gatk BaseRecalibrator on bam input file. Produce a recalibration report",
+        "workflow_language": "CWL",
+        "category": [
+            "processing"
+        ],
+        "status": "in review",
+        "cwl_child_filenames": [],
+        "title": "Run gatk BaseRecalibrator"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_picard-MarkDuplicates-check_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Mark duplicates in bam input file"
+                    ],
+                    "software_used": [
+                        "586cef39-6505-4bf6-920a-4b26a500d210"
+                    ]
+                },
+                "name": "MarkDuplicates",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "bam"
+                        },
+                        "name": "dupmarked_bam",
+                        "target": [
+                            {
+                                "name": "dupmarked_bam",
+                                "step": "integrity-check"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "txt"
+                        },
+                        "name": "duplicate_metrics",
+                        "target": [
+                            {
+                                "name": "duplicate_metrics"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": true,
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "name": "input_bam",
+                        "source": [
+                            {
+                                "name": "input_bam"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "xmx",
+                        "source": [
+                            {
+                                "name": "xmx"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "xms",
+                        "source": [
+                            {
+                                "name": "xms"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "max_records_in_ram",
+                        "source": [
+                            {
+                                "name": "max_records_in_ram"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "duplicate_pixel_distance",
+                        "source": [
+                            {
+                                "name": "duplicate_pixel_distance"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Check integrity of output file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "integrity-check",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "report",
+                            "global": true
+                        },
+                        "name": "dupmarked_bam-check",
+                        "target": [
+                            {
+                                "name": "dupmarked_bam-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "data file",
+                            "global": false,
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c"
+                        },
+                        "name": "dupmarked_bam",
+                        "source": [
+                            {
+                                "name": "dupmarked_bam",
+                                "step": "MarkDuplicates"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "count",
+                        "source": [
+                            {
+                                "name": "count"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "uuid": "beb2b340-94ee-4afe-b4e3-66caaf063397",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "dupmarked_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output processed file"
+            },
+            {
+                "workflow_argument_name": "duplicate_metrics",
+                "argument_format": "0cd4e777-a596-4927-95c8-b07716121aa3",
+                "argument_type": "Output processed file"
+            },
+            {
+                "qc_html": false,
+                "qc_json": false,
+                "qc_type": "quality_metric_bamcheck",
+                "workflow_argument_name": "dupmarked_bam-check",
+                "qc_zipped": false,
+                "qc_table": true,
+                "argument_to_be_attached_to": "dupmarked_bam",
+                "argument_type": "Output QC file"
+            },
+            {
+                "workflow_argument_name": "xmx",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "xms",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "max_records_in_ram",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "duplicate_pixel_distance",
+                "argument_type": "parameter"
+            },
+            {
+                "workflow_argument_name": "count",
+                "argument_type": "parameter"
+            }
+        ],
+        "app_version": "v9",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_picard-MarkDuplicates-check_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "workflow_picard-MarkDuplicates_plus_integrity-check.cwl",
+        "institution": "hms-dbmi",
+        "workflow_language": "CWL",
+        "description": "Mark duplicates in bam input file. An integrity check is performed on the output file",
+        "app_name": "workflow_picard-MarkDuplicates-check",
+        "category": [
+            "processing"
+        ],
+        "status": "in review",
+        "cwl_child_filenames": [
+            "picard-MarkDuplicates.cwl",
+            "integrity-check.cwl"
+        ],
+        "title": "Mark duplicates plus output integrity-check"
+    },
+    {
+        "docker_registry_url": "https://hub.docker.com/",
+        "cwl_pointer": "",
+        "name": "workflow_merge-bam-check_v9",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "steps": [
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Merge bam input files"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "merge",
+                "outputs": [
+                    {
+                        "meta": {
+                            "file_format": "bam",
+                            "type": "data file",
+                            "global": true,
+                            "cardinality": "single"
+                        },
+                        "name": "merged_bam",
+                        "target": [
+                            {
+                                "name": "merged_bam",
+                                "step": "integrity-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "type": "data file",
+                            "global": true,
+                            "cardinality": "array"
+                        },
+                        "name": "input_bams",
+                        "source": [
+                            {
+                                "name": "input_bams"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "meta": {
+                    "analysis_step_types": [
+                        "Check integrity of output file"
+                    ],
+                    "software_used": [
+                        "3f2d3b0e-0365-4212-9468-c16ad9531c4d"
+                    ]
+                },
+                "name": "integrity-check",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "QC",
+                            "global": true
+                        },
+                        "name": "merged_bam-check",
+                        "target": [
+                            {
+                                "name": "merged_bam-check"
+                            }
+                        ]
+                    }
+                ],
+                "inputs": [
+                    {
+                        "meta": {
+                            "file_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                            "type": "data file",
+                            "global": false,
+                            "cardinality": "single"
+                        },
+                        "name": "merged_bam",
+                        "source": [
+                            {
+                                "name": "merged_bam",
+                                "step": "merge"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "type": "parameter",
+                            "global": true
+                        },
+                        "name": "count",
+                        "source": [
+                            {
+                                "name": "count"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "cwl_directory_url": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "uuid": "30802d8c-20c3-4eea-82dd-dd34621569c6",
+        "docker_image_name": "cgap/cgap",
+        "arguments": [
+            {
+                "workflow_argument_name": "input_bams",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Input file"
+            },
+            {
+                "workflow_argument_name": "merged_bam",
+                "argument_format": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+                "argument_type": "Output processed file"
+            },
+            {
+                "workflow_argument_name": "merged_bam-check",
+                "qc_json": false,
+                "qc_html": false,
+                "qc_type": "quality_metric_bamcheck",
+                "argument_to_be_attached_to": "merged_bam",
+                "qc_zipped": false,
+                "qc_table": true,
+                "argument_type": "Output QC file"
+            }
+        ],
+        "app_version": "v9",
+        "cwl_directory_url_v1": "https://raw.githubusercontent.com/dbmi-bgm/cgap-pipeline/master/cwl",
+        "aliases": [
+            "4dn-dcic-lab:workflow_merge-bam-check_v9"
+        ],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "cwl_main_filename": "workflow_merge-bam_plus_integrity-check.cwl",
+        "institution": "hms-dbmi",
+        "workflow_language": "CWL",
+        "cwl_child_filenames": [
+            "merge-bam.cwl",
+            "integrity-check.cwl"
+        ],
+        "app_name": "workflow_merge-bam-check",
+        "category": [
+            "processing"
+        ],
+        "status": "in review",
+        "description": "Merge bam input files. An integrity check is performed on the output file",
+        "title": "Merge bam files plus output integrity-check"
+    }
+]

@@ -1,0 +1,233 @@
+[
+    {
+        "institution": "hms-dbmi",
+        "extrafile_formats": [
+            "d13d06c1-218e-4f61-aaf0-91f226248b3c"
+        ],
+        "valid_item_types": [
+            "FileProcessed"
+        ],
+        "description": "This format is used for aligned reads",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "bam",
+        "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
+        "file_format": "bam",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileProcessed"
+        ],
+        "description": "Bam index format",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "bam.bai",
+        "uuid": "d13d06c1-218e-4f61-aaf0-91f226248b3c",
+        "file_format": "bai",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "extrafile_formats": [
+            "106199e5-5a85-4817-9a55-7b31698e1fda",
+            "8db70ed6-0121-4fe1-a72e-d91dc5aa6cd3",
+            "7373ca48-0b3e-467b-967a-80870846f89b",
+            "11f2fc36-9a65-4d60-9365-d8ff241df4f7"
+        ],
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "BWA genome index, untarred, uncompressed",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "bwt",
+        "uuid": "813b0001-5f3f-4e28-9203-4cdf261e19c4",
+        "file_format": "bwt",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "uuid": "5ced774b-a73e-4d1b-8186-d7fbbde7a3c2",
+        "institution": "hms-dbmi",
+        "extrafile_formats": [
+            "4ed9f7e0-2b2f-4aca-9533-a0a652b43442",
+            "fb728bb4-bc56-46d5-8df5-a05562826b9a"
+        ],
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "genome reference fasta",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "fa",
+        "file_format": "fa",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "file_format": "txt",
+        "status": "in review",
+        "valid_item_types": [
+            "FileProcessed",
+            "FileReference"
+        ],
+        "uuid": "0cd4e777-a596-4927-95c8-b07716121aa3",
+        "institution": "hms-dbmi",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "txt",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileFastq",
+            "FileProcessed"
+        ],
+        "description": "This format is used for short read sequence data - more information can be found here https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/#fastq-files",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "other_allowed_extensions": [
+            "fq.gz"
+        ],
+        "uuid": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
+        "file_format": "fastq",
+        "standard_file_extension": "fastq.gz",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "An extra file of a bwt file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "standard_file_extension": "pac",
+        "uuid": "7373ca48-0b3e-467b-967a-80870846f89b",
+        "file_format": "pac",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "An extra file of a bwt file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "standard_file_extension": "ann",
+        "uuid": "106199e5-5a85-4817-9a55-7b31698e1fda",
+        "file_format": "ann",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "extrafile_formats": [
+            "ec96f95a-cf13-4633-ab0d-c4a5138bbe0b"
+        ],
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "vcf, uncompressed",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "vcf",
+        "uuid": "fcc2647d-301b-4888-8d9d-83ea4270309c",
+        "file_format": "vcf",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "extra file of genome reference fasta",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "fa.fai",
+        "uuid": "fb728bb4-bc56-46d5-8df5-a05562826b9a",
+        "file_format": "fa_fai",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "extra file of genome reference fasta",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "standard_file_extension": "dict",
+        "uuid": "4ed9f7e0-2b2f-4aca-9533-a0a652b43442",
+        "file_format": "dict",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "An extra file of a bwt file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "standard_file_extension": "amb",
+        "uuid": "8db70ed6-0121-4fe1-a72e-d91dc5aa6cd3",
+        "file_format": "amb",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "extrafile_formats": [
+            "f84f1922-7f4e-4afc-922f-bec620969bf1"
+        ],
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "vcf, compressed",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "vcf.gz",
+        "uuid": "1b8f525f-aecb-4211-9ae5-a2c998b05599",
+        "file_format": "vcf_gz",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "An extra file of a bwt file",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "standard_file_extension": "sa",
+        "uuid": "11f2fc36-9a65-4d60-9365-d8ff241df4f7",
+        "file_format": "sa",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "Tabix index file of vcf, compressed",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "standard_file_extension": "vcf.gz.tbi",
+        "uuid": "f84f1922-7f4e-4afc-922f-bec620969bf1",
+        "file_format": "vcf_gz_tbi",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "valid_item_types": [
+            "FileReference"
+        ],
+        "description": "GATK/IGV-index of vcf, uncompressed",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "standard_file_extension": "vcf.idx",
+        "uuid": "ec96f95a-cf13-4633-ab0d-c4a5138bbe0b",
+        "file_format": "vcf_idx",
+        "status": "in review",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    }
+]

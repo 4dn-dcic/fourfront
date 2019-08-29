@@ -1,0 +1,222 @@
+[
+    {
+        "uuid": "fd849d78-ce08-4778-9fbc-5729a0d59daa",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "93fdd533-e24f-43d3-9aed-ab06017875f2",
+                "members": [
+                    "93fdd533-e24f-43d3-9aed-ab06017875f2",
+                    "a68e06ad-a407-4d65-a600-a1c094cfaffe",
+                    "02647a21-684a-47f2-833d-6a0a1e25b53d"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0339"
+        ],
+        "description": "CGAP Family bgm0339 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0339"
+    },
+    {
+        "uuid": "f185b780-f56b-4f28-b176-4f0841625ebf",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "37902b41-71cc-4559-b456-8447201dcccb",
+                "members": [
+                    "37902b41-71cc-4559-b456-8447201dcccb",
+                    "94ac4013-b103-47b0-a0fd-59df382d77dc",
+                    "c44764e0-3697-45b9-9ef3-7bcbe2f343a8"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0347"
+        ],
+        "description": "CGAP Family bgm0347 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0347"
+    },
+    {
+        "uuid": "eb97ace9-6b6a-43a4-8fa1-47974fa5b5c0",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "e807f97f-7fdb-4e42-8f5b-61b778e65206",
+                "members": [
+                    "e807f97f-7fdb-4e42-8f5b-61b778e65206",
+                    "ef3d2591-9b01-4572-a1ad-ea33b9c9b92c",
+                    "a48ad8fb-45cf-40f9-8cfb-d3e0c50a541d"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0284"
+        ],
+        "description": "CGAP Family bgm0284 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0284"
+    },
+    {
+        "uuid": "e6211c0c-5382-4026-a41a-a442af0163aa",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "5ff06a8b-06ae-4d96-86a2-a916ce61521f",
+                "members": [
+                    "5ff06a8b-06ae-4d96-86a2-a916ce61521f",
+                    "e175f23c-52ef-497d-abbb-cd0e1722dbfb",
+                    "cd049338-8856-4a37-b2ca-4c81aaf52903"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0360"
+        ],
+        "description": "CGAP Family bgm0360 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0360"
+    },
+    {
+        "uuid": "dd67cc9f-68a0-46b1-8685-ce538393a511",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "d94de448-8cf6-49d7-ae48-84feb86d30c9",
+                "members": [
+                    "d94de448-8cf6-49d7-ae48-84feb86d30c9",
+                    "f7482293-c581-485b-83cb-b940a6809783",
+                    "c1f77048-729c-402d-b2a3-1bbc8760dd5e"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0295"
+        ],
+        "description": "CGAP Family bgm0295 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0295"
+    },
+    {
+        "uuid": "d4397328-5bfa-42fa-973e-b923e7f7105e",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "5edc3f00-e59e-4add-a2da-3083c1b4b15b",
+                "members": [
+                    "5edc3f00-e59e-4add-a2da-3083c1b4b15b",
+                    "5b691159-8171-4417-89a7-5edb56622b86",
+                    "0549e4b7-0818-407c-a2e4-464f769cab5d"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0345"
+        ],
+        "description": "CGAP Family bgm0345 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0345"
+    },
+    {
+        "uuid": "a7a9ec61-6b43-4867-9db3-3a5b8cb1969f",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "3def7bdf-8514-45c2-9211-2a259cd5ec84",
+                "members": [
+                    "3def7bdf-8514-45c2-9211-2a259cd5ec84",
+                    "7d07b647-ebb4-4447-99ce-2ac573068d0c",
+                    "29f35693-a300-407e-9046-2784b7d2199f"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0389"
+        ],
+        "description": "CGAP Family bgm0389 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0389"
+    },
+    {
+        "uuid": "685908b1-ccca-439e-b000-8e32478b7c68",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "e8495b67-07e4-4de0-99fb-4c59d4d03c0e",
+                "members": [
+                    "e8495b67-07e4-4de0-99fb-4c59d4d03c0e",
+                    "53bd2de4-f416-414b-a256-85bfa065f131",
+                    "1cba983a-7b2e-4eba-bbe0-3eb75f04166c"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0344"
+        ],
+        "description": "CGAP Family bgm0344 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0344"
+    },
+    {
+        "uuid": "53a8d47d-ea5a-4921-9bd2-04a4bc4a802a",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "58f198c8-a2e5-4259-834d-2e38c5c2a70a",
+                "members": [
+                    "58f198c8-a2e5-4259-834d-2e38c5c2a70a",
+                    "ada763a4-1540-4022-b137-bee0c2e57101",
+                    "c1f460ab-35d5-443f-a9c1-a88c01eaa48b"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0351"
+        ],
+        "description": "CGAP Family bgm0351 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0351"
+    },
+    {
+        "uuid": "4f58d724-c892-495e-821f-936f6ae89fca",
+        "institution": "hms-dbmi",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "families": [
+            {
+                "proband": "db40f905-3a69-4af5-9e10-8a55e9098f6d",
+                "members": [
+                    "db40f905-3a69-4af5-9e10-8a55e9098f6d",
+                    "db904433-b80a-4cb1-bbec-3b3f3ff73dcb",
+                    "b820ef62-3a44-4085-944c-72359ce4fc2f"
+                ]
+            }
+        ],
+        "aliases": [
+            "cgap:family_bgm0363"
+        ],
+        "description": "CGAP Family bgm0363 with proband, father, mother",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "title": "bgm0363"
+    }
+]

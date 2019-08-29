@@ -1,0 +1,16 @@
+[
+    {
+  "status": "released",
+  "software_type": [
+    "aligner"
+  ],
+  "name": "bwa",
+  "schema_version": "1",
+  "version": "0.7.17",
+  "title": "bwa_0.7.17",
+  "uuid": "02d636b9-d82d-4da9-950c-2ca994a13209",
+  "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+  "institution": "hms-dbmi",
+  "submitted_by": "koray_kirli@hms.harvard.edu"
+}
+]

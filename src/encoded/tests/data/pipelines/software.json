@@ -1,0 +1,86 @@
+[
+    {
+        "institution": "hms-dbmi",
+        "name": "samtools",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "uuid": "3f2d3b0e-0365-4212-9468-c16ad9531c4d",
+        "software_type": [
+            "file format converter"
+        ],
+        "source_url": "https://github.com/samtools/samtools",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "version": "1.9",
+        "title": "samtools_1.9"
+    },
+    {
+        "institution": "hms-dbmi",
+        "name": "bwa",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "uuid": "42adeb1b-c46c-4ba8-b191-56036ddcd544",
+        "status": "in review",
+        "software_type": [
+            "aligner"
+        ],
+        "aliases": [],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "version": "0.7.17",
+        "title": "bwa_0.7.17"
+    },
+    {
+        "institution": "hms-dbmi",
+        "name": "fastqc",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "uuid": "02d636b9-d82d-4da9-950c-2ca994a13131",
+        "software_type": [
+            "quality metric generator"
+        ],
+        "aliases": [],
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "version": "0.11.4",
+        "title": "fastqc_0.11.4"
+    },
+    {
+        "institution": "hms-dbmi",
+        "name": "gatk",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "uuid": "4ae88fb4-23f2-4939-8852-4644069d14d9",
+        "software_type": [
+            "variant caller"
+        ],
+        "source_url": "https://software.broadinstitute.org/gatk/gatk4",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "version": "4.1.2.0",
+        "title": "gatk_4.1.2.0"
+    },
+    {
+        "institution": "hms-dbmi",
+        "name": "add-readgroups",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "uuid": "d7ac4c75-e133-4a8e-a19e-b7e87873cc16",
+        "title": "add-readgroups_81ca652",
+        "software_type": [
+            "annotator"
+        ],
+        "commit": "81ca652",
+        "source_url": "https://github.com/dbmi-bgm/cgap-pipeline/blob/master/dockerfiles/cgap-docker/AddReadGroups.py",
+        "submitted_by": "koray_kirli@hms.harvard.edu"
+    },
+    {
+        "institution": "hms-dbmi",
+        "name": "picard",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "status": "in review",
+        "uuid": "586cef39-6505-4bf6-920a-4b26a500d210",
+        "software_type": [
+            "filter"
+        ],
+        "source_url": "https://broadinstitute.github.io/picard/",
+        "submitted_by": "koray_kirli@hms.harvard.edu",
+        "version": "2.20.2",
+        "title": "picard_2.20.2"
+    }
+]

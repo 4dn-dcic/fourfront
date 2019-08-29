@@ -33,4 +33,4 @@ def test_insert_and_get_tracking_item(testapp, tracking_item):
 #     # should not have date created in this case (no validators run)
 #     assert 'date_created' not in app_res.json
 #     # however status is added automatically when using create_and_commit fxn
-#     assert app_res.json['status'] == 'in review by lab'
+#     assert app_res.json['status'] == 'in review'
