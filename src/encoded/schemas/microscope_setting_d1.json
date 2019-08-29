@@ -197,6 +197,30 @@
             "description": "e.g. camera, confocal, etc...",
             "type": "string",
             "lookup": 403
+        },
+        "ch04_light_source_type":{
+            "title": "Ch03 light source type",
+            "description": "Type of the light source for channel 3",
+            "type": "string",
+            "lookup": 400
+        },
+        "ch04_light_source_model":{
+            "title": "Ch03 light source model",
+            "description": "Manufacturer and model number of the light source on channel 3",
+            "type": "string",
+            "lookup": 401
+        },
+        "ch04_light_source_center_wl":{
+            "title": "Ch03 center wavelength",
+            "description": "Center wavelength of the light source on ch03",
+            "type": "number",
+            "lookup": 402
+        },
+        "ch04_detector_type":{
+            "title": "Ch03 detector type",
+            "description": "e.g. camera, confocal, etc...",
+            "type": "string",
+            "lookup": 403
         }
     },
     "facets": {
