@@ -93,7 +93,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false
         };
-
+         
         this.higlassRef = React.createRef();
     }
 
@@ -119,21 +119,22 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 'genome_assembly'    : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
             });
         }
-
-        if (nextProps.href !== this.props.href && object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context)){
+        const hiGlassTabIndex = (this.props.hiGlassTabIndex !== 'undefined') ? this.props.hiGlassTabIndex : -1;        
+        const recentTabIsHiglass = (hiGlassTabIndex === 0 ? this.props.href.indexOf('#') < 0 : false) || (this.props.href.indexOf('#higlass') >= 0);
+        if (recentTabIsHiglass && (nextProps.href !== this.props.href) && (object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context))) {
             // If component is still same instance, then is likely that we're changing
             // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
             // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
-            var hgc                 = this.getHiGlassComponent(),
-                currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-                currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
-
-            currentViewConf && _.extend(nextState, {
-                'viewConfig' : currentViewConf
-            });
+            var hgc = this.getHiGlassComponent(),
+                currentViewConfStr = hgc && hgc.api.exportAsViewConfString(),
+                currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+               
+                //  currentViewConf && _.extend(nextState, {
+                //      'viewConfig' : currentViewConf
+                //  });
         }
 
-        if (_.keys(nextState).length > 0){
+        if (_.keys(nextState).length > 0) {
             this.setState(nextState);
         }
     }
@@ -628,7 +629,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { addFileLoading, genome_assembly, viewConfig } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
-
+        
         // Setting the height of the HiGlass Component follows one of these rules:
         // - If it's Fullscreen it should almost take up the entire window.
         // - Set to a fixed height.

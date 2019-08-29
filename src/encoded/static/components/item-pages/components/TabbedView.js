@@ -68,7 +68,12 @@ export class TabbedView extends React.PureComponent {
     }
 
     static renderTabPane(tabObj, tabIndex = 0){
-        const { key, tab, placeholder, disabled = false, style = null, content } = tabObj;
+        const { key, tab, placeholder, disabled = false, style = null } = tabObj;
+        let { content } = tabObj;
+        if(this.hiGlassTabIndex >= 0){
+            content = React.cloneElement(content, { 'hiGlassTabIndex': this.hiGlassTabIndex });
+        }
+        
         return (
             <Tabs.TabPane
                 key={key || tabIndex}
@@ -299,18 +304,19 @@ export class TabbedView extends React.PureComponent {
     render(){
         const { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
 
-        var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
-            tabsProps = {
-                onChange, destroyInactiveTabPane,
-                'renderTabBar'          : () => (
-                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
-                        className="extra-style-2" tabBarGutter={0} />
-                ),
-                'renderTabContent'      : () => <TabContent animated={animated} />,
-                'ref'                   : this.tabsRef,
-                'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents),
-                'children'              : _.map(allTabs, TabbedView.renderTabPane)
-            };
+        var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
+        const hiGlassTabIndex = _.findIndex(contents, function (el) { return ['higlass'].indexOf(el.key) > -1; });
+        var tabsProps = {
+            onChange, destroyInactiveTabPane,
+            'renderTabBar': () => (
+                <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
+                    className="extra-style-2" tabBarGutter={0} />
+            ),
+            'renderTabContent': () => <TabContent animated={animated} />,
+            'ref': this.tabsRef,
+            'defaultActiveKey': TabbedView.getDefaultActiveKeyFromContents(contents),
+            'children': _.map(allTabs, TabbedView.renderTabPane, { 'hiGlassTabIndex': hiGlassTabIndex })
+        };
 
         if (activeKey) tabsProps.activeKey = activeKey;
 
