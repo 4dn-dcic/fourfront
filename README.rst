@@ -66,6 +66,8 @@ Step 3: Run buildout::
     If you have issues with Pillow you may need to install new xcode command line tools:
     - First update Xcode from AppStore (reboot)
     $ xcode-select --install
+    If you are running macOS Mojave, you may need to run the below command as well:
+    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
 
 
 
