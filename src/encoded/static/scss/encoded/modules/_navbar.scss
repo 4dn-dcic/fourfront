@@ -14,13 +14,13 @@ $navbar-separator-color : scale-color($navbar-link-color, $alpha: -80%) !default
 
 @mixin navbar-link-button-item {
     position: relative;
-    font-size: 1.125rem;
+    font-size: 1.075rem;
     font-weight: 400;
     color: $navbar-link-color;
     padding-top: 0;
     padding-bottom: 0;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 15px;
+    padding-right: 15px;
 
     @include navbar-fixed-position {
         height: inherit;

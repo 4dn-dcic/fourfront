@@ -29,6 +29,11 @@ function ClipPathDefinitions({ dims : { individualHeight: height, individualWidt
                 orient="auto-start-reverse">
                 <path d="M 0 0 L 10 5 L 0 10 z" />
             </marker>
+            <marker id="pedigree_circle" viewBox="0 0 10 10" refX="5" refY="5"
+                markerWidth="4" markerHeight="4"
+                orient="auto-start-reverse">
+                <circle r={5} cx={5} cy={5} style={{ fill: "#0002" }} />
+            </marker>
             <clipPath id="pedigree_clipPath_for_FemaleShape">
                 <FemaleShape {...{ height, width }} />
             </clipPath>
@@ -360,7 +365,7 @@ function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
 
 /** @todo Implement things like age, stillBirth, isEctopic, etc. */
 function UnderNodeText({ individual, width, height, shape, dims }){
-    const { id, name } = individual;
+    const { id, name, age } = individual;
     const textYStart = 19;
     const showTitle = name || id;
 
@@ -368,8 +373,9 @@ function UnderNodeText({ individual, width, height, shape, dims }){
 
     return (
         <g className="text-box" transform={"translate(" + 0 + ", " + (height + 4) + ")"}>
-            <rect width={width + 8} x={-4} height={dims.individualYSpacing / 3} className="bg-rect" rx={5} />
+            <rect width={width + 4} x={-2} height={dims.individualYSpacing / 3} className="bg-rect" rx={5} />
             <text y={textYStart}>{ showTitle }</text>
+            { age ? <text y={textYStart + 20}>Age: { age }</text> : null }
         </g>
     );
 }

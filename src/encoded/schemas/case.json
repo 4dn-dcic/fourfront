@@ -49,11 +49,20 @@
                         "type" : "string",
                         "linkTo" : "Individual"
                     },
-                    "ped_file": {
-                        "title" : "Pedigree File",
-                        "description": "Ped format file with pedigree information",
+                    "original_pedigree": {
+                        "title" : "Original Pedigree File",
+                        "description": "The original pedigree file used for this family",
                         "type" : "string",
                         "linkTo": "Document"
+                    },
+                    "timestamp": {
+                        "title": "Pedigree Timestamp",
+                        "description": "Date of original pedigree file generation",
+                        "type": "string",
+                        "anyOf": [
+                            {"format": "date-time"},
+                            {"format": "date"}
+                        ]
                     }
                 }
             }

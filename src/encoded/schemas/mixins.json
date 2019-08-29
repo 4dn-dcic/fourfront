@@ -224,6 +224,7 @@
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                         "application/pdf",
                         "application/zip",
+                        "application/proband+xml",
                         "text/plain",
                         "text/tab-separated-values",
                         "image/jpeg",

@@ -3,7 +3,7 @@
     "id": "/profiles/individual.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["life_status", "sex"],
+    "required": ["is_deceased", "sex"],
     "identifyingProperties": ["uuid"],
     "additionalProperties": true,
     "mixinProperties": [
@@ -24,10 +24,9 @@
             "title": "Sex",
             "type": "string",
             "enum": [
-                "male",
-                "female",
-                "other",
-                "unknown"
+                "M",
+                "F",
+                "U"
             ]
         },
         "phenotypic_features": {
@@ -61,14 +60,14 @@
             "type" : "string",
             "notes": "might be useful for cases like individual from pregnancy loss, not sure if needed"
         },
-        "life_status": {
-            "title": "Life Status",
-            "type": "string",
-            "enum": [
-                "alive",
-                "deceased",
-                "unknown"
-            ]
+        "is_deceased": {
+            "title": "Deceased",
+            "description": "Whether the individual is deceased",
+            "type": "boolean"
+        },
+        "is_still_birth": {
+            "title": "Still Birth",
+            "type": "boolean"
         },
         "ethnicity": {
             "title": "Ethnicity",
@@ -126,6 +125,16 @@
             "title": "Father",
             "type": "string",
             "linkTo": "Individual"
+        },
+        "parents": {
+            "title": "Parents",
+            "type": "array",
+            "description": "Can optionally be used to supplement mother/father",
+            "items": {
+                "title": "Parent",
+                "type": "string",
+                "linkTo": "Individual"
+            }
         },
         "samples" : {
             "title" : "Samples",

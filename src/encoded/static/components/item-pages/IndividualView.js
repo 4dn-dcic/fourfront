@@ -37,7 +37,7 @@ export const PedigreeTabView = React.memo(function PedigreeTabView(props){
                 <span>Pedigree</span>
             </h3>
             <hr className="tab-section-title-horiz-divider"/>
-            <PedigreeTabViewBody {...{ dataset, innerOverlaysContainer, windowWidth, windowHeight }} />
+            <PedigreeTabViewBody {...{ innerOverlaysContainer, windowWidth, windowHeight }} />
         </div>
     );
 });

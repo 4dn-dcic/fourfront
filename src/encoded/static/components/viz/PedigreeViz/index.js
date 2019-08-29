@@ -51,7 +51,7 @@ const POSITION_DEFAULTS = {
     graphPadding: 60,
     relationshipSize: 40,
     edgeLedge: 40,
-    edgeCornerDiameter: 10
+    edgeCornerDiameter: 20
 };
 
 /**
@@ -139,16 +139,18 @@ export class PedigreeViz extends React.PureComponent {
                 id: 11, name: "Max", gender: "m", parents: [],
                 asymptoticDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"]
             },
-            { id: 12, name: "William", gender: "u", parents: [11, 5], deceased: true, age: 24 },
+            { id: 12, name: "Winnie the Pooh", gender: "u", parents: [11, 5], deceased: true, age: 24 },
             {
                 id: 13, name: "Rutherford", gender: "m", parents: [10, 5], age: 0.3,
                 isPregnancy: true, deceased: true, isTerminatedPregnancy: true,
                 diseases: ["Ubercrampus", "Blue Thumb Syndrome", "Green Thumbitis"],
                 carrierOfDiseases: ["BlueClues", "BlueClues2", "BluesClues3"]
             },
-            //{ id: 14, name: "Sally", gender: "f", parents: [12, 9] },
+            { id: 14, name: "Sally", gender: "f", parents: [12, 9] },
             //{ id: 15, name: "Sally2", gender: "f" },
             //{ id: 16, name: "Silly", gender: "m", parents: [15, 12] },
+            //{ id: 17, name: "Silly2", gender: "m", parents: [15, 12] },
+            //{ id: 18, name: "Silly3", gender: "f", parents: [16, 14] },
         ],
 
         /**
@@ -308,19 +310,20 @@ class GraphTransformer extends React.PureComponent {
 
     render(){
         const { jsonList, children, dimensionOpts, filterUnrelatedIndividuals, ...passProps } = this.props;
-        const dims                  = this.memoized.getFullDims(dimensionOpts);
-        const objectGraph           = this.memoized.createObjectGraph(jsonList);
-        const relationships         = this.memoized.createRelationships(objectGraph);
-        const anyUnrelatedIndvs     = this.memoized.assignTreeHeightIndices(objectGraph, filterUnrelatedIndividuals);
-        const order                 = this.memoized.orderObjectGraph(objectGraph, this.memoized);
+        const { objectGraph, disconnectedIndividuals } = this.memoized.createObjectGraph(jsonList, filterUnrelatedIndividuals);
+        const relationships = this.memoized.createRelationships(objectGraph);
+        this.memoized.assignTreeHeightIndices(objectGraph);
+        const order = this.memoized.orderObjectGraph(objectGraph, relationships, this.memoized);
+        const dims = this.memoized.getFullDims(dimensionOpts);
         this.memoized.positionObjectGraph(objectGraph, order, dims);
-        const graphHeight           = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
+        const graphHeight = this.memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const edges = this.memoized.createEdges(objectGraph, dims, graphHeight);
         console.log('TTT2', objectGraph, relationships, edges);
 
         const viewProps = {
             ...passProps,
             objectGraph, relationships, dims, order, edges,
+            disconnectedIndividuals, filterUnrelatedIndividuals,
             memoized: this.memoized
         };
 
@@ -435,8 +438,6 @@ export class PedigreeVizView extends React.PureComponent {
             width: containerWidth,
             height: "auto",
             minHeight : containerHeight || "none",
-            position: "relative",
-            overflow: "auto",
             ...containerStyle
         };
 
@@ -449,7 +450,7 @@ export class PedigreeVizView extends React.PureComponent {
             vizAreaStyle.position = 'relative';
             vizAreaStyle.left = Math.max((containerWidth - graphWidth) / 2, 0);
             // Less top margin than bottom due to more labels at bottom.
-            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 3, 0);
+            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 2 - (dims.graphPadding / 2), 0);
         }
 
         const commonChildProps = {
@@ -477,10 +478,12 @@ export class PedigreeVizView extends React.PureComponent {
 
         return (
             <div className="pedigree-viz-container" style={useContainerStyle} onClick={this.handleContainerClick}>
-                <div className="viz-area" style={vizAreaStyle}>
-                    <ShapesLayer {...commonChildProps} />
-                    <RelationshipsLayer {...commonChildProps} />
-                    <IndividualsLayer {...commonChildProps} />
+                <div className="inner-container">
+                    <div className="viz-area" style={vizAreaStyle}>
+                        <ShapesLayer {...commonChildProps} />
+                        <RelationshipsLayer {...commonChildProps} />
+                        <IndividualsLayer {...commonChildProps} />
+                    </div>
                 </div>
                 { selectedNodePane }
             </div>

@@ -5,18 +5,42 @@ import * as d3 from 'd3';
 
 export const EdgesLayer = React.memo(function EdgesLayer(props){
     const { graphHeight, graphWidth, edges, ...passProps } = props;
-    const { directEdges, adjustableEdges } = edges;
+    const { dims } = passProps;
+    const { directEdges, adjustableEdges, visibilityGraph } = edges;
     const allEdges = [].concat(directEdges).concat(adjustableEdges);
     return (
         <g className="individuals-edge-shape-layer">
-            { allEdges.map((edge) => {
-                const edgeId = edge.fromVertex.toString() + "-to-" + edge.toVertex.toString();
-                return <Edge key={edgeId} id={edgeId} edge={edge} {...passProps} />; 
-            } )}
+            <DebugVizGraphLayer visibilityGraph={visibilityGraph} dims={dims} />
+            <g className="primary-edges">
+                { allEdges.map((edge) => {
+                    const edgeId = edge.fromVertex.toString() + "-to-" + edge.toVertex.toString();
+                    return <Edge key={edgeId} id={edgeId} edge={edge} {...passProps} />;
+                } )}
+            </g>
         </g>
     );
 });
 
+const DebugVizGraphLayer = React.memo(function DebugVizGraphLayer(props){
+    const { visibilityGraph, dims, enabled = false } = props;
+    if (!visibilityGraph || !enabled) return null;
+    const { hSegments, vSegments } = visibilityGraph;
+    console.log('VIZG', visibilityGraph);
+    return (
+        <g className="visibility-graph" style={{ stroke: "#ccc" }}
+            transform={"translate(" + dims.graphPadding + "," + dims.graphPadding + ")"}>
+            {
+                [].concat(vSegments).concat(hSegments).map(function([ start, end ]){
+                    const path = d3.path();
+                    path.moveTo(...start);
+                    path.lineTo(...end);
+                    const pathStr = path.toString();
+                    return <path d={pathStr} key={pathStr} markerEnd="url(#pedigree_circle)" markerStart="url(#pedigree_circle)" />;
+                })
+            }
+        </g>
+    );
+});
 
 function makeEdgePathDimensions(edgeObj, dims){
     const { edgeLedge, edgeCornerDiameter = 10 } = dims;
@@ -37,7 +61,6 @@ function makeEdgePathDimensions(edgeObj, dims){
             path.lineTo(...currCoord);
         } else if (futureCoord && futureCoord[0] !== prevCoord[0] && futureCoord[1] !== prevCoord[1]){
             const currCoordModified = currCoord.slice(0);
-            const intermediatePt = currCoord.slice(0);
             let toLeftMultiplier;
             let toUpMultiplier;
             if (currCoord[0] !== futureCoord[0]){
@@ -45,15 +68,11 @@ function makeEdgePathDimensions(edgeObj, dims){
                 toLeftMultiplier = currCoord[0] < futureCoord[0] ? 1 : -1;
                 toUpMultiplier = currCoord[1] > prevCoord[1] ? -1 : 1;
                 currCoordModified[1] += (toUpMultiplier * edgeCornerDiameter);
-                intermediatePt[0] = currCoord[0] + (toLeftMultiplier * edgeCornerDiameter);
-                intermediatePt[1] = currCoord[1];
             } else {
                 toUpMultiplier = currCoord[1] < futureCoord[1] ? 1 : -1;
                 toLeftMultiplier = currCoord[0] < prevCoord[0] ? 1 : -1;
                 //currCoordModified[1] += (toUpMultiplier * edgeCornerDiameter);
                 currCoordModified[0] += (toLeftMultiplier * edgeCornerDiameter);
-                intermediatePt[0] = currCoord[0];
-                intermediatePt[1] = currCoord[1] + (toUpMultiplier * edgeCornerDiameter);
             }
 
             path.lineTo(...currCoordModified);
@@ -66,7 +85,7 @@ function makeEdgePathDimensions(edgeObj, dims){
                 edgeCornerDiameter
             );
 
-            path.lineTo(...intermediatePt);
+            //path.lineTo(...intermediatePt);
         } else {
             path.lineTo(...currCoord);
         }

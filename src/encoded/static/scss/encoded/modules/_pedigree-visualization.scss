@@ -51,221 +51,232 @@ $pedigree-disease-colors :
 
 
 .pedigree-viz-container {
-    transform: translate3d(0,0,0);
-    background: $pedigree-viz-bg-color;
-    overflow: auto;
+    position: relative;
 
-    > .viz-area {
+    .inner-container {
 
-        > .individuals-layer {
-            position: relative;
-            > .pedigree-individual {
-                position: absolute;
-                text-align: center;
-                cursor: pointer;
-                z-index: 100;
-                overflow: visible;
-                //transition: overflow 0s .2s;
-                .btns-container {
+        transform: translate3d(0,0,0);
+        background: $pedigree-viz-bg-color;
+        overflow: auto;
+        min-height: inherit;
+        height: inherit;
+
+        > .viz-area {
+
+            > .individuals-layer {
+                position: relative;
+                > .pedigree-individual {
                     position: absolute;
-                    right: -15px;
-                    bottom: -19px;
-                    opacity: 0;
-                    z-index: -100;
-                    transition: z-index .0s .2s, opacity .2s, right .2s, bottom .2s;
-                    > button {
-                        display: block;
-                        border: 1px solid transparent;
-                        color: #fff;
-                        margin-bottom: 5px;
-                        border-radius: 50%;
-                        width: 0px;
-                        height: 0px;
-                        text-align: center;
-                        padding: 0;
-                        background: $brand-primary;
-                        font-size: 0.9rem;
-                        transition: width 0s .2s, height 0s .2s;
-                    }
-                }
-
-                .detail-text {
-                    position: absolute;
-                    border: 1px solid transparent;
-                    //left: 100%;
-                    //top: 100%;
-                    padding: 0px 6px;
-                    transition: padding-top .2s;
-                    .line-item {
-                        width: 100%;
-                        display: block;
-                        overflow: hidden;
-                        white-space: nowrap;
-                        text-overflow: ellipsis;
-                    }
-                }
-
-                &.is-hovered-over,
-                &.is-selected {
-                    //overflow: visible;
-                    //transition: overflow 0s;
+                    text-align: center;
+                    cursor: pointer;
+                    z-index: 100;
+                    overflow: visible;
+                    //transition: overflow 0s .2s;
                     .btns-container {
-                        opacity: 1;
-                        z-index: 1;
+                        position: absolute;
                         right: -15px;
-                        transition: z-index 0s, opacity .2s, right .2s, bottom .2s;
+                        bottom: -19px;
+                        opacity: 0;
+                        z-index: -100;
+                        transition: z-index .0s .2s, opacity .2s, right .2s, bottom .2s;
                         > button {
-                            width: 30px;
-                            height: 30px;
-                            transition: width 0s 0s, height 0s 0s;
+                            display: block;
+                            border: 1px solid transparent;
+                            color: #fff;
+                            margin-bottom: 5px;
+                            border-radius: 50%;
+                            width: 0px;
+                            height: 0px;
+                            text-align: center;
+                            padding: 0;
+                            background: $brand-primary;
+                            font-size: 0.9rem;
+                            transition: width 0s .2s, height 0s .2s;
                         }
                     }
+    
                     .detail-text {
-                        max-width: none !important;
-                        background-color: $pedigree-viz-bg-color;
-                    }
-                    &.is-editable {
-                        .detail-text {
-                            padding-top: 12px;
+                        position: absolute;
+                        border: 1px solid transparent;
+                        //left: 100%;
+                        //top: 100%;
+                        padding: 0px 6px;
+                        transition: padding-top .2s;
+                        .line-item {
+                            width: 100%;
+                            display: block;
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
                         }
                     }
-                }
-
-                &.is-hovered-over:not(.is-selected) {
-                    .btns-container {
-                        right: -18px;
-                        bottom: -21px;
-                        > button {
-                            
-                        }
-                    }
-                    &.is-editable {
-                        .detail-text {
-                            padding-top: 18px;
-                        }
-                    }
-                }
-            }
-        }
-        > .relationships-layer {
-            .pedigree-relationship {
-                position: absolute;
-                border: 2px solid transparent;
-                border-radius: 50%;
-                background-color: #521f1fad;
-                background: transparent;
-                padding: 9px;
-                transition: padding .2s;
-                cursor: pointer;
-                &:after {
-                    content: '';
-                    position: relative;
-                    width: 18px;
-                    height: 18px;
-                    background-color: #521f1fad;
-                    border: 2px solid #521f1f;
-                    border-radius: 50%;
-                    display: block;
-                    transition: width .2s, height .2s;
-                }
-
-                &.is-hovered-over:not(.is-selected) {
-                    padding: 6px;
-                    &:after {
-                        width: 24px;
-                        height: 24px;
-                    }
-                }
-            }
-        }
-
-        > .shapes-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-
-            > .individuals-bg-shape-layer {
-
-                > g.pedigree-individual-shape {
-                    // Shapes will inherit group styles unless overriding
-                    stroke-width: 3px;
-                    stroke: $pedigree-viz-node-stroke-color;
-                    transition: transform .2s;
-
-                    .bg-shape-copy {
-                        stroke-width: 0px;
-                        fill: $pedigree-viz-bg-color;
-                    }
-
-                    .fg-shape {
-                        stroke-width: 3px;
-                        fill: transparent;
-                        transition: stroke-width .2s;
-                    }
-
-                    text {
-                        stroke-width: 0px;
-                        fill: $pedigree-viz-node-stroke-color;
-                        &.proband-identifier {
-                            font-weight: 700;
-                        }
-                    }
-
-                    circle.circle-disease-dot,
-                    rect.rect-disease-partition {
-                        stroke-width: 1;
-                        @include color-cycle-fill;
-                    }
-
+    
                     &.is-hovered-over,
                     &.is-selected {
-                        .fg-shape {
-                            stroke-width: 4px;
-                            stroke: darken($pedigree-viz-node-stroke-color, 20%);
+                        //overflow: visible;
+                        //transition: overflow 0s;
+                        .btns-container {
+                            opacity: 1;
+                            z-index: 1;
+                            right: -15px;
+                            transition: z-index 0s, opacity .2s, right .2s, bottom .2s;
+                            > button {
+                                width: 30px;
+                                height: 30px;
+                                transition: width 0s 0s, height 0s 0s;
+                            }
+                        }
+                        .detail-text {
+                            max-width: none !important;
+                            background-color: $pedigree-viz-bg-color;
+                        }
+                        &.is-editable {
+                            .detail-text {
+                                padding-top: 12px;
+                            }
                         }
                     }
-
-                    &.is-affected {
-                        fill: transparent; // Colors of disease-arcs behind it will show through.
-                        path.disease-arc {
+    
+                    &.is-hovered-over:not(.is-selected) {
+                        .btns-container {
+                            right: -18px;
+                            bottom: -21px;
+                            > button {
+                                
+                            }
+                        }
+                        &.is-editable {
+                            .detail-text {
+                                padding-top: 18px;
+                            }
+                        }
+                    }
+                }
+            }
+            > .relationships-layer {
+                .pedigree-relationship {
+                    position: absolute;
+                    border: 2px solid transparent;
+                    border-radius: 50%;
+                    background-color: #521f1fad;
+                    background: transparent;
+                    padding: 9px;
+                    transition: padding .2s;
+                    cursor: pointer;
+                    &:after {
+                        content: '';
+                        position: relative;
+                        width: 18px;
+                        height: 18px;
+                        background-color: #521f1fad;
+                        border: 2px solid #521f1f;
+                        border-radius: 50%;
+                        display: block;
+                        transition: width .2s, height .2s;
+                    }
+    
+                    &.is-hovered-over:not(.is-selected) {
+                        padding: 6px;
+                        &:after {
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                }
+            }
+    
+            > .shapes-layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+    
+                > .individuals-bg-shape-layer {
+    
+                    > g.pedigree-individual-shape {
+                        // Shapes will inherit group styles unless overriding
+                        stroke-width: 3px;
+                        stroke: $pedigree-viz-node-stroke-color;
+                        transition: transform .2s;
+    
+                        .bg-shape-copy {
+                            stroke-width: 0px;
+                            fill: $pedigree-viz-bg-color;
+                        }
+    
+                        .fg-shape {
+                            stroke-width: 3px;
+                            fill: transparent;
+                            transition: stroke-width .2s;
+                        }
+    
+                        text {
+                            stroke-width: 0px;
+                            fill: $pedigree-viz-node-stroke-color;
+                            &.proband-identifier {
+                                font-weight: 700;
+                            }
+                        }
+    
+                        circle.circle-disease-dot,
+                        rect.rect-disease-partition {
                             stroke-width: 1;
                             @include color-cycle-fill;
                         }
+    
+                        &.is-hovered-over,
+                        &.is-selected {
+                            .fg-shape {
+                                stroke-width: 4px;
+                                stroke: darken($pedigree-viz-node-stroke-color, 20%);
+                            }
+                        }
+    
+                        &.is-affected {
+                            fill: transparent; // Colors of disease-arcs behind it will show through.
+                            path.disease-arc {
+                                stroke-width: 1;
+                                @include color-cycle-fill;
+                            }
+                        }
+    
+                        g.text-box {
+                            rect.bg-rect {
+                                stroke: none;
+                                fill: transparentize($pedigree-viz-bg-color, 0.25);
+                            }
+                        }
                     }
-
-                    g.text-box {
-                        rect.bg-rect {
-                            stroke: none;
-                            fill: $pedigree-viz-bg-color;
+    
+                }
+    
+                > .individuals-edge-shape-layer {
+                    path.edge-path {
+                        stroke: $pedigree-viz-node-stroke-color;
+                        fill: none;
+                        stroke-width: 2;
+                        &.is-adjustable {
+                            stroke: #7d0000;
+                            //stroke: orange;
                         }
                     }
                 }
-
-            }
-
-            > .individuals-edge-shape-layer {
-                path.edge-path {
-                    stroke: $pedigree-viz-node-stroke-color;
-                    fill: none;
-                    stroke-width: 2;
-                    &.is-adjustable {
-                        stroke: #7d0000;
-                        //stroke: orange;
+    
+                > g.selected-node-identifier {
+                    transition: transform .3s;
+                    > path {
+                        stroke: #0005;
+                        stroke-width: 7px;
+                        fill: none;
                     }
                 }
             }
-
-            > g.selected-node-identifier {
-                transition: transform .3s;
-                > path {
-                    stroke: #0005;
-                    stroke-width: 7px;
-                    fill: none;
-                }
-            }
+    
         }
 
     }
+
+    
+
 }
 
 /** Default Detail Pane Styling **/
