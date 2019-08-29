@@ -309,6 +309,11 @@ export default class DefaultItemView extends React.PureComponent {
         return null; /*<ItemFooterRow context={context} schemas={schemas} />*/
     }
 
+    /** Render additional item actions */
+    additionalItemActionsContent(){
+        return null;
+    }
+
     /**
      * Somewhat hacky/anti-pattern - calls function of a child component.
      * Is kept this way to simplify code and avoid putting more logic into
@@ -354,7 +359,10 @@ export default class DefaultItemView extends React.PureComponent {
         };
         const menuTabObj = {
             'className' : "menu-tab",
-            'tab' : <ItemActionsTab {..._.pick(this.props, 'schemas', 'href', 'context', 'innerOverlaysContainer', 'session')}/>,
+            'tab' : (
+                <ItemActionsTab {..._.pick(this.props, 'schemas', 'href', 'context', 'innerOverlaysContainer', 'session')}
+                    additionalItemActionsContent={this.additionalItemActionsContent()} />
+            ),
             'key' : 'item-actions-menu',
             //'onClick' : this.onItemActionsTabClick
         };
@@ -454,11 +462,11 @@ export class ItemActionsTab extends React.PureComponent {
     }
 
     render(){
-        const { innerOverlaysContainer, ...passProps } = this.props;
+        const { innerOverlaysContainer, additionalItemActionsContent, ...passProps } = this.props;
         const { context : { actions = [] }, session, href, itemActionsExtras } = passProps;
         const { open } = this.state;
 
-        if (!session){
+        if (!session && !additionalItemActionsContent){
             // No context.actions available except to see JSON (hardcoded)
             // might change in future.
             // So just show view JSON action and no menu.
@@ -484,7 +492,9 @@ export class ItemActionsTab extends React.PureComponent {
                     <span>Actions</span>
                 </div>
                 <SlideInPane in={open} overlaysContainer={innerOverlaysContainer} onClose={this.toggleOpen}>
-                    <ItemActionsTabMenu {...passProps} actions={filteredActions} onClose={this.toggleOpen} />
+                    <ItemActionsTabMenu {...passProps} actions={filteredActions} onClose={this.toggleOpen}>
+                        { additionalItemActionsContent }
+                    </ItemActionsTabMenu>
                 </SlideInPane>
             </React.Fragment>
         );
@@ -494,7 +504,7 @@ export class ItemActionsTab extends React.PureComponent {
 
 
 const ItemActionsTabMenu = React.memo(function ItemActionsTabMenu(props){
-    const { actions, itemActionsExtras, href: currentPageHref, onClose } = props;
+    const { actions, itemActionsExtras, href: currentPageHref, onClose, children } = props;
 
     const renderedActions = actions.map(function({ name, title, profile, href }, idx){
         const { description, icon } = itemActionsExtras[name];
@@ -533,7 +543,10 @@ const ItemActionsTabMenu = React.memo(function ItemActionsTabMenu(props){
                     <i className="icon icon-times fas"/>
                 </div>
             </div>
-            <div className="menu-inner">{ renderedActions }</div>
+            <div className="menu-inner">
+                { renderedActions }
+                { children }
+            </div>
         </div>
     );
 });

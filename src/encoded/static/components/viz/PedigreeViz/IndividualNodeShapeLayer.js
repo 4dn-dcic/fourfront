@@ -365,7 +365,7 @@ function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
 
 /** @todo Implement things like age, stillBirth, isEctopic, etc. */
 function UnderNodeText({ individual, width, height, shape, dims }){
-    const { id, name } = individual;
+    const { id, name, age } = individual;
     const textYStart = 19;
     const showTitle = name || id;
 
@@ -375,6 +375,7 @@ function UnderNodeText({ individual, width, height, shape, dims }){
         <g className="text-box" transform={"translate(" + 0 + ", " + (height + 4) + ")"}>
             <rect width={width + 4} x={-2} height={dims.individualYSpacing / 3} className="bg-rect" rx={5} />
             <text y={textYStart}>{ showTitle }</text>
+            { age ? <text y={textYStart + 20}>Age: { age }</text> : null }
         </g>
     );
 }

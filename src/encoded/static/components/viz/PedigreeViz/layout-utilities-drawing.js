@@ -226,9 +226,9 @@ export function createEdges(objectGraph, dims, graphHeight){
     });
 
     let visibilityGraph = computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, true);
-    let subdivisions = 1;
+    let subdivisions = 3;
     function trySubdivisions(){
-        if (subdivisions >= 3){
+        if (subdivisions >= 5){
             console.error("Could not build a connecting path");
             //throw new Error("Could not build a connecting path");
             return;
@@ -364,7 +364,6 @@ function tracePaths(adjustableEdges, visibilityGraph){
                 if (costToTargetEstimate < bestCostEstimate){
                     bestCostEstimate = costToTargetEstimate;
                     bestIdx = i;
-                    if (initCurrV[0] === 560 && initCurrV[1] === 240) console.log("BEST", costToTargetEstimate);
                 }
             }
             const result = vQueue[bestIdx];
@@ -545,12 +544,10 @@ function tracePaths(adjustableEdges, visibilityGraph){
  * becomes a little less pretty, so would need to add a subsequent step (maybe dif function) where
  * normalize paths to go down center of 'alleys'.
  */
-export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, countDirectEdges = true, subdivisions = 1){
+export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeight, countDirectEdges = true, divCount = 2){
 
     const hSegments = [];
     const vSegments = [];
-
-    const divCount = subdivisions * 2;
 
     const seenRelationships = new Set();
 
@@ -558,8 +555,10 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     const halfIndvHeight = dims.individualHeight / 2;
     const halfRelationSize = dims.relationshipSize / 2;
 
-    const partIndWidth = dims.individualWidth / divCount;
-    const partIndHeight = dims.individualHeight / divCount;
+    // We might have nodes be in same 'column' of spacing of dif rows
+    // if even # of children siblings
+    const partIndWidth = dims.individualWidth / divCount; // / 2;
+    const partIndHeight = dims.individualHeight / 2;
     const partIndXSpacing = dims.individualXSpacing / divCount;
     const partIndYSpacing = dims.individualYSpacing / divCount;
 
@@ -614,41 +613,45 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
             boundingBoxes.push(edge.vertices);
             return;
         }
+        let bb = null;
         if (edge.vertices[0][0] === edge.vertices[1][0]){
             // Vertical line segment
             if (edge.vertices[0][1] > edge.vertices[1][1]){
-                boundingBoxes.push([
+                bb = [
                     [ edge.vertices[0][0] - halfRelationSize, edge.vertices[1][1] ],
                     [ edge.vertices[0][0] - halfRelationSize, edge.vertices[0][1] ],
                     [ edge.vertices[0][0] + halfRelationSize, edge.vertices[1][1] ],
                     [ edge.vertices[0][0] + halfRelationSize, edge.vertices[0][1] ]
-                ]);
+                ];
             } else {
-                boundingBoxes.push([
+                bb = [
                     [ edge.vertices[0][0] - halfRelationSize, edge.vertices[0][1] ],
                     [ edge.vertices[0][0] - halfRelationSize, edge.vertices[1][1] ],
                     [ edge.vertices[0][0] + halfRelationSize, edge.vertices[0][1] ],
                     [ edge.vertices[0][0] + halfRelationSize, edge.vertices[1][1] ]
-                ]);
+                ];
             }
         } else {
             // Horizontal line segment
             if (edge.vertices[0][0] < edge.vertices[1][0]){
-                boundingBoxes.push([
+                bb = [
                     [ edge.vertices[0][0], edge.vertices[1][1] - halfRelationSize ],
                     [ edge.vertices[0][0], edge.vertices[1][1] + halfRelationSize ],
                     [ edge.vertices[1][0], edge.vertices[1][1] - halfRelationSize ],
                     [ edge.vertices[1][0], edge.vertices[1][1] + halfRelationSize ]
-                ]);
+                ];
             } else {
-                boundingBoxes.push([
+                bb = [
                     [ edge.vertices[1][0], edge.vertices[1][1] - halfRelationSize ],
                     [ edge.vertices[1][0], edge.vertices[1][1] + halfRelationSize ],
                     [ edge.vertices[0][0], edge.vertices[1][1] - halfRelationSize ],
                     [ edge.vertices[0][0], edge.vertices[1][1] + halfRelationSize ]
-                ]);
+                ];
             }
         }
+        // Hacky-ish - arrays are instances of object.
+        bb.obstacleType = "edge";
+        boundingBoxes.push(bb);
     });
 
     function splitSortFxn(a, b){
@@ -690,11 +693,16 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     let counter = -1;
     while (xCoordToSave < graphWidth){
         // Make vert lines, split them into pieces
-        if (counter % (2 * divCount) < divCount){ // Even
+        // TODO: Reconsider; only practical atm if partIndWidth
+        // & partIndXSpacing are equal since nodes might occupy
+        // the partIndXSpacing area if even # of children of parent
+        // relationship, for example
+        if (counter % (2 * divCount) < divCount){
             xCoordToSave += partIndWidth;
         } else {
             xCoordToSave += partIndXSpacing;
         }
+        //xCoordToSave += partIndXSpacing;
         vertlineXCoords.push(xCoordToSave);
         counter++;
     }
@@ -704,10 +712,10 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     counter = -1;
     while (yCoord < graphHeight){
         // Make horiz lines, split them into pieces
-        if (counter % (2 * divCount) < divCount){ // Even
+        if (counter % (2 + divCount) < 2){ // Within row of individuals
             yCoord += partIndHeight;
         } else {
-            yCoord += partIndYSpacing;
+            yCoord += partIndYSpacing;  // Within row of spacing area
         }
         horizLineYCoords.push(yCoord);
         console.log('Y-', yCoord);
@@ -735,21 +743,20 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
                 //*/
             } else if (bb.length === 4){
                 if (bb[0][1] <= yCoord && bb[3][1] >= yCoord){
-                    //console.log('BB', bb, [ bb[0][0], bb[3][0] ], [...splits]);
                     splitArrs.push([ bb[0][0], bb[3][0] ]);
+                    // Add edgeLedge splits
+                    if (bb.obstacleType !== 'edge'){
+                        if (bb[0][0] - dims.edgeLedge >= 0){
+                            splits.add(bb[0][0] - dims.edgeLedge);
+                        }
+                        if (bb[3][0] + dims.edgeLedge <= graphWidth){
+                            splits.add(bb[3][0] + dims.edgeLedge);
+                        }
+                    }
                 } else {
-                    splits.add(bb[0][0]);
-                    splits.add(bb[3][0]);
+                    //splits.add(bb[0][0]);
+                    //splits.add(bb[3][0]);
                 }
-                // Add edgeLedge splits - somewhat custom logic indv vs relationship:
-                //if (bb.obstacleType === "individual"){
-                    if (bb[0][0] - dims.edgeLedge >= 0){
-                        splits.add(bb[0][0] - dims.edgeLedge);
-                    }
-                    if (bb[3][0] + dims.edgeLedge <= graphWidth){
-                        splits.add(bb[3][0] + dims.edgeLedge);
-                    }
-                //}
             }
         });
         //console.log('SPLITS1', splits, splitArrs);
@@ -813,8 +820,8 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
                 if (bb[0][0] <= xCoord && bb[3][0] >= xCoord){
                     splitArrs.push([bb[0][1], bb[3][1]]);
                 } else {
-                    splits.add(bb[0][1]);
-                    splits.add(bb[3][1]);
+                    //splits.add(bb[0][1]);
+                    //splits.add(bb[3][1]);
                 }
                 //todo
             }
@@ -876,6 +883,10 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     return { hSegments, vSegments };
 }
 
+/**
+ * Make sure only 1 object reference exists for each
+ * vertex (array of [x,y]) for simpler comparisons.
+ */
 function uniquifyVertices(...pathLists){
     const uniqueVertices = new Set();
     const allPaths = pathLists.reduce(function(m, paths){
@@ -902,6 +913,7 @@ function uniquifyVertices(...pathLists){
         });
     });
 }
+
 
 /** Gets all diseases, uniqifies, then assigns a numerical index to each. */
 export function graphToDiseaseIndices(objectGraph){

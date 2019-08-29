@@ -6,7 +6,7 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import { DropdownButton, DropdownItem } from 'react-bootstrap';
 import DefaultItemView from './DefaultItemView';
-import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, layout, ajax, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { PedigreeViz } from './../viz/PedigreeViz';
@@ -16,38 +16,120 @@ import url from 'url';
 
 export default class CaseView extends DefaultItemView {
 
+    static haveFullViewPermissionForFamily(family){
+        const { original_pedigree = null, proband = null, members = [] } = family;
+        if (original_pedigree && !object.isAnItem(original_pedigree)){
+            // Tests for presence of display_title and @id, lack of which indicates lack of view permission.
+            return false;
+        }
+        if (proband && !object.isAnItem(proband)){
+            return false;
+        }
+        if (members.length === 0) {
+            return false;
+        }
+        for (var i = 0; i < members.length; i++){
+            if (!object.isAnItem(members[i])){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    constructor(props){
+        super(props);
+        this.onAddedFamily = this.onAddedFamily.bind(this);
+        this.handleFamilySelect = this.handleFamilySelect.bind(this);
+        this.state.pedigreeFamilies = (props.context.families || []).filter(CaseView.haveFullViewPermissionForFamily);
+        this.state.pedigreeFamiliesIdx = 0;
+    }
+
+    componentDidUpdate(pastProps, pastState){
+        const { context } = this.props;
+        if (pastProps.context !== context){
+            const pedigreeFamilies = (context.families || []).filter(CaseView.haveFullViewPermissionForFamily);
+            this.setState(function({ pedigreeFamiliesIdx: pastIdx }){
+                return {
+                    pedigreeFamilies,
+                    pedigreeFamiliesIdx: (pedigreeFamilies.length > pastIdx ? pastIdx : 0)
+                };
+            });
+        }
+    }
+
+    onAddedFamily(response){
+        const { family: newFamily } = response;
+        if (!newFamily) return;
+        this.setState(function({ pedigreeFamilies }){
+            const nextFamilies = pedigreeFamilies.slice(0);
+            if (!CaseView.haveFullViewPermissionForFamily(newFamily)){
+                return null; // Shouldn't occur given that User had permission to add in 1st place.
+            }
+            nextFamilies.push(newFamily);
+            return {
+                pedigreeFamilies: nextFamilies,
+                pedigreeFamiliesIdx: nextFamilies.length - 1
+            };
+        });
+    }
+
+    handleFamilySelect(key){
+        this.setState({ 'pedigreeFamiliesIdx' : parseInt(key) });
+    }
+
     getTabViewContents(){
         const { context : { families = [] } } = this.props;
+        const { pedigreeFamilies = [] } = this.state;
         const initTabs = [];
 
-        if (families.length > 0){ // Remove this outer if condition if wanna show disabled '0 Pedigrees' tab instead
-            initTabs.push(PedigreeTabView.getTabObject(this.props));
+        if (pedigreeFamilies.length > 0){ // Remove this outer if condition if wanna show disabled '0 Pedigrees' tab instead
+            initTabs.push(PedigreeTabView.getTabObject({
+                ...this.props,
+                ...this.state, // pedigreeFamilies & pedigreeFamiliesIdx
+                handleFamilySelect: this.handleFamilySelect
+            }));
         }
 
         return this.getCommonTabs().concat(initTabs);
+    }
+
+    /** Render additional item actions */
+    additionalItemActionsContent(){
+        const { context, href } = this.props;
+        const hasEditPermission = _.find(context.actions || [], { 'name' : 'edit' });
+        if (!hasEditPermission){
+            return null;
+        }
+        return (
+            <AttachmentInputController {...{ context, href }} onAddedFamily={this.onAddedFamily}>
+                <AttachmentInputMenuOption />
+            </AttachmentInputController>
+        );
     }
 
 }
 
 
 export function parseFamilyIntoDataset(family){
-    const { members = [], proband: { "@id" : probandID } = {}, ped_file } = family;
+    const { members = [], proband, ped_file } = family;
     return members.map(function(individual){
         const {
             "@id": id,
             display_title: name,
             sex: gender = "undetermined",
-            father = {},
-            mother = {},
+            father = null, // We might get these back as strings from back-end response, instd of embedded obj.
+            mother = null,
             is_deceased = false
         } = individual;
 
-        // TODO throw error if some expected values not present
+        const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
+        const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
+        const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
 
         return {
             id, gender, name,
-            'father' : father['@id'] || null,
-            'mother' : mother['@id'] || null,
+            'father' : fatherStr,
+            'mother' : motherStr,
             'isProband' : probandID && probandID === id,
             'deceased' : !!(is_deceased),
             'data' : {
@@ -62,7 +144,7 @@ export function parseFamilyIntoDataset(family){
 export class PedigreeTabView extends React.PureComponent {
 
     static getTabObject(props){
-        const { context : { families = [] } } = props;
+        const { pedigreeFamilies: families = [] } = props;
         const familiesLen = families.length;
         return {
             'tab' : (
@@ -77,33 +159,26 @@ export class PedigreeTabView extends React.PureComponent {
         };
     }
 
-    static getDerivedStateFromProps(props, state){
-        return null;
-    }
 
     constructor(props){
         super(props);
-        this.handleFamilySelect = this.handleFamilySelect.bind(this);
         this.memoized = {
             parseFamilyIntoDataset : memoize(parseFamilyIntoDataset)
         };
         if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
             throw new Error("Expected props.context.families to be a non-empty Array.");
         }
-        this.state = {
-            currentFamilyIdx : 0,
-            families: props.context.families
-        };
     }
 
-    handleFamilySelect(key){
-        this.setState({ 'currentFamilyIdx' : parseInt(key) });
-    }
 
     render(){
-        const { context, schemas, windowWidth, windowHeight, innerOverlaysContainer, href } = this.props;
-        const { currentFamilyIdx, families = [] } = this.state;
-        const currentFamily = families[currentFamilyIdx];
+        const {
+            context, schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
+            handleFamilySelect, pedigreeFamiliesIdx, pedigreeFamilies
+        } = this.props;
+
+        const families = pedigreeFamilies || context.families;
+        const currentFamily = families[pedigreeFamiliesIdx];
 
         const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
 
@@ -114,8 +189,7 @@ export class PedigreeTabView extends React.PureComponent {
                     <h3 className="tab-section-title">
                         <span>Pedigree</span>
                         <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}>
-                            <FamilySelectionDropdown {...{ families, currentFamilyIdx }} onSelect={this.handleFamilySelect} />
-                            <AttachmentInputBtn href={href} context={context} />
+                            <FamilySelectionDropdown {...{ families, currentFamilyIdx: pedigreeFamiliesIdx }} onSelect={handleFamilySelect} />
                         </CollapsibleItemViewButtonToolbar>
                     </h3>
                 </div>
@@ -160,7 +234,7 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
         <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="mr-05">
             {
                 families.map(function(family, i){
-                    const { ped_file = null } = family;
+                    const { original_pedigree: ped_file = null } = family;
                     const pedFileStr = ped_file && (" (" + ped_file.display_title + ")");
                     return (
                         <DropdownItem key={i} eventKey={i} active={i === currentFamilyIdx}>
@@ -173,7 +247,8 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
     );
 });
 
-class AttachmentInputBtn extends React.PureComponent {
+
+class AttachmentInputController extends React.PureComponent {
 
     constructor(props){
         super(props);
@@ -187,7 +262,7 @@ class AttachmentInputBtn extends React.PureComponent {
         const file = e.target.files[0];
         this.setState({ loading: true }, ()=>{
             const attachment_props = {};
-            const { context: { uuid: case_uuid }, href } = this.props;
+            const { context: { uuid: case_uuid }, href, onAddedFamily } = this.props;
             const { host } = url.parse(href);
             let config_uri;
             if (host.indexOf('localhost') > -1){
@@ -218,14 +293,33 @@ class AttachmentInputBtn extends React.PureComponent {
                         return data;
                     }).then((data)=>{
                         // todo
+                        const {
+                            case: caseItem,
+                            family : {
+                                members,
+                                original_pedigree: {
+                                    display_title: pedigreeTitle,
+                                    '@id' : pedigreeID
+                                } = {}
+                            }
+                        } = data;
                         this.setState({ loading: false }, function(){
+                            let message = "Added family";
+                            if (pedigreeTitle && pedigreeID){
+                                message = (
+                                    <span>
+                                        Added family from pedigree <a href={pedigreeID}>{ pedigreeTitle }</a>
+                                    </span>
+                                );
+                            }
                             Alerts.queue({
-                                "title" : "Error reading pedigree file",
-                                "message" : "Check your file and try again.",
+                                "title" : "Added family",
+                                message,
+                                "style" : "success"
                             });
                         });
                         return data;
-                    }).catch((data)=>{
+                    }).then(onAddedFamily).catch((data)=>{
                         this.setState({ loading: false }, function(){
                             Alerts.queue({
                                 "title" : "Error parsing pedigree file",
@@ -248,29 +342,29 @@ class AttachmentInputBtn extends React.PureComponent {
     }
 
     render(){
-        const { context : { actions = [] } } = this.props;
-        const { loading } = this.state;
-        const hasEditPermission = _.find(actions, { 'name' : 'edit' });
-        if (!hasEditPermission){
-            return null;
-        }
-        const innerLabel = (
-            loading ? (
-                <label className="text-400 mb-0 btn btn-outline-dark disabled" tabIndex={0}>
-                    <i className="icon icon-fw fas icon-circle-notch icon-spin"/>
-                </label>
-            ) : (
-                <label className="text-400 mb-0 btn btn-outline-dark clickable" htmlFor="test_pedigree" tabIndex={0}>
-                    Upload new pedigree
-                </label>
-            )
-        );
-        return(
-            <React.Fragment>
-                <input id="test_pedigree" type="file" onChange={this.handleChange} className="d-none" accept="*/*" />
-                { innerLabel }
-            </React.Fragment>
+        const { children, ...passProps }  = this.props;
+        const { loading: loadingPedigreeResult }  = this.state;
+        return React.Children.map(children, (c)=>
+            React.cloneElement(c, { ...passProps, loadingPedigreeResult, onFileInputChange: this.handleChange })
         );
     }
 }
 
+const AttachmentInputMenuOption = React.memo(function AttachmentInputMenuOption(props){
+    const { loadingPedigreeResult, onFileInputChange } = props;
+    const icon = loadingPedigreeResult ? "circle-notch fas icon-spin" : "upload fas";
+    return (
+        <label className={"menu-option text-400" + (loadingPedigreeResult ? ' disabled' : ' clickable')}>
+            <input id="test_pedigree" type="file" onChange={onFileInputChange} className="d-none" accept="*/*" />
+            <div className="row">
+                <div className="col-auto icon-container">
+                    <i className={"icon icon-fw icon-" + icon}/>
+                </div>
+                <div className="col title-col">
+                    <h5>Add Family</h5>
+                    <span className="description">Upload a new pedigree file.</span>
+                </div>
+            </div>
+        </label>
+    );
+});

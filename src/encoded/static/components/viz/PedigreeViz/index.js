@@ -438,8 +438,6 @@ export class PedigreeVizView extends React.PureComponent {
             width: containerWidth,
             height: "auto",
             minHeight : containerHeight || "none",
-            position: "relative",
-            overflow: "auto",
             ...containerStyle
         };
 
@@ -480,10 +478,12 @@ export class PedigreeVizView extends React.PureComponent {
 
         return (
             <div className="pedigree-viz-container" style={useContainerStyle} onClick={this.handleContainerClick}>
-                <div className="viz-area" style={vizAreaStyle}>
-                    <ShapesLayer {...commonChildProps} />
-                    <RelationshipsLayer {...commonChildProps} />
-                    <IndividualsLayer {...commonChildProps} />
+                <div className="inner-container">
+                    <div className="viz-area" style={vizAreaStyle}>
+                        <ShapesLayer {...commonChildProps} />
+                        <RelationshipsLayer {...commonChildProps} />
+                        <IndividualsLayer {...commonChildProps} />
+                    </div>
                 </div>
                 { selectedNodePane }
             </div>
