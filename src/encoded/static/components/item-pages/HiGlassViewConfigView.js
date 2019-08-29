@@ -93,7 +93,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false
         };
-         
         this.higlassRef = React.createRef();
     }
 
@@ -127,8 +126,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
             var hgc = this.getHiGlassComponent(),
                 currentViewConfStr = hgc && hgc.api.exportAsViewConfString(),
-                currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-               
+                currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);s               
                 //  currentViewConf && _.extend(nextState, {
                 //      'viewConfig' : currentViewConf
                 //  });
@@ -627,9 +625,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     render(){
         const { isFullscreen, windowWidth, windowHeight, width, session } = this.props;
         const { addFileLoading, genome_assembly, viewConfig } = this.state;
-
-        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
-        
+        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;        
         // Setting the height of the HiGlass Component follows one of these rules:
         // - If it's Fullscreen it should almost take up the entire window.
         // - Set to a fixed height.
