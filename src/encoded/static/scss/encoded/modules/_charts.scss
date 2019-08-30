@@ -1743,6 +1743,12 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     .edges-layer {
                         pointer-events: inherit;
                         @include workflow-edge-layer;
+                        g.vis-debug-graph {
+                            path {
+                                stroke: #ccc;
+                                stroke-width: 1px;
+                            }
+                        }
                     }
                 }
 

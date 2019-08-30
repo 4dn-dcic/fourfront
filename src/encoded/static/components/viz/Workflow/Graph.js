@@ -78,7 +78,7 @@ export default class Graph extends React.Component {
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
-        'rowSpacing'    : 75,
+        'rowSpacing'    : 80,
         'rowSpacingType': 'wide',
         'pathArrows'    : true,
         'renderDetailPane' : function(selectedNode, props){
@@ -261,7 +261,7 @@ export default class Graph extends React.Component {
     }
 
     nodesWithCoordinates(viewportWidth, contentWidth, contentHeight){
-        var { nodes, innerMargin, rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext } = this.props;
+        const { nodes, innerMargin, rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext } = this.props;
         return Graph.getNodesWithCoordinates(
             nodes, viewportWidth, contentWidth, contentHeight, innerMargin,
             rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext
@@ -269,12 +269,13 @@ export default class Graph extends React.Component {
     }
 
     render(){
-        var { width, innerMargin, edges, minimumHeight } = this.props,
-            innerHeight     = this.height(),
-            contentWidth    = this.scrollableWidth(),
-            innerWidth      = width;
+        const { width, innerMargin, edges, minimumHeight } = this.props;
+        const { mounted } = this.state;
+        const innerHeight = this.height();
+        const contentWidth = this.scrollableWidth();
+        let innerWidth = width;
 
-        if (!this.state.mounted){
+        if (!mounted){
             return (
                 <div key="outer">
                     <Fade appear in>
@@ -289,11 +290,11 @@ export default class Graph extends React.Component {
             innerWidth -= (innerMargin.right || 0);
         }
 
-        var nodes       = this.nodesWithCoordinates(innerWidth, contentWidth, innerHeight),
-            fullHeight  = Math.max(
-                (typeof minimumHeight === 'number' && minimumHeight) || 0,
-                innerHeight + (innerMargin.top || 0) + (innerMargin.bottom || 0)
-            );
+        const nodes = this.nodesWithCoordinates(innerWidth, contentWidth, innerHeight);
+        const fullHeight = Math.max(
+            (typeof minimumHeight === 'number' && minimumHeight) || 0,
+            innerHeight + (innerMargin.top || 0) + (innerMargin.bottom || 0)
+        );
 
         /* TODO: later
         var spacerCount = _.reduce(nodes, function(m,n){ if (n.nodeType === 'spacer'){ return m + 1; } else { return m; }}, 0);

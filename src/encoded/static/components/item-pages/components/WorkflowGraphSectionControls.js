@@ -169,21 +169,16 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         );
     }
 
-    /**
-     * @param {...JSX.Element} element - Element(s) to wrap in controls wrapper.
-     * @returns {JSX.Element} Workflow Controls Element.
-     */
-    wrapper(elems){
+    render(){
+        const { enabledControls, windowWidth } = this.props;
+        const elems = _.map(
+            enabledControls, (ctrlFuncName) => this[ctrlFuncName]()
+        );
         return (
-            <CollapsibleItemViewButtonToolbar constantButtons={this.fullScreenButton()} windowWidth={this.props.windowWidth}>
+            <CollapsibleItemViewButtonToolbar constantButtons={this.fullScreenButton()} windowWidth={windowWidth}>
                 { elems }
             </CollapsibleItemViewButtonToolbar>
         );
-    }
-
-    render(){
-        var { enabledControls } = this.props;
-        return this.wrapper(_.map(enabledControls, (ctrlFuncName) => this[ctrlFuncName]()));
     }
 }
 
