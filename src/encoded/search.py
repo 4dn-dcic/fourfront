@@ -1424,19 +1424,3 @@ def build_table_columns(request, schemas, doc_types):
             "order"             : 510
         }
     return columns
-
-_ASSEMBLY_MAPPER = {
-    'GRCh38-minimal': 'hg38',
-    'GRCh38': 'hg38',
-    'GRCh37': 'hg19',
-    'GRCm38': 'mm10',
-    'GRCm37': 'mm9',
-    'BDGP6': 'dm4',
-    'BDGP5': 'dm3',
-    'WBcel235': 'WBcel235'
-}
-
-hgConnect = ''.join([
-    'http://genome.ucsc.edu/cgi-bin/hgTracks',
-    '?hubClear=',
-])
