@@ -50,6 +50,7 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
 
 
 @pytest.mark.slow
+@pytest.mark.flaky
 def test_indexing_simple(app, testapp, indexer_testapp):
     es = app.registry['elasticsearch']
     doc_count = es.count(index='testing_post_put_patch', doc_type='testing_post_put_patch').get('count')
@@ -92,6 +93,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert testing_ppp_settings['settings']['index']['number_of_shards'] == '1'
 
 
+@pytest.mark.flaky
 def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     """
     Test overall create_mapping functionality using app.
@@ -142,6 +144,7 @@ def test_fp_uuid(testapp, award, experiment, lab, file_formats):
     return res.json['@graph'][0]['uuid']
 
 
+@pytest.mark.flaky
 def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
                                  award, lab, file_formats):
     # Todo, input a list of accessions / uuids:
@@ -190,6 +193,7 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
+@pytest.mark.flaky
 def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
     """
     Create an item (file-processed) with a validation error and index,

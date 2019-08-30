@@ -27,6 +27,7 @@ def recursively_find_uuids(json, uuids):
     return uuids
 
 
+@pytest.mark.flaky
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
     assert res['@type'] == ['Search']
@@ -40,6 +41,7 @@ def test_search_view(workbook, testapp):
     assert '@graph' in res
 
 
+@pytest.mark.flaky
 def test_search_with_no_query(workbook, testapp):
     # using /search/ (with no query) should default to /search/?type=Item
     # thus, should satisfy same assertions as test_search_view
@@ -59,6 +61,7 @@ def test_search_with_no_query(workbook, testapp):
     assert '@graph' in res
 
 
+@pytest.mark.flaky
 def test_collections_redirect_to_search(workbook, testapp):
     # we removed the collections page and redirect to search of that type
     # redirected_from is not used for search
@@ -75,6 +78,7 @@ def test_collections_redirect_to_search(workbook, testapp):
     assert '@graph' in res
 
 
+@pytest.mark.flaky
 def test_search_with_embedding(workbook, testapp):
     res = testapp.get('/search/?type=Biosample&limit=all').json
     # Use a specific biosample, found by accession from test data
@@ -96,6 +100,7 @@ def test_search_with_embedding(workbook, testapp):
     assert test_json['lab'].get('awards') is None
 
 
+@pytest.mark.flaky
 def test_search_with_simple_query(workbook, testapp):
     # run a simple query with type=Organism and q=mouse
     res = testapp.get('/search/?type=Organism&q=mouse').json
@@ -129,6 +134,7 @@ def test_search_with_simple_query(workbook, testapp):
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
 
 
+@pytest.mark.flaky
 def test_search_facets_and_columns_order(workbook, testapp, registry):
     # TODO: Adjust ordering of mixed-in facets, perhaps sort by lookup or something, in order to un-xfail.
     test_type = 'experiment_set_replicate'
@@ -149,6 +155,7 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
         assert res['columns'][key]['title'] == val['title']
 
 
+@pytest.mark.flaky
 def test_search_embedded_file_by_accession(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentHiC&files.accession=4DNFIO67APU1').json
     assert len(res['@graph']) > 0
@@ -185,6 +192,7 @@ def mboI_dts(testapp, workbook):
     }
 
 
+@pytest.mark.flaky
 def test_search_date_range_find_within(mboI_dts, testapp, workbook):
     # the MboI enzyme should be returned with all the provided pairs
     gres = testapp.get('/search/?type=Enzyme&name=MboI').json
@@ -205,6 +213,7 @@ def test_search_date_range_find_within(mboI_dts, testapp, workbook):
         assert set(g_uuids).issubset(set(s_uuids))
 
 
+@pytest.mark.flaky
 def test_search_with_nested_integer(testapp, workbook):
     search0 = '/search/?type=ExperimentHiC'
     s0res = testapp.get(search0).json
@@ -225,7 +234,7 @@ def test_search_with_nested_integer(testapp, workbook):
     assert set(s1_uuids) | set(s2_uuids) == set(s0_uuids)
 
 
-
+@pytest.mark.flaky
 def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
     # the MboI enzyme should be returned with all the provided pairs
     dts = {k: v.replace(':', '%3A') for k, v in mboI_dts.items()}
@@ -239,12 +248,14 @@ def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
         assert testapp.get(search, status=404)
 
 
+@pytest.mark.flaky
 def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     # if you use + and - with same field you should get no result
     search = '/search/?q=cell+-cell&type=Biosource'
     assert testapp.get(search, status=404)
 
 
+@pytest.mark.flaky
 def test_search_query_string_with_booleans(workbook, testapp):
     """
     moved references to res_not_induced and not_induced_uuids,
@@ -277,6 +288,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert swag_bios not in not_uuids
 
 
+@pytest.mark.flaky
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3
@@ -344,6 +356,7 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     check_tsv(result_rows, len(res2_post_data['accession_triples']))
 
 
+@pytest.mark.flaky
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     from snovault import TYPES
     from snovault.util import add_default_embeds
@@ -365,6 +378,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     assert 'biosource.biosource_type' in facet_fields
 
 
+@pytest.mark.flaky
 def test_search_query_string_no_longer_functional(workbook, testapp):
     # since we now use simple_query_string, cannot use field:value or range
     # expect 404s, since simple_query_string doesn't return exceptions
@@ -377,6 +391,7 @@ def test_search_query_string_no_longer_functional(workbook, testapp):
     assert len(res_search.json['@graph']) == 0
 
 
+@pytest.mark.flaky
 def test_search_with_added_display_title(workbook, testapp, registry):
     # 4DNBS1234567 is display_title for biosample
     search = '/search/?type=ExperimentHiC&biosample=4DNBS1234567'
@@ -407,6 +422,7 @@ def test_search_with_added_display_title(workbook, testapp, registry):
     assert added_ff_facet[0]['title'] == ff_title + ' (Title)'
 
 
+@pytest.mark.flaky
 def test_search_with_no_value(workbook, testapp):
     search = '/search/?description=No+value&description=GM12878+prepared+for+HiC&type=Biosample'
     res_json = testapp.get(search).json
@@ -430,11 +446,13 @@ def test_search_with_no_value(workbook, testapp):
 
 from .test_views import TYPE_LENGTH
 
+@pytest.mark.flaky
 def test_collection_limit(workbook, testapp):
     res = testapp.get('/biosamples/?limit=2', status=301)
     assert len(res.follow().json['@graph']) == 2
 
 
+@pytest.mark.flaky
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
     res = testapp.get('/biosamples/')
     assert any(action for action in res.follow().json.get('actions', []) if action['name'] == 'add')
@@ -444,6 +462,7 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     assert len(res.json['@graph']) == 0
 
 
+@pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     from snovault.elasticsearch import create_mapping
     es = app.registry['elasticsearch']
@@ -498,6 +517,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
 ######################################
 
 
+@pytest.mark.flaky
 def test_barplot_aggregation_endpoint(workbook, testapp):
 
     # Check what we get back -
