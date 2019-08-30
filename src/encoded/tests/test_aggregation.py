@@ -1,6 +1,6 @@
 import pytest
 from .features.conftest import app_settings, workbook
-pytestmark = [pytest.mark.working, pytest.mark.indexing]
+pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky]
 
 def test_aggregation_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
