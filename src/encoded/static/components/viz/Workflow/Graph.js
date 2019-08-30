@@ -5,8 +5,6 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
-import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import StateContainer from './StateContainer';
 import ScrollContainer from './ScrollContainer';
@@ -278,9 +276,7 @@ export default class Graph extends React.Component {
         if (!mounted){
             return (
                 <div key="outer">
-                    <Fade appear in>
-                        <div>&nbsp;</div>
-                    </Fade>
+                    <div>&nbsp;</div>
                 </div>
             );
         }
@@ -306,17 +302,15 @@ export default class Graph extends React.Component {
 
         return (
             <div className="worfklow-chart-outer-container" key="outer">
-                <Fade in appear>
-                    <div className="workflow-chart-inner-container">
-                        <StateContainer {...{ nodes, edges, innerWidth, innerHeight, contentWidth, width }}
-                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}>
-                            <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
-                                <NodesLayer {..._.pick(this.props, 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
-                            </ScrollContainer>
-                        </StateContainer>
-                    </div>
-                </Fade>
+                <div className="workflow-chart-inner-container">
+                    <StateContainer {...{ nodes, edges, innerWidth, innerHeight, contentWidth, width }}
+                        {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}>
+                        <ScrollContainer outerHeight={fullHeight}>
+                            <EdgesLayer {..._.pick(this.props, 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
+                            <NodesLayer {..._.pick(this.props, 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
+                        </ScrollContainer>
+                    </StateContainer>
+                </div>
             </div>
         );
     }

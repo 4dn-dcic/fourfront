@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import { TransitionGroup, Transition } from 'react-transition-group';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { path as d3Path } from 'd3';
 
 import Edge from './Edge';

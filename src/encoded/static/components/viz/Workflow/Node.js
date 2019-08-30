@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { traceNodePathAndRun } from './parsing-functions';
 
 

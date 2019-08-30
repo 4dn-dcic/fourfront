@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import * as d3 from 'd3';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import Node from './Node';
 import { traceNodePathAndRun } from './parsing-functions';
@@ -179,7 +178,7 @@ export default class Edge extends React.Component {
         var selectedInputs = (selectedNode && (selectedNode.inputNodes || (selectedNode.outputOf && [selectedNode.outputOf]))) || null;
 
         if (Array.isArray(selectedInputs) && selectedInputs.length > 0){
-            var resultsHistory = _.flatten(_.map(selectedInputs, function(sI){
+            var resultsHistory = _.flatten(selectedInputs.map(function(sI){
                 return traceNodePathAndRun(sI, checkInput, 'input', selectedNode);
             }), false);
             if (_.any(resultsHistory)) return true;
@@ -188,7 +187,7 @@ export default class Edge extends React.Component {
         var selectedOutputs = (selectedNode && (selectedNode.outputNodes || (selectedNode.inputOf && selectedNode.inputOf))) || null;
 
         if (Array.isArray(selectedOutputs) && selectedOutputs.length > 0){
-            var resultsFuture =  _.flatten(_.map(selectedOutputs, function(sO){
+            var resultsFuture =  _.flatten(selectedOutputs.map(function(sO){
                 return traceNodePathAndRun(sO, checkOutput, 'output', selectedNode);
             }), false);
             if (_.any(resultsFuture)) return true;
@@ -409,7 +408,7 @@ export default class Edge extends React.Component {
 
         if (!pathElem) return;
 
-        var animation = d3.select(this)
+        d3.select(this)
             .interrupt()
             .transition()
             .ease(d3.easeQuadOut)
@@ -421,8 +420,8 @@ export default class Edge extends React.Component {
     }
 
     getPathOffsets(startOffset = 5, endOffset = -5, props = this.props){
-        var { edge, pathArrows } = props,
-            { disabled, selected, related, distantlySelected } = this.getComputedProperties(props);
+        const { edge, pathArrows } = props;
+        const { disabled, selected, related, distantlySelected } = this.getComputedProperties(props);
         if (pathArrows)             endOffset -= 10;
         if (selected || related)    endOffset -= 5;
         if (distantlySelected)      endOffset -= 2;
