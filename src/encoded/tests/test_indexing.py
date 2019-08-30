@@ -126,6 +126,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         assert compare_against_existing_mapping(es, item_type, item_record, True)
 
 
+@pytest.fixture
 def test_fp_uuid(testapp, award, experiment, lab, file_formats):
     # this is a processed file
     item = {
