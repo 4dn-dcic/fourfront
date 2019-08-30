@@ -7,10 +7,11 @@ import url from 'url';
 import memoize from 'memoize-one';
 
 import { isServerSide, console, object, layout, valueTransforms, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
 import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
 
-import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { ExperimentSetTablesLoaded, ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -51,11 +52,27 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
-        const { context } = this.props;
+        const { context, browseBaseState } = this.props;
         const width = this.getTabViewWidth();
         const tabs = [];
 
         tabs.push(FileViewOverview.getTabObject(this.props, width));
+
+        if(getItemType(context) === 'FileReference') {
+            const expSetTableProps = {
+                ...this.props,
+                'requestHref': (
+                    "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                    (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
+                    "experiments_in_set.reference_files.accession=" + context.accession
+                ),
+                'title': function (props, { totalCount }) {
+                    return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
+                }
+            };
+
+            tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
+        }
 
         if (this.shouldGraphExist(context)){
             tabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));

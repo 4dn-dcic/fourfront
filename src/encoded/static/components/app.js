@@ -1308,7 +1308,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        const { canonical, status, currentAction, context, routeLeaf, contentViews } = this.props;
+        const { canonical, status, currentAction, context, routeLeaf, contentViews, href } = this.props;
         const contextAtID     = object.itemUtil.atId(context);
         const key             = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
 
@@ -1349,7 +1349,7 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>;
+        return <ContentErrorBoundary canonical={canonical} href={href}>{ content }</ContentErrorBoundary>;
     }
 }
 
@@ -1760,7 +1760,7 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, slowLoad } = this.props;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
@@ -1801,7 +1801,7 @@ class BodyElement extends React.PureComponent {
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <ContentErrorBoundary canonical={canonical}>
+                            <ContentErrorBoundary canonical={canonical} href={href}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                     registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
                                     overlaysContainer } } />

@@ -10,10 +10,11 @@ import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
+/** This file/component is specific to 4DN portal */
 
 export function getIconForCustomTab(tabName){
     switch(tabName){
@@ -67,15 +68,16 @@ export class TabbedView extends React.PureComponent {
     }
 
     static renderTabPane(tabObj, tabIndex = 0){
+        const { key, tab, placeholder, disabled = false, style = null, content } = tabObj;
         return (
             <Tabs.TabPane
-                key={tabObj.key || tabObj.tab || tabIndex}
-                data-tab-key={tabObj.key}
-                id={'tab:' + tabObj.key}
-                tab={<span className="tab" data-tab-key={tabObj.key}>{ tabObj.tab }</span>}
-                placeholder={tabObj.placeholder || <TabPlaceHolder/> }
-                disabled={tabObj.disabled} style={tabObj.style}>
-                { tabObj.content }
+                key={key || tabIndex}
+                data-tab-key={key}
+                id={'tab:' + key}
+                tab={<span className="tab" data-tab-key={key}>{ tab }</span>}
+                placeholder={placeholder || <TabPlaceHolder/> }
+                disabled={disabled} style={style}>
+                <TabErrorBoundary tabKey={key}>{ content }</TabErrorBoundary>
             </Tabs.TabPane>
         );
     }
@@ -328,3 +330,61 @@ class TabPlaceHolder extends React.PureComponent {
         );
     }
 }
+
+
+
+
+/**
+ * Error Boundary component to wrap an individual tab in a page.
+ */
+class TabErrorBoundary extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            'hasError': false,
+            'errorInfo': null
+        };
+    }
+
+    componentDidCatch(err, info) {
+        const { tabKey } = this.props;
+        this.setState({ 'hasError': true, 'errorInfo': info }, () => {
+            // `window` is only available when we're mounted / client-side.
+            const href = (window && window.location.href) || "(Unknown URL)";
+            analytics.exception('Client Error - ' + href + ' (#' + tabKey + '): ' + err, true);
+        });
+    }
+
+    componentDidUpdate(pastProps) {
+        const { tabKey } = this.props;
+        if (pastProps.tabKey !== tabKey) {
+            this.setState(function ({ hasError }) {
+                if (hasError) {
+                    return {
+                        'hasError': false,
+                        'errorInfo': null
+                    };
+                }
+                return null;
+            });
+        }
+    }
+
+    render() {
+        const { children } = this.props;
+        const { hasError } = this.state;
+        if (hasError) {
+            return (
+                <div className="error-boundary container">
+                    <div className="mb-2 mt-2">
+                        <h3 className="text-400">A client-side error has occured, tab content cannot be rendered correctly.</h3>
+                    </div>
+                </div>
+            );
+        }
+        return children;
+    }
+}
+
+
