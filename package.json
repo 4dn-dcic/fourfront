@@ -105,7 +105,7 @@
     "detect-browser": "^3.0.1",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
-    "higlass": "^1.5.7",
+    "higlass": "^1.6.7",
     "html-react-parser": "^0.4.7",
     "markdown-to-jsx": "^6.9.3",
     "memoize-one": "^5.0.1",
