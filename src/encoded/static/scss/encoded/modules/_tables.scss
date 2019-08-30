@@ -358,6 +358,24 @@ $search-results-above-results-row-height: 42px;
 	}
 }
 
+
+
+/*** FACETS CONTAINER STICKY ***/
+
+.search-page-container {
+	body.scrolled-past-80 & {
+		.facets-container {
+			position: sticky;
+			top: 40px;
+			max-height: calc(100vh - 41px);
+			overflow-y: auto;
+			overflow-x: hidden;
+			margin-bottom: 20px;
+		}
+	}
+}
+
+
 .popover.file-format-selection-popover {
 	.popover-content {
 		min-width: 240px;
@@ -371,4 +389,6 @@ $search-results-above-results-row-height: 42px;
 		}
 	}
 }
+
+
 

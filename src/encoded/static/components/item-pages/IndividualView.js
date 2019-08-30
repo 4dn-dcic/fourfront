@@ -32,7 +32,7 @@ export const PedigreeTabView = React.memo(function PedigreeTabView(props){
     }
     const dataset = parseFamilyIntoDataset({ members: family, proband: context });
     return (
-        <div className="overflow-hidden">
+        <div>
             <h3 className="tab-section-title container-wide">
                 <span>Pedigree</span>
             </h3>

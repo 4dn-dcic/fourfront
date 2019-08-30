@@ -14,7 +14,8 @@ html {
 
 body {
     text-rendering: optimizeLegibility;
-    background: #f8f8f8 !important;
+	background: #f8f8f8 !important;
+	overflow-x: hidden;
 }
 
 .float-wrap { overflow: hidden; }
@@ -66,7 +67,7 @@ blockquote {
     margin: 0 auto -$footer-height;
     min-height: 100%;
 	background-color: $appBackgroundColor;
-	overflow-x: hidden;
+	// overflow-x: hidden;
 }
 
 .project-info {

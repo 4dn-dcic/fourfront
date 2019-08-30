@@ -1,7 +1,6 @@
 import React from 'react';
 import memoize from 'memoize-one';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import { SlideInPane } from './../SlideInPane';
+
 
 
 
@@ -12,24 +11,17 @@ function getIndividualDisplayTitle(individual){
 
 
 export const DefaultDetailPaneComponent = React.memo(function DefaultDetailPaneComponent(props){
-    const { unselectNode, memoized, objectGraph, currSelectedNodeId, overlaysContainer } = props;
+    const { unselectNode, memoized, objectGraph, currSelectedNodeId, overlaysContainer, className } = props;
     const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
 
-    let body;
-    if (!currSelectedNodeId){
-        body = null;
+    if (!selectedNode){
+        return null;
     } else if (currSelectedNodeId.slice(0,13) === 'relationship:'){
-        body = <RelationshipBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
+        return <RelationshipBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
     } else {
-        body = <IndividualBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
+        return <IndividualBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
     }
 
-    return (
-        <SlideInPane overlaysContainer={overlaysContainer} in={!!(selectedNode)}
-            onClose={unselectNode} className="pedigree-viz-detail-pane-container">
-            { body }
-        </SlideInPane>
-    );
 });
 
 function IndividualBody(props){

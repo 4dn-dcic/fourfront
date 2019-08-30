@@ -184,7 +184,7 @@ export class PedigreeTabView extends React.PureComponent {
 
         console.log('DDD', dataset);
         return (
-            <div className="overflow-hidden">
+            <div>
                 <div className="container-wide">
                     <h3 className="tab-section-title">
                         <span>Pedigree</span>
@@ -231,7 +231,7 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
         <span>Family <strong>{currentFamilyIdx + 1}</strong></span>
     );
     return (
-        <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="mr-05">
+        <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="mr-05" alignRight>
             {
                 families.map(function(family, i){
                     const { original_pedigree: ped_file = null } = family;

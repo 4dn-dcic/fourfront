@@ -127,8 +127,9 @@ $tabbar-height: 46px;
 
 	.tabs-bar-outer {
 		display: block;
-		position: sticky;
-		top: 40px;
+		//position: sticky;
+		//top: 41px;
+		//z-index: 50;
 		div.tabs-bar {
 			display: flex;
 			background-color: $tabbar-bg-color;

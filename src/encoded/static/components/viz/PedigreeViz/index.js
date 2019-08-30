@@ -355,17 +355,26 @@ export class PedigreeVizView extends React.PureComponent {
         };
     }
 
+    componentDidUpdate(pastProps){
+        const { objectGraph, memoized } = this.props;
+        if (objectGraph !== pastProps.objectGraph){
+            this.setState(function({ currSelectedNodeId }){
+                const retState = { currHoverNodeId: null };
+                const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
+                if (!selectedNode){
+                    retState.currSelectedNodeId = null;
+                }
+                return retState;
+            });
+        }
+    }
+
     handleNodeMouseIn(id){
         const { windowWidth = null } = this.props;
         if (isMobileSize(windowWidth)){
             // Prevent hover interaction handling on mobile sizes for perf/safety.
             return false;
         }
-        //const id = doesAncestorHaveId
-        //console.log('in', evt.currentTarget, evt.target, evt.relatedTarget);
-        //if (!evt.currentTarget.id){
-        //    return false;
-        //}
         if (!id) {
             return;
         }
@@ -435,7 +444,7 @@ export class PedigreeVizView extends React.PureComponent {
         const containerHeight = propHeight || graphHeight;
 
         const useContainerStyle = {
-            width: containerWidth,
+            //width: containerWidth,
             height: "auto",
             minHeight : containerHeight || "none",
             ...containerStyle
@@ -443,15 +452,8 @@ export class PedigreeVizView extends React.PureComponent {
 
         const vizAreaStyle = {
             'width': graphWidth,
-            'height': graphHeight
+            'height': graphHeight + 60 // Add extra to offset text @ bottom of nodes.
         };
-
-        if (graphWidth < containerWidth || graphHeight < containerHeight){
-            vizAreaStyle.position = 'relative';
-            vizAreaStyle.left = Math.max((containerWidth - graphWidth) / 2, 0);
-            // Less top margin than bottom due to more labels at bottom.
-            vizAreaStyle.top = Math.max((containerHeight - graphHeight) / 2 - (dims.graphPadding / 2), 0);
-        }
 
         const commonChildProps = {
             objectGraph, graphHeight, graphWidth, dims, memoized, diseaseToIndex,
@@ -465,27 +467,39 @@ export class PedigreeVizView extends React.PureComponent {
         let selectedNodePane = null;
 
         if (detailPaneComponent){
-            selectedNodePane = React.createElement(detailPaneComponent, {
-                objectGraph,
-                currSelectedNodeId,
-                memoized,
-                diseaseToIndex,
-                overlaysContainer,
-                'unselectNode' : this.handleUnselectNode,
-                'onNodeClick' : this.handleNodeClick,
-            });
+            selectedNodePane = (
+                React.createElement(detailPaneComponent, {
+                    objectGraph,
+                    currSelectedNodeId,
+                    memoized,
+                    diseaseToIndex,
+                    overlaysContainer,
+                    'unselectNode' : this.handleUnselectNode,
+                    'onNodeClick' : this.handleNodeClick,
+                })
+            );
         }
 
+        const cls = (
+            "pedigree-viz-container" +
+            (currSelectedNodeId ? ' node-selected' : '')
+        );
+
+        const detailPanelCls = (
+            "detail-pane-container" +
+            (selectedNodePane && currSelectedNodeId ? ' has-selected-node' : '')
+        );
+
         return (
-            <div className="pedigree-viz-container" style={useContainerStyle} onClick={this.handleContainerClick}>
-                <div className="inner-container">
+            <div className={cls} style={useContainerStyle}>
+                <div className="inner-container" onClick={this.handleContainerClick}>
                     <div className="viz-area" style={vizAreaStyle}>
                         <ShapesLayer {...commonChildProps} />
                         <RelationshipsLayer {...commonChildProps} />
                         <IndividualsLayer {...commonChildProps} />
                     </div>
                 </div>
-                { selectedNodePane }
+                { selectedNodePane ? <div className={detailPanelCls}>{ selectedNodePane }</div> : null }
             </div>
         );
     }
