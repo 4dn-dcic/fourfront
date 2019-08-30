@@ -91,6 +91,37 @@ class QualityMetricBamcheck(QualityMetric):
 
 
 @collection(
+    name='quality-metrics-margi_pairs_check',
+    properties={
+        'title': 'MARGI pairs Check Quality Metrics',
+        'description': 'Listing of MARGI pairs Check Quality Metrics'
+    })
+class QualityMetricPairsMargicheck(QualityMetric):
+    """Subclass of quality matrics for MARGI pairs files."""
+
+    item_type = 'quality_metric_pairsmargicheck'
+    schema = load_schema('encoded:schemas/quality_metric_margi.json')
+    embedded_list = QualityMetric.embedded_list
+
+    def _update(self, properties, sheets=None):
+        qc_val = properties.get('Sequence mapping QC', '')
+        overall = ''
+        if qc_val == 'passed':
+            overall = 'PASS'
+        elif qc_val == 'failed':
+            overall = 'FAIL'
+        if not properties.get('overall_quality_status'):
+            overall = 'WARN'
+        elif qc_val == 'OK':
+            overall = 'PASS'
+        else:
+            overall = 'FAIL'
+        # set name based on what is entered into title
+        properties['overall_quality_status'] = overall
+        super(QualityMetricBamcheck, self)._update(properties, sheets)
+
+
+@collection(
     name='quality-metrics-bamqc',
     properties={
         'title': 'BamQC Quality Metrics',
