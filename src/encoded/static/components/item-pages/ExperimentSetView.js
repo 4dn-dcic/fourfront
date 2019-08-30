@@ -353,15 +353,25 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 }
 
-class RenderQCMetricsTablesRow extends React.PureComponent {
+
+class QCMetricsTable extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.memoized = {
+            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
+            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles)
+        };
+    }
+
     render() {
         const { width, files, windowWidth, href } = this.props;
-        const filesWithMetrics = commonFileUtil.filterFilesWithQCSummary(files);
+        const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
         const filesWithMetricsLen = filesWithMetrics.length;
 
-        if(!filesWithMetrics || filesWithMetricsLen === 0) return null;
+        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
-        const filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics);
 
         return (
             <div className="row">
@@ -487,7 +497,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
             <div className="processed-files-table-section exp-table-section">
                 {this.renderHeader()}
                 {this.renderTopRow()}
-                <RenderQCMetricsTablesRow {...this.props} />
+                <QCMetricsTable {...this.props} />
             </div>
         );
     }
@@ -589,7 +599,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
                             <HiGlassAdjustableWidthRow higlassItem={higlass_view_config} windowWidth={windowWidth} mounted={mounted} width={width - 21}
                                 renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
                             : this.renderFilesTable(width - 21) }
-                        <RenderQCMetricsTablesRow { ...{ 'width': width - 20, windowWidth, href, files } } />
+                        <QCMetricsTable { ...{ 'width': width - 20, windowWidth, href, files } } />
                     </div>
                 </Collapse>
             </div>

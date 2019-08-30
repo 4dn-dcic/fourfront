@@ -262,10 +262,10 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
     }
     const filename = Schemas.Term.toName('quality_metric.url', file.quality_metric.url, false);
     return (
-        <button type="button" className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
+        <a className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
             href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
             <i className="icon icon-fw icon-file-text-o" />
-        </button>
+        </a>
     );
 }
 
