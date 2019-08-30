@@ -2,16 +2,17 @@ import argparse
 import logging
 import structlog
 import json
+import os
+import boto3
 from pyramid.paster import get_app
 from webtest import TestApp
-from os import environ
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
 
 log = structlog.getLogger(__name__)
 EPILOG = __doc__
 
 
-def get_existing_key_ids(testapp, key_desc, user_uuid):
+def get_existing_key_ids(testapp, user_uuid, key_desc):
     """
     Search for an access key with given description and user uuid.
     If successful return list of @id values of all found access keys.
@@ -20,8 +21,8 @@ def get_existing_key_ids(testapp, key_desc, user_uuid):
 
     Args:
         testapp (webtest.TestApp): current TestApp
-        key_desc (str): description of the access key to find
         user_uuid (str): uuid of the user used to generate the key
+        key_desc (str): description of the access key to find
 
     Return:
         list: of str access keys ids
@@ -38,8 +39,6 @@ def get_existing_key_ids(testapp, key_desc, user_uuid):
                     'description %s and user.uuid %s.'
                     % (len(search_res['@graph']), key_name, user_uuid))
     return [res['@id'] for res in search_res['@graph']]
-
-
 
 
 def generate_access_key(testapp, env, user_uuid, description):
@@ -68,7 +67,7 @@ def main():
     Function to create and load access keys for multiple users to the system s3
     bucket. The description of the key is set to the s3 object name. Before
     creating the keys, will attempt to delete pre-existing keys with the given
-    descriptions.
+    descriptions. This command is not meant to be run locally.
 
     Provide required `config_uri` and `--app-name` to the command.
     Example usage:
@@ -82,8 +81,8 @@ def main():
         description="Load Access Keys", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('config_uri', help='path to configfile')
+    parser.add_argument('--app-name', help='Pyramid app name in configfile')
     args = parser.parse_args()
 
     app = get_app(args.config_uri, args.app_name)
@@ -97,8 +96,8 @@ def main():
     if not env:
         raise RuntimeError('load_access_keys: cannot find env.name in settings')
 
-    encrypt_key = environ.get('S3_ENCRYPT_KEY')
-    if not env:
+    encrypt_key = os.environ.get('S3_ENCRYPT_KEY')
+    if not encrypt_key:
         raise RuntimeError('load_access_keys: must define S3_ENCRYPT_KEY in env')
 
     # will need to use a dynamic region at some point (not just here)
@@ -116,11 +115,11 @@ def main():
             log.error('load_access_keys: could not get user %s. Exception: %s' % (email, exc))
             continue
 
-        key_ids = get_existing_key_ids(testapp, key_desc, user_uuid)
+        key_ids = get_existing_key_ids(testapp,  user_props['uuid'], key_name)
         for key_id in key_ids:
             testapp.patch_json(key_id, {'status': 'deleted'})
 
-        key = generate_access_key(testapp, env, user_uuid, key_name)
+        key = generate_access_key(testapp, env, user_props['uuid'], key_name)
         s3.put_object(Bucket=s3_bucket,
                       Key=key_name,
                       Body=json.dumps(key),
