@@ -160,6 +160,7 @@ def test_search_embedded_file_by_accession(workbook, testapp):
         assert '46e82a90-49e5-4c33-afab-9ec90d65faa0' in file_uuids
 
 
+@pytest.mark.fixture
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
     # relative to the creation date of the mboI one object in test inserts
