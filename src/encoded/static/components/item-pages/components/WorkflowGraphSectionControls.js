@@ -136,7 +136,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
 
         return (
             <DropdownButton id="detail-granularity-selector" key="chart-type"
-                className="for-state-showChart" pullRight
+                className="for-state-showChart" variant="outline-dark"
                 onSelect={onChangeShowChartType}
                 title={WorkflowGraphSectionControls.keyTitleMap[showChartType]}>
                 { basic }{ detail }
