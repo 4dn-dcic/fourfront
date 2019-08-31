@@ -16,6 +16,7 @@ export default class ScrollContainer extends React.PureComponent {
             'pastHeight' : null
         };
         this.containerRef = React.createRef();
+        this.heightTimer = null;
     }
 
     componentDidMount(){
@@ -23,26 +24,23 @@ export default class ScrollContainer extends React.PureComponent {
     }
 
     componentDidUpdate(prevProps, pastState){
-        const { outerHeight } = this.props;
-        if (outerHeight < prevProps.outerHeight){
+        const { outerHeight: updateOuterHeight } = this.props;
+        if (updateOuterHeight < prevProps.outerHeight){
             this.setState(({ isHeightDecreasing })=>{
-                if (isHeightDecreasing) {
-                    return null;
-                }
-                return { 'isHeightDecreasing' : true, 'pastHeight' : prevProps.outerHeight, outerHeight };
+                return { 'isHeightDecreasing' : true, 'pastHeight' : prevProps.outerHeight, outerHeight: updateOuterHeight };
+            }, ()=>{
+                this.heightTimer && clearTimeout(this.heightTimer);
+                this.heightTimer = setTimeout(()=>{
+                    this.setState({ 'isHeightDecreasing' : false, 'pastHeight' : null, outerHeight: updateOuterHeight });
+                }, 500);
             });
             return;
         }
 
-        if (outerHeight > prevProps.outerHeight){
-            this.setState({ 'isHeightDecreasing' : false, 'pastHeight' : null, outerHeight });
+        if (updateOuterHeight > prevProps.outerHeight){
+            this.heightTimer && clearTimeout(this.heightTimer);
+            this.setState({ 'isHeightDecreasing' : false, 'pastHeight' : null, outerHeight: updateOuterHeight });
             return;
-        }
-
-        if (!pastState.isHeightDecreasing && this.state.isHeightDecreasing){
-            setTimeout(()=>{
-                this.setState({ 'isHeightDecreasing' : false, 'pastHeight' : null, outerHeight });
-            }, 500);
         }
     }
 

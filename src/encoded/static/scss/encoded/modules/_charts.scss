@@ -1246,14 +1246,22 @@ $workflow-node-color-type-global-context: #ffb3b3;
             background-color: $workflow-node-color-default;
             white-space: nowrap;
 
+            display: flex;
+            align-items: center;
+
+            > .innermost {
+                width: 100%;
+            }
+
             > .innermost > .node-name,
             > .node-name {
                 padding-left: 2px;
                 padding-right: 5px;
-                display: inline-block;
+                display: block;
                 max-width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
+                line-height: 1.2;
             }
 
             i.icon.icon-fw {
@@ -1266,7 +1274,8 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 position: absolute;
                 width: 24px;
                 height: 24px;
-                padding: 3px 6px;
+                line-height: 24px;
+                text-align: center;
                 border-radius: 50%;
                 font-size: 0.75rem;
                 top: -15px;
@@ -1375,10 +1384,7 @@ $workflow-node-color-type-global-context: #ffb3b3;
             
             .node-visible-element {
                 height : $workflow-step-node-height;
-                line-height: $workflow-step-node-lineheight;
-                padding-top: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
-                padding-bottom: ($workflow-step-node-height - $workflow-step-node-lineheight) / 2 - 1px;
-                
+
                 background-color: $workflow-node-color-type-step;
                 border-radius: 2px;
                 border: 1px solid rgba(0,0,0,0.2);
@@ -1444,11 +1450,6 @@ $workflow-node-color-type-global-context: #ffb3b3;
             
             .node-visible-element {
                 height : $workflow-io-node-height;
-                line-height: $workflow-io-node-lineheight;
-                padding-top: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
-                padding-bottom: ($workflow-io-node-height - $workflow-io-node-lineheight) / 2;
-                display: inline-block;
-                vertical-align: middle;
                 position: relative;
                 z-index: 5;
                 background-color: transparent;

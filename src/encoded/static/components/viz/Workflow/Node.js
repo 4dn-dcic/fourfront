@@ -79,7 +79,7 @@ export class DefaultNodeElement extends React.PureComponent {
                 className="node-visible-element"
                 data-tip={this.tooltip()}
                 data-place="top" data-html style={style}>
-                <span className="node-name">{ this.icon() }{ title || node.title || node.name }</span>
+                <div className="node-name">{ this.icon() }{ title || node.title || node.name }</div>
             </div>
         );
     }

@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import _ from 'underscore';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
@@ -43,7 +44,7 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     constructor(props){
         super(props);
         this.shouldGraphExist = this.shouldGraphExist.bind(this);
-        this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
+        this.handleToggleAllRuns = _.throttle(this.handleToggleAllRuns.bind(this), 1000, { trailing: false });
         const steps = _testing_data || null;
         this.state = {
             'mounted' : false,
@@ -83,26 +84,26 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         if (!this.shouldGraphExist()) return;
         if (!force && Array.isArray(steps) && steps.length > 0) return;
 
-        var tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/',
-            callback = (r) => {
-                raf(()=>{
-                    if (Array.isArray(r) && r.length > 0){
-                        this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
-                    } else {
-                        this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
-                    }
-                });
-            },
-            opts = {};
+        let tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/';
+        const callback = (r) => {
+            if (Array.isArray(r) && r.length > 0){
+                this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
+            } else {
+                this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
+            }
+        };
+        const opts = {};
 
         if (!cache) {
-            opts['timestamp'] = moment.utc().unix();
+            opts.timestamp = moment.utc().unix();
         }
         if (this.state.allRuns === true){
-            opts['all_runs'] = true;
+            opts.all_runs = true;
         }
         if (_.keys(opts).length > 0){
-            tracingHref += '?' + _.map(_.pairs(opts), function(p){ return p[0] + '=' + p[1]; }).join('&');
+            tracingHref += '?' + _.map(_.pairs(opts), function([ optKey, optVal ]){
+                return encodeURIComponent(optKey) + '=' + encodeURIComponent(optVal);
+            }).join('&');
         }
 
         ajax.load(tracingHref, callback, 'GET', callback);
@@ -110,8 +111,13 @@ export default class WorkflowRunTracingView extends DefaultItemView {
 
     handleToggleAllRuns(){
         this.setState(function({ allRuns }){
-            return { 'allRuns' : !allRuns, 'loadingGraphSteps' : true };
-        }, () => { this.loadGraphSteps(true); });
+            return {
+                'allRuns' : !allRuns,
+                'loadingGraphSteps' : true
+            };
+        }, () => {
+            this.loadGraphSteps(true);
+        });
     }
 }
 
@@ -174,12 +180,18 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         ) || false;
     }
 
+    static anyGroupNodesExist(nodes){
+        return _.any(nodes, function(n){
+            return n.nodeType === 'input-group' || n.nodeType === 'output-group';
+        });
+    }
+
     constructor(props){
         super(props);
         this.commonGraphProps           = this.commonGraphProps.bind(this);
-        this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
-        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
-        this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 1000, { trailing: false });
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000, { trailing: false });
+        this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000, { trailing: false });
         this.isNodeCurrentContext       = this.isNodeCurrentContext.bind(this);
         this.state = _.extend({
             'showChart' : 'detail',
@@ -190,6 +202,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             'anyIndirectPathIONodes' : true, // Overriden
             'anyReferenceFileNodes' : true // Overriden
         }, checkIfIndirectOrReferenceNodesExist(props.steps));
+
+        this.memoized = {
+            parseAnalysisSteps : memoize(parseAnalysisSteps),
+            anyGroupNodesExist : memoize(FileViewGraphSection.anyGroupNodesExist),
+            allFilesForWorkflowRunsMappedByUUID : memoize(allFilesForWorkflowRunsMappedByUUID),
+            mapEmbeddedFilesToStepRunDataIDs : memoize(mapEmbeddedFilesToStepRunDataIDs)
+        };
     }
 
     componentWillReceiveProps(nextProps){
@@ -203,40 +222,37 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     commonGraphProps(){
-        var { steps, allRuns } = this.props,
-            parsingOptions = _.extend(
-                {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters', 'showIndirectFiles')
-            ),
-            legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items),
-            graphData   = parseAnalysisSteps(steps, parsingOptions);
+        const {
+            steps, allRuns, isNodeCurrentContext,
+            context : { workflow_run_outputs = [], workflow_run_inputs = [] }
+        } = this.props;
+        const { showReferenceFiles, showParameters, showIndirectFiles, rowSpacingType } = this.state;
+        const parsingOptions = { ...DEFAULT_PARSING_OPTIONS, showReferenceFiles, showParameters, showIndirectFiles };
+        const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        const { nodes: originalNodes, edges } = this.memoized.parseAnalysisSteps(steps, parsingOptions);
 
-        if (!this.state.showParameters){
+        if (!showParameters){
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
-        this.anyGroupNodesExist = !allRuns && _.any(graphData.nodes, function(n){
-            return n.nodeType === 'input-group' || n.nodeType === 'output-group';
-        });
-
-        if (!this.state.showReferenceFiles || !this.state.anyReferenceFileNodes){
+        if (!showReferenceFiles || !this.state.anyReferenceFileNodes){
             delete legendItems['Input Reference File'];
         }
-        if (!this.anyGroupNodesExist || this.props.all_runs){
+        if (allRuns || !this.memoized.anyGroupNodesExist(originalNodes)){
             delete legendItems['Group of Similar Files'];
         }
-        var fileMap = allFilesForWorkflowRunsMappedByUUID(
-            (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
-        );
-        var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
 
-        return _.extend(commonGraphPropsFromProps(_.extend({ legendItems }, this.props)), {
-            'isNodeDisabled'        : FileViewGraphSection.isNodeDisabled,
-            'nodes'                 : nodes,
-            'edges'                 : graphData.edges,
-            'columnSpacing'         : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
-            'rowSpacingType'        : this.state.rowSpacingType,
-            'isNodeCurrentContext'  : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || this.isNodeCurrentContext
-        });
+        const fileMap = this.memoized.allFilesForWorkflowRunsMappedByUUID(workflow_run_outputs.concat(workflow_run_inputs));
+        const nodes = this.memoized.mapEmbeddedFilesToStepRunDataIDs(originalNodes, fileMap );
+
+        return {
+            ...commonGraphPropsFromProps({ ...this.props, legendItems }),
+            nodes, edges, rowSpacingType,
+            'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
+            'columnSpacing' : 100,
+            'isNodeCurrentContext' : (typeof isNodeCurrentContext === 'function' && isNodeCurrentContext) || this.isNodeCurrentContext
+
+        };
     }
 
     onToggleIndirectFiles(){

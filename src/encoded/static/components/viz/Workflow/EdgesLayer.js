@@ -13,10 +13,14 @@ import Edge from './Edge';
 
 
 
-export function traceEdges(originalEdges, nodes, columnWidth, columnSpacing, rowSpacing, contentWidth, contentHeight, innerMargin){
+export function traceEdges(
+    originalEdges,
+    nodes,
+    columnWidth, columnSpacing, rowSpacing, contentWidth, contentHeight, innerMargin, nodeEdgeLedgeWidths = [10, 10]
+){
     const topMargin = (innerMargin && innerMargin.top) || 0;
     const leftMargin = (innerMargin && innerMargin.left) || 0;
-    const endHeight = topMargin + contentHeight;
+    const endHeight = topMargin + contentHeight + (innerMargin && Math.max(0, innerMargin.bottom - 10)) || 0;
     const colStartXMap = {}; // Filled in visibility graph
 
     const nodesByColumn = _.reduce(nodes, function(m, node){
@@ -34,7 +38,10 @@ export function traceEdges(originalEdges, nodes, columnWidth, columnSpacing, row
         const partialHeight = rowSpacing / subdivisions;
         const quarterHeight = rowSpacing / 4;
         const horizontalLineYCoords = [];
-        let currY = topMargin - partialHeight;
+        let currY = topMargin;
+        while (currY >= 10){
+            currY -= partialHeight;
+        }
         while (currY < endHeight){
             currY += partialHeight;
             horizontalLineYCoords.push(currY);
@@ -67,24 +74,79 @@ export function traceEdges(originalEdges, nodes, columnWidth, columnSpacing, row
         return segments;
     }
 
-    function assembleSegments(segmentQ){
+    function assembleSegments(segmentQ, subdivisionsUsed = 4){
 
-        function getNearestSegment(columnIdx, yCoord){
+        function getNearestSegment(columnIdx, prevYCoord, targetYCoord, previousEdges = []){
             const segmentQLen = segmentQ.length;
             const startXForCol = colStartXMap[columnIdx];
+            const prevEdgesLen = previousEdges.length;
+
+            const upperY = Math.max(prevYCoord, targetYCoord);
+            const lowerY = Math.min(prevYCoord, targetYCoord);
+            //const yCoordMedian = (prevYCoord + targetYCoord) / 2;
+
             let closestSegmentDiff = Infinity;
             let closestSegmentIdx = -1;
-            let currSegment = null, currDiff = null;
-            for (var i = 0; i < segmentQLen; i++){
+            let currSegment = null, currDiff = null, currSegmentY = 0;
+            let i, j, prevEdge, prevVs, intersections = 0;
+            for (i = 0; i < segmentQLen; i++){
                 currSegment = segmentQ[i];
+                currSegmentY = currSegment[0][1];
                 if (currSegment[0][0] !== startXForCol){
                     continue;
                 }
-                currDiff = Math.abs(yCoord - segmentQ[i][0][1]);
-                if (closestSegmentDiff >= currDiff){
+
+                //currDiff = Math.abs(yCoordMedian - currSegmentY);
+                if (currSegmentY > upperY){
+                    currDiff = currSegmentY - upperY;
+                } else if (currSegmentY < lowerY){
+                    currDiff = lowerY - currSegmentY;
+                } else {
+                    // Any path between lower and upper bound is fine.
+                    // Favor those closer to prev edge
+                    //currDiff = Math.abs(yCoordMedian - currSegmentY) * 0.1;
+                    currDiff = Math.abs(prevYCoord - currSegmentY) * 0.1;
+                }
+
+                // Check for intersections, add to score
+                intersections = 0;
+                for (j = 0; j < prevEdgesLen; j++){
+                    prevEdge = previousEdges[j];
+                    if (Array.isArray(prevEdge.vertices)){
+                        prevVs = prevEdge.vertices;
+                    } else {
+                        prevVs = [
+                            [ prevEdge.source.x + columnWidth, prevEdge.source.y ],
+                            [ prevEdge.target.x, prevEdge.target.y ]
+                        ];
+                    }
+
+                    prevVs.reduce(function(prevV, v){
+                        if (!prevV){
+                            return v;
+                        }
+                        if (!(prevV[0] <= startXForCol && v[0] >= startXForCol)){
+                            return v;
+                        }
+                        if (
+                            (v[1] > currSegmentY && prevV[1] < prevYCoord) ||
+                            (v[1] < currSegmentY && prevV[1] > prevYCoord)
+                        ) {
+                            if (intersections === 0) intersections += 2;
+                            intersections++;
+                        }
+                        return v;
+                    }, null);
+
+                }
+
+                currDiff += (intersections * (rowSpacing / 2));
+
+                if (closestSegmentDiff > currDiff){
                     closestSegmentDiff = currDiff;
                     closestSegmentIdx = i;
                 }
+
             }
             if (closestSegmentIdx === -1){
                 return null;
@@ -94,7 +156,28 @@ export function traceEdges(originalEdges, nodes, columnWidth, columnSpacing, row
             return bestSegment;
         }
 
-        return originalEdges.map(function(edge){
+        const originalEdgesSortedByLength = originalEdges.slice(0).sort(function(edgeA, edgeB){
+            // Handle the shorter edges first
+            const { source: sA, target: tA } = edgeA;
+            const { source: sB, target: tB } = edgeB;
+            const xDistA = Math.abs(tA.x - sA.x);
+            const xDistB = Math.abs(tB.x - sB.x);
+
+            if (xDistA < xDistB) return -1;
+            if (xDistA > xDistB) return 1;
+
+            const yDistA = Math.abs(tA.y - sA.y);
+            const yDistB = Math.abs(tB.y - sB.y);
+
+            if (yDistA < yDistB) return -1;
+            if (yDistA > yDistB) return 1;
+
+
+
+            return 0;
+        });
+
+        return originalEdgesSortedByLength.map(function(edge, edgeIdx){
             const { source, target } = edge;
             const { column: sourceCol, x: sourceX, y: sourceY } = source;
             const { column: targetCol, x: targetX, y: targetY } = target;
@@ -112,19 +195,23 @@ export function traceEdges(originalEdges, nodes, columnWidth, columnSpacing, row
 
             let prevY = sourceY;
             for (let colIdx = sourceCol + 1; colIdx < targetCol; colIdx++){
-                const yDiff = targetY - prevY;
-                const idealYCoord = prevY + (yDiff / 2); // (((colIdx - sourceCol) / columnDiff) * yDiff);
-                const bestSegment = getNearestSegment(colIdx, idealYCoord);
+                //const yDiff = targetY - prevY;
+                //const idealYCoord = prevY + (yDiff / 2); // (((colIdx - sourceCol) / columnDiff) * yDiff);
+                const bestSegment = getNearestSegment(
+                    colIdx,
+                    prevY,
+                    targetY,
+                    originalEdgesSortedByLength.slice(0, edgeIdx)
+                );
                 if (!bestSegment){
                     throw new Error("Could not find viable path for edge");
                 }
-                vertices.push(bestSegment[0]);
-                vertices.push(bestSegment[1]);
-                prevY = bestSegment[1][1];
+                const [ [ bsX, bsY ], [ beX, beY ] ] = bestSegment;
+                vertices.push([ bsX - nodeEdgeLedgeWidths[0], bsY ]);
+                vertices.push([ beX + nodeEdgeLedgeWidths[1], beY ]);
+                prevY = beY;
             }
             vertices.push([ targetX, targetY ]);
-
-            console.log("NEWVS", vertices);
 
             return _.extend({ vertices }, edge);
         });
@@ -137,8 +224,9 @@ export function traceEdges(originalEdges, nodes, columnWidth, columnSpacing, row
     while (!tracedEdges && attempts < 5){
         horizontalSegments = buildVisibilityGraph(4 + attempts);
         try {
-            tracedEdges = assembleSegments(horizontalSegments);
+            tracedEdges = assembleSegments(horizontalSegments, 4 + attempts);
         } catch (e){
+            tracedEdges = null;
             if (e.message === "Could not find viable path for edge"){
                 console.warn("Could not find path", attempts);
             } else {
