@@ -2,10 +2,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 
 const memoizedFindNode = memoize(function(nodes, name, nodeType, id=null){
@@ -57,10 +55,12 @@ export default class StateContainer extends React.PureComponent {
     }
 
     handleNodeClick(node, evt){
-        if (typeof this.props.onNodeClick === 'function'){
-            this.props.onNodeClick.call(this, node, this.state.selectedNode, evt);
+        const { onNodeClick } = this.props;
+        const { selectedNode } = this.state;
+        if (typeof onNodeClick === 'function'){
+            onNodeClick(node, selectedNode, evt);
         } else {
-            this.defaultOnNodeClick(node, this.state.selectedNode, evt);
+            this.defaultOnNodeClick(node, selectedNode, evt);
         }
     }
 
@@ -72,14 +72,14 @@ export default class StateContainer extends React.PureComponent {
     }
 
     render(){
+        const { children, ...passProps } = this.props;
+        const { selectedNode } = this.state;
         return (
-            <div className="state-container" data-is-node-selected={!!(this.state.selectedNode)}>
+            <div className="state-container" data-is-node-selected={!!(selectedNode)}>
                 {
-                    React.Children.map(this.props.children, (child)=>{
-                        return React.cloneElement(child, _.extend(
-                            _.omit(this.props, 'children'), { onNodeClick : this.handleNodeClick }, this.state
-                        ));
-                    })
+                    React.Children.map(children, (child) =>
+                        React.cloneElement(child, { ...passProps, ...this.state, onNodeClick : this.handleNodeClick })
+                    )
                 }
                 { this.detailPane() }
             </div>
