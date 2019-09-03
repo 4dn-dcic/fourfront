@@ -480,7 +480,7 @@ def _format_def_str(defdict):
 
 
 def set_definition(terms, ontologies):
-    uuid2prefix = {o.get('uuid'): o.get('ontology_prefix') for o in ontologies}
+    # uuid2prefix = {o.get('uuid'): o.get('ontology_prefix') for o in ontologies}
     for termid, term in terms.items():
         definition = {}
         found = False
@@ -644,13 +644,13 @@ def _parse_def(defstr):
     pass
 
 def update_definition(tdef, dbdef, ont):
-    pass
+    # pass
     '''
-        for the term because it is only a single ont if got here then def ends with ontpre in parens
-        need to check the def in the db to see if any of the defs in the string come from db being
-        processed - if the ontprefix is in the trailing string and the 2 defs don't match need to
-        remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
-        string
+    for the term because it is only a single ont if got here then def ends with ontpre in parens
+    need to check the def in the db to see if any of the defs in the string come from db being
+    processed - if the ontprefix is in the trailing string and the 2 defs don't match need to
+    remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
+    string
     '''
     ontregex = re.compile(' +\(([A-Z]+,* *[A-Z]*)\)\s*')
     tmatch = ontregex.split(tdef)
@@ -664,7 +664,7 @@ def update_definition(tdef, dbdef, ont):
     if tstr not in dbdefs.keys():
         # the def is new for that ontology so remove that prefix from
         # any existing def strings
-        for d, o in dbdefs.items():
+        for o in dbdefs.values():
             if ont in o:
                 o.remove(ont)
         dbdefs[tstr] = [ont]
