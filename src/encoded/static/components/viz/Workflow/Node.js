@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { traceNodePathAndRun } from './parsing-functions';
 
 
@@ -80,7 +79,7 @@ export class DefaultNodeElement extends React.PureComponent {
                 className="node-visible-element"
                 data-tip={this.tooltip()}
                 data-place="top" data-html style={style}>
-                <span className="node-name">{ this.icon() }{ title || node.title || node.name }</span>
+                <div className="node-name">{ this.icon() }{ title || node.title || node.name }</div>
             </div>
         );
     }

@@ -85,7 +85,7 @@ class FileColumnActionsBtn extends React.PureComponent {
             );
         } else {
             return (
-                <div className="inline-block" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
+                <div className="in-stacked-table-button-container" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
                     <button type="button" className="btn btn-xs btn-primary in-stacked-table-button"
                         data-tip="Visualize with HiGlass" onClick={onClick}>
                         <i className="icon icon-fw icon-television"/>

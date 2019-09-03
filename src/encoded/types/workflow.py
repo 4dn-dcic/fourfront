@@ -764,7 +764,14 @@ class WorkflowRun(Item):
         # fileCache = {} # Unnecessary unless we'll convert file @id into plain embedded dictionary, in which case we use this to avoid re-requests for same file UUID.
 
         def get_global_source_or_target(all_io_source_targets):
-            global_pointing_source_target = [ source_target for source_target in all_io_source_targets if source_target.get('step') == None ] # Find source or target w/o a 'step'.
+            # Find source or target w/o a 'step'.
+            # Step outputs or inputs with a source or target without a "step" defined
+            # are considered global inputs/outputs. Matching WorkflowRun.[output|input]_files
+            # is done against step step.[inputs | output].[target | source].name.
+            global_pointing_source_target = [
+                source_target for source_target in all_io_source_targets
+                if source_target.get('step') == None
+            ]
             if len(global_pointing_source_target) > 1:
                 raise Exception('Found more than one source or target without a step.')
             if len(global_pointing_source_target) == 0:
