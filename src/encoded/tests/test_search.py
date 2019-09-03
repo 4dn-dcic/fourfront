@@ -5,8 +5,14 @@ from encoded.commands.run_upgrader_on_inserts import get_inserts
 import json
 import time
 from snovault import TYPES
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.flaky]
 
+def delay_rerun(*args):
+    """ Rerun function for flaky """
+    time.sleep(90)
+    return True
+
+
+pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
