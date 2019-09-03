@@ -504,8 +504,8 @@ def set_definition(terms, ontologies):
         for p, defs in tdefs.items():
             for d in defs:
                 definition.setdefault(d.strip(), []).append(p)
-        dstring = _format_def_str(defintion)
-        #for d, o in sorted(definition.items()):
+        dstring = _format_def_str(definition)
+        # for d, o in sorted(definition.items()):
         #    ostr = ', '.join(sorted(o))
         #    dstring += '{} ({})'.format(d, ostr)
         if dstring:
