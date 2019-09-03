@@ -4,38 +4,71 @@
     "id": "/profiles/phenotype.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["term_name", "term_id"],
+    "required": ["phenotype_name", "hpo_id"],
     "identifyingProperties": ["uuid"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
-        { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/static_embeds" }
+        { "$ref": "mixins.json#/status" }
     ],
     "properties": {
-        "term_name" : {
-            "title" : "Standard Term Name",
-            "type" : "string"
+        "schema_version": {
+            "default": "1"
         },
-        "term_id" : {
+        "status": {
+            "default": "released"
+        },
+        "hpo_id" : {
             "title" : "HPO Identifier",
             "description" : "Identifier of phenotype at hpo.jax.org. E.g. \"HP:0000347\"",
             "type" : "string",
             "uniqueKey": true
         },
-        "parent_term" : {
-            "title": "Parent Term",
-            "type" : "string",
-            "linkTo" : "Phenotype"
+        "phenotype_name" : {
+            "title" : "Phenotype Name",
+            "description": "HPO assigned official term name",
+            "type" : "string"
+        },
+        "hpo_url": {
+            "title": "URL",
+            "description": "The url that uniquely identifies term - often purl.",
+            "type": "string",
+            "format": "uri"
+        },
+        "parents" : {
+            "title": "Parent Phenotypes",
+            "type" : "array",
+            "items": {
+                "title": "Parent",
+                "type": "string",
+                "linkTo": "Phenotype"
+            }
+        },
+        "slim_terms": {
+            "title": "Categories",
+            "description": "Categories for grouping phenotypes",
+            "type": "array",
+            "items": {
+                "title": "Category",
+                "type": "string",
+                "linkTo": "Phenotype"
+            }
+        },
+        "is_slim_for": {
+            "title": "Slim Branch",
+            "description": "If the phenotype is a category the value is the slot that the slim is for",
+            "type": "string",
+            "enum": ["Phenotypic abnormality"]
         },
         "definition" : {
             "title" : "Definition",
             "description": "Definition of this phenotype",
-            "type" : "string"
+            "type" : "string",
+            "formInput": "textarea"
         },
         "synonyms" : {
             "type" : "array",
@@ -49,6 +82,11 @@
             "type" : "string",
             "title" : "Comment",
             "formInput": "textarea"
+        },
+        "ontology_version": {
+            "title": "HPO version",
+            "description": "The version of HPO that the term was last updated from",
+            "type": "string"
         }
     }
 }
