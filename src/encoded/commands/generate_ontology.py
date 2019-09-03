@@ -2,6 +2,7 @@ import os
 import json
 import sys
 import argparse
+import re
 from dateutil.relativedelta import relativedelta
 import datetime
 import boto3
@@ -29,7 +30,7 @@ from dcicutils.ff_utils import (
     unified_authentication
 )
 from dcicutils.s3_utils import s3Utils
-import mimetypes
+# import mimetypes
 from pyramid.paster import get_app
 
 EPILOG = __doc__
@@ -470,6 +471,14 @@ def remove_obsoletes_and_unnamed(terms, deprecated):
     return live_terms
 
 
+def _format_def_str(defdict):
+    dstring = ''
+    for d, o in sorted(defdict.items()):
+        ostr = ', '.join(sorted([ostr.strip() for ostr in o]))
+        dstring += '{} ({}) '.format(d, ostr)
+    return dstring.rstrip()
+
+
 def set_definition(terms, ontologies):
     uuid2prefix = {o.get('uuid'): o.get('ontology_prefix') for o in ontologies}
     for termid, term in terms.items():
@@ -495,10 +504,10 @@ def set_definition(terms, ontologies):
         for p, defs in tdefs.items():
             for d in defs:
                 definition.setdefault(d.strip(), []).append(p)
-        dstring = ''
-        for d, o in sorted(definition.items()):
-            ostr = ', '.join(sorted(o))
-            dstring += '{} ({})'.format(d, ostr)
+        dstring = _format_def_str(defintion)
+        #for d, o in sorted(definition.items()):
+        #    ostr = ', '.join(sorted(o))
+        #    dstring += '{} ({})'.format(d, ostr)
         if dstring:
             term['definition'] = dstring
         del term['definitions']
@@ -636,9 +645,34 @@ def _parse_def(defstr):
 
 def update_definition(tdef, dbdef, ont):
     pass
-    #revtdef = tdef[::-1]
-    #tend = len(tdef) - (revtdef.index('(') + 1) - 1
-    #newdef = tdef[:tend]  # gets string before the last (
+    '''
+        for the term because it is only a single ont if got here then def ends with ontpre in parens
+        need to check the def in the db to see if any of the defs in the string come from db being
+        processed - if the ontprefix is in the trailing string and the 2 defs don't match need to
+        remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
+        string
+    '''
+    ontregex = re.compile(' +\(([A-Z]+,* *[A-Z]*)\)\s*')
+    tmatch = ontregex.split(tdef)
+    tstr = tmatch[0]
+    dbmatch = ontregex.split(dbdef)
+    dbdefs = dict(zip(dbmatch[::2], dbmatch[1::2]))
+    dbdefs = {k: v.split(',') for k, v in dbdefs.items()}
+    # if tstr is not in dbdefs keys
+    # if for any dbdef the ontology is in value
+    # take the ont out
+    if tstr not in dbdefs.keys():
+        # the def is new for that ontology so remove that prefix from
+        # any existing def strings
+        for d, o in dbdefs.items():
+            if ont in o:
+                o.remove(ont)
+        dbdefs[tstr] = [ont]
+    else:
+        if ont not in dbdefs[tstr]:
+            dbdefs[tstr].append(ont)
+            dbdefs[tstr].sort()
+    return _format_def_str(dbdefs)
 
 
 def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None):

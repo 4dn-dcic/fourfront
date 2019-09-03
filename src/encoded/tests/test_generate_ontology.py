@@ -1295,6 +1295,14 @@ def embedded_dbterm():
 
 
 def test_get_raw_form(embedded_dbterm):
-    import pdb; pdb.set_trace()
     raw_term = go.get_raw_form(embedded_dbterm)
     print(raw_term)
+
+
+def test_update_definition():
+    prefix = 'EFO'
+    tdef = 'here is EFO definition (EFO)'
+    dbdef = 'here is outdated definition (EFO, OBI) and another def (SO)'
+    newdef = go.update_definition(tdef, dbdef, prefix)
+    assertv tdef in newdef
+    assert 'here is outdated definition (EFO, OBI)' not in newdef
