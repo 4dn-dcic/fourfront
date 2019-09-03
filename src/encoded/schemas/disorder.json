@@ -39,7 +39,13 @@
                     "phenotype": {
                         "title": "Phenotype",
                         "type": "string",
-                        "linkTo": "OntologyTerm"
+                        "linkTo": "Phenotype"
+                    },
+                    "qualifier": {
+                        "title": "Qualifier",
+                        "description": "Field can only be used to record “NOT” or is empty. A value of NOT indicates that the disease in question is not characterized by the indicated HPO term. This is used to record phenotypic features that can be of special differential diagnostic utility.",
+                        "type": "string",
+                        "enum": ["NOT"]
                     },
                     "evidence_code": {
                         "title": "Data obtained from external source on the evidence underlying the association",
@@ -47,16 +53,18 @@
                         "note":  "This required field indicates the level of evidence supporting the annotation. Annotations that have been extracted by parsing the Clinical Features sections of the omim.txt file are assigned the evidence code IEA (inferred from electronic annotation). Please note that you need to contact OMIM in order to reuse these annotations in other software products. Other codes include PCS for published clinical study. This should be used for information extracted from articles in the medical literature. Generally, annotations of this type will include the PubMed id of the published study in the DB_Reference field. ICE can be used for annotations based on individual clinical experience. This may be appropriate for disorders with a limited amount of published data. This must be accompanied by an entry in the DB:Reference field denoting the individual or center performing the annotation together with an identifier. For instance, GH:007 might be used to refer to the seventh such annotation made by a specialist from Gotham Hospital (assuming the prefix GH has been registered with the HPO). Finally we have TAS, which stands for “traceable author statement”, usually reviews or disease entries (e.g. OMIM) that only refers to the original publication.",
                         "enum": ["TAS", "IEA", "PCS"]
                     },
-                    "frequency_info": {
-                        "title": "Frequeny Info",
-                        "description": "A term-id from the HPO-sub-ontology below the term Frequency. There are three allowed options for this field. A term-id from the HPO-sub-ontology below the term Frequency. A count of patiennts affected within a cohort. For instance, 7/13 would indicate that 7 of the 13 patients with the specified disease were found to have the phenotypic abnormality referred to by the HPO term in question in the study referred to by the DB_Reference. A percentage value such as 17%, again referring to the percentage of patients found to have the phenotypic abnormality referred to by the HPO term in question in the study referred to by the DB_Reference. If possible, the 7/13 format is preferred over the percentage format if the exact data is available",
+                    "frequency_term": {
+                        "title": "Frequency Term",
+                        "description": "A term-id from the HPO-sub-ontology below the term Frequency.",
                         "type": "string",
-                        "comment": "this will be a controlled enum"
+                        "linkTo": "Phenotype",
+                        "comment": "If there is a value in this field there should not be one in frequency_value and vice versa"
                     },
                     "frequency_value": {
                         "title": "Frequency Value",
-                        "description": "A calculated value using the values in frequency info that indicate the frequency of linkage between disorder and phenotype",
-                        "type": "string"
+                        "description": "Either a count of patients affected within a cohort (example 7/13 indicates that in attribution, 7 of the 13 patients with the disorder have the phenotype or a percentage value such as 17%, again referring to the percent of patients with disorder with phenotype.",
+                        "type": "string",
+                        "comment": "If there is a value in this field there should not be one in frequency_term and vice versa"
                     },
                     "attribution_id": {
                         "title": "Attribution",
@@ -67,13 +75,19 @@
                         "title": "Onset",
                         "description": "A term-id from the HPO-sub-ontology below the term Age of onset.",
                         "type": "string",
-                        "linkTo": "OntologyTerm"
+                        "linkTo": "Phenotype"
                     },
-                    "modifier_term": {
+                    "sex": {
+                        "title": "SEX",
+                        "description": "Used if the annotation in question is limited to males or females. This field refers to the phenotypic (and not the chromosomal) sex",
+                        "type": "string",
+                        "enum": ["MALE", "FEMALE"]
+                    },
+                    "modifier": {
                         "title": "Modifier",
                         "description": "A term from the clinical modifier sub ontology",
                         "type": "string",
-                        "linkTo": "OntologyTerm"
+                        "linkTo": "Phenotype"
                     },
                     "aspect": {
                         "title": "Aspect",
@@ -92,7 +106,7 @@
                     },
                     "curated_by": {
                         "title": "Curated by",
-                        "description": "Designation for who made the curation of the association",
+                        "description": "History of curation with format 'HPO:Joseph[2012-07-05];HPO:Suzanna[2015-12-07]'",
                         "type": "string"
                     },
                     "sex": {
@@ -118,6 +132,15 @@
             "title" : "Definition",
             "description": "Definition of this disorder",
             "type" : "string"
+        },
+        "synonyms": {
+            "title": "Disorder Synonyms",
+            "description": "Synonyms for the disease or disorder",
+            "type": "array",
+            "items": {
+                "title": "Synonym",
+                "type": "string"
+            }
         },
         "comment" : {
             "type" : "string",
