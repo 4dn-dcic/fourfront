@@ -9,8 +9,9 @@ import time
 from encoded.verifier import verify_item
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from .features.conftest import app_settings, app as conf_app
+from .test_search import delay_rerun
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing]
+pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
