@@ -8,7 +8,7 @@ pytestmark = [pytest.mark.setone, pytest.mark.working]
 def test_parse_args_defaults():
     args = []
     args = go.parse_args(args)
-    assert args.ontologies == 'all'
+    assert args.ontology == 'all'
     assert args.key == 's3'
     assert args.env == 'data'
 
@@ -131,7 +131,7 @@ def test_get_ontologies_all(mocker, connection):
 def test_get_ontologies_one(mocker, connection):
     prefix = 'EFO'
     with mocker.patch('encoded.commands.generate_ontology.get_metadata', side_effect=get_fdn_ontology_side_effect):
-        ont_list = ['EFO']
+        ont_list = 'EFO'
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 1
         assert ontologies[0]['ontology_prefix'] == prefix
@@ -141,14 +141,10 @@ def test_get_ontologies_not_in_db(mocker, connection):
     prefix = 'EFO'
     all_ontology.append({'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'})
     with mocker.patch('encoded.commands.generate_ontology.get_metadata',
-                      side_effect=[all_ontology[0],
-                                   {'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}]):
-        ont_list = ['EFO', 'FAKE']
+                      return_value={'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}):
+        ont_list = 'FAKE'
         ontologies = go.get_ontologies(connection, ont_list)
-        for ont in ontologies:
-            print(ont)
-        assert len(ontologies) == 1
-        assert ontologies[0]['ontology_prefix'] == prefix
+        assert not ontologies
 
 
 @pytest.fixture
@@ -869,12 +865,15 @@ def test_add_additional_term_info(mocker, simple_terms):
                 result = go.add_additional_term_info(simple_terms, 'data', 'synterms', 'defterms')
                 for tid, term in result.items():
                     if tid == 't3':
-                        assert term['definition'] == 'def1 -- def2'
+                        assert 'UNK' in term['definitions']
+                        assert 'def1' in term['definitions']['UNK']
+                        assert 'def2' in term['definitions']['UNK']
                         assert len(term['synonyms']) == 2
                         assert 'syn1' in term['synonyms']
                         assert 'syn2' in term['synonyms']
                     elif tid == 't2':
-                        assert term['definition'] == 'def1'
+                        assert 'UNK' in term['definitions']
+                        assert 'def1' in term['definitions']['UNK']
                         assert len(term['synonyms']) == 1
                         assert term['synonyms'][0] == 'syn1'
                     else:
@@ -1009,12 +1008,12 @@ def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
         assert t.get('term_id') in tids
 
 
-def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result) == 2
-    assert '7890' in [t.get('uuid') for t in result]
-    # assert 't4' in idmap
+# def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
+#     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
+#     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+#     assert len(result) == 2
+#     assert '7890' in [t.get('uuid') for t in result]
+#     # assert 't4' in idmap
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
@@ -1024,12 +1023,12 @@ def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
     # assert 't4' not in idmap
 
 
-def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
-    db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
-    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    print(result)
-    assert 't4' not in [t.get('term_id') for t in result]
-    # assert 't4' not in idmap
+# def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
+#     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
+#     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+#     print(result)
+#     assert 't4' not in [t.get('term_id') for t in result]
+#     # assert 't4' not in idmap
 
 
 def valid_uuid(uid):
@@ -1304,5 +1303,5 @@ def test_update_definition():
     tdef = 'here is EFO definition (EFO)'
     dbdef = 'here is outdated definition (EFO, OBI) and another def (SO)'
     newdef = go.update_definition(tdef, dbdef, prefix)
-    assertv tdef in newdef
+    assert tdef in newdef
     assert 'here is outdated definition (EFO, OBI)' not in newdef
