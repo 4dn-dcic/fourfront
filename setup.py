@@ -107,6 +107,7 @@ setup(
         migrate-attachments-aws = encoded.commands.migrate_attachments_aws:main
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
         load-data = encoded.commands.load_data:main
+        load-access-keys = encoded.commands.load_access_keys:main
         dropdb = encoded.commands.dropdb:main
         verify-item = encoded.commands.verify_item:main
         clone-beanstalk = encoded.commands.clone_beanstalk_env:main

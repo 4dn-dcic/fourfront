@@ -20,8 +20,6 @@ def main():
     )
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
-    parser.add_argument('--access-key', default='s3',
-                        help="store local or copy to s3, will generate and store access key for admin user")
     parser.add_argument('--drop-db-on-mt', action='store_true',  help="path to configfile")
     parser.add_argument('--prod', action='store_true',
                         help="must be set to run on webprod/webprod2")
@@ -49,7 +47,7 @@ def main():
         log.info('load_data: skipping, since we are on webprod/webprod2 and --prod not used')
         return
 
-    load_test_data(app, args.access_key, clear_tables, args.overwrite)
+    load_test_data(app, clear_tables, args.overwrite)
 
 if __name__ == "__main__":
     main()
