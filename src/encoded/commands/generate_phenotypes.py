@@ -3,6 +3,8 @@ import json
 import sys
 import argparse
 import datetime
+from uuid import uuid4
+from collections import Counter
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
@@ -25,7 +27,6 @@ from dcicutils.ff_utils import (
     unified_authentication
 )
 from dcicutils.s3_utils import s3Utils
-import mimetypes
 from pyramid.paster import get_app
 
 EPILOG = __doc__
@@ -369,7 +370,7 @@ def get_existing_phenotypes(connection):
     '''Retrieves all existing phenotypes from db '''
     search_suffix = 'search/?type=Phenotype'
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
-    return {t['hpo_url_id']: t for t in db_terms}
+    return {t['hpo_id']: t for t in db_terms}
 
 
 def get_ontology(connection, ont):
@@ -570,15 +571,10 @@ def id_post_and_patch(terms, dbterms, rm_unchanged=True, set_obsoletes=True):
         to_patch += 1
 
     if set_obsoletes:
-
-        if simple:
-            use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
-        else:
-            use_terms = {tid: term for tid, term in dbterms.items()}
         # go through db terms and find which aren't in terms and set status
         # to obsolete by adding to to_patch
         # need a way to exclude our own terms and synonyms and definitions
-        for tid, term in use_terms.items():
+        for tid, term in dbterms.items():
             if tid not in terms:
                 source_onts = [so.get('uuid') for so in term['source_ontologies']]
                 if not source_onts or not [o for o in ontids if o in source_onts]:
@@ -784,9 +780,9 @@ def main():
 
     # fourfront connection
     connection = connect2server(args.env, args.key)
-    ontology = get_ontology(connection, 'HPO')
+    ontology = get_ontology(connection, 'HP')
     slim_terms = get_slim_terms(connection)
-    db_terms = get_existing_ontology_terms(connection)
+    db_terms = get_existing_phenotypes(connection)
     terms = {}
 
     print('Processing: ', ontology['ontology_name'])
