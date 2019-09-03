@@ -9,43 +9,6 @@ from encoded.commands.run_upgrader_on_inserts import get_inserts
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
-def test_gen_access_keys(testapp, admin):
-    res = loadxl.generate_access_key(testapp,
-                                     store_access_key='local',
-                                     email=admin['email'])
-    res = json.loads(res)
-    assert res['default']['server'] == 'http://localhost:8000'
-    assert res['default']['secret']
-    assert res['default']['key']
-
-
-def test_gen_access_keys_on_server(testapp, admin):
-    old_get = testapp.get
-
-    def side_effect(path, status=None):
-        from webtest.response import TestResponse
-        if path == '/health?format=json':
-            tr = TestResponse()
-            tr.json_body = {"beanstalk_env": "fourfront-webprod"}
-            tr.content_type = 'application/json'
-            return tr
-        else:
-            return old_get(path, status=status)
-
-    testapp.get = mock.Mock(side_effect=side_effect)
-    with mock.patch('encoded.loadxl.get_beanstalk_real_url') as mocked_url:
-        mocked_url.return_value = 'http://fourfront-hotseat'
-
-        res = loadxl.generate_access_key(testapp,
-                                         store_access_key='s3',
-                                         email=admin['email'])
-        res = json.loads(res)
-        assert res['default']['server'] == 'http://fourfront-hotseat'
-        assert res['default']['secret']
-        assert res['default']['key']
-        assert mocked_url.called_once()
-
-
 def test_load_data_endpoint(testapp):
     data = {'fdn_dir': 'master-inserts',
             'itype': ['award', 'lab', 'user']}
