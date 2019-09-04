@@ -11,7 +11,7 @@ from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from .features.conftest import app_settings, app as conf_app
 from .test_search import delay_rerun
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_retries=3)]
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
