@@ -28,7 +28,7 @@ def includeme(config):
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
     'user',
-    'file_format'
+    'file_format',
     'institution',
     'project',
     'disease',

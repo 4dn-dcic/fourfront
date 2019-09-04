@@ -156,45 +156,6 @@ class Gene(Item):
 
 
 @collection(
-    name='phenotypes',
-    properties={
-        'title': 'Phenotypes',
-        'description': 'Listing of Phenotypes',
-    })
-class Phenotype(Item):
-    item_type = 'phenotype'
-    schema = load_schema('encoded:schemas/phenotype.json')
-    rev = {
-        'associated_disorders': ('Disorder', 'associated_phenotypes')
-    }
-    embedded_list = [
-        'associated_disorders.disorder_id'
-    ]
-
-    @calculated_property(schema={
-        "title": "Associated Disorders",
-        "description": "Disorders associated with this phenotype",
-        "type": "array",
-        "exclude_from": ["submit4dn", "FFedit-create"],
-        "items": {
-            "title": "Disorder",
-            "type": "string",
-            "linkTo": "Disorder"
-        }
-    })
-    def associated_disorders(self, request):
-        return self.rev_link_atids(request, "associated_disorders")
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, term_name):
-        return term_name
-
-
-@collection(
     name='documents',
     properties={
         'title': 'Documents',

@@ -96,7 +96,9 @@ setup(
         extract-test-data = encoded.commands.extract_test_data:main
         es-index-data = encoded.commands.es_index_data:main
         generate-ontology = encoded.commands.generate_ontology:main
+        generate-phenotypes = encoded.commands.generate_phenotypes:main
         load-ontology = encoded.commands.load_ontology_terms:main
+        load-phenotypes = encoded.commands.load_phenotypes:main
         import-data = encoded.commands.import_data:main
         export-data = encoded.commands.export_data:main
         jsonld-rdf = encoded.commands.jsonld_rdf:main
