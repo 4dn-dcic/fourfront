@@ -76,8 +76,8 @@
                         "type": "string",
                         "linkTo": "Phenotype"
                     },
-                    "sex": {
-                        "title": "SEX",
+                    "affected_sex": {
+                        "title": "Affected Sex",
                         "description": "Used if the annotation in question is limited to males or females. This field refers to the phenotypic (and not the chromosomal) sex",
                         "type": "string",
                         "enum": ["M", "F"]
@@ -90,21 +90,12 @@
                     },
                     "aspect": {
                         "title": "Aspect",
-                        "description": "one of P (Phenotypic abnormality), I (inheritance), C (onset and clinical course).",
+                        "description": "one of P (Phenotypic abnormality), I (inheritance), C (onset and clinical course) or M (modifier).",
                         "type": "string",
-                        "enum": ["phenotypic abnormality", "inheritance", "onset and clinical course"]
+                        "enum": ["P", "I", "C", "M"]
                     },
-                    "date_curated": {
-                       "title": "Date added",
-                       "description": "The date YYYY-MM-DD that the association was made",
-                       "type": "string",
-                       "anyOf": [
-                           {"format": "date-time"},
-                           {"format": "date"}
-                       ]
-                    },
-                    "curated_by": {
-                        "title": "Curated by",
+                    "curattion_history": {
+                        "title": "Curation History",
                         "description": "History of curation with format 'HPO:Joseph[2012-07-05];HPO:Suzanna[2015-12-07]'",
                         "type": "string"
                     }
