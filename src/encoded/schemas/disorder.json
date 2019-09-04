@@ -41,11 +41,10 @@
                         "type": "string",
                         "linkTo": "Phenotype"
                     },
-                    "qualifier": {
-                        "title": "Qualifier",
-                        "description": "Field can only be used to record “NOT” or is empty. A value of NOT indicates that the disease in question is not characterized by the indicated HPO term. This is used to record phenotypic features that can be of special differential diagnostic utility.",
-                        "type": "string",
-                        "enum": ["NOT"]
+                    "is_not": {
+                        "title": "NOT Qualifier",
+                        "description": "If 'True' indicates that the disease in question is not characterized by the indicated HPO term. This is used to record phenotypic features that can be of special differential diagnostic utility.",
+                        "type": "boolean"
                     },
                     "evidence_code": {
                         "title": "Data obtained from external source on the evidence underlying the association",
@@ -81,7 +80,7 @@
                         "title": "SEX",
                         "description": "Used if the annotation in question is limited to males or females. This field refers to the phenotypic (and not the chromosomal) sex",
                         "type": "string",
-                        "enum": ["MALE", "FEMALE"]
+                        "enum": ["M", "F"]
                     },
                     "modifier": {
                         "title": "Modifier",
@@ -108,12 +107,6 @@
                         "title": "Curated by",
                         "description": "History of curation with format 'HPO:Joseph[2012-07-05];HPO:Suzanna[2015-12-07]'",
                         "type": "string"
-                    },
-                    "sex": {
-                        "title": "Affected sex",
-                        "description": " MALE or FEMALE if the annotation in question is limited to males or females. This field refers to the phenotypic (and not the chromosomal) sex, and does not intend to capture the further complexities of sex determination. If a phenotype is limited to one or the other sex, then the corresponding term from the Clinical modifier subontology should also be used in the Modifier field",
-                        "type": "string",
-                        "enum": ["MALE", "FEMALE"]
                     }
                 }
             }
