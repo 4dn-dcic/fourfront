@@ -8,6 +8,7 @@ import json
 import time
 from encoded.verifier import verify_item
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
+from elasticsearch.exceptions import NotFoundError
 from .features.conftest import app_settings, app as conf_app
 from .test_search import delay_rerun
 
@@ -208,7 +209,7 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
         'higlass_uid': 1  # validation error -- higlass_uid should be string
     }
     res = testapp.post_json('/files-processed/?validate=false&upgrade=False',
-                                  fp_body, status=201).json
+                            fp_body, status=201).json
     fp_id = res['@graph'][0]['@id']
     val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
     assert val_err_view['@id'] == fp_id
@@ -217,8 +218,17 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     # call to /index will throw MissingIndexItemException multiple times, since
     # associated file_format, lab, and award are not indexed. That's okay
     indexer_testapp.post_json('/index', {'record': True})
-    time.sleep(2)
-    es_res = es.get(index='file_processed', doc_type='file_processed', id=res['@graph'][0]['uuid'])
+    counts = 0
+    es_res = None
+    while not es_res and counts < 10:
+        time.sleep(2)
+        try:
+            es_res = es.get(index='file_processed', doc_type='file_processed',
+                            id=res['@graph'][0]['uuid'])
+        except NotFoundError:
+            pass
+        counts += 1
+    assert es_res
     assert len(es_res['_source'].get('validation_errors', [])) == 1
     # check that validation-errors view works
     val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
