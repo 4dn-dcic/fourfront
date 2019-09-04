@@ -103,39 +103,39 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      * componentDidUpdate (?) now that we don't swap out state.viewConfig with nextProps.viewConfig.
      * -- After cleanup.
      */
-    UNSAFE_componentWillReceiveProps(nextProps){
-        var nextState = {};
+    // UNSAFE_componentWillReceiveProps(nextProps){
+    //     const nextState = {};
 
-        /*  Below code:
-            We will likely adjust/remove to no longer change viewConfig if receive new one from back-end because
-            backend will always deliver new object reference. Even if same context['@id'] and context.date_modified.
-        */
+    //     /*  Below code:
+    //         We will likely adjust/remove to no longer change viewConfig if receive new one from back-end because
+    //         backend will always deliver new object reference. Even if same context['@id'] and context.date_modified.
+    //     */
 
-        if (nextProps.viewConfig !== this.props.viewConfig){
-            _.extend(nextState, {
-                'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
-                'viewConfig'         : nextProps.viewConfig,
-                'genome_assembly'    : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
-            });
-        }
-        const hiGlassTabIndex = (this.props.hiGlassTabIndex !== 'undefined') ? this.props.hiGlassTabIndex : -1;        
-        const recentTabIsHiglass = (hiGlassTabIndex === 0 ? this.props.href.indexOf('#') < 0 : false) || (this.props.href.indexOf('#higlass') >= 0);
-        if (recentTabIsHiglass && (nextProps.href !== this.props.href) && (object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context))) {
-            // If component is still same instance, then is likely that we're changing
-            // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
-            // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
-            var hgc = this.getHiGlassComponent(),
-                currentViewConfStr = hgc && hgc.api.exportAsViewConfString(),
-                currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);s               
-                //  currentViewConf && _.extend(nextState, {
-                //      'viewConfig' : currentViewConf
-                //  });
-        }
+    //     if (nextProps.viewConfig !== this.props.viewConfig){
+    //         _.extend(nextState, {
+    //             'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
+    //             'viewConfig'         : nextProps.viewConfig,
+    //             'genome_assembly'    : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
+    //         });
+    //     }
+    //     const hiGlassTabIndex = (this.props.hiGlassTabIndex !== 'undefined') ? this.props.hiGlassTabIndex : -1;
+    //     const recentTabIsHiglass = (hiGlassTabIndex === 0 ? this.props.href.indexOf('#') < 0 : false) || (this.props.href.indexOf('#higlass') >= 0);
+    //     if (recentTabIsHiglass && (nextProps.href !== this.props.href) && (object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context))) {
+    //         // If component is still same instance, then is likely that we're changing
+    //         // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
+    //         // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
+    //         const hgc = this.getHiGlassComponent();
+    //         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+    //         const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+    //         //  currentViewConf && _.extend(nextState, {
+    //         //      'viewConfig' : currentViewConf
+    //         //  });
+    //     }
 
-        if (_.keys(nextState).length > 0) {
-            this.setState(nextState);
-        }
-    }
+    //     if (_.keys(nextState).length > 0) {
+    //         this.setState(nextState);
+    //     }
+    // }
 
     componentDidUpdate(pastProps, pastState){
         if (this.props.isFullscreen !== pastProps.isFullscreen){
@@ -267,13 +267,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         // Check if our title already has " - user's copy" substring and if so,
         // increment an appended counter instead of re-adding the substring.
         if (context.display_title.indexOf(viewConfTitleAppendStr) > -1){
-            var regexCheck      = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d+\\)'),
-                regexMatches    = context.display_title.match(regexCheck);
+            const regexCheck = new RegExp('(' + viewConfTitleAppendStr + ')\\s\\(\\d+\\)');
+            const regexMatches = context.display_title.match(regexCheck);
 
             if (regexMatches && regexMatches.length === 2) {
                 // regexMatches[0] ==> " - user's copy (int)"
                 // regexMatches[1] ==> " - user's copy"
-                var copyCount = parseInt(
+                let copyCount = parseInt(
                     regexMatches[0].replace(regexMatches[1], '')
                         .trim()
                         .replace('(', '')
@@ -349,10 +349,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     * @returns {void}
     */
     addFileToHiglass(fileAtID) {
-        var { context }         = this.props,
-            hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const { context } = this.props;
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -386,7 +386,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             firstViewLocationAndZoom = [xCenter, yCenter, k];
         }
 
-        var payload = {
+        const payload = {
             'higlass_viewconfig': currentViewConf,
             'genome_assembly': this.state.genome_assembly,
             'files' : [fileAtID],
@@ -394,7 +394,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         };
 
         // If it failed, show the error in the popup window.
-        var fallbackCallback = (errResp, xhr) => {
+        const fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
                 'title' : "Failed to add file.",
@@ -451,9 +451,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     handleStatusChange(statusToSet = 'released', evt){
         evt.preventDefault();
 
-        var { context, href }   = this.props,
-            hgc                 = this.getHiGlassComponent(),
-            viewConfTitle       = context.title || context.display_title;
+        const { context, href } = this.props;
+        const hgc = this.getHiGlassComponent();
+        const viewConfTitle = context.title || context.display_title;
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
         if (context.status === statusToSet) {
@@ -513,7 +513,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
 
-        var btnProps  = {
+        const btnProps  = {
             'onSelect'      : this.handleStatusChange,
             //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
             'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
@@ -592,12 +592,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      * in response to new `width` and `height` props passed to it.
      */
     handleFullscreenToggle(){
-        var { isFullscreen, toggleFullScreen } = this.props;
+        const { isFullscreen, toggleFullScreen } = this.props;
         setTimeout(toggleFullScreen, 0, !isFullscreen);
     }
 
     fullscreenButton(){
-        var { isFullscreen, toggleFullScreen } = this.props;
+        const { isFullscreen, toggleFullScreen } = this.props;
         if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
                 <button type="button" className="btn btn-outline-dark" onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
@@ -625,20 +625,20 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     render(){
         const { isFullscreen, windowWidth, windowHeight, width, session } = this.props;
         const { addFileLoading, genome_assembly, viewConfig } = this.state;
-        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;        
+        const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
         // Setting the height of the HiGlass Component follows one of these rules:
         // - If it's Fullscreen it should almost take up the entire window.
         // - Set to a fixed height.
-        var hiGlassComponentHeight;
+        let hiGlassComponentHeight;
         if (isFullscreen) {
-            hiGlassComponentHeight = windowHeight -120;
+            hiGlassComponentHeight = windowHeight - 120;
         }
         else {
             hiGlassComponentHeight = 600;
         }
 
         // If the user isn't logged in, add a tooltip reminding them to log in.
-        var tooltip = null;
+        let tooltip = null;
         if (!session) {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
@@ -778,8 +778,8 @@ class CollapsibleViewConfOutput extends React.PureComponent {
     }
 
     render(){
-        var { viewConfig } = this.props,
-            { open } = this.state;
+        const { viewConfig } = this.props;
+        const { open } = this.state;
 
         return (
             <div className="viewconfig-panel">
