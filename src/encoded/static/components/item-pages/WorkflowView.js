@@ -140,11 +140,11 @@ export class WorkflowGraphSection extends React.PureComponent {
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
-        this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
-        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
-        this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
-        this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
-        this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
+        this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 1000);
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000);
+        this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 1000, { trailing : false });
+        this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 1000, { trailing : false });
+        this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 1000, { trailing : false });
         this.state = _.extend({
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
@@ -154,17 +154,20 @@ export class WorkflowGraphSection extends React.PureComponent {
     }
 
     componentWillUnmount(){
-        if (this.props.isFullscreen){
-            this.props.toggleFullScreen(false);
+        const { isFullscreen = false, toggleFullScreen } = this.props;
+        if (isFullscreen){
+            toggleFullScreen(false);
         }
     }
 
     parseAnalysisSteps(context = this.props.context){
-        var parsingOptions = _.extend(
-            {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters')
-        );
+        const { showReferenceFiles, showParameters, showChart } = this.state;
+        const parsingOptions = {
+            ...DEFAULT_PARSING_OPTIONS,
+            showReferenceFiles, showParameters
+        };
         return (
-            this.state.showChart === 'basic' ?
+            showChart === 'basic' ?
                 parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
                 :
                 parseAnalysisSteps(context.steps, parsingOptions)
@@ -172,11 +175,11 @@ export class WorkflowGraphSection extends React.PureComponent {
     }
 
     commonGraphProps(){
-        var { showParameters, showReferenceFiles, rowSpacingType } = this.state,
-            graphData = this.parseAnalysisSteps();
+        const { showParameters, showReferenceFiles, rowSpacingType } = this.state;
+        const graphData = this.parseAnalysisSteps();
 
         // Filter out legend items which aren't relevant for this context.
-        var keepItems = ['Input File', 'Output File', 'Input Reference File'];
+        const keepItems = ['Input File', 'Output File', 'Input Reference File'];
         if (showParameters){
             keepItems.push('Input Parameter');
         }
@@ -185,10 +188,13 @@ export class WorkflowGraphSection extends React.PureComponent {
         }
         keepItems.push('Intermediate File');
 
-        var legendItems         = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems),
-            commonGraphProps    = commonGraphPropsFromProps(_.extend({ legendItems }, this.props));
-
-        return _.extend(commonGraphProps, this.parseAnalysisSteps(), { rowSpacingType });
+        const legendItems = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems);
+        const commonGraphProps = commonGraphPropsFromProps({ ...this.props, legendItems });
+        return {
+            ...commonGraphProps,
+            ...graphData,
+            rowSpacingType
+        };
     }
 
     onToggleShowParameters(){
@@ -241,8 +247,8 @@ export class WorkflowGraphSection extends React.PureComponent {
     }
 
     render(){
-        var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
-            { isFullscreen } = this.props;
+        const { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state;
+        const { isFullscreen } = this.props;
 
         return (
             <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>

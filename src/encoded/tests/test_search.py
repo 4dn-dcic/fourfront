@@ -5,8 +5,14 @@ from encoded.commands.run_upgrader_on_inserts import get_inserts
 import json
 import time
 from snovault import TYPES
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing]
 
+def delay_rerun(*args):
+    """ Rerun function for flaky """
+    time.sleep(90)
+    return True
+
+
+pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
@@ -223,7 +229,6 @@ def test_search_with_nested_integer(testapp, workbook):
     # make sure there is no intersection of the uuids
     assert not set(s1_uuids) & set(s2_uuids)
     assert set(s1_uuids) | set(s2_uuids) == set(s0_uuids)
-
 
 
 def test_search_date_range_dontfind_without(mboI_dts, testapp, workbook):
