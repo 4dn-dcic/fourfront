@@ -438,7 +438,7 @@ def connect2server(env=None, key=None):
     if all([v in key for v in ['key', 'secret', 'server']]):
         import ast
         key = ast.literal_eval(key)
-
+    print(key)
     try:
         auth = get_authentication_with_server(key, env)
     except Exception:
@@ -473,9 +473,13 @@ def remove_obsoletes_and_unnamed(terms, deprecated):
 
 def _format_def_str(defdict):
     dstring = ''
-    for d, o in sorted(defdict.items()):
-        ostr = ', '.join(sorted([ostr.strip() for ostr in o]))
-        dstring += '{} ({}) '.format(d, ostr)
+    reverse_dict = {}
+    for val in sorted(set([', '.join(v) for v in defdict.values()])):
+        defstr = ' -- '.join([k for k in defdict.keys() if ', '.join(defdict[k]) == val])
+    # for d, o in sorted(defdict.items()):
+    #     ostr = ', '.join(sorted([ostr.strip() for ostr in o]))
+    #     dstring += '{} ({}) '.format(d, ostr)
+        dstring += '{} ({}) '.format(defstr, val)
     return dstring.rstrip()
 
 
@@ -785,7 +789,10 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         # need a way to exclude our own terms and synonyms and definitions
         for tid, term in use_terms.items():
             if tid not in terms:
-                source_onts = [so.get('uuid') for so in term['source_ontologies']]
+                try:
+                    source_onts = [so.get('uuid') for so in term['source_ontologies']]
+                except KeyError:
+                    print(term)
                 if not source_onts or not [o for o in ontids if o in source_onts]:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
@@ -927,6 +934,12 @@ def parse_args(args):
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
+    parser.add_argument('--keyfile',
+                        default='../keypairs.json',
+                        help="A file where access keys are stored.")
+    parser.add_argument('--keyname',
+                        default='default',
+                        help="The name of the key to use in the keyfile.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
@@ -970,7 +983,15 @@ def main():
     print('Writing to %s' % postfile)
 
     # fourfront connection
-    connection = connect2server(args.env, args.key)
+    if args.key == 's3' and args.keyfile and args.keyname:
+        with open(args.keyfile, 'r') as keyfile:
+            keys = json.load(keyfile)
+        key = keys[args.keyname]
+    elif args.key != 's3':
+        key = args.key
+    else:
+        key = None
+    connection = connect2server(args.env, str(key))
     print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
