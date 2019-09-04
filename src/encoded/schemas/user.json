@@ -104,23 +104,24 @@
             "suggested_enum": [
                 "Graduate Student",
                 "Postdoc",
-                "PI",
-                "Co-I",
                 "Staff",
                 "Administrator",
-                "Program Coordinator",
                 "Senior Researcher",
                 "Researcher",
-                "Submitter",
                 "Trainee",
                 "Data Wrangler",
                 "Software Developer",
-                "Collaborator",
                 "Imaging Specialist",
                 "Data Analyst",
                 "Facility Head",
-                "Lab/Project Manager",
-                "Other"
+                "Other",
+                "Lab Associate",
+                "NIH Official",
+                "Lab Manager",
+                "Principal Investigator (Collaborator)",
+                "External Scientific Adviser",
+                "Project Coordinator / Manager",
+                "Principal Investigator (4DN Grantee)"
             ]
         },
         "phone1": {
