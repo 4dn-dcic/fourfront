@@ -356,6 +356,14 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 class QCMetricsTable extends React.PureComponent {
 
+    static defaultProps = {
+        heading: (
+            <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
+                <span>Quality Metrics</span>
+            </h3>
+        )
+    };
+
     constructor(props){
         super(props);
         this.memoized = {
@@ -365,7 +373,7 @@ class QCMetricsTable extends React.PureComponent {
     }
 
     render() {
-        const { width, files, windowWidth, href } = this.props;
+        const { width, files, windowWidth, href, heading } = this.props;
         const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
         const filesWithMetricsLen = filesWithMetrics.length;
 
@@ -376,9 +384,7 @@ class QCMetricsTable extends React.PureComponent {
         return (
             <div className="row">
                 <div className="exp-table-container col-12">
-                    <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
-                        <span>Quality Metrics</span>
-                    </h3>
+                    {heading}
                     {_.map(filesByTitles, function (fileGroup, i) {
                         const columnHeaders = [ // Static / present-for-each-table headers
                             { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
@@ -579,6 +585,11 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         const { collection, index, width, mounted, defaultOpen, windowWidth, href } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
+        const qcMetricsHeading = (
+            <h4 className="text-500 mt-2 mb-1" key={"tab-section-title-metrics-" + index}>
+                <span>Quality Metrics</span>
+            </h4>);
+
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
                 { this.renderStatusIndicator() }
@@ -599,7 +610,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
                             <HiGlassAdjustableWidthRow higlassItem={higlass_view_config} windowWidth={windowWidth} mounted={mounted} width={width - 21}
                                 renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
                             : this.renderFilesTable(width - 21) }
-                        <QCMetricsTable { ...{ 'width': width - 20, windowWidth, href, files } } />
+                        <QCMetricsTable {...{ 'width': width - 20, windowWidth, href, files, 'heading': qcMetricsHeading }} />
                     </div>
                 </Collapse>
             </div>
