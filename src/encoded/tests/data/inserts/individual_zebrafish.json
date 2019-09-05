@@ -2,9 +2,9 @@
     {
         "aliases": ["dcic:zebrafish"],
         "award": "1U01CA200059-01",
-        "fly_strain": "TU",
+        "zebrafish_strain": "TU",
         "lab": "4dn-dcic-lab",
-        "fly_life_stage": "embryonic stage",
+        "zebrafish_life_stage": "embryonic stage",
         "sex": "male",
         "status": "in review by lab",
         "submitted_by": "wrangler@wrangler.com",
