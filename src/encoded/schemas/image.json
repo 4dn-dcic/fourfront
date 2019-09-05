@@ -33,19 +33,11 @@
             "type": "string",
             "formInput": "textarea"
         },
-        "urls": {
-            "rdfs:subPropertyOf": "rdfs:seeAlso",
-            "title": "URLs",
-            "description": "External resources with additional information to the document.",
-            "type": "array",
-            "lookup": 40,
-            "uniqueItems": true,
-            "items": {
-                "title": "URL",
-                "description": "An external resource with additional information to the document.",
-                "type": "string",
-                "format": "uri"
-            }
+        "caption": {
+            "title": "Caption",
+            "type": "string",
+            "lookup": 20,
+            "formInput": "textarea"
         }
     }
 }

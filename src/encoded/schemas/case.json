@@ -55,6 +55,10 @@
                         "type" : "string",
                         "linkTo": "Document"
                     },
+                    "clinic_notes": {
+                        "title": "Case Notes from the Clinic",
+                        "type": "string"
+                    },
                     "timestamp": {
                         "title": "Pedigree Timestamp",
                         "description": "Date of original pedigree file generation",
