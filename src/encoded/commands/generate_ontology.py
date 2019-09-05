@@ -438,7 +438,6 @@ def connect2server(env=None, key=None):
     if all([v in key for v in ['key', 'secret', 'server']]):
         import ast
         key = ast.literal_eval(key)
-    print(key)
     try:
         auth = get_authentication_with_server(key, env)
     except Exception:
@@ -935,7 +934,7 @@ def parse_args(args):
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
     parser.add_argument('--keyfile',
-                        default='../keypairs.json',
+                        default='',
                         help="A file where access keys are stored.")
     parser.add_argument('--keyname',
                         default='default',
@@ -983,15 +982,13 @@ def main():
     print('Writing to %s' % postfile)
 
     # fourfront connection
-    if args.key == 's3' and args.keyfile and args.keyname:
+    if args.key == 's3' and args.keyfile:
         with open(args.keyfile, 'r') as keyfile:
             keys = json.load(keyfile)
-        key = keys[args.keyname]
-    elif args.key != 's3':
-        key = args.key
+        key = str(keys[args.keyname])
     else:
-        key = None
-    connection = connect2server(args.env, str(key))
+        key = str(args.key)
+    connection = connect2server(args.env, key)
     print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
