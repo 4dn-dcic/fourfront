@@ -64,6 +64,7 @@ tests_require = [
     'pytest-xdist',
     'pytest-cov',
     'attrs',
+    'flaky',
 ]
 
 setup(
