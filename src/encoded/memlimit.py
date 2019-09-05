@@ -38,23 +38,35 @@ import psutil
 import humanfriendly
 
 
-def rss_checker(rss_limit=None):
+def rss_checker(rss_limit=None, rss_percent_limit=None):
+    """
+    Uses a configured rss_limit (absolute amount in bytes) and percentage
+    rss_limit to determine whether to kill the running process.
+    If the current rss usage is above rss_limit AND the percentage rss usage
+    of physical memory is above rss_percent_limit, kill the process
+    """
     log = logging.getLogger(__name__)
     process = psutil.Process()
 
     def callback(environ):
         rss = process.memory_info().rss
-        if rss_limit and rss > rss_limit:
-            msg = "Restarting process. Memory usage exceeds limit of %d: %d"
-            log.error(msg, rss_limit, rss)
+        over_rss = rss_limit and rss > rss_limit
+        rss_perc = process.memory_percent(memtype="rss")
+        if rss_percent_limit:
+            over_perc = rss_perc > rss_percent_limit
+        else:
+            over_perc = True  # only consider rss if we have no percent set
+        if over_rss and over_perc:
+            log.error("Restarting process. Memory usage: %s (limit %s); Percentage "
+                      "%s (limit %s)" % (rss, rss_limit, rss_perc, rss_percent_limit))
             process.kill()
 
     return callback
 
 
-def filter_app(app, global_conf, rss_limit=None):
+def filter_app(app, global_conf, rss_limit=None, rss_percent_limit=None):
     if rss_limit is not None:
         rss_limit = humanfriendly.parse_size(rss_limit)
 
-    callback = rss_checker(rss_limit)
+    callback = rss_checker(rss_limit, rss_percent_limit)
     return ExecuteOnCompletion2(app, callback)
