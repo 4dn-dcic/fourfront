@@ -133,7 +133,6 @@ export class WorkflowGraphSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
         this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 1000);
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000);
@@ -231,25 +230,20 @@ export class WorkflowGraphSection extends React.PureComponent {
         this.props.toggleFullScreen(null, ReactTooltip.rebuild);
     }
 
-    body(){
-        var { context, mounted, width } = this.props,
-            { showChart } = this.state;
-
-        if (!Array.isArray(context.steps)) return null;
-
-        if (showChart === 'basic') {
-            return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 180) / 3 : 180} />;
-        } else if (showChart === 'detail') {
-            return <Graph { ...this.commonGraphProps() } />;
-        } else {
-            throw new Error('No valid chart type set to be displayed.');
-        }
-    }
-
     render(){
         const { showChart, rowSpacingType, showParameters, showReferenceFiles } = this.state;
-        const { isFullscreen, context } = this.props;
+        const { isFullscreen, context, mounted, width } = this.props;
         const { anyIndirectPathIONodes, anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(context.steps);
+
+        let body = null;
+
+        if (!Array.isArray(context.steps)) body = null;
+
+        if (showChart === 'basic') {
+            body = <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 180) / 3 : 180} />;
+        } else if (showChart === 'detail') {
+            body = <Graph { ...this.commonGraphProps() } />;
+        }
 
         return (
             <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
@@ -268,7 +262,7 @@ export class WorkflowGraphSection extends React.PureComponent {
                     />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { this.body() }
+                { body }
             </div>
         );
 
