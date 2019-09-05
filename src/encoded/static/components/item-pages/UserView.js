@@ -435,7 +435,7 @@ export default class UserView extends React.Component {
 
                     </div>
 
-                    { lab || submits_for ? <SyncedAccessKeyTable user={user} access_keys={access_keys} /> : null }
+                    <SyncedAccessKeyTable user={user} access_keys={access_keys} />
 
                 </div>
             </div>
