@@ -99,7 +99,7 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.6",
+    "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.7",
     "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.11",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",
