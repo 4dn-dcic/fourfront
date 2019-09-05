@@ -401,7 +401,7 @@ def get_slim_terms(connection):
 def get_existing_ontology_terms(connection):  # , ontologies=None):
     '''Retrieves all existing ontology terms from the db
     '''
-    search_suffix = 'search/?type=OntologyTerm'  # + ont_list
+    search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
     return {t['term_id']: t for t in db_terms}
 
