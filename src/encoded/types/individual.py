@@ -103,3 +103,18 @@ class IndividualChicken(Individual):
     item_type = 'individual_chicken'
     schema = load_schema('encoded:schemas/individual_chicken.json')
     embedded_list = Individual.embedded_list + ['chicken_vendor.name']
+
+
+@collection(
+    name='individuals-zebrafish',
+    unique_key='accession',
+    properties={
+        'title': 'Individuals-Zebrafish',
+        'description': 'Listing Zebrafish Sources',
+    })
+class IndividualZebrafish(Individual):
+    """the sub class of individuals for zebrafish."""
+
+    item_type = 'individual_zebrafish'
+    schema = load_schema('encoded:schemas/individual_zebrafish.json')
+    embedded_list = Individual.embedded_list + ['zebrafish_vendor.name']
