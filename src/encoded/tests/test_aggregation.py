@@ -1,6 +1,7 @@
 import pytest
 from .features.conftest import app_settings, workbook
-pytestmark = [pytest.mark.working, pytest.mark.indexing]
+from .test_search import delay_rerun
+pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 def test_aggregation_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json

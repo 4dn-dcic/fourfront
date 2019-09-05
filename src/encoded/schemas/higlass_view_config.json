@@ -177,7 +177,7 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["name", "server", "tilesetUid"],
+                                            "required" : ["server", "tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
                                                 "name" : {
@@ -291,7 +291,7 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["name", "server", "tilesetUid"],
+                                            "required" : ["server", "tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
                                                 "name" : {
@@ -405,7 +405,7 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["name", "server", "tilesetUid"],
+                                            "required" : ["server", "tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
                                                 "name" : {
@@ -519,7 +519,7 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["name", "server", "tilesetUid"],
+                                            "required" : ["server", "tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
                                                 "name" : {
