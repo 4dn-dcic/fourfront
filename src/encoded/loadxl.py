@@ -119,8 +119,8 @@ def load_data_view(context, request):
     # this directly calls load_all_gen, instead of load_all
     if iter_resp:
         return Response(
-            content_type = 'text/plain',
-            app_iter = LoadGenWrapper(
+            content_type='text/plain',
+            app_iter=LoadGenWrapper(
                 load_all_gen(testapp, inserts, None, overwrite=overwrite,
                              itype=itype, from_json=from_json)
             )

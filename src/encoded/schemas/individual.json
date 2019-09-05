@@ -170,6 +170,16 @@
                 "other"
             ]
         },
+        "Images" : {
+            "title" : "Images",
+            "type" : "array",
+            "uniqueItems": true,
+            "items" : {
+                "title" : "Image",
+                "type" : "string",
+                "linkTo" : "Image"
+            }
+        },
         "institutional_id": {
             "description": "Custom identifier provided by the institution",
             "type": "object",

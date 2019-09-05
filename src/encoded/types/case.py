@@ -219,7 +219,6 @@ def descendancy_xml_ref_to_parents(ref_id, refs, case, uuids_by_ref):
     return result
 
 
-
 def etree_to_dict(ele, ref_container=None, ref_field=''):
     """
     Helper function to recursively parse ElementTree (XML) to Python objects.
@@ -320,8 +319,7 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
             for xml_key in xml_obj:
                 converted = PROBAND_MAPPING[item_type].get(xml_key)
                 if converted is None:
-                    log.warn('Unknown field %s for %s in process-pedigree!'
-                              % (xml_key, item_type))
+                    log.warn('Unknown field %s for %s in process-pedigree!' % (xml_key, item_type))
                     continue
                 if round == 'first':
                     if converted.get('linked', False) is True:
