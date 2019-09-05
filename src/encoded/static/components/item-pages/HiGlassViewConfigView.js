@@ -715,7 +715,7 @@ class AddFileButton extends React.PureComponent {
             return;
         }
 
-        this.setState({ 'isSelecting' : false }, ()=>{
+        this.setState({ 'isSelecting' : true }, ()=>{
             // Invoke the object callback function, using the text input.
             this.props.onClick(fileAtID);
         });
