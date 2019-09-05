@@ -7,11 +7,14 @@ import ReactTooltip from 'react-tooltip';
 
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
+import Graph from '@hms-dbmi-bgm/react-workflow-viz';
+
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
-import Graph, { parseAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
+
 import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 
@@ -204,7 +207,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         }, checkIfIndirectOrReferenceNodesExist(props.steps));
 
         this.memoized = {
-            parseAnalysisSteps : memoize(parseAnalysisSteps),
+            ...this.memoized,
             anyGroupNodesExist : memoize(FileViewGraphSection.anyGroupNodesExist),
             allFilesForWorkflowRunsMappedByUUID : memoize(allFilesForWorkflowRunsMappedByUUID),
             mapEmbeddedFilesToStepRunDataIDs : memoize(mapEmbeddedFilesToStepRunDataIDs)
@@ -227,7 +230,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             context : { workflow_run_outputs = [], workflow_run_inputs = [] }
         } = this.props;
         const { showReferenceFiles, showParameters, showIndirectFiles, rowSpacingType } = this.state;
-        const parsingOptions = { ...DEFAULT_PARSING_OPTIONS, showReferenceFiles, showParameters, showIndirectFiles };
+        const parsingOptions = { showReferenceFiles, showParameters, showIndirectFiles };
         const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
         const { nodes: originalNodes, edges } = this.memoized.parseAnalysisSteps(steps, parsingOptions);
 
@@ -267,14 +270,20 @@ export class FileViewGraphSection extends WorkflowGraphSection {
 
     render(){
         const { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props;
-        const { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state;
+        const { showIndirectFiles, showChart } = this.state;
+        const { anyIndirectPathIONodes, anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
         const graphProps = Array.isArray(steps) ? this.commonGraphProps() : null;
         const isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes;
         const isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false);
         const isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
+        const outerCls = (
+            "tabview-container-fullscreen-capable workflow-view-container"
+            + " workflow-viewing-" + (showChart)
+            + (isFullscreen ? ' full-screen-view' : '')
+        );
 
         return (
-            <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={outerCls}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls

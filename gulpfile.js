@@ -1,25 +1,26 @@
-var gulp        = require('gulp'),
-    PluginError = require('plugin-error'),
-    log         = require('fancy-log'),
-    webpack     = require('webpack'),
-    sass        = require('node-sass'),
-    fs          = require('fs');
+const gulp = require('gulp');
+const PluginError = require('plugin-error');
+const log = require('fancy-log');
+const webpack = require('webpack');
+const sass = require('node-sass');
+const fs = require('fs');
+const webpackConfig = require('./webpack.config.js');
 
 
-var setProduction = (done) => {
+function setProduction(done){
     process.env.NODE_ENV = 'production';
     done();
-};
+}
 
-var setQuick = (done) => {
+function setQuick(done){
     process.env.NODE_ENV = 'quick';
     done();
-};
+}
 
-var setDevelopment = (done) => {
+function setDevelopment(done){
     process.env.NODE_ENV = 'development';
     done();
-};
+}
 
 function webpackOnBuild(done) {
     var start = Date.now();
@@ -36,15 +37,14 @@ function webpackOnBuild(done) {
     };
 }
 
-var doWebpack = (cb) => {
-    var webpackConfig = require('./webpack.config.js');
+function doWebpack(cb){
     webpack(webpackConfig).run(webpackOnBuild(cb));
-};
+}
 
-var watch = () => {
-    var webpackConfig = require('./webpack.config.js');
+function watch(){
     webpack(webpackConfig).watch(300, webpackOnBuild());
-};
+}
+
 
 
 // TODO: Just use command-line `node-sass` ?
@@ -77,7 +77,7 @@ var doSassBuild = (done, options = {}) => {
             });
         }
     });
-}
+};
 
 
 const devSlow       = gulp.series(setDevelopment, doWebpack, watch);
