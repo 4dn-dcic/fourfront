@@ -2,8 +2,9 @@ import pytest
 import time
 from .features.conftest import app_settings, app, teardown
 from webtest import AppError
+from .test_search import delay_rerun
 
-pytestmark = [pytest.mark.indexing, pytest.mark.working]
+pytestmark = [pytest.mark.indexing, pytest.mark.working, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 
 @pytest.fixture(scope='module')

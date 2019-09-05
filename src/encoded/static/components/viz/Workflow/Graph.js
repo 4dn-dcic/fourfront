@@ -5,8 +5,6 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import * as d3 from 'd3';
 import memoize from 'memoize-one';
-import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
-import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import StateContainer from './StateContainer';
 import ScrollContainer from './ScrollContainer';
@@ -78,7 +76,7 @@ export default class Graph extends React.Component {
         'width'         : null,
         'columnSpacing' : 56,
         'columnWidth'   : 150,
-        'rowSpacing'    : 75,
+        'rowSpacing'    : 80,
         'rowSpacingType': 'wide',
         'pathArrows'    : true,
         'renderDetailPane' : function(selectedNode, props){
@@ -89,8 +87,8 @@ export default class Graph extends React.Component {
         },
         'onNodeClick'   : null, // Use StateContainer.defaultOnNodeClick
         'innerMargin'   : {
-            'top' : 60,
-            'bottom' : 60,
+            'top' : 80,
+            'bottom' : 80,
             'left' : 30,
             'right' : 20
         },
@@ -103,7 +101,7 @@ export default class Graph extends React.Component {
         'nodeEdgeLedgeWidths' : [3,5]
     };
 
-    static getHeightFromNodes = memoize(function(nodes, nodesPreSortFxn, rowSpacing, minimumHeight){
+    static getHeightFromNodes(nodes, nodesPreSortFxn, rowSpacing, minimumHeight){
         // Run pre-sort fxn, e.g. to manually pre-arrange nodes into different columns.
         if (typeof nodesPreSortFxn === 'function'){
             nodes = nodesPreSortFxn(nodes.slice(0));
@@ -118,13 +116,13 @@ export default class Graph extends React.Component {
                 .value() * (rowSpacing) - rowSpacing,
             minimumHeight
         );
-    });
+    }
 
-    static getScrollableWidthFromNodes = memoize(function(nodes, columnWidth, columnSpacing, innerMargin){
+    static getScrollableWidthFromNodes(nodes, columnWidth, columnSpacing, innerMargin){
         return (_.reduce(nodes, function(highestCol, node){
             return Math.max(node.column, highestCol);
         }, 0) + 1) * (columnWidth + columnSpacing) + (innerMargin.left || 0) + (innerMargin.right || 0) - columnSpacing;
-    });
+    }
 
     /**
      * Extends each node with X & Y coordinates.
@@ -139,7 +137,7 @@ export default class Graph extends React.Component {
      * @static
      * @memberof Graph
      */
-    static getNodesWithCoordinates = memoize(function(
+    static getNodesWithCoordinates(
         nodes                = null,
         viewportWidth        = null,
         contentWidth         = null,
@@ -235,7 +233,7 @@ export default class Graph extends React.Component {
         }
 
         return nodesWithCoords;
-    });
+    }
 
     constructor(props){
         super(props);
@@ -244,6 +242,11 @@ export default class Graph extends React.Component {
         this.state = {
             'mounted' : false
         };
+        this.memoized = {
+            getHeightFromNodes: memoize(Graph.getHeightFromNodes),
+            getScrollableWidthFromNodes: memoize(Graph.getScrollableWidthFromNodes),
+            getNodesWithCoordinates: memoize(Graph.getNodesWithCoordinates)
+        };
     }
 
     componentDidMount(){
@@ -251,35 +254,34 @@ export default class Graph extends React.Component {
     }
 
     height() {
-        var { nodes, nodesPreSortFxn, rowSpacing, minimumHeight } = this.props;
-        return Graph.getHeightFromNodes(nodes, nodesPreSortFxn, rowSpacing, minimumHeight);
+        const { nodes, nodesPreSortFxn, rowSpacing, minimumHeight } = this.props;
+        return this.memoized.getHeightFromNodes(nodes, nodesPreSortFxn, rowSpacing, minimumHeight);
     }
 
     scrollableWidth(){
-        var { nodes, columnWidth, columnSpacing, innerMargin } = this.props;
-        return Graph.getScrollableWidthFromNodes(nodes, columnWidth, columnSpacing, innerMargin);
+        const { nodes, columnWidth, columnSpacing, innerMargin } = this.props;
+        return this.memoized.getScrollableWidthFromNodes(nodes, columnWidth, columnSpacing, innerMargin);
     }
 
     nodesWithCoordinates(viewportWidth, contentWidth, contentHeight){
-        var { nodes, innerMargin, rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext } = this.props;
-        return Graph.getNodesWithCoordinates(
+        const { nodes, innerMargin, rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext } = this.props;
+        return this.memoized.getNodesWithCoordinates(
             nodes, viewportWidth, contentWidth, contentHeight, innerMargin,
             rowSpacingType, rowSpacing, columnWidth, columnSpacing, isNodeCurrentContext
         );
     }
 
     render(){
-        var { width, innerMargin, edges, minimumHeight } = this.props,
-            innerHeight     = this.height(),
-            contentWidth    = this.scrollableWidth(),
-            innerWidth      = width;
+        const { width, innerMargin, edges, minimumHeight } = this.props;
+        const { mounted } = this.state;
+        const innerHeight = this.height();
+        const contentWidth = this.scrollableWidth();
+        let innerWidth = width;
 
-        if (!this.state.mounted){
+        if (!mounted){
             return (
                 <div key="outer">
-                    <Fade appear in>
-                        <div>&nbsp;</div>
-                    </Fade>
+                    <div>&nbsp;</div>
                 </div>
             );
         }
@@ -289,11 +291,11 @@ export default class Graph extends React.Component {
             innerWidth -= (innerMargin.right || 0);
         }
 
-        var nodes       = this.nodesWithCoordinates(innerWidth, contentWidth, innerHeight),
-            fullHeight  = Math.max(
-                (typeof minimumHeight === 'number' && minimumHeight) || 0,
-                innerHeight + (innerMargin.top || 0) + (innerMargin.bottom || 0)
-            );
+        const nodes = this.nodesWithCoordinates(innerWidth, contentWidth, innerHeight);
+        const fullHeight = Math.max(
+            (typeof minimumHeight === 'number' && minimumHeight) || 0,
+            innerHeight + (innerMargin.top || 0) + (innerMargin.bottom || 0)
+        );
 
         /* TODO: later
         var spacerCount = _.reduce(nodes, function(m,n){ if (n.nodeType === 'spacer'){ return m + 1; } else { return m; }}, 0);
@@ -305,17 +307,15 @@ export default class Graph extends React.Component {
 
         return (
             <div className="worfklow-chart-outer-container" key="outer">
-                <Fade in appear>
-                    <div className="workflow-chart-inner-container">
-                        <StateContainer {...{ nodes, edges, innerWidth, innerHeight, contentWidth, width }}
-                            {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}>
-                            <ScrollContainer outerHeight={fullHeight}>
-                                <EdgesLayer {..._.pick(this.props, 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
-                                <NodesLayer {..._.pick(this.props, 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
-                            </ScrollContainer>
-                        </StateContainer>
-                    </div>
-                </Fade>
+                <div className="workflow-chart-inner-container">
+                    <StateContainer {...{ nodes, edges, innerWidth, innerHeight, contentWidth, width }}
+                        {..._.pick(this.props, 'innerMargin', 'columnWidth', 'columnSpacing', 'pathArrows', 'href', 'onNodeClick', 'renderDetailPane')}>
+                        <ScrollContainer outerHeight={fullHeight}>
+                            <EdgesLayer {..._.pick(this.props, 'isNodeDisabled', 'isNodeCurrentContext', 'isNodeSelected', 'edgeStyle', 'rowSpacing', 'columnWidth', 'columnSpacing', 'nodeEdgeLedgeWidths')} />
+                            <NodesLayer {..._.pick(this.props, 'renderNodeElement', 'isNodeDisabled', 'isNodeCurrentContext', 'nodeClassName')} />
+                        </ScrollContainer>
+                    </StateContainer>
+                </div>
             </div>
         );
     }
