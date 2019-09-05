@@ -358,7 +358,7 @@ class QCMetricsTable extends React.PureComponent {
 
     static defaultProps = {
         heading: (
-            <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
+            <h3 className="tab-section-title mt-12">
                 <span>Quality Metrics</span>
             </h3>
         )
@@ -586,9 +586,10 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         const qcMetricsHeading = (
-            <h4 className="text-500 mt-2 mb-1" key={"tab-section-title-metrics-" + index}>
+            <h4 className="text-500 mt-2 mb-1">
                 <span>Quality Metrics</span>
-            </h4>);
+            </h4>
+        );
 
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
