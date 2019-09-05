@@ -472,7 +472,6 @@ def remove_obsoletes_and_unnamed(terms, deprecated):
 
 def _format_def_str(defdict):
     dstring = ''
-    reverse_dict = {}
     for val in sorted(set([', '.join(v) for v in defdict.values()])):
         defstr = ' -- '.join([k for k in defdict.keys() if ', '.join(defdict[k]) == val])
     # for d, o in sorted(defdict.items()):
