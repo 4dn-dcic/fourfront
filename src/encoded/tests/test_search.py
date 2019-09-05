@@ -8,7 +8,7 @@ from snovault import TYPES
 
 def delay_rerun(*args):
     """ Rerun function for flaky """
-    time.sleep(90)
+    time.sleep(120)
     return True
 
 
