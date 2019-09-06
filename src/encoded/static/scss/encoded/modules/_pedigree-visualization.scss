@@ -251,6 +251,9 @@ $pedigree-disease-colors :
                                 stroke: none;
                                 fill: transparentize($pedigree-viz-bg-color, 0.25);
                             }
+                            text {
+                                font-size: 0.9rem;
+                            }
                         }
                     }
     

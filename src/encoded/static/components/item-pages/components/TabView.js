@@ -259,6 +259,8 @@ export class TabView extends React.PureComponent {
         }
         if (foundContent.disabled){
             console.error('Tab is disabled', foundContent);
+            // Same page, remove hash
+            navigate('', { 'skipRequest' : true, 'dontScrollToTop' : true, 'replace' : true });
             return false;
         }
         this.setActiveKey(foundContent.key); // Same as `hash`

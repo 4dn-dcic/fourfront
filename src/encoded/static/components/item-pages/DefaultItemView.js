@@ -120,7 +120,6 @@ export default class DefaultItemView extends React.PureComponent {
         this.getTabViewContents = this.getTabViewContents.bind(this);
         this.getTabViewWidth = this.getTabViewWidth.bind(this);
         this.setTabViewKey = this.setTabViewKey.bind(this);
-        //this.onItemActionsTabClick = this.onItemActionsTabClick.bind(this);
 
         /**
          * Empty state object. May be extended by sub-classes.
@@ -205,9 +204,9 @@ export default class DefaultItemView extends React.PureComponent {
         const returnArr = [];
 
         // Attribution Tab
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(this.props));
-        }
+        //if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+        //    returnArr.push(AttributionTabView.getTabObject(this.props));
+        //}
 
         returnArr.push(DetailsTabView.getTabObject(this.props));
 
@@ -233,9 +232,9 @@ export default class DefaultItemView extends React.PureComponent {
 
         returnArr.push(DetailsTabView.getTabObject(this.props));
 
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(this.props));
-        }
+        //if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+        //    returnArr.push(AttributionTabView.getTabObject(this.props));
+        //}
         return returnArr;
     }
 

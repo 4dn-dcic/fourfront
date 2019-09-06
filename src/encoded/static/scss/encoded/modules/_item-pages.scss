@@ -167,6 +167,11 @@ $tabbar-height: 46px;
 					margin-left: 8px;
 				}
 
+				&.clickable:not(.active):hover {
+					background-color: lighten($tabbar-bg-color, 5%);
+					z-index: 10;
+				}
+
 				// Title shown at left (prefix)
 				&.title-tab {
 					max-width: 320px;
@@ -176,6 +181,9 @@ $tabbar-height: 46px;
 						flex-wrap: nowrap;
 						> .item-type-title {
 							font-weight: 600;
+							max-width: 150px;
+							overflow: hidden;
+							text-overflow: ellipsis;
 							+ .item-title:before {
 								/** Emulate FontAwesome Icon styling **/
 								display: inline-block;

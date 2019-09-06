@@ -36,11 +36,11 @@ export const Term = {
             return linkFromItem(term, addDescriptionTipForLinkTos);
         }
 
-        var name = null;
+        let name = null;
 
         switch (field) {
             case 'type':
-                return getTitleForType(term);
+                return getTitleForType(term, get());
             case 'status':
                 if (allowJSXOutput){
                     return <React.Fragment><i className="item-status-indicator-dot mr-07" data-status="released"/>{ capitalizeSentence(term) }</React.Fragment>;
