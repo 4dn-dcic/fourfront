@@ -9,7 +9,7 @@ import memoize from 'memoize-one';
 import { console, object, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from '@hms-dbmi-bgm/react-workflow-viz';
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from '@hms-dbmi-bgm/react-workflow-viz';
 
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
@@ -164,12 +164,10 @@ export class WorkflowGraphSection extends React.PureComponent {
     parseAnalysisSteps(context = this.props.context){
         const { showReferenceFiles, showParameters, showChart } = this.state;
         const parsingOptions = { showReferenceFiles, showParameters };
-        const parseFxn = showChart === 'basic' ? parseBasicIOAnalysisSteps : parseAnalysisSteps;
-        return (
-            showChart === 'basic' ?
-                parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
-                :
-                parseAnalysisSteps(context.steps, parsingOptions)
+        return (showChart === 'basic' ?
+            parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
+            :
+            parseAnalysisSteps(context.steps, parsingOptions)
         );
     }
 
