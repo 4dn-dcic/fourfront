@@ -94,7 +94,7 @@ def test_validate_biosource_tissue_no_tissue(testapp, award, lab, gm12878_oterm)
 
 
 def test_validate_biosource_tissue_invalid(testapp, award, lab, lung_oterm, ontology):
-    testapp.patch_json(lung_oterm['@id'], {'source_ontology': ontology['@id']}, status=200)
+    testapp.patch_json(lung_oterm['@id'], {'source_ontologies': [ontology['@id']]}, status=200)
     biosource = {'award': award['@id'],
                  'lab': lab['@id'],
                  'biosource_type': 'tissue',
@@ -131,7 +131,7 @@ def test_validate_biosource_tissue_on_valid_patch(testapp, award, lab, lung_oter
     assert not res.json.get('errors')
     new_oterm = {'term_name': 'finger',
                  'term_id': 'UBERON:0000009',
-                 'source_ontology': lung_oterm['source_ontology']}
+                 'source_ontologies': lung_oterm['source_ontologies']}
     ot = testapp.post_json('/ontology_term', new_oterm, status=201)
     pid = '/' + res.json['@graph'][0].get('uuid')
     res2 = testapp.patch_json(pid, {'tissue': ot.json['@graph'][0]['uuid']})
@@ -147,7 +147,7 @@ def test_validate_biosource_tissue_on_invalid_patch(testapp, award, lab, lung_ot
     assert not res.json.get('errors')
     new_oterm = {'term_name': 'finger',
                  'term_id': 'UBERON:0000009',
-                 'source_ontology': ontology['uuid']}
+                 'source_ontologies': [ontology['uuid']]}
     ot = testapp.post_json('/ontology_term', new_oterm, status=201)
     pid = '/' + res.json['@graph'][0].get('uuid')
     res2 = testapp.patch_json(pid, {'tissue': ot.json['@graph'][0]['uuid']}, status=422)
@@ -203,7 +203,7 @@ def test_validate_biosource_cell_line_on_valid_patch(testapp, award, lab, gm1287
     assert not res.json.get('errors')
     new_oterm = {'term_name': 'bigcell',
                  'term_id': 'test:1',
-                 'source_ontology': gm12878_oterm['source_ontology'],
+                 'source_ontologies': gm12878_oterm['source_ontologies'],
                  'slim_terms': gm12878_oterm['slim_terms']}
     ot = testapp.post_json('/ontology_term', new_oterm, status=201)
     pid = '/' + res.json['@graph'][0].get('uuid')
@@ -220,7 +220,7 @@ def test_validate_biosource_cell_line_on_invalid_patch(testapp, award, lab, gm12
     assert not res.json.get('errors')
     new_oterm = {'term_name': 'bigcell',
                  'term_id': 'test:1',
-                 'source_ontology': gm12878_oterm['source_ontology']}
+                 'source_ontologies': gm12878_oterm['source_ontologies']}
     ot = testapp.post_json('/ontology_term', new_oterm, status=201)
     pid = '/' + res.json['@graph'][0].get('uuid')
     res2 = testapp.patch_json(pid, {'cell_line': ot.json['@graph'][0]['uuid']}, status=422)

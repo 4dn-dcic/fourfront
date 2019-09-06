@@ -2,10 +2,12 @@ import os
 import json
 import sys
 import argparse
+import re
 from dateutil.relativedelta import relativedelta
 import datetime
 import boto3
 from uuid import uuid4
+from collections import Counter
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
@@ -28,7 +30,7 @@ from dcicutils.ff_utils import (
     unified_authentication
 )
 from dcicutils.s3_utils import s3Utils
-import mimetypes
+# import mimetypes
 from pyramid.paster import get_app
 
 EPILOG = __doc__
@@ -140,7 +142,7 @@ def create_term_dict(class_, termid, data, ontology_id=None):
         'term_url': class_.__str__(),
     }
     if ontology_id is not None:
-        term['source_ontology'] = ontology_id
+        term.setdefault('source_ontologies', []).append(ontology_id)
     (name, ns) = splitNameFromNamespace(term['term_url'])
     term['namespace'] = ns
     name = get_term_name_from_rdf(class_, data)
@@ -158,6 +160,8 @@ def _add_term_and_info(class_, parent_uri, relationship, data, terms):
     for subclass in data.rdfGraph.objects(class_, subClassOf):
         term_id = get_termid_from_uri(parent_uri)
         if terms.get(term_id) is None:
+            if _is_deprecated(parent_uri, data):
+                continue
             terms[term_id] = create_term_dict(parent_uri, term_id, data)
         if terms[term_id].get(relationship) is None:
             terms[term_id][relationship] = []
@@ -195,6 +199,7 @@ def process_blank_node(class_, data, terms, simple=False):
         # direct parents of blank nodes
         if not isBlankNode(object_):
             if not simple:
+                # TODO: this skip with simple assumes that UBERON will not be parsed simply - needs change
                 # we have a resource
                 for intersection in data.rdfGraph.objects(class_, IntersectionOf):
                     # intersectionOf triples are checked for human part_of
@@ -213,6 +218,8 @@ def _find_and_add_parent_of(parent, child, data, terms, has_part=False, relation
     '''
     child_id = get_termid_from_uri(child)
     for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
+        if _is_deprecated(obj, data):
+            continue
         if not isBlankNode(obj):
             objid = get_termid_from_uri(obj)
             term2add = objid
@@ -254,6 +261,8 @@ def process_parents(class_, data, terms):
                     # terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
                     terms = _find_and_add_parent_of(parent, class_, data, terms, has_part, relation)
         else:
+            if _is_deprecated(parent, data):
+                continue
             if not terms[termid].get('parents'):
                 terms[termid]['parents'] = []
             terms[termid]['parents'].append(get_termid_from_uri(parent))
@@ -263,12 +272,16 @@ def process_parents(class_, data, terms):
 def get_synonyms(class_, data, synonym_terms):
     '''Gets synonyms for the class as strings
     '''
+    if not synonym_terms:
+        return
     return getObjectLiteralsOfType(class_, data, synonym_terms)
 
 
 def get_definitions(class_, data, definition_terms):
     '''Gets definitions for the class as strings
     '''
+    if not definition_terms:
+        return
     return getObjectLiteralsOfType(class_, data, definition_terms)
 
 
@@ -388,12 +401,7 @@ def get_slim_terms(connection):
 def get_existing_ontology_terms(connection):  # , ontologies=None):
     '''Retrieves all existing ontology terms from the db
     '''
-    # ont_list = ''
-    # if ontologies is not None:
-    #    for o in ontologies:
-    #        ouuid = o.get('uuid')
-    #        ont_list += '&source_ontology.uuid={}'.format(ouuid)
-    search_suffix = 'search/?type=OntologyTerm'  # + ont_list
+    search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
     return {t['term_id']: t for t in db_terms}
 
@@ -406,7 +414,7 @@ def get_ontologies(connection, ont_list):
     if ont_list == 'all':
         ontologies = search_metadata('search/?type=Ontology', connection)
     else:
-        ontologies = [get_metadata('ontologys/' + ontology, connection) for ontology in ont_list]
+        ontologies = [get_metadata('ontologys/' + ont_list, connection)]
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
         print("we must not have got ontolgies... bailing")
@@ -430,7 +438,6 @@ def connect2server(env=None, key=None):
     if all([v in key for v in ['key', 'secret', 'server']]):
         import ast
         key = ast.literal_eval(key)
-
     try:
         auth = get_authentication_with_server(key, env)
     except Exception:
@@ -441,38 +448,72 @@ def connect2server(env=None, key=None):
     return auth
 
 
-def remove_obsoletes_and_unnamed(terms):
-    terms = {termid: term for termid, term in terms.items()
-             if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
-    terms = {termid: term for termid, term in terms.items()
-             if 'term_name' in term and (term['term_name'] and not term['term_name'].lower().startswith('obsolete'))}
-    return terms
-
-
-def verify_and_update_ontology(terms, ontologies, dbterms):
-    '''checks to be sure the ontology associated with the term agrees with
-        the term prefix as long as term does not already exist in db.
-        If it doesn't it is likely that the term was
-        imported into a previously processed ontology and so the ontlogy
-        of the term should be updated to the one that matches the prefix
-    '''
-    ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
-    ont_prefi = {v: k for k, v in ont_lookup.items()}
-    to_delete = []
+def remove_obsoletes_and_unnamed(terms, deprecated):
+    live_terms = {}
     for termid, term in terms.items():
-        # if termid in dbterms:
-        #     if ont_lookup.get(term['source_ontology'], None) != dbterms[termid]['source_ontology']:
-        #         to_delete.append(termid)
-        if ont_lookup.get(term['source_ontology'], None):
-            prefix = termid.split(':')[0]
-            if prefix in ont_prefi:
-                if prefix != ont_lookup[term['source_ontology']]:
-                    term['source_ontology'] = ont_prefi[prefix]
-        if termid in dbterms and term['source_ontology'] != dbterms[termid]['source_ontology']['uuid']:
-            to_delete.append(termid)
-            print('WARNING - {} is already present as a term in {} and not {}'.format(termid, dbterms[termid]['source_ontology']['display_title'], term['source_ontology']))
-    keep_terms = {k: v for k, v in terms.items() if k not in to_delete}
-    return keep_terms
+        if termid in deprecated:
+            continue
+        parents = term.get('parents')
+        if parents:
+            if 'ObsoleteClass' in parents:
+                continue
+            for p in parents:
+                if p in deprecated:
+                    parents.remove(p)
+            term['parents'] = parents
+
+        if not term.get('term_name'):
+            continue
+        if 'term_name' in term and term['term_name'].lower().startswith('obsolete'):
+            continue
+        live_terms[termid] = term
+    return live_terms
+
+
+def _format_def_str(defdict):
+    dstring = ''
+    for val in sorted(set([', '.join(v) for v in defdict.values()])):
+        defstr = ' -- '.join([k for k in defdict.keys() if ', '.join(defdict[k]) == val])
+    # for d, o in sorted(defdict.items()):
+    #     ostr = ', '.join(sorted([ostr.strip() for ostr in o]))
+    #     dstring += '{} ({}) '.format(d, ostr)
+        dstring += '{} ({}) '.format(defstr, val)
+    return dstring.rstrip()
+
+
+def set_definition(terms, ontologies):
+    # uuid2prefix = {o.get('uuid'): o.get('ontology_prefix') for o in ontologies}
+    for termid, term in terms.items():
+        definition = {}
+        found = False
+        tdefs = term.get('definitions')
+        if not tdefs:
+            continue
+        fromont = [p for p in tdefs.keys() if termid.startswith(p)]
+        if fromont:
+            ont = fromont[0]
+            definition[ont] = tdefs[ont]
+        elif len(tdefs) == 1:
+            definition = tdefs  # we've got a single value to deal with
+        for p, defs in definition.items():
+            # ideal case where term is directly from the ontology based on termid prefix
+            term['definition'] = '{} ({})'.format(' -- '.join(sorted(list(set([d.strip() for d in defs])))), p)
+            found = True
+        if found:
+            del term['definitions']
+            continue
+        # if we get here add all the defs by uniquifying with onts
+        for p, defs in tdefs.items():
+            for d in defs:
+                definition.setdefault(d.strip(), []).append(p)
+        dstring = _format_def_str(definition)
+        # for d, o in sorted(definition.items()):
+        #    ostr = ', '.join(sorted(o))
+        #    dstring += '{} ({})'.format(d, ostr)
+        if dstring:
+            term['definition'] = dstring
+        del term['definitions']
+    return terms
 
 
 def _get_t_id(val):
@@ -494,7 +535,7 @@ def _terms_match(t1, t2):
         if k not in t2:
             return False
         else:
-            if k == 'parents' or k == 'slim_terms':
+            if k == 'parents' or k == 'slim_terms' or k == 'source_ontologies':
                 if len(val) != len(t2[k]):
                     return False
                 for p1 in val:
@@ -510,12 +551,6 @@ def _terms_match(t1, t2):
                             pass
                     if not found:
                         return False
-            elif k == 'source_ontology':
-                continue
-                # same as above comment to potentially deal with different response
-                # t2ont = _get_t_id(t2['source_ontology'])
-                # if val not in t2ont:
-                #     return False
             elif k == 'synonyms':
                 t2syns = t2.get('synonyms')
                 if not t2syns or (set(t2syns) != set(val)):
@@ -526,13 +561,178 @@ def _terms_match(t1, t2):
     return True
 
 
-def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True):
+def check_for_fields_to_keep(term, dbterm):
+    ''' see if is_slim_for present and check if preferred_name is different from
+        term_name in dbterm if so add to term
+    '''
+    if 'is_slim_for' in dbterm:
+        term['is_slim_for'] = dbterm['is_slim_for']
+    if 'preferred_name' in dbterm:  # should alwawys be true
+        if dbterm.get('preferred_name') != dbterm.get('term_name'):
+            term['preferred_name'] = dbterm['preferred_name']
+    return term
+
+
+def _format_as_raw(val):
+    if isinstance(val, dict):
+        if 'uuid' in val:
+            return val.get('uuid')
+        else:
+            d = {}
+            for f, v in val.items():
+                nv = _format_as_raw(v)
+                d[f] = nv
+            return d
+    elif isinstance(val, list):
+        nl = []
+        for i in val:
+            ni = _format_as_raw(i)
+            nl.append(ni)
+        return nl
+    else:
+        return val
+
+
+def get_raw_form(term):
+    ''' takes a term dict that could be in embedded or object format
+        and transforms to raw (so uuids) are used for linked items
+    '''
+    raw_term = {}
+    for field, val in term.items():
+        if isinstance(val, str):
+            raw_term[field] = val
+        else:
+            rawval = _format_as_raw(val)
+            if rawval:
+                raw_term[field] = rawval
+
+    return raw_term
+
+
+def update_parents(termid, ontid, tparents, dparents, simple, connection):
+    ''' tricky bit is when to remove terms from existing term
+        single ontology processing only remove parents that
+        are not in term parents that are in dbterm parents from that ontology
+        but if simple have additional restriction that term prefixes of
+        parent and child _terms_match
+    '''
+    parents2keep = [p.get('uuid') for p in dparents]
+    if not tparents or Counter(parents2keep) == Counter(tparents):
+        return None
+    dp2chk = []
+    dpmeta = dparents
+    if not dpmeta or 'source_ontologies' not in dpmeta[0] or 'term_id' not in dpmeta[0]:
+        # make sure we have the required fields - should be embedded but maybe not
+        dpmeta = [get_metadata(p.get('uuid'), connection) for p in dparents]
+    for dp in dpmeta:
+        donts = [o.get('uuid') for o in dp.get('source_ontologies')]
+    dp2chk = [p.get('uuid') for p in dpmeta if ontid in donts]
+    if simple:
+        # need to check for missing parents in term that have same prefix as term
+        # that are in dbterm
+        tpre, _ = termid.split(':')
+        dp2chk = [p.get('uuid') for p in dpmeta if p.get('term_id', '').startswith(tpre)]
+    for uid in dp2chk:
+        if uid not in tparents:
+            try:
+                parents2keep.remove(uid)
+            except ValueError:
+                print('{} not found in parent list'.format(uid))
+                continue
+    return parents2keep
+
+
+def _parse_def(defstr):
+    pass
+
+def update_definition(tdef, dbdef, ont):
+    # pass
+    '''
+    for the term because it is only a single ont if got here then def ends with ontpre in parens
+    need to check the def in the db to see if any of the defs in the string come from db being
+    processed - if the ontprefix is in the trailing string and the 2 defs don't match need to
+    remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
+    string
+    '''
+    ontregex = re.compile(' +\(([A-Z]+,* *[A-Z]*)\)\s*')
+    tmatch = ontregex.split(tdef)
+    tstr = tmatch[0]
+    dbmatch = ontregex.split(dbdef)
+    dbdefs = dict(zip(dbmatch[::2], dbmatch[1::2]))
+    dbdefs = {k: v.split(',') for k, v in dbdefs.items()}
+    # if tstr is not in dbdefs keys
+    # if for any dbdef the ontology is in value
+    # take the ont out
+    if tstr not in dbdefs.keys():
+        # the def is new for that ontology so remove that prefix from
+        # any existing def strings
+        for o in dbdefs.values():
+            if ont in o:
+                o.remove(ont)
+        dbdefs[tstr] = [ont]
+    else:
+        if ont not in dbdefs[tstr]:
+            dbdefs[tstr].append(ont)
+            dbdefs[tstr].sort()
+    return _format_def_str(dbdefs)
+
+
+def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None):
+    ''' Looks at 2 terms and depending on the type of processing - all or single ontology
+        and simple or not determines what fields might need to be patched
+    '''
+    rawdbterm = get_raw_form(dbterm)
+    if ont == 'all':  # just need a simple comparison
+        if rm_unch and _terms_match(term, rawdbterm):
+            return None
+        else:
+            term = check_for_fields_to_keep(term, dbterm)
+            return term
+    else:
+        patch_term = {}
+        oid = ontids[0]
+        for f, v in term.items():
+            if f not in dbterm:
+                patch_term[f] = v
+            elif rawdbterm.get(f) == v:
+                continue
+            else:
+                dbval = rawdbterm.get(f)
+                if f == 'parents':
+                    # special treatment for parents depending on simple or not
+                    parents = update_parents(term.get('term_id'), oid, v, dbterm.get(f), simple, connection)
+                    if parents:
+                        patch_term['parents'] = parents
+                elif f == 'definition':
+                    # deal with definition parsing
+                    dbdef = dbterm.get('definition')
+                    if v in dbdef:  # checking to see if the string is in the db def string
+                        continue
+                    new_def = update_definition(v, dbdef, ont)
+                    if new_def:
+                        patch_term['definition'] = new_def
+                elif isinstance(v, list):
+                    to_add = []
+                    for val in v:
+                        if val not in dbval:
+                            to_add.append(val)
+                    if to_add:
+                        dbval.extend(to_add)
+                    patch_term[f] = dbval
+                else:
+                    patch_term[f] = v
+        if patch_term:
+            patch_term['uuid'] = term.get('uuid')
+        return patch_term
+
+
+def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True, ontarg='all', simple=False, connection=None):
     '''compares terms to terms that are already in db - if no change
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
     '''
     to_update = []
-    to_post = 0
+    to_post = []
     to_patch = 0
     obsoletes = 0
     tid2uuid = {}  # to keep track of existing uuids
@@ -546,42 +746,52 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                 print("PREVIOUS={}; NEW={}".format(tid2uuid[tid], uid))
             to_update.append(term)
             tid2uuid[tid] = uid
-            to_post += 1
+            to_post.append(tid)
         else:
-            # add uuid to mapping
+            # add uuid to mapping and existing term
             dbterm = dbterms[tid]
             uuid = dbterm['uuid']
             if tid in tid2uuid:
                 print("WARNING HAVE SEEN {} BEFORE!".format(tid))
                 print("PREVIOUS={}; NEW={}".format(tid2uuid[tid], uuid))
-            tid2uuid[term['term_id']] = uuid
-            if rm_unchanged and _terms_match(term, dbterm):
-                # check to see if contents of term are also in db_term
-                continue
-            else:
-                term['uuid'] = uuid
-                to_update.append(term)
-                to_patch += 1
+            tid2uuid[tid] = uuid
+            term['uuid'] = uuid
 
-    for term in to_update:
+    # all terms have uuid - now add uuids to linked terms
+    for term in terms.values():
         puuids = _get_uuids_for_linked(term, tid2uuid)
         for rt, uuids in puuids.items():
-            term[rt] = uuids
+            term[rt] = list(set(uuids))  # to avoid redundant terms
+
+    # now to determine what needs to be patched for patches
+    prefixes = [o.get('ontology_prefix', '') for o in ontologies]
+    ontids = [o['uuid'] for o in ontologies]
+    for tid, term in terms.items():
+        if tid in to_post:
+            continue  # it's a new term
+        dbterm = dbterms[tid]
+        term = id_fields2patch(term, dbterm, ontarg, ontids, simple, rm_unchanged, connection)
+        if not term:
+            continue
+        to_update.append(term)
+        to_patch += 1
 
     if set_obsoletes:
-        prefixes = [o.get('ontology_prefix', '') for o in ontologies]
-        if prefixes == ['EFO'] or prefixes == ['HP']:
+
+        if simple:
             use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
         else:
             use_terms = {tid: term for tid, term in dbterms.items()}
         # go through db terms and find which aren't in terms and set status
         # to obsolete by adding to to_patch
         # need a way to exclude our own terms and synonyms and definitions
-        ontids = [o['uuid'] for o in ontologies]
-
         for tid, term in use_terms.items():
             if tid not in terms:
-                if not term.get('source_ontology') or term['source_ontology']['uuid'] not in ontids:
+                try:
+                    source_onts = [so.get('uuid') for so in term['source_ontologies']]
+                except KeyError:
+                    print(term)
+                if not source_onts or not [o for o in ontids if o in source_onts]:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
                 dbuid = term['uuid']
@@ -591,7 +801,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                 tid2uuid[term['term_id']] = dbuid
                 to_patch += 1
     print("Will obsolete {} TERMS".format(obsoletes))
-    print("{} TERMS ARE NEW".format(to_post))
+    print("{} TERMS ARE NEW".format(len(to_post)))
     print("{} LIVE TERMS WILL BE PATCHED".format(to_patch - obsoletes))
     return to_update
 
@@ -609,7 +819,7 @@ def _get_uuids_for_linked(term, idmap):
     return puuids
 
 
-def add_additional_term_info(terms, data, synonym_terms, definition_terms):
+def add_additional_term_info(terms, data, synonym_terms, definition_terms, prefix='UNK'):
     for termid, term in terms.items():
         termuri = convert2URIRef(term['term_url'])
 
@@ -619,15 +829,18 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
             if 'synonyms' not in term:
                 term['synonyms'] = []
             for syn in synonyms:
+                syn = syn.strip()
                 if syn not in term['synonyms']:
                     term['synonyms'].append(syn)
 
-        # we only want one definition - may want to add some checking if multiple
-        if term.get('definition') is None:
-            definitions = get_definitions(termuri, data, definition_terms)
-            if definitions:
-                term['definition'] = ' -- '.join(sorted(definitions))
-
+        # adding all defs
+        # if term.get('definition') is None:
+        definitions = get_definitions(termuri, data, definition_terms)
+        if definitions:
+            if 'definitions' not in term:
+                term['definitions'] = {}
+            definitions = list(set([d.strip() for d in definitions]))
+            term['definitions'].setdefault(prefix, []).extend(definitions)
     return terms
 
 
@@ -640,32 +853,38 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, connection, terms, simple=False):
+def download_and_process_owl(ontology, connection, terms, deprecated, simple=False):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
+    ont_prefix = ontology.get('ontology_prefix')
     if not terms:
         terms = {}
+    if not deprecated:
+        deprecated = []
     for class_ in data.allclasses:
-        if not _is_deprecated(class_, data):
-            if isBlankNode(class_):
-                terms = process_blank_node(class_, data, terms, simple)
+        if _is_deprecated(class_, data):
+            deprecated.append(get_termid_from_uri(class_))
+    for class_ in data.allclasses:
+        if isBlankNode(class_):
+            terms = process_blank_node(class_, data, terms, simple)
+        else:
+            termid = get_termid_from_uri(class_)
+            if simple and ont_prefix and not termid.startswith(ont_prefix):
+                # we only want to process terms from the same ontology
+                continue
+            if terms.get(termid) is None:
+                terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
             else:
-                termid = get_termid_from_uri(class_)
-                if simple and not termid.startswith(ontology.get('ontology_prefix')):
-                    continue
-                if terms.get(termid) is None:
-                    terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
-                else:
-                    if 'term_name' not in terms[termid]:
-                        terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                    if 'source_ontology' not in terms[termid]:
-                        terms[termid]['source_ontology'] = ontology['uuid']
-                # deal with parents
-                terms = process_parents(class_, data, terms)
-    # add synonyms and definitions
-    terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
-    return terms
+                if 'term_name' not in terms[termid]:
+                    terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
+                if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
+                    terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
+            # deal with parents
+            terms = process_parents(class_, data, terms)
+# add synonyms and definitions
+    terms = add_additional_term_info(terms, data, synonym_terms, definition_terms, ont_prefix)
+    return terms, list(set(deprecated))
 
 
 def write_outfile(terms, filename, pretty=False):
@@ -686,11 +905,15 @@ def parse_args(args):
         epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--ontologies',
-                        nargs='+',
+    parser.add_argument('--ontology',
                         default='all',
-                        help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
-                        all retrieves all ontologies that exist in db")
+                        help="Prefix of ontology to process - eg. UBERON, OBI, EFO; \
+                        default will process all the ontologies in db or can specify a single ontology (with --simple if desired)")
+    parser.add_argument('--simple',
+                        default=False,
+                        action='store_true',
+                        help="Default false - WARNING can only be used if processing a single ontology!!! \
+                        - will process only terms that share the prefix ontology and skip terms imported from other ontologies")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -709,10 +932,12 @@ def parse_args(args):
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
-    parser.add_argument('--imports',
-                        default=False,
-                        action='store_true',
-                        help="For EFO or HP, imports option includes terms imported from other ontologies.")
+    parser.add_argument('--keyfile',
+                        default='',
+                        help="A file where access keys are stored.")
+    parser.add_argument('--keyname',
+                        default='default',
+                        help="The name of the key to use in the keyfile.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
 
@@ -756,37 +981,49 @@ def main():
     print('Writing to %s' % postfile)
 
     # fourfront connection
-    connection = connect2server(args.env, args.key)
+    if args.key == 's3' and args.keyfile:
+        with open(args.keyfile, 'r') as keyfile:
+            keys = json.load(keyfile)
+        key = str(keys[args.keyname])
+    else:
+        key = str(args.key)
+    connection = connect2server(args.env, key)
     print("Pre-processing")
-    ontologies = get_ontologies(connection, args.ontologies)
+    ontologies = get_ontologies(connection, args.ontology)
+    if len(ontologies) > 1 and args.simple:
+        print("INVALID USAGE - simple can only be used while processing a single ontology")
+        sys.exit(1)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
+    print('HAVE ONTOLOGY INFO')
     slim_terms = get_slim_terms(connection)
+    print('HAVE SLIM TERMS')
     db_terms = get_existing_ontology_terms(connection)
+    print('HAVE DB TERMS')
     terms = {}
-
+    deprecated = []
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
-            # want only simple processing for HP
-            simple = False
-            if ontology.get('ontology_prefix') in ['HP', 'EFO'] and not args.imports:
-                simple = True
             # get all the terms for an ontology
-            terms = download_and_process_owl(ontology, connection, terms, simple)
+            terms, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, args.simple)
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
         print("Post-processing")
         terms = add_slim_terms(terms, slim_terms)
-        terms = remove_obsoletes_and_unnamed(terms)
-        terms = verify_and_update_ontology(terms, ontologies, db_terms)
+        print("SLIM TERMS ADDED")
+        # doing this after adding slims in case an ontology is not in sync with one it imports
+        # will preserve slimming but remove obsolete terms and parents in next step
+        terms = remove_obsoletes_and_unnamed(terms, deprecated)
+        terms = set_definition(terms, ontologies)
+        print("OBS GONE and DEF SET")
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged)
-        # terms2write = add_uuids_and_combine(partitioned_terms)
+        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology, simple=args.simple, connection=connection)
+        print("DONE FINDING UPDATES")
 
         pretty = False
         if args.pretty:

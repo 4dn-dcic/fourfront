@@ -53,7 +53,7 @@ class Biosource(Item):
         "tissue.preferred_name",
         "tissue.slim_terms",
         "tissue.synonyms",
-        "tissue.source_ontology.ontology_name",
+        "tissue.source_ontologies.ontology_name",
         "cell_line.term_name",
         "cell_line.preferred_name",
         "cell_line.slim_terms",
@@ -126,7 +126,7 @@ class Biosource(Item):
         pass
 
 
-# validator for tissue field
+# # validator for tissue field
 def validate_biosource_tissue(context, request):
     data = request.json
     if 'tissue' not in data:
@@ -143,14 +143,15 @@ def validate_biosource_tissue(context, request):
         except AttributeError:
             getter = context.collection
         term = getter.get(termuid)
-        ontology = getter.get(term.properties['source_ontology'])
-        ontology_name = ontology.properties.get('ontology_name')
+        ontologies = term.upgrade_properties()['source_ontologies']
     except AttributeError:
         pass
-
-    if ontology_name is not None and (
-            ontology_name == 'Uberon' or ontology_name == '4DN Controlled Vocabulary'):
-        term_ok = True
+    request.validated.update({})
+    for o in ontologies:
+        oname = get_item_if_you_can(request, o, 'ontologys').get('ontology_name')
+        if oname in ['Uberon', '4DN Controlled Vocabulary']:
+            term_ok = True
+            break
     if not term_ok:
         try:
             tissuename = tissue.get('term_name')
@@ -178,10 +179,10 @@ def validate_biosource_cell_line(context, request):
     try:
         termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
         term = getter.get(termuid)
-        slims = term.properties.get('slim_terms', [])
+        slims = term.upgrade_properties().get('slim_terms', [])
         for slim in slims:
             slim_term = getter.get(slim)
-            slimfor = slim_term.properties.get('is_slim_for')
+            slimfor = slim_term.upgrade_properties().get('is_slim_for')
             if slimfor is not None and slimfor == 'cell':
                 term_ok = True
                 break
@@ -199,7 +200,7 @@ def validate_biosource_cell_line(context, request):
 
 
 @view_config(context=Biosource.Collection, permission='add', request_method='POST',
-             validators=[validate_item_content_post, validate_biosource_tissue, validate_biosource_cell_line])
+             validators=[validate_item_content_post, validate_biosource_cell_line, validate_biosource_tissue])
 @view_config(context=Biosource.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
@@ -208,9 +209,9 @@ def biosource_add(context, request, render=None):
 
 
 @view_config(context=Biosource, permission='edit', request_method='PUT',
-             validators=[validate_item_content_put, validate_biosource_tissue, validate_biosource_cell_line])
+             validators=[validate_item_content_put, validate_biosource_cell_line, validate_biosource_tissue])  # , validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit', request_method='PATCH',
-             validators=[validate_item_content_patch, validate_biosource_tissue, validate_biosource_cell_line])
+             validators=[validate_item_content_patch, validate_biosource_cell_line, validate_biosource_tissue])  # , validate_biosource_cell_line])
 @view_config(context=Biosource, permission='edit_unvalidated', request_method='PUT',
              validators=[no_validate_item_content_put],
              request_param=['validate=false'])
@@ -218,7 +219,7 @@ def biosource_add(context, request, render=None):
              validators=[no_validate_item_content_patch],
              request_param=['validate=false'])
 @view_config(context=Biosource, permission='index', request_method='GET',
-             validators=[validate_item_content_in_place, validate_biosource_tissue, validate_biosource_cell_line],
+             validators=[validate_item_content_in_place, validate_biosource_cell_line, validate_biosource_tissue],  # , validate_biosource_cell_line],
              request_param=['check_only=true'])
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)
