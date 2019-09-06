@@ -155,6 +155,19 @@
                 "year"
             ]
         },
+        "is_no_children_by_choice": {
+            "title": "Spontaneous Abortion",
+            "type": "boolean"
+        },
+        "is_infertile": {
+            "title": "Spontaneous Abortion",
+            "type": "boolean"
+        },
+        "cause_of_infertility": {
+            "title" : "Cause of Death",
+            "type" : "string",
+            "linkTo" : "Phenotype"
+        },
         "ethnicity": {
             "title": "Ethnicity",
             "type": "string",
