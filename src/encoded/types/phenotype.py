@@ -26,8 +26,7 @@ class Phenotype(Item):
     embedded_list = [
         'slim_terms.is_slim_for',
         'slim_terms.phenotype_name',
-        'parents.hpo_id',
-        'associated_disorders.disorder_id'
+        'parents.hpo_id'
     ]
     name_key = 'hpo_id'
 
