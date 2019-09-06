@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["disorder_name", "disorder_id"],
-    "identifyingProperties": ["uuid"],
+    "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": true,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
