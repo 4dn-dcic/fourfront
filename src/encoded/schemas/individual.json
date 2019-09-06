@@ -156,15 +156,15 @@
             ]
         },
         "is_no_children_by_choice": {
-            "title": "Spontaneous Abortion",
+            "title": "No Children by Choice",
             "type": "boolean"
         },
         "is_infertile": {
-            "title": "Spontaneous Abortion",
+            "title": "Infertile",
             "type": "boolean"
         },
         "cause_of_infertility": {
-            "title" : "Cause of Death",
+            "title" : "Cause of Infertility",
             "type" : "string",
             "linkTo" : "Phenotype"
         },
