@@ -67,6 +67,8 @@ def rss_checker(rss_limit=None, rss_percent_limit=None):
 def filter_app(app, global_conf, rss_limit=None, rss_percent_limit=None):
     if rss_limit is not None:
         rss_limit = humanfriendly.parse_size(rss_limit)
+    if rss_percent_limit is not None:
+        rss_percent_limit = float(rss_percent_limit)
 
     callback = rss_checker(rss_limit, rss_percent_limit)
     return ExecuteOnCompletion2(app, callback)
