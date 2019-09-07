@@ -196,15 +196,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000, { trailing: false });
         this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000, { trailing: false });
         this.isNodeCurrentContext       = this.isNodeCurrentContext.bind(this);
-        this.state = _.extend({
+        this.state = {
             'showChart' : 'detail',
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'stacked',
-            'showParameters' : false,
-            'anyIndirectPathIONodes' : true, // Overriden
-            'anyReferenceFileNodes' : true // Overriden
-        }, checkIfIndirectOrReferenceNodesExist(props.steps));
+            'showParameters' : false
+        };
 
         this.memoized = {
             ...this.memoized,
@@ -232,13 +230,14 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         const { showReferenceFiles, showParameters, showIndirectFiles, rowSpacingType } = this.state;
         const parsingOptions = { showReferenceFiles, showParameters, showIndirectFiles };
         const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        const { anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
         const { nodes: originalNodes, edges } = this.memoized.parseAnalysisSteps(steps, parsingOptions);
 
         if (!showParameters){
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
-        if (!showReferenceFiles || !this.state.anyReferenceFileNodes){
+        if (!showReferenceFiles || !anyReferenceFileNodes){
             delete legendItems['Input Reference File'];
         }
         if (allRuns || !this.memoized.anyGroupNodesExist(originalNodes)){
