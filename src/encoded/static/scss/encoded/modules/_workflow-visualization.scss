@@ -1,12 +1,35 @@
 @import "./../../../../../../node_modules/@hms-dbmi-bgm/react-workflow-viz/src/styles";
 
+.workflow-chart-outer-container {
 
-.workflow-chart-inner-container {
+    .workflow-chart-inner-container {
 
-    .nodes-layer {
-        .node {
-            font-size: 0.9rem;
+        overflow-x: initial !important;
+        overflow-y: initial !important;
+
+        .nodes-layer {
+            .node {
+                font-size: 0.9rem;
+            }
         }
-    }
 
+        @include media-breakpoint-up(md){
+            .state-container {
+                display: flex;
+                > .scroll-container-wrapper {
+                    flex: 1 0;
+                }
+                > .detail-pane-container {
+                    &.has-selected-node {
+                        border-left-color: #ddd !important;
+                    }
+                }
+            }
+        }
+
+        .state-container {
+            @include visualization-detail-pane;
+        }
+
+    }
 }

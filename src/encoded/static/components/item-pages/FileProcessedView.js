@@ -3,11 +3,14 @@
 import React from 'react';
 import moment from 'moment';
 import _ from 'underscore';
-import Graph, { GraphParser } from '@hms-dbmi-bgm/react-workflow-viz';
+import memoize from 'memoize-one';
+import Graph, { GraphParser, parseAnalysisSteps } from '@hms-dbmi-bgm/react-workflow-viz';
 import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
 import { WorkflowNodeElement } from './components/Workflow/WorkflowNodeElement';
+import { WorkflowDetailPane } from './components/Workflow/WorkflowDetailPane';
+import { WorkflowGraphSectionControls } from './components/Workflow/WorkflowGraphSectionControls';
 import { FullHeightCalculator } from './components/FullHeightCalculator';
 
 
@@ -26,6 +29,7 @@ export default class FileProcessedView extends DefaultItemView {
     constructor(props){
         super(props);
         this.loadGraphSteps = this.loadGraphSteps.bind(this);
+        this.toggleAllRuns = _.throttle(this.toggleAllRuns.bind(this), 1000, { trailing: false });
         this.state = {
             ...this.state,
             includeAllRunsInSteps: false,
@@ -93,6 +97,20 @@ export default class FileProcessedView extends DefaultItemView {
         });
     }
 
+    toggleAllRuns(){
+        let doRequest = false;
+        this.setState(function({ includeAllRunsInSteps, isLoadingGraphSteps }){
+            if (isLoadingGraphSteps){
+                return null;
+            }
+            doRequest = true;
+            return { includeAllRunsInSteps: !includeAllRunsInSteps };
+        }, ()=>{
+            if (!doRequest) return;
+            this.loadGraphSteps();
+        });
+    }
+
     getTabViewContents(){
         const { context } = this.props;
         const initTabs = [
@@ -101,7 +119,11 @@ export default class FileProcessedView extends DefaultItemView {
         ];
 
         if (FileProcessedView.shouldGraphExist(context)){
-            initTabs.push(ProvenanceGraphTabView.getTabObject(this.props, this.state));
+            initTabs.push(ProvenanceGraphTabView.getTabObject({
+                ...this.props,
+                ...this.state,
+                toggleAllRuns: this.toggleAllRuns
+            }));
         }
 
         return initTabs;
@@ -109,12 +131,53 @@ export default class FileProcessedView extends DefaultItemView {
 
 }
 
+export function getNodesInfo(steps){
+    const { nodes } = parseAnalysisSteps(steps, { 'showReferenceFiles' : true, 'showIndirectFiles' : true });
+    const anyReferenceFileNodes = _.any(nodes, function(n){
+        return (n.nodeType === 'output' && n.meta && n.meta.in_path === false);
+    });
+    const anyIndirectFileNodes = _.any(nodes, function(n){
+        return (n.ioType === 'reference file');
+    });
+    const anyGroupNodes = _.any(nodes, function(n){
+        return n.nodeType === 'input-group' || n.nodeType === 'output-group';
+    });
+    return { anyReferenceFileNodes, anyIndirectFileNodes, anyGroupNodes };
+}
+/*
+export function anyReferenceFileNodes(nodes){
+    return _.any(nodes, function(n){
+        return (n.nodeType === 'output' && n.meta && n.meta.in_path === false);
+    });
+}
+
+export function anyIndirectFileNodes(nodes){
+    return _.any(nodes, function(n){
+        return (n.ioType === 'reference file');
+    });
+}
+
+export function anyGroupNodes(nodes){
+    return _.any(nodes, function(n){
+        return n.nodeType === 'input-group' || n.nodeType === 'output-group';
+    });
+}
+*/
+
+export function isNodeCurrentContext(node, context){
+    if (node.nodeType !== 'input' && node.nodeType !== 'output') return false;
+    return (
+        context && typeof context.accession === 'string' && node.meta.run_data && node.meta.run_data.file
+        && typeof node.meta.run_data.file !== 'string' && !Array.isArray(node.meta.run_data.file)
+        && typeof node.meta.run_data.file.accession === 'string'
+        && node.meta.run_data.file.accession === context.accession
+    ) || false;
+}
 
 export class ProvenanceGraphTabView extends React.Component {
 
-    static getTabObject(props, state){
-        const { windowWidth, windowHeight } = props;
-        const { isLoadingGraphSteps, graphSteps } = state;
+    static getTabObject(props){
+        const { windowWidth, windowHeight, isLoadingGraphSteps, graphSteps } = props;
         const stepsExist = Array.isArray(graphSteps) && graphSteps.length > 0;
         let icon;
         if (isLoadingGraphSteps){
@@ -135,7 +198,7 @@ export class ProvenanceGraphTabView extends React.Component {
             'disabled'  : !stepsExist,
             'content' : (
                 <FullHeightCalculator windowHeight={windowHeight} windowWidth={windowWidth}>
-                    <ProvenanceGraphTabView {...props} {...state} />
+                    <ProvenanceGraphTabView {...props} />
                 </FullHeightCalculator>
             )
         };
@@ -151,8 +214,15 @@ export class ProvenanceGraphTabView extends React.Component {
     constructor(props){
         super(props);
         this.handleParsingOptChange = this.handleParsingOptChange.bind(this);
-        this.handleRowSpacingTypeChange = this.handleRowSpacingTypeChange.bind(this);
+        this.handleRowSpacingTypeSelect = this.handleRowSpacingTypeSelect.bind(this);
         this.renderNodeElement = this.renderNodeElement.bind(this);
+        this.renderDetailPane = this.renderDetailPane.bind(this);
+        this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
+
+        this.memoized = {
+            getNodesInfo: memoize(getNodesInfo)
+        };
+
         this.state = {
             parsingOptions: {
                 showReferenceFiles: true,
@@ -166,6 +236,7 @@ export class ProvenanceGraphTabView extends React.Component {
 
     handleParsingOptChange(evt){
         const key = evt.target.getAttribute("name");
+        console.log('evt', evt, key);
         if (!key) return false;
         this.setState(function({ parsingOptions : prevOpts }){
             const nextOpts = { ...prevOpts, [key] : !prevOpts[key] };
@@ -173,9 +244,7 @@ export class ProvenanceGraphTabView extends React.Component {
         });
     }
 
-    handleRowSpacingTypeChange(evt){
-        const valMap = _.invert(ProvenanceGraphTabView.rowSpacingTitleMap);
-        const nextValue = evt.target.value && valMap[evt.target.value];
+    handleRowSpacingTypeSelect(nextValue, evt){
         if (!nextValue) return false;
         this.setState({ rowSpacingType: nextValue });
     }
@@ -185,19 +254,50 @@ export class ProvenanceGraphTabView extends React.Component {
         return <WorkflowNodeElement {...graphProps} schemas={schemas} windowWidth={windowWidth} node={node}/>;
     }
 
+    renderDetailPane(node, graphProps){
+        const { context, schemas } = this.props;
+        return <WorkflowDetailPane {...graphProps} {...{ context, node, schemas }} />;
+    }
+
+    isNodeCurrentContext(node){
+        return isNodeCurrentContext(node, this.props.context);
+    }
+
     render(){
-        const { graphSteps, height: fullVizSpaceHeight } = this.props;
-        const { parsingOptions, rowSpacingType } = this.state;
+        const {
+            graphSteps,
+            height: fullVizSpaceHeight, windowWidth,
+            toggleAllRuns, includeAllRunsInSteps, isLoadingGraphSteps
+        } = this.props;
+        const { parsingOptions: origParseOpts, rowSpacingType } = this.state;
+        const { anyReferenceFileNodes, anyIndirectFileNodes, anyGroupNodes } = this.memoized.getNodesInfo(graphSteps);
         const lastStep = graphSteps[graphSteps.length - 1];
         const graphProps = {
             rowSpacingType, minimumHeight: fullVizSpaceHeight || 300,
-            renderNodeElement: this.renderNodeElement
+            renderNodeElement: this.renderNodeElement,
+            renderDetailPane: this.renderDetailPane,
+            isNodeCurrentContext: this.isNodeCurrentContext
         };
+        const parsingOptions = { ...origParseOpts };
+        if (!anyReferenceFileNodes){
+            parsingOptions.showReferenceFiles = null;
+            //delete parsingOptions.showReferenceFiles;
+        }
+
         return (
-            <div className="overflow-hidden container-wide">
-                <h3 className="tab-section-title">
-                    <span>Provenance</span>
-                </h3>
+            <div>
+                <div className="container-wide">
+                    <h3 className="tab-section-title">
+                        <span>Provenance</span>
+                        <WorkflowGraphSectionControls
+                            {...{ rowSpacingType, parsingOptions, toggleAllRuns, isLoadingGraphSteps, windowWidth }}
+                            includeAllRunsInSteps={anyGroupNodes || includeAllRunsInSteps ? includeAllRunsInSteps : null}
+                            onRowSpacingTypeSelect={this.handleRowSpacingTypeSelect}
+                            onParsingOptChange={this.handleParsingOptChange}
+                            rowSpacingTitleMap={ProvenanceGraphTabView.rowSpacingTitleMap} />
+                    </h3>
+                </div>
+                <hr className="tab-section-title-horiz-divider"/>
                 <GraphParser parsingOptions={parsingOptions} parentItem={lastStep} steps={graphSteps}>
                     <Graph {...graphProps} />
                 </GraphParser>
@@ -209,37 +309,3 @@ export class ProvenanceGraphTabView extends React.Component {
 }
 
 
-
-
-
-const DocumentViewOverview = React.memo(function DocumentViewOverview({ context, schemas }){
-    const tips = object.tipsFromSchema(schemas, context);
-    return (
-        <div>
-            <div className="row overview-blocks">
-                <ItemFileAttachment context={context} tips={tips} wrapInColumn="col-12 col-md-6" includeTitle btnSize="lg" itemType="Document" />
-            </div>
-        </div>
-    );
-});
-DocumentViewOverview.getTabObject = function({ context, schemas }){
-    return {
-        'tab' : (
-            <React.Fragment>
-                <i className="icon icon-file-text fas icon-fw"/>
-                <span>Overview</span>
-            </React.Fragment>
-        ),
-        'key' : 'overview',
-        //'disabled' : !Array.isArray(context.experiments),
-        'content' : (
-            <div className="overflow-hidden container-wide">
-                <h3 className="tab-section-title">
-                    <span>Overview</span>
-                </h3>
-                <hr className="tab-section-title-horiz-divider"/>
-                <DocumentViewOverview context={context} schemas={schemas} />
-            </div>
-        )
-    };
-};
