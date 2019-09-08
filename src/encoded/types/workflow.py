@@ -927,7 +927,7 @@ def pseudo_run(context, request):
 
     # hand-off to tibanna for further processing
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
-    res = aws_lambda.invoke(FunctionName='run_workflow',
+    res = aws_lambda.invoke(FunctionName='run_workflow_zebra',
                             Payload=json.dumps(input_json))
     res_decode = res['Payload'].read().decode()
     res_dict = json.loads(res_decode)
@@ -974,7 +974,7 @@ def run_workflow(context, request):
 
     # hand-off to tibanna for further processing
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
-    res = aws_lambda.invoke(FunctionName='run_workflow',
+    res = aws_lambda.invoke(FunctionName='run_workflow_zebra',
                             Payload=json.dumps(input_json))
     res_decode = res['Payload'].read().decode()
     res_dict = json.loads(res_decode)
