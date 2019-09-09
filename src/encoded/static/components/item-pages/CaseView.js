@@ -144,14 +144,15 @@ const ProcessingSummaryTabView = React.memo(function ProcessingSummaryTabView(pr
             {
                 families.map(function(family, idx){
                     const { original_pedigree: { display_title: pedFileName } = {} } = family;
+                    const cls = "summary-table-container family-index-" + idx;
                     const title = familiesLen === 1 ? null : (
-                        <h4 className="mt-15 mb-1 text-400">
+                        <h4>
                             { "Family " + (idx + 1) }
                             { pedFileName ? <span className="text-300">{ " (" + pedFileName + ")" }</span> : null }
                         </h4>
                     );
                     return (
-                        <div className="summary-table-container" key={idx}>
+                        <div className={cls} key={idx}>
                             { title }
                             <ProcessingSummaryTable {...family} idx={idx} />
                         </div>
@@ -181,8 +182,17 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
     const {
         members = [],
         proband: { '@id' : probandID } = {},
-        ped_file = null
+        original_pedigree = null
     } = props;
+
+    if (members.length === 0){
+        return (
+            <div className="processing-summary">
+                <em>No members available.</em>
+            </div>
+        );
+    }
+
     const columnOrder = [
         "individual",
         "sample",
@@ -190,6 +200,7 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
         "rawFileCount",
         "sampleStatus"
     ];
+
     const columnTitles = {
         'individual' : "Individual",
         'sample' : "Sample",
@@ -197,18 +208,24 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
         'rawFileCount' : "Raw Files",
         'sampleStatus' : "Sample Status"
     };
+
+
     const rows = [];
+    const membersWithoutSamples = [];
+    const membersWithoutViewPermissions = [];
 
     // Gather rows from family.members - 1 per sample (or individual, if no sample).
     members.forEach(function(individual){
         const {
-            display_title = null,
-            '@id' : id,
+            display_title: indvDisplayTitle = null,
+            '@id' : indvId,
             error = null,
             samples = []
         } = individual;
 
-        if (!display_title || !id){
+        if (!indvDisplayTitle || !indvId){
+            membersWithoutViewPermissions.push(individual);
+            /*
             rows.push({
                 individual : <em>{ error || "No view permissions" }</em>,
                 isProband: false,
@@ -217,19 +234,24 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
                 rawFileCount: <em>N/A</em>,
                 sampleStatus: <em>N/A</em>
             });
+            */
             return;
         }
-
-        const indvLink = <a href={id} className="accession">{ display_title }</a>;
 
         if (samples.length === 0){
+            membersWithoutSamples.push(individual);
+            /*
             rows.push({
                 individual : indvLink,
-                isProband: (probandID && probandID === id),
+                isProband: (probandID && probandID === indvId),
                 sample: <em className="small" data-tip="No samples available for this individual">N/A</em>
             });
+            */
             return;
         }
+
+        const indvLink = <a href={indvId} className="accession">{ indvDisplayTitle }</a>;
+        const isProband = (probandID && probandID === indvId);
 
         samples.forEach(function(sample){
             const {
@@ -244,14 +266,14 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
             if (!sampleTitle || !sampleID){
                 rows.push({
                     individual : indvLink,
-                    isProband: (probandID && probandID === id),
+                    isProband,
                     sample : <em>{ sampleErr || "No view permissions" }</em>
                 });
                 return;
             } else {
                 rows.push({
                     individual : indvLink,
-                    isProband: (probandID && probandID === id),
+                    isProband,
                     sample: <a href={sampleID} className="accession">{ sampleTitle }</a>,
                     processedFileCount: processed_files.length,
                     rawFileCount: files.length,
@@ -267,8 +289,38 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
 
     });
 
+    const membersWithoutSamplesLen = membersWithoutSamples.length;
+    const membersWithoutViewPermissionsLen = membersWithoutViewPermissions.length;
+
+    const renderedSummary = (membersWithoutSamplesLen + membersWithoutViewPermissionsLen) > 0 ? (
+        <div className="processing-summary">
+            { membersWithoutSamplesLen > 0 ?
+                <p className="mb-0">{ (membersWithoutSamplesLen + " members without samples.") }</p>
+                /*
+                <React.Fragment>
+                    <p className="mb-0">{ (membersWithoutSamplesLen + " members without samples: ") }</p>
+                    {
+                        membersWithoutSamples.map(function(member, idx){
+                            const { '@id' : id, display_title } = member;
+                            return (
+                                <React.Fragment key={id}>
+                                    { idx !== 0 ? ", " : null }
+                                    <a href={id}>{ display_title }</a>
+                                </React.Fragment>
+                            );
+                        })
+                    }
+                </React.Fragment>
+                */
+                : null }
+            { membersWithoutViewPermissionsLen > 0 ?
+                <p className="mb-0">{ (membersWithoutViewPermissionsLen + " members without view permissions.") }</p>
+                : null }
+        </div>
+    ) : null;
+
     if (rows.length === 0){
-        return <em>No members available.</em>;
+        return renderedSummary;
     }
 
     const renderedRows = rows.map(function(row, rowIdx){
@@ -286,7 +338,7 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
         return <tr key={rowIdx} className={rowCls}>{ rowCols }</tr>;
     });
 
-    return (
+    const renderedTable = (
         <table className="processing-summary-table">
             <thead>
                 <tr>
@@ -299,6 +351,12 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
         </table>
     );
 
+    return (
+        <React.Fragment>
+            { renderedSummary }
+            { renderedTable }
+        </React.Fragment>
+    );
 });
 
 
@@ -331,7 +389,7 @@ class PedigreeTabView extends React.PureComponent {
      * PedigreeViz-compliant properties.
      */
     static parseFamilyIntoDataset(family){
-        const { members = [], proband, ped_file } = family;
+        const { members = [], proband, original_pedigree } = family;
         const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
         return members.map(function(individual){
             const {
@@ -430,8 +488,8 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
         <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="mr-05" alignRight>
             {
                 families.map(function(family, i){
-                    const { original_pedigree: ped_file = null } = family;
-                    const pedFileStr = ped_file && (" (" + ped_file.display_title + ")");
+                    const { original_pedigree: pf = null } = family;
+                    const pedFileStr = pf && (" (" + pf.display_title + ")");
                     return (
                         <DropdownItem key={i} eventKey={i} active={i === currentFamilyIdx}>
                             Family {i + 1}{ pedFileStr }

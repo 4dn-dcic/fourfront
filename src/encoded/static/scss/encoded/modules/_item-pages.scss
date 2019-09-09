@@ -1822,32 +1822,58 @@ $badge-item-min-height: 90px;
 **********************************************************/
 
 .item-page-container {
-	table.processing-summary-table {
-		width: 100%;
 
-		tbody {
-			tr {
-				td {
-					padding: 4px 8px;
-					/*
-					&[data-for-col="individual"],
-					&[data-for-col="sample"] {
-						font-family: $font-family-monospace;
+	div.summary-table-container {
+
+		padding-top: 10px;
+		padding-bottom: 10px;
+
+		> h4:first-child {
+			margin-bottom: 0;
+			font-weight: 400;
+			margin-top: 10px;
+		}
+
+		&:not(.family-index-0){
+			border-top: 1px solid #ddd;
+			padding-top: 10px;
+		}
+
+		div.processing-summary {
+			margin-bottom: 10px;
+		}
+
+		table.processing-summary-table {
+
+			margin-top: 10px;
+			width: 100%;
+
+			tbody {
+				tr {
+					td {
+						padding: 4px 8px;
+						/*
+						&[data-for-col="individual"],
+						&[data-for-col="sample"] {
+							font-family: $font-family-monospace;
+						}
+						*/
 					}
-					*/
-				}
-				&.is-proband {
-					> td {
-						background-color: #ebf6ff;
-						&:first-child {
-							font-weight: 600;
+					&.is-proband {
+						> td {
+							background-color: #ebf6ff;
+							&:first-child {
+								font-weight: 600;
+							}
 						}
 					}
 				}
 			}
+
 		}
 
 	}
+
 }
 
 
