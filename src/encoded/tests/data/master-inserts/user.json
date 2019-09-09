@@ -88,5 +88,30 @@
         "groups": ["admin"],
         "submits_for": ["hms-dbmi"],
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
+    },
+    {
+        "last_name": "App",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "aliases": ["4dn-dcic-lab:foursight_app"],
+        "first_name": "Foursight",
+        "status": "current",
+        "groups": ["admin"],
+        "email": "foursight.app@gmail.com",
+        "uuid": "7677f8a8-79d2-4cff-ab0a-a967a2a68e39",
+        "submits_for": ["4dn-dcic-lab"],
+        "job_title": "Other"
+    },
+    {
+        "last_name": "App",
+        "aliases": ["4dn-dcic-lab:tibanna_app"],
+        "first_name": "Tibanna",
+        "timezone": "US/Eastern",
+        "status": "current",
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
+        "groups": ["admin"],
+        "email": "tibanna.app@gmail.com",
+        "uuid": "b041dba8-e2b2-4e54-a621-97edb508a0c4",
+        "submits_for": ["4dn-dcic-lab"],
+        "job_title": "Other"
     }
 ]
