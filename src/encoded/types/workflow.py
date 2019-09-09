@@ -934,7 +934,7 @@ def pseudo_run(context, request):
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
     for i in range(100):
-        res = aws_lambda.invoke(FunctionName='status_wfr',
+        res = aws_lambda.invoke(FunctionName='status_wfr_zebra',
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)
@@ -981,7 +981,7 @@ def run_workflow(context, request):
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
     for _ in range(2):
-        res = aws_lambda.invoke(FunctionName='status_wfr',
+        res = aws_lambda.invoke(FunctionName='status_wfr_zebra',
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)
