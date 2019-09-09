@@ -94,22 +94,22 @@ export class TabView extends React.PureComponent {
         if (typeof contents === 'function') contents = contents();
 
 
-        var resultArr = [];
+        const resultArr = [];
         //
         // PART 1
         // Content grouped by 'tab:some_title' is put into new tab with 'Some Title' as title.
         //
 
-        var existingTabKeys = _.pluck(contents, 'key'),
-            staticTabContent = _.filter(staticContentList, function(s){
-                return s.content && !s.content.error && typeof s.location === 'string' && s.location.slice(0,4) === 'tab:';
-            });
+        const existingTabKeys = _.pluck(contents, 'key');
+        let staticTabContent = _.filter(staticContentList, function(s){
+            return s.content && !s.content.error && typeof s.location === 'string' && s.location.slice(0,4) === 'tab:';
+        });
 
         // Filter down to locations which don't already exist in our tabs.
         staticTabContent = _.filter(
             _.map(staticTabContent, function(s){
-                var splitLocation   = s.location.split(':'),
-                    tabKey          = splitLocation.slice(1).join(':'); // This could have more ':'s in it, theoretically.
+                const splitLocation = s.location.split(':');
+                const tabKey = splitLocation.slice(1).join(':'); // This could have more ':'s in it, theoretically.
                 return _.extend({ tabKey }, s);
             }),
             function(s){
@@ -117,13 +117,10 @@ export class TabView extends React.PureComponent {
             }
         );
 
-        var groupedContent = _.groupBy(staticTabContent, 'tabKey');
+        const groupedContent = _.groupBy(staticTabContent, 'tabKey');
 
-        _.forEach(_.pairs(groupedContent), function([ tabKey, contentForTab ]){
-
-            var tabTitle, icon;
-
-            tabTitle = contentForTab.title || getTitleForCustomTab(tabKey);
+        _.pairs(groupedContent).forEach(function([ tabKey, contentForTab ]){
+            let tabTitle = contentForTab.title || getTitleForCustomTab(tabKey);
             if (!tabTitle){ // Auto-generate one from key
                 tabTitle = _.map(
                     tabKey.split('_'),
@@ -133,7 +130,7 @@ export class TabView extends React.PureComponent {
                 ).join(' ');
             }
 
-            icon = contentForTab.icon || getIconForCustomTab(tabKey);
+            const icon = contentForTab.icon || getIconForCustomTab(tabKey);
 
             resultArr.push(TabView.createTabObject(tabKey, tabTitle, icon, contentForTab));
         });
@@ -159,12 +156,12 @@ export class TabView extends React.PureComponent {
 
     static combineSystemAndCustomTabs = memoize(function(additionalTabs, contents){
         if (typeof contents === 'function') contents = contents();
-        var allTabs;
+        let allTabs;
         if (additionalTabs.length === 0){
             allTabs = contents;
         } else {
-            var addBeforeTabs   = ['details', 'attribution'],
-                addIdx          = _.findIndex(contents, function(t){ return addBeforeTabs.indexOf(t.key) > -1; });
+            const addBeforeTabs = ['details', 'attribution'];
+            const addIdx = _.findIndex(contents, function(t){ return addBeforeTabs.indexOf(t.key) > -1; });
 
             if (typeof addIdx !== 'number'){
                 allTabs = contents.concat(additionalTabs);
@@ -181,7 +178,8 @@ export class TabView extends React.PureComponent {
             'tab'       : PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
             'content'   : PropTypes.element.isRequired,
             'key'       : PropTypes.string.isRequired,
-            'disabled'  : PropTypes.bool
+            'disabled'  : PropTypes.bool,
+            'cache'     : PropTypes.bool
         }))  ]).isRequired,
         'href' : PropTypes.string.isRequired
     };
@@ -297,7 +295,8 @@ export class TabView extends React.PureComponent {
         const { currentTabKey } = this.state;
 
         const allTabs = TabView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
-        const currentTab = _.findWhere(allTabs, { key : currentTabKey });
+        const currentTabIdx = _.findIndex(allTabs, { 'key' : currentTabKey });
+        const currentTab = allTabs[currentTabIdx];
 
         if (!currentTab) {
             throw new Error("Tab not available in list of tabs -", currentTabKey);
@@ -306,7 +305,7 @@ export class TabView extends React.PureComponent {
         return (
             <React.Fragment>
                 <TabsBar tabs={allTabs} onTabClick={this.onTabClick} {...{ currentTab, prefixTabs, suffixTabs }} />
-                <TabPane currentTab={currentTab} />
+                <TabPane {...{ currentTab, currentTabIdx }} />
             </React.Fragment>
         );
     }
@@ -368,13 +367,35 @@ const TabsBar = React.memo(function TabsBar({ tabs, currentTab, onTabClick, pref
     );
 });
 
+class TabPane extends React.PureComponent {
 
-const TabPane = React.memo(function TabsBar({ currentTab }){
-    const { key, content } = currentTab;
-    return (
-        <div className="tab-pane-outer" data-tab-key={key} id={key}>
-            { content }
-        </div>
-    );
-});
+    constructor(props){
+        super(props);
+        this.cacheCurrentTabContent = this.cacheCurrentTabContent.bind(this);
+        this.cachedContent = {};
+    }
 
+    cacheCurrentTabContent(){
+        const { currentTab, currentTabIdx: idx } = this.props;
+        const { key, content, cache = true } = currentTab;
+        this.cachedContent[key] = { content, idx, key, cache };
+    }
+
+    render(){
+        this.cacheCurrentTabContent();
+
+        const { currentTab : { key: currKey } } = this.props;
+
+        return _.values(this.cachedContent).filter(function(viewObj){
+            return viewObj && (viewObj.cache || viewObj.key === currKey);
+        }).map(function({ content, idx, key }){
+            const cls = "tab-pane-outer" + (currKey === key ? " active" : " d-none");
+            return (
+                <div className={cls} data-tab-key={key} id={key} key={key || idx}>
+                    { content }
+                </div>
+            );
+        });
+    }
+
+}

@@ -227,7 +227,7 @@ export class ProvenanceGraphTabView extends React.Component {
             parsingOptions: {
                 showReferenceFiles: true,
                 showParameters: false,
-                showIndirectFiles: false,
+                showIndirectFiles: true,
                 parseBasicIO: false
             },
             rowSpacingType: "stacked"
@@ -278,10 +278,16 @@ export class ProvenanceGraphTabView extends React.Component {
             renderDetailPane: this.renderDetailPane,
             isNodeCurrentContext: this.isNodeCurrentContext
         };
-        const parsingOptions = { ...origParseOpts };
+        const parsingOptionsForControls = { ...origParseOpts };
+        const parsingOptsForGraph = { ...origParseOpts };
         if (!anyReferenceFileNodes){
-            parsingOptions.showReferenceFiles = null;
+            parsingOptionsForControls.showReferenceFiles = null;
+            parsingOptsForGraph.showReferenceFiles = false;
             //delete parsingOptions.showReferenceFiles;
+        }
+        if (!anyIndirectFileNodes){
+            parsingOptionsForControls.showIndirectFiles = null;
+            parsingOptsForGraph.showIndirectFiles = false;
         }
 
         return (
@@ -290,7 +296,8 @@ export class ProvenanceGraphTabView extends React.Component {
                     <h3 className="tab-section-title">
                         <span>Provenance</span>
                         <WorkflowGraphSectionControls
-                            {...{ rowSpacingType, parsingOptions, toggleAllRuns, isLoadingGraphSteps, windowWidth }}
+                            {...{ rowSpacingType, toggleAllRuns, isLoadingGraphSteps, windowWidth }}
+                            parsingOptions={parsingOptionsForControls}
                             includeAllRunsInSteps={anyGroupNodes || includeAllRunsInSteps ? includeAllRunsInSteps : null}
                             onRowSpacingTypeSelect={this.handleRowSpacingTypeSelect}
                             onParsingOptChange={this.handleParsingOptChange}
@@ -298,7 +305,7 @@ export class ProvenanceGraphTabView extends React.Component {
                     </h3>
                 </div>
                 <hr className="tab-section-title-horiz-divider"/>
-                <GraphParser parsingOptions={parsingOptions} parentItem={lastStep} steps={graphSteps}>
+                <GraphParser parsingOptions={parsingOptsForGraph} parentItem={lastStep} steps={graphSteps}>
                     <Graph {...graphProps} />
                 </GraphParser>
             </div>

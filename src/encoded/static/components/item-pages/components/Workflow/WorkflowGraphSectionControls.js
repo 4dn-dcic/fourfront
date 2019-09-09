@@ -7,7 +7,7 @@ import { CollapsibleItemViewButtonToolbar } from './../CollapsibleItemViewButton
 
 export const WorkflowGraphSectionControls = React.memo(function WorkflowGraphSectionControls(props){
     const {
-        parsingOptions: { showReferenceFiles },
+        parsingOptions: { showReferenceFiles, showIndirectFiles },
         onParsingOptChange, windowWidth,
         rowSpacingType, onRowSpacingTypeSelect,
         includeAllRunsInSteps, toggleAllRuns, isLoadingGraphSteps
@@ -16,6 +16,7 @@ export const WorkflowGraphSectionControls = React.memo(function WorkflowGraphSec
         <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}>
             <ShowAllRunsCheckbox checked={includeAllRunsInSteps} onChange={toggleAllRuns} disabled={isLoadingGraphSteps} />
             <ReferenceFilesCheckbox checked={showReferenceFiles} onChange={onParsingOptChange} />
+            <IndirectFilesCheckbox checked={showIndirectFiles} onChange={onParsingOptChange} />
             <RowSpacingTypeSelect rowSpacingType={rowSpacingType} onSelect={onRowSpacingTypeSelect} />
         </CollapsibleItemViewButtonToolbar>
     );
@@ -43,18 +44,33 @@ function ReferenceFilesCheckbox({ checked, onChange, disabled }){
     return (
         <Checkbox checked={checked} onChange={onChange} disabled={disabled || checked === null}
             className="checkbox-container for-state-showReferenceFiles" name="showReferenceFiles">
-            Show Reference Files
+            Reference Files
         </Checkbox>
     );
 }
+
+
+function IndirectFilesCheckbox({ checked, onChange, disabled }){
+    if (typeof onChange !== 'function') return null;
+    if (typeof checked === 'undefined') return null;
+    return (
+        <Checkbox checked={checked} onChange={onChange} disabled={disabled || checked === null}
+            className="checkbox-container for-state-showIndirectFiles" name="showIndirectFiles">
+            Indirect Files
+        </Checkbox>
+    );
+}
+
 
 function ShowAllRunsCheckbox({ checked, onChange, disabled }){
     if (typeof onChange !== 'function') return null;
     if (typeof checked === 'undefined') return null;
     return (
-        <Checkbox checked={checked} onChange={onChange} disabled={disabled || checked === null}
+        <Checkbox checked={checked || checked === null} onChange={onChange} disabled={disabled || checked === null}
             className="checkbox-container for-state-allRuns">
-            Show All Runs
+            All Runs
         </Checkbox>
     );
 }
+
+

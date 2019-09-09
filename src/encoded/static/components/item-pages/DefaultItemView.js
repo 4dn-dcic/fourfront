@@ -600,14 +600,15 @@ const DetailsTabView = React.memo(function DetailsTabView(props){
 
 DetailsTabView.getTabObject = function(props){
     return {
-        tab : (
+        'tab' : (
             <React.Fragment>
                 <i className="icon fas icon-list icon-fw"/>
                 <span>Details</span>
             </React.Fragment>
         ),
-        key : 'details',
-        content : <DetailsTabView {...props} />
+        'key' : 'details',
+        'content' : <DetailsTabView {...props} />,
+        'cache' : false
     };
 };
 

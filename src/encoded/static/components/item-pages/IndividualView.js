@@ -3,10 +3,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import DefaultItemView from './DefaultItemView';
 import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-//import { PedigreeJSLibContainer } from './../../libs/pedigreejs';
 
+import DefaultItemView from './DefaultItemView';
 import { PedigreeTabViewBody, parseFamilyIntoDataset } from './CaseView';
 
 
