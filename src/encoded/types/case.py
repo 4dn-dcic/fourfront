@@ -65,6 +65,29 @@ class Case(Item):
     def display_title(self, title):
         return title
 
+    @calculated_property(schema={
+        "title": "Phenotypic features",
+        "description": "Phenotypic features that define the case",
+        "type" : "array",
+        "items": {
+            "title": "Phenotypic feature",
+            "type": "string",
+            "linkTo": "Phenotype"
+        }
+    })
+    def case_phenotypic_features(self, families=None):
+        """
+        Calc property that uses `family_phenotypic_features` from each family
+        and creates a overall list of phenotypic features shared between
+        all families. Returns a list of Phenotypes @id values
+        """
+        if not families:
+            return []
+        case_feats = set()
+        for fam in families:
+            case_feats.update(set(fam.get('family_phenotypic_features', [])))
+        return list(case_feats)
+
 
 @view_config(name='process-pedigree', context=Case, request_method='PATCH',
              permission='edit')
@@ -112,6 +135,10 @@ def process_pedigree(context, request):
                                       % (case, request.json['type'], request.json['download']))
 
     config_uri = request.params.get('config_uri', 'production.ini')
+    # TODO: get pedigree timestamp dynamically, maybe from query_params
+    # ped_timestamp = request.params.get('timestamp')
+    ped_datetime = datetime.utcnow()
+    ped_timestamp = ped_datetime.isoformat() + '+00:00'
     app = get_app(config_uri, 'app')
     # get user email for TestApp authentication
     email = getattr(request, '_auth0_authenticated', None)
@@ -137,25 +164,33 @@ def process_pedigree(context, request):
         response['status'] = 'failure'
         response['detail'] = 'Error parsing pedigree XML: %s' % str(exc)
         return response
+    # add "affected" metadata to refs for easy access
+    family_pheno_feats = []
+    for meta_key, meta_val in xml_data.get('meta', {}).items():
+        if meta_key.startswith('affected'):
+            refs[meta_key] = meta_val
+            if meta_val.get('id') and meta_val.get('ontology') == 'HPO':
+                family_pheno_feats.append(meta_val['id'])
 
+    # extra values that are used when creating the pedigree
     case_props = context.upgrade_properties()
-    extra_attrs = {'project': case_props['project'],
-                   'institution': case_props['institution']}
+    post_extra = {'project': case_props['project'],
+                  'institution': case_props['institution']}
+    xml_extra = {'ped_datetime': ped_datetime}
 
     family = create_family_proband(testapp, xml_data, refs, 'managedObjectID',
-                                   case, extra_attrs)
-    response['family'] = family
+                                   case, post_extra, xml_extra)
     family_uuids = {'members': [mem['uuid'] for mem in family['members']],
                     'proband': family['proband']['uuid'] if family.get('proband') else None}
 
-    # create Document for input file
+    # create Document for input pedigree file
     # pbxml files are not handled by default. Do some mimetype processing
     mimetypes.add_type('application/proband+xml', '.pbxml')
     use_type = 'application/proband+xml'
     data_href = 'data:%s;base64,%s' % (use_type, b64encode(request.json['href'].encode()).decode('ascii'))
     attach = {'attachment': {'download': request.json['download'],
                              'type': use_type, 'href': data_href}}
-    attach.update(extra_attrs)
+    attach.update(post_extra)
     try:
         attach_res = testapp.post_json('/Document', attach)
         assert attach_res.status_code == 201
@@ -165,9 +200,31 @@ def process_pedigree(context, request):
                      ' Check logs. These items were already created: %s'
                      % (case, family_uuids['members']))
         raise HTTPUnprocessableEntity(error_msg)
+
+    # add extra fields to the family object
     attach_uuid = attach_res.json['@graph'][0]['uuid']
     family['original_pedigree'] = attach_res.json['@graph'][0]
     family_uuids['original_pedigree'] = attach_uuid
+    family['timestamp'] = family_uuids['timestamp'] = ped_timestamp
+    if xml_data.get('meta', {}).get('notes'):
+        family['clinic_notes'] = family_uuids['clinic_notes'] = xml_data['meta']['notes']
+    ped_src = 'Proband app'
+    if xml_data.get('meta', {}).get('version'):
+        ped_src += (' ' + xml_data['meta']['version'])
+    family['pedigree_source'] = family_uuids['pedigree_source'] = ped_src
+    family['family_phenotypic_features'] = []
+    family_uuids['family_phenotypic_features'] = []
+    for hpo_id in family_pheno_feats:
+        try:
+            pheno_res = testapp.get('/phenotypes/' + hpo_id, status=200).json
+        except Exception as exc:
+            error_msg = ('Case %s: Cannot GET family feature %s. Error: %s'
+                         % (case, hpo_id, str(exc)))
+            log.error(error_msg)
+            raise HTTPUnprocessableEntity(error_msg)
+        else:
+            family['family_phenotypic_features'].append(pheno_res)
+            family_uuids['family_phenotypic_features'].append(pheno_res['uuid'])
 
     # PATCH the Case with new family
     case_families = case_props.get('families', []) + [family_uuids]
@@ -184,6 +241,7 @@ def process_pedigree(context, request):
         raise HTTPUnprocessableEntity(error_msg)
 
     response['case'] = case_res.json['@graph'][0]
+    response['family'] = family
     response['status'] = 'success'
     return response
 
@@ -193,7 +251,49 @@ def process_pedigree(context, request):
 #####################################
 
 
-def descendancy_xml_ref_to_parents(ref_id, refs, case, uuids_by_ref):
+def convert_age_units(age_unit):
+    """
+    Simple function to convert proband age units to cgap standard
+
+    Args:
+        age_unit (str): proband age unit
+
+    Return:
+        str: cgap age unit
+    """
+    convert_dict = {
+        "d": "day",
+        "w": "week",
+        "m": "month",
+        "y": "year"
+    }
+    return convert_dict[age_unit.lower()]
+
+
+
+def convert_to_list(xml_value):
+    """
+    An expected list of references is None for zero values, a dict for
+    one value, and a list for two or more values. Use this function to
+    standardize to a list. If individual items contain an "@ref" field, use
+    that in the returned list, otherwise return the whole item
+
+    Args:
+        xml_value (dict or list): value to transform to a list
+
+    Returns:
+        list: processed list of values from original xml_value
+    """
+    if not xml_value:
+        return []
+    elif isinstance(xml_value, dict):
+        return [xml_value.get('@ref', xml_value)]
+
+    else:
+        return [val.get('@ref', val) for val in xml_value]
+
+
+def descendancy_xml_ref_to_parents(testapp, ref_id, refs, data, case, uuids_by_ref):
     """
     This is a `xml_ref_fxn`, so it must take the correpsonding args in the
     standardized way and return a dictionary that is used to update the
@@ -205,13 +305,15 @@ def descendancy_xml_ref_to_parents(ref_id, refs, case, uuids_by_ref):
     them in a standardized way.
 
     Args:
+        testapp (webtest.TestApp): test application for posting/patching
         ref_id (str): value for the reference field of the relevant xml obj
         refs: (dict): reference-based parsed XML data
+        data (dict): metadata to POST/PATCH
         case (str): identifier of the case
         uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
 
     Returns:
-        dict: results used to update the Fourfront metadata in progress
+        None
     """
     result = {'mother': None, 'father': None}
     error_msg = None
@@ -234,7 +336,132 @@ def descendancy_xml_ref_to_parents(ref_id, refs, case, uuids_by_ref):
     if error_msg:
         log.error(error_msg)
         raise HTTPUnprocessableEntity(error_msg)
-    return result
+    data.update(result)
+
+
+def annotations_xml_ref_to_clinic_notes(testapp, ref_ids, refs, data, case, uuids_by_ref):
+    """
+    This is a `xml_ref_fxn`, so it must take the corresponding args in the
+    standardized way and update the `data` dictionary, which is used to PATCH
+    the Individual item.
+
+    Helper function to use specifically with `annotations` object reference
+    in input XML. Uses the string reference id and input dictionary of refs
+    to find the annotations used as note .
+
+    Args:
+        testapp (webtest.TestApp): test application for posting/patching
+        ref_ids (list): value for the reference field of the relevant xml obj
+        refs: (dict): reference-based parsed XML data
+        data (dict): metadata to POST/PATCH
+        case (str): identifier of the case
+        uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
+
+    Returns:
+        None
+    """
+    clinic_notes = []
+    for annotation_ref in ref_ids:
+        annotation_obj = refs[annotation_ref]
+        if annotation_obj.get('text'):
+            clinic_notes.append(annotation_obj['text'])
+    if clinic_notes:
+        if data.get('clinic_notes'):
+            clinic_notes.insert(0, data['clinic_notes'])
+        data['clinic_notes'] = '\n'.join(clinic_notes)
+
+
+def diagnoses_xml_to_phenotypic_features(testapp, ref_vals, refs, data, case, uuids_by_ref):
+    """
+    This is a `xml_ref_fxn`, so it must take the corresponding args in the
+    standardized way and update the `data` dictionary, which is used to PATCH
+    the Individual item.
+
+    Helper function to use specifically with `diagnoses` object values
+    in input XML. Uses a list of dict ref_vals and converts to
+    `phenotypic_features` or `clinic_notes` in the family metadata.
+
+    Args:
+        testapp (webtest.TestApp): test application for posting/patching
+        ref_vals (list): list of dict diagnoses values
+        refs: (dict): reference-based parsed XML data
+        data (dict): metadata to POST/PATCH
+        case (str): identifier of the case
+        uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
+
+    Returns:
+        None
+    """
+    # need Phenotype, onset_age, and onset_age_units
+    pheno_feats = data.get('phenotypic_features', [])
+    clinic_notes = []
+    for diagnosis in ref_vals:
+        found_term = False
+        # only use HPO terms for now
+        if diagnosis.get('id') and diagnosis.get('ontology') == 'HPO':
+            pheno_feat_data = {}
+            if diagnosis.get('ageAtDx'):
+                pheno_feat_data['onset_age'] = int(diagnosis['ageAtDx'])
+            if diagnosis.get('ageAtDx') and diagnosis.get('ageAtDxUnits'):
+                pheno_feat_data['onset_age_units'] = convert_age_units(diagnosis['ageAtDxUnits'])
+            if diagnosis:
+                # look up HPO term. If not found, use a clinical note
+                try:
+                    pheno_res = testapp.get('/phenotypes/' + diagnosis['id'], status=200).json
+                except Exception as exc:
+                    log.error('Case %s: Cannot GET term %s. Error: %s'
+                              % (case, diagnosis['id'], str(exc)))
+                else:
+                    found_term = True
+                    pheno_feat_data['phenotypic_feature'] = pheno_res['uuid']
+                    pheno_feats.append(pheno_feat_data)
+
+        # if we cannot find the term, update the clinical notes
+        if not found_term:
+            dx_note = 'Diagnosis: ' + diagnosis['name']
+            if diagnosis.get('ageAtDx') and diagnosis.get('ageAtDxUnits'):
+                dx_note += ('at ' + diagnosis['ageAtDx'] + ' ' +
+                            convert_age_units(diagnosis['ageAtDxUnits']) + 's')
+            if diagnosis['id']:
+                dx_note += ' (HPO term %s not found)' % diagnosis['id']
+            clinic_notes.append(dx_note)
+
+    if pheno_feats:
+        data['phenotypic_features'] = pheno_feats
+    if clinic_notes:
+        if data.get('clinic_notes'):
+            clinic_notes.insert(0, data['clinic_notes'])
+        data['clinic_notes'] = '\n'.join(clinic_notes)
+
+
+def affected_xml_to_phenotypic_features(testapp, ref_vals, refs, data, case, uuids_by_ref):
+    """
+    This is a `xml_ref_fxn`, so it must take the corresponding args in the
+    standardized way and update the `data` dictionary, which is used to PATCH
+    the Individual item.
+
+    Helper function to use specifically with `affected` object references
+    in input XML. Uses a list of dict ref_vals and converts to
+    `phenotypic_features` or `clinic_notes` in the family metadata.
+
+    Args:
+        testapp (webtest.TestApp): test application for posting/patching
+        ref_vals (list): list of dict affected values (should only have 1 item)
+        refs: (dict): reference-based parsed XML data
+        data (dict): metadata to POST/PATCH
+        case (str): identifier of the case
+        uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
+
+    Returns:
+        None
+    """
+    if ref_vals[0]['affected'] != '1':
+        return
+    found_aff_val = refs[ref_vals[0]['meta']].copy()
+    # make sure these are consistently set from the `person` xml data
+    found_aff_val.update(ref_vals[0])
+    diagnoses_xml_to_phenotypic_features(testapp, [found_aff_val], refs, data,
+                                         case, uuids_by_ref)
 
 
 def etree_to_dict(ele, ref_container=None, ref_field=''):
@@ -271,8 +498,8 @@ def etree_to_dict(ele, ref_container=None, ref_field=''):
         ret = {}
         # add child elements and attributes from this element
         for child in children:
+            # make into a list if the element is found multiple times
             if child.tag in ret:
-                # make into a list
                 if not isinstance(ret[child.tag], list):
                     ret[child.tag] = [ret[child.tag]]
                 ret[child.tag].append(etree_to_dict(child, ref_container, ref_field))
@@ -298,12 +525,13 @@ def etree_to_dict(ele, ref_container=None, ref_field=''):
     return ret
 
 
-def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
+def create_family_proband(testapp, xml_data, refs, ref_field, case,
+                          post_extra=None, xml_extra=None):
     """
     Proband-specific object creation protocol. We can expand later on
 
     General process (in development):
-    - POST individuals with required fields and attribution (in `extra` input)
+    - POST individuals with required fields and attribution (`post_extra` kwarg)
     - PATCH non-required fields
 
     Can be easily extended by adding tuples to `to_convert` dict
@@ -314,7 +542,9 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
         refs: (dict): reference-based parsed XML data
         ref_field (str): name of reference field from the XML data
         case (str): identifier of the case
-        extra (dict): keys/values given in the arg are added to POST
+        post_extra (dict): keys/values given here are added to POST
+        xml_extra (dict): key/values given here are added to each XML object
+            processed using the PROBAND_MAPPING
 
     Returns:
         dict: family created, including members and proband with full context
@@ -332,8 +562,10 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
             if not ref:  # element does not have a managed ID
                 continue
             data = {}
-            if extra is not None:
-                data.update(extra)
+            if round == 'first' and post_extra is not None:
+                data.update(post_extra)
+            if xml_extra is not None:
+                xml_obj.update(xml_extra)
             for xml_key in xml_obj:
                 converted = PROBAND_MAPPING[item_type].get(xml_key)
                 if converted is None:
@@ -343,20 +575,22 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
                     if converted.get('linked', False) is True:
                         continue
                     data[converted['corresponds_to']] = converted['value'](xml_obj)
-                else:
+                elif round == 'second':
                     if converted.get('linked', False) is False:
                         continue
+
                     ref_val = converted['value'](xml_obj)
                     # more complex function based on xml refs needed
-                    if 'xml_ref_fxn' in converted and ref_val:
-                        result = converted['xml_ref_fxn'](ref_val, refs, case, uuids_by_ref)
-                        data.update(result)
+                    if ref_val and 'xml_ref_fxn' in converted:
+                        # will update data in place
+                        converted['xml_ref_fxn'](testapp, ref_val, refs, data,
+                                                 case, uuids_by_ref)
                     elif ref_val:
                         data[converted['corresponds_to']] = uuids_by_ref[ref_val]
+
             # POST if first round
             if round == 'first':
                 try:
-                    # post_res = post_item_snovault(request, item_type, data)
                     post_res = testapp.post_json('/' + item_type, data)
                     assert post_res.status_code == 201
                 except Exception as exc:
@@ -374,7 +608,6 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case, extra=None):
             if round == 'second' and data:
                 try:
                     patch_res = testapp.patch_json('/' + uuids_by_ref[ref], data)
-                    # patch_res = patch_item_snovault(request, item_type, uuids_by_ref[ref], data)
                     assert patch_res.status_code == 200
                 except Exception as exc:
                     log.error('Failure to PATCH %s in process-pedigree with '
@@ -441,6 +674,36 @@ PROBAND_MAPPING = {
         'descendancy': {
             'xml_ref_fxn': descendancy_xml_ref_to_parents,
             'value': lambda v: v['descendancy']['@ref'] if v.get('descendancy') else None,
+            'linked': True
+        },
+        'annotations': {
+            'xml_ref_fxn': annotations_xml_ref_to_clinic_notes,
+            'value': lambda v: convert_to_list(v['annotations']),
+            'linked': True
+        },
+        'diagnoses': {
+            'xml_ref_fxn': diagnoses_xml_to_phenotypic_features,
+            'value': lambda v: convert_to_list(v['diagnoses']),
+            'linked': True
+        },
+        'affected1': {
+            'xml_ref_fxn': affected_xml_to_phenotypic_features,
+            'value': lambda v: [{'meta': 'affected1', 'affected': v['affected1'], 'ageAtDx': v['affected1DxAge'], 'ageAtDxUnits': v['affected1DxAgeUnits']}],
+            'linked': True
+        },
+        'affected2': {
+            'xml_ref_fxn': affected_xml_to_phenotypic_features,
+            'value': lambda v: [{'meta': 'affected2', 'affected': v['affected2'], 'ageAtDx': v['affected2DxAge'], 'ageAtDxUnits': v['affected2DxAgeUnits']}],
+            'linked': True
+        },
+        'affected3': {
+            'xml_ref_fxn': affected_xml_to_phenotypic_features,
+            'value': lambda v: [{'meta': 'affected3', 'affected': v['affected3'], 'ageAtDx': v['affected3DxAge'], 'ageAtDxUnits': v['affected3DxAgeUnits']}],
+            'linked': True
+        },
+        'affected4': {
+            'xml_ref_fxn': affected_xml_to_phenotypic_features,
+            'value': lambda v: [{'meta': 'affected4', 'affected': v['affected4'], 'ageAtDx': v['affected4DxAge'], 'ageAtDxUnits': v['affected4DxAgeUnits']}],
             'linked': True
         }
     }
