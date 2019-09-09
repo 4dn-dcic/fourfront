@@ -111,8 +111,12 @@ export default class CaseView extends DefaultItemView {
 
 }
 
-
-export function parseFamilyIntoDataset(family){
+/**
+ * Parses `context.families` instance
+ * into list of Individuals (JSON objects) with
+ * PedigreeViz-compliant properties.
+ */
+function parseFamilyIntoDataset(family){
     const { members = [], proband, ped_file } = family;
     return members.map(function(individual){
         const {
@@ -142,8 +146,11 @@ export function parseFamilyIntoDataset(family){
     });
 }
 
-
-export class PedigreeTabView extends React.PureComponent {
+/**
+ * TabView that shows Pedigree(s) of Case families.
+ * Specific to CaseView.
+ */
+class PedigreeTabView extends React.PureComponent {
 
     static getTabObject(props){
         const { pedigreeFamilies: families = [] } = props;
@@ -203,6 +210,11 @@ export class PedigreeTabView extends React.PureComponent {
 }
 
 
+/**
+ * Given dataset and options, renders out a pedigree from dataset.
+ * Reusable for any PedigreeTabView of any ItemView.
+ * @todo Maybe move into item-pages/components? Maybe not.
+ */
 export function PedigreeTabViewBody({ innerOverlaysContainer, dataset, windowWidth, windowHeight }){
     return (
         <FullHeightCalculator {...{ windowWidth, windowHeight }}>

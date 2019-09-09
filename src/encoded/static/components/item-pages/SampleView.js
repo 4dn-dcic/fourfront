@@ -10,7 +10,7 @@ import DefaultItemViewWithProvenance, { ProvenanceGraphTabView } from './Default
 
 
 
-export default class FileProcessedView extends DefaultItemViewWithProvenance {
+export default class SampleView extends DefaultItemViewWithProvenance {
 
     shouldGraphExist(){
         const { context } = this.props;

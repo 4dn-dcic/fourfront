@@ -56,14 +56,13 @@ def trace_workflow_runs(context, request):
     if 'File' in item_types:
         files_objs_to_trace.append(item_model_obj)
 
-    #
-    #elif 'Experiment' in item_types:
-    #    for file_uuid in item_model_obj.get('processed_files', []):
-    #        file_model = request.registry[CONNECTION].storage.get_by_uuid(file_uuid)
-    #        file_obj = item_model_to_object(file_model, request)
-    #        files_objs_to_trace.append(file_obj)
-    #    files_objs_to_trace.reverse()
-    #
+    elif 'Sample' in item_types:
+        for file_uuid in item_model_obj.get('processed_files', []):
+            file_model = request.registry[CONNECTION].storage.get_by_uuid(file_uuid)
+            file_obj = item_model_to_object(file_model, request)
+            files_objs_to_trace.append(file_obj)
+        files_objs_to_trace.reverse()
+
     #elif 'ExperimentSet' in item_types:
     #    file_uuids_to_trace_from_experiment_set = item_model_obj.get('processed_files', [])
     #    file_uuids_to_trace_from_experiments    = []

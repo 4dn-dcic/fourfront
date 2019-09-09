@@ -7,6 +7,52 @@ import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-co
 //import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
 
 
+// These functions are used here and may be re-used in WorkflowDetailPane.js and similar.
+
+export function isNodeParameter(node){
+    return node.ioType === 'parameter';
+}
+
+export function isNodeFile(node){
+    return WorkflowNodeElement.ioFileTypes.has(node.ioType);
+}
+
+export function isNodeGroup(node){
+    return ((node.nodeType || '').indexOf('group') > -1);
+}
+
+export function isNodeQCMetric(node){
+    if (node.ioType === 'qc') return true;
+    if (node.ioType === 'report') return true;
+    if (node.meta && node.meta.type === 'QC') return true;
+    if (node.meta && node.meta.type === 'report') return true;
+    if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
+    return false;
+}
+
+export function doesRunDataExist(node){
+    if (isNodeGroup(node)){
+        return (
+            node.meta && node.meta.run_data && node.meta.run_data.file
+            && Array.isArray(node.meta.run_data.file) && node.meta.run_data.file.length > 0 && typeof node.meta.run_data.file[0]['@id'] === 'string'
+            /* && typeof node.meta.run_data.file.display_title === 'string'*/
+        );
+    } else if (isNodeParameter(node)){
+        return (node.meta && node.meta.run_data && (
+            typeof node.meta.run_data.value === 'string' ||
+            typeof node.meta.run_data.value === 'number' ||
+            typeof node.meta.run_data.value === 'boolean'
+        ));
+    } else if (isNodeFile(node)) { // Uncomment this in-line comment once all Workflows have been upgraded and have 'step.inputs[]|outputs[].meta.type'
+        return (
+            node.meta && node.meta.run_data && node.meta.run_data.file
+            && typeof node.meta.run_data.file['@id'] === 'string'
+            /* && typeof node.meta.run_data.file.display_title === 'string'*/
+        );
+    }
+}
+
+
 /** TODO codify what we want shown here and cleanup code - breakup into separate functional components */
 
 export class WorkflowNodeElement extends React.PureComponent {
@@ -21,49 +67,6 @@ export class WorkflowNodeElement extends React.PureComponent {
     };
 
     static ioFileTypes = new Set(['data file', 'QC', 'reference file', 'report']);
-
-    static isNodeParameter(node){
-        return node.ioType === 'parameter';
-    }
-
-    static isNodeFile(node){
-        return WorkflowNodeElement.ioFileTypes.has(node.ioType);
-    }
-
-    static isNodeGroup(node){
-        return ((node.nodeType || '').indexOf('group') > -1);
-    }
-
-    static isNodeQCMetric(node){
-        if (node.ioType === 'qc') return true;
-        if (node.ioType === 'report') return true;
-        if (node.meta && node.meta.type === 'QC') return true;
-        if (node.meta && node.meta.type === 'report') return true;
-        if (node.meta && node.meta.run_data && node.meta.run_data.type === 'quality_metric') return true;
-        return false;
-    }
-
-    static doesRunDataExist(node){
-        if (WorkflowNodeElement.isNodeGroup(node)){
-            return (
-                node.meta && node.meta.run_data && node.meta.run_data.file
-                && Array.isArray(node.meta.run_data.file) && node.meta.run_data.file.length > 0 && typeof node.meta.run_data.file[0]['@id'] === 'string'
-                /* && typeof node.meta.run_data.file.display_title === 'string'*/
-            );
-        } else if (WorkflowNodeElement.isNodeParameter(node)){
-            return (node.meta && node.meta.run_data && (
-                typeof node.meta.run_data.value === 'string' ||
-                typeof node.meta.run_data.value === 'number' ||
-                typeof node.meta.run_data.value === 'boolean'
-            ));
-        } else if (WorkflowNodeElement.isNodeFile(node)) { // Uncomment this in-line comment once all Workflows have been upgraded and have 'step.inputs[]|outputs[].meta.type'
-            return (
-                node.meta && node.meta.run_data && node.meta.run_data.file
-                && typeof node.meta.run_data.file['@id'] === 'string'
-                /* && typeof node.meta.run_data.file.display_title === 'string'*/
-            );
-        }
-    }
 
     static getFileFormat(node){
         /** @see https://medium.com/@JasonCust/fun-with-destructuring-assignments-ba5717c8d7e **/
@@ -119,11 +122,11 @@ export class WorkflowNodeElement extends React.PureComponent {
             else if (typeof ioType === 'undefined'){
                 iconClass = 'question';
             } else if (typeof ioType === 'string') {
-                if (WorkflowNodeElement.isNodeQCMetric(node)) {
+                if (isNodeQCMetric(node)) {
                     iconClass = 'check-square-o';
-                } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
+                } else if (isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
                     iconClass = 'wrench';
-                } else if (WorkflowNodeElement.isNodeFile(node)){
+                } else if (isNodeFile(node)){
                     iconClass = 'file-text-o fas';
                 } else {
                     iconClass = 'question fas';
@@ -176,7 +179,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         if (nodeType === 'input' || nodeType === 'output'){
             let argumentName = nodeType;
             argumentName = argumentName.charAt(0).toUpperCase() + argumentName.slice(1);
-            hasRunDataFile = WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node);
+            hasRunDataFile = isNodeFile(node) && doesRunDataExist(node);
             const fileTitle = hasRunDataFile && (meta.run_data.file.display_title || meta.run_data.file.accession);
             if (fileTitle) {
                 output += '<small>' + argumentName + ' File</small>';
@@ -240,8 +243,8 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
 
         // If Parameter
-        if (WorkflowNodeElement.isNodeParameter(node)){
-            if (WorkflowNodeElement.doesRunDataExist(node)){
+        if (isNodeParameter(node)){
+            if (doesRunDataExist(node)){
                 elemProps.className += ' mono-text';
                 return <div {...elemProps}>{ node.name }</div>;
             }
@@ -249,7 +252,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
 
         // If File
-        if (WorkflowNodeElement.isNodeFile(node)){
+        if (isNodeFile(node)){
             if (fileFormatAsString) {
                 return <div {...elemProps}>{ fileFormatAsString }</div>;
             }
@@ -325,7 +328,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
 
 
-        if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
+        if (isNodeFile(node) && doesRunDataExist(node)){
             var belowTitle;
             if (node.meta && node.meta.file_type){
                 belowTitle = node.meta.file_type;
@@ -370,7 +373,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             return <div className="node-name">{ this.icon() }{ workflow.display_title }</div>;
         }
 
-        if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
+        if (isNodeFile(node) && doesRunDataExist(node)){
             const { file : { accession, display_title } } = run_data;
             return (
                 <div className={"node-name" + (accession ? ' mono-text' : '')}>
@@ -380,7 +383,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             );
         }
 
-        if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){
+        if (isNodeParameter(node) && doesRunDataExist(node)){
             return <div className="node-name mono-text">{ this.icon() }{ run_data.value }</div>;
         }
 
@@ -398,7 +401,7 @@ export class WorkflowNodeElement extends React.PureComponent {
     qcMarker(){
         const { node, selected } = this.props;
 
-        if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
+        if (!isNodeFile(node) || !doesRunDataExist(node)){
             return null;
         }
 
