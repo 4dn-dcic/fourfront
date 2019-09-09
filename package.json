@@ -70,7 +70,7 @@
     "babel-plugin-minify-dead-code-elimination": "^0.5.0",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.0.2",
-    "cypress": "^3.4.0",
+    "cypress": "^3.4.1",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-external-nodejs-plugin": "^1.0.0",
@@ -99,7 +99,8 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.11",
+    "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.11",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.12",
     "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",

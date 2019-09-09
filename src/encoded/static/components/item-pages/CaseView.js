@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
+import url from 'url';
 import { DropdownButton, DropdownItem } from 'react-bootstrap';
 import DefaultItemView from './DefaultItemView';
 import { console, layout, ajax, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
@@ -11,7 +12,8 @@ import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { PedigreeViz } from './../viz/PedigreeViz';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
-import url from 'url';
+import { FullHeightCalculator } from './components/FullHeightCalculator';
+
 
 
 export default class CaseView extends DefaultItemView {
@@ -109,8 +111,12 @@ export default class CaseView extends DefaultItemView {
 
 }
 
-
-export function parseFamilyIntoDataset(family){
+/**
+ * Parses `context.families` instance
+ * into list of Individuals (JSON objects) with
+ * PedigreeViz-compliant properties.
+ */
+function parseFamilyIntoDataset(family){
     const { members = [], proband, ped_file } = family;
     return members.map(function(individual){
         const {
@@ -140,8 +146,11 @@ export function parseFamilyIntoDataset(family){
     });
 }
 
-
-export class PedigreeTabView extends React.PureComponent {
+/**
+ * TabView that shows Pedigree(s) of Case families.
+ * Specific to CaseView.
+ */
+class PedigreeTabView extends React.PureComponent {
 
     static getTabObject(props){
         const { pedigreeFamilies: families = [] } = props;
@@ -201,23 +210,19 @@ export class PedigreeTabView extends React.PureComponent {
 }
 
 
+/**
+ * Given dataset and options, renders out a pedigree from dataset.
+ * Reusable for any PedigreeTabView of any ItemView.
+ * @todo Maybe move into item-pages/components? Maybe not.
+ */
 export function PedigreeTabViewBody({ innerOverlaysContainer, dataset, windowWidth, windowHeight }){
-
-    // Hardcoded to avoid trying to measure heights of DOM elems and whatnot.
-    // This is duplicated in CSS3 using calc() for more modern browsers. If changing,
-    // make sure is changing in both places.
-
-    let height = null;
-    const surroundingComponentsHeight = 216; // 215 = footer (50) + navbar (41) + tab-section-title (78) + hr (1) + item page nav (46)
-    const rgs = layout.responsiveGridState(windowWidth);
-    if (rgs === 'md' || rgs === 'lg' || rgs === 'xl') {
-        height = Math.max(windowHeight - surroundingComponentsHeight, 600);
-    }
     return (
-        <PedigreeViz overlaysContainer={innerOverlaysContainer}
-            {...{ dataset, windowWidth, height, width: windowWidth }}
-            filterUnrelatedIndividuals={false}>
-        </PedigreeViz>
+        <FullHeightCalculator {...{ windowWidth, windowHeight }}>
+            <PedigreeViz overlaysContainer={innerOverlaysContainer}
+                {...{ dataset, windowWidth, width: windowWidth }}
+                filterUnrelatedIndividuals={false}>
+            </PedigreeViz>
+        </FullHeightCalculator>
     );
 }
 
