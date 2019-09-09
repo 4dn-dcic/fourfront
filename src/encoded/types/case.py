@@ -31,12 +31,30 @@ class Case(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/case.json')
     embedded_list = [
-        "families.members.sex",
+        "families.members.accession",
         "families.members.father",
         "families.members.mother",
         "families.members.status",
-        "families.members.accession",
-        "families.members.is_deceased"
+        "families.members.sex",
+        "families.members.is_deceased",
+        "families.members.is_pregnancy",
+        "families.members.is_termination_of_pregnancy",
+        "families.members.is_spontaneous_abortion",
+        "families.members.is_still_birth",
+        "families.members.cause_of_death",
+        "families.members.age_at_death",
+        "families.members.age_at_death_units",
+        "families.members.is_no_children_by_choice",
+        "families.members.is_infertile",
+        "families.members.cause_of_infertility",
+        "families.members.ethnicity",
+        "families.members.clinic_notes",
+        "families.members.phenotypic_features.phenotypic_feature",
+        "families.members.phenotypic_features.onset_age",
+        "families.members.phenotypic_features.onset_age_units",
+        "families.members.samples.status",
+        "families.members.samples.processed_files",
+        "families.members.samples.files"
     ]
 
     @calculated_property(schema={

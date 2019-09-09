@@ -13,6 +13,7 @@ import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui
 import { PedigreeViz } from './../viz/PedigreeViz';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { FullHeightCalculator } from './components/FullHeightCalculator';
+import { Schemas } from './../util';
 
 
 
@@ -42,8 +43,12 @@ export default class CaseView extends DefaultItemView {
         super(props);
         this.onAddedFamily = this.onAddedFamily.bind(this);
         this.handleFamilySelect = this.handleFamilySelect.bind(this);
-        this.state.pedigreeFamilies = (props.context.families || []).filter(CaseView.haveFullViewPermissionForFamily);
-        this.state.pedigreeFamiliesIdx = 0;
+        const pedigreeFamilies = (props.context.families || []).filter(CaseView.haveFullViewPermissionForFamily);
+        this.state = {
+            ...this.state,
+            pedigreeFamilies,
+            pedigreeFamiliesIdx: 0 // Maybe should be most recent/last index, idk, tbd.
+        };
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -82,14 +87,29 @@ export default class CaseView extends DefaultItemView {
     getTabViewContents(){
         const { context : { families = [] } } = this.props;
         const { pedigreeFamilies = [] } = this.state;
+        const familiesLen = pedigreeFamilies.length;
         const initTabs = [];
 
-        if (pedigreeFamilies.length > 0){ // Remove this outer if condition if wanna show disabled '0 Pedigrees' tab instead
+        if (familiesLen > 0){
+            // Remove this outer if condition if wanna show disabled '0 Pedigrees' tab instead
+
             initTabs.push(PedigreeTabView.getTabObject({
                 ...this.props,
                 ...this.state, // pedigreeFamilies & pedigreeFamiliesIdx
                 handleFamilySelect: this.handleFamilySelect
             }));
+
+        }
+
+        if (familiesLen > 0){
+            // Remove this outer if condition if wanna show disabled 'Pedigree Summary' tab instead
+
+            initTabs.push(ProcessingSummaryTabView.getTabObject({
+                ...this.props,
+                ...this.state, // pedigreeFamilies & pedigreeFamiliesIdx
+                handleFamilySelect: this.handleFamilySelect
+            }));
+
         }
 
         return this.getCommonTabs().concat(initTabs);
@@ -111,40 +131,177 @@ export default class CaseView extends DefaultItemView {
 
 }
 
-/**
- * Parses `context.families` instance
- * into list of Individuals (JSON objects) with
- * PedigreeViz-compliant properties.
- */
-function parseFamilyIntoDataset(family){
-    const { members = [], proband, ped_file } = family;
-    return members.map(function(individual){
+
+const ProcessingSummaryTabView = React.memo(function ProcessingSummaryTabView(props){
+    const { pedigreeFamilies: families = [] } = props;
+    const familiesLen = families.length;
+    return (
+        <div className="container-wide">
+            <h3 className="tab-section-title">
+                <span>Processing Summary</span>
+            </h3>
+            <hr className="tab-section-title-horiz-divider"/>
+            {
+                families.map(function(family, idx){
+                    const { original_pedigree: { display_title: pedFileName } = {} } = family;
+                    const title = familiesLen === 1 ? null : (
+                        <h4 className="mt-15 mb-1 text-400">
+                            { "Family " + (idx + 1) }
+                            { pedFileName ? <span className="text-300">{ " (" + pedFileName + ")" }</span> : null }
+                        </h4>
+                    );
+                    return (
+                        <div className="summary-table-container" key={idx}>
+                            { title }
+                            <ProcessingSummaryTable {...family} idx={idx} />
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
+});
+ProcessingSummaryTabView.getTabObject = function(props){
+    const { pedigreeFamilies: families = [] } = props;
+    const familiesLen = families.length;
+    return {
+        'tab' : (
+            <React.Fragment>
+                <i className="icon icon-cogs fas icon-fw"/>
+                <span>Processing Summary</span>
+            </React.Fragment>
+        ),
+        'key' : 'processing-summary',
+        'disabled' : familiesLen === 0,
+        'content' : <ProcessingSummaryTabView {...props} />
+    };
+};
+
+const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props){
+    const {
+        members = [],
+        proband: { '@id' : probandID } = {},
+        ped_file = null
+    } = props;
+    const columnOrder = [
+        "individual",
+        "sample",
+        "processedFileCount",
+        "rawFileCount",
+        "sampleStatus"
+    ];
+    const columnTitles = {
+        'individual' : "Individual",
+        'sample' : "Sample",
+        'processedFileCount' : "Processed Files",
+        'rawFileCount' : "Raw Files",
+        'sampleStatus' : "Sample Status"
+    };
+    const rows = [];
+
+    // Gather rows from family.members - 1 per sample (or individual, if no sample).
+    members.forEach(function(individual){
         const {
-            "@id": id,
-            display_title: name,
-            sex: gender = "undetermined",
-            father = null, // We might get these back as strings from back-end response, instd of embedded obj.
-            mother = null,
-            is_deceased = false
+            display_title = null,
+            '@id' : id,
+            error = null,
+            samples = []
         } = individual;
 
-        const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
-        const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
-        const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
+        if (!display_title || !id){
+            rows.push({
+                individual : <em>{ error || "No view permissions" }</em>,
+                isProband: false,
+                sample: <em>N/A</em>,
+                processedFileCount: <em>N/A</em>,
+                rawFileCount: <em>N/A</em>,
+                sampleStatus: <em>N/A</em>
+            });
+            return;
+        }
 
-        return {
-            id, gender, name,
-            'father' : fatherStr,
-            'mother' : motherStr,
-            'isProband' : probandID && probandID === id,
-            'deceased' : !!(is_deceased),
-            'data' : {
-                // Keep non-proband-viz specific data here. TODO: Define/document.
-                'individualItem' : individual
+        const indvLink = <a href={id} className="accession">{ display_title }</a>;
+
+        if (samples.length === 0){
+            rows.push({
+                individual : indvLink,
+                isProband: (probandID && probandID === id),
+                sample: <em className="small" data-tip="No samples available for this individual">N/A</em>
+            });
+            return;
+        }
+
+        samples.forEach(function(sample){
+            const {
+                '@id' : sampleID,
+                display_title: sampleTitle,
+                error: sampleErr = null,
+                processed_files = [],
+                files = [],
+                status: sampleStatus
+            } = sample;
+
+            if (!sampleTitle || !sampleID){
+                rows.push({
+                    individual : indvLink,
+                    isProband: (probandID && probandID === id),
+                    sample : <em>{ sampleErr || "No view permissions" }</em>
+                });
+                return;
+            } else {
+                rows.push({
+                    individual : indvLink,
+                    isProband: (probandID && probandID === id),
+                    sample: <a href={sampleID} className="accession">{ sampleTitle }</a>,
+                    processedFileCount: processed_files.length,
+                    rawFileCount: files.length,
+                    sampleStatus: (
+                        <span>
+                            <i className="item-status-indicator-dot mr-05" data-status={sampleStatus}/>
+                            { Schemas.Term.toName("status", sampleStatus) }
+                        </span>
+                    )
+                });
             }
-        };
+        });
+
     });
-}
+
+    if (rows.length === 0){
+        return <em>No members available.</em>;
+    }
+
+    const renderedRows = rows.map(function(row, rowIdx){
+        const { isProband = false } = row;
+        const rowCls = "sample-row" + (isProband ? " is-proband" : "");
+        const rowCols = columnOrder.map(function(colName){
+            return (
+                <td key={colName} data-for-col={colName}
+                    data-tip={isProband && colName === "individual" ? "Proband" : null}
+                    className={typeof row[colName] !== 'undefined' ? "has-value" : null}>
+                    { row[colName] || " - " }
+                </td>
+            );
+        });
+        return <tr key={rowIdx} className={rowCls}>{ rowCols }</tr>;
+    });
+
+    return (
+        <table className="processing-summary-table">
+            <thead>
+                <tr>
+                    { columnOrder.map(function(colName){
+                        return <th key={colName}>{ columnTitles[colName] }</th>;
+                    }) }
+                </tr>
+            </thead>
+            <tbody>{ renderedRows }</tbody>
+        </table>
+    );
+
+});
+
+
 
 /**
  * TabView that shows Pedigree(s) of Case families.
@@ -168,11 +325,45 @@ class PedigreeTabView extends React.PureComponent {
         };
     }
 
+    /**
+     * Parses `context.families` instance
+     * into list of Individuals (JSON objects) with
+     * PedigreeViz-compliant properties.
+     */
+    static parseFamilyIntoDataset(family){
+        const { members = [], proband, ped_file } = family;
+        const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
+        return members.map(function(individual){
+            const {
+                "@id": id,
+                display_title: name,
+                sex: gender = "undetermined",
+                father = null, // We might get these back as strings from back-end response, instd of embedded obj.
+                mother = null,
+                is_deceased = false
+            } = individual;
+
+            const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
+            const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
+
+            return {
+                id, gender, name,
+                'father' : fatherStr,
+                'mother' : motherStr,
+                'isProband' : probandID && probandID === id,
+                'deceased' : !!(is_deceased),
+                'data' : {
+                    // Keep non-proband-viz specific data here. TODO: Define/document.
+                    'individualItem' : individual
+                }
+            };
+        });
+    }
 
     constructor(props){
         super(props);
         this.memoized = {
-            parseFamilyIntoDataset : memoize(parseFamilyIntoDataset)
+            parseFamilyIntoDataset : memoize(PedigreeTabView.parseFamilyIntoDataset)
         };
         if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
             throw new Error("Expected props.context.families to be a non-empty Array.");

@@ -13,12 +13,19 @@ import DefaultItemViewWithProvenance, { ProvenanceGraphTabView } from './Default
 export default class SampleView extends DefaultItemViewWithProvenance {
 
     shouldGraphExist(){
-        const { context } = this.props;
-        return (
-            (Array.isArray(context.workflow_run_outputs) && context.workflow_run_outputs.length > 0)
-            // We can uncomment below line once do permissions checking on backend for graphing
-            //&& _.any(context.workflow_run_outputs, object.itemUtil.atId)
-        );
+        const { context : { processed_files = [] } } = this.props;
+        const procFileLen = processed_files.length;
+        let file;
+        for (var i = 0; i < procFileLen; i++){
+            file = processed_files[i];
+            if (
+                file && object.itemUtil.atId(file) &&
+                Array.isArray(file.workflow_run_outputs) && file.workflow_run_outputs.length > 0
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 
     getTabViewContents(){

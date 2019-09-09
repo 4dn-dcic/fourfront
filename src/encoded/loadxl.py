@@ -26,9 +26,9 @@ def includeme(config):
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
     'user',
-    'file_format',
-    'institution',
     'project',
+    'institution',
+    'file_format',
     'disease',
     'case',
     'individual',
@@ -525,7 +525,7 @@ def load_local_data(app, clear_tables=False, overwrite=False):
 
     if use_temp_local:
         return load_data(app, docsdir='documents', indir='temp-local-inserts',
-                         clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
+                         clear_tables=clear_tables, use_master_inserts=True, overwrite=overwrite)
     else:
         return load_data(app, docsdir='documents', indir='inserts',
                          clear_tables=clear_tables, overwrite=overwrite)

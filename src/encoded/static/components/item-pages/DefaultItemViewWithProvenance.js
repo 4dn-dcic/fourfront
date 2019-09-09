@@ -75,9 +75,12 @@ export default class DefaultItemViewWithProvenance extends DefaultItemView {
         };
 
         const uriOpts = {
-            timestamp: moment.utc().unix(),
-            all_runs: includeAllRunsInSteps
+            timestamp: moment.utc().unix()
         };
+
+        if (includeAllRunsInSteps){
+            uriOpts.all_runs = "True";
+        }
 
         const tracingHref = (
             '/trace_workflow_run_steps/' + uuid + '/'
@@ -190,7 +193,7 @@ export class ProvenanceGraphTabView extends React.Component {
             parsingOptions: {
                 showReferenceFiles: true,
                 showParameters: false,
-                showIndirectFiles: true,
+                showIndirectFiles: false,
                 parseBasicIO: false
             },
             rowSpacingType: "stacked"

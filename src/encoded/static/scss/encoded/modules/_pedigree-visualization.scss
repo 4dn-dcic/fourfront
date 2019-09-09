@@ -324,7 +324,7 @@ $pedigree-disease-colors :
             transition: flex .3s, width .3s, background-color .2s;
             &.has-selected-node {
                 background-color: #fff;
-                border-left: 1px solid darken($pedigree-viz-bg-color, 10%);
+                border-left-color: darken($pedigree-viz-bg-color, 10%) !important;
             }
         }
     }

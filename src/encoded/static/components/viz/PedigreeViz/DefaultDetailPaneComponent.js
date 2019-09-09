@@ -5,13 +5,14 @@ import memoize from 'memoize-one';
 
 
 function getIndividualDisplayTitle(individual){
-    const { display_title, name, id } = individual;
+    const { name, id, data : { individualItem = null } } = individual;
+    const { display_title } = individualItem || {};
     return display_title || name || id;
 }
 
 
 export const DefaultDetailPaneComponent = React.memo(function DefaultDetailPaneComponent(props){
-    const { unselectNode, memoized, objectGraph, currSelectedNodeId, overlaysContainer, className } = props;
+    const { unselectNode, memoized, objectGraph, currSelectedNodeId, className } = props;
     const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
 
     if (!selectedNode){
@@ -27,11 +28,19 @@ export const DefaultDetailPaneComponent = React.memo(function DefaultDetailPaneC
 function IndividualBody(props){
     const { selectedNode: individual, onNodeClick, onClose } = props;
     const {
-        id, name,
-        _parentReferences : parents = [],
-        _childReferences : children = []
+        id,
+        name,
+        data: { individualItem = {} } = {},
+        _parentReferences: parents = [],
+        _childReferences: children = []
     } = individual;
-    const showTitle = getIndividualDisplayTitle(individual);
+
+    // This should be same as "id" but we grab from here to be safe.
+    const { '@id' : individualID } = individualItem;
+    let showTitle = getIndividualDisplayTitle(individual);
+    if (individualID) {
+        showTitle = <a href={individualID}>{ showTitle }</a>;
+    }
     return (
         <div className="detail-pane-inner">
             <div className="title-box row">
@@ -46,6 +55,7 @@ function IndividualBody(props){
                     : null }
             </div>
             <div className="details">
+                {/*
                 <div className="detail-row row" data-describing="parents">
                     <div className="col-12">
                         <label>Parents</label>
@@ -60,8 +70,8 @@ function IndividualBody(props){
                         : <PartnersLinks onNodeClick={onNodeClick} partners={children}/>
                     }
                 </div>
+                */}
             </div>
-            Hello World
         </div>
     );
 }

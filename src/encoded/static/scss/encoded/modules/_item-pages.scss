@@ -461,7 +461,8 @@ h3.submission-subtitle {
 		background-color: #47419a;
 	}
 
-	&[data-status="in review by lab"]:before {
+	&[data-status="in review by lab"]:before,
+	&[data-status="in review"]:before {
 		color: #fff;
 		background-color: #d8bd22;
 	}
@@ -1782,35 +1783,6 @@ $badge-item-min-height: 90px;
 	display: block;
 }
 
-.expset-higlass-panel {
-	position: relative;
-	.higlass-view-container {
-
-		&.disabled {
-			opacity: 0.25;
-			pointer-events: none;
-			> *,
-			> * > * {
-				pointer-events: none;
-			}
-		}
-
-		// Adjustments for when HiGlass inside ExpSet view as mini preview thingy
-		.higlass-instance {
-			.ViewHeader-module_multitrack-header-nav-list-2nvcu {
-				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(1),
-				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(1),
-				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(3),
-				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(3),
-				.ViewHeader-module_multitrack-header-icon-squeazed-25lkF:nth-child(4),
-				.ViewHeader-module_multitrack-header-icon-16QKZ:nth-child(4) {
-					display: none;
-				}
-			}
-		}
-	}
-}
-
 .draggable-border {
 	height: 100%;
 	padding-left: 5px;
@@ -1846,73 +1818,37 @@ $badge-item-min-height: 90px;
 
 
 /**********************************************************
-			Fullscreen-Capable Tab Section
+			Processing Summary Table (CaseView)
 **********************************************************/
 
-.tabview-container-fullscreen-capable {
+.item-page-container {
+	table.processing-summary-table {
+		width: 100%;
 
-	// Header
-	h3.tab-section-title {
-		> span:first-child { // Text itself
-			display: block;
-			padding-top: 27px;
-			float: left;
-			padding-right: 20px;
-		}
-		padding-top: 0;
-		min-height: 67px;
-	}
-
-	// Body Stuff
-
-	.graph-wrapper {
-		opacity : 1;
-		transition: opacity .5s ease-out;
-		overflow: hidden;
-	}
-
-	// Full Screen Styling
-	&.full-screen-view {
-		position: fixed;
-		left: 0;
-		right: 0;
-		top: 0;
-		@include navbar-fixed-position {
-			top: 41px;
-			z-index: 1000;
-		}
-		bottom: 0;
-		z-index: 10000;
-		background: #fff;
-		overflow-y: auto;
-
-		> .graph-wrapper {
-			//position: absolute;
-			//top: 68px;
-			padding-left: 20px;
-			padding-right: 20px;
-			//bottom: 0;
-			//left: 0;
-			//right: 0;
-			//overflow-y: auto;
-		}
-
-		> .tab-section-title,
-		.detail-pane {
-			margin: 0 auto;
-			padding-left: 16px;
-			padding-right: 16px;
-			body:not(.is-full-screen) & {
-				@include make-max-widths-container-width();
-				@include media-breakpoint-up(md) {
-					padding-left: 0;
-					padding-right: 0;
+		tbody {
+			tr {
+				td {
+					padding: 4px 8px;
+					/*
+					&[data-for-col="individual"],
+					&[data-for-col="sample"] {
+						font-family: $font-family-monospace;
+					}
+					*/
+				}
+				&.is-proband {
+					> td {
+						background-color: #ebf6ff;
+						&:first-child {
+							font-weight: 600;
+						}
+					}
 				}
 			}
 		}
+
 	}
 }
-
 
 
 
