@@ -198,7 +198,9 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     to ensure that validation errors work
     """
     import uuid
+    import datetime
     from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
+    indexer_queue = app.registry[INDEXER_QUEUE]
     es = app.registry[ELASTIC_SEARCH]
     fp_body = {
         'schema_version': '3',
@@ -218,10 +220,12 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     # call to /index will throw MissingIndexItemException multiple times, since
     # associated file_format, lab, and award are not indexed. That's okay
     # if we don't detect that it succeeded, keep trying until it does
-    indexer_res = indexer_testapp.post_json('/index', {'record': True}).json
-    while indexer_res['indexing_status'] != 'finished':
-         time.sleep(2)
-         indexer_res = indexer_testapp.post_json('/index', {'record': True}).json
+    indexer_testapp.post_json('/index', {'record': True})
+    to_queue = {
+        'uuid': fp_id,
+        'strict': True,
+        'timestamp': datetime.datetime.utcnow().isoformat()
+    }
     counts = 0
     es_res = None
     while not es_res and counts < 15:
@@ -230,7 +234,8 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
             es_res = es.get(index='file_processed', doc_type='file_processed',
                             id=res['@graph'][0]['uuid'])
         except NotFoundError:
-            pass
+            indexer_queue.send_message([to_queue], target_queue='primary')
+            indexer_testapp.post_json('/index', {'record': True})
         counts += 1
     assert es_res
     assert len(es_res['_source'].get('validation_errors', [])) == 1
