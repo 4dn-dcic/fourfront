@@ -216,6 +216,7 @@ def main(global_config, **local_config):
     config.include('.root')
     config.include('.types')
     config.include('.loadxl')
+    config.include('.visualization')
 
     if 'elasticsearch.server' in config.registry.settings:
         config.include('snovault.elasticsearch')

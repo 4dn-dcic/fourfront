@@ -17,11 +17,11 @@ beanstalk.cfg
 /develop-eggs/
 /downloads/
 /eggs/
+/ped_files_data/
 /.eggs/
 /extends/
 /jsconfig.json
 /node_modules/
-package-lock.json
 /cypress/screenshots/
 /cypress/videos/
 /deploy/post_deploy_testing/cypress/videos/
