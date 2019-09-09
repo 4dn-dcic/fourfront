@@ -1853,8 +1853,8 @@ $badge-item-min-height: 90px;
 					td {
 						padding: 4px 8px;
 						/*
-						&[data-for-col="individual"],
-						&[data-for-col="sample"] {
+						&[data-for-column="individual"],
+						&[data-for-column="sample"] {
 							font-family: $font-family-monospace;
 						}
 						*/
@@ -1865,6 +1865,16 @@ $badge-item-min-height: 90px;
 							&:first-child {
 								font-weight: 600;
 							}
+						}
+					}
+					&[data-sample-index="0"] {
+						> td {
+							border-top: 1px solid #f8f8f8;
+						}
+					}
+					&:not([data-sample-index="0"]) {
+						> td[data-for-column="individual"] {
+							visibility: hidden;
 						}
 					}
 				}

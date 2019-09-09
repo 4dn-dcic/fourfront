@@ -196,7 +196,8 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
     const columnOrder = [
         "individual",
         "sample",
-        "processedFileCount",
+        //"processedFileCount",
+        "processedFiles",
         "rawFileCount",
         "sampleStatus"
     ];
@@ -205,6 +206,7 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
         'individual' : "Individual",
         'sample' : "Sample",
         'processedFileCount' : "Processed Files",
+        'processedFiles' : "Output File",
         'rawFileCount' : "Raw Files",
         'sampleStatus' : "Sample Status"
     };
@@ -253,7 +255,7 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
         const indvLink = <a href={indvId} className="accession">{ indvDisplayTitle }</a>;
         const isProband = (probandID && probandID === indvId);
 
-        samples.forEach(function(sample){
+        samples.forEach(function(sample, sampleIdx){
             const {
                 '@id' : sampleID,
                 display_title: sampleTitle,
@@ -267,7 +269,8 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
                 rows.push({
                     individual : indvLink,
                     isProband,
-                    sample : <em>{ sampleErr || "No view permissions" }</em>
+                    sample : <em>{ sampleErr || "No view permissions" }</em>,
+                    sampleIdx
                 });
                 return;
             } else {
@@ -276,7 +279,9 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
                     isProband,
                     sample: <a href={sampleID} className="accession">{ sampleTitle }</a>,
                     processedFileCount: processed_files.length,
+                    processedFiles: processed_files,
                     rawFileCount: files.length,
+                    sampleIdx,
                     sampleStatus: (
                         <span>
                             <i className="item-status-indicator-dot mr-05" data-status={sampleStatus}/>
@@ -324,18 +329,39 @@ const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props)
     }
 
     const renderedRows = rows.map(function(row, rowIdx){
-        const { isProband = false } = row;
+        const { isProband = false, sampleIdx } = row;
         const rowCls = "sample-row" + (isProband ? " is-proband" : "");
         const rowCols = columnOrder.map(function(colName){
+            let colVal = row[colName] || " - ";
+            if (colName === "processedFiles"){
+                const filesWPermissions = row[colName].filter(function(file){
+                    return file['@id'] && file.display_title;
+                });
+                const filesWPermissionsLen = filesWPermissions.length;
+                if (filesWPermissionsLen === 0){
+                    colVal = " - ";
+                } else if (filesWPermissionsLen === 1){
+                    colVal = filesWPermissions[0];
+                    colVal = <a href={colVal['@id']}>{ colVal.display_title }</a>;
+                } else {
+                    colVal = filesWPermissions[0];
+                    colVal = (
+                        <span>
+                            <a href={colVal['@id']}>{ colVal.display_title }</a>
+                            { "+ " + ( filesWPermissions[0].length - 1 ) + " more" }
+                        </span>
+                    );
+                }
+            }
             return (
-                <td key={colName} data-for-col={colName}
+                <td key={colName} data-for-column={colName}
                     data-tip={isProband && colName === "individual" ? "Proband" : null}
                     className={typeof row[colName] !== 'undefined' ? "has-value" : null}>
-                    { row[colName] || " - " }
+                    { colVal }
                 </td>
             );
         });
-        return <tr key={rowIdx} className={rowCls}>{ rowCols }</tr>;
+        return <tr key={rowIdx} className={rowCls} data-sample-index={sampleIdx}>{ rowCols }</tr>;
     });
 
     const renderedTable = (
