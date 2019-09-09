@@ -217,10 +217,14 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
 
     # call to /index will throw MissingIndexItemException multiple times, since
     # associated file_format, lab, and award are not indexed. That's okay
-    indexer_testapp.post_json('/index', {'record': True})
+    # if we don't detect that it succeeded, keep trying until it does
+    indexer_res = indexer_testapp.post_json('/index', {'record': True}).json
+    while indexer_res['indexing_status'] != 'finished':
+         time.sleep(2)
+         indexer_res = indexer_testapp.post_json('/index', {'record': True}).json
     counts = 0
     es_res = None
-    while not es_res and counts < 10:
+    while not es_res and counts < 15:
         time.sleep(2)
         try:
             es_res = es.get(index='file_processed', doc_type='file_processed',
