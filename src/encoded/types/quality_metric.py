@@ -90,6 +90,12 @@ class QualityMetricWorkflowrun(QualityMetric):
     embedded_list = QualityMetric.embedded_list
 
 
+@collection(
+    name='quality-metrics-bamqc',
+    properties={
+        'title': 'QC Quality metrics for Bam QC',
+        'description': 'Listing of QC Quality Metrics for Bam QC.',
+    })
 class QualityMetricBamqc(QualityMetric):
     """Subclass of quality matrics for bam files."""
 
