@@ -1,0 +1,64 @@
+{
+    "title" : "Quality Metric for QC List",
+    "description": "Schema for reporting the specific calculation of an quality metrics",
+    "id": "/profiles/quality_metric_qclist.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [ "project", "institution"],
+    "additionalProperties": true,
+    "identifyingProperties": ["uuid", "aliases"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "quality_metric.json#/properties" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "quality_metric.json#/properties" }
+    ],
+    "mixinFacets" : [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "qc_list": {
+            "title": "QC List",
+            "description": "List of QC metric objects",
+            "type": "array",
+            "items": {
+                "title": "Output file mapping",
+                "description": "Info on file output by the workflow and how it is mapped to CWL arguments.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "qc_type": {
+                        "title": "Quality metric type",
+                        "description": "Type of quality metric, e.g. quality_metric_fastqc",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Quality metric object",
+                        "description": "link to a quality metric object",
+                        "type": "string",
+                        "linkTo": "QualityMetric"
+                    }
+                }
+            }
+        }
+    },
+    "facets": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    },
+    "columns": {
+        "overall_quality_status": {
+            "title" : "Overall Quality"
+        }
+    }
+}
