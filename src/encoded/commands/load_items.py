@@ -13,7 +13,7 @@ EPILOG = __doc__
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Load Ontology Term Data", epilog=EPILOG,
+        description="Load json formatted Items to Database from a file", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('json_file', help="File containing json of items to load")
