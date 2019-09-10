@@ -90,6 +90,16 @@
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
     },
     {
+        "email": "duplexa@gmail.com",
+        "first_name": "Soo",
+        "last_name": "Lee",
+        "role": "scientist",
+        "uuid": "1d524d43-01b5-4b71-94c6-32d2d09c8323",
+        "groups": ["admin"],
+        "submits_for": ["hms-dbmi"],
+        "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b"
+    },
+    {
         "last_name": "App",
         "project": "12a92962-8265-4fc0-b2f8-cf14f05db58b",
         "aliases": ["hms-dbmi:foursight_app"],
