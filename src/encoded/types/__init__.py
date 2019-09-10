@@ -102,6 +102,7 @@ class Sample(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/sample.json')
     embedded_list = [
+        "processed_files.workflow_run_outputs"
     ]
 
 

@@ -13,7 +13,7 @@ $pedigree-disease-colors :
     #b276b2;
 
 
-@mixin color-cycle-fill {
+@mixin pedigree-color-cycle-fill {
     $pedigree-colors-length: length($pedigree-disease-colors);
     @for $i from 1 through $pedigree-colors-length {
         $color: nth($pedigree-disease-colors, $i);
@@ -31,6 +31,28 @@ $pedigree-disease-colors :
         $color: nth($pedigree-disease-colors, $i);
         &[data-disease-index="#{2 * $pedigree-colors-length + $i}"] {
             fill: lighten($color, 10%);
+        }
+    }
+}
+
+@mixin pedigree-color-cycle-background {
+    $pedigree-colors-length: length($pedigree-disease-colors);
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{$i}"] {
+            background-color: $color;
+        }
+    }
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{$pedigree-colors-length + $i}"] {
+            background-color: darken($color, 10%);
+        }
+    }
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{2 * $pedigree-colors-length + $i}"] {
+            background-color: lighten($color, 10%);
         }
     }
 }
@@ -226,8 +248,9 @@ $pedigree-disease-colors :
     
                         circle.circle-disease-dot,
                         rect.rect-disease-partition {
+                            @include pedigree-color-cycle-fill;
                             stroke-width: 1;
-                            @include color-cycle-fill;
+                            
                         }
     
                         &.is-hovered-over,
@@ -240,10 +263,16 @@ $pedigree-disease-colors :
     
                         &.is-affected {
                             fill: transparent; // Colors of disease-arcs behind it will show through.
-                            path.disease-arc {
-                                stroke-width: 1;
-                                @include color-cycle-fill;
+                            g.disease-path-arcs {
+                                path.disease-arc {
+                                    @include pedigree-color-cycle-fill;
+                                    stroke-width: 1;
+                                    &:only-of-type {
+                                        stroke-width: 0;
+                                    }
+                                }
                             }
+
                         }
     
                         g.text-box {
@@ -324,7 +353,7 @@ $pedigree-disease-colors :
             transition: flex .3s, width .3s, background-color .2s;
             &.has-selected-node {
                 background-color: #fff;
-                border-left: 1px solid darken($pedigree-viz-bg-color, 10%);
+                border-left-color: darken($pedigree-viz-bg-color, 10%) !important;
             }
         }
     }
@@ -339,10 +368,72 @@ $pedigree-disease-colors :
                 h3 {
                     @include partner-links;
                 }
+
+                /*
+                i.icon.icon-times {
+                    font-size: 1.25rem;
+                    color: #777;
+                    padding-top: 7px;
+                    &:hover {
+                        color: #000;
+                    }
+                }
+                */
+
+                .label-row {
+                    .buttons-col {
+                        a.edit-btn {
+                            color: #777;
+                            margin-right: 15px;
+                            &:hover {
+                                color: #111;
+                            }
+                        }
+                    }
+                }
+
             }
 
             > .details {
                 > .detail-row {
+
+                    &[data-describing="Ethnicity"] {
+                        .value {
+                            text-transform: capitalize;
+                        }
+                    }
+
+                    &[data-describing="phenotypic_features"],
+                    &.phenotypic-features {
+                        > .detail-row-list-item.phenotypic-feature {
+                            display: flex;
+                            align-items: center;
+                            > .legend-patch {
+                                display: block;
+                                height: 12px;
+                                width: 12px;
+                                margin-right: 10px;
+                                border: 1px solid #555;
+                                @include pedigree-color-cycle-background;
+                                &[data-disease-index="-1"]{
+                                    border-color: transparent;
+                                    background-color: #f4f4f4;
+                                    height: 8px;
+                                    width: 8px;
+                                    margin-right: 12px;
+                                    margin-left: 2px;
+                                    border-radius: 2px;
+                                }
+                            }
+                            > .title {
+                                text-align: left;
+                                flex: 1;
+                            }
+                            > .onset {
+                                font-size: 0.9em;
+                            }
+                        }
+                    }
 
                     &[data-describing="parents"],
                     &[data-describing="children"] {

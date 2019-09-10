@@ -25,8 +25,9 @@ import { DefaultDetailPaneComponent } from './DefaultDetailPaneComponent';
  * @prop {?number} [age]                Should be calculated from date of birth to be in context of today.
  * @prop {?string[]} [diseases]         List of diseases affecting the individual.
  * @prop {!boolean} [isProband]         If true, identifies the proband individual.
- * @prop {?(boolean|string)} [deceased]     If present & truthy (e.g. text notes), then Individual is deceased.
- * @prop {?(boolean|string)} [consultand]   If present & truthy (e.g. text notes), Individual is seeking consultation.
+ * @prop {!boolean} [isDeceased]        If true, then Individual is deceased.
+ * @prop {!string} [causeOfDeath]       Describes cause of death.
+ * @prop {!boolean} [isConsultand]      If true, Individual is seeking consultation.
  * @prop {?boolean} [isStillBirth]      If present & true, deceased must also be truthy _and_ must have no children.
  * @prop {?boolean} [isPregnancy]       If present & true, this individual is not yet born.
  * @prop {?boolean} [isSpontaneousAbortion] `isPregnancy` must also be `true`.
@@ -45,7 +46,7 @@ import { DefaultDetailPaneComponent } from './DefaultDetailPaneComponent';
  */
 const POSITION_DEFAULTS = {
     individualWidth: 80,
-    individualXSpacing: 80,
+    individualXSpacing: 80, // THIS MUST BE EQUAL TO OR MULTIPLE OF INDIVIDUAL WIDTH FOR TIME BEING
     individualHeight: 80,
     individualYSpacing: 120,
     graphPadding: 60,
@@ -79,8 +80,8 @@ export class PedigreeViz extends React.PureComponent {
             'carrierOfDiseases' : PropTypes.arrayOf(PropTypes.string),
             'asymptoticDiseases': PropTypes.arrayOf(PropTypes.string),
             'isProband'         : PropTypes.bool,
-            'deceased'          : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
-            'consultand'        : PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
+            'isDeceased'        : PropTypes.bool,
+            'isConsultand'      : PropTypes.bool,
             'isStillBirth'      : PropTypes.bool,
             'isPregnancy'       : PropTypes.bool,
             'isSpontaneousAbortion' : PropTypes.bool,
@@ -98,7 +99,8 @@ export class PedigreeViz extends React.PureComponent {
         editable: PropTypes.bool,
         onNodeSelect: PropTypes.func,
         overlaysContainer: PropTypes.element,
-        detailPaneComponent: PropTypes.elementType
+        //detailPaneComponent: PropTypes.elementType,
+        renderDetailPane: PropTypes.func
     };
 
     static defaultProps = {
@@ -196,24 +198,14 @@ export class PedigreeViz extends React.PureComponent {
         },
 
         /**
-         * A DOM HTML node.
-         * If this and `props.detailPaneComponent` are both provided, then will
-         * render detailPaneComponent out into `props.overlaysContainer` via React
-         * Portal with selectedNode prop.
+         * A function which returns a React Component.
+         * Will be instantiated/rendered at side of visualization.
          *
-         * @type {HTMLElement}
-         * @optional
+         * @type {function}
          */
-        "overlaysContainer" : null,
-
-        /**
-         * A React Component class or function.
-         * Will be instantiated/rendered into `props.overlaysContainer`,
-         * if supplied.
-         *
-         * @type {React.Component}
-         */
-        "detailPaneComponent" : DefaultDetailPaneComponent
+        "renderDetailPane" : function(vizProps){
+            return <DefaultDetailPaneComponent {...vizProps} />;
+        }
     };
 
     static initState(dataset){
@@ -434,10 +426,11 @@ export class PedigreeVizView extends React.PureComponent {
             width: containerWidth,
             height: propHeight,
             objectGraph, dims, order, memoized,
-            overlaysContainer, detailPaneComponent, containerStyle,
+            overlaysContainer, renderDetailPane, containerStyle,
             ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
+
         const diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
@@ -466,18 +459,16 @@ export class PedigreeVizView extends React.PureComponent {
 
         let selectedNodePane = null;
 
-        if (detailPaneComponent){
-            selectedNodePane = (
-                React.createElement(detailPaneComponent, {
-                    objectGraph,
-                    currSelectedNodeId,
-                    memoized,
-                    diseaseToIndex,
-                    overlaysContainer,
-                    'unselectNode' : this.handleUnselectNode,
-                    'onNodeClick' : this.handleNodeClick,
-                })
-            );
+        if (typeof renderDetailPane === 'function'){
+            selectedNodePane = renderDetailPane({
+                objectGraph,
+                currSelectedNodeId,
+                memoized,
+                diseaseToIndex,
+                overlaysContainer,
+                'unselectNode' : this.handleUnselectNode,
+                'onNodeClick' : this.handleNodeClick,
+            });
         }
 
         const cls = (
@@ -665,7 +656,3 @@ class RelationshipNode extends React.PureComponent {
         );
     }
 }
-
-
-//const EdgesLayer = 
-

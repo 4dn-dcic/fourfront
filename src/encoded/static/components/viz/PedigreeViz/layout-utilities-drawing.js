@@ -684,8 +684,21 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
     }
 
     const vertlineXCoords = [];
-    let xCoordToSave = -partIndWidth;
+    let xCoordToSave;// = -partIndWidth;
     let counter = -1;
+    const maxWidthCounter = graphWidth / partIndWidth;
+
+    // We moved to this approach instead of the commented-out
+    // below one due to JS floats not being precise at all.
+    // It relies on dims.individualXSpacing and dims.individualWidth being equal
+    while (counter < maxWidthCounter){
+        counter++;
+        xCoordToSave = counter * partIndWidth;
+        xCoordToSave = Math.round(xCoordToSave * 10000) / 10000;
+        vertlineXCoords.push(xCoordToSave);
+    }
+
+    /*
     while (xCoordToSave < graphWidth){
         // Make vert lines, split them into pieces
         // TODO: Reconsider; only practical atm if partIndWidth
@@ -697,14 +710,25 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
         } else {
             xCoordToSave += partIndXSpacing;
         }
+        // Round it so we don't be comparing 239.9999999997 vs 240 to get !==.
+        const remainder = xCoordToSave % dims.individualWidth;
+        if ((remainder < .00001) || (dims.individualWidth - remainder < .00001)){
+            xCoordToSave = Math.round(xCoordToSave * 10000) / 10000;
+        }
         //xCoordToSave += partIndXSpacing;
         vertlineXCoords.push(xCoordToSave);
         counter++;
     }
+    */
 
     let yCoord = -partIndHeight;
     const horizLineYCoords = [];
     counter = -1;
+    // Unlike approach for xCoords, this approach can break if partIndHeight
+    // or partIndYSpacing is a float, esp something like XX.33333, since is not precise.
+    // For now, partIndHeight is always 40 and dims.individualYSpacing is 120, wherein 120 is
+    // divisible by integers 1-6, which covers all our possible subdivisions for time being.
+    // In the future, we could return to this to make sure float values are handled and rounded.
     while (yCoord < graphHeight){
         // Make horiz lines, split them into pieces
         if (counter % (2 + divCount) < 2){ // Within row of individuals
@@ -830,7 +854,7 @@ export function computeVisibilityGraph(objectGraph, directEdges, dims, graphHeig
             }
         });
         splits = reduceSplits(splits, splitArrs);
-        console.log('SPLITS-h', splits);
+        console.log('SPLITS-h', splits, splitArrs);
         const lastY = splits.reduce(function(lastY, currSplit){
             let y2;
             let nextLastY;
@@ -918,26 +942,32 @@ function uniquifyVertices(...edgeSegmentsList){
 }
 
 
+
 /** Gets all diseases, uniqifies, then assigns a numerical index to each. */
 export function graphToDiseaseIndices(objectGraph){
+
     // Collect affective diseases first.
     let allDiseases = objectGraph.reduce(function(m, indv){
         indv.diseases.forEach(function(diseaseStr){  m.add(diseaseStr); });
         return m;
     }, new Set());
+
     // Carrier of disease(s) (clinical evaluation)
     allDiseases = objectGraph.reduce(function(m, indv){
         indv.carrierOfDiseases.forEach(function(diseaseStr){  m.add(diseaseStr); });
         return m;
     }, allDiseases);
+
     // Asymptotic/presymptotic disease(s) (clinical evaluation)
     allDiseases = objectGraph.reduce(function(m, indv){
         indv.asymptoticDiseases.forEach(function(diseaseStr){  m.add(diseaseStr); });
         return m;
     }, allDiseases);
+
     const diseaseToIndex = {};
     [...allDiseases].forEach(function(diseaseStr, idx){
         diseaseToIndex[diseaseStr] = idx + 1;
     });
+
     return diseaseToIndex;
 }

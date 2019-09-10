@@ -13,7 +13,79 @@ import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui
 import { PedigreeViz } from './../viz/PedigreeViz';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { FullHeightCalculator } from './components/FullHeightCalculator';
+import { PedigreeDetailPane } from './components/PedigreeDetailPane';
+import { Schemas } from './../util';
 
+
+
+/**
+ * Parses `context.families` instance
+ * into list of Individuals (JSON objects) with
+ * PedigreeViz-compliant properties.
+ */
+export function parseFamilyIntoDataset(family, diseasesAllowed = null){
+    const { members = [], proband, original_pedigree } = family;
+    const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
+    return members.map(function(individual){
+        const {
+            "@id": id,
+            display_title: name,
+            sex: gender = "undetermined",
+            father = null, // We might get these back as strings from back-end response, instd of embedded obj.
+            mother = null,
+            is_deceased: isDeceased = false,
+            is_pregnancy: isPregnancy = false,
+            is_termination_of_pregnancy: isTerminatedPregnancy = false,
+            is_spontaneous_abortion: isSpontaneousAbortion = false,
+            is_still_birth: isStillBirth = false,
+            phenotypic_features = []
+        } = individual;
+
+        const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
+        const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
+
+        // Internally, PedigreeViz uses the "diseases" vocabulary per a pedigree standards doc.
+        // Here we transform phenotypic_features to this vocab (might change later, and/or conditionally)
+        let diseasesAllowedObj = null;
+        if (Array.isArray(diseasesAllowed) && diseasesAllowed.length > 0){
+            diseasesAllowedObj = {};
+            diseasesAllowed.forEach(function(d){
+                diseasesAllowedObj[d] = true;
+            });
+        }
+
+        const diseases = []; // All strings
+        const carrierOfDiseases = [];
+        const asymptoticDiseases = [];
+
+        phenotypic_features.forEach(function(featureWrapperObj){
+            const { phenotypic_feature: { '@id' : featureID } } = featureWrapperObj;
+            if (diseasesAllowedObj && !diseasesAllowedObj[featureID]) {
+                return;
+            }
+            if (!featureID) return;
+            diseases.push(featureID);
+        });
+
+
+
+
+        return {
+            id, gender, name,
+            isDeceased,
+            isPregnancy, isTerminatedPregnancy,
+            isSpontaneousAbortion, isStillBirth,
+            diseases,
+            'father' : fatherStr,
+            'mother' : motherStr,
+            'isProband' : probandID && probandID === id,
+            'data' : {
+                // Keep non-proband-viz specific data here. TODO: Define/document.
+                'individualItem' : individual
+            }
+        };
+    });
+}
 
 
 export default class CaseView extends DefaultItemView {
@@ -42,8 +114,12 @@ export default class CaseView extends DefaultItemView {
         super(props);
         this.onAddedFamily = this.onAddedFamily.bind(this);
         this.handleFamilySelect = this.handleFamilySelect.bind(this);
-        this.state.pedigreeFamilies = (props.context.families || []).filter(CaseView.haveFullViewPermissionForFamily);
-        this.state.pedigreeFamiliesIdx = 0;
+        const pedigreeFamilies = (props.context.families || []).filter(CaseView.haveFullViewPermissionForFamily);
+        this.state = {
+            ...this.state,
+            pedigreeFamilies,
+            pedigreeFamiliesIdx: 0 // Maybe should be most recent/last index, idk, tbd.
+        };
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -82,14 +158,29 @@ export default class CaseView extends DefaultItemView {
     getTabViewContents(){
         const { context : { families = [] } } = this.props;
         const { pedigreeFamilies = [] } = this.state;
+        const familiesLen = pedigreeFamilies.length;
         const initTabs = [];
 
-        if (pedigreeFamilies.length > 0){ // Remove this outer if condition if wanna show disabled '0 Pedigrees' tab instead
+        if (familiesLen > 0){
+            // Remove this outer if condition if wanna show disabled '0 Pedigrees' tab instead
+
             initTabs.push(PedigreeTabView.getTabObject({
                 ...this.props,
                 ...this.state, // pedigreeFamilies & pedigreeFamiliesIdx
                 handleFamilySelect: this.handleFamilySelect
             }));
+
+        }
+
+        if (familiesLen > 0){
+            // Remove this outer if condition if wanna show disabled 'Pedigree Summary' tab instead
+
+            initTabs.push(ProcessingSummaryTabView.getTabObject({
+                ...this.props,
+                ...this.state, // pedigreeFamilies & pedigreeFamiliesIdx
+                handleFamilySelect: this.handleFamilySelect
+            }));
+
         }
 
         return this.getCommonTabs().concat(initTabs);
@@ -111,40 +202,261 @@ export default class CaseView extends DefaultItemView {
 
 }
 
-/**
- * Parses `context.families` instance
- * into list of Individuals (JSON objects) with
- * PedigreeViz-compliant properties.
- */
-function parseFamilyIntoDataset(family){
-    const { members = [], proband, ped_file } = family;
-    return members.map(function(individual){
+
+const ProcessingSummaryTabView = React.memo(function ProcessingSummaryTabView(props){
+    const { pedigreeFamilies: families = [] } = props;
+    const familiesLen = families.length;
+    return (
+        <div className="container-wide">
+            <h3 className="tab-section-title">
+                <span>Processing Summary</span>
+            </h3>
+            <hr className="tab-section-title-horiz-divider"/>
+            {
+                families.map(function(family, idx){
+                    const { original_pedigree: { display_title: pedFileName } = {} } = family;
+                    const cls = "summary-table-container family-index-" + idx;
+                    const title = familiesLen === 1 ? null : (
+                        <h4>
+                            { "Family " + (idx + 1) }
+                            { pedFileName ? <span className="text-300">{ " (" + pedFileName + ")" }</span> : null }
+                        </h4>
+                    );
+                    return (
+                        <div className={cls} key={idx}>
+                            { title }
+                            <ProcessingSummaryTable {...family} idx={idx} />
+                        </div>
+                    );
+                })
+            }
+        </div>
+    );
+});
+ProcessingSummaryTabView.getTabObject = function(props){
+    const { pedigreeFamilies: families = [] } = props;
+    const familiesLen = families.length;
+    return {
+        'tab' : (
+            <React.Fragment>
+                <i className="icon icon-cogs fas icon-fw"/>
+                <span>Processing Summary</span>
+            </React.Fragment>
+        ),
+        'key' : 'processing-summary',
+        'disabled' : familiesLen === 0,
+        'content' : <ProcessingSummaryTabView {...props} />
+    };
+};
+
+const ProcessingSummaryTable = React.memo(function ProcessingSummaryTable(props){
+    const {
+        members = [],
+        proband: { '@id' : probandID } = {},
+        original_pedigree = null
+    } = props;
+
+    if (members.length === 0){
+        return (
+            <div className="processing-summary">
+                <em>No members available.</em>
+            </div>
+        );
+    }
+
+    const columnOrder = [
+        "individual",
+        "sample",
+        //"processedFileCount",
+        "processedFiles",
+        "rawFileCount",
+        "sampleStatus"
+    ];
+
+    const columnTitles = {
+        'individual' : "Individual",
+        'sample' : "Sample",
+        'processedFileCount' : "Processed Files",
+        'processedFiles' : "Output File",
+        'rawFileCount' : "Raw Files",
+        'sampleStatus' : "Sample Status"
+    };
+
+
+    const rows = [];
+    const membersWithoutSamples = [];
+    const membersWithoutViewPermissions = [];
+
+    // Gather rows from family.members - 1 per sample (or individual, if no sample).
+    members.forEach(function(individual){
         const {
-            "@id": id,
-            display_title: name,
-            sex: gender = "undetermined",
-            father = null, // We might get these back as strings from back-end response, instd of embedded obj.
-            mother = null,
-            is_deceased = false
+            display_title: indvDisplayTitle = null,
+            '@id' : indvId,
+            error = null,
+            samples = []
         } = individual;
 
-        const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
-        const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
-        const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
+        if (!indvDisplayTitle || !indvId){
+            membersWithoutViewPermissions.push(individual);
+            /*
+            rows.push({
+                individual : <em>{ error || "No view permissions" }</em>,
+                isProband: false,
+                sample: <em>N/A</em>,
+                processedFileCount: <em>N/A</em>,
+                rawFileCount: <em>N/A</em>,
+                sampleStatus: <em>N/A</em>
+            });
+            */
+            return;
+        }
 
-        return {
-            id, gender, name,
-            'father' : fatherStr,
-            'mother' : motherStr,
-            'isProband' : probandID && probandID === id,
-            'deceased' : !!(is_deceased),
-            'data' : {
-                // Keep non-proband-viz specific data here. TODO: Define/document.
-                'individualItem' : individual
+        if (samples.length === 0){
+            membersWithoutSamples.push(individual);
+            /*
+            rows.push({
+                individual : indvLink,
+                isProband: (probandID && probandID === indvId),
+                sample: <em className="small" data-tip="No samples available for this individual">N/A</em>
+            });
+            */
+            return;
+        }
+
+        const indvLink = <a href={indvId} className="accession">{ indvDisplayTitle }</a>;
+        const isProband = (probandID && probandID === indvId);
+
+        samples.forEach(function(sample, sampleIdx){
+            const {
+                '@id' : sampleID,
+                display_title: sampleTitle,
+                error: sampleErr = null,
+                processed_files = [],
+                files = [],
+                status: sampleStatus
+            } = sample;
+
+            if (!sampleTitle || !sampleID){
+                rows.push({
+                    individual : indvLink,
+                    isProband,
+                    sample : <em>{ sampleErr || "No view permissions" }</em>,
+                    sampleIdx
+                });
+                return;
+            } else {
+                rows.push({
+                    individual : indvLink,
+                    isProband,
+                    sample: <a href={sampleID} className="accession">{ sampleTitle }</a>,
+                    processedFileCount: processed_files.length,
+                    processedFiles: processed_files,
+                    rawFileCount: files.length,
+                    sampleIdx,
+                    sampleStatus: (
+                        <span>
+                            <i className="item-status-indicator-dot mr-05" data-status={sampleStatus}/>
+                            { Schemas.Term.toName("status", sampleStatus) }
+                        </span>
+                    )
+                });
             }
-        };
+        });
+
     });
-}
+
+    const membersWithoutSamplesLen = membersWithoutSamples.length;
+    const membersWithoutViewPermissionsLen = membersWithoutViewPermissions.length;
+
+    const renderedSummary = (membersWithoutSamplesLen + membersWithoutViewPermissionsLen) > 0 ? (
+        <div className="processing-summary">
+            { membersWithoutSamplesLen > 0 ?
+                <p className="mb-0">{ (membersWithoutSamplesLen + " members without samples.") }</p>
+                /*
+                <React.Fragment>
+                    <p className="mb-0">{ (membersWithoutSamplesLen + " members without samples: ") }</p>
+                    {
+                        membersWithoutSamples.map(function(member, idx){
+                            const { '@id' : id, display_title } = member;
+                            return (
+                                <React.Fragment key={id}>
+                                    { idx !== 0 ? ", " : null }
+                                    <a href={id}>{ display_title }</a>
+                                </React.Fragment>
+                            );
+                        })
+                    }
+                </React.Fragment>
+                */
+                : null }
+            { membersWithoutViewPermissionsLen > 0 ?
+                <p className="mb-0">{ (membersWithoutViewPermissionsLen + " members without view permissions.") }</p>
+                : null }
+        </div>
+    ) : null;
+
+    if (rows.length === 0){
+        return renderedSummary;
+    }
+
+    const renderedRows = rows.map(function(row, rowIdx){
+        const { isProband = false, sampleIdx } = row;
+        const rowCls = "sample-row" + (isProband ? " is-proband" : "");
+        const rowCols = columnOrder.map(function(colName){
+            let colVal = row[colName] || " - ";
+            if (colName === "processedFiles"){
+                const filesWPermissions = row[colName].filter(function(file){
+                    return file['@id'] && file.display_title;
+                });
+                const filesWPermissionsLen = filesWPermissions.length;
+                if (filesWPermissionsLen === 0){
+                    colVal = " - ";
+                } else if (filesWPermissionsLen === 1){
+                    colVal = filesWPermissions[0];
+                    colVal = <a href={colVal['@id']}>{ colVal.display_title }</a>;
+                } else {
+                    colVal = filesWPermissions[0];
+                    colVal = (
+                        <span>
+                            <a href={colVal['@id']}>{ colVal.display_title }</a>
+                            { "+ " + ( filesWPermissions[0].length - 1 ) + " more" }
+                        </span>
+                    );
+                }
+            }
+            return (
+                <td key={colName} data-for-column={colName}
+                    data-tip={isProband && colName === "individual" ? "Proband" : null}
+                    className={typeof row[colName] !== 'undefined' ? "has-value" : null}>
+                    { colVal }
+                </td>
+            );
+        });
+        return <tr key={rowIdx} className={rowCls} data-sample-index={sampleIdx}>{ rowCols }</tr>;
+    });
+
+    const renderedTable = (
+        <table className="processing-summary-table">
+            <thead>
+                <tr>
+                    { columnOrder.map(function(colName){
+                        return <th key={colName}>{ columnTitles[colName] }</th>;
+                    }) }
+                </tr>
+            </thead>
+            <tbody>{ renderedRows }</tbody>
+        </table>
+    );
+
+    return (
+        <React.Fragment>
+            { renderedSummary }
+            { renderedTable }
+        </React.Fragment>
+    );
+});
+
+
 
 /**
  * TabView that shows Pedigree(s) of Case families.
@@ -168,28 +480,51 @@ class PedigreeTabView extends React.PureComponent {
         };
     }
 
+    static getPhenotypicFeatureStrings(case_phenotypic_features = []){
+        const strings = [];
+        case_phenotypic_features.forEach(function(feature){
+            const { '@id' : featureID } = feature;
+            if (!featureID) return;
+            strings.push(featureID);
+        });
+        return strings;
+    }
 
     constructor(props){
         super(props);
+        this.renderDetailPane = this.renderDetailPane.bind(this);
         this.memoized = {
-            parseFamilyIntoDataset : memoize(parseFamilyIntoDataset)
+            parseFamilyIntoDataset : memoize(parseFamilyIntoDataset),
+            getPhenotypicFeatureStrings : memoize(PedigreeTabView.getPhenotypicFeatureStrings)
         };
         if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
             throw new Error("Expected props.context.families to be a non-empty Array.");
         }
     }
 
+    renderDetailPane(pedigreeVizProps){
+        const { session, href, context } = this.props;
+        return <PedigreeDetailPane {...pedigreeVizProps} {...{ session, href, context }} />;
+    }
 
     render(){
         const {
-            context, schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
+            context : {
+                families: contextFamilies = [],
+                case_phenotypic_features = []
+            },
+            schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
             handleFamilySelect, pedigreeFamiliesIdx, pedigreeFamilies
         } = this.props;
 
-        const families = pedigreeFamilies || context.families;
+        const families = pedigreeFamilies || contextFamilies;
         const currentFamily = families[pedigreeFamiliesIdx];
+        const phenotypicFeatureStrings = this.memoized.getPhenotypicFeatureStrings(case_phenotypic_features);
 
-        const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
+        const dataset = this.memoized.parseFamilyIntoDataset(
+            currentFamily,
+            phenotypicFeatureStrings.length > 0 ? phenotypicFeatureStrings : null
+        );
 
         console.log('DDD', dataset);
         return (
@@ -203,7 +538,7 @@ class PedigreeTabView extends React.PureComponent {
                     </h3>
                 </div>
                 <hr className="tab-section-title-horiz-divider"/>
-                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight, innerOverlaysContainer }} />
+                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight }} renderDetailPane={this.renderDetailPane} />
             </div>
         );
     }
@@ -215,12 +550,11 @@ class PedigreeTabView extends React.PureComponent {
  * Reusable for any PedigreeTabView of any ItemView.
  * @todo Maybe move into item-pages/components? Maybe not.
  */
-export function PedigreeTabViewBody({ innerOverlaysContainer, dataset, windowWidth, windowHeight }){
+export function PedigreeTabViewBody({ dataset, windowWidth, windowHeight, renderDetailPane }){
     return (
         <FullHeightCalculator {...{ windowWidth, windowHeight }}>
-            <PedigreeViz overlaysContainer={innerOverlaysContainer}
-                {...{ dataset, windowWidth, width: windowWidth }}
-                filterUnrelatedIndividuals={false}>
+            <PedigreeViz {...{ dataset, windowWidth, renderDetailPane }}
+                width={windowWidth} filterUnrelatedIndividuals={false}>
             </PedigreeViz>
         </FullHeightCalculator>
     );
@@ -239,8 +573,8 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
         <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="mr-05" alignRight>
             {
                 families.map(function(family, i){
-                    const { original_pedigree: ped_file = null } = family;
-                    const pedFileStr = ped_file && (" (" + ped_file.display_title + ")");
+                    const { original_pedigree: pf = null } = family;
+                    const pedFileStr = pf && (" (" + pf.display_title + ")");
                     return (
                         <DropdownItem key={i} eventKey={i} active={i === currentFamilyIdx}>
                             Family {i + 1}{ pedFileStr }

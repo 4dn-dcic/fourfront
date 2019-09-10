@@ -5,13 +5,14 @@ import memoize from 'memoize-one';
 
 
 function getIndividualDisplayTitle(individual){
-    const { display_title, name, id } = individual;
+    const { name, id, data : { individualItem = null } } = individual;
+    const { display_title } = individualItem || {};
     return display_title || name || id;
 }
 
 
 export const DefaultDetailPaneComponent = React.memo(function DefaultDetailPaneComponent(props){
-    const { unselectNode, memoized, objectGraph, currSelectedNodeId, overlaysContainer, className } = props;
+    const { unselectNode, memoized, objectGraph, currSelectedNodeId, className } = props;
     const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
 
     if (!selectedNode){
@@ -27,10 +28,13 @@ export const DefaultDetailPaneComponent = React.memo(function DefaultDetailPaneC
 function IndividualBody(props){
     const { selectedNode: individual, onNodeClick, onClose } = props;
     const {
-        id, name,
-        _parentReferences : parents = [],
-        _childReferences : children = []
+        id,
+        name,
+        data: { individualItem = {} } = {},
+        _parentReferences: parents = [],
+        _childReferences: children = []
     } = individual;
+
     const showTitle = getIndividualDisplayTitle(individual);
     return (
         <div className="detail-pane-inner">
@@ -61,7 +65,6 @@ function IndividualBody(props){
                     }
                 </div>
             </div>
-            Hello World
         </div>
     );
 }

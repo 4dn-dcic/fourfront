@@ -26,9 +26,9 @@ def includeme(config):
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
     'user',
-    'file_format',
-    'institution',
     'project',
+    'institution',
+    'file_format',
     'disease',
     'case',
     'individual',
@@ -119,8 +119,8 @@ def load_data_view(context, request):
     # this directly calls load_all_gen, instead of load_all
     if iter_resp:
         return Response(
-            content_type = 'text/plain',
-            app_iter = LoadGenWrapper(
+            content_type='text/plain',
+            app_iter=LoadGenWrapper(
                 load_all_gen(testapp, inserts, None, overwrite=overwrite,
                              itype=itype, from_json=from_json)
             )
@@ -525,7 +525,7 @@ def load_local_data(app, clear_tables=False, overwrite=False):
 
     if use_temp_local:
         return load_data(app, docsdir='documents', indir='temp-local-inserts',
-                         clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
+                         clear_tables=clear_tables, use_master_inserts=True, overwrite=overwrite)
     else:
         return load_data(app, docsdir='documents', indir='inserts',
                          clear_tables=clear_tables, overwrite=overwrite)

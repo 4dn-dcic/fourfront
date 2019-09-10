@@ -7,7 +7,7 @@ import { object, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-co
 import { ItemFileAttachment } from './../ItemFileAttachment';
 import { isNodeFile, isNodeGroup, isNodeParameter, isNodeQCMetric } from './WorkflowNodeElement';
 
-function getFile(node){
+export function getFile(node){
     if (!isNodeFile(node)) return null;
     const { meta : { run_data = null } = {} } = node;
     return (run_data && run_data.file) || null;

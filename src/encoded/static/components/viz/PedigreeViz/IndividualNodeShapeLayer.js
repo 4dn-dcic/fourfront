@@ -83,9 +83,9 @@ const TerminatedPregnancyShape = React.memo(function TerminatedPregnancyShape({ 
 
 
 function getIndividualShape(individual, width, height){
-    const { isPregnancy, deceased, gender } = individual;
+    const { isPregnancy, isDeceased, gender } = individual;
     let shape = <rect width={width} height={height} />; // Default
-    if (isPregnancy && deceased){
+    if (isPregnancy && isDeceased){
         shape = <TerminatedPregnancyShape {...{ width, height }} />;
     } else if (gender === "female"){
         shape = <FemaleShape {...{ width, height }} />;
@@ -195,7 +195,7 @@ const AffectedBGPieChart = React.memo(function AffectedBGPieChart({ width, heigh
                 data-disease-index={diseaseToIndex[disease]} className="disease-arc" />
         );
     });
-    return <React.Fragment>{ arcPaths }</React.Fragment>;
+    return <g className="disease-path-arcs">{ arcPaths }</g>;
 });
 
 const UnderlayMarkers = React.memo(function UnderlayMarkers({ individual, width, height, shape, diseaseToIndex }){
@@ -204,11 +204,11 @@ const UnderlayMarkers = React.memo(function UnderlayMarkers({ individual, width,
         name,
         gender,
         isProband = false,
-        consultand = false,
+        isConsultand = false,
         diseases = [],
         carrierOfDiseases = [],
         asymptoticDiseases = [],
-        deceased = false,
+        isDeceased = false,
         isPregnancy = false,
         isSpontaneousAbortion = false,
         isTerminatedPregnancy = false,
@@ -240,20 +240,20 @@ const OverlayMarkers = React.memo(function OverlayMarkers({ individual, width, h
         name,
         gender,
         isProband = false,
-        consultand = false,
+        isConsultand = false,
         diseases = [],
         carrierOfDiseases = [],
         asymptoticDiseases = [],
-        deceased = false,
+        isDeceased = false,
         isPregnancy = false,
         isSpontaneousAbortion = false,
         isTerminatedPregnancy = false,
         _drawing : { xCoord, yCoord }
     } = individual;
 
-    const showAsDeceased = deceased && !(isSpontaneousAbortion && isPregnancy);
+    const showAsDeceased = isDeceased && !(isSpontaneousAbortion && isPregnancy);
     const showAsProband = isProband;
-    const showAsConsultand = !showAsProband && consultand;
+    const showAsConsultand = !showAsProband && isConsultand;
 
     const markers = [];
 

@@ -4,6 +4,7 @@ from copy import (
 )
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest
+from snovault import CONNECTION
 from .types.base import Item
 from .types.workflow import (
     trace_workflows,
