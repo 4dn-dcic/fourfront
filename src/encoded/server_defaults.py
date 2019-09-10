@@ -12,6 +12,7 @@ from snovault.schema_utils import server_default
 
 
 ACCESSION_FACTORY = __name__ + ':accession_factory'
+ACCESSION_PREFIX = 'GAP'
 
 
 def includeme(config):
@@ -65,7 +66,7 @@ FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
 
 def enc_accession(accession_type):
     random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
-    return 'GAP' + accession_type + random_part
+    return ACCESSION_PREFIX + accession_type + random_part
 
 
 TEST_ACCESSION_FORMAT = (digits, ) * 7

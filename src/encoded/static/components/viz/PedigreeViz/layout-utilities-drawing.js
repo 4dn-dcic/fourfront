@@ -918,26 +918,32 @@ function uniquifyVertices(...edgeSegmentsList){
 }
 
 
+
 /** Gets all diseases, uniqifies, then assigns a numerical index to each. */
 export function graphToDiseaseIndices(objectGraph){
+
     // Collect affective diseases first.
     let allDiseases = objectGraph.reduce(function(m, indv){
         indv.diseases.forEach(function(diseaseStr){  m.add(diseaseStr); });
         return m;
     }, new Set());
+
     // Carrier of disease(s) (clinical evaluation)
     allDiseases = objectGraph.reduce(function(m, indv){
         indv.carrierOfDiseases.forEach(function(diseaseStr){  m.add(diseaseStr); });
         return m;
     }, allDiseases);
+
     // Asymptotic/presymptotic disease(s) (clinical evaluation)
     allDiseases = objectGraph.reduce(function(m, indv){
         indv.asymptoticDiseases.forEach(function(diseaseStr){  m.add(diseaseStr); });
         return m;
     }, allDiseases);
+
     const diseaseToIndex = {};
     [...allDiseases].forEach(function(diseaseStr, idx){
         diseaseToIndex[diseaseStr] = idx + 1;
     });
+
     return diseaseToIndex;
 }

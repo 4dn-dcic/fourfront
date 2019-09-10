@@ -4,13 +4,15 @@ from jsonschema_serialize_fork import FormatChecker
 from pyramid.threadlocal import get_current_request
 from .server_defaults import (
     ACCESSION_FACTORY,
+    ACCESSION_PREFIX,
     test_accession,
 )
 from uuid import UUID
 
-accession_re = re.compile(r'^4DN(EX|ES|FI|FS|SR|BS|IN|WF)[1-9A-Z]{7}$')
+accession_re = re.compile(r'^%s[1-9A-Z]{9}$' % ACCESSION_PREFIX)
 test_accession_re = re.compile(r'^TST(EX|ES|FI|FS|SR|BS|IN|WF)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$')
 uuid_re = re.compile(r'(?i)\{?(?:[0-9a-f]{4}-?){8}\}?')
+
 
 @FormatChecker.cls_checks("uuid")
 def is_uuid(instance):

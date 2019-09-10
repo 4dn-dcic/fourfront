@@ -4,7 +4,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["title", "project", "institution"],
-    "identifyingProperties": ["uuid"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": true,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -49,11 +49,20 @@
                         "type" : "string",
                         "linkTo" : "Individual"
                     },
+                    "pedigree_source": {
+                        "title": "Pedigree Source",
+                        "description": "Source of the input pedigree. Include version information, if applicable",
+                        "type": "string"
+                    },
                     "original_pedigree": {
                         "title" : "Original Pedigree File",
                         "description": "The original pedigree file used for this family",
                         "type" : "string",
                         "linkTo": "Document"
+                    },
+                    "clinic_notes": {
+                        "title": "Case Notes from the Clinic",
+                        "type": "string"
                     },
                     "timestamp": {
                         "title": "Pedigree Timestamp",
@@ -63,6 +72,16 @@
                             {"format": "date-time"},
                             {"format": "date"}
                         ]
+                    },
+                    "family_phenotypic_features": {
+                        "title": "Family phenotypic features",
+                        "description": "Main phenotypic features for the family",
+                        "type" : "array",
+                        "items": {
+                            "title": "Family phenotypic feature",
+                            "type": "string",
+                            "linkTo": "Phenotype"
+                        }
                     }
                 }
             }
@@ -71,16 +90,6 @@
             "title": "Description",
             "description": "Description of the case",
             "type": "string"
-        },
-        "case_phenotypic_features": {
-            "title": "Phenotypic features",
-            "description": "Phenotypic features that define the case",
-            "type" : "array",
-            "items": {
-                "title": "Phenotypic feature",
-                "type": "string",
-                "linkTo": "Phenotype"
-            }
         }
     }
 }

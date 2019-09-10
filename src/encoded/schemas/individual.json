@@ -3,8 +3,8 @@
     "id": "/profiles/individual.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["is_deceased", "sex"],
-    "identifyingProperties": ["uuid"],
+    "required": ["sex"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": true,
     "mixinProperties": [
         { "$ref": "mixins.json#/attribution" },
@@ -19,6 +19,31 @@
     "properties": {
         "accession" : {
             "accessionType" : "ID"
+        },
+        "age": {
+            "title": "Age of the Individual",
+            "type": "number",
+            "lookup": 2
+        },
+        "age_units": {
+            "title": "Age units",
+            "type": "string",
+            "lookup": 3,
+            "enum": [
+                "day",
+                "week",
+                "month",
+                "year"
+            ]
+        },
+        "is_pregnancy": {
+            "title": "Pregnancy",
+            "type": "boolean"
+        },
+        "gestational_age": {
+            "title": "Gestational Age (weeks)",
+            "description": "Age of fetus, expressed as weeks",
+            "type": "number"
         },
         "sex": {
             "title": "Sex",
@@ -35,14 +60,37 @@
             "type": "array",
             "uniqueItems": true,
             "items":{
-                "title": "Phenotypic Feature",
-                "type": "string",
-                "linkTo": "Phenotype"
+                "title": "Phenotypic Feature Info",
+                "type": "object",
+                "required": ["phenotypic_feature"],
+                "properties": {
+                    "phenotypic_feature": {
+                        "title": "Phenotypic Feature",
+                        "type": "string",
+                        "linkTo": "Phenotype",
+                        "lookup": 11
+                    },
+                    "onset_age": {
+                        "title": "Onset Age",
+                        "type": "number",
+                        "lookup": 12
+                    },
+                    "onset_age_units": {
+                        "title": "Onset Age Units",
+                        "type": "string",
+                        "lookup": 13,
+                        "enum": [
+                            "day",
+                            "week",
+                            "month",
+                            "year"
+                        ]
+                    }
+                }
             }
         },
         "disorders" : {
             "title" : "Disorders",
-
             "type" : "array",
             "uniqueItems": true,
             "items" : {
@@ -51,23 +99,74 @@
                 "linkTo" : "Disorder"
             }
         },
+        "clinic_notes": {
+            "title": "Notes from the Clinic",
+            "type": "string"
+        },
         "birth_year" : {
             "title" : "Year of Birth",
             "type" : "integer"
-        },
-        "development_stage" : {
-            "title" : "Development Stage",
-            "type" : "string",
-            "notes": "might be useful for cases like individual from pregnancy loss, not sure if needed"
         },
         "is_deceased": {
             "title": "Deceased",
             "description": "Whether the individual is deceased",
             "type": "boolean"
         },
+        "life_status": {
+            "title": "Life Status",
+            "description": "Status of individual",
+            "type": "string",
+            "enum": [
+                "alive and well",
+                "alive",
+                "dead",
+                "unknown"
+            ]
+        },
+        "is_termination_of_pregnancy": {
+            "title": "Termination of Pregnancy",
+            "type": "boolean"
+        },
+        "is_spontaneous_abortion": {
+            "title": "Spontaneous Abortion",
+            "type": "boolean"
+        },
         "is_still_birth": {
             "title": "Still Birth",
             "type": "boolean"
+        },
+        "cause_of_death": {
+            "title" : "Cause of Death",
+            "type" : "string",
+            "linkTo" : "Phenotype"
+        },
+        "age_at_death": {
+            "title": "Death Age",
+            "type": "number"
+            },
+        "age_at_death_units": {
+            "title": "Death Age Units",
+            "type": "string",
+            "lookup": 13,
+            "enum": [
+                "day",
+                "week",
+                "month",
+                "year"
+            ]
+        },
+        "is_no_children_by_choice": {
+            "title": "No Children by Choice",
+            "type": "boolean"
+        },
+        "is_infertile": {
+            "title": "Infertile",
+            "type": "boolean"
+        },
+        "cause_of_infertility": {
+            "title" : "Cause of Infertility",
+            "type" : "string",
+            "linkTo" : "Phenotype"
         },
         "ethnicity": {
             "title": "Ethnicity",
@@ -83,6 +182,16 @@
                 "white",
                 "other"
             ]
+        },
+        "Images" : {
+            "title" : "Images",
+            "type" : "array",
+            "uniqueItems": true,
+            "items" : {
+                "title" : "Image",
+                "type" : "string",
+                "linkTo" : "Image"
+            }
         },
         "institutional_id": {
             "description": "Custom identifier provided by the institution",
@@ -101,21 +210,6 @@
                 }
             }
         },
-        "age_of_onset": {
-            "title": "Age of Onset",
-            "type": "string",
-            "enum": [
-                "unknown",
-                "congenital onset",
-                "embryonal onset",
-                "fetal onset",
-                "neonatal onset",
-                "infantile onset",
-                "childhood onset",
-                "juvenile onset",
-                "adult onset"
-            ]
-        },
         "mother": {
             "title": "Mother",
             "type": "string",
@@ -125,16 +219,6 @@
             "title": "Father",
             "type": "string",
             "linkTo": "Individual"
-        },
-        "parents": {
-            "title": "Parents",
-            "type": "array",
-            "description": "Can optionally be used to supplement mother/father",
-            "items": {
-                "title": "Parent",
-                "type": "string",
-                "linkTo": "Individual"
-            }
         },
         "samples" : {
             "title" : "Samples",

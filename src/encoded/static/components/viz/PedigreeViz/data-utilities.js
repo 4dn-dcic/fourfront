@@ -164,8 +164,8 @@ export function standardizeObjectsInList(jsonList){
             }
         });
         // todo - maybe change to be isDeceased (bool) and add another property for notes
-        indv.deceased = indv.deceased || indv.isDeceased || false;
-        indv.consultand = indv.consultand || indv.isConsultand || false;
+        indv.isDeceased = indv.isDeceased || false;
+        indv.isConsultand = indv.isConsultand || false;
         indv.isStillBirth = indv.isStillBirth || false;
         indv.isPregnancy = indv.isPregnancy || false;
         indv.isSpontaneousAbortion = indv.isSpontaneousAbortion || false;

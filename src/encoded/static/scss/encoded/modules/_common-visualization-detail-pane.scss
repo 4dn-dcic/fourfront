@@ -88,10 +88,11 @@
             }
             > .details {
                 > .detail-row {
-                    padding: 12px 18px;
+                    padding: 9px 18px;
+                    border-bottom: 1px solid #eee;
 
                     label {
-                        font-weight: 400;
+                        font-weight: 600;
                         margin-bottom: 1px;
                     }
 
