@@ -226,7 +226,9 @@ def process_pedigree(context, request):
             error_msg = ('Case %s: Cannot GET family feature %s. Error: %s'
                          % (case, hpo_id, str(exc)))
             log.error(error_msg)
-            raise HTTPUnprocessableEntity(error_msg)
+            # HACKY. Skip raising this error if local
+            if config_uri == 'production.ini':
+                raise HTTPUnprocessableEntity(error_msg)
         else:
             family['family_phenotypic_features'].append(pheno_res)
             family_uuids['family_phenotypic_features'].append(pheno_res['uuid'])
