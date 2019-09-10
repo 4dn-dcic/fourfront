@@ -25,7 +25,7 @@
     "properties": {
         "schema_version": {
             "default": "1"
-        }
+        },
         "qc_list": {
             "title": "QC List",
             "description": "List of QC metric objects",
