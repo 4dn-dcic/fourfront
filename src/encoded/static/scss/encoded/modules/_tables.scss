@@ -365,6 +365,7 @@ $search-results-above-results-row-height: 42px;
 .search-page-container {
 	body.scrolled-past-80 & {
 		.facets-container {
+			position: -webkit-sticky;
 			position: sticky;
 			top: 40px;
 			max-height: calc(100vh - 41px);

@@ -361,6 +361,25 @@ $pedigree-disease-colors :
                 h3 {
                     @include partner-links;
                 }
+
+                /*
+                i.icon.icon-times {
+                    font-size: 1.25rem;
+                    color: #777;
+                    padding-top: 7px;
+                    &:hover {
+                        color: #000;
+                    }
+                }
+                */
+                a.edit-btn {
+                    color: #999;
+                    margin-top: 7px;
+                    &:hover {
+                        color: #111;
+                    }
+                }
+
             }
 
             > .details {
@@ -390,7 +409,7 @@ $pedigree-disease-colors :
                                 flex: 1;
                             }
                             > .onset {
-                                
+                                font-size: 0.9em;
                             }
                         }
                     }
