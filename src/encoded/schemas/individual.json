@@ -165,8 +165,7 @@
         },
         "cause_of_infertility": {
             "title" : "Cause of Infertility",
-            "type" : "string",
-            "linkTo" : "Phenotype"
+            "type" : "string"
         },
         "ethnicity": {
             "title": "Ethnicity",
