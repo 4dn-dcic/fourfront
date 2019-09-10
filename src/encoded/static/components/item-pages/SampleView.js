@@ -60,9 +60,10 @@ export function isNodeCurrentContext(node, context){
         return m;
     }, {});
     const file = getFile(node);
-    if (file['@id'] && processedFileIds[file['@id']]){
+    if (file && file['@id'] && processedFileIds[file['@id']]){
         return true;
     }
+    return false;
 }
 
 
