@@ -226,7 +226,7 @@ def process_pedigree(context, request):
             error_msg = ('Case %s: Cannot GET family feature %s. Error: %s'
                          % (case, hpo_id, str(exc)))
             log.error(error_msg)
-            # raise HTTPUnprocessableEntity(error_msg)
+            raise HTTPUnprocessableEntity(error_msg)
         else:
             family['family_phenotypic_features'].append(pheno_res)
             family_uuids['family_phenotypic_features'].append(pheno_res['uuid'])
@@ -487,6 +487,55 @@ def affected_xml_to_phenotypic_features(testapp, ref_vals, refs, data, case, uui
                                          case, uuids_by_ref)
 
 
+def cause_of_death_xml_to_phenotype(testapp, ref_vals, refs, data, case, uuids_by_ref):
+    """
+    This is a `xml_ref_fxn`, so it must take the corresponding args in the
+    standardized way and update the `data` dictionary, which is used to PATCH
+    the Individual item.
+
+    Helper function to use specifically with `causeOfDeath` object references
+    in input XML. Uses a list of dict ref_vals and converts to
+    `cause_of_death` or `clinic_notes` in the family metadata.
+
+    Args:
+        testapp (webtest.TestApp): test application for posting/patching
+        ref_vals (list): list of dict containg cause of death info (should be length 1)
+        refs: (dict): reference-based parsed XML data
+        data (dict): metadata to POST/PATCH
+        case (str): identifier of the case
+        uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
+
+    Returns:
+        None
+    """
+    clinic_notes = []
+    for xml_obj in ref_vals:
+        found_term = False
+        # only use HPO terms for now
+        if xml_obj.get('causeOfDeathOntologyId') and xml_obj.get('causeOfDeathOntology') == 'HPO':
+            # look up HPO term. If not found, use a clinical note
+            try:
+                pheno_res = testapp.get('/phenotypes/' + xml_obj['causeOfDeathOntologyId'], status=200).json
+            except Exception as exc:
+                log.error('Case %s: Cannot GET term %s. Error: %s'
+                          % (case, xml_obj['causeOfDeathOntologyId'], str(exc)))
+            else:
+                found_term = True
+                data['cause_of_death'] = pheno_res['uuid']
+
+        # if we cannot find the term, update the clinical notes
+        if xml_obj.get('causeOfDeath') and not found_term:
+            dx_note = 'Cause of death: ' + xml_obj['causeOfDeath']
+            if xml_obj['causeOfDeathOntologyId']:
+                dx_note += ' (HPO term %s not found)' % xml_obj['causeOfDeathOntologyId']
+            clinic_notes.append(dx_note)
+
+    if clinic_notes:
+        if data.get('clinic_notes'):
+            clinic_notes.insert(0, data['clinic_notes'])
+        data['clinic_notes'] = '\n'.join(clinic_notes)
+
+
 def etree_to_dict(ele, ref_container=None, ref_field=''):
     """
     Helper function to recursively parse ElementTree (XML) to Python objects.
@@ -693,9 +742,29 @@ PROBAND_MAPPING = {
             'corresponds_to': 'age_units',
             'value': lambda v: convert_age_units(v['ageUnits']) if v.get('ageUnits') else None
         },
+        'ageAtDeath': {
+            'corresponds_to': 'age_at_death',
+            'value': lambda v: int(v['ageAtDeath']) if v.get('ageAtDeath') is not None else None
+        },
+        'ageAtDeathUnits': {
+            'corresponds_to': 'age_at_death_units',
+            'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if v.get('ageAtDeathUnits') else None
+        },
+        'gestAge': {
+            'corresponds_to': 'gestational_age',
+            'value': lambda v: int(v['gestAge']) if v.get('gestAge') is not None else None
+        },
         'stillBirth': {
             'corresponds_to': 'is_still_birth',
             'value': lambda v: True if v['stillBirth'] == '1' else False
+        },
+        'noChildrenByChoice': {
+            'corresponds_to': 'is_no_children_by_choice',
+            'value': lambda v: True if v['noChildrenByChoice'] == '1' else False
+        },
+        'noChildrenInfertility': {
+            'corresponds_to': 'is_infertile',
+            'value': lambda v: True if v['noChildrenInfertility'] == '1' else False
         },
         'explicitlySetBiologicalFather': {
             'corresponds_to': 'father',
@@ -720,6 +789,11 @@ PROBAND_MAPPING = {
         'diagnoses': {
             'xml_ref_fxn': diagnoses_xml_to_phenotypic_features,
             'value': lambda v: convert_to_list(v['diagnoses']),
+            'linked': True
+        },
+        'causeOfDeath': {
+            'xml_ref_fxn': cause_of_death_xml_to_phenotype,
+            'value': lambda v: convert_to_list(v),
             'linked': True
         },
         'affected1': {
