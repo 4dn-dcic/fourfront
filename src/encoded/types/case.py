@@ -440,7 +440,7 @@ def diagnoses_xml_to_phenotypic_features(testapp, ref_vals, refs, data, case, uu
                     pheno_feats.append(pheno_feat_data)
 
         # if we cannot find the term, update the clinical notes
-        if not found_term:
+        if diagnosis.get('name') and not found_term:
             dx_note = 'Diagnosis: ' + diagnosis['name']
             if diagnosis.get('ageAtDx') and diagnosis.get('ageAtDxUnits'):
                 dx_note += ('at ' + diagnosis['ageAtDx'] + ' ' +
