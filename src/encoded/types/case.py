@@ -119,7 +119,11 @@ def process_pedigree(context, request):
     from pyramid.paster import get_app
     from webtest import TestApp
     from base64 import b64encode
-    from defusedxml.ElementTree import fromstring
+    # temporary: there seem to be buildout installation problems w defusedxml
+    try:
+        from defusedxml.ElementTree import fromstring
+    except ImportError:
+        from xml.etree.ElementTree import fromstring
 
     case = str(context.uuid)  # used in logging
 
@@ -591,18 +595,19 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case,
                 if round == 'first':
                     if converted.get('linked', False) is True:
                         continue
-                    data[converted['corresponds_to']] = converted['value'](xml_obj)
+                    ref_val = converted['value'](xml_obj)
+                    if ref_val is not None:
+                        data[converted['corresponds_to']] = ref_val
                 elif round == 'second':
                     if converted.get('linked', False) is False:
                         continue
-
                     ref_val = converted['value'](xml_obj)
                     # more complex function based on xml refs needed
-                    if ref_val and 'xml_ref_fxn' in converted:
+                    if ref_val is not None and 'xml_ref_fxn' in converted:
                         # will update data in place
                         converted['xml_ref_fxn'](testapp, ref_val, refs, data,
                                                  case, uuids_by_ref)
-                    elif ref_val:
+                    elif ref_val is not None:
                         data[converted['corresponds_to']] = uuids_by_ref[ref_val]
 
             # POST if first round
