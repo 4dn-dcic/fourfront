@@ -503,7 +503,8 @@ class PedigreeTabView extends React.PureComponent {
     }
 
     renderDetailPane(pedigreeVizProps){
-        return <PedigreeDetailPane {...pedigreeVizProps} />;
+        const { session, href, context } = this.props;
+        return <PedigreeDetailPane {...pedigreeVizProps} {...{ session, href, context }} />;
     }
 
     render(){

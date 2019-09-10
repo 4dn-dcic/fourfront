@@ -448,6 +448,7 @@ function initOrderingSimple(objectGraph, memoized = {}){
 
     const seenOrderInIndex = {};
     const seenIndvs = [];
+    // eslint-disable-next-line no-constant-condition
     while (true){
         while (q.length){
             const node = q.pop();
@@ -651,6 +652,7 @@ function initOrdering(objectGraph, startIndividuals = null, direction = "childre
 
     const seenOrderInIndex = {};
     const seenIndvs = [];
+    // eslint-disable-next-line no-constant-condition
     while (true){
         while (q.length){
             const node = q.pop();
@@ -866,7 +868,7 @@ export function orderObjectGraph(objectGraph, memoized = {}){
 
     function checkCrossings(order){
         const edgeCrossings = countEdgeCrossings(objectGraph, order, memoized);
-        console.log("ORDER", order, edgeCrossings);
+        //console.log("ORDER", order, edgeCrossings);
         if (edgeCrossings < bestCrossings){
             bestOrder = order;//copyOrder(order, objectGraph, memoized);
             bestCrossings = edgeCrossings;
@@ -914,7 +916,7 @@ export function orderObjectGraph(objectGraph, memoized = {}){
 export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
     const { orderByHeightIndex, seenOrderInIndex } = order;
     const graphHeight = (memoized.getGraphHeight || getGraphHeight)(orderByHeightIndex, dims);
-    const relationships = (memoized.getRelationships || getRelationships)(objectGraph);
+    //const relationships = (memoized.getRelationships || getRelationships)(objectGraph);
     const yCoordByHeightIndex = orderByHeightIndex.map(function(indvsInRow, heightIndex){
         return graphHeight - (
             (dims.graphPadding * 2)
@@ -929,7 +931,7 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
     function slideChildren(children, diff, seenIndvs=null, skipPRs=null){
         const q = [...children];
         const seen = (seenIndvs && Object.assign({}, seenIndvs)) || {};
-        const seenPRs = (skipPRs && Object.assign({}, skipPRs)) || {};
+        //const seenPRs = (skipPRs && Object.assign({}, skipPRs)) || {};
         while (q.length){
             const child = q.shift();
             const { id, _drawing, _parentalRelationship, children } = child;

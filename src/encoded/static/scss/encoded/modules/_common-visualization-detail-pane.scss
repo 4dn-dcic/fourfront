@@ -78,14 +78,29 @@
                     }
                 }
 
+                /** A couple different options for layouting out **/
+
                 i.icon.icon-times {
                     font-size: 1.25rem;
                     color: #777;
-                    padding-top: 5px;
+                    transform: scale3d(1,1,1);
+                    transition: transform .25s;
                     &:hover {
                         color: #000;
+                        transform: scale3d(1.125,1.125,1);
                     }
                 }
+
+                &.row > .col-auto > i.icon.icon-times {
+                    padding-top: 5px;
+                }
+
+                > .label-row > .buttons-col {
+                    display: flex;
+                    align-items: center;
+                }
+
+
 
             }
             > .details {

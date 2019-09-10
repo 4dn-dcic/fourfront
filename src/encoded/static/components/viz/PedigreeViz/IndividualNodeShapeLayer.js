@@ -195,7 +195,7 @@ const AffectedBGPieChart = React.memo(function AffectedBGPieChart({ width, heigh
                 data-disease-index={diseaseToIndex[disease]} className="disease-arc" />
         );
     });
-    return <React.Fragment>{ arcPaths }</React.Fragment>;
+    return <g className="disease-path-arcs">{ arcPaths }</g>;
 });
 
 const UnderlayMarkers = React.memo(function UnderlayMarkers({ individual, width, height, shape, diseaseToIndex }){
