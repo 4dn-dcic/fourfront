@@ -72,9 +72,11 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
 
         return {
             id, gender, name,
-            isDeceased,
-            isPregnancy, isTerminatedPregnancy,
-            isSpontaneousAbortion, isStillBirth,
+            isDeceased : isDeceased || isTerminatedPregnancy || isSpontaneousAbortion || isStillBirth || false,
+            isPregnancy : isPregnancy || isTerminatedPregnancy || isSpontaneousAbortion || isStillBirth || false,
+            isTerminatedPregnancy,
+            isSpontaneousAbortion,
+            isStillBirth,
             diseases,
             'father' : fatherStr,
             'mother' : motherStr,
