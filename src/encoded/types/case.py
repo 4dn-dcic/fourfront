@@ -761,20 +761,24 @@ PROBAND_MAPPING = {
             },
             {
                 'corresponds_to': 'age',
-                'value': lambda v: int(v['age']) if v.get('age') is not None else None
+                'value': lambda v: int(v['age']) if v['age'] is not None else None
             }
         ],
         'ageUnits': {
             'corresponds_to': 'age_units',
-            'value': lambda v: convert_age_units(v['ageUnits']) if v.get('ageUnits') else None
+            'value': lambda v: convert_age_units(v['ageUnits']) if v['ageUnits'] else None
         },
         'ageAtDeath': {
             'corresponds_to': 'age_at_death',
-            'value': lambda v: int(v['ageAtDeath']) if v.get('ageAtDeath') is not None else None
+            'value': lambda v: int(v['ageAtDeath']) if v['ageAtDeath'] is not None else None
         },
         'ageAtDeathUnits': {
             'corresponds_to': 'age_at_death_units',
             'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if v.get('ageAtDeathUnits') else None
+        },
+        'quantity': {
+            'corresponds_to': 'quantity',
+            'value': lambda v: int(v['quantity']) if v['quantity'] is not None else None
         },
         'p': {
             'corresponds_to': 'is_pregnancy',
@@ -782,7 +786,7 @@ PROBAND_MAPPING = {
         },
         'gestAge': {
             'corresponds_to': 'gestational_age',
-            'value': lambda v: int(v['gestAge']) if v.get('gestAge') is not None else None
+            'value': lambda v: int(v['gestAge']) if v['gestAge'] is not None else None
         },
         'sab': {
             'corresponds_to': 'is_spontaneous_abortion',
@@ -804,6 +808,10 @@ PROBAND_MAPPING = {
             'corresponds_to': 'is_infertile',
             'value': lambda v: v['noChildrenInfertility'] == '1'
         },
+        'infertilityReason': {
+            'corresponds_to': 'cause_of_infertility',
+            'value': lambda v: v['infertilityReason']
+        },
         'explicitlySetBiologicalFather': {
             'corresponds_to': 'father',
             'value': lambda v: v['explicitlySetBiologicalFather']['@ref'] if v['explicitlySetBiologicalFather'] else None,
@@ -816,7 +824,7 @@ PROBAND_MAPPING = {
         },
         'descendancy': {
             'xml_ref_fxn': descendancy_xml_ref_to_parents,
-            'value': lambda v: v['descendancy']['@ref'] if v.get('descendancy') else None,
+            'value': lambda v: v['descendancy']['@ref'] if v['descendancy'] else None,
             'linked': True
         },
         'annotations': {
