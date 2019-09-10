@@ -226,7 +226,7 @@ def process_pedigree(context, request):
             error_msg = ('Case %s: Cannot GET family feature %s. Error: %s'
                          % (case, hpo_id, str(exc)))
             log.error(error_msg)
-            raise HTTPUnprocessableEntity(error_msg)
+            # raise HTTPUnprocessableEntity(error_msg)
         else:
             family['family_phenotypic_features'].append(pheno_res)
             family_uuids['family_phenotypic_features'].append(pheno_res['uuid'])
@@ -286,6 +286,8 @@ def age_to_birth_year(xml_obj):
     Returns:
         int: year of birth
     """
+    if xml_obj.get('age') is None or xml_obj.get('ageUnits') is None:
+        return None
     delta_kwargs = {convert_age_units(xml_obj['ageUnits']) + 's': int(xml_obj['age'])}
     rel_delta = relativedelta(**delta_kwargs)
     birth_datetime = xml_obj['ped_datetime'] - rel_delta
@@ -590,25 +592,29 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case,
             for xml_key in xml_obj:
                 converted = PROBAND_MAPPING[item_type].get(xml_key)
                 if converted is None:
-                    log.warn('Unknown field %s for %s in process-pedigree!' % (xml_key, item_type))
+                    log.info('Unknown field %s for %s in process-pedigree!' % (xml_key, item_type))
                     continue
-                if round == 'first':
-                    if converted.get('linked', False) is True:
-                        continue
-                    ref_val = converted['value'](xml_obj)
-                    if ref_val is not None:
-                        data[converted['corresponds_to']] = ref_val
-                elif round == 'second':
-                    if converted.get('linked', False) is False:
-                        continue
-                    ref_val = converted['value'](xml_obj)
-                    # more complex function based on xml refs needed
-                    if ref_val is not None and 'xml_ref_fxn' in converted:
-                        # will update data in place
-                        converted['xml_ref_fxn'](testapp, ref_val, refs, data,
-                                                 case, uuids_by_ref)
-                    elif ref_val is not None:
-                        data[converted['corresponds_to']] = uuids_by_ref[ref_val]
+                # can handle meta multiple fields based off one one xml field
+                if not isinstance(converted, list):
+                    converted = [converted]
+                for converted_dict in converted:
+                    if round == 'first':
+                        if converted_dict.get('linked', False) is True:
+                            continue
+                        ref_val = converted_dict['value'](xml_obj)
+                        if ref_val is not None:
+                            data[converted_dict['corresponds_to']] = ref_val
+                    elif round == 'second':
+                        if converted_dict.get('linked', False) is False:
+                            continue
+                        ref_val = converted_dict['value'](xml_obj)
+                        # more complex function based on xml refs needed
+                        if ref_val is not None and 'xml_ref_fxn' in converted_dict:
+                            # will update data in place
+                            converted_dict['xml_ref_fxn'](testapp, ref_val, refs, data,
+                                                     case, uuids_by_ref)
+                        elif ref_val is not None:
+                            data[converted_dict['corresponds_to']] = uuids_by_ref[ref_val]
 
             # POST if first round
             if round == 'first':
@@ -673,16 +679,24 @@ PROBAND_MAPPING = {
             'corresponds_to': 'is_deceased',
             'value': lambda v: True if v['deceased'] == '1' else False
         },
-        # TODO: fix. This is NOT right, need timestamp from XML
-        'age': {
-            'corresponds_to': 'birth_year',
-            'value': lambda v: age_to_birth_year(v)
+        'age': [
+            {
+                'corresponds_to': 'birth_year',
+                'value': lambda v: age_to_birth_year(v)
+            },
+            {
+                'corresponds_to': 'age',
+                'value': lambda v: int(v['age']) if v.get('age') is not None else None
+            }
+        ],
+        'ageUnits': {
+            'corresponds_to': 'age_units',
+            'value': lambda v: convert_age_units(v['ageUnits']) if v.get('ageUnits') else None
         },
         'stillBirth': {
             'corresponds_to': 'is_still_birth',
             'value': lambda v: True if v['stillBirth'] == '1' else False
         },
-        # TODO: can you have more than one of these fields?
         'explicitlySetBiologicalFather': {
             'corresponds_to': 'father',
             'value': lambda v: v['explicitlySetBiologicalFather']['@ref'] if v['explicitlySetBiologicalFather'] else None,
