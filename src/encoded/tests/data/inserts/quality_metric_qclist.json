@@ -6,7 +6,7 @@
             "value": "108e47c1-35bd-46fd-8a2e-e5d7b89560eb",
         },
         {
-            "qc_type": "quality_metric_bamqc",
+            "qc_type": "quality_metric_wgs_bamqc",
             "value": "08c4829f-5efa-421f-a556-4ffa2e63692c",
         }
     ],

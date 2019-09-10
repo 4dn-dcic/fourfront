@@ -91,16 +91,16 @@ class QualityMetricWorkflowrun(QualityMetric):
 
 
 @collection(
-    name='quality-metrics-bamqc',
+    name='quality-metrics-wgs-bamqc',
     properties={
-        'title': 'QC Quality metrics for Bam QC',
-        'description': 'Listing of QC Quality Metrics for Bam QC.',
+        'title': 'QC Quality metrics for WGS Bam QC',
+        'description': 'Listing of QC Quality Metrics for WGS Bam QC.',
     })
-class QualityMetricBamqc(QualityMetric):
-    """Subclass of quality matrics for bam files."""
+class QualityMetricWgsBamqc(QualityMetric):
+    """Subclass of quality matrics for WGS bam files."""
 
-    item_type = 'quality_metric_bamqc'
-    schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
+    item_type = 'quality_metric_wgs_bamqc'
+    schema = load_schema('encoded:schemas/quality_metric_wgs_bamqc.json')
     embedded_list = QualityMetric.embedded_list
 
 
