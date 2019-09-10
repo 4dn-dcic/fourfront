@@ -435,6 +435,18 @@ $pedigree-disease-colors :
                         }
                     }
 
+                    &[data-describing="clinic_notes"] {
+                        textarea {
+                            width: 100%;
+                            min-height: 80px;
+                            transition: min-height .25s;
+                            font-size: 0.925em;
+                            &:focus {
+                                min-height: 180px;
+                            }
+                        }
+                    }
+
                     &[data-describing="parents"],
                     &[data-describing="children"] {
                         .partners-links {

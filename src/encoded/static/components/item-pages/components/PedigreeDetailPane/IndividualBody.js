@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import { Fade } from 'react-bootstrap';
 import memoize from 'memoize-one';
 
 
@@ -10,7 +11,10 @@ export function getIndividualDisplayTitle(individual){
     return display_title || name || id;
 }
 
-
+/**
+ * At some point, will likely make into class component
+ * and add methods to save/load things such as clinician notes.
+ */
 export function IndividualBody(props){
     const {
         selectedNode: individual,
@@ -41,7 +45,6 @@ export function IndividualBody(props){
     return (
         <div className="detail-pane-inner">
 
-
             <div className="title-box">
                 <div className="label-row row">
                     <div className="col">
@@ -62,6 +65,7 @@ export function IndividualBody(props){
             <div className="details">
                 { ethnicity ? <InlineDetailRow label="Ethnicity" value={ethnicity} /> : null }
                 <PhenotypicFeatures features={phenotypic_features} diseaseToIndex={diseaseToIndex} />
+                <ClinicianNotes individual={individualItem} key={individualID} />
                 {/*
                 <div className="detail-row row" data-describing="parents">
                     <div className="col-12">
@@ -129,3 +133,38 @@ function PhenotypicFeatures({ features, diseaseToIndex }){
         </div>
     );
 }
+
+
+/** @todo Save functionality */
+class ClinicianNotes extends React.PureComponent {
+
+    constructor(props){
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        const notes = props.individual.clinic_notes || "";
+        this.state = { notes };
+    }
+
+    onChange(e){
+        this.setState({ notes: e.target.value });
+    }
+
+    render(){
+        const { individual } = this.props;
+        const { '@id' : indvID, clinic_notes: origNotes } = individual;
+        const { notes } = this.state;
+        const notesChanged = (notes !== (origNotes || ""));
+        return (
+            <div className="detail-row" data-describing="clinic_notes">
+                <label className="d-block">Clinical Notes</label>
+                <textarea value={notes} onChange={this.onChange}/>
+                <Fade in={notesChanged}>
+                    <button type="button" className="btn btn-success mt-02">
+                        Save (todo)
+                    </button>
+                </Fade>
+            </div>
+        );
+    }
+}
+

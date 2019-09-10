@@ -814,10 +814,13 @@ function countEdgeCrossings(objectGraph, order, memoized = {}){
     const seenFrom = {};
 
     orderByHeightIndex.forEach(function(nodesInRow, hi){ // going up
-        nodesInRow.forEach(function(node){ // left to right
+        nodesInRow.forEach(function(node, indexInRow){ // left to right
             const { id, partners, children, _maritalRelationships, _parentalRelationship } = node;
             if (!seenFrom[id]) seenFrom[id] = new Set();
             if (isRelationship(node)) {
+                if (indexInRow === 0) {
+                    crossings += 10;
+                }
                 partners.forEach(function(indv){
                     if (seenFrom[indv.id] && seenFrom[indv.id].has(id)) {
                         return;
@@ -891,6 +894,7 @@ export function orderObjectGraph(objectGraph, memoized = {}){
         if (edgeCrossings < bestCrossings){
             bestOrder = order;//copyOrder(order, objectGraph, memoized);
             bestCrossings = edgeCrossings;
+            //console.log("ISBEST");
         }
     }
 
