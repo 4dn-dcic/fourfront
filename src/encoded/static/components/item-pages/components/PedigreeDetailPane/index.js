@@ -2,23 +2,32 @@
 
 import React from 'react';
 import memoize from 'memoize-one';
+import ReactTooltip from 'react-tooltip';
 import { IndividualBody, getIndividualDisplayTitle } from './IndividualBody';
 
 
+export class PedigreeDetailPane extends React.PureComponent {
 
-export const PedigreeDetailPane = React.memo(function PedigreeDetailPane(props){
-    const { unselectNode, memoized, objectGraph, currSelectedNodeId, className } = props;
-    const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
-
-    if (!selectedNode){
-        return null;
-    } else if (currSelectedNodeId.slice(0,13) === 'relationship:'){
-        return <RelationshipBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
-    } else {
-        return <IndividualBody {...props} selectedNode={selectedNode} onClose={unselectNode} />;
+    componentDidUpdate(pastProps){
+        const { currSelectedNodeId } = this.props;
+        if (pastProps.currSelectedNodeId !== currSelectedNodeId) {
+            ReactTooltip.rebuild();
+        }
     }
 
-});
+    render(){
+        const { unselectNode, memoized, objectGraph, currSelectedNodeId, className } = this.props;
+        const selectedNode = currSelectedNodeId && memoized.findNodeWithId(objectGraph, currSelectedNodeId);
+
+        if (!selectedNode){
+            return null;
+        } else if (currSelectedNodeId.slice(0,13) === 'relationship:'){
+            return <RelationshipBody {...this.props} selectedNode={selectedNode} onClose={unselectNode} />;
+        } else {
+            return <IndividualBody {...this.props} selectedNode={selectedNode} onClose={unselectNode} />;
+        }
+    }
+}
 
 
 

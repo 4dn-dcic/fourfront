@@ -35,15 +35,19 @@ export function IndividualBody(props){
     return (
         <div className="detail-pane-inner">
             <div className="title-box row">
-                <div className="col">
+                <div className="col-11">
                     <label>Individual</label>
                     <h3>{ showTitle }</h3>
                 </div>
-                { onClose ?
-                    <div className="col-auto">
-                        <i className="icon icon-times fas clickable" onClick={onClose}/>
-                    </div>
-                    : null }
+                <div className="col-auto">
+                    { onClose ? <i className="icon icon-times fas clickable d-block" onClick={onClose}/> : null }
+                    {/*
+                    <a href={individualID + "?currentAction=edit"} className="d-block edit-btn">
+                        <i className="icon icon-pencil fas clickable" />
+                    </a>
+                    */}
+                </div>
+    
             </div>
             <div className="details">
                 { ethnicity ? <InlineDetailRow label="Ethnicity" value={ethnicity} /> : null }
@@ -97,16 +101,19 @@ function PhenotypicFeatures({ features, diseaseToIndex }){
         return (
             <div className="detail-row-list-item phenotypic-feature" key={featureID}>
                 <div className="legend-patch" data-disease-index={diseaseToIndex[featureID]} />
-                <a href={featureID} className="title">{ title }</a>
-                { onset_age !== null && onset_age_units !== null ?
-                    <span className="onset">{ "" + onset_age + " " + onset_age_units + (onset_age > 1 ? "s" : "") }</span>
-                    : null }
+                <span className="title"><a href={featureID}>{ title }</a></span>
+                { onset_age !== null && onset_age_units !== null ? (
+                    <span className="onset" data-tip="Age of onset">
+                        <small> @ </small>
+                        { "" + onset_age + " " + onset_age_units + (onset_age > 1 ? "s" : "") }
+                    </span>
+                ) : null }
             </div>
         );
     });
     return (
         <div className="detail-row phenotypic-features" data-describing="phenotypic_features">
-            <label className="d-block">Phenotypic Features & Onset</label>
+            <label className="d-block">Phenotypic Features</label>
             { renderedFeatures }
         </div>
     );

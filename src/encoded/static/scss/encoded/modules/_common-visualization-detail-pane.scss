@@ -13,6 +13,7 @@
                 transition: width .3s, opacity .3s;
                 opacity: 0;
 
+                position: -webkit-sticky;
                 position: sticky;
                 top: 41px;
                 //max-height: calc(100vh - 41px);
@@ -80,11 +81,12 @@
                 i.icon.icon-times {
                     font-size: 1.25rem;
                     color: #777;
-                    padding-top: 7px;
+                    padding-top: 5px;
                     &:hover {
                         color: #000;
                     }
                 }
+
             }
             > .details {
                 > .detail-row {
