@@ -169,6 +169,7 @@ def process_pedigree(context, request):
         response['status'] = 'failure'
         response['detail'] = 'Error parsing pedigree XML: %s' % str(exc)
         return response
+
     # add "affected" metadata to refs for easy access
     family_pheno_feats = []
     for meta_key, meta_val in xml_data.get('meta', {}).items():
@@ -294,6 +295,25 @@ def age_to_birth_year(xml_obj):
     rel_delta = relativedelta(**delta_kwargs)
     birth_datetime = xml_obj['ped_datetime'] - rel_delta
     return birth_datetime.year
+
+
+def alive_and_well(xml_obj):
+    """
+    Simple conversion function that uses 'deceased' and 'aw' fields from the
+    xml person object to determine Individual 'life_status'
+
+    Args:
+        xml_obj (dict): xml data for the individual
+
+    Returns:
+        str: life_status
+    """
+    if xml_obj['deceased'] == '1':
+        return 'deceased'
+    elif xml_obj['aw'] == '1':
+        return 'alive and well'
+    else:
+        return 'alive'
 
 
 def convert_to_list(xml_value):
@@ -728,7 +748,11 @@ PROBAND_MAPPING = {
         },
         'deceased': {
             'corresponds_to': 'is_deceased',
-            'value': lambda v: True if v['deceased'] == '1' else False
+            'value': lambda v: v['deceased'] == '1'
+        },
+        'aw': {
+            'corresponds_to': 'life_status',
+            'value': lambda v: alive_and_well(v)
         },
         'age': [
             {
@@ -752,21 +776,33 @@ PROBAND_MAPPING = {
             'corresponds_to': 'age_at_death_units',
             'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if v.get('ageAtDeathUnits') else None
         },
+        'p': {
+            'corresponds_to': 'is_pregnancy',
+            'value': lambda v: v['p'] == '1'
+        },
         'gestAge': {
             'corresponds_to': 'gestational_age',
             'value': lambda v: int(v['gestAge']) if v.get('gestAge') is not None else None
         },
+        'sab': {
+            'corresponds_to': 'is_spontaneous_abortion',
+            'value': lambda v: v['sab'] == '1'
+        },
+        'top': {
+            'corresponds_to': 'is_termination_of_pregnancy',
+            'value': lambda v: v['top'] == '1'
+        },
         'stillBirth': {
             'corresponds_to': 'is_still_birth',
-            'value': lambda v: True if v['stillBirth'] == '1' else False
+            'value': lambda v: v['stillBirth'] == '1'
         },
         'noChildrenByChoice': {
             'corresponds_to': 'is_no_children_by_choice',
-            'value': lambda v: True if v['noChildrenByChoice'] == '1' else False
+            'value': lambda v: v['noChildrenByChoice'] == '1'
         },
         'noChildrenInfertility': {
             'corresponds_to': 'is_infertile',
-            'value': lambda v: True if v['noChildrenInfertility'] == '1' else False
+            'value': lambda v: v['noChildrenInfertility'] == '1'
         },
         'explicitlySetBiologicalFather': {
             'corresponds_to': 'father',
