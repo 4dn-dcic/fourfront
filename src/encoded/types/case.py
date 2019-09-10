@@ -776,6 +776,10 @@ PROBAND_MAPPING = {
             'corresponds_to': 'age_at_death_units',
             'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if v.get('ageAtDeathUnits') else None
         },
+        'quantity': {
+            'corresponds_to': 'quantity',
+            'value': lambda v: int(v['quantity']) if v['quantity'] is not None else None
+        },
         'p': {
             'corresponds_to': 'is_pregnancy',
             'value': lambda v: v['p'] == '1'
