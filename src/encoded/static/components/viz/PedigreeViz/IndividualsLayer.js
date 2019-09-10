@@ -18,8 +18,8 @@ export function doesAncestorHaveId(id, htmlNode, maxDepth = 10){
 
 export function individualClassName(individual, isBeingHovered = false, isSelected = false){
     const classes = [];
-    const { gender, isProband = false, diseases = [], deceased } = individual;
-    if (deceased){
+    const { gender, isProband = false, diseases = [], isDeceased } = individual;
+    if (isDeceased){
         classes.push("is-deceased");
     }
     if (diseases.length > 0){

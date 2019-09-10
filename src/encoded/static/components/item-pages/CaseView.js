@@ -13,8 +13,76 @@ import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui
 import { PedigreeViz } from './../viz/PedigreeViz';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { FullHeightCalculator } from './components/FullHeightCalculator';
+import { PedigreeDetailPane } from './components/PedigreeDetailPane';
 import { Schemas } from './../util';
 
+
+
+/**
+ * Parses `context.families` instance
+ * into list of Individuals (JSON objects) with
+ * PedigreeViz-compliant properties.
+ */
+export function parseFamilyIntoDataset(family, diseasesAllowed = null){
+    const { members = [], proband, original_pedigree } = family;
+    const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
+    return members.map(function(individual){
+        const {
+            "@id": id,
+            display_title: name,
+            sex: gender = "undetermined",
+            father = null, // We might get these back as strings from back-end response, instd of embedded obj.
+            mother = null,
+            is_deceased: isDeceased = false,
+            is_pregnancy: isPregnancy = false,
+            is_termination_of_pregnancy: isTerminatedPregnancy = false,
+            is_spontaneous_abortion: isSpontaneousAbortion = false,
+            is_still_birth: isStillBirth = false,
+            phenotypic_features = []
+        } = individual;
+
+        const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
+        const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
+
+        // Internally, PedigreeViz uses the "diseases" vocabulary per a pedigree standards doc.
+        // Here we transform phenotypic_features to this vocab (might change later, and/or conditionally)
+        const diseasesAllowedObj = diseasesAllowed.length > 0 ? {} : null;
+        diseasesAllowed.forEach(function(d){
+            diseasesAllowedObj[d] = true;
+        });
+
+        const diseases = []; // All strings
+        const carrierOfDiseases = [];
+        const asymptoticDiseases = [];
+
+        phenotypic_features.forEach(function(featureWrapperObj){
+            const { phenotypic_feature: { '@id' : featureID } } = featureWrapperObj;
+            if (diseasesAllowedObj && !diseasesAllowedObj[featureID]) {
+                return;
+            }
+            if (!featureID) return;
+            diseases.push(featureID);
+        });
+
+
+
+
+        return {
+            id, gender, name,
+            isDeceased,
+            isPregnancy, isTerminatedPregnancy,
+            isSpontaneousAbortion, isStillBirth,
+            diseases,
+            'father' : fatherStr,
+            'mother' : motherStr,
+            'isProband' : probandID && probandID === id,
+            'data' : {
+                // Keep non-proband-viz specific data here. TODO: Define/document.
+                'individualItem' : individual
+            }
+        };
+    });
+}
 
 
 export default class CaseView extends DefaultItemView {
@@ -409,62 +477,50 @@ class PedigreeTabView extends React.PureComponent {
         };
     }
 
-    /**
-     * Parses `context.families` instance
-     * into list of Individuals (JSON objects) with
-     * PedigreeViz-compliant properties.
-     */
-    static parseFamilyIntoDataset(family){
-        const { members = [], proband, original_pedigree } = family;
-        const probandID = (proband && (typeof proband === 'string' ? proband : proband['@id'])) || null;
-        return members.map(function(individual){
-            const {
-                "@id": id,
-                display_title: name,
-                sex: gender = "undetermined",
-                father = null, // We might get these back as strings from back-end response, instd of embedded obj.
-                mother = null,
-                is_deceased = false
-            } = individual;
-
-            const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
-            const motherStr = (mother && (typeof mother === 'string' ? mother : mother['@id'])) || null;
-
-            return {
-                id, gender, name,
-                'father' : fatherStr,
-                'mother' : motherStr,
-                'isProband' : probandID && probandID === id,
-                'deceased' : !!(is_deceased),
-                'data' : {
-                    // Keep non-proband-viz specific data here. TODO: Define/document.
-                    'individualItem' : individual
-                }
-            };
+    static getPhenotypicFeatureStrings(case_phenotypic_features = []){
+        const strings = [];
+        case_phenotypic_features.forEach(function(feature){
+            const { '@id' : featureID } = feature;
+            if (!featureID) return;
+            strings.push(featureID);
         });
+        return strings;
     }
 
     constructor(props){
         super(props);
+        this.renderDetailPane = this.renderDetailPane.bind(this);
         this.memoized = {
-            parseFamilyIntoDataset : memoize(PedigreeTabView.parseFamilyIntoDataset)
+            parseFamilyIntoDataset : memoize(parseFamilyIntoDataset),
+            getPhenotypicFeatureStrings : memoize(PedigreeTabView.getPhenotypicFeatureStrings)
         };
         if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
             throw new Error("Expected props.context.families to be a non-empty Array.");
         }
     }
 
+    renderDetailPane(pedigreeVizProps){
+        return <PedigreeDetailPane {...pedigreeVizProps} />;
+    }
 
     render(){
         const {
-            context, schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
+            context : {
+                families: contextFamilies = [],
+                case_phenotypic_features = []
+            },
+            schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
             handleFamilySelect, pedigreeFamiliesIdx, pedigreeFamilies
         } = this.props;
 
-        const families = pedigreeFamilies || context.families;
+        const families = pedigreeFamilies || contextFamilies;
         const currentFamily = families[pedigreeFamiliesIdx];
+        const phenotypicFeatureStrings = this.memoized.getPhenotypicFeatureStrings(case_phenotypic_features);
 
-        const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
+        const dataset = this.memoized.parseFamilyIntoDataset(
+            currentFamily,
+            phenotypicFeatureStrings.length > 0 ? phenotypicFeatureStrings : null
+        );
 
         console.log('DDD', dataset);
         return (
@@ -478,7 +534,7 @@ class PedigreeTabView extends React.PureComponent {
                     </h3>
                 </div>
                 <hr className="tab-section-title-horiz-divider"/>
-                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight, innerOverlaysContainer }} />
+                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight }} renderDetailPane={this.renderDetailPane} />
             </div>
         );
     }
@@ -490,12 +546,11 @@ class PedigreeTabView extends React.PureComponent {
  * Reusable for any PedigreeTabView of any ItemView.
  * @todo Maybe move into item-pages/components? Maybe not.
  */
-export function PedigreeTabViewBody({ innerOverlaysContainer, dataset, windowWidth, windowHeight }){
+export function PedigreeTabViewBody({ dataset, windowWidth, windowHeight, renderDetailPane }){
     return (
         <FullHeightCalculator {...{ windowWidth, windowHeight }}>
-            <PedigreeViz overlaysContainer={innerOverlaysContainer}
-                {...{ dataset, windowWidth, width: windowWidth }}
-                filterUnrelatedIndividuals={false}>
+            <PedigreeViz {...{ dataset, windowWidth, renderDetailPane }}
+                width={windowWidth} filterUnrelatedIndividuals={false}>
             </PedigreeViz>
         </FullHeightCalculator>
     );

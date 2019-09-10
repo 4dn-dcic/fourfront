@@ -13,7 +13,7 @@ $pedigree-disease-colors :
     #b276b2;
 
 
-@mixin color-cycle-fill {
+@mixin pedigree-color-cycle-fill {
     $pedigree-colors-length: length($pedigree-disease-colors);
     @for $i from 1 through $pedigree-colors-length {
         $color: nth($pedigree-disease-colors, $i);
@@ -31,6 +31,28 @@ $pedigree-disease-colors :
         $color: nth($pedigree-disease-colors, $i);
         &[data-disease-index="#{2 * $pedigree-colors-length + $i}"] {
             fill: lighten($color, 10%);
+        }
+    }
+}
+
+@mixin pedigree-color-cycle-background {
+    $pedigree-colors-length: length($pedigree-disease-colors);
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{$i}"] {
+            background-color: $color;
+        }
+    }
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{$pedigree-colors-length + $i}"] {
+            background-color: darken($color, 10%);
+        }
+    }
+    @for $i from 1 through $pedigree-colors-length {
+        $color: nth($pedigree-disease-colors, $i);
+        &[data-disease-index="#{2 * $pedigree-colors-length + $i}"] {
+            background-color: lighten($color, 10%);
         }
     }
 }
@@ -227,7 +249,7 @@ $pedigree-disease-colors :
                         circle.circle-disease-dot,
                         rect.rect-disease-partition {
                             stroke-width: 1;
-                            @include color-cycle-fill;
+                            @include pedigree-color-cycle-fill;
                         }
     
                         &.is-hovered-over,
@@ -242,7 +264,7 @@ $pedigree-disease-colors :
                             fill: transparent; // Colors of disease-arcs behind it will show through.
                             path.disease-arc {
                                 stroke-width: 1;
-                                @include color-cycle-fill;
+                                @include pedigree-color-cycle-fill;
                             }
                         }
     
@@ -343,6 +365,35 @@ $pedigree-disease-colors :
 
             > .details {
                 > .detail-row {
+
+                    &[data-describing="Ethnicity"] {
+                        .value {
+                            text-transform: capitalize;
+                        }
+                    }
+
+                    &[data-describing="phenotypic_features"],
+                    &.phenotypic-features {
+                        > .detail-row-list-item.phenotypic-feature {
+                            display: flex;
+                            align-items: center;
+                            > .legend-patch {
+                                display: block;
+                                height: 12px;
+                                width: 12px;
+                                margin-right: 10px;
+                                border: 1px solid #555;
+                                @include pedigree-color-cycle-background;
+                            }
+                            > .title {
+                                text-align: left;
+                                flex: 1;
+                            }
+                            > .onset {
+                                
+                            }
+                        }
+                    }
 
                     &[data-describing="parents"],
                     &[data-describing="children"] {
