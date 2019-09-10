@@ -445,7 +445,7 @@ def diagnoses_xml_to_phenotypic_features(testapp, ref_vals, refs, data, case, uu
         if diagnosis.get('name') and not found_term:
             dx_note = 'Diagnosis: ' + diagnosis['name']
             if diagnosis.get('ageAtDx') and diagnosis.get('ageAtDxUnits'):
-                dx_note += ('at ' + diagnosis['ageAtDx'] + ' ' +
+                dx_note += (' at ' + diagnosis['ageAtDx'] + ' ' +
                             convert_age_units(diagnosis['ageAtDxUnits']) + 's')
             if diagnosis['id']:
                 dx_note += ' (HPO term %s not found)' % diagnosis['id']
