@@ -46,7 +46,7 @@ import { DefaultDetailPaneComponent } from './DefaultDetailPaneComponent';
  */
 const POSITION_DEFAULTS = {
     individualWidth: 80,
-    individualXSpacing: 80,
+    individualXSpacing: 80, // THIS MUST BE EQUAL TO OR MULTIPLE OF INDIVIDUAL WIDTH FOR TIME BEING
     individualHeight: 80,
     individualYSpacing: 120,
     graphPadding: 60,
