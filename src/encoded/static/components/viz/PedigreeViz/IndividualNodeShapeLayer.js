@@ -131,17 +131,14 @@ export class IndividualNodeShape extends IndividualNodeBase {
             );
         }
 
-        const bgShape = Object.assign(
-            {}, shape, {
-                props: Object.assign({}, shape.props, { className: "bg-shape-copy" })
-            }
-        );
+        const bgShape = { ...shape, props : {
+            ...shape.props,
+            className: "bg-shape-copy"
+        } };
 
-        const fgShape = Object.assign(
-            {}, shape, {
-                props: Object.assign({}, shape.props, { className: "fg-shape" })
-            }
-        );
+        const fgShape = { ...shape, props: {
+            ...shape.props, className: "fg-shape"
+        } };
 
         return (
             <g width={individualWidth} height={individualHeight} transform={groupTransform} data-individual-id={id}
@@ -195,7 +192,7 @@ const AffectedBGPieChart = React.memo(function AffectedBGPieChart({ width, heigh
                 data-disease-index={diseaseToIndex[disease]} className="disease-arc" />
         );
     });
-    return <React.Fragment>{ arcPaths }</React.Fragment>;
+    return <g className="disease-path-arcs">{ arcPaths }</g>;
 });
 
 const UnderlayMarkers = React.memo(function UnderlayMarkers({ individual, width, height, shape, diseaseToIndex }){

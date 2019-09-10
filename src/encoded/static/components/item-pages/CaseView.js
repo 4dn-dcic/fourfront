@@ -72,9 +72,11 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
 
         return {
             id, gender, name,
-            isDeceased,
-            isPregnancy, isTerminatedPregnancy,
-            isSpontaneousAbortion, isStillBirth,
+            isDeceased : isDeceased || isTerminatedPregnancy || isSpontaneousAbortion || isStillBirth || false,
+            isPregnancy : isPregnancy || isTerminatedPregnancy || isSpontaneousAbortion || isStillBirth || false,
+            isTerminatedPregnancy,
+            isSpontaneousAbortion,
+            isStillBirth,
             diseases,
             'father' : fatherStr,
             'mother' : motherStr,
@@ -503,7 +505,8 @@ class PedigreeTabView extends React.PureComponent {
     }
 
     renderDetailPane(pedigreeVizProps){
-        return <PedigreeDetailPane {...pedigreeVizProps} />;
+        const { session, href, context } = this.props;
+        return <PedigreeDetailPane {...pedigreeVizProps} {...{ session, href, context }} />;
     }
 
     render(){

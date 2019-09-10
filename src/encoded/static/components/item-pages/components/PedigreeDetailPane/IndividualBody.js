@@ -12,7 +12,13 @@ export function getIndividualDisplayTitle(individual){
 
 
 export function IndividualBody(props){
-    const { selectedNode: individual, onNodeClick, onClose, diseaseToIndex } = props;
+    const {
+        selectedNode: individual,
+        onNodeClick,
+        onClose,
+        diseaseToIndex,
+        session
+    } = props;
     const {
         id, name,
         data: { individualItem = null } = {},
@@ -34,21 +40,25 @@ export function IndividualBody(props){
 
     return (
         <div className="detail-pane-inner">
-            <div className="title-box row">
-                <div className="col-11">
-                    <label>Individual</label>
-                    <h3>{ showTitle }</h3>
+
+
+            <div className="title-box">
+                <div className="label-row row">
+                    <div className="col">
+                        <label>Individual</label>
+                    </div>
+                    <div className="col-auto buttons-col">
+                        { session ?
+                            <a href={individualID + "?currentAction=edit"} className="d-block edit-btn">
+                                <i className="icon icon-pencil fas clickable" />
+                            </a>
+                            : null }
+                        { onClose ? <i className="icon icon-times fas clickable d-block" onClick={onClose}/> : null }
+                    </div>
                 </div>
-                <div className="col-auto">
-                    { onClose ? <i className="icon icon-times fas clickable d-block" onClick={onClose}/> : null }
-                    {/*
-                    <a href={individualID + "?currentAction=edit"} className="d-block edit-btn">
-                        <i className="icon icon-pencil fas clickable" />
-                    </a>
-                    */}
-                </div>
-    
+                <h3>{ showTitle }</h3>
             </div>
+
             <div className="details">
                 { ethnicity ? <InlineDetailRow label="Ethnicity" value={ethnicity} /> : null }
                 <PhenotypicFeatures features={phenotypic_features} diseaseToIndex={diseaseToIndex} />
@@ -98,9 +108,10 @@ function PhenotypicFeatures({ features, diseaseToIndex }){
             onset_age = null,
             onset_age_units = null
         } = feature;
+        const diseaseIndex = diseaseToIndex[featureID] || -1;
         return (
             <div className="detail-row-list-item phenotypic-feature" key={featureID}>
-                <div className="legend-patch" data-disease-index={diseaseToIndex[featureID]} />
+                <div className="legend-patch" data-disease-index={diseaseIndex} />
                 <span className="title"><a href={featureID}>{ title }</a></span>
                 { onset_age !== null && onset_age_units !== null ? (
                     <span className="onset" data-tip="Age of onset">

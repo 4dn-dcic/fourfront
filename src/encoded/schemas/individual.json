@@ -119,7 +119,7 @@
             "enum": [
                 "alive and well",
                 "alive",
-                "dead",
+                "deceased",
                 "unknown"
             ]
         },
