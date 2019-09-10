@@ -1,7 +1,7 @@
 {
-    "title" : "Quality Metric for Bam QC",
+    "title" : "Quality Metric for WGS Bam QC",
     "description": "Schema for reporting the specific calculation of an quality metrics",
-    "id": "/profiles/quality_metric_bamqc.json",
+    "id": "/profiles/quality_metric_wgs_bamqc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [ "project", "institution"],
