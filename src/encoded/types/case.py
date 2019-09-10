@@ -119,7 +119,11 @@ def process_pedigree(context, request):
     from pyramid.paster import get_app
     from webtest import TestApp
     from base64 import b64encode
-    from defusedxml.ElementTree import fromstring
+    # temporary: there seem to be buildout installation problems w defusedxml
+    try:
+        from defusedxml.ElementTree import fromstring
+    except ImportError:
+        from xml.etree.ElementTree import fromstring
 
     case = str(context.uuid)  # used in logging
 
@@ -282,6 +286,8 @@ def age_to_birth_year(xml_obj):
     Returns:
         int: year of birth
     """
+    if xml_obj.get('age') is None or xml_obj.get('ageUnits') is None:
+        return None
     delta_kwargs = {convert_age_units(xml_obj['ageUnits']) + 's': int(xml_obj['age'])}
     rel_delta = relativedelta(**delta_kwargs)
     birth_datetime = xml_obj['ped_datetime'] - rel_delta
@@ -481,6 +487,55 @@ def affected_xml_to_phenotypic_features(testapp, ref_vals, refs, data, case, uui
                                          case, uuids_by_ref)
 
 
+def cause_of_death_xml_to_phenotype(testapp, ref_vals, refs, data, case, uuids_by_ref):
+    """
+    This is a `xml_ref_fxn`, so it must take the corresponding args in the
+    standardized way and update the `data` dictionary, which is used to PATCH
+    the Individual item.
+
+    Helper function to use specifically with `causeOfDeath` object references
+    in input XML. Uses a list of dict ref_vals and converts to
+    `cause_of_death` or `clinic_notes` in the family metadata.
+
+    Args:
+        testapp (webtest.TestApp): test application for posting/patching
+        ref_vals (list): list of dict containg cause of death info (should be length 1)
+        refs: (dict): reference-based parsed XML data
+        data (dict): metadata to POST/PATCH
+        case (str): identifier of the case
+        uuids_by_ref (dict): mapping of Fourfront uuids by xml ref
+
+    Returns:
+        None
+    """
+    clinic_notes = []
+    for xml_obj in ref_vals:
+        found_term = False
+        # only use HPO terms for now
+        if xml_obj.get('causeOfDeathOntologyId') and xml_obj.get('causeOfDeathOntology') == 'HPO':
+            # look up HPO term. If not found, use a clinical note
+            try:
+                pheno_res = testapp.get('/phenotypes/' + xml_obj['causeOfDeathOntologyId'], status=200).json
+            except Exception as exc:
+                log.error('Case %s: Cannot GET term %s. Error: %s'
+                          % (case, xml_obj['causeOfDeathOntologyId'], str(exc)))
+            else:
+                found_term = True
+                data['cause_of_death'] = pheno_res['uuid']
+
+        # if we cannot find the term, update the clinical notes
+        if xml_obj.get('causeOfDeath') and not found_term:
+            dx_note = 'Cause of death: ' + xml_obj['causeOfDeath']
+            if xml_obj['causeOfDeathOntologyId']:
+                dx_note += ' (HPO term %s not found)' % xml_obj['causeOfDeathOntologyId']
+            clinic_notes.append(dx_note)
+
+    if clinic_notes:
+        if data.get('clinic_notes'):
+            clinic_notes.insert(0, data['clinic_notes'])
+        data['clinic_notes'] = '\n'.join(clinic_notes)
+
+
 def etree_to_dict(ele, ref_container=None, ref_field=''):
     """
     Helper function to recursively parse ElementTree (XML) to Python objects.
@@ -586,24 +641,29 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case,
             for xml_key in xml_obj:
                 converted = PROBAND_MAPPING[item_type].get(xml_key)
                 if converted is None:
-                    log.warn('Unknown field %s for %s in process-pedigree!' % (xml_key, item_type))
+                    log.info('Unknown field %s for %s in process-pedigree!' % (xml_key, item_type))
                     continue
-                if round == 'first':
-                    if converted.get('linked', False) is True:
-                        continue
-                    data[converted['corresponds_to']] = converted['value'](xml_obj)
-                elif round == 'second':
-                    if converted.get('linked', False) is False:
-                        continue
-
-                    ref_val = converted['value'](xml_obj)
-                    # more complex function based on xml refs needed
-                    if ref_val and 'xml_ref_fxn' in converted:
-                        # will update data in place
-                        converted['xml_ref_fxn'](testapp, ref_val, refs, data,
-                                                 case, uuids_by_ref)
-                    elif ref_val:
-                        data[converted['corresponds_to']] = uuids_by_ref[ref_val]
+                # can handle meta multiple fields based off one one xml field
+                if not isinstance(converted, list):
+                    converted = [converted]
+                for converted_dict in converted:
+                    if round == 'first':
+                        if converted_dict.get('linked', False) is True:
+                            continue
+                        ref_val = converted_dict['value'](xml_obj)
+                        if ref_val is not None:
+                            data[converted_dict['corresponds_to']] = ref_val
+                    elif round == 'second':
+                        if converted_dict.get('linked', False) is False:
+                            continue
+                        ref_val = converted_dict['value'](xml_obj)
+                        # more complex function based on xml refs needed
+                        if ref_val is not None and 'xml_ref_fxn' in converted_dict:
+                            # will update data in place
+                            converted_dict['xml_ref_fxn'](testapp, ref_val, refs, data,
+                                                     case, uuids_by_ref)
+                        elif ref_val is not None:
+                            data[converted_dict['corresponds_to']] = uuids_by_ref[ref_val]
 
             # POST if first round
             if round == 'first':
@@ -668,16 +728,44 @@ PROBAND_MAPPING = {
             'corresponds_to': 'is_deceased',
             'value': lambda v: True if v['deceased'] == '1' else False
         },
-        # TODO: fix. This is NOT right, need timestamp from XML
-        'age': {
-            'corresponds_to': 'birth_year',
-            'value': lambda v: age_to_birth_year(v)
+        'age': [
+            {
+                'corresponds_to': 'birth_year',
+                'value': lambda v: age_to_birth_year(v)
+            },
+            {
+                'corresponds_to': 'age',
+                'value': lambda v: int(v['age']) if v.get('age') is not None else None
+            }
+        ],
+        'ageUnits': {
+            'corresponds_to': 'age_units',
+            'value': lambda v: convert_age_units(v['ageUnits']) if v.get('ageUnits') else None
+        },
+        'ageAtDeath': {
+            'corresponds_to': 'age_at_death',
+            'value': lambda v: int(v['ageAtDeath']) if v.get('ageAtDeath') is not None else None
+        },
+        'ageAtDeathUnits': {
+            'corresponds_to': 'age_at_death_units',
+            'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if v.get('ageAtDeathUnits') else None
+        },
+        'gestAge': {
+            'corresponds_to': 'gestational_age',
+            'value': lambda v: int(v['gestAge']) if v.get('gestAge') is not None else None
         },
         'stillBirth': {
             'corresponds_to': 'is_still_birth',
             'value': lambda v: True if v['stillBirth'] == '1' else False
         },
-        # TODO: can you have more than one of these fields?
+        'noChildrenByChoice': {
+            'corresponds_to': 'is_no_children_by_choice',
+            'value': lambda v: True if v['noChildrenByChoice'] == '1' else False
+        },
+        'noChildrenInfertility': {
+            'corresponds_to': 'is_infertile',
+            'value': lambda v: True if v['noChildrenInfertility'] == '1' else False
+        },
         'explicitlySetBiologicalFather': {
             'corresponds_to': 'father',
             'value': lambda v: v['explicitlySetBiologicalFather']['@ref'] if v['explicitlySetBiologicalFather'] else None,
@@ -701,6 +789,11 @@ PROBAND_MAPPING = {
         'diagnoses': {
             'xml_ref_fxn': diagnoses_xml_to_phenotypic_features,
             'value': lambda v: convert_to_list(v['diagnoses']),
+            'linked': True
+        },
+        'causeOfDeath': {
+            'xml_ref_fxn': cause_of_death_xml_to_phenotype,
+            'value': lambda v: convert_to_list(v),
             'linked': True
         },
         'affected1': {

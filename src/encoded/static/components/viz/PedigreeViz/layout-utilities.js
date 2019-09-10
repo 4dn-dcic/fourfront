@@ -697,7 +697,7 @@ function initOrdering(objectGraph, startIndividuals = null, direction = "childre
         }
     }
 
-    console.log("ORDER ASSIGNMENTS", direction, stack, orderAssignedDebugList, startIndividuals);
+    //console.log("ORDER ASSIGNMENTS", direction, stack, orderAssignedDebugList, startIndividuals);
 
     return { orderByHeightIndex, seenOrderInIndex };
 }
@@ -790,22 +790,38 @@ function countEdgeCrossings(objectGraph, order, memoized = {}){
     const { orderByHeightIndex, seenOrderInIndex } = order;
     let crossings = 0;
 
+    const seenFrom = {};
+
     orderByHeightIndex.forEach(function(nodesInRow, hi){ // going up
-        nodesInRow.forEach(function(node){
+        nodesInRow.forEach(function(node){ // left to right
             const { id, partners, children, _maritalRelationships, _parentalRelationship } = node;
+            if (!seenFrom[id]) seenFrom[id] = new Set();
             if (isRelationship(node)) {
                 partners.forEach(function(indv){
+                    if (seenFrom[indv.id] && seenFrom[indv.id].has(id)) {
+                        return;
+                    }
                     crossings += countEdgeCrossingInstance(order, node, indv);
+                    seenFrom[id].add(indv.id);
                 });
                 children.forEach(function(indv){
+                    if (seenFrom[indv.id] && seenFrom[indv.id].has(id)) {
+                        return;
+                    }
                     crossings += countEdgeCrossingInstance(order, node, indv);
+                    seenFrom[id].add(indv.id);
                 });
             } else {
                 _maritalRelationships.forEach(function(mr){
+                    if (seenFrom[mr.id] && seenFrom[mr.id].has(id)) {
+                        return;
+                    }
                     crossings += countEdgeCrossingInstance(order, node, mr);
+                    seenFrom[id].add(mr.id);
                 });
-                if (_parentalRelationship){
+                if (_parentalRelationship && (!seenFrom[_parentalRelationship.id] || !seenFrom[_parentalRelationship.id].has(id))){
                     crossings += countEdgeCrossingInstance(order, node, _parentalRelationship);
+                    seenFrom[id].add(_parentalRelationship.id);
                     //(_parentalRelationship.children || []).forEach(function(sibling){
                     //    crossings += countEdgeCrossingInstance(order, node, sibling);
                     //});
@@ -979,7 +995,7 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
             if (prevNode === null){
                 _drawing.xCoord = relativeMidpoint;
                 offsetFromPrevNode = _drawing.xCoord; // + dims.individualWidth + dims.individualXSpacing;
-                console.log('DDD2', name, relativeMidpoint);
+                console.log('DDD2', name, relativeMidpoint, currNode);
             } else {
 
                 offsetFromPrevNode = prevNode._drawing.xCoord + dims.individualWidth + dims.individualXSpacing;
@@ -1054,12 +1070,6 @@ export function positionObjectGraph(objectGraph, order, dims, memoized = {}){
         });
         */
 
-        // Recursively center above child nodes, slide them down if needed.
-        //nodesInRow.forEach(function(individual){
-        //    console.log('TT', indv);
-        //    const { _childReferences, _maritalRelationships } = individual;
-        //    
-        //});
     });
 
     // Re-align to left edge if needed -
