@@ -46,10 +46,13 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
 
         // Internally, PedigreeViz uses the "diseases" vocabulary per a pedigree standards doc.
         // Here we transform phenotypic_features to this vocab (might change later, and/or conditionally)
-        const diseasesAllowedObj = diseasesAllowed.length > 0 ? {} : null;
-        diseasesAllowed.forEach(function(d){
-            diseasesAllowedObj[d] = true;
-        });
+        let diseasesAllowedObj = null;
+        if (Array.isArray(diseasesAllowed) && diseasesAllowed.length > 0){
+            diseasesAllowedObj = {};
+            diseasesAllowed.forEach(function(d){
+                diseasesAllowedObj[d] = true;
+            });
+        }
 
         const diseases = []; // All strings
         const carrierOfDiseases = [];
