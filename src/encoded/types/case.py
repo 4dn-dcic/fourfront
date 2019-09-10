@@ -13,6 +13,7 @@ from .base import (
 from pyramid.httpexceptions import HTTPUnprocessableEntity
 from pyramid.view import view_config
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import structlog
 
 
@@ -269,6 +270,22 @@ def convert_age_units(age_unit):
     }
     return convert_dict[age_unit.lower()]
 
+
+def age_to_birth_year(xml_obj):
+    """
+    Simple conversion function that takes an individual from the xml and
+    converts age to birth year, taking age units into account
+
+    Args:
+        xml_obj (dict): xml data for the individual
+
+    Returns:
+        int: year of birth
+    """
+    delta_kwargs = {convert_age_units(xml_obj['ageUnits']) + 's': int(xml_obj['age'])}
+    rel_delta = relativedelta(**delta_kwargs)
+    birth_datetime = xml_obj['ped_datetime'] - rel_delta
+    return birth_datetime.year
 
 
 def convert_to_list(xml_value):
@@ -654,7 +671,7 @@ PROBAND_MAPPING = {
         # TODO: fix. This is NOT right, need timestamp from XML
         'age': {
             'corresponds_to': 'birth_year',
-            'value': lambda v: datetime.utcnow().year - int(v['age']) if v['age'] and v['ageUnits'] == 'Y' else 9999
+            'value': lambda v: age_to_birth_year(v)
         },
         'stillBirth': {
             'corresponds_to': 'is_still_birth',
