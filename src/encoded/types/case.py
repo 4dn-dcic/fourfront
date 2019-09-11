@@ -665,7 +665,8 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case,
                 if converted is None:
                     log.info('Unknown field %s for %s in process-pedigree!' % (xml_key, item_type))
                     continue
-                # can handle meta multiple fields based off one one xml field
+                # convert all conversions to lists, since some xml fields map
+                # to multiple metadata fields and this makes it simpler
                 if not isinstance(converted, list):
                     converted = [converted]
                 for converted_dict in converted:
@@ -729,7 +730,10 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case,
                     proband = idv_props['uuid']
 
     # process into family structure
-    family = {'members': [v for v in family_members.values()]}
+    # invert uuids_by_ref to sort family members by managedObjectID (xml ref)
+    refs_by_uuid = {v: k for k, v in uuids_by_ref.items()}
+    family = {'members': sorted([m for m in family_members.values()],
+                                 key=lambda v: int(refs_by_uuid[v['uuid']]))}
     if proband and proband in family_members:
         family['proband'] = family_members[proband]
     else:
@@ -737,9 +741,6 @@ def create_family_proband(testapp, xml_data, refs, ref_field, case,
     return family
 
 
-# in form: <proband field>: <cgap field>
-# fields unused by CGAP use 'corresponds_to': None
-# extract @ref values for connected objects in the first round
 PROBAND_MAPPING = {
     'Individual': {
         'sex': {
@@ -766,7 +767,7 @@ PROBAND_MAPPING = {
         ],
         'ageUnits': {
             'corresponds_to': 'age_units',
-            'value': lambda v: convert_age_units(v['ageUnits']) if v['ageUnits'] else None
+            'value': lambda v: convert_age_units(v['ageUnits']) if (v['age'] and v['ageUnits']) else None
         },
         'ageAtDeath': {
             'corresponds_to': 'age_at_death',
@@ -774,7 +775,7 @@ PROBAND_MAPPING = {
         },
         'ageAtDeathUnits': {
             'corresponds_to': 'age_at_death_units',
-            'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if v.get('ageAtDeathUnits') else None
+            'value': lambda v: convert_age_units(v['ageAtDeathUnits']) if (v['ageAtDeath'] and v['ageAtDeathUnits']) else None
         },
         'quantity': {
             'corresponds_to': 'quantity',
