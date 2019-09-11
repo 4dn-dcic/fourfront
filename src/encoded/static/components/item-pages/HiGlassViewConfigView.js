@@ -346,14 +346,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     /**
-    * Update the current Viewconf to add a new view with the file with the given uuid.
+    * Update the current Viewconf to add a new view with the file(s) with the given uuid.
     * @returns {void}
     */
-    addFileToHiglass(fileAtID) {
-        var { context }         = this.props,
-            hgc                 = this.getHiGlassComponent(),
-            currentViewConfStr  = hgc && hgc.api.exportAsViewConfString(),
-            currentViewConf     = currentViewConfStr && JSON.parse(currentViewConfStr);
+    addFileToHiglass(files) {
+        const { context } = this.props;
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -390,7 +390,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         var payload = {
             'higlass_viewconfig': currentViewConf,
             'genome_assembly': this.state.genome_assembly,
-            'files' : [fileAtID],
+            'files' : files,
             'firstViewLocationAndZoom': firstViewLocationAndZoom
         };
 
@@ -708,16 +708,14 @@ class AddFileButton extends React.PureComponent {
         });
     }
 
-    receiveFile(fileAtID, fileContext) {
-
-        // Is it blank? Do nothing.
-        if (!fileAtID) {
+    receiveFile(items, endDataPost) {
+        if (!items || !Array.isArray(items) || items.length === 0 || !_.every(items, function (item) { return item.id && typeof item.id === 'string' && item.json; })) {
             return;
         }
-
-        this.setState({ 'isSelecting' : true }, ()=>{
+        endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+        this.setState({ 'isSelecting' : !endDataPost }, ()=>{
             // Invoke the object callback function, using the text input.
-            this.props.onClick(fileAtID);
+            this.props.onClick(_.pluck(items, 'id'));
         });
     }
 
@@ -727,7 +725,7 @@ class AddFileButton extends React.PureComponent {
         const tooltip         = "Search for a file and add it to the display.";
         const dropMessage     = "Drop a File here.";
         const searchURL       = (
-            '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
+            '/search/?currentAction=multiselect&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
             + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
         );
 

@@ -8,7 +8,7 @@ import memoize from 'memoize-one';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, JWT, layout, schemaTransforms, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 
 import { content_views } from './globals';
 import { typedefs } from './util';
@@ -38,15 +38,21 @@ const TITLE_PATHNAME_MAP = {
     },
     '/search/' : {
         'title' : function(pathName, context, href, currentAction){
-            if (currentAction === 'selection') return 'Selecting';
+            if (isSelectAction(currentAction)) return 'Selecting';
             return 'Search';
         },
         'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
             var thisTypeTitle = schemaTransforms.getSchemaTypeFromSearchContext(context, schemas);
-            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
+            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ isSelectAction(currentAction) ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){
-            if (currentAction === 'selection') {
+            if (isSelectAction(currentAction)) {
+                if (currentAction === 'selection') {
+                    return 'Select or Drag & drop Item from this view into other window(s).';
+                } else if (currentAction === 'multiselect') {
+                    return 'Select one or more Items and click Apply button on the bottom.';
+                }
+                //default
                 return 'Drag and drop Items from this view into other window(s).';
             }
             return null;
@@ -292,6 +298,7 @@ export default class PageTitle extends React.PureComponent {
     render(){
         const { context, href, session, currentAction, windowWidth, alerts, schemas } = this.props;
         const { mounted } = this.state;
+        const displayBreadCrumb = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && (currentAction === 'multiselect'));
 
         let elementStyle;
 
@@ -329,11 +336,13 @@ export default class PageTitle extends React.PureComponent {
             && context['table-of-contents'].enabled
         );
 
+        const containerClassName = displayBreadCrumb ? "container" : "container pt-1";
         elementStyle = PageTitle.getStyles(context, href, mounted, hasToc, windowWidth);
-
         return (
-            <div id="page-title-container" className="container">
-                <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
+            <div id="page-title-container" className={containerClassName}>
+                {displayBreadCrumb ?
+                    <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
+                    : null}
                 <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={mounted} style={elementStyle} />
                 <Alerts alerts={alerts} style={{ 'width' : elementStyle.width || null }} />
             </div>

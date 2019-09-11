@@ -16,7 +16,7 @@ import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
 
@@ -610,11 +610,11 @@ export default class App extends React.PureComponent {
         }
 
         // If we're submitting search form in selection mode, preserve selection mode at next URL.
-        if (currentAction === 'selection'){
-            if (search && search.indexOf('currentAction=selection') === -1){
-                search += '&currentAction=selection';
+        if (isSelectAction(currentAction)){
+            if (search && search.indexOf('currentAction=' + currentAction) === -1){
+                search += ('&currentAction=' + currentAction);
             } else if (!search) {
-                search = 'currentAction=selection';
+                search = ('currentAction=' + currentAction);
             }
         }
 
@@ -1765,6 +1765,7 @@ class BodyElement extends React.PureComponent {
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
+        const displayNavBarAndFooter = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && (currentAction === 'multiselect'));
 
         if (hasError) return this.renderErrorState();
 
@@ -1788,11 +1789,16 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
-                                {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo')} />
+                            {displayNavBarAndFooter ?
+                                <React.Fragment>
+                                    <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
+                                        {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
+                                            'context', 'updateUserInfo')} />
 
-                            <div id="pre-content-placeholder"/>
+                                    <div id="pre-content-placeholder" />
+                                </React.Fragment>
+                                : null
+                            }
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
 
@@ -1809,7 +1815,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="layout-footer"/>
                         </div>
-                        <Footer version={context.app_version} />
+                        {displayNavBarAndFooter ? <Footer version={context.app_version} /> : null}
                     </div>
                 </div>
 

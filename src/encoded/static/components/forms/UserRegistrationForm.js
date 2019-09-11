@@ -377,17 +377,21 @@ class LookupLabField extends React.PureComponent {
         });
     }
 
-    receiveItem(selectionAtID, selectionItemContext) {
-
-        // Is it blank? Do nothing.
-        if (!selectionAtID) {
+    receiveItem(items, endDataPost) {
+        if (!items || !Array.isArray(items) || items.length === 0 || !_.every(items, function (item) { return item.id && typeof item.id === 'string' && item.json; })) {
             return;
         }
+        endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+        if (items.length > 1) {
+            console.warn('Multiple labs selected but we only get a single item, since handler\'s multiple version not implemented yet!');
+        }
 
-        this.setState({ 'isSelecting' : false }, ()=>{
+        this.setState({ 'isSelecting' : !endDataPost }, ()=>{
             // Invoke the object callback function, using the text input.
             // eslint-disable-next-line react/destructuring-assignment
-            this.props.onSelect(selectionAtID, selectionItemContext);
+
+            // TODO: Currently, we support only a single lab selection. Add multiple version.
+            this.props.onSelect(items[0].id, items[0].json);
         });
     }
 
