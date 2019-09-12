@@ -1,4 +1,5 @@
-[{
+[
+    {
         "date_created": "2018-11-30T23:09:01.632252+00:00",
         "name": "51d28485-5f94-465d-b2ec-3bf011754360",
         "schema_version": "1",
@@ -6,114 +7,119 @@
             "trackSourceServers": [
                 "https://higlass.4dnucleome.org/api/v1"
             ],
-            "views": [{
-                "uid": "view-4dn-mcool-0",
-                "initialYDomain": [
-                    14304786.141375601,
-                    1494384977.335208
-                ],
-                "initialXDomain": [
-                    -301096704.1778082,
-                    3350629531.737105
-                ],
-                "layout": {
-                    "static": false,
-                    "i": "view-4dn-mcool-0",
-                    "w": 12,
-                    "x": 0,
-                    "moved": false,
-                    "y": 0,
-                    "h": 12
-                },
-                "tracks": {
-                    "top": [{
-                            "server": "https://higlass.4dnucleome.org/api/v1",
-                            "uid": "top-annotation-track",
-                            "orientation": "1d-horizontal",
-                            "options": {
-                                "plusStandColor": "blue",
-                                "valueScaling": "linear",
-                                "geneAnnotationHeight": 10,
-                                "showTooltip": false,
-                                "mousePositionColor": "#999999",
-                                "geneLabelPosition": "outside",
-                                "fontSize": 11,
-                                "labelPosition": "hidden",
-                                "plusStrandColor": "black",
-                                "name": "Gene Annotations (GRCh38)",
-                                "minusStrandColor": "black",
-                                "trackBorderWidth": 0,
-                                "geneStrandSpacing": 4,
-                                "labelColor": "black",
-                                "coordSystem": "mm10",
-                                "showMousePosition": false,
-                                "trackBorderColor": "black"
-                            },
-                            "width": 1130,
-                            "name": "4DNFIWG6CQQA.beddb",
-                            "type": "horizontal-gene-annotations",
-                            "tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
-                            "minHeight": 55,
-                            "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                            "height": 55,
-                            "position": "top"
-                        },
-                        {
-                            "server": "https://higlass.4dnucleome.org/api/v1",
-                            "uid": "top-chromosome-track",
-                            "thumbnail": null,
-                            "orientation": "1d-horizontal",
-                            "options": {
-                                "plusStandColor": "blue",
-                                "fontIsAligned": false,
-                                "color": "#777777",
-                                "labelColor": "#888",
-                                "mousePositionColor": "#999999",
-                                "valueScaling": "linear",
-                                "fontSize": 12,
-                                "labelPosition": "hidden",
-                                "trackBorderWidth": 0,
-                                "minusStrandColor": "red",
-                                "stroke": "#FFFFFF",
-                                "showTooltip": false,
-                                "coordSystem": "mm10",
-                                "showMousePosition": false,
-                                "trackBorderColor": "black"
-                            },
-                            "width": 1130,
-                            "name": "Chromosome Axis",
-                            "type": "horizontal-chromosome-labels",
-                            "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                            "minHeight": 30,
-                            "height": 35,
-                            "local": true,
-                            "position": "top"
-                        }
+            "views": [
+                {
+                    "uid": "view-4dn-mcool-0",
+                    "initialYDomain": [
+                        14304786.141375601,
+                        1494384977.335208
                     ],
-                    "whole": [],
-                    "bottom": [],
-                    "gallery": [],
-                    "right": [],
-                    "left": [],
-                    "center": [{
-                        "type": "combined",
-                        "uid": "e6155437-5041-44ab-b090-6d27634cca8a",
-                        "position": "center",
-                        "contents": [],
-                        "options": {},
-                        "width": 1130,
-                        "height": 203
-                    }]
-                },
-                "genomePositionSearchBox": {
-                    "chromInfoId": "GRCh38",
-                    "autocompleteServer": "https://higlass.4dnucleome.org/api/v1",
-                    "chromInfoServer": "https://higlass.4dnucleome.org/api/v1",
-                    "autocompleteId": "XGrAqZupQb2h5Pjiarf8PA",
-                    "visible": true
-                },
-                "autocompleteSource": "/api/v1/suggest/?d=XGrAqZupQb2h5Pjiarf8PA&"
-            }],
+                    "initialXDomain": [
+                        -301096704.1778082,
+                        3350629531.737105
+                    ],
+                    "layout": {
+                        "static": false,
+                        "i": "view-4dn-mcool-0",
+                        "w": 12,
+                        "x": 0,
+                        "moved": false,
+                        "y": 0,
+                        "h": 12
+                    },
+                    "tracks": {
+                        "top": [
+                            {
+                                "server": "https://higlass.4dnucleome.org/api/v1",
+                                "uid": "top-annotation-track",
+                                "orientation": "1d-horizontal",
+                                "options": {
+                                    "plusStandColor": "blue",
+                                    "valueScaling": "linear",
+                                    "geneAnnotationHeight": 10,
+                                    "showTooltip": false,
+                                    "mousePositionColor": "#999999",
+                                    "geneLabelPosition": "outside",
+                                    "fontSize": 11,
+                                    "labelPosition": "hidden",
+                                    "plusStrandColor": "black",
+                                    "name": "Gene Annotations (GRCh38)",
+                                    "minusStrandColor": "black",
+                                    "trackBorderWidth": 0,
+                                    "geneStrandSpacing": 4,
+                                    "labelColor": "black",
+                                    "coordSystem": "mm10",
+                                    "showMousePosition": false,
+                                    "trackBorderColor": "black"
+                                },
+                                "width": 1130,
+                                "name": "4DNFIWG6CQQA.beddb",
+                                "type": "horizontal-gene-annotations",
+                                "tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
+                                "minHeight": 55,
+                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+                                "height": 55,
+                                "position": "top"
+                            },
+                            {
+                                "server": "https://higlass.4dnucleome.org/api/v1",
+                                "uid": "top-chromosome-track",
+                                "thumbnail": null,
+                                "orientation": "1d-horizontal",
+                                "options": {
+                                    "plusStandColor": "blue",
+                                    "fontIsAligned": false,
+                                    "color": "#777777",
+                                    "labelColor": "#888",
+                                    "mousePositionColor": "#999999",
+                                    "valueScaling": "linear",
+                                    "fontSize": 12,
+                                    "labelPosition": "hidden",
+                                    "trackBorderWidth": 0,
+                                    "minusStrandColor": "red",
+                                    "stroke": "#FFFFFF",
+                                    "showTooltip": false,
+                                    "coordSystem": "mm10",
+                                    "showMousePosition": false,
+                                    "trackBorderColor": "black"
+                                },
+                                "width": 1130,
+                                "name": "Chromosome Axis",
+                                "type": "horizontal-chromosome-labels",
+                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
+                                "minHeight": 30,
+                                "height": 35,
+                                "local": true,
+                                "position": "top"
+                            }
+                        ],
+                        "whole": [],
+                        "bottom": [],
+                        "gallery": [],
+                        "right": [],
+                        "left": [],
+                        "center": [
+                            {
+                                "type": "combined",
+                                "uid": "e6155437-5041-44ab-b090-6d27634cca8a",
+                                "position": "center",
+                                "contents": [],
+                                "options": {},
+                                "width": 1130,
+                                "height": 203
+                            }
+                        ]
+                    },
+                    "genomePositionSearchBox": {
+                        "chromInfoId": "GRCh38",
+                        "autocompleteServer": "https://higlass.4dnucleome.org/api/v1",
+                        "chromInfoServer": "https://higlass.4dnucleome.org/api/v1",
+                        "autocompleteId": "XGrAqZupQb2h5Pjiarf8PA",
+                        "visible": true
+                    },
+                    "autocompleteSource": "/api/v1/suggest/?d=XGrAqZupQb2h5Pjiarf8PA&"
+                }
+            ],
             "zoomFixed": false,
             "valueScaleLocks": {
                 "locksByViewUid": {},
@@ -164,159 +170,140 @@
         "name": "00000000-1111-0000-1111-000000000001",
         "viewconfig": {
             "zoomLocks": {
-                "locksByViewUid": {
-
-                },
-                "locksDict": {
-
-                }
+                "locksByViewUid": {},
+                "locksDict": {}
             },
             "trackSourceServers": [
                 "https://higlass.4dnucleome.org/api/v1"
             ],
             "locationLocks": {
-                "locksByViewUid": {
-
-                },
-                "locksDict": {
-
-                }
+                "locksByViewUid": {},
+                "locksDict": {}
             },
             "valueScaleLocks": {
-                "locksByViewUid": {
-
-                },
-                "locksDict": {
-
-                }
+                "locksByViewUid": {},
+                "locksDict": {}
             },
-            "views": [{
-                "initialYDomain": [
-                    654868407.8925054,
-                    1605004461.6768782
-                ],
-                "initialXDomain": [
-                    -166316769.39873636,
-                    3257874853.005984
-                ],
-                "layout": {
-                    "static": false,
-                    "h": 12,
-                    "x": 0,
-                    "moved": false,
-                    "y": 0,
-                    "w": 12
-                },
-                "tracks": {
-                    "bottom": [
-
+            "views": [
+                {
+                    "initialYDomain": [
+                        654868407.8925054,
+                        1605004461.6768782
                     ],
-                    "top": [
-
+                    "initialXDomain": [
+                        -166316769.39873636,
+                        3257874853.005984
                     ],
-                    "right": [
-
-                    ],
-                    "center": [{
-                        "type": "combined",
-                        "options": {
-
-                        },
-                        "contents": [{
-                            "type": "heatmap",
-                            "resolutions": [
-                                1000,
-                                2000,
-                                5000,
-                                10000,
-                                25000,
-                                50000,
-                                100000,
-                                250000,
-                                500000,
-                                1000000,
-                                2500000,
-                                5000000,
-                                10000000
-                            ],
-                            "tilesetUid": "OxZJjFLwRYq8PA_cRgipbQ",
-                            "server": "https://higlass.4dnucleome.org/api/v1",
-                            "options": {
-                                "name": "File for Biosource Dataset Assay",
-                                "colorbarPosition": "topRight",
-                                "labelRightMargin": 0,
-                                "extent": "full",
-                                "colorRange": [
-                                    "white",
-                                    "rgba(245,166,35,1.0)",
-                                    "rgba(208,2,27,1.0)",
-                                    "black"
+                    "layout": {
+                        "static": false,
+                        "h": 12,
+                        "x": 0,
+                        "moved": false,
+                        "y": 0,
+                        "w": 12
+                    },
+                    "tracks": {
+                        "bottom": [],
+                        "top": [],
+                        "right": [],
+                        "center": [
+                            {
+                                "type": "combined",
+                                "options": {},
+                                "contents": [
+                                    {
+                                        "type": "heatmap",
+                                        "resolutions": [
+                                            1000,
+                                            2000,
+                                            5000,
+                                            10000,
+                                            25000,
+                                            50000,
+                                            100000,
+                                            250000,
+                                            500000,
+                                            1000000,
+                                            2500000,
+                                            5000000,
+                                            10000000
+                                        ],
+                                        "tilesetUid": "OxZJjFLwRYq8PA_cRgipbQ",
+                                        "server": "https://higlass.4dnucleome.org/api/v1",
+                                        "options": {
+                                            "name": "File for Biosource Dataset Assay",
+                                            "colorbarPosition": "topRight",
+                                            "labelRightMargin": 0,
+                                            "extent": "full",
+                                            "colorRange": [
+                                                "white",
+                                                "rgba(245,166,35,1.0)",
+                                                "rgba(208,2,27,1.0)",
+                                                "black"
+                                            ],
+                                            "scaleEndPercent": "1.00000",
+                                            "labelLeftMargin": 0,
+                                            "backgroundColor": "#eeeeee",
+                                            "labelTopMargin": 0,
+                                            "scaleStartPercent": "0.00000",
+                                            "labelShowResolution": true,
+                                            "labelPosition": "bottomRight",
+                                            "colorbarBackgroundColor": "#ffffff",
+                                            "mousePositionColor": "#000000",
+                                            "trackBorderWidth": 0,
+                                            "heatmapValueScaling": "log",
+                                            "coordSystem": "GRCm38",
+                                            "labelBottomMargin": 0,
+                                            "maxZoom": null,
+                                            "trackBorderColor": "black",
+                                            "showTooltip": false,
+                                            "showMousePosition": false
+                                        },
+                                        "transforms": [
+                                            {
+                                                "name": "ICE",
+                                                "value": "weight"
+                                            },
+                                            {
+                                                "name": "VC",
+                                                "value": "VC"
+                                            },
+                                            {
+                                                "name": "KR",
+                                                "value": "KR"
+                                            },
+                                            {
+                                                "name": "VC_SQRT",
+                                                "value": "VC_SQRT"
+                                            }
+                                        ],
+                                        "width": 1110,
+                                        "height": 513,
+                                        "position": "center",
+                                        "uid": "ZAIAbsxZTz-Xkt4wPG43Bg"
+                                    }
                                 ],
-                                "scaleEndPercent": "1.00000",
-                                "labelLeftMargin": 0,
-                                "backgroundColor": "#eeeeee",
-                                "labelTopMargin": 0,
-                                "scaleStartPercent": "0.00000",
-                                "labelShowResolution": true,
-                                "labelPosition": "bottomRight",
-                                "colorbarBackgroundColor": "#ffffff",
-                                "mousePositionColor": "#000000",
-                                "trackBorderWidth": 0,
-                                "heatmapValueScaling": "log",
-                                "coordSystem": "GRCm38",
-                                "labelBottomMargin": 0,
-                                "maxZoom": null,
-                                "trackBorderColor": "black",
-                                "showTooltip": false,
-                                "showMousePosition": false
-                            },
-                            "transforms": [{
-                                    "name": "ICE",
-                                    "value": "weight"
-                                },
-                                {
-                                    "name": "VC",
-                                    "value": "VC"
-                                },
-                                {
-                                    "name": "KR",
-                                    "value": "KR"
-                                },
-                                {
-                                    "name": "VC_SQRT",
-                                    "value": "VC_SQRT"
-                                }
-                            ],
-                            "width": 1110,
-                            "height": 513,
-                            "position": "center",
-                            "uid": "ZAIAbsxZTz-Xkt4wPG43Bg"
-                        }],
-                        "width": 1110,
-                        "height": 513,
-                        "position": "center",
-                        "uid": "Go5AjPP9QD6c-fN3fKeS5Q"
-                    }],
-                    "whole": [
-
-                    ],
-                    "left": [
-
-                    ],
-                    "gallery": [
-
-                    ]
-                },
-                "genomePositionSearchBox": {
-                    "visible": true,
-                    "autocompleteId": "IUcqX4GzTNWJIzE2-b_sZg",
-                    "chromInfoId": "GRCm38",
-                    "chromInfoServer": "https://higlass.4dnucleome.org/api/v1",
-                    "autocompleteServer": "https://higlass.4dnucleome.org/api/v1"
-                },
-                "autocompleteSource": "/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
-                "uid": "view-4dn-bigwig-0"
-            }],
+                                "width": 1110,
+                                "height": 513,
+                                "position": "center",
+                                "uid": "Go5AjPP9QD6c-fN3fKeS5Q"
+                            }
+                        ],
+                        "whole": [],
+                        "left": [],
+                        "gallery": []
+                    },
+                    "genomePositionSearchBox": {
+                        "visible": true,
+                        "autocompleteId": "IUcqX4GzTNWJIzE2-b_sZg",
+                        "chromInfoId": "GRCm38",
+                        "chromInfoServer": "https://higlass.4dnucleome.org/api/v1",
+                        "autocompleteServer": "https://higlass.4dnucleome.org/api/v1"
+                    },
+                    "autocompleteSource": "/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
+                    "uid": "view-4dn-bigwig-0"
+                }
+            ],
             "exportViewUrl": "/api/v1/viewconfs",
             "editable": true,
             "zoomFixed": false
@@ -328,6 +315,8 @@
         "date_created": "2019-09-04T06:41:55.889092+00:00",
         "schema_version": "1",
         "title": "Test BigWig Display",
-        "status": "released"
+        "status": "released",
+        "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }
 ]
