@@ -331,6 +331,7 @@
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "ff_flag": "clear clone",
+            "lookup": 1000,
             "uniqueItems": true,
             "items": {
                 "title": "External identifier",
