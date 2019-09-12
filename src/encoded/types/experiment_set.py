@@ -233,6 +233,9 @@ class ExperimentSet(Item):
         "other_processed_files.files.href",
         "other_processed_files.files.status",
         "other_processed_files.files.last_modified.date_modified",
+        "other_processed_files.files.quality_metric.url",
+        "other_processed_files.files.quality_metric.overall_quality_status",
+        "other_processed_files.files.quality_metric_summary.*",
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -248,6 +251,9 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.genome_assembly",
         "experiments_in_set.other_processed_files.files.status",
         "experiments_in_set.other_processed_files.files.last_modified.date_modified",
+        "experiments_in_set.other_processed_files.files.quality_metric.url",
+        "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
+        "experiments_in_set.other_processed_files.files.quality_metric_summary.*",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
