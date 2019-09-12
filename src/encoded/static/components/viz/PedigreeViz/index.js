@@ -567,34 +567,49 @@ const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierSh
         segmentLengthX = 7,
         offset = 18
     } = props;
-    const cornerPaths = [];
+
+    const cornerPaths = {
+        topLeft: null, topRight: null, bottomRight: null, bottomleft: null
+    };
 
     const topLeft = d3Path();
     topLeft.moveTo(-offset, -offset + segmentLengthY);
     topLeft.lineTo(-offset, -offset);
     topLeft.lineTo(-offset + segmentLengthX, -offset);
-    cornerPaths.push(topLeft.toString());
+    cornerPaths.topLeft = topLeft.toString();
 
     const topRight = d3Path();
-    topRight.moveTo(width - segmentLengthX + offset, -offset);
-    topRight.lineTo(width + offset, -offset);
-    topRight.lineTo(width + offset, -offset + segmentLengthY);
-    cornerPaths.push(topRight.toString());
+    topRight.moveTo(0 - segmentLengthX + offset, -offset);
+    topRight.lineTo(offset, -offset);
+    topRight.lineTo(offset, -offset + segmentLengthY);
+    cornerPaths.topRight = topRight.toString();
 
     const bottomRight = d3Path();
-    bottomRight.moveTo(width + offset, height + offset - segmentLengthY);
-    bottomRight.lineTo(width + offset, height + offset);
-    bottomRight.lineTo(width + offset - segmentLengthX, height + offset);
-    cornerPaths.push(bottomRight.toString());
+    bottomRight.moveTo(offset, offset - segmentLengthY);
+    bottomRight.lineTo(offset, offset);
+    bottomRight.lineTo(offset - segmentLengthX, offset);
+    cornerPaths.bottomRight = bottomRight.toString();
 
     const bottomLeft = d3Path();
-    bottomLeft.moveTo(-offset + segmentLengthX, height + offset);
-    bottomLeft.lineTo(-offset, height + offset);
-    bottomLeft.lineTo(-offset, height + offset - segmentLengthY);
-    cornerPaths.push(bottomLeft.toString());
+    bottomLeft.moveTo(-offset + segmentLengthX, offset);
+    bottomLeft.lineTo(-offset, offset);
+    bottomLeft.lineTo(-offset, offset - segmentLengthY);
+    cornerPaths.bottomLeft = bottomLeft.toString();
 
-    const cornerPathsJSX = cornerPaths.map(function(pathStr, idx){
-        return <path d={pathStr} key={idx} />;
+    const cornerPathsJSX = Object.keys(cornerPaths).map(function(pos){
+        const pathStr = cornerPaths[pos];
+        const t = { x: 0, y: 0 };
+        if (pos === "topRight" || pos === "bottomRight"){
+            t.x = width;
+        }
+        if (pos === "bottomLeft" || pos === "bottomRight"){
+            t.y = height;
+        }
+        return (
+            <g className={"identifier-corner corner-" + pos} key={pos} transform={"translate(" + t.x + ", " + t.y + ")"}>
+                <path d={pathStr} />
+            </g>
+        );
     });
 
     return <React.Fragment>{ cornerPathsJSX }</React.Fragment>;
