@@ -26,7 +26,7 @@ import { EmbeddedHiglassActions } from './../static-pages/components';
 // eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
 
-// import { SET } from './../testdata/experiment_set/replicate_4DNESXZ4FW4';
+// import { SET } from './../testdata/experiment_set/replicate_4DNESDG4HNP9';
 // import { SET } from './../testdata/experiment_set/replicate_with_bigwigs';
 
 
@@ -354,6 +354,72 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 }
 
 
+class QCMetricsTable extends React.PureComponent {
+
+    static defaultProps = {
+        heading: (
+            <h3 className="tab-section-title mt-12">
+                <span>Quality Metrics</span>
+            </h3>
+        )
+    };
+
+    constructor(props){
+        super(props);
+        this.memoized = {
+            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
+            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles)
+        };
+    }
+
+    render() {
+        const { width, files, windowWidth, href, heading } = this.props;
+        const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
+        const filesWithMetricsLen = filesWithMetrics.length;
+
+        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
+
+        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics);
+
+        return (
+            <div className="row">
+                <div className="exp-table-container col-12">
+                    {heading}
+                    {_.map(filesByTitles, function (fileGroup, i) {
+                        const columnHeaders = [ // Static / present-for-each-table headers
+                            { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                            { columnClass: 'file', title: 'For File', initialWidth: 100 }
+                        ].concat(_.map(fileGroup[0].quality_metric_summary, function (sampleQMSItem, qmsIndex) { // Dynamic Headers
+                            function renderColValue(file, field, colIndex, fileEntryBlockProps) {
+                                const qmsItem = file.quality_metric_summary[qmsIndex];
+                                const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                                return <span className="inline-block" data-tip={tooltip}>{value}</span>;
+                            }
+                            return { columnClass: 'file-detail', title: sampleQMSItem.title, initialWidth: 80, render: renderColValue };
+                        }));
+
+                        // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
+                        const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
+                            return f && f.quality_metric && f.quality_metric.url;
+                        });
+
+                        if(anyFilesWithMetricURL) {
+                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render: renderFileQCReportLinkButton });
+                        } else {
+                            columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render: function () { return ''; } });
+                        }
+
+                        return (
+                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i}
+                                files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+}
+
 class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
@@ -387,7 +453,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderTopRow', 'renderQCMetricsTablesRow', 'renderHeader', 'renderProcessedFilesTableAsRightPanel');
+        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderProcessedFilesTableAsRightPanel');
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
@@ -405,55 +471,6 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         } else {
             return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={width}/>;
         }
-    }
-
-    renderQCMetricsTablesRow(){
-        const { width, files, windowWidth, href } = this.props;
-        const filesWithMetrics = commonFileUtil.filterFilesWithQCSummary(files);
-        const filesWithMetricsLen = filesWithMetrics.length;
-
-        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
-
-        const filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
-
-        return (
-            <div className="row">
-                <div className="exp-table-container col-12">
-                    <h3 className="tab-section-title mt-12" key="tab-section-title-metrics">
-                        <span>Quality Metrics</span>
-                    </h3>
-                    { _.map(filesByTitles, function(fileGroup, i){
-                        const columnHeaders = [ // Static / present-for-each-table headers
-                            { columnClass: 'experiment',  title: 'Experiment',  initialWidth: 145,  className: 'text-left' },
-                            { columnClass: 'file',        title: 'For File',    initialWidth: 100 }
-                        ].concat(_.map(fileGroup[0].quality_metric_summary, function(sampleQMSItem, qmsIndex){ // Dynamic Headers
-                            function renderColValue(file, field, colIndex, fileEntryBlockProps){
-                                const qmsItem = file.quality_metric_summary[qmsIndex];
-                                const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
-                                return <span className="inline-block" data-tip={tooltip}>{ value }</span>;
-                            }
-                            return { columnClass : 'file-detail', title : sampleQMSItem.title, initialWidth : 80, render : renderColValue };
-                        }));
-
-                        // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
-                        const anyFilesWithMetricURL = _.any(fileGroup, function(f){
-                            return f && f.quality_metric && f.quality_metric.url;
-                        });
-
-                        if (anyFilesWithMetricURL){
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render : renderFileQCReportLinkButton });
-                        } else {
-                            columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render : function(){ return ''; } });
-                        }
-
-                        return (
-                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i}
-                                files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
-                        );
-                    }) }
-                </div>
-            </div>
-        );
     }
 
     renderHeader(){
@@ -484,9 +501,9 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     render(){
         return (
             <div className="processed-files-table-section exp-table-section">
-                { this.renderHeader() }
-                { this.renderTopRow() }
-                { this.renderQCMetricsTablesRow() }
+                {this.renderHeader()}
+                {this.renderTopRow()}
+                <QCMetricsTable {...this.props} />
             </div>
         );
     }
@@ -565,9 +582,15 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     render(){
-        const { collection, index, width, mounted, defaultOpen, windowWidth } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth, href } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
+        const qcMetricsHeading = (
+            <h4 className="text-500 mt-2 mb-1">
+                <span>Quality Metrics</span>
+            </h4>
+        );
+
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
                 { this.renderStatusIndicator() }
@@ -588,6 +611,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
                             <HiGlassAdjustableWidthRow higlassItem={higlass_view_config} windowWidth={windowWidth} mounted={mounted} width={width - 21}
                                 renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
                             : this.renderFilesTable(width - 21) }
+                        <QCMetricsTable {...{ 'width': width - 20, windowWidth, href, files, 'heading': qcMetricsHeading }} />
                     </div>
                 </Collapse>
             </div>
@@ -764,7 +788,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
     });
 
     render(){
-        const { context, width, mounted, windowWidth } = this.props;
+        const { context, width, mounted, windowWidth, href } = this.props;
         const gridState = mounted && layout.responsiveGridState(windowWidth);
         const otherProcessedFileSetsCombined = SupplementaryFilesTabView.combinedOtherProcessedFiles(context);
         const otherProcessedFileSetsCombinedLen = otherProcessedFileSetsCombined.length;
@@ -778,7 +802,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
             (otherProcessedFileSetsCombinedLen > 0 ? (otherProcessedFileSetsCombinedLen + " Processed Files Collection" + (otherProcessedFileSetsCombinedLen > 1 ? "s" : "")) : '')
         );
 
-        const commonProps = { context, width, mounted, windowWidth };
+        const commonProps = { context, width, mounted, windowWidth, href };
 
         // TODO: Metadata.tsv stuff needs to be setup before we can select files from other_processed_files & reference_files
         //const commonProps = _.extend({ context, width, mounted, windowWidth }, SelectedFilesController.pick(this.props));
