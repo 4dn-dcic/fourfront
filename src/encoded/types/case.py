@@ -43,6 +43,8 @@ class Case(Item):
         "families.members.is_spontaneous_abortion",
         "families.members.is_still_birth",
         "families.members.cause_of_death",
+        "families.members.age",
+        "families.members.age_units",
         "families.members.age_at_death",
         "families.members.age_at_death_units",
         "families.members.is_no_children_by_choice",

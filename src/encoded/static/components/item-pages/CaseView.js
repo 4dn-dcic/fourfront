@@ -38,7 +38,9 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
             is_termination_of_pregnancy: isTerminatedPregnancy = false,
             is_spontaneous_abortion: isSpontaneousAbortion = false,
             is_still_birth: isStillBirth = false,
-            phenotypic_features = []
+            phenotypic_features = [],
+            age = null, age_units = null,
+            age_at_death = null, age_at_death_units = null
         } = individual;
 
         const fatherStr = (father && (typeof father === 'string' ? father : father['@id'])) || null;
@@ -46,6 +48,7 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
 
         // Internally, PedigreeViz uses the "diseases" vocabulary per a pedigree standards doc.
         // Here we transform phenotypic_features to this vocab (might change later, and/or conditionally)
+        /*
         let diseasesAllowedObj = null;
         if (Array.isArray(diseasesAllowed) && diseasesAllowed.length > 0){
             diseasesAllowedObj = {};
@@ -53,22 +56,49 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
                 diseasesAllowedObj[d] = true;
             });
         }
+        */
 
         const diseases = []; // All strings
         const carrierOfDiseases = [];
         const asymptoticDiseases = [];
 
-        phenotypic_features.forEach(function(featureWrapperObj){
-            const { phenotypic_feature: { '@id' : featureID } } = featureWrapperObj;
+        phenotypic_features.forEach(function(featureWrapper){
+            const feature = (featureWrapper && featureWrapper.phenotypic_feature) || null;
+            const featureID = (feature && (typeof feature === 'string' ? feature : feature['@id'])) || null;
+            if (!featureID) return;
+            /*
             if (diseasesAllowedObj && !diseasesAllowedObj[featureID]) {
                 return;
             }
-            if (!featureID) return;
+            */
             diseases.push(featureID);
         });
 
+        function calcAgeNum(ageNum, units){
+            if (units === 'months') {
+                return ageNum * (1/12);
+            }
+            if (units === 'weeks') {
+                return ageNum * (1/52);
+            }
+            if (units === 'days') {
+                return ageNum * (1/365);
+            }
+            if (units === 'hours') {
+                return ageNum * (1/(365 * 24));
+            }
+            return ageNum;
+        }
 
-
+        let showAgeText = null;
+        let ageNumerical = age_at_death || age;
+        if (typeof age_at_death === 'number' && age_at_death_units){
+            showAgeText = "" + age_at_death + " " + age_at_death_units + (age_at_death > 1 ? "s" : "");
+            ageNumerical = calcAgeNum(age_at_death, age_at_death_units);
+        } else if (typeof age === 'number' && age_units) {
+            showAgeText = "" + age + " " + age_units + (age > 1 ? "s" : "");
+            ageNumerical = calcAgeNum(age, age_units);
+        }
 
         return {
             id, gender, name,
@@ -78,6 +108,8 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
             isSpontaneousAbortion,
             isStillBirth,
             diseases,
+            'ageText' : showAgeText || ageNumerical,
+            'age' : ageNumerical,
             'father' : fatherStr,
             'mother' : motherStr,
             'isProband' : probandID && probandID === id,
@@ -523,10 +555,7 @@ class PedigreeTabView extends React.PureComponent {
         const currentFamily = families[pedigreeFamiliesIdx];
         const phenotypicFeatureStrings = this.memoized.getPhenotypicFeatureStrings(case_phenotypic_features);
 
-        const dataset = this.memoized.parseFamilyIntoDataset(
-            currentFamily,
-            phenotypicFeatureStrings.length > 0 ? phenotypicFeatureStrings : null
-        );
+        const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
 
         console.log('DDD', dataset);
         return (
@@ -540,7 +569,8 @@ class PedigreeTabView extends React.PureComponent {
                     </h3>
                 </div>
                 <hr className="tab-section-title-horiz-divider"/>
-                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight }} renderDetailPane={this.renderDetailPane} />
+                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight }}
+                    renderDetailPane={this.renderDetailPane} visibleDiseases={phenotypicFeatureStrings} />
             </div>
         );
     }
@@ -552,10 +582,10 @@ class PedigreeTabView extends React.PureComponent {
  * Reusable for any PedigreeTabView of any ItemView.
  * @todo Maybe move into item-pages/components? Maybe not.
  */
-export function PedigreeTabViewBody({ dataset, windowWidth, windowHeight, renderDetailPane }){
+export function PedigreeTabViewBody({ dataset, windowWidth, windowHeight, renderDetailPane, visibleDiseases }){
     return (
         <FullHeightCalculator {...{ windowWidth, windowHeight }}>
-            <PedigreeViz {...{ dataset, windowWidth, renderDetailPane }}
+            <PedigreeViz {...{ dataset, windowWidth, renderDetailPane, visibleDiseases }}
                 width={windowWidth} filterUnrelatedIndividuals={false}>
             </PedigreeViz>
         </FullHeightCalculator>

@@ -943,7 +943,10 @@ function uniquifyVertices(...edgeSegmentsList){
 
 
 
-/** Gets all diseases, uniqifies, then assigns a numerical index to each. */
+/**
+ * Gets all diseases, uniqifies, then assigns a numerical index to each.
+ * Disease indices start from 1 for easier truthy/falsy checking.
+ */
 export function graphToDiseaseIndices(objectGraph){
 
     // Collect affective diseases first.

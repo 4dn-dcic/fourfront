@@ -443,16 +443,18 @@ $pedigree-disease-colors :
                         textarea {
                             width: 100%;
                             width: calc(100% + 8px);
-                            min-height: 80px;
+                            min-height: 100px;
+                            min-height: 15vh;
                             transition: min-height .25s;
                             font-size: 0.925em;
-                            border: 1px solid #777;
+                            border: 1px solid #ccc;
                             padding: 3px;
                             margin-left: -4px;
                             margin-right: -4px;
                             &:focus,
                             &.has-changed {
                                 min-height: 180px;
+                                min-height: 20vh;
                                 border-color: #333;
                             }
                         }

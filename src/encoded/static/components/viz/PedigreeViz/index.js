@@ -48,7 +48,7 @@ const POSITION_DEFAULTS = {
     individualWidth: 80,
     individualXSpacing: 80, // THIS MUST BE EQUAL TO OR MULTIPLE OF INDIVIDUAL WIDTH FOR TIME BEING
     individualHeight: 80,
-    individualYSpacing: 120,
+    individualYSpacing: 180,
     graphPadding: 60,
     relationshipSize: 40,
     edgeLedge: 40,
@@ -141,18 +141,18 @@ export class PedigreeViz extends React.PureComponent {
                 id: 11, name: "Max", gender: "m", parents: [],
                 asymptoticDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"]
             },
-            { id: 12, name: "Winnie the Pooh", gender: "u", parents: [11, 5], deceased: true, age: 24 },
+            { id: 12, name: "Winnie the Pooh", gender: "u", parents: [11, 5], isDeceased: true, age: 24 },
             {
                 id: 13, name: "Rutherford", gender: "m", parents: [10, 5], age: 0.3,
-                isPregnancy: true, deceased: true, isTerminatedPregnancy: true,
+                isPregnancy: true, isDeceased: true, isTerminatedPregnancy: true,
                 diseases: ["Ubercrampus", "Blue Thumb Syndrome", "Green Thumbitis"],
                 carrierOfDiseases: ["BlueClues", "BlueClues2", "BluesClues3"]
             },
             { id: 14, name: "Sally", gender: "f", parents: [12, 9] },
-            //{ id: 15, name: "Sally2", gender: "f" },
-            //{ id: 16, name: "Silly", gender: "m", parents: [15, 12] },
-            //{ id: 17, name: "Silly2", gender: "m", parents: [15, 12] },
-            //{ id: 18, name: "Silly3", gender: "f", parents: [16, 14] },
+            { id: 15, name: "Sally2", gender: "f" },
+            { id: 16, name: "Silly", gender: "m", parents: [15, 12] },
+            { id: 17, name: "Silly2", gender: "m", parents: [15, 12] },
+            { id: 18, name: "Silly3", gender: "f", parents: [16, 14] },
         ],
 
         /**
@@ -272,7 +272,7 @@ function getFullDims(dimensionOpts){
             graphPadding : Math.max(
                 dimensionOpts.graphPadding || POSITION_DEFAULTS.graphPadding,
                 dimensionOpts.individualXSpacing || POSITION_DEFAULTS.individualXSpacing,
-                dimensionOpts.individualYSpacing || POSITION_DEFAULTS.individualYSpacing
+                0 //dimensionOpts.individualYSpacing || POSITION_DEFAULTS.individualYSpacing
             )
         }
     );
@@ -427,11 +427,21 @@ export class PedigreeVizView extends React.PureComponent {
             height: propHeight,
             objectGraph, dims, order, memoized,
             overlaysContainer, renderDetailPane, containerStyle,
+            visibleDiseases = null,
             ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
 
-        const diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
+        let diseaseToIndex;
+        if (Array.isArray(visibleDiseases)){
+            diseaseToIndex = {};
+            visibleDiseases.forEach(function(disease, index){
+                diseaseToIndex[disease] = index + 1;
+            });
+        } else {
+            diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
+        }
+
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
         const containerHeight = propHeight || graphHeight;
@@ -549,31 +559,37 @@ const SelectedNodeIdentifier = React.memo(function SelectedNodeIdentifier(props)
  * @todo Move segmentLength to dims?
  * @todo Make into instantiable component and if detect width change, height change, etc, then use d3 transition.
  */
-const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape({ height, width, segmentLength = 30, offset = 18 }){
+const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape(props){
+    const {
+        height, width,
+        segmentLengthY = 25,
+        segmentLengthX = 8,
+        offset = 18
+    } = props;
     const cornerPaths = [];
 
     const topLeft = d3Path();
-    topLeft.moveTo(-offset, -offset + segmentLength);
+    topLeft.moveTo(-offset, -offset + segmentLengthY);
     topLeft.lineTo(-offset, -offset);
-    topLeft.lineTo(-offset + segmentLength, -offset);
+    topLeft.lineTo(-offset + segmentLengthX, -offset);
     cornerPaths.push(topLeft.toString());
 
     const topRight = d3Path();
-    topRight.moveTo(width - segmentLength + offset, -offset);
+    topRight.moveTo(width - segmentLengthX + offset, -offset);
     topRight.lineTo(width + offset, -offset);
-    topRight.lineTo(width + offset, -offset + segmentLength);
+    topRight.lineTo(width + offset, -offset + segmentLengthY);
     cornerPaths.push(topRight.toString());
 
     const bottomRight = d3Path();
-    bottomRight.moveTo(width + offset, height + offset - segmentLength);
+    bottomRight.moveTo(width + offset, height + offset - segmentLengthY);
     bottomRight.lineTo(width + offset, height + offset);
-    bottomRight.lineTo(width + offset - segmentLength, height + offset);
+    bottomRight.lineTo(width + offset - segmentLengthX, height + offset);
     cornerPaths.push(bottomRight.toString());
 
     const bottomLeft = d3Path();
-    bottomLeft.moveTo(-offset + segmentLength, height + offset);
+    bottomLeft.moveTo(-offset + segmentLengthX, height + offset);
     bottomLeft.lineTo(-offset, height + offset);
-    bottomLeft.lineTo(-offset, height + offset - segmentLength);
+    bottomLeft.lineTo(-offset, height + offset - segmentLengthY);
     cornerPaths.push(bottomLeft.toString());
 
     const cornerPathsJSX = cornerPaths.map(function(pathStr, idx){
