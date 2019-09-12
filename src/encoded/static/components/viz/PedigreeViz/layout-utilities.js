@@ -587,7 +587,7 @@ function divideIntoBuckets(rowOfNodes = []){
     return buckets;
 }
 
-/** NOT USED **/
+/** NOT USED - TOO UNPERFORMANT - O(n!) **/
 function createOrderingPermutations(order, memoized = {}){
     const { orderByHeightIndex } = order;
     const orderByHeightIndexPermutations = orderByHeightIndex.map(function(nodesInrow, heightIndex){
@@ -640,6 +640,7 @@ function createOrderingPermutations(order, memoized = {}){
 }
 
 
+
 function initOrdering(objectGraph, startIndividuals = null, direction = "children", stack = false, memoized = {}){
     const q = startIndividuals.slice(0);
     if (!stack){
@@ -658,6 +659,48 @@ function initOrdering(objectGraph, startIndividuals = null, direction = "childre
         } else {
             q.unshift(indv);
         }
+    }
+
+    function countAncestors(indvNode){
+        const seenA = {};
+        const aQ = [indvNode];
+        let count = 0;
+        while (aQ.length){
+            const currA = aQ.pop();
+            if (seenA[currA.id]) continue;
+            if (currA._parentalRelationship){
+                currA._parentalRelationship.partners.forEach(function(p){
+                    aQ.unshift(p);
+                });
+            }
+            count++;
+        }
+        return count;
+    }
+
+    function sortByAncestorCount(a,b){
+        return countAncestors(b) - countAncestors(a);
+    }
+
+    function countDescendants(indvNode){
+        const seenD = {};
+        const dQ = [indvNode];
+        let count = 0;
+        while (dQ.length){
+            const currD = dQ.pop();
+            if (seenD[currD.id]) continue;
+            (currD._maritalRelationships || []).forEach(function(mr){
+                (mr.children || []).forEach(function(child){
+                    dQ.unshift(child);
+                });
+            });
+            count++;
+        }
+        return count;
+    }
+
+    function sortByDescendantCount(a,b){
+        return countDescendants(b) - countDescendants(a);
     }
 
     const orderAssignedDebugList = [];
@@ -692,14 +735,20 @@ function initOrdering(objectGraph, startIndividuals = null, direction = "childre
 
             if (isRelationship(node)){
                 if (direction === "parents" && partners){
-                    partners.forEach(addToQ);
+                    partners.sort(sortByAncestorCount).forEach(addToQ);
                 } else if (direction === "children" && children){
-                    children.forEach(addToQ);
+                    children.sort(sortByDescendantCount).forEach(addToQ);
                 }
             } else {
                 seenIndvs.push(node);
                 if (direction === "parents" && _parentalRelationship){
+                    const [ firstParentPartner, ...otherParentPartners ] = (_parentalRelationship.partners || []).sort(sortByAncestorCount);
+                    if (firstParentPartner){
+                        addToQ(firstParentPartner);
+                    }
                     addToQ(_parentalRelationship);
+                    otherParentPartners.forEach(addToQ);
+
                 } else if (direction === "children" && _maritalRelationships){
                     _maritalRelationships.forEach(addToQ);
                 }
@@ -725,7 +774,7 @@ function initOrdering(objectGraph, startIndividuals = null, direction = "childre
     return { orderByHeightIndex, seenOrderInIndex };
 }
 
-// todo improve
+
 function countNodesInBetween(order, fromNode, toNode){
     const { orderByHeightIndex, seenOrderInIndex } = order;
     const { _drawing : { heightIndex } } = fromNode;
@@ -840,7 +889,7 @@ function countEdgeCrossingInstance(order, fromNode, toNode){
     return crossings;
 }
 
-function countEdgeCrossings(order, memoized = {}){
+function countEdgeCrossings(order){
     const { orderByHeightIndex, seenOrderInIndex } = order;
     let crossings = 0;
 
@@ -895,6 +944,11 @@ function countEdgeCrossings(order, memoized = {}){
 }
 
 
+function generateOrders(objectGraph, leafPermutations, rootPermutations){
+
+}
+
+
 export function orderObjectGraph(objectGraph, memoized = {}){
     //const parentlessIndividuals     = (memoized.getParentlessIndividuals || getParentlessIndividuals)(objectGraph);
     const leafChildren              = (memoized.getChildlessIndividuals || getChildlessIndividuals)(objectGraph);
@@ -922,7 +976,7 @@ export function orderObjectGraph(objectGraph, memoized = {}){
     );
 
     function checkCrossings(order){
-        const edgeCrossings = countEdgeCrossings(order, memoized);
+        const edgeCrossings = countEdgeCrossings(order);
         //console.log("ORDER", order, edgeCrossings);
         if (edgeCrossings < bestCrossings){
             bestOrder = order;//copyOrder(order, objectGraph, memoized);

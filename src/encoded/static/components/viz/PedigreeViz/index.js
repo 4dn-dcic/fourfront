@@ -117,7 +117,7 @@ export class PedigreeViz extends React.PureComponent {
                     "notes" : "Likes cheeseburger and other sandwiches. Dislikes things that aren't those things.",
                     "description" : "Too many calories in the diet."
                 },
-                age: 52,
+                age: 42,
                 diseases: ["Badfeelingitis", "Ubercrampus", "Blue Thumb Syndrome"],
                 carrierOfDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"],
                 //asymptoticDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"]
@@ -125,6 +125,7 @@ export class PedigreeViz extends React.PureComponent {
             { id: 2, name: "Joe", gender: "m" },
             { id: 3, name: "Mary", gender: "f", diseases: ["Blue Thumb Syndrome", "Green Thumbitis"] },
             { id: 4, name: "George", gender: "m", parents: [2,3], age: 45, carrierOfDiseases: ["Blue Thumb Syndrome"], },
+            { id: 19, name: "George II", gender: "m", parents: [2,3], age: 46, carrierOfDiseases: ["Blue Thumb Syndrome"], },
             { id: 5, name: "Patricia", gender: "f", parents: [3, 6], diseases: ["Badfeelingitis", "Ubercrampus", "Blue Thumb Syndrome"] },
             {
                 id: 6, name: "Patrick", gender: "m", children: [5],
@@ -562,8 +563,8 @@ const SelectedNodeIdentifier = React.memo(function SelectedNodeIdentifier(props)
 const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape(props){
     const {
         height, width,
-        segmentLengthY = 25,
-        segmentLengthX = 8,
+        segmentLengthY = 7,
+        segmentLengthX = 7,
         offset = 18
     } = props;
     const cornerPaths = [];

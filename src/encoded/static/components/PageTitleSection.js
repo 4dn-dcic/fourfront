@@ -134,7 +134,7 @@ const StaticPageTitle = React.memo(function StaticPageTitle(props){
     );
     const commonCls = "col-12" + hasToc ? " col-lg-9" : '';
     return (
-        <PageTitleContainer alerts={alerts} className="container" alertsContainerClassName={commonCls}>
+        <PageTitleContainer alerts={alerts} className="container" alertsContainerClassName={commonCls + " mt-2"}>
             <div className="row">
                 { !breadCrumbsVisible ?
                     <StaticPageBreadcrumbs {...{ context, session, href }}

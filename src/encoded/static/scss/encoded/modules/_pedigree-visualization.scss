@@ -303,8 +303,8 @@ $pedigree-disease-colors :
                 > g.selected-node-identifier {
                     transition: transform .3s;
                     > path {
-                        stroke: #0005;
-                        stroke-width: 7px;
+                        stroke: $pedigree-viz-node-stroke-color;
+                        stroke-width: 2px;
                         fill: none;
                     }
                 }

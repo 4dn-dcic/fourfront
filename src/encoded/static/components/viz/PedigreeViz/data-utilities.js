@@ -78,14 +78,6 @@ export function standardizeObjectsInList(jsonList){
             delete indv.mother;
         });
 
-        function sortIDByAge(indvIdA, indvIdB){
-            return sortByAge(idObjMap[indvIdA], idObjMap[indvIdB]);
-        }
-
-        function sortIDByGender(indvIdA, indvIdB){
-            return sortByGender(idObjMap[indvIdA], idObjMap[indvIdB]);
-        }
-
         listOfIndividuals.forEach(function(indv){
             const { id: indvID } = indv;
             const { parents = [], children = [] } = indv;
@@ -106,11 +98,7 @@ export function standardizeObjectsInList(jsonList){
                 childIndv.parents.push(indvID);
             });
         });
-        return listOfIndividuals.map(function(indv){
-            indv.parents = (indv.parents || []);//.sort(sortIDByGender);
-            indv.children = (indv.children || []).sort(sortIDByAge);
-            return indv;
-        });
+        return listOfIndividuals;
     }
 
 
@@ -163,14 +151,19 @@ export function standardizeObjectsInList(jsonList){
                 // todo check for duplicates
             }
         });
-        // todo - maybe change to be isDeceased (bool) and add another property for notes
-        indv.isDeceased = indv.isDeceased || false;
+
+        indv.age = indv.age || indv.ageNumber;
+        indv.ageText = indv.ageText || (typeof indv.age === 'number' ? (indv.age + " years") : null);
+
         indv.isConsultand = indv.isConsultand || false;
         indv.isStillBirth = indv.isStillBirth || false;
-        indv.isPregnancy = indv.isPregnancy || false;
         indv.isSpontaneousAbortion = indv.isSpontaneousAbortion || false;
         indv.isTerminatedPregnancy = indv.isTerminatedPregnancy || false;
         indv.isEctopic = indv.isEctopic || false;
+
+        indv.isDeceased = indv.isDeceased || indv.isTerminatedPregnancy || indv.isSpontaneousAbortion || indv.isStillBirth || indv.isEctopic || false;
+        indv.isPregnancy = indv.isPregnancy || indv.isTerminatedPregnancy || indv.isSpontaneousAbortion || indv.isStillBirth || indv.isEctopic || false;
+
         indv.data = indv.data || {};
     });
 
