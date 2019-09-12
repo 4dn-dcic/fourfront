@@ -64,7 +64,7 @@
             "lookup": 411
         },
         "ch04_coupling":{
-            "title": "Ch03 light source coupling",
+            "title": "Ch04 light source coupling",
             "description": "e.g. fiber, light guide, direct",
             "type": "string",
             "lookup": 511

@@ -131,25 +131,25 @@
             "lookup": 408
         },
         "ch04_filter_set":{
-            "title": "Ch03 filter set",
+            "title": "ch04_coupling filter set",
             "description": "",
             "type": "string",
             "lookup": 505
         },
         "ch04_filter_additional":{
-            "title": "Ch03 additional filter",
+            "title": "Ch04 additional filter",
             "description": "If there are additional channels please indicate",
             "type": "string",
             "lookup": 507
         },
         "ch04_detector_model":{
-            "title": "Ch03 detector model",
+            "title": "Ch04 detector model",
             "description": "Manufacturer and model number for the detector on ch03",
             "type": "string",
             "lookup": 504
         },
         "ch04_integration_time":{
-            "title": "Ch03 integration time (millisec)",
+            "title": "Ch04 integration time (millisec)",
             "description": "time the image is exposed to light for a single frame, e.g. 20 millisec",
             "type": "string",
             "lookup": 508

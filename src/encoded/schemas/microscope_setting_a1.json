@@ -117,19 +117,19 @@
             "lookup": 406
         },
         "ch04_power_output":{
-            "title": "Ch03 power output",
+            "title": "Ch04 power output",
             "description": "Nominal power output from ch03 light source",
             "type": "string",
             "lookup": 509
         },
         "ch04_lasers_diodes":{
-            "title": "Ch03 lasers/diodes",
+            "title": "Ch04 lasers/diodes",
             "description": "",
             "type": "string",
             "lookup": 510
         },
         "ch04_filter_set_model":{
-            "title": "Ch03 filter set model",
+            "title": "Ch04 filter set model",
             "description": "Manufacturer and model for the filter set in ch03",
             "type": "string",
             "lookup": 506
