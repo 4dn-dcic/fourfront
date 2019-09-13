@@ -44,7 +44,7 @@ These inserts are kept up-to-date by hand and eventually by using `bin/update-in
 These files contain a subset of items that are minimally linked and are crucial to other metadata items or portal function. This includes static pages, labs, and awards, among other items. These inserts are **always** loaded, with the exception of fourfront-webprod and fourfront-webprod2. To load them on these environments, you must provide the `--prod` flag to `bin/load-data`. This is to prevent accidental loading of inserts that may be malformed into the production database. To do this, run the following command directly on the server:
 
 ```
-bin/load-data production.ini --app-name app --access-key s3 --prod
+bin/load-data production.ini --app-name app --prod
 ```
 
 Certain item types from these inserts are loaded in a couple tests within `test_loadxl.py`, so try not too add an excessive number of items to them.

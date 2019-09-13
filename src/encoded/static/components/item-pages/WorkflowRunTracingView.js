@@ -1,16 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import memoize from 'memoize-one';
 import _ from 'underscore';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
+import Graph from '@hms-dbmi-bgm/react-workflow-viz';
+
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
-import Graph, { parseAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
+
 import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 
@@ -27,6 +31,7 @@ var _testing_data;
 //import { STEPS } from './../testdata/traced_workflow_runs/4DNESIQ6IPCO';
 //import { STEPS } from './../testdata/traced_workflow_runs/hotseat-replicate-4DNES18BMU79';
 //import { STEPS } from './../testdata/traced_workflow_runs/4DNESXZ4FW4T';
+//import { STEPS } from './../testdata/traced_workflow_runs/file_processed_4DNFI9WF1Y8W';
 //_testing_data = STEPS;
 
 
@@ -42,7 +47,7 @@ export default class WorkflowRunTracingView extends DefaultItemView {
     constructor(props){
         super(props);
         this.shouldGraphExist = this.shouldGraphExist.bind(this);
-        this.handleToggleAllRuns = this.handleToggleAllRuns.bind(this);
+        this.handleToggleAllRuns = _.throttle(this.handleToggleAllRuns.bind(this), 1000, { trailing: false });
         const steps = _testing_data || null;
         this.state = {
             'mounted' : false,
@@ -82,26 +87,26 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         if (!this.shouldGraphExist()) return;
         if (!force && Array.isArray(steps) && steps.length > 0) return;
 
-        var tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/',
-            callback = (r) => {
-                raf(()=>{
-                    if (Array.isArray(r) && r.length > 0){
-                        this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
-                    } else {
-                        this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
-                    }
-                });
-            },
-            opts = {};
+        let tracingHref = '/trace_workflow_run_steps/' + context.uuid + '/';
+        const callback = (r) => {
+            if (Array.isArray(r) && r.length > 0){
+                this.setState({ 'steps' : r, 'loadingGraphSteps' : false }, cb);
+            } else {
+                this.setState({ 'steps' : 'ERROR', 'loadingGraphSteps' : false }, cb);
+            }
+        };
+        const opts = {};
 
         if (!cache) {
-            opts['timestamp'] = moment.utc().unix();
+            opts.timestamp = moment.utc().unix();
         }
         if (this.state.allRuns === true){
-            opts['all_runs'] = true;
+            opts.all_runs = true;
         }
         if (_.keys(opts).length > 0){
-            tracingHref += '?' + _.map(_.pairs(opts), function(p){ return p[0] + '=' + p[1]; }).join('&');
+            tracingHref += '?' + _.map(_.pairs(opts), function([ optKey, optVal ]){
+                return encodeURIComponent(optKey) + '=' + encodeURIComponent(optVal);
+            }).join('&');
         }
 
         ajax.load(tracingHref, callback, 'GET', callback);
@@ -109,8 +114,13 @@ export default class WorkflowRunTracingView extends DefaultItemView {
 
     handleToggleAllRuns(){
         this.setState(function({ allRuns }){
-            return { 'allRuns' : !allRuns, 'loadingGraphSteps' : true };
-        }, () => { this.loadGraphSteps(true); });
+            return {
+                'allRuns' : !allRuns,
+                'loadingGraphSteps' : true
+            };
+        }, () => {
+            this.loadGraphSteps(true);
+        });
     }
 }
 
@@ -173,22 +183,33 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         ) || false;
     }
 
+    static anyGroupNodesExist(nodes){
+        return _.any(nodes, function(n){
+            return n.nodeType === 'input-group' || n.nodeType === 'output-group';
+        });
+    }
+
     constructor(props){
         super(props);
         this.commonGraphProps           = this.commonGraphProps.bind(this);
-        this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 250);
-        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
-        this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000);
+        this.onToggleIndirectFiles      = _.throttle(this.onToggleIndirectFiles.bind(this), 1000, { trailing: false });
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000, { trailing: false });
+        this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000, { trailing: false });
         this.isNodeCurrentContext       = this.isNodeCurrentContext.bind(this);
-        this.state = _.extend({
+        this.state = {
             'showChart' : 'detail',
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'stacked',
-            'showParameters' : false,
-            'anyIndirectPathIONodes' : true, // Overriden
-            'anyReferenceFileNodes' : true // Overriden
-        }, checkIfIndirectOrReferenceNodesExist(props.steps));
+            'showParameters' : false
+        };
+
+        this.memoized = {
+            ...this.memoized,
+            anyGroupNodesExist : memoize(FileViewGraphSection.anyGroupNodesExist),
+            allFilesForWorkflowRunsMappedByUUID : memoize(allFilesForWorkflowRunsMappedByUUID),
+            mapEmbeddedFilesToStepRunDataIDs : memoize(mapEmbeddedFilesToStepRunDataIDs)
+        };
     }
 
     componentWillReceiveProps(nextProps){
@@ -202,40 +223,38 @@ export class FileViewGraphSection extends WorkflowGraphSection {
     }
 
     commonGraphProps(){
-        var { steps, allRuns } = this.props,
-            parsingOptions = _.extend(
-                {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters', 'showIndirectFiles')
-            ),
-            legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items),
-            graphData   = parseAnalysisSteps(steps, parsingOptions);
+        const {
+            steps, allRuns, isNodeCurrentContext,
+            context : { workflow_run_outputs = [], workflow_run_inputs = [] }
+        } = this.props;
+        const { showReferenceFiles, showParameters, showIndirectFiles, rowSpacingType } = this.state;
+        const parsingOptions = { showReferenceFiles, showParameters, showIndirectFiles };
+        const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        const { anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
+        const { nodes: originalNodes, edges } = this.memoized.parseAnalysisSteps(steps, parsingOptions);
 
-        if (!this.state.showParameters){
+        if (!showParameters){
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
-        this.anyGroupNodesExist = !allRuns && _.any(graphData.nodes, function(n){
-            return n.nodeType === 'input-group' || n.nodeType === 'output-group';
-        });
-
-        if (!this.state.showReferenceFiles || !this.state.anyReferenceFileNodes){
+        if (!showReferenceFiles || !anyReferenceFileNodes){
             delete legendItems['Input Reference File'];
         }
-        if (!this.anyGroupNodesExist || this.props.all_runs){
+        if (allRuns || !this.memoized.anyGroupNodesExist(originalNodes)){
             delete legendItems['Group of Similar Files'];
         }
-        var fileMap = allFilesForWorkflowRunsMappedByUUID(
-            (this.props.context.workflow_run_outputs || []).concat(this.props.context.workflow_run_inputs || [])
-        );
-        var nodes = mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, fileMap );
 
-        return _.extend(commonGraphPropsFromProps(_.extend({ legendItems }, this.props)), {
-            'isNodeDisabled'        : FileViewGraphSection.isNodeDisabled,
-            'nodes'                 : nodes,
-            'edges'                 : graphData.edges,
-            'columnSpacing'         : 100, //graphData.edges.length > 40 ? (graphData.edges.length > 80 ? 270 : 180) : 90,
-            'rowSpacingType'        : this.state.rowSpacingType,
-            'isNodeCurrentContext'  : (typeof this.props.isNodeCurrentContext === 'function' && this.props.isNodeCurrentContext) || this.isNodeCurrentContext
-        });
+        const fileMap = this.memoized.allFilesForWorkflowRunsMappedByUUID(workflow_run_outputs.concat(workflow_run_inputs));
+        const nodes = this.memoized.mapEmbeddedFilesToStepRunDataIDs(originalNodes, fileMap );
+
+        return {
+            ...commonGraphPropsFromProps({ ...this.props, legendItems }),
+            nodes, edges, rowSpacingType,
+            'isNodeDisabled' : FileViewGraphSection.isNodeDisabled,
+            'columnSpacing' : 100,
+            'isNodeCurrentContext' : (typeof isNodeCurrentContext === 'function' && isNodeCurrentContext) || this.isNodeCurrentContext
+
+        };
     }
 
     onToggleIndirectFiles(){
@@ -250,14 +269,20 @@ export class FileViewGraphSection extends WorkflowGraphSection {
 
     render(){
         const { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props;
-        const { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state;
+        const { showIndirectFiles, showChart } = this.state;
+        const { anyIndirectPathIONodes, anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
         const graphProps = Array.isArray(steps) ? this.commonGraphProps() : null;
         const isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes;
         const isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false);
         const isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
+        const outerCls = (
+            "tabview-container-fullscreen-capable workflow-view-container"
+            + " workflow-viewing-" + (showChart)
+            + (isFullscreen ? ' full-screen-view' : '')
+        );
 
         return (
-            <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={outerCls}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls

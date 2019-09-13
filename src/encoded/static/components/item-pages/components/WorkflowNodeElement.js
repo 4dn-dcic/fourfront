@@ -88,7 +88,14 @@ export class WorkflowNodeElement extends React.PureComponent {
 
     static getFileFormatString(node){
         const fileFormatItem = WorkflowNodeElement.getFileFormat(node);
-        if (!fileFormatItem && (!node.meta || !node.meta.run_data)) {
+
+        if (!fileFormatItem) {
+
+            const fileFormatStrDeprecated = (node.meta && typeof node.meta.file_format === 'string' && node.meta.file_format) || null;
+            if (fileFormatStrDeprecated){
+                return fileFormatStrDeprecated;
+            }
+
             // Some extra glitter to show lack of defined file_format.
             // Assuming is Workflow visualization with no run data or file_format definition pre-defined.
             return "Any file format";
@@ -139,7 +146,9 @@ export class WorkflowNodeElement extends React.PureComponent {
         } else if (nodeType === 'step'){
             iconClass = 'cogs';
         }
-        if (!iconClass) return null;
+        if (!iconClass) {
+            iconClass = 'question';
+        }
         return <i className={"icon icon-fw icon-" + iconClass}/>;
     }
 
@@ -341,41 +350,51 @@ export class WorkflowNodeElement extends React.PureComponent {
     }
 
     nodeTitle(){
-        var node = this.props.node;
+        const { node } = this.props;
+        const {
+            nodeType,
+            ioType,
+            name,
+            title = null,
+            meta : {
+                workflow,
+                run_data
+            } = {}
+        } = node;
 
-        if (node.nodeType === 'input-group'){
+        if (nodeType === 'input-group'){
             var files = node.meta.run_data.file;
             if (Array.isArray(files)){
                 var len = files.length - 1;
                 return (
-                    <span className="node-name">
+                    <div className="node-name">
                         { this.icon() }
                         <b>{ files.length - 1 }</b> similar file{ len === 1 ? '' : 's' }
-                    </span>
+                    </div>
                 );
             }
         }
 
-        if (node.nodeType === 'step' && node.meta && node.meta.workflow && typeof node.meta.workflow === 'object' && node.meta.workflow.display_title && typeof node.meta.workflow.display_title === 'string'){
-            return <span className="node-name">{ this.icon() }{ node.meta.workflow.display_title }</span>;
+        if (nodeType === 'step' && workflow && typeof workflow === 'object' && workflow.display_title){
+            return <div className="node-name">{ this.icon() }{ workflow.display_title }</div>;
         }
 
         if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
-            var file = node.meta.run_data.file;
+            const { file : { accession, display_title } } = run_data;
             return (
-                <span className={"node-name" + (file.accession ? ' mono-text' : '')}>
+                <div className={"node-name" + (accession ? ' mono-text' : '')}>
                     { this.icon() }
-                    { typeof file === 'string' ? node.ioType : file.accession || file.display_title }
-                </span>
+                    { typeof file === 'string' ? ioType : accession || display_title }
+                </div>
             );
         }
 
         if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){
-            return <span className="node-name mono-text">{ this.icon() }{ node.meta.run_data.value }</span>;
+            return <div className="node-name mono-text">{ this.icon() }{ run_data.value }</div>;
         }
 
         // Fallback / Default - use node.name
-        return <span className="node-name">{ this.icon() }{ node.title || node.name }</span>;
+        return <div className="node-name">{ this.icon() }{ title || name }</div>;
     }
 
     /**
@@ -386,20 +405,21 @@ export class WorkflowNodeElement extends React.PureComponent {
      * seems having a link on node would be bit unexpected if clicked accidentally.
      */
     qcMarker(){
-        var { node, selected } = this.props,
-            file, qc, qcStatus, markerProps;
+        const { node, selected } = this.props;
 
         if (!WorkflowNodeElement.isNodeFile(node) || !WorkflowNodeElement.doesRunDataExist(node)){
             return null;
         }
 
-        file     = node.meta.run_data.file,
-        qc       = file && file.quality_metric;
+        const {
+            meta : { run_data : { file } }
+        } = node;
 
+        const qc = file && file.quality_metric;
         if (!qc) return null;
 
-        qcStatus = qc.overall_quality_status && qc.overall_quality_status.toLowerCase();
-        markerProps = {
+        const qcStatus = qc.overall_quality_status && qc.overall_quality_status.toLowerCase();
+        const markerProps = {
             'className' : "qc-present-node-marker",
             'data-tip'  : "This file has a quality control metric associated with it.",
             'children'  : "QC",

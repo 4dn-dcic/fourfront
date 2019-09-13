@@ -4,17 +4,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
+import memoize from 'memoize-one';
 
 import { console, object, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+
+import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from '@hms-dbmi-bgm/react-workflow-viz';
 
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
-import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
-
 
 
 /**
@@ -35,20 +35,18 @@ export function onItemPageNodeClick(node, selectedNode, evt){
 }
 
 export function checkIfIndirectOrReferenceNodesExist(steps){
-    var graphData = parseAnalysisSteps(steps, _.extend(
-        {}, DEFAULT_PARSING_OPTIONS, { 'showIndirectFiles' : true, 'showReferenceFiles' : true }
-    ));
-    var anyIndirectPathIONodes = _.any(graphData.nodes, function(n){
+    const graphData = parseAnalysisSteps(steps, { 'showIndirectFiles' : true, 'showReferenceFiles' : true });
+    const anyIndirectPathIONodes = _.any(graphData.nodes, function(n){
         return (n.nodeType === 'output' && n.meta && n.meta.in_path === false);
     });
-    var anyReferenceFileNodes = _.any(graphData.nodes, function(n){
+    const anyReferenceFileNodes = _.any(graphData.nodes, function(n){
         return (n.ioType === 'reference file');
     });
     return { anyIndirectPathIONodes, anyReferenceFileNodes };
 }
 
 export function commonGraphPropsFromProps(props){
-    var graphProps = {
+    const graphProps = {
         'href'              : props.href,
         'renderDetailPane'  : function(selectedNode, paneProps){
             return (
@@ -63,12 +61,6 @@ export function commonGraphPropsFromProps(props){
         'onNodeClick'       : typeof props.onNodeClick !== 'undefined' ? props.onNodeClick : null,
         'windowWidth'       : props.windowWidth
     };
-
-    if (props.isFullscreen) {
-        graphProps.width = props.windowWidth - 40;
-    } else if (props.width){
-        graphProps.width = props.width;
-    }
 
     return graphProps;
 }
@@ -96,6 +88,9 @@ export default class WorkflowView extends DefaultItemView {
         this.state = {
             'mounted' : false
         };
+        this.memoized = {
+            doValidAnalysisStepsExist : memoize(doValidAnalysisStepsExist)
+        };
     }
 
     componentDidMount(){
@@ -105,7 +100,7 @@ export default class WorkflowView extends DefaultItemView {
     getTabViewContents(){
         const { context, windowHeight } = this.props;
         const width   = this.getTabViewWidth();
-        const tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
+        const tabs    = !this.memoized.doValidAnalysisStepsExist(context.steps) ? [] : [
             {
                 tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
                 key : 'graph',
@@ -138,45 +133,50 @@ export class WorkflowGraphSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
-        this.body = this.body.bind(this);
         this.parseAnalysisSteps = this.parseAnalysisSteps.bind(this);
-        this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 250);
-        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 250);
-        this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 250, { trailing : false });
-        this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 250, { trailing : false });
-        this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 250, { trailing : false });
-        this.state = _.extend({
+        this.onToggleShowParameters     = _.throttle(this.onToggleShowParameters.bind(this), 1000);
+        this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000);
+        this.onChangeRowSpacingType     = _.throttle(this.onChangeRowSpacingType.bind(this), 1000, { trailing : false });
+        this.onChangeShowChartType      = _.throttle(this.onChangeShowChartType.bind(this), 1000, { trailing : false });
+        this.onToggleFullScreenView     = _.throttle(this.onToggleFullScreenView.bind(this), 1000, { trailing : false });
+
+        this.memoized = {
+            parseAnalysisSteps : memoize(parseAnalysisSteps),
+            parseBasicIOAnalysisSteps : memoize(parseBasicIOAnalysisSteps),
+            checkIfIndirectOrReferenceNodesExist : memoize(checkIfIndirectOrReferenceNodesExist)
+        };
+
+        this.state = {
             'showChart' : WorkflowGraphSectionControls.analysisStepsSet(props.context) ? 'detail' : 'basic',
             'showParameters' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'compact',
-        }, props.context && props.context.steps ? checkIfIndirectOrReferenceNodesExist(props.context.steps) : {});
+        };
     }
 
     componentWillUnmount(){
-        if (this.props.isFullscreen){
-            this.props.toggleFullScreen(false);
+        const { isFullscreen = false, toggleFullScreen } = this.props;
+        if (isFullscreen){
+            toggleFullScreen(false);
         }
     }
 
     parseAnalysisSteps(context = this.props.context){
-        var parsingOptions = _.extend(
-            {}, DEFAULT_PARSING_OPTIONS, _.pick(this.state, 'showReferenceFiles', 'showParameters')
-        );
-        return (
-            this.state.showChart === 'basic' ?
-                parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
-                :
-                parseAnalysisSteps(context.steps, parsingOptions)
+        const { showReferenceFiles, showParameters, showChart } = this.state;
+        const parsingOptions = { showReferenceFiles, showParameters };
+        return (showChart === 'basic' ?
+            this.memoized.parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
+            :
+            this.memoized.parseAnalysisSteps(context.steps, parsingOptions)
         );
     }
 
     commonGraphProps(){
-        var { showParameters, showReferenceFiles, rowSpacingType } = this.state,
-            graphData = this.parseAnalysisSteps();
+        const { showParameters, showReferenceFiles, rowSpacingType } = this.state;
+        const graphData = this.parseAnalysisSteps();
 
         // Filter out legend items which aren't relevant for this context.
-        var keepItems = ['Input File', 'Output File', 'Input Reference File'];
+        const keepItems = ['Input File', 'Output File', 'Input Reference File'];
         if (showParameters){
             keepItems.push('Input Parameter');
         }
@@ -185,10 +185,13 @@ export class WorkflowGraphSection extends React.PureComponent {
         }
         keepItems.push('Intermediate File');
 
-        var legendItems         = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems),
-            commonGraphProps    = commonGraphPropsFromProps(_.extend({ legendItems }, this.props));
-
-        return _.extend(commonGraphProps, this.parseAnalysisSteps(), { rowSpacingType });
+        const legendItems = _.pick(WorkflowDetailPane.Legend.defaultProps.items, keepItems);
+        const commonGraphProps = commonGraphPropsFromProps({ ...this.props, legendItems });
+        return {
+            ...commonGraphProps,
+            ...graphData,
+            rowSpacingType
+        };
     }
 
     onToggleShowParameters(){
@@ -225,24 +228,20 @@ export class WorkflowGraphSection extends React.PureComponent {
         this.props.toggleFullScreen(null, ReactTooltip.rebuild);
     }
 
-    body(){
-        var { context, mounted, width } = this.props,
-            { showChart } = this.state;
+    render(){
+        const { showChart, rowSpacingType, showParameters, showReferenceFiles } = this.state;
+        const { isFullscreen, context, mounted, width } = this.props;
+        const { anyIndirectPathIONodes, anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(context.steps);
 
-        if (!Array.isArray(context.steps)) return null;
+        let body = null;
+
+        if (!Array.isArray(context.steps)) body = null;
 
         if (showChart === 'basic') {
-            return <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 180) / 3 : 180} />;
+            body = <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 320) / 3 : 180} />;
         } else if (showChart === 'detail') {
-            return <Graph { ...this.commonGraphProps() } />;
-        } else {
-            throw new Error('No valid chart type set to be displayed.');
+            body = <Graph { ...this.commonGraphProps() } />;
         }
-    }
-
-    render(){
-        var { showChart, rowSpacingType, showParameters, showReferenceFiles, anyReferenceFileNodes } = this.state,
-            { isFullscreen } = this.props;
 
         return (
             <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + showChart + (isFullscreen ? ' full-screen-view' : '')}>
@@ -261,7 +260,7 @@ export class WorkflowGraphSection extends React.PureComponent {
                     />
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
-                { this.body() }
+                { body }
             </div>
         );
 
