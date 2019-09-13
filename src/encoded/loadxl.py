@@ -360,6 +360,23 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
     # run step1 - if item does not exist, post with minimal metadata
     second_round_items = {}
     for a_type in all_types:
+        # handle access_key inserts which don't have uuid, try posting, if error skip
+        if a_type == 'access_key':
+            for an_item in store[a_type]:
+                try:
+                    res = testapp.post_json('/'+a_type, an_item)
+                    assert res.status_code == 201
+                    # yield bytes to work with Response.app_iter
+                    yield str.encode('POST: %s\n' % res.json['@graph'][0]['access_key_id'])
+                except Exception as e:
+                    print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
+                          a_type, str(an_item), str(e)))
+                    # remove newlines from error, since they mess with generator output
+                    e_str = str(e).replace('\n', '')
+                    yield str.encode('ERROR: %s\n' % e_str)
+                    raise StopIteration
+            continue
+
         # this conversion of schema name to object type works for all existing schemas at the moment
         obj_type = "".join([i.title() for i in a_type.split('_')])
         # minimal schema
@@ -402,7 +419,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     yield str.encode('POST: %s\n' % res.json['@graph'][0]['uuid'])
                 except Exception as e:
                     print('Posting {} failed. Post body:\n{}\nError Message:{}'.format(
-                          a_type, str(first_fields), str(e)))
+                          a_type, str(post_first), str(e)))
                     # remove newlines from error, since they mess with generator output
                     e_str = str(e).replace('\n', '')
                     yield str.encode('ERROR: %s\n' % e_str)
@@ -413,6 +430,9 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
 
     # Round II - patch the rest of the metadata
     for a_type in all_types:
+        # skip access key
+        if a_type == 'access_key':
+            continue
         obj_type = "".join([i.title() for i in a_type.split('_')])
         if not second_round_items[a_type]:
             logger.info('{} 2nd: no items to patch'.format(a_type))
