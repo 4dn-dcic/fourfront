@@ -165,9 +165,9 @@ export class WorkflowGraphSection extends React.PureComponent {
         const { showReferenceFiles, showParameters, showChart } = this.state;
         const parsingOptions = { showReferenceFiles, showParameters };
         return (showChart === 'basic' ?
-            parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
+            this.memoized.parseBasicIOAnalysisSteps(context.steps, context, parsingOptions)
             :
-            parseAnalysisSteps(context.steps, parsingOptions)
+            this.memoized.parseAnalysisSteps(context.steps, parsingOptions)
         );
     }
 
@@ -238,7 +238,7 @@ export class WorkflowGraphSection extends React.PureComponent {
         if (!Array.isArray(context.steps)) body = null;
 
         if (showChart === 'basic') {
-            body = <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 180) / 3 : 180} />;
+            body = <Graph { ...this.commonGraphProps() } edgeStyle="curve" columnWidth={mounted && width ? (width - 320) / 3 : 180} />;
         } else if (showChart === 'detail') {
             body = <Graph { ...this.commonGraphProps() } />;
         }

@@ -4,7 +4,6 @@ const log = require('fancy-log');
 const webpack = require('webpack');
 const sass = require('node-sass');
 const fs = require('fs');
-const webpackConfig = require('./webpack.config.js');
 
 
 function setProduction(done){
@@ -38,10 +37,14 @@ function webpackOnBuild(done) {
 }
 
 function doWebpack(cb){
+    // Import in here so process.env.NODE_ENV changes are picked up.
+    const webpackConfig = require('./webpack.config.js');
     webpack(webpackConfig).run(webpackOnBuild(cb));
 }
 
 function watch(){
+    // Import in here so process.env.NODE_ENV changes are picked up.
+    const webpackConfig = require('./webpack.config.js');
     webpack(webpackConfig).watch(300, webpackOnBuild());
 }
 
@@ -51,7 +54,7 @@ function watch(){
 
 const cssOutputLocation = './src/encoded/static/css/style.css';
 
-var doSassBuild = (done, options = {}) => {
+const doSassBuild = (done, options = {}) => {
     sass.render({
         file: './src/encoded/static/scss/style.scss',
         outFile: './src/encoded/static/css/style-map.css', // sourceMap location
