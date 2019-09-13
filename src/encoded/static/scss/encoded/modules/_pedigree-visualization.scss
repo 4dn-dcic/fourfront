@@ -91,6 +91,7 @@ $pedigree-disease-colors :
 
         > .viz-area {
             position: relative;
+            transform-origin: 0 0;
 
             > .individuals-layer {
                 position: relative;

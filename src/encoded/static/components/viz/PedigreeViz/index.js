@@ -219,7 +219,10 @@ export class PedigreeViz extends React.PureComponent {
          *
          * @type {!string[]}
          */
-        "visibleDiseases": null
+        "visibleDiseases": null,
+
+
+        "scale" : 1
     };
 
     static initState(dataset){
@@ -346,7 +349,8 @@ class GraphTransformer extends React.PureComponent {
 export class PedigreeVizView extends React.PureComponent {
 
     static defaultProps = {
-        'width': 600
+        'width': 600,
+        "scale" : 1
     };
 
     constructor(props){
@@ -443,6 +447,7 @@ export class PedigreeVizView extends React.PureComponent {
             objectGraph, dims, order, memoized,
             overlaysContainer, renderDetailPane, containerStyle,
             visibleDiseases = null,
+            scale = 1,
             ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
@@ -470,8 +475,10 @@ export class PedigreeVizView extends React.PureComponent {
         };
 
         const vizAreaStyle = {
-            'width': graphWidth,
-            'height': graphHeight + 60 // Add extra to offset text @ bottom of nodes.
+            'width': graphWidth * scale,
+            // Add extra to offset text @ bottom of nodes.
+            'height': (graphHeight * scale) + 60,
+            'transform' : scale !== 1 ? "scale(" + scale + ")" : null
         };
 
         const commonChildProps = {
