@@ -786,7 +786,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         # to obsolete by adding to to_patch
         # need a way to exclude our own terms and synonyms and definitions
         for tid, term in use_terms.items():
-            if tid not in terms:
+            if tid not in terms and term['status'] != 'obsolete':
                 try:
                     source_onts = [so.get('uuid') for so in term['source_ontologies']]
                 except KeyError:
