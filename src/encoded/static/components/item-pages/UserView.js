@@ -112,7 +112,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
         const idToken = JWT.get();
         if (idToken){
             const decoded = JWT.decode(idToken);
-            item.user = decoded.email_verified ? decoded.email : "";
+            item.user = decoded.email_verified ? decoded.email.toLowerCase() : "";
         } else {
             console.warn("Access key aborted");
             return;
@@ -281,7 +281,7 @@ function AccessKeyTableContainer({ children }){
 
 const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete, onResetSecret }){
 
-    if (!accessKeys.length){
+    if (typeof accessKeys === 'undefined' || !accessKeys.length){
         return (
             <div className="no-access-keys">
                 <hr/><span>No access keys set.</span>
