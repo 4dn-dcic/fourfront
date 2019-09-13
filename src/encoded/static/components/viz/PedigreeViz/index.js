@@ -8,7 +8,11 @@ import {
     createObjectGraph, createRelationships, getRelationships
 } from './data-utilities';
 import { assignTreeHeightIndices, orderObjectGraph, positionObjectGraph } from './layout-utilities';
-import { getGraphHeight, getGraphWidth, createEdges, relationshipTopPosition, graphToDiseaseIndices } from './layout-utilities-drawing';
+import {
+    getGraphHeight, getGraphWidth,
+    createEdges, relationshipTopPosition,
+    graphToDiseaseIndices, orderNodesBottomRightToTopLeft
+} from './layout-utilities-drawing';
 import { IndividualsLayer, doesAncestorHaveId } from './IndividualsLayer';
 import { IndividualNodeShapeLayer } from './IndividualNodeShapeLayer';
 import { EdgesLayer } from './EdgesLayer';
@@ -48,7 +52,7 @@ const POSITION_DEFAULTS = {
     individualWidth: 80,
     individualXSpacing: 80, // THIS MUST BE EQUAL TO OR MULTIPLE OF INDIVIDUAL WIDTH FOR TIME BEING
     individualHeight: 80,
-    individualYSpacing: 120,
+    individualYSpacing: 180,
     graphPadding: 60,
     relationshipSize: 40,
     edgeLedge: 40,
@@ -117,7 +121,7 @@ export class PedigreeViz extends React.PureComponent {
                     "notes" : "Likes cheeseburger and other sandwiches. Dislikes things that aren't those things.",
                     "description" : "Too many calories in the diet."
                 },
-                age: 52,
+                age: 42,
                 diseases: ["Badfeelingitis", "Ubercrampus", "Blue Thumb Syndrome"],
                 carrierOfDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"],
                 //asymptoticDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"]
@@ -125,6 +129,7 @@ export class PedigreeViz extends React.PureComponent {
             { id: 2, name: "Joe", gender: "m" },
             { id: 3, name: "Mary", gender: "f", diseases: ["Blue Thumb Syndrome", "Green Thumbitis"] },
             { id: 4, name: "George", gender: "m", parents: [2,3], age: 45, carrierOfDiseases: ["Blue Thumb Syndrome"], },
+            { id: 19, name: "George II", gender: "m", parents: [2,3], age: 46, carrierOfDiseases: ["Blue Thumb Syndrome"], },
             { id: 5, name: "Patricia", gender: "f", parents: [3, 6], diseases: ["Badfeelingitis", "Ubercrampus", "Blue Thumb Syndrome"] },
             {
                 id: 6, name: "Patrick", gender: "m", children: [5],
@@ -141,18 +146,18 @@ export class PedigreeViz extends React.PureComponent {
                 id: 11, name: "Max", gender: "m", parents: [],
                 asymptoticDiseases: ["Green Thumbitis", "BlueClues", "BlueClues2", "BluesClues3"]
             },
-            { id: 12, name: "Winnie the Pooh", gender: "u", parents: [11, 5], deceased: true, age: 24 },
+            { id: 12, name: "Winnie the Pooh", gender: "u", parents: [11, 5], isDeceased: true, age: 24 },
             {
                 id: 13, name: "Rutherford", gender: "m", parents: [10, 5], age: 0.3,
-                isPregnancy: true, deceased: true, isTerminatedPregnancy: true,
+                isPregnancy: true, isDeceased: true, isTerminatedPregnancy: true,
                 diseases: ["Ubercrampus", "Blue Thumb Syndrome", "Green Thumbitis"],
                 carrierOfDiseases: ["BlueClues", "BlueClues2", "BluesClues3"]
             },
             { id: 14, name: "Sally", gender: "f", parents: [12, 9] },
-            //{ id: 15, name: "Sally2", gender: "f" },
-            //{ id: 16, name: "Silly", gender: "m", parents: [15, 12] },
-            //{ id: 17, name: "Silly2", gender: "m", parents: [15, 12] },
-            //{ id: 18, name: "Silly3", gender: "f", parents: [16, 14] },
+            { id: 15, name: "Sally2", gender: "f" },
+            { id: 16, name: "Silly", gender: "m", parents: [15, 12] },
+            { id: 17, name: "Silly2", gender: "m", parents: [15, 12] },
+            { id: 18, name: "Silly3", gender: "f", parents: [16, 14] },
         ],
 
         /**
@@ -205,7 +210,16 @@ export class PedigreeViz extends React.PureComponent {
          */
         "renderDetailPane" : function(vizProps){
             return <DefaultDetailPaneComponent {...vizProps} />;
-        }
+        },
+
+
+        /**
+         * Can supply an array of strings to color only those diseases.
+         * If null, then _all_ diseases will be colored.
+         *
+         * @type {!string[]}
+         */
+        "visibleDiseases": null
     };
 
     static initState(dataset){
@@ -296,6 +310,7 @@ class GraphTransformer extends React.PureComponent {
             findNodeWithId          : memoize(findNodeWithId),
             getFullDims             : memoize(getFullDims),
             getRelationships        : memoize(getRelationships),
+            orderNodesBottomRightToTopLeft : memoize(orderNodesBottomRightToTopLeft),
             graphToDiseaseIndices   : memoize(graphToDiseaseIndices)
         };
     }
@@ -427,14 +442,25 @@ export class PedigreeVizView extends React.PureComponent {
             height: propHeight,
             objectGraph, dims, order, memoized,
             overlaysContainer, renderDetailPane, containerStyle,
+            visibleDiseases = null,
             ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
 
-        const diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
+        let diseaseToIndex;
+        if (Array.isArray(visibleDiseases)){
+            diseaseToIndex = {};
+            visibleDiseases.forEach(function(disease, index){
+                diseaseToIndex[disease] = index + 1;
+            });
+        } else {
+            diseaseToIndex = memoized.graphToDiseaseIndices(objectGraph);
+        }
+
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
         const containerHeight = propHeight || graphHeight;
+        const orderedNodes = memoized.orderNodesBottomRightToTopLeft(objectGraph);
 
         const useContainerStyle = {
             //width: containerWidth,
@@ -449,7 +475,8 @@ export class PedigreeVizView extends React.PureComponent {
         };
 
         const commonChildProps = {
-            objectGraph, graphHeight, graphWidth, dims, memoized, diseaseToIndex,
+            objectGraph: orderedNodes,
+            graphHeight, graphWidth, dims, memoized, diseaseToIndex,
             containerHeight, containerWidth,
             'onNodeMouseIn' : this.handleNodeMouseIn,
             'onNodeMouseLeave' : this.handleNodeMouseLeave,
@@ -549,35 +576,56 @@ const SelectedNodeIdentifier = React.memo(function SelectedNodeIdentifier(props)
  * @todo Move segmentLength to dims?
  * @todo Make into instantiable component and if detect width change, height change, etc, then use d3 transition.
  */
-const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape({ height, width, segmentLength = 30, offset = 18 }){
-    const cornerPaths = [];
+const SelectedNodeIdentifierShape = React.memo(function SelectedNodeIdentifierShape(props){
+    const {
+        height, width,
+        segmentLengthY = 7,
+        segmentLengthX = 7,
+        offset = 18
+    } = props;
+
+    const cornerPaths = {
+        topLeft: null, topRight: null, bottomRight: null, bottomleft: null
+    };
 
     const topLeft = d3Path();
-    topLeft.moveTo(-offset, -offset + segmentLength);
+    topLeft.moveTo(-offset, -offset + segmentLengthY);
     topLeft.lineTo(-offset, -offset);
-    topLeft.lineTo(-offset + segmentLength, -offset);
-    cornerPaths.push(topLeft.toString());
+    topLeft.lineTo(-offset + segmentLengthX, -offset);
+    cornerPaths.topLeft = topLeft.toString();
 
     const topRight = d3Path();
-    topRight.moveTo(width - segmentLength + offset, -offset);
-    topRight.lineTo(width + offset, -offset);
-    topRight.lineTo(width + offset, -offset + segmentLength);
-    cornerPaths.push(topRight.toString());
+    topRight.moveTo(0 - segmentLengthX + offset, -offset);
+    topRight.lineTo(offset, -offset);
+    topRight.lineTo(offset, -offset + segmentLengthY);
+    cornerPaths.topRight = topRight.toString();
 
     const bottomRight = d3Path();
-    bottomRight.moveTo(width + offset, height + offset - segmentLength);
-    bottomRight.lineTo(width + offset, height + offset);
-    bottomRight.lineTo(width + offset - segmentLength, height + offset);
-    cornerPaths.push(bottomRight.toString());
+    bottomRight.moveTo(offset, offset - segmentLengthY);
+    bottomRight.lineTo(offset, offset);
+    bottomRight.lineTo(offset - segmentLengthX, offset);
+    cornerPaths.bottomRight = bottomRight.toString();
 
     const bottomLeft = d3Path();
-    bottomLeft.moveTo(-offset + segmentLength, height + offset);
-    bottomLeft.lineTo(-offset, height + offset);
-    bottomLeft.lineTo(-offset, height + offset - segmentLength);
-    cornerPaths.push(bottomLeft.toString());
+    bottomLeft.moveTo(-offset + segmentLengthX, offset);
+    bottomLeft.lineTo(-offset, offset);
+    bottomLeft.lineTo(-offset, offset - segmentLengthY);
+    cornerPaths.bottomLeft = bottomLeft.toString();
 
-    const cornerPathsJSX = cornerPaths.map(function(pathStr, idx){
-        return <path d={pathStr} key={idx} />;
+    const cornerPathsJSX = Object.keys(cornerPaths).map(function(pos){
+        const pathStr = cornerPaths[pos];
+        const t = { x: 0, y: 0 };
+        if (pos === "topRight" || pos === "bottomRight"){
+            t.x = width;
+        }
+        if (pos === "bottomLeft" || pos === "bottomRight"){
+            t.y = height;
+        }
+        return (
+            <g className={"identifier-corner corner-" + pos} key={pos} transform={"translate(" + t.x + ", " + t.y + ")"}>
+                <path d={pathStr} />
+            </g>
+        );
     });
 
     return <React.Fragment>{ cornerPathsJSX }</React.Fragment>;

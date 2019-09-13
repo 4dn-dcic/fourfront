@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { navigate, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate, console, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
@@ -392,10 +392,49 @@ class TabPane extends React.PureComponent {
             const cls = "tab-pane-outer" + (currKey === key ? " active" : " d-none");
             return (
                 <div className={cls} data-tab-key={key} id={key} key={key || idx}>
-                    { content }
+                    <TabPaneErrorBoundary>
+                        { content }
+                    </TabPaneErrorBoundary>
                 </div>
             );
         });
+    }
+
+}
+
+class TabPaneErrorBoundary extends React.PureComponent {
+
+    static getDerivedStateFromError(error) {
+        // Update state so the next render will show the fallback UI.
+        return { hasError: true };
+    }
+
+    constructor(props){
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    componentDidCatch(error, info){
+        analytics.exception("TabPaneErrorBoundary: " + info.componentStack);
+        console.error("Caught error", error, info);
+    }
+
+    render(){
+        const { children } = this.props;
+        const { hasError } = this.state;
+
+        if (hasError){
+            return (
+                <div className="error-boundary-container container">
+                    <div className="error-msg-container mt-3 mb-3 row">
+                        <i className="icon icon-times fas col-auto"/>
+                        <h4 className="text-400 mb-0 mt-0 col">A client-side error has occured, please go back or try again later.</h4>
+                    </div>
+                </div>
+            );
+        }
+
+        return children;
     }
 
 }

@@ -1,7 +1,10 @@
 'use strict';
 
 import React from 'react';
-import memoize from 'memoize-one';
+import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
+import { object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ClinicianNotes } from './ClinicianNotes';
 
 
 export function getIndividualDisplayTitle(individual){
@@ -10,77 +13,154 @@ export function getIndividualDisplayTitle(individual){
     return display_title || name || id;
 }
 
+/**
+ * At some point, will likely make into class component
+ * and add methods to save/load things such as clinician notes.
+ */
+export class IndividualBody extends React.PureComponent {
 
-export function IndividualBody(props){
-    const {
-        selectedNode: individual,
-        onNodeClick,
-        onClose,
-        diseaseToIndex,
-        session
-    } = props;
-    const {
-        id, name,
-        data: { individualItem = null } = {},
-        _parentReferences: parents = [],
-        _childReferences: children = []
-    } = individual;
-
-    // This should be same as "id" but we grab from here to be safe.
-    const {
-        '@id' : individualID,
-        ethnicity,
-        phenotypic_features = []
-    } = individualItem || {};
-
-    let showTitle = getIndividualDisplayTitle(individual);
-    if (individualID) {
-        showTitle = <a href={individualID}>{ showTitle }</a>;
+    constructor(props){
+        super(props);
+        this.loadIndividual = this.loadIndividual.bind(this);
+        this.state = {
+            loadedIndividual: null,
+            isLoadingIndividual: false,
+            timestamp: 0
+        };
+        this.currRequest = null;
     }
 
-    return (
-        <div className="detail-pane-inner">
+    componentDidMount(){
+        this.loadIndividual();
+    }
 
+    componentWillUnmount(){
+        this.currRequest && this.currRequest.abort && this.currRequest.abort();
+    }
 
-            <div className="title-box">
-                <div className="label-row row">
-                    <div className="col">
-                        <label>Individual</label>
+    componentDidUpdate(pastProps){
+        const { selectedNode, session } = this.props;
+        if (pastProps.selectedNode !== selectedNode || session !== pastProps.session){
+            this.loadIndividual({ loadedIndividual: null });
+        }
+    }
+
+    loadIndividual(extraStateChange){
+        const { selectedNode = {} } = this.props;
+        const { data : { individualItem = null } } = selectedNode;
+        const { '@id' : id } = individualItem || {};
+        if (!id) {
+            console.error("Couldnt get ID of individual");
+            return;
+        }
+        let ourRequest = null;
+        const timestamp = parseInt(Date.now());
+        const cb = (res, xhr) => {
+            if (xhr.status === 0 || ourRequest !== this.currRequest){
+                return; // Aborted, skip state change.
+            }
+            this.currRequest = null;
+            if (!res || res['@id'] !== id){
+                // Error, maybe no permissions
+                this.setState({ loadedIndividual : null, isLoadingIndividual: false });
+                return;
+            }
+            this.setState({
+                loadedIndividual : res,
+                isLoadingIndividual: false,
+                timestamp
+            });
+        };
+
+        this.setState({ ...extraStateChange, isLoadingIndividual : true }, ()=>{
+            this.currRequest && this.currRequest.abort && this.currRequest.abort();
+            ourRequest = this.currRequest = ajax.load(id + "?ts=" + timestamp, cb, 'GET', cb);
+        });
+    }
+
+    render(){
+        const {
+            selectedNode: individual,
+            onNodeClick,
+            onClose,
+            diseaseToIndex,
+            session
+        } = this.props;
+        const {
+            isLoadingIndividual,
+            loadedIndividual: loadedIndividualItem,
+            timestamp
+        } = this.state;
+        const {
+            id, name,
+            data: { individualItem = null } = {},
+            _parentReferences: parents = [],
+            _childReferences: children = []
+        } = individual;
+
+        // This should be same as "id" but we grab from here to be safe.
+        const {
+            '@id' : individualID,
+            ethnicity,
+            phenotypic_features = [],
+            actions = []
+        } = loadedIndividualItem || individualItem || {};
+
+        const haveEditPermission = session && _.any(actions, { "name" : "edit" });
+
+        let showTitle = getIndividualDisplayTitle(individual);
+        if (individualID) {
+            showTitle = <a href={individualID}>{ showTitle }</a>;
+        }
+
+        console.log("INDV", loadedIndividualItem, individualItem);
+
+        return (
+            <div className="detail-pane-inner">
+
+                <div className="title-box">
+                    <div className="label-row row">
+                        <div className="col">
+                            <label>Individual</label>
+                        </div>
+                        <div className="col-auto buttons-col">
+                            { haveEditPermission ?
+                                <a href={individualID + "?currentAction=edit"} className="d-block edit-btn">
+                                    <i className="icon icon-pencil fas clickable" />
+                                </a>
+                                : isLoadingIndividual ?
+                                    <i className="icon icon-circle-notch icon-spin fas d-block mr-15" />
+                                    : null }
+                            { onClose ? <i className="icon icon-times fas clickable d-block" onClick={onClose}/> : null }
+                        </div>
                     </div>
-                    <div className="col-auto buttons-col">
-                        { session ?
-                            <a href={individualID + "?currentAction=edit"} className="d-block edit-btn">
-                                <i className="icon icon-pencil fas clickable" />
-                            </a>
-                            : null }
-                        { onClose ? <i className="icon icon-times fas clickable d-block" onClick={onClose}/> : null }
-                    </div>
+                    <h3>{ showTitle }</h3>
                 </div>
-                <h3>{ showTitle }</h3>
-            </div>
 
-            <div className="details">
-                { ethnicity ? <InlineDetailRow label="Ethnicity" value={ethnicity} /> : null }
-                <PhenotypicFeatures features={phenotypic_features} diseaseToIndex={diseaseToIndex} />
-                {/*
-                <div className="detail-row row" data-describing="parents">
-                    <div className="col-12">
-                        <label>Parents</label>
-                        { !parents.length ? <div><em>None</em></div>
-                            : <PartnersLinks onNodeClick={onNodeClick} partners={parents}/>
+                <div className="details">
+                    { ethnicity ? <InlineDetailRow label="Ethnicity" value={ethnicity} /> : null }
+                    <PhenotypicFeatures features={phenotypic_features} diseaseToIndex={diseaseToIndex} />
+                    <ClinicianNotes individual={loadedIndividualItem || individualItem} haveEditPermission={haveEditPermission} />
+                    {/*
+                    <div className="detail-row row" data-describing="parents">
+                        <div className="col-12">
+                            <label>Parents</label>
+                            { !parents.length ? <div><em>None</em></div>
+                                : <PartnersLinks onNodeClick={onNodeClick} partners={parents}/>
+                            }
+                        </div>
+                    </div>
+                    <div className="detail-row" data-describing="children">
+                        <label>Children</label>
+                        { !children.length ? <div><em>None</em></div>
+                            : <PartnersLinks onNodeClick={onNodeClick} partners={children}/>
                         }
                     </div>
+                    */}
                 </div>
-                <div className="detail-row" data-describing="children">
-                    <label>Children</label>
-                    { !children.length ? <div><em>None</em></div>
-                        : <PartnersLinks onNodeClick={onNodeClick} partners={children}/>
-                    }
-                </div>
-                */}
             </div>
-        </div>
-    );
+        );
+    }
 }
 
 function InlineDetailRow({ property, label, value }){
@@ -108,7 +188,7 @@ function PhenotypicFeatures({ features, diseaseToIndex }){
             onset_age = null,
             onset_age_units = null
         } = feature;
-        const diseaseIndex = diseaseToIndex[featureID] || -1;
+        const diseaseIndex = diseaseToIndex[title] || -1;
         return (
             <div className="detail-row-list-item phenotypic-feature" key={featureID}>
                 <div className="legend-patch" data-disease-index={diseaseIndex} />

@@ -943,7 +943,10 @@ function uniquifyVertices(...edgeSegmentsList){
 
 
 
-/** Gets all diseases, uniqifies, then assigns a numerical index to each. */
+/**
+ * Gets all diseases, uniqifies, then assigns a numerical index to each.
+ * Disease indices start from 1 for easier truthy/falsy checking.
+ */
 export function graphToDiseaseIndices(objectGraph){
 
     // Collect affective diseases first.
@@ -970,4 +973,18 @@ export function graphToDiseaseIndices(objectGraph){
     });
 
     return diseaseToIndex;
+}
+
+
+export function orderNodesBottomRightToTopLeft(originalObjectGraph){
+    return originalObjectGraph.slice().sort(function(a, b){
+        const { _drawing: { heightIndexA, orderByHeightIndexA } } = a;
+        const { _drawing: { heightIndexB, orderByHeightIndexB } } = b;
+        if (heightIndexA !== heightIndexB){
+            // Bottom to top
+            return heightIndexB - heightIndexA;
+        }
+        // Right to left
+        return orderByHeightIndexA - orderByHeightIndexB;
+    });
 }

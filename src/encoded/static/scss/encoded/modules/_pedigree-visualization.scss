@@ -302,9 +302,12 @@ $pedigree-disease-colors :
     
                 > g.selected-node-identifier {
                     transition: transform .3s;
-                    > path {
-                        stroke: #0005;
-                        stroke-width: 7px;
+                    > g.identifier-corner {
+                        transition: transform .3s;
+                    }
+                    path {
+                        stroke: $pedigree-viz-node-stroke-color;
+                        stroke-width: 2px;
                         fill: none;
                     }
                 }
@@ -412,6 +415,7 @@ $pedigree-disease-colors :
                                 display: block;
                                 height: 12px;
                                 width: 12px;
+                                flex: 0 0 12px;
                                 margin-right: 10px;
                                 border: 1px solid #555;
                                 @include pedigree-color-cycle-background;
@@ -420,6 +424,7 @@ $pedigree-disease-colors :
                                     background-color: #f4f4f4;
                                     height: 8px;
                                     width: 8px;
+                                    flex: 0 0 8px;
                                     margin-right: 12px;
                                     margin-left: 2px;
                                     border-radius: 2px;
@@ -428,10 +433,44 @@ $pedigree-disease-colors :
                             > .title {
                                 text-align: left;
                                 flex: 1;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
                             }
                             > .onset {
                                 font-size: 0.9em;
                             }
+                        }
+                    }
+
+                    &[data-describing="clinic_notes"] {
+                        textarea {
+                            width: 100%;
+                            width: calc(100% + 8px);
+                            min-height: 100px;
+                            min-height: 15vh;
+                            transition: min-height .25s;
+                            font-size: 0.925em;
+                            border: 1px solid #ccc;
+                            padding: 3px;
+                            margin-left: -4px;
+                            margin-right: -4px;
+                            &:focus,
+                            &.has-changed {
+                                min-height: 180px;
+                                min-height: 20vh;
+                                border-color: #333;
+                            }
+                        }
+                        p.read-only-notes {
+                            margin-bottom: 0;
+                            font-size: 0.925em;
+                            white-space: pre-wrap;
+                            text-overflow: ellipsis;
+                            overflow-x: hidden;
+                            padding: 4px 0;
+                        }
+                        .save-btn-container {
+                            text-align: right;
                         }
                     }
 

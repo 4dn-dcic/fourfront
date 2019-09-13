@@ -147,7 +147,7 @@ export class IndividualNodeShape extends IndividualNodeBase {
                 <UnderlayMarkers {...{ width, height, individual, shape, diseaseToIndex }} />
                 { fgShape }
                 <OverlayMarkers {...{ width, height, individual, shape, diseaseToIndex }} />
-                <UnderNodeText {...{ width, height, individual, shape, dims }} />
+                <UnderNodeText {...{ width, height, individual, shape, diseaseToIndex, dims }} />
             </g>
         );
     }
@@ -169,14 +169,17 @@ function shapeTypeToString(shapeType){
 
 
 const AffectedBGPieChart = React.memo(function AffectedBGPieChart({ width, height, shape, diseases = [], diseaseToIndex = {} }){
-    const diseaseLen = diseases.length;
+    const visibleDiseases = diseases.filter(function(disease){
+        return diseaseToIndex[disease];
+    });
+    const diseaseLen = visibleDiseases.length;
     if (diseaseLen === 0) return;
     const centerX = width / 2;
     const centerY = shape.type === TerminatedPregnancyShape ? height / 4 : height / 2;
     const clipID = "pedigree_clipPath_for_" + (shapeTypeToString(shape.type));
     const startAngle = -(Math.PI / 2);
     const endAngle = (2 * Math.PI ) / diseaseLen;
-    const arcPaths = diseases.map(function(disease, idx){
+    const arcPaths = visibleDiseases.map(function(disease, idx){
         const path = d3Path();
         path.moveTo(centerX, centerY);
         path.arc(
@@ -294,7 +297,11 @@ const OverlayMarkers = React.memo(function OverlayMarkers({ individual, width, h
  */
 function CircleOfDiseaseDots({ individual, width, height, shape, diseaseToIndex }){
     const { carrierOfDiseases = [] } = individual;
-    const diseaseLen = carrierOfDiseases.length;
+    const visibleDiseases = carrierOfDiseases.filter(function(disease){
+        return diseaseToIndex[disease];
+    });
+    const diseaseLen = visibleDiseases.length;
+
     if (diseaseLen === 0) return;
     const centerX = width / 2;
     const centerY = shape.type === TerminatedPregnancyShape ? height * 0.3 : height / 2;
@@ -303,7 +310,7 @@ function CircleOfDiseaseDots({ individual, width, height, shape, diseaseToIndex 
     if (diseaseLen === 1){
         return (
             <circle cx={centerX} cy={centerY} r={singleCircleRadius} className="circle-disease-dot"
-                data-disease-index={diseaseToIndex[carrierOfDiseases[0]]} />
+                data-disease-index={diseaseToIndex[visibleDiseases[0]]} />
         );
     }
     const positioningCircleRadius = smallestOuterDim / ( shape.type === TerminatedPregnancyShape ? 8 : 4 );
@@ -312,7 +319,7 @@ function CircleOfDiseaseDots({ individual, width, height, shape, diseaseToIndex 
     const smallCircleRadius = Math.min(singleCircleRadius, maxSmallCircleRadius);
     const portionRadians = (Math.PI * 2) / diseaseLen;
     const startAngle = Math.PI * -0.5;
-    const circleDims = carrierOfDiseases.map(function(diseaseStr, idx){
+    const circleDims = visibleDiseases.map(function(diseaseStr, idx){
         return [
             (positioningCircleRadius * Math.cos(startAngle + (portionRadians * idx))) + centerX,
             (positioningCircleRadius * Math.sin(startAngle + (portionRadians * idx))) + centerY
@@ -320,7 +327,7 @@ function CircleOfDiseaseDots({ individual, width, height, shape, diseaseToIndex 
     });
 
     const ringOfCircles = circleDims.map(function([ x, y ], idx){
-        const diseaseStr = carrierOfDiseases[idx];
+        const diseaseStr = visibleDiseases[idx];
         return (
             <circle cx={x} cy={y} r={smallCircleRadius} className="circle-disease-dot"
                 data-disease-index={diseaseToIndex[diseaseStr]} key={diseaseStr} />
@@ -337,7 +344,10 @@ function CircleOfDiseaseDots({ individual, width, height, shape, diseaseToIndex 
  */
 function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
     const { asymptoticDiseases = [] } = individual;
-    const diseaseLen = asymptoticDiseases.length;
+    const visibleDiseases = asymptoticDiseases.filter(function(disease){
+        return diseaseToIndex[disease];
+    });
+    const diseaseLen = visibleDiseases.length;
     if (diseaseLen === 0) return;
     const clipID = "pedigree_clipPath_for_" + (shapeTypeToString(shape.type));
     const topY = 0;
@@ -347,7 +357,7 @@ function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
     const colWidth = Math.max(width / 10, 10);
     const partitionHeight = colHeight / diseaseLen;
 
-    const colOfRects = asymptoticDiseases.map(function(diseaseStr, idx){
+    const colOfRects = visibleDiseases.map(function(diseaseStr, idx){
         return (
             <rect x={centerX - (colWidth / 2)} y={colHeight - ((idx + 1) * partitionHeight)}
                 width={colWidth} height={partitionHeight} className="rect-disease-partition"
@@ -361,18 +371,50 @@ function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
 }
 
 /** @todo Implement things like age, stillBirth, isEctopic, etc. */
-function UnderNodeText({ individual, width, height, shape, dims }){
-    const { id, name, age } = individual;
-    const textYStart = 19;
+function UnderNodeText({ individual, width, height, shape, dims, diseaseToIndex }){
+    const { id, name, ageText, diseases = [] } = individual;
+    const halfWidth = width / 2;
+    //const textYStart = 18;
     const showTitle = name || id;
+
+    const textRows = [[ showTitle, "title" ]];
+    if (ageText){
+        textRows.push([ ageText, "age" ]);
+    }
+
+    diseases.filter(function(disease){
+        return !diseaseToIndex[disease];
+    }).forEach(function(disease, i){
+        textRows.push([
+            <React.Fragment key={i}>
+                &bull; { disease }
+            </React.Fragment>,
+            "disease"
+        ]);
+    });
+
+    const renderedTexts = textRows.map(function([ content, desc ], idx){
+        const txtProps = {
+            y: 18 + (20 * idx)
+        };
+        if (desc === "title" || desc === "age"){
+            // Center text
+            txtProps.textAnchor = "middle";
+            txtProps.x = halfWidth;
+        }
+        if (desc === "disease"){
+            // Left align text, but from midpoint
+            // txtProps.x = halfWidth;
+        }
+        return <text {...txtProps} key={desc}>{ content }</text>;
+    });
 
     // todo maybe make an array of 'rows' to map to <text>s with incremented y coord.
 
     return (
-        <g className="text-box" transform={"translate(" + 0 + ", " + (height + 4) + ")"}>
+        <g className="text-box" transform={"translate(0, " + (height + 4) + ")"}>
             <rect width={width + 4} x={-2} height={dims.individualYSpacing / 3} className="bg-rect" rx={5} />
-            <text y={textYStart}>{ showTitle }</text>
-            { age ? <text y={textYStart + 20}>Age: { age }</text> : null }
+            { renderedTexts }
         </g>
     );
 }
