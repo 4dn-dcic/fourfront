@@ -97,6 +97,7 @@ setup(
         es-index-data = encoded.commands.es_index_data:main
         generate-ontology = encoded.commands.generate_ontology:main
         generate-phenotypes = encoded.commands.generate_phenotypes:main
+        items-from-owl = encoded.commands.generate_items_from_owl:main
         load-ontology = encoded.commands.load_ontology_terms:main
         load-phenotypes = encoded.commands.load_items:main
         load-items = encoded.commands.load_items:main
