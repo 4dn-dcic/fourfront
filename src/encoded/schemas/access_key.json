@@ -2,7 +2,7 @@
     "title": "Admin access key",
     "id": "/profiles/access_key.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "required": [],
+    "required": ["access_key_id", "user"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
