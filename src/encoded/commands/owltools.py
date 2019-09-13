@@ -16,6 +16,7 @@ subClassOf = RDFS.subClassOf
 SomeValuesFrom = OWLNS["someValuesFrom"]
 IntersectionOf = OWLNS["intersectionOf"]
 Deprecated = OWLNS["deprecated"]
+hasDbXref = OBO_OWL["hasDbXref"]
 
 DEFAULT_LANGUAGE = "en"
 
