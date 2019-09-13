@@ -679,7 +679,11 @@ function initOrdering(objectGraph, startIndividuals = null, direction = "childre
     }
 
     function sortByAncestorCount(a,b){
-        return countAncestors(b) - countAncestors(a);
+        const count = countAncestors(b) - countAncestors(a);
+        if (count !== 0) return count;
+        if (a.gender === 'male') return -1;
+        if (b.gender === 'male') return 1;
+        return 0;
     }
 
     function countDescendants(indvNode){
@@ -941,11 +945,6 @@ function countEdgeCrossings(order){
     });
 
     return crossings;
-}
-
-
-function generateOrders(objectGraph, leafPermutations, rootPermutations){
-
 }
 
 

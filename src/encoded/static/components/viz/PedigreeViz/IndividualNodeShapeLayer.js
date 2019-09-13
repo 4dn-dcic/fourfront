@@ -147,7 +147,7 @@ export class IndividualNodeShape extends IndividualNodeBase {
                 <UnderlayMarkers {...{ width, height, individual, shape, diseaseToIndex }} />
                 { fgShape }
                 <OverlayMarkers {...{ width, height, individual, shape, diseaseToIndex }} />
-                <UnderNodeText {...{ width, height, individual, shape, dims }} />
+                <UnderNodeText {...{ width, height, individual, shape, diseaseToIndex, dims }} />
             </g>
         );
     }
@@ -371,19 +371,52 @@ function ColumnOfDiseases({ individual, width, height, shape, diseaseToIndex }){
 }
 
 /** @todo Implement things like age, stillBirth, isEctopic, etc. */
-function UnderNodeText({ individual, width, height, shape, dims }){
-    const { id, name, ageText } = individual;
+function UnderNodeText({ individual, width, height, shape, dims, diseaseToIndex }){
+    const { id, name, ageText, diseases = [] } = individual;
     const halfWidth = width / 2;
     //const textYStart = 18;
     const showTitle = name || id;
+
+    const textRows = [[ showTitle, "title" ]];
+    if (ageText){
+        textRows.push([ ageText, "age" ]);
+    }
+
+    diseases.filter(function(disease){
+        return !diseaseToIndex[disease];
+    }).forEach(function(disease, i){
+        textRows.push([
+            <React.Fragment key={i}>
+                &bull; { disease }
+            </React.Fragment>,
+            "disease"
+        ]);
+    });
+
+    const renderedTexts = textRows.map(function([ content, desc ], idx){
+        const txtProps = {
+            y: 18 + (20 * idx)
+        };
+        if (desc === "title" || desc === "age"){
+            // Center text
+            txtProps.textAnchor = "middle";
+            txtProps.x = halfWidth;
+        } else {
+            // Left align text, but from midpoint
+            txtProps.x = halfWidth;
+        }
+        if (desc === "disease"){
+
+        }
+        return <text {...txtProps} key={desc}>{ content }</text>;
+    });
 
     // todo maybe make an array of 'rows' to map to <text>s with incremented y coord.
 
     return (
         <g className="text-box" transform={"translate(0, " + (height + 4) + ")"}>
             <rect width={width + 4} x={-2} height={dims.individualYSpacing / 3} className="bg-rect" rx={5} />
-            <text y="18" textAnchor="middle" x={halfWidth}>{ showTitle }</text>
-            { ageText ? <text y="38" textAnchor="middle" x={halfWidth}>{ ageText }</text> : null }
+            { renderedTexts }
         </g>
     );
 }

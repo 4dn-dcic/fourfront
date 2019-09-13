@@ -188,7 +188,7 @@ function PhenotypicFeatures({ features, diseaseToIndex }){
             onset_age = null,
             onset_age_units = null
         } = feature;
-        const diseaseIndex = diseaseToIndex[featureID] || -1;
+        const diseaseIndex = diseaseToIndex[title] || -1;
         return (
             <div className="detail-row-list-item phenotypic-feature" key={featureID}>
                 <div className="legend-patch" data-disease-index={diseaseIndex} />

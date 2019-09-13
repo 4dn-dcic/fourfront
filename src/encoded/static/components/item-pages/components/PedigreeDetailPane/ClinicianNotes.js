@@ -49,10 +49,13 @@ export class ClinicianNotes extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps, pastState){
-        const { individual: { clinic_notes: currPropNotes = "" } } = this.props;
-        const { individual: { clinic_notes: pastPropNotes = "" } } = pastProps;
+        const { individual: currIndv } = this.props;
+        const { individual: pastIndv } = pastProps;
+        const { clinic_notes: currPropNotes = "" } = currIndv || {};
+        const { clinic_notes: pastPropNotes = "" } = pastIndv || {};
 
-        if (currPropNotes !== pastPropNotes){
+
+        if (currIndv !== pastIndv || currPropNotes !== pastPropNotes){
             // We could alternatively just use unique key for ClinicianNotes instances
             this.setState(ClinicianNotes.initState(this.props));
             return;

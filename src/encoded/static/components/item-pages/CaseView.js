@@ -48,15 +48,6 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
 
         // Internally, PedigreeViz uses the "diseases" vocabulary per a pedigree standards doc.
         // Here we transform phenotypic_features to this vocab (might change later, and/or conditionally)
-        /*
-        let diseasesAllowedObj = null;
-        if (Array.isArray(diseasesAllowed) && diseasesAllowed.length > 0){
-            diseasesAllowedObj = {};
-            diseasesAllowed.forEach(function(d){
-                diseasesAllowedObj[d] = true;
-            });
-        }
-        */
 
         const diseases = []; // All strings
         const carrierOfDiseases = [];
@@ -64,14 +55,13 @@ export function parseFamilyIntoDataset(family, diseasesAllowed = null){
 
         phenotypic_features.forEach(function(featureWrapper){
             const feature = (featureWrapper && featureWrapper.phenotypic_feature) || null;
-            const featureID = (feature && (typeof feature === 'string' ? feature : feature['@id'])) || null;
-            if (!featureID) return;
-            /*
-            if (diseasesAllowedObj && !diseasesAllowedObj[featureID]) {
-                return;
-            }
-            */
-            diseases.push(featureID);
+            const featureTitle = (
+                feature && (
+                    typeof feature === 'string' ? feature : feature.display_title || feature['@id']
+                )
+            ) || null;
+            if (!featureTitle) return;
+            diseases.push(featureTitle);
         });
 
         function calcAgeNum(ageNum, units){
@@ -517,15 +507,18 @@ class PedigreeTabView extends React.PureComponent {
     static getPhenotypicFeatureStrings(case_phenotypic_features = []){
         const strings = [];
         case_phenotypic_features.forEach(function(feature){
-            const { '@id' : featureID } = feature;
+            if (typeof feature === 'string') return feature;
+            const { '@id' : featureID, display_title } = feature;
             if (!featureID) return;
-            strings.push(featureID);
+            strings.push(display_title || featureID);
         });
         return strings;
     }
 
     constructor(props){
         super(props);
+        this.handleToggleCheckbox = this.handleToggleCheckbox.bind(this);
+        this.handleChangeShowAsDiseases = this.handleChangeShowAsDiseases.bind(this);
         this.renderDetailPane = this.renderDetailPane.bind(this);
         this.memoized = {
             parseFamilyIntoDataset : memoize(parseFamilyIntoDataset),
@@ -534,6 +527,33 @@ class PedigreeTabView extends React.PureComponent {
         if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
             throw new Error("Expected props.context.families to be a non-empty Array.");
         }
+
+        this.state = {
+            showAllDiseases : false,
+            showAsDiseases: "Phenotypic Features" // todo - enum
+        };
+    }
+
+    handleToggleCheckbox(evt){
+        const name = evt.target.getAttribute("name");
+        if (!name) return false;
+        this.setState(function({ [name] : currState }){
+            return { [name]: !currState };
+        });
+    }
+
+    handleChangeShowAsDiseases(key, evt){
+        const nextShowAllDiseases = key.slice(0,4) === "All ";
+        let showAsDiseases;
+        if (nextShowAllDiseases){ // = "All ..."
+            showAsDiseases = key.slice(4);
+        } else { // = "Case ..."
+            showAsDiseases = key.slice(5);
+        }
+        this.setState({
+            showAsDiseases,
+            showAllDiseases: nextShowAllDiseases
+        });
     }
 
     renderDetailPane(pedigreeVizProps){
@@ -550,10 +570,11 @@ class PedigreeTabView extends React.PureComponent {
             schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
             handleFamilySelect, pedigreeFamiliesIdx, pedigreeFamilies
         } = this.props;
+        const { showAllDiseases, showAsDiseases } = this.state;
 
         const families = pedigreeFamilies || contextFamilies;
         const currentFamily = families[pedigreeFamiliesIdx];
-        const phenotypicFeatureStrings = this.memoized.getPhenotypicFeatureStrings(case_phenotypic_features);
+        const phenotypicFeatureStrings = showAllDiseases ? null : this.memoized.getPhenotypicFeatureStrings(case_phenotypic_features);
 
         const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
 
@@ -564,6 +585,8 @@ class PedigreeTabView extends React.PureComponent {
                     <h3 className="tab-section-title">
                         <span>Pedigree</span>
                         <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}>
+                            {/* <ColorAllDiseasesCheckbox checked={showAllDiseases} onChange={this.handleToggleCheckbox} /> */}
+                            <ShowAsDiseasesDropdown onSelect={this.handleChangeShowAsDiseases} {...{ showAllDiseases, showAsDiseases }}  />
                             <FamilySelectionDropdown {...{ families, currentFamilyIdx: pedigreeFamiliesIdx }} onSelect={handleFamilySelect} />
                         </CollapsibleItemViewButtonToolbar>
                     </h3>
@@ -602,7 +625,7 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
         <span>Family <strong>{currentFamilyIdx + 1}</strong></span>
     );
     return (
-        <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="mr-05" alignRight>
+        <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" className="ml-05" alignRight>
             {
                 families.map(function(family, i){
                     const { original_pedigree: pf = null } = family;
@@ -614,6 +637,27 @@ const FamilySelectionDropdown = React.memo(function FamilySelectionDropdown(prop
                     );
                 })
             }
+        </DropdownButton>
+    );
+});
+
+const ColorAllDiseasesCheckbox = React.memo(function ShowAllDiseasesCheckbox({ checked, onChange }){
+    return (
+        <Checkbox className="checkbox-container" name="showAllDiseases" checked={checked} onChange={onChange}>
+            Highlight All
+        </Checkbox>
+    );
+});
+
+
+const ShowAsDiseasesDropdown = React.memo(function ShowAsDiseasesDropdown({ showAsDiseases, onSelect, showAllDiseases }){
+    const title = (showAllDiseases ? "All " : "Case ") + showAsDiseases;
+    return (
+        <DropdownButton onSelect={onSelect} title={title} variant="outline-dark" alignRight>
+            <DropdownItem active={!showAllDiseases && showAsDiseases === "Phenotypic Features"} eventKey="Case Phenotypic Features">Case Phenotypic Features</DropdownItem>
+            <DropdownItem active={showAllDiseases && showAsDiseases === "Phenotypic Features"} eventKey="All Phenotypic Features">All Phenotypic Features</DropdownItem>
+            <DropdownItem active={!showAllDiseases && showAsDiseases === "Disorders"} disabled eventKey="Case Disorders">Case Disorders</DropdownItem>
+            <DropdownItem active={showAllDiseases && showAsDiseases === "Disorders"} disabled eventKey="All Disorders">All Disorders</DropdownItem>
         </DropdownButton>
     );
 });

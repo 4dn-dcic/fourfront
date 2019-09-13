@@ -206,7 +206,16 @@ export class PedigreeViz extends React.PureComponent {
          */
         "renderDetailPane" : function(vizProps){
             return <DefaultDetailPaneComponent {...vizProps} />;
-        }
+        },
+
+
+        /**
+         * Can supply an array of strings to color only those diseases.
+         * If null, then _all_ diseases will be colored.
+         *
+         * @type {!string[]}
+         */
+        "visibleDiseases": null
     };
 
     static initState(dataset){
@@ -273,7 +282,7 @@ function getFullDims(dimensionOpts){
             graphPadding : Math.max(
                 dimensionOpts.graphPadding || POSITION_DEFAULTS.graphPadding,
                 dimensionOpts.individualXSpacing || POSITION_DEFAULTS.individualXSpacing,
-                0 //dimensionOpts.individualYSpacing || POSITION_DEFAULTS.individualYSpacing
+                dimensionOpts.individualYSpacing || POSITION_DEFAULTS.individualYSpacing
             )
         }
     );
