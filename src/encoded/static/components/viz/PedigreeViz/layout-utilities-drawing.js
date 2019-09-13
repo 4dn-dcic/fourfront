@@ -974,3 +974,17 @@ export function graphToDiseaseIndices(objectGraph){
 
     return diseaseToIndex;
 }
+
+
+export function orderNodesBottomRightToTopLeft(originalObjectGraph){
+    return originalObjectGraph.slice().sort(function(a, b){
+        const { _drawing: { heightIndexA, orderByHeightIndexA } } = a;
+        const { _drawing: { heightIndexB, orderByHeightIndexB } } = b;
+        if (heightIndexA !== heightIndexB){
+            // Bottom to top
+            return heightIndexB - heightIndexA;
+        }
+        // Right to left
+        return orderByHeightIndexA - orderByHeightIndexB;
+    });
+}

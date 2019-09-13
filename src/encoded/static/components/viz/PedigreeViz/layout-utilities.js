@@ -953,7 +953,6 @@ export function orderObjectGraph(objectGraph, memoized = {}){
     const leafChildren              = (memoized.getChildlessIndividuals || getChildlessIndividuals)(objectGraph);
     //const parentlessPartners        = (memoized.getParentlessPartners || getParentlessPartners)(objectGraph, memoized);
     //const leafSiblings              = (memoized.getChildlessSiblings || getChildlessSiblings)(objectGraph, memoized);
-    //const relationships             = (memoized.getRelationships || getRelationships)(objectGraph);
     const rootPermutations          = computePossibleParentlessPermutations(objectGraph, memoized);
     const leafPermutations          = computePossibleChildlessPermutations(objectGraph, memoized);
 
@@ -1019,10 +1018,14 @@ export function orderObjectGraph(objectGraph, memoized = {}){
     improveOrder(bestOrder, bestCrossings);
     heuristicallyAdjustOrder(bestOrder);
 
-    // Apply to objects
+    // Save final order to nodes so we don't need order object anymore
     const { seenOrderInIndex } = bestOrder;
     objectGraph.forEach(function(indv){
         indv._drawing.orderInHeightIndex = seenOrderInIndex[indv.id];
+    });
+    const relationships = (memoized.getRelationships || getRelationships)(objectGraph);
+    relationships.forEach(function(r){
+        r._drawing.orderInHeightIndex = seenOrderInIndex[r.id];
     });
 
     console.log("BEST ORDER2", bestOrder, bestCrossings, objectGraph);

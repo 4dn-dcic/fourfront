@@ -8,7 +8,11 @@ import {
     createObjectGraph, createRelationships, getRelationships
 } from './data-utilities';
 import { assignTreeHeightIndices, orderObjectGraph, positionObjectGraph } from './layout-utilities';
-import { getGraphHeight, getGraphWidth, createEdges, relationshipTopPosition, graphToDiseaseIndices } from './layout-utilities-drawing';
+import {
+    getGraphHeight, getGraphWidth,
+    createEdges, relationshipTopPosition,
+    graphToDiseaseIndices, orderNodesBottomRightToTopLeft
+} from './layout-utilities-drawing';
 import { IndividualsLayer, doesAncestorHaveId } from './IndividualsLayer';
 import { IndividualNodeShapeLayer } from './IndividualNodeShapeLayer';
 import { EdgesLayer } from './EdgesLayer';
@@ -306,6 +310,7 @@ class GraphTransformer extends React.PureComponent {
             findNodeWithId          : memoize(findNodeWithId),
             getFullDims             : memoize(getFullDims),
             getRelationships        : memoize(getRelationships),
+            orderNodesBottomRightToTopLeft : memoize(orderNodesBottomRightToTopLeft),
             graphToDiseaseIndices   : memoize(graphToDiseaseIndices)
         };
     }
@@ -455,6 +460,7 @@ export class PedigreeVizView extends React.PureComponent {
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
         const containerHeight = propHeight || graphHeight;
+        const orderedNodes = memoized.orderNodesBottomRightToTopLeft(objectGraph);
 
         const useContainerStyle = {
             //width: containerWidth,
@@ -469,7 +475,8 @@ export class PedigreeVizView extends React.PureComponent {
         };
 
         const commonChildProps = {
-            objectGraph, graphHeight, graphWidth, dims, memoized, diseaseToIndex,
+            objectGraph: orderedNodes,
+            graphHeight, graphWidth, dims, memoized, diseaseToIndex,
             containerHeight, containerWidth,
             'onNodeMouseIn' : this.handleNodeMouseIn,
             'onNodeMouseLeave' : this.handleNodeMouseLeave,

@@ -401,12 +401,10 @@ function UnderNodeText({ individual, width, height, shape, dims, diseaseToIndex 
             // Center text
             txtProps.textAnchor = "middle";
             txtProps.x = halfWidth;
-        } else {
-            // Left align text, but from midpoint
-            txtProps.x = halfWidth;
         }
         if (desc === "disease"){
-
+            // Left align text, but from midpoint
+            // txtProps.x = halfWidth;
         }
         return <text {...txtProps} key={desc}>{ content }</text>;
     });

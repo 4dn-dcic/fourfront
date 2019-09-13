@@ -259,6 +259,36 @@ $tabbar-height: 46px;
 }
 
 /*************************
+    Error Pane / MSG - todo maybe propagate to other error msgs.
+**************************/
+
+.item-page-container {
+	.error-boundary-container {
+		display: flex;
+		align-items: center;
+		height: calc(100vh - 135px);
+		.error-msg-container {
+			width: 100%;
+			border: 1px solid #6b0101;
+			color: #6b0101;
+			padding-top: 18px;
+			padding-bottom: 18px;
+			padding-left: 20px;
+			padding-right: 20px;
+			align-items: center;
+			> i.icon-times {
+				color: inherit;
+				width: 2.5rem;
+				font-size: 1.5rem;
+			}
+			> h4 {
+				color: inherit;
+			}
+		}
+	}
+}
+
+/*************************
     Alerts - Shown differently on ItemPages than others
 **************************/
 
