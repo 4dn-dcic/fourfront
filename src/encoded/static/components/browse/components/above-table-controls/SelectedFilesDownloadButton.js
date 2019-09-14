@@ -52,7 +52,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     return (
         <SelectedFilesDownloadButton selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
             id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={cls}>
-            <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
+            <i className="icon icon-download fas icon-fw mr-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
             <span className="d-none d-md-inline text-400"> Selected Files</span>
