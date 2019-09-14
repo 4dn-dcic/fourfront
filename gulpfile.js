@@ -64,7 +64,7 @@ function getLinkedSharedComponentsPath(){
         "`@hms-dbmi-bgm/shared-portal-components` directory is",
         isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
     );
-    return { isLinked, sharedComponentPath };
+    return { isLinked, sharedComponentPath : isLinked ? sharedComponentPath : null };
 }
 
 function buildSharedPortalComponents(done){
@@ -72,6 +72,7 @@ function buildSharedPortalComponents(done){
 
     if (!isLinked){ // Exit
         done();
+        return;
     }
 
     // Same as shared-portal-components own build method
@@ -95,6 +96,7 @@ function watchSharedPortalComponents(done){
 
     if (!isLinked){ // Exit
         done();
+        return;
     }
 
     // Same as shared-portal-components own build method, but with "--watch"

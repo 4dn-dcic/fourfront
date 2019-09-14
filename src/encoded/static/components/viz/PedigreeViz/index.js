@@ -180,6 +180,15 @@ export class PedigreeViz extends React.PureComponent {
         //"height" : null,
 
         /**
+         * Minimum height of parent container,
+         * if height is not set and want container to
+         * be at least a certain height.
+         *
+         * @optional
+         */
+        "minimumHeight" : 400,
+
+        /**
          * Width of parent container.
          * Will be scrollable left/right if greater than this.
          *
@@ -444,6 +453,7 @@ export class PedigreeVizView extends React.PureComponent {
         const {
             width: containerWidth,
             height: propHeight,
+            minimumHeight,
             objectGraph, dims, order, memoized,
             overlaysContainer, renderDetailPane, containerStyle,
             visibleDiseases = null,
@@ -464,13 +474,13 @@ export class PedigreeVizView extends React.PureComponent {
 
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
-        const containerHeight = propHeight || graphHeight;
+        const containerHeight = propHeight || Math.max(minimumHeight, graphHeight);
         const orderedNodes = memoized.orderNodesBottomRightToTopLeft(objectGraph);
 
         const useContainerStyle = {
             //width: containerWidth,
-            height: "auto",
-            minHeight : containerHeight || "none",
+            height: propHeight || "auto",
+            minHeight : containerHeight,
             ...containerStyle
         };
 

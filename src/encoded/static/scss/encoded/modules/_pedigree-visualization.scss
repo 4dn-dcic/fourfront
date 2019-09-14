@@ -345,147 +345,165 @@ $pedigree-disease-colors :
     }
 }
 
-.pedigree-viz-container {
+div#pedigree-viz-container-cgap {
 
-    @include media-breakpoint-up(md){
-        display: flex;
-        > .inner-container {
-            flex: 1;
-        }
-        > .detail-pane-container {
-            background-color: $pedigree-viz-bg-color;
-            transition: flex .3s, width .3s, background-color .2s;
-            &.has-selected-node {
-                background-color: #fff;
-                border-left-color: darken($pedigree-viz-bg-color, 10%) !important;
+    .pedigree-viz-container {
+
+        @include media-breakpoint-up(md){
+            display: flex;
+            > .inner-container {
+                flex: 1;
+            }
+            > .detail-pane-container {
+                background-color: $pedigree-viz-bg-color;
+                transition: flex .3s, width .3s, background-color .2s;
+                &.has-selected-node {
+                    background-color: #fff;
+                    border-left-color: darken($pedigree-viz-bg-color, 10%) !important;
+                }
             }
         }
-    }
 
-    @include visualization-detail-pane;
+        @include visualization-detail-pane;
 
-    .detail-pane-container {
+        .detail-pane-container {
 
-        .detail-pane-inner {
+            .detail-pane-inner {
 
-            > .title-box {
-                h3 {
-                    @include partner-links;
-                }
-
-                /*
-                i.icon.icon-times {
-                    font-size: 1.25rem;
-                    color: #777;
-                    padding-top: 7px;
-                    &:hover {
-                        color: #000;
+                > .title-box {
+                    h3 {
+                        @include partner-links;
                     }
-                }
-                */
 
-                .label-row {
-                    .buttons-col {
-                        a.edit-btn {
-                            color: #777;
-                            margin-right: 15px;
-                            &:hover {
-                                color: #111;
-                            }
+                    /*
+                    i.icon.icon-times {
+                        font-size: 1.25rem;
+                        color: #777;
+                        padding-top: 7px;
+                        &:hover {
+                            color: #000;
                         }
                     }
-                }
+                    */
 
-            }
-
-            > .details {
-                > .detail-row {
-
-                    &[data-describing="Ethnicity"] {
-                        .value {
-                            text-transform: capitalize;
-                        }
-                    }
-
-                    &[data-describing="phenotypic_features"],
-                    &.phenotypic-features {
-                        > .detail-row-list-item.phenotypic-feature {
-                            display: flex;
-                            align-items: center;
-                            > .legend-patch {
-                                display: block;
-                                height: 12px;
-                                width: 12px;
-                                flex: 0 0 12px;
-                                margin-right: 10px;
-                                border: 1px solid #555;
-                                @include pedigree-color-cycle-background;
-                                &[data-disease-index="-1"]{
-                                    border-color: transparent;
-                                    background-color: #f4f4f4;
-                                    height: 8px;
-                                    width: 8px;
-                                    flex: 0 0 8px;
-                                    margin-right: 12px;
-                                    margin-left: 2px;
-                                    border-radius: 2px;
+                    .label-row {
+                        .buttons-col {
+                            a.edit-btn {
+                                color: #777;
+                                margin-right: 15px;
+                                &:hover {
+                                    color: #111;
                                 }
                             }
-                            > .title {
-                                text-align: left;
-                                flex: 1;
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                            }
-                            > .onset {
-                                font-size: 0.9em;
-                            }
-                        }
-                    }
-
-                    &[data-describing="clinic_notes"] {
-                        textarea {
-                            width: 100%;
-                            width: calc(100% + 8px);
-                            min-height: 100px;
-                            min-height: 15vh;
-                            transition: min-height .25s;
-                            font-size: 0.925em;
-                            border: 1px solid #ccc;
-                            padding: 3px;
-                            margin-left: -4px;
-                            margin-right: -4px;
-                            &:focus,
-                            &.has-changed {
-                                min-height: 180px;
-                                min-height: 20vh;
-                                border-color: #333;
-                            }
-                        }
-                        p.read-only-notes {
-                            margin-bottom: 0;
-                            font-size: 0.925em;
-                            white-space: pre-wrap;
-                            text-overflow: ellipsis;
-                            overflow-x: hidden;
-                            padding: 4px 0;
-                        }
-                        .save-btn-container {
-                            text-align: right;
-                        }
-                    }
-
-                    &[data-describing="parents"],
-                    &[data-describing="children"] {
-                        .partners-links {
-                            @include partner-links;
                         }
                     }
 
                 }
+
+                > .details {
+                    > .detail-row {
+
+                        &[data-describing="Ethnicity"] {
+                            .value {
+                                text-transform: capitalize;
+                            }
+                        }
+
+                        &[data-describing="phenotypic_features"],
+                        &.phenotypic-features {
+                            > .detail-row-list-item.phenotypic-feature {
+                                display: flex;
+                                align-items: center;
+                                > .legend-patch {
+                                    display: block;
+                                    height: 12px;
+                                    width: 12px;
+                                    flex: 0 0 12px;
+                                    margin-right: 10px;
+                                    border: 1px solid #555;
+                                    @include pedigree-color-cycle-background;
+                                    &[data-disease-index="-1"]{
+                                        border-color: transparent;
+                                        background-color: #f4f4f4;
+                                        height: 8px;
+                                        width: 8px;
+                                        flex: 0 0 8px;
+                                        margin-right: 12px;
+                                        margin-left: 2px;
+                                        border-radius: 2px;
+                                    }
+                                }
+                                > .title {
+                                    text-align: left;
+                                    flex: 1;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+                                > .onset {
+                                    font-size: 0.9em;
+                                }
+                            }
+                        }
+
+                        &[data-describing="clinic_notes"] {
+                            textarea {
+                                width: 100%;
+                                width: calc(100% + 8px);
+                                min-height: 100px;
+                                min-height: 15vh;
+                                transition: min-height .25s;
+                                font-size: 0.925em;
+                                border: 1px solid #ccc;
+                                padding: 3px;
+                                margin-left: -4px;
+                                margin-right: -4px;
+                                &:focus,
+                                &.has-changed {
+                                    min-height: 180px;
+                                    min-height: 20vh;
+                                    border-color: #333;
+                                }
+                            }
+                            p.read-only-notes {
+                                margin-bottom: 0;
+                                font-size: 0.925em;
+                                white-space: pre-wrap;
+                                text-overflow: ellipsis;
+                                overflow-x: hidden;
+                                padding: 4px 0;
+                            }
+                            .save-btn-container {
+                                text-align: right;
+                            }
+                        }
+
+                        &[data-describing="parents"],
+                        &[data-describing="children"] {
+                            .partners-links {
+                                @include partner-links;
+                            }
+                        }
+
+                    }
+                }
             }
+
         }
 
     }
 
+}
+
+/** CGAP-specific full screen view styling **/
+
+div#pedigree-viz-container-cgap.view-is-full-screen {
+    .pedigree-viz-container {
+        @include media-breakpoint-up(md){
+            > .detail-pane-container {
+                .detail-pane-inner {
+                    top: 0px;
+                }
+            }
+        }
+    }
 }
