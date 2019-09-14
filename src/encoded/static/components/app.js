@@ -1781,7 +1781,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="slow-load-container" className={slowLoad ? 'visible' : null}>
                     <div className="inner">
-                        <i className="icon icon-circle-o-notch fas"/>
+                        <i className="icon icon-circle-notch fas"/>
                     </div>
                 </div>
 

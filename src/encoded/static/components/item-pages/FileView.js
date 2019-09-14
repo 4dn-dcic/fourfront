@@ -99,7 +99,7 @@ class FileViewOverview extends React.PureComponent {
 
     static getTabObject({ context, schemas, windowWidth, href }, width){
         return {
-            'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
             'key' : 'file-overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (

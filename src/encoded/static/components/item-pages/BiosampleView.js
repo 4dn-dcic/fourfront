@@ -91,7 +91,7 @@ class BiosampleViewOverview extends React.PureComponent {
 
     static getTabObject({ context, schemas, windowWidth }, width){
         return {
-            'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
             'key' : 'overview',
             'content' : (
                 <div className="overflow-hidden">

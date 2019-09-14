@@ -130,7 +130,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
      */
     static getTabObject(props, width){
         return {
-            'tab' : <span><i className="icon icon-file-text far icon-fw"/> Experiment Sets</span>,
+            'tab' : <span><i className="icon icon-file-alt far icon-fw"/> Experiment Sets</span>,
             'key' : 'expsets-table',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (

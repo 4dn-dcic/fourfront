@@ -125,7 +125,7 @@ body .rc-tabs-top {
 				margin-right: 3px;
 				vertical-align: middle;
 
-				&.icon-warning {
+				&.icon-exclamation-triangle {
 					color: $badge-color-warning;
 				}
 
@@ -1911,7 +1911,7 @@ $badge-item-min-height: 90px;
 			.icon-exclamation-circle {
 				color : $badge-color-error;
 			}
-			.icon-warning {
+			.icon-exclamation-triangle {
 				color : $badge-color-warning;
 			}
 			.icon-check {

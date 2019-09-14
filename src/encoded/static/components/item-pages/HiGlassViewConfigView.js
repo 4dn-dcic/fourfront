@@ -48,7 +48,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     static getTabObject(props, width){
         return {
-            'tab' : <span><i className="icon icon-fw icon-television fas"/> HiGlass Browser</span>,
+            'tab' : <span><i className="icon icon-fw icon-tv fas"/> HiGlass Browser</span>,
             'key' : 'higlass',
             'disabled' : false,
             'content' : <HiGlassViewConfigTabView {...props} width={width} />

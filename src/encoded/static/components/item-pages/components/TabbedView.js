@@ -22,14 +22,14 @@ export function getIconForCustomTab(tabName){
         case 'overview':
         case 'experiment-summaries':
         case 'experiment_summaries':
-            return 'file-text';
+            return 'file-alt';
         case 'data_processing':
-            return 'area-chart';
+            return 'area-chart fas';
         case 'processed_files':
-            return 'microchip';
+            return 'microchip fas';
         case 'higlass':
         case 'higlass_displays':
-            return 'television';
+            return 'tv fas';
         default:
             return null;
     }

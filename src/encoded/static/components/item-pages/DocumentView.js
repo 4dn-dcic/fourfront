@@ -30,7 +30,7 @@ const DocumentViewOverview = React.memo(function DocumentViewOverview({ context,
 });
 DocumentViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon far icon-file-text icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon far icon-file-alt icon-fw"/> Overview</span>,
         'key' : 'document-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

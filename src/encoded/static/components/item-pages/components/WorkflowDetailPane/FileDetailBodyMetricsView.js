@@ -85,7 +85,7 @@ function MetricsViewItemIcon({ resultStr = "UNKNOWN", extraIconClassName = "" })
         case 'PASS':
             return <i className={"icon fas icon-check " + extraIconClassName} data-tip={resultStr} />;
         case 'WARN':
-            return <i className={"icon fas icon-warning " + extraIconClassName} data-tip={resultStr} />;
+            return <i className={"icon fas icon-exclamation-triangle " + extraIconClassName} data-tip={resultStr} />;
         case 'ERROR':
             return <i className={"icon fas icon-exclamation-circle " + extraIconClassName} data-tip={resultStr} />;
         default:

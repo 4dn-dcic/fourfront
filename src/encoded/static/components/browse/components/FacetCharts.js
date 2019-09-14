@@ -231,7 +231,7 @@ export class FacetCharts extends React.PureComponent {
         if (!mounted){
             return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
                 <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height }}>
-                    <i className="icon icon-spin icon-circle-o-notch fas" style={{ 'top' : (height / 2 - 30) + 'px' }} />
+                    <i className="icon icon-spin icon-circle-notch fas" style={{ 'top' : (height / 2 - 30) + 'px' }} />
                 </div>
             );
         }

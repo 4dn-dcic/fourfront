@@ -125,7 +125,7 @@ export class WorkflowNodeElement extends React.PureComponent {
                 } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
                     iconClass = 'wrench fas';
                 } else if (WorkflowNodeElement.isNodeFile(node)){
-                    iconClass = 'file-text far';
+                    iconClass = 'file-alt far';
                 } else {
                     iconClass = 'question fas';
                 }
@@ -134,7 +134,7 @@ export class WorkflowNodeElement extends React.PureComponent {
                     ioType[0] === 'File' ||
                     (ioType[0] === 'null' && ioType[1] === 'File')
                 ){
-                    iconClass = 'file-text far';
+                    iconClass = 'file-alt far';
                 } else if (
                     (ioType[0] === 'int' || ioType[0] === 'string') ||
                     (ioType[0] === 'null' && (ioType[1] === 'int' || ioType[1] === 'string'))

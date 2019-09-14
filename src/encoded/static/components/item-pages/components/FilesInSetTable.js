@@ -106,7 +106,7 @@ export const FileItemRow = React.memo(function FileItemRow(props){
                 </a>
                 <a href={attachmentDownloadHref} download disabled={!attachmentDownloadHref}
                     className={"btn btn-sm btn-outline-dark button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}>
-                    <i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>
+                    <i className={"icon icon-" + (attachmentIconClass || 'file far')}/>
                 </a>
             </div>
 
@@ -253,7 +253,7 @@ export class FilesInSetTable extends React.PureComponent {
             fileType.indexOf('txt') > -1 ||
             fileType.indexOf('tex') > -1
         ){
-            return 'file-text far';
+            return 'file-alt far';
         } else if (
             fileType.indexOf('xls') > -1 ||
             fileType.indexOf('csv') > -1 ||

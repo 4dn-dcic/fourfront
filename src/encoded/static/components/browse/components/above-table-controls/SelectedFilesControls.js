@@ -94,7 +94,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         const isAllSelected = this.isAllSelected();
         const isEnabled = this.isEnabled();
         const iconClassName = (
-            "mr-05 icon icon-fw icon-" + (selecting ? 'circle-o-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
+            "mr-05 icon icon-fw icon-" + (selecting ? 'circle-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
         );
         const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
 

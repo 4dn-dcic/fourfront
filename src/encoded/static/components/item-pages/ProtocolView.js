@@ -38,7 +38,7 @@ const ProtocolViewOverview = React.memo(function ProtocolViewOverview({ context,
 });
 ProtocolViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
         'key' : 'protocol-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

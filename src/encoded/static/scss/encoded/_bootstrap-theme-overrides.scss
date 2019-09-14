@@ -128,21 +128,7 @@
     }
 }
 
-/** Adding Bootstrap 4 CSS button 'Outline' styles **/
-/** Copied from https://v4-alpha.getbootstrap.com/components/buttons/ **/
-
-.btn-outline-primary,
-.btn-outline-secondary,
-.btn-outline-default,
-.btn-outline-success,
-.btn-outline-info,
-.btn-outline-warning,
-.btn-outline-danger,
-.btn-outline-dark,
-.btn-outline-white {
-    background-image: none;
-    background-color: transparent;
-}
+/** Extend btn styles with some extra ones **/
 
 .btn-outline-primary-light {
     @include button-outline-variant($brand-primary, $brand-primary);

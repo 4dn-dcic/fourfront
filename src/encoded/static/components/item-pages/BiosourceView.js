@@ -49,7 +49,7 @@ const BiosourceViewOverview = React.memo(function BiosourceViewOverview({ contex
  */
 BiosourceViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
         'key' : 'biosource-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

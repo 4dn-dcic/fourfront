@@ -205,7 +205,7 @@ ExperimentSetsViewOverview.propTypes = {
 };
 ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWidth }, width){
     return {
-        'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Experiment Sets</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Experiment Sets</span>,
         'key' : 'experiments-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

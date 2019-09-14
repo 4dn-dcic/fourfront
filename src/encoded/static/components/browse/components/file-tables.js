@@ -88,7 +88,7 @@ class FileColumnActionsBtn extends React.PureComponent {
                 <div className="in-stacked-table-button-container" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
                     <button type="button" className="btn btn-xs btn-primary in-stacked-table-button"
                         data-tip="Visualize with HiGlass" onClick={onClick}>
-                        <i className="icon icon-fw icon-television fas"/>
+                        <i className="icon icon-fw icon-tv fas"/>
                     </button>
                 </div>
             );
@@ -168,7 +168,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         if (hasJBOrEpigenomeBtn){
             return (
                 <DropdownButton className="in-stacked-table-button-container" variant="primary" data-tip="Visualize this file..."
-                    data-place="right" title={<i className="icon icon-fw icon-television fas"/>} drop="up" size="xs">
+                    data-place="right" title={<i className="icon icon-fw icon-tv fas"/>} drop="up" size="xs">
                     { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
                 </DropdownButton>
             );
@@ -264,7 +264,7 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
     return (
         <a className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
             href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
-            <i className="icon icon-fw icon-file-text far" />
+            <i className="icon icon-fw icon-file-alt far" />
         </a>
     );
 }

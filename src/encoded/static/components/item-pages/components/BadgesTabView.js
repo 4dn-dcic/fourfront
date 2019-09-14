@@ -239,7 +239,7 @@ class SummaryIcon extends React.PureComponent {
                 const tooltip = countWarnings + " Warning" + (countWarnings > 1 ? "s" : "");
                 return (
                     <span className="active">
-                        <i className="icon icon-fw icon-warning fas" data-tip={tooltip}/>
+                        <i className="icon icon-fw icon-exclamation-triangle fas" data-tip={tooltip}/>
                     </span>
                 );
             }

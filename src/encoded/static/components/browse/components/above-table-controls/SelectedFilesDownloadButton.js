@@ -249,7 +249,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
             <button type="submit" name="Download" className="btn btn-primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                <i className="icon icon-fw icon-file-text fas"/>&nbsp; Download metadata for files
+                <i className="icon icon-fw icon-file-alt fas"/>&nbsp; Download metadata for files
             </button>
         </form>
     );

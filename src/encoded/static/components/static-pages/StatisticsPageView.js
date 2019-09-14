@@ -831,15 +831,15 @@ class UsageChartsCountByDropdown extends React.PureComponent {
         if (chartID === 'experiment_set_views' || chartID === 'file_views'){
             menuOptions.set('views',        <React.Fragment><i className="icon fas icon-fw icon-eye mr-05"/>Detail View</React.Fragment>);
             menuOptions.set('list_views',   <React.Fragment><i className="icon fas icon-fw icon-list mr-05"/>Appearance within first 25 Search Results</React.Fragment>);
-            menuOptions.set('clicks',       <React.Fragment><i className="icon fas icon-fw icon-hand-o-up mr-05"/>Search Result Click</React.Fragment>);
+            menuOptions.set('clicks',       <React.Fragment><i className="icon far icon-fw icon-hand-point-up mr-05"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            menuOptions.set('download_tracking.experiment_type', <React.Fragment><i className="icon fas icon-fw icon-folder-o mr-05"/>Experiment Type</React.Fragment>);
+            menuOptions.set('download_tracking.experiment_type', <React.Fragment><i className="icon far icon-fw icon-folder mr-05"/>Experiment Type</React.Fragment>);
             menuOptions.set('download_tracking.geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-05"/>Country</React.Fragment>);
             if (includePartialRequests){
                 // No point showing if not included. @see getDerivedStateFromProps which unsets this value if set previously.
-                menuOptions.set('download_tracking.range_query', <React.Fragment><i className="icon fas icon-fw icon-television mr-05"/>Downloads as part of visualization</React.Fragment>);
+                menuOptions.set('download_tracking.range_query', <React.Fragment><i className="icon fas icon-fw icon-tv mr-05"/>Downloads as part of visualization</React.Fragment>);
             }
-            menuOptions.set('download_tracking.file_format',     <React.Fragment><i className="icon far icon-fw icon-file-text mr-05"/>File Format</React.Fragment>);
+            menuOptions.set('download_tracking.file_format',     <React.Fragment><i className="icon far icon-fw icon-file-alt mr-05"/>File Format</React.Fragment>);
         } else {
             menuOptions.set('views',    <React.Fragment><i className="icon icon-fw fas icon-eye mr-05"/>View</React.Fragment>);
             menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw fas icon-user mr-05"/>User Session</React.Fragment>);

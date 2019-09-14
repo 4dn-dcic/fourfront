@@ -92,7 +92,7 @@ const ExperimentTypeViewOverview = React.memo(function ExperimentTypeViewOvervie
 });
 ExperimentTypeViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
         'key' : 'overview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (
