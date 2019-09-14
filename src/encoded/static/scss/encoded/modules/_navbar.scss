@@ -239,7 +239,7 @@ div#top-nav.navbar-fixed-top {
                     text-shadow: 0 0 0 #000;
                     &:after {
                         content: "\f105";
-                        font-family: FontAwesome;
+                        font-family: $fa-font-family;
                         margin-left: 12px;
                         font-size: 1.25rem;
                         line-height: inherit;
@@ -799,7 +799,7 @@ div#top-nav.navbar-fixed-top {
 							color: #fff;
 							&:after {
 								content: "\f105";
-								font-family: FontAwesome;
+								font-family: $fa-font-family;
 								opacity: 0;
 								margin-left: 5px;
 							}
@@ -874,7 +874,7 @@ div#top-nav.navbar-fixed-top {
 								text-decoration: none;
 								background-color: #484848;
 								&:before {
-									font-family: "FontAwesome";
+									font-family: $fa-font-family;
 									content: "\f105";
 									position: absolute;
 									left: 0px;

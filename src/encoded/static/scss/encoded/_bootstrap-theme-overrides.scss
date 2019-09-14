@@ -53,14 +53,6 @@
 	border-radius: 11px;
 }
 
-
-.btn.btn-sm {
-    /* increased from 0.25rem */
-    // padding-top: 0.275rem;
-    padding-top: 0.3rem;
-    //padding-bottom: 0.2rem;
-}
-
 .btn.btn-primary-dark {
     @include button-variant($brand-primary-dark, $brand-primary-dark);
 }

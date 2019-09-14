@@ -239,7 +239,7 @@
                 &:after {
                     //content: '\f105';
                     content: '';
-                    //font-family: FontAwesome;
+                    //font-family: $fa-font-family;
                     position: absolute;
                     transform: rotateZ(45deg);
                     height: 18px;

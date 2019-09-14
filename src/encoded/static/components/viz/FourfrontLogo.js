@@ -169,10 +169,10 @@ export class FourfrontLogo extends React.PureComponent {
                 <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={FourfrontLogo.svgElemStyle}>
                     { this.renderDefs() }
                     <path d={circlePathDefinitionOrig} style={FourfrontLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
-                    <text transform={textTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgTextStyleOut, FourfrontLogo.svgTextStyleIn) : FourfrontLogo.svgTextStyleOut} ref={this.fgTextRef}>
+                    <text transform={textTransformOrig} style={hover ? { ...FourfrontLogo.svgTextStyleOut, ...FourfrontLogo.svgTextStyleIn } : FourfrontLogo.svgTextStyleOut} ref={this.fgTextRef}>
                         4DN
                     </text>
-                    <text transform={fgCircleTransformOrig} style={hover ? _.extend({}, FourfrontLogo.svgInnerCircleStyleOut, FourfrontLogo.svgInnerCircleStyleIn) : FourfrontLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
+                    <text transform={fgCircleTransformOrig} style={hover ? { ...FourfrontLogo.svgInnerCircleStyleOut, ...FourfrontLogo.svgInnerCircleStyleIn } : FourfrontLogo.svgInnerCircleStyleOut} ref={this.fgCircleRef}>
                         O
                     </text>
                 </svg>
