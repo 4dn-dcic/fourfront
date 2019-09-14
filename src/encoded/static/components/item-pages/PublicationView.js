@@ -48,7 +48,7 @@ class PublicationSummary extends React.PureComponent {
      */
     static getTabObject(props, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
             'key' : 'overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (

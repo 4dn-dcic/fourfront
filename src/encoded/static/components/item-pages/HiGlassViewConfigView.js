@@ -48,7 +48,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     static getTabObject(props, width){
         return {
-            'tab' : <span><i className="icon icon-fw icon-television"/> HiGlass Browser</span>,
+            'tab' : <span><i className="icon icon-fw icon-television fas"/> HiGlass Browser</span>,
             'key' : 'higlass',
             'disabled' : false,
             'content' : <HiGlassViewConfigTabView {...props} width={width} />
@@ -550,7 +550,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
             'title'         : (
                 <React.Fragment>
-                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-o-notch icon-spin' : 'id-badge')}/>&nbsp; Manage
+                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-notch fas icon-spin' : 'id-badge far')}/>&nbsp; Manage
                 </React.Fragment>
             ),
             'pullRight'     : true
@@ -581,7 +581,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         return (
             <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
-                <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-o-notch icon-spin' : 'save')}/>&nbsp; Save
+                <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-notch icon-spin fas' : 'save fas')}/>&nbsp; Save
             </button>
         );
     }
@@ -593,7 +593,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         return (
             <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
-                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-o-notch icon-spin' : 'clone')}/>&nbsp; Clone
+                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Clone
             </button>
         );
     }
@@ -604,7 +604,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const isMobile = gridState !== 'lg' && gridState !== 'xl';
         return (
             <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button" value={href}>
-                <i className="icon icon-fw icon-copy"/>
+                <i className="icon icon-fw icon-copy far"/>
                 { isMobile ?
                     <React.Fragment>
                         &nbsp;&nbsp; Copy URL
@@ -629,7 +629,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
                 <button type="button" className="btn btn-outline-dark" onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
+                    <i className={"icon icon-fw fas icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </button>
             );
         }
@@ -639,7 +639,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     collapseButtonTitle(isOpen){
         return (
             <span>
-                <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
+                <i className={"icon icon-fw fas icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
             </span>
         );
     }
@@ -686,7 +686,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={viewConfig}
                             ref={this.higlassRef} />
                     </div>
-                    { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>
                 { modal }
             </div>
@@ -751,7 +750,7 @@ class AddFileButton extends React.PureComponent {
             <React.Fragment>
                 <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}
                     {..._.pick(this.props, 'className', 'style')}>
-                    <i className={"icon icon-fw icon-" + (loading ? 'circle-o-notch icon-spin' : 'plus')}/>&nbsp; Add Data
+                    <i className={"icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>&nbsp; Add Data
                 </Button>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
             </React.Fragment>
@@ -804,7 +803,7 @@ class CollapsibleViewConfOutput extends React.PureComponent {
             <div className="viewconfig-panel">
                 <hr/>
                 <h4 className="clickable inline-block text-400" onClick={this.toggle}>
-                    <i className={"icon icon-fw icon-" + (open ? 'minus' : 'plus' )} />&nbsp;&nbsp;
+                    <i className={"icon icon-fw fas icon-" + (open ? 'minus' : 'plus' )} />&nbsp;&nbsp;
                     { open ? 'Close' : 'View' } Configuration
                 </h4>
                 <Collapse in={open}>
@@ -820,7 +819,7 @@ class CollapsibleViewConfOutput extends React.PureComponent {
  * TODO: this component can be moved to another file for generic use in portal.
  */
 export const ConfirmModal = React.memo(function (props) {
-    const { handleConfirm, handleCancel, modalTitle, confirmButtonText, cancelButtonText } = props;
+    const { handleConfirm, handleCancel, modalTitle, confirmButtonText = "OK", cancelButtonText = "Cancel" } = props;
     return (
         <Modal show onHide={handleCancel}>
             <Modal.Header closeButton>
@@ -831,10 +830,10 @@ export const ConfirmModal = React.memo(function (props) {
             </Modal.Body>
             <Modal.Footer>
                 <button type="button" onClick={handleConfirm} className="btn btn-success">
-                    <i className="icon icon-fw icon-check mr-08" />{confirmButtonText || 'OK'}
+                    <i className="icon icon-fw icon-check mr-05 fas" />{ confirmButtonText || 'OK' }
                 </button>
                 <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
-                    <i className="icon icon-fw icon-times mr-08" />{cancelButtonText || 'Cancel'}
+                    <i className="icon icon-fw icon-times mr-05 fas" />{ cancelButtonText || 'Cancel' }
                 </button>
             </Modal.Footer>
         </Modal>);

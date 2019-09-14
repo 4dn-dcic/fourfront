@@ -59,14 +59,14 @@ const LabIcon = React.memo(function LabIcon(props){
         console.error("We need lab with @id.");
         return (
             <span className="lab-icon no-lab">
-                <i className="icon icon-users"/>
+                <i className="icon icon-users fas"/>
             </span>
         );
     }
     return (
         <a href={atId} className="lab-icon inline-block" data-tip={lab.display_title}
             onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-            <i className="icon icon-users"/>
+            <i className="icon icon-users fas"/>
         </a>
     );
 });
@@ -167,7 +167,7 @@ export const Small = React.memo(function Small({ files }){
                             </div>
                             <div className="col-12 col-md-2 text-right download-button">
                                 <a className="btn btn-sm btn-primary" href={downloadHref} download disabled={!downloadHref}>
-                                    <i className="icon icon-download"/>
+                                    <i className="icon fas icon-download"/>
                                 </a>
                             </div>
                         </div>
@@ -193,7 +193,7 @@ export class FilesInSetTable extends React.PureComponent {
     static getTabObject(context, title, schemas = null){
         title = title || 'Files in Set';
         return {
-            tab : <span><i className="icon icon-list-ul icon-fw"/> { title }</span>,
+            tab : <span><i className="icon icon-list-ul fas icon-fw"/> { title }</span>,
             key : 'files_in_set',
             content : (
                 <div className="overflow-hidden">
@@ -241,25 +241,25 @@ export class FilesInSetTable extends React.PureComponent {
      * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
      */
     static iconClassFromFileType(fileType){
-        if (typeof fileType !== 'string') return 'file-o';
+        if (typeof fileType !== 'string') return 'file far';
         fileType = fileType.toLowerCase();
         if (fileType.indexOf('zip') > -1){
-            return 'file-zip-o';
+            return 'file-zip far';
         } else if ( fileType.indexOf('pdf') > -1 ){
-            return 'file-pdf-o';
+            return 'file-pdf far';
         } else if ( fileType.indexOf('doc') > -1 ){
-            return 'file-word-o';
+            return 'file-word far';
         } else if (
             fileType.indexOf('txt') > -1 ||
             fileType.indexOf('tex') > -1
         ){
-            return 'file-text-o';
+            return 'file-text far';
         } else if (
             fileType.indexOf('xls') > -1 ||
             fileType.indexOf('csv') > -1 ||
             fileType.indexOf('tsv') > -1
         ){
-            return 'file-excel-o';
+            return 'file-excel far';
         } else if (
             fileType.indexOf('png') > -1 ||
             fileType.indexOf('tiff') > -1 ||
@@ -267,9 +267,9 @@ export class FilesInSetTable extends React.PureComponent {
             fileType.indexOf('jpeg') > -1 ||
             fileType.indexOf('svg') > -1
         ){
-            return 'file-picture-o';
+            return 'file-picture far';
         } else {
-            return 'file-o';
+            return 'file far';
         }
     }
 

@@ -60,7 +60,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
                 <button type="button" onClick={onToggleFullScreenView} key="full-screen-btn"
                     className="btn btn-outline-dark for-state-fullscreenViewEnabled"
                     data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
+                    <i className={"icon icon-fw fas icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </button>
             );
         }
@@ -164,7 +164,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         return (
             <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns}
                 disabled={isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
-                { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                { loading ? <i className="icon icon-spin icon-fw fas icon-circle-notch mr-03"/> : '' } Collapse Similar Runs
             </Checkbox>
         );
     }

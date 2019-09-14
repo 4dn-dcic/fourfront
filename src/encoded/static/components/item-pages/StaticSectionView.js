@@ -49,7 +49,7 @@ const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ 
 });
 StaticSectionViewPreview.getTabObject = function({ context, windowWidth }){
     return {
-        'tab' : <span><i className="icon icon-image icon-fw"/> Preview</span>,
+        'tab' : <span><i className="icon icon-image far icon-fw"/> Preview</span>,
         'key' : 'preview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

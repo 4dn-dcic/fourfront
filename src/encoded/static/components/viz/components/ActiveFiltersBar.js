@@ -112,7 +112,7 @@ const RegularCrumb = React.memo(function RegularCrumb(props){
                     'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
                 });
             }}>
-                <i className="icon icon-times"/>
+                <i className="icon icon-times fas"/>
             </span>
         </span>
     );

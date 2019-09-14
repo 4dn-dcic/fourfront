@@ -9,19 +9,23 @@
 
 .btn {
     font-weight: 500;
-    /* @include box-shadow(0 1px 3px rgba(0,0,0,.1), inset 0 -2px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.3)); */
-    //@include box-shadow(0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 4px rgba(0,0,0,0.2),inset 0 1px 4px rgba(255,255,255,0.3));
+
+    &:not(.btn-sm):not(.btn-xs):not(.btn-lg) {
+        // overrides .375rem to better center text & icons
+        padding-top: .4rem;
+    }
 
     > i.icon {
-        transform: translate3d(0, 1.5px, 0);
+        // transform: translate3d(0, 1.5px, 0);
+        vertical-align: middle;
     }
 }
 
 .btn.btn-lg {
-    > i.icon {
-        transform: translate3d(0, 2px, 0);
-        transform: translate3d(0, 1.75px, 0);
-    }
+    // > i.icon {
+    //    transform: translate3d(0, 2px, 0);
+    //    transform: translate3d(0, 1.75px, 0);
+    //}
 }
 
 /** Overrides for own styled btns **/
@@ -35,6 +39,7 @@
     > i.icon {
         // Unset btn style
         transform: none;
+        vertical-align: baseline;
     }
 }
 

@@ -459,7 +459,7 @@ export class StaticPageBreadcrumbs extends React.Component {
         }
         return (
             <div className="static-breadcrumb" data-name={ancestor.name} key={ancestor['@id']}>
-                { index > 0 ? <i className="icon icon-fw icon-angle-right"/> : null }
+                { index > 0 ? <i className="icon icon-fw icon-angle-right fas"/> : null }
                 { inner }
             </div>
         );
@@ -479,7 +479,7 @@ export class StaticPageBreadcrumbs extends React.Component {
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
-                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
+                            <i className="icon icon-fw icon-pencil fas"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
                 }

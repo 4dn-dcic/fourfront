@@ -91,11 +91,16 @@ class AnnouncementsLoaded extends React.PureComponent {
     }
 
     render (){
-        if (Array.isArray(this.state.announcements)){
-            return <Announcements {...this.props} loaded={false} announcements={this.state.announcements} total={this.state.totalCount} />;
+        const { announcements, totalCount, mounted, loading } = this.state;
+        if (Array.isArray(announcements)){
+            return <Announcements {...this.props} loaded={false} announcements={announcements} total={totalCount} />;
         }
-        if (this.state.loading || !this.state.mounted){
-            return <h4 className="text-center mb-5" style={{ 'opacity' : 0.5 }}><i className="icon icon-spin icon-circle-o-notch"/></h4>;
+        if (loading || !mounted){
+            return (
+                <h4 className="text-center mb-5" style={{ 'opacity' : 0.5 }}>
+                    <i className="icon icon-spin icon-circle-notch fas"/>
+                </h4>
+            );
         }
         return <Announcements loaded={false} announcements={[]} total={0} />;
     }

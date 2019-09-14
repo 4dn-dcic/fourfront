@@ -64,12 +64,12 @@ export class HomePageCarousel extends React.PureComponent {
             //'renderCenterRightControls' : null,
             'renderCenterLeftControls' : function({ previousSlide, currentSlide }){
                 if (currentSlide === 0) return null;
-                return <i className="icon icon-fw icon-angle-left" onClick={previousSlide} />;
+                return <i className="icon icon-fw fas icon-angle-left" onClick={previousSlide} />;
             },
             'renderCenterRightControls' : function(sliderProps){
                 var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
                 if (currentSlide >= slideCount - slidesToShow) return null;
-                return <i className="icon icon-fw icon-angle-right" onClick={nextSlide} />;
+                return <i className="icon icon-fw fas icon-angle-right" onClick={nextSlide} />;
             },
             'renderBottomCenterControls' : null,
             'autoGenerateStyleTag' : false,

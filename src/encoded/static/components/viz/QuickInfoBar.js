@@ -190,7 +190,7 @@ export default class QuickInfoBar extends React.PureComponent {
                     <ActiveFiltersBar expSetFilters={expSetFilters} orderedFieldNames={null}
                         href={href} showTitle={false} schemas={schemas} context={context} />
                     <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
-                        <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
+                        <i className="icon icon-pie-chart fas" style={{ opacity : 0.05 }} />
                     </div>
                 </div>
             );
@@ -265,7 +265,7 @@ const StatsCol = React.memo(function StatsCol(props){
             <Stat {...statProps} shortLabel="Files" longLabel="Files in Experiments" classNameID="files" value={stats.files} key="files" />
             <div className={"any-filters glance-label" + (show ? " showing" : "")} data-tip={anyFiltersSet ? "Filtered" : "No Filters Set"}
                 onMouseEnter={onIconMouseEnter}>
-                <i className="icon icon-filter" style={{ 'opacity' : anyFiltersSet ? 1 : 0.25 }} />
+                <i className="icon icon-filter fas" style={{ 'opacity' : anyFiltersSet ? 1 : 0.25 }} />
             </div>
         </div>
     );
@@ -328,7 +328,7 @@ class Stat extends React.PureComponent {
         return (
             <div className={"stat stat-" + classNameID} title={longLabel}>
                 <div id={id + '-stat-' + classNameID} className={"stat-value" + (isLoadingChartData ? ' loading' : '')}>
-                    { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-o-notch" style={{ opacity : 0.25 }}/> : value }
+                    { isLoadingChartData ? <i className="icon icon-fw icon-spin icon-circle-notch fas" style={{ opacity : 0.25 }}/> : value }
                 </div>
                 <div className="stat-label">
                     { this.label() }

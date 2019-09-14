@@ -246,7 +246,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     'left' : 0, 'right' : 0, 'bottom' : 0, 'top' : 0
                 }}>
                     <div className="text-center" style={{ 'width' : '100%' }}>
-                        <i className="icon icon-spin icon-circle-o-notch"/>
+                        <i className="icon icon-spin icon-circle-notch fas"/>
                     </div>
                 </div>
             );
@@ -254,7 +254,7 @@ export default class UserRegistrationForm extends React.PureComponent {
             errorIndicator = (
                 <div className="alert alert-success" role="alert">
                     <span className="text-500">
-                        <i className="icon icon-fw icon-circle-o-notch"/>&nbsp;&nbsp;{' '}
+                        <i className="icon icon-fw fas icon-circle-notch"/>&nbsp;&nbsp;{' '}
                         Registered account, logging in...
                     </span>
                 </div>
@@ -410,7 +410,7 @@ class LookupLabField extends React.PureComponent {
                         rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                         { currentLabDetails.display_title }
                     </a>
-                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small"/>
+                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link fas text-small"/>
                 </div>
             )
         ) || (

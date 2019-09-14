@@ -99,13 +99,13 @@ function XAxis(props){
                 { prefixContent }
                 { yAxisTitle ?
                     <div className="matrix-y-axis-title">
-                        {/*<div><small className="text-300">Row<i className="icon icon-arrow-down"/></small></div>*/}
+                        {/*<div><small className="text-300">Row<i className="icon icon-arrow-down fas"/></small></div>*/}
                         { yAxisTitle }
                     </div>
                     : null }
                 { showXAxisTitle && xAxisTitle ?
                     <div className="matrix-x-axis-title text-right">
-                        <div><small className="text-300">Column<i className="icon icon-arrow-right"/></small></div>
+                        <div><small className="text-300">Column<i className="icon icon-arrow-right fas"/></small></div>
                         { xAxisTitle }
                     </div>
                     : null }
@@ -218,7 +218,7 @@ export class MatrixContainer extends React.PureComponent {
         var totalHeight = xLabelsHeight + (grid.length * this.cellSize());
         return (
             <Fade in appear>
-				<div className="matrix-view-container-wrapper" style={{ minHeight : totalHeight }}>
+                <div className="matrix-view-container-wrapper" style={{ minHeight : totalHeight }}>
                     { this.body() }
                 </div>
             </Fade>
@@ -290,7 +290,7 @@ export default class MatrixView extends React.PureComponent {
                     maxValue={maxValue || MatrixView.findGreatestValueInGrid(grid)}
                     showXAxisTitle={showXAxisTitle}
                 />
-                <ReactTooltip id="matrix-tooltip" class='matrix-tooltip' delayHide={0} effect='solid' offset={{ 'top' : -15, 'left' : 0 }} globalEventOff='click'/>
+                <ReactTooltip id="matrix-tooltip" class="matrix-tooltip" delayHide={0} effect="solid" offset={{ 'top' : -15, 'left' : 0 }} globalEventOff="click"/>
             </div>
         );
     }

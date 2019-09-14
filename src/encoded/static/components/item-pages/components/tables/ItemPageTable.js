@@ -99,7 +99,7 @@ export class ItemPageTable extends React.Component {
         if (loading || !Array.isArray(results)){
             return (
                 <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
+                    <i className="icon icon-fw icon-spin icon-circle-notch fas"/>
                 </div>
             );
         }

@@ -163,7 +163,7 @@ export class FileDetailBody extends React.PureComponent {
                 body = (
                     <div>
                         <h4 className="text-400" style={{ color : '#777' }}>
-                            <i className="icon icon-times" style={{ color : '#8e0000' }}/>&nbsp; No View Permissions
+                            <i className="icon icon-times fas" style={{ color : '#8e0000' }}/>&nbsp; No View Permissions
                         </h4>
                         <hr/>
                     </div>

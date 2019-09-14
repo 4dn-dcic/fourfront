@@ -530,10 +530,10 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         const hasIdentifiableChildren = !checkCollapsibility ? true : (depth + 2 >= groupingProperties.length) && childRowsKeys && childRowsKeys.length > 0 && !(childRowsKeys.length === 1 && childRowsKeys[0] === 'No value');
 
         if (!Array.isArray(data) && data && hasIdentifiableChildren){
-            toggleIcon = <i className={"clickable icon icon-fw icon-" + (open ? 'minus' : 'plus')} onClick={this.toggleOpen} />;
+            toggleIcon = <i className={"clickable icon fas icon-fw icon-" + (open ? 'minus' : 'plus')} onClick={this.toggleOpen} />;
             className += ' may-collapse';
-        } else {
-            toggleIcon = <i className={"icon icon-fw"} />;
+        } else { // ?
+            toggleIcon = <i className="icon icon-fw" />;
         }
 
         let header = null;

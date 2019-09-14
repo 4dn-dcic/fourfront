@@ -264,11 +264,11 @@ export class GroupByController extends React.PureComponent {
 
     static defaultProps = {
         'groupByOptions' : {
-            'award.center_title'                 : <span><i className="icon icon-fw icon-institution"/>&nbsp; Center</span>,
-            'award.project'                      : <span><i className="icon icon-fw icon-institution"/>&nbsp; Project</span>,
-            'lab.display_title'                  : <span><i className="icon icon-fw icon-users"/>&nbsp; Lab</span>,
+            'award.center_title'                 : <span><i className="icon icon-fw fas icon-institution"/>&nbsp; Center</span>,
+            'award.project'                      : <span><i className="icon icon-fw fas icon-institution"/>&nbsp; Project</span>,
+            'lab.display_title'                  : <span><i className="icon icon-fw fas icon-users"/>&nbsp; Lab</span>,
             //'status'                             : <span><i className="icon icon-fw icon-circle"/>&nbsp; <span className="text-600">Current</span> Status</span>,
-            'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+            'experiments_in_set.experiment_type.display_title' : <span><i className="icon fas icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
         },
         'initialGroupBy' : 'award.center_title'
     }
@@ -332,7 +332,7 @@ export class GroupByDropdown extends React.PureComponent {
         const optionItems = _.map(_.pairs(groupByOptions), ([field, title]) =>
             <DropdownItem eventKey={field} key={field} active={field === currentGroupBy}>{ title }</DropdownItem>
         );
-        const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin icon-circle-o-notch"/> : groupByOptions[currentGroupBy];
+        const selectedValueTitle = loadingStatus === 'loading' ? <i className="icon icon-fw icon-spin fas icon-circle-notch"/> : groupByOptions[currentGroupBy];
 
         return (
             <div className={outerClassName}>
@@ -1076,7 +1076,7 @@ export function LoadingIcon(props){
     const { children } = props;
     return (
         <div className="mt-5 mb-5 text-center">
-            <i className="icon icon-fw icon-spin icon-circle-o-notch icon-2x" style={{ opacity : 0.5 }}/>
+            <i className="icon icon-fw icon-spin icon-circle-notch icon-2x fas" style={{ opacity : 0.5 }}/>
             <h5 className="text-400">{ children }</h5>
         </div>
     );
@@ -1087,7 +1087,7 @@ export function ErrorIcon(props){
     const { children } = props;
     return (
         <div className="mt-5 mb-5 text-center">
-            <i className="icon icon-fw icon-times icon-2x"/>
+            <i className="icon icon-fw icon-times icon-2x fas"/>
             <h5 className="text-400">{ children }</h5>
         </div>
     );
@@ -1155,7 +1155,7 @@ export class AreaChartContainer extends React.Component {
         const expanded = AreaChartContainer.isExpanded(this.props);
         return (
             <button type="button" className="btn btn-outline-dark btn-sm" onClick={this.toggleExpanded}>
-                <i className={"icon icon-fw icon-search-" + (expanded ? 'minus' : 'plus')}/>
+                <i className={"icon icon-fw fas icon-search-" + (expanded ? 'minus' : 'plus')}/>
             </button>
         );
     }

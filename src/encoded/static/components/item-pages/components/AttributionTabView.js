@@ -55,7 +55,7 @@ export function generateContactPersonListItem(contactPerson, idx){
     return (
         <li className="contact-person" key={contactPerson.contact_email || idx}>
             <div className="inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
-                <i className="icon icon-fw icon-envelope-o" />
+                <i className="icon icon-fw icon-envelope far" />
                 &nbsp;&nbsp;
                 { contactPerson.display_title }
             </div>
@@ -71,7 +71,7 @@ export class AttributionTabView extends React.PureComponent {
     static getTabObject(props){
         var context = props.context;
         return {
-            tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
+            tab : <span><i className="icon icon-users fas icon-fw"/> Attribution</span>,
             key : "attribution",
             disabled : (!context.lab && !context.award && !context.submitted_by),
             content : (
@@ -174,7 +174,7 @@ class LabsSection extends React.PureComponent {
                 { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, isMounted) : null }
                 { contributingLabs ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
-                        iconClass="user-plus" itemRenderFxn={this.contributingLabRenderFxn} />
+                        iconClass="user-plus fas" itemRenderFxn={this.contributingLabRenderFxn} />
                     : null }
                 { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
             </div>

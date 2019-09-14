@@ -145,8 +145,7 @@ class Body extends React.PureComponent {
                     : null */}
                 </h6>
                 <h3 className="details-title">
-                    <i
-                        className="term-color-indicator icon icon-circle"
+                    <i className="term-color-indicator icon icon-circle fas"
                         style={{ color : leafNode.color || barplot_color_cycler.colorForNode(leafNode) }}
                     />
                     { this.primaryCount(leafNode) }

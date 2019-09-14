@@ -93,7 +93,9 @@ export class SelectAllFilesButton extends React.PureComponent {
         const { selecting } = this.state;
         const isAllSelected = this.isAllSelected();
         const isEnabled = this.isEnabled();
-        const iconClassName = "mr-05 icon icon-fw icon-" + (selecting ? 'circle-o-notch icon-spin' : (isAllSelected ? 'square-o' : 'check-square-o'));
+        const iconClassName = (
+            "mr-05 icon icon-fw icon-" + (selecting ? 'circle-o-notch icon-spin fas' : (isAllSelected ? 'square far' : 'check-square far'))
+        );
         const cls = "btn " + (isAllSelected ? "btn-outline-primary" : "btn-primary");
 
         return (
@@ -217,14 +219,14 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
     return (
         <button type="button" id="selected-files-file-type-filter-button" className={cls} onClick={onFilterFilesByClick}
             key="filter-selected-files-by" disabled={isDisabled} active={active.toString()} data-tip={tooltip} data-html>
-            <i className="icon icon-filter icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
+            <i className="icon icon-filter fas icon-fw mr-05" style={{ opacity : currentFiltersLength > 0 ? 1 : 0.75 }}/>
             {
                 currentFiltersLength > 0 ? <span>{ currentFiltersLength } </span> : (
                     <span className="d-none d-lg-inline">All </span>
                 )
             }
             <span className="text-400 d-none d-lg-inline mr-05">{ "File Type" + (currentFiltersLength === 1 ? '' : 's') }</span>
-            <i className="icon icon-angle-down icon-fw"/>
+            <i className="icon icon-angle-down icon-fw fas"/>
         </button>
     );
 });

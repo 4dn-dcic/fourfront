@@ -461,7 +461,7 @@ export default class StatisticsPageView extends React.PureComponent {
     static viewOptions = {
         'submissions' : {
             'title' : "Submissions Statistics",
-            'icon' : 'upload',
+            'icon' : 'upload fas',
             'tip' : "View statistics related to submission and release of Experiment Set",
             'aggregationsToChartData' : _.pick(aggregationsToChartData,
                 'expsets_released', 'expsets_released_internal',
@@ -471,7 +471,7 @@ export default class StatisticsPageView extends React.PureComponent {
         },
         'usage' : {
             'title' : "Usage Statistics",
-            'icon' : 'users',
+            'icon' : 'users fas',
             'tip' : "View statistics related to usage of the 4DN Data Portal",
             'aggregationsToChartData' : _.pick(aggregationsToChartData,
                 'sessions_by_country', 'fields_faceted', /* 'browse_search_queries', 'other_search_queries', */
@@ -522,15 +522,15 @@ export default class StatisticsPageView extends React.PureComponent {
         const { browseBaseState } = this.props;
         const { aggregationsToChartData } = StatisticsPageView.viewOptions.submissions;
 
-        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw icon-institution mr-05"/>Project</span> };
+        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw fas icon-institution mr-05"/>Project</span> };
 
         let initialGroupBy = 'award.project';
 
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
-                'award.center_title'                 : <span><i className="icon icon-fw icon-institution mr-05"/>Center</span>,
-                'lab.display_title'                  : <span><i className="icon icon-fw icon-users mr-05"/>Lab</span>,
-                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw icon-bar-chart mr-05"/>Experiment Type</span>
+                'award.center_title'                 : <span><i className="icon icon-fw fas icon-institution mr-05"/>Center</span>,
+                'lab.display_title'                  : <span><i className="icon icon-fw fas icon-users mr-05"/>Lab</span>,
+                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw fas icon-bar-chart mr-05"/>Experiment Type</span>
             });
             initialGroupBy = 'award.center_title';
         }
@@ -829,20 +829,20 @@ class UsageChartsCountByDropdown extends React.PureComponent {
         const menuOptions = new Map();
 
         if (chartID === 'experiment_set_views' || chartID === 'file_views'){
-            menuOptions.set('views',        <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>Detail View</React.Fragment>);
-            menuOptions.set('list_views',   <React.Fragment><i className="icon icon-fw icon-list mr-05"/>Appearance within first 25 Search Results</React.Fragment>);
-            menuOptions.set('clicks',       <React.Fragment><i className="icon icon-fw icon-hand-o-up mr-05"/>Search Result Click</React.Fragment>);
+            menuOptions.set('views',        <React.Fragment><i className="icon fas icon-fw icon-eye mr-05"/>Detail View</React.Fragment>);
+            menuOptions.set('list_views',   <React.Fragment><i className="icon fas icon-fw icon-list mr-05"/>Appearance within first 25 Search Results</React.Fragment>);
+            menuOptions.set('clicks',       <React.Fragment><i className="icon fas icon-fw icon-hand-o-up mr-05"/>Search Result Click</React.Fragment>);
         } else if (chartID === 'file_downloads'){
-            menuOptions.set('download_tracking.experiment_type', <React.Fragment><i className="icon icon-fw icon-folder-o mr-05"/>Experiment Type</React.Fragment>);
-            menuOptions.set('download_tracking.geo_country',     <React.Fragment><i className="icon icon-fw icon-globe mr-05"/>Country</React.Fragment>);
+            menuOptions.set('download_tracking.experiment_type', <React.Fragment><i className="icon fas icon-fw icon-folder-o mr-05"/>Experiment Type</React.Fragment>);
+            menuOptions.set('download_tracking.geo_country',     <React.Fragment><i className="icon fas icon-fw icon-globe mr-05"/>Country</React.Fragment>);
             if (includePartialRequests){
                 // No point showing if not included. @see getDerivedStateFromProps which unsets this value if set previously.
-                menuOptions.set('download_tracking.range_query', <React.Fragment><i className="icon icon-fw icon-television mr-05"/>Downloads as part of visualization</React.Fragment>);
+                menuOptions.set('download_tracking.range_query', <React.Fragment><i className="icon fas icon-fw icon-television mr-05"/>Downloads as part of visualization</React.Fragment>);
             }
-            menuOptions.set('download_tracking.file_format',     <React.Fragment><i className="icon icon-fw icon-file-text-o mr-05"/>File Format</React.Fragment>);
+            menuOptions.set('download_tracking.file_format',     <React.Fragment><i className="icon far icon-fw icon-file-text mr-05"/>File Format</React.Fragment>);
         } else {
-            menuOptions.set('views',    <React.Fragment><i className="icon icon-fw icon-eye mr-05"/>View</React.Fragment>);
-            menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw icon-user mr-05"/>User Session</React.Fragment>);
+            menuOptions.set('views',    <React.Fragment><i className="icon icon-fw fas icon-eye mr-05"/>View</React.Fragment>);
+            menuOptions.set('sessions', <React.Fragment><i className="icon icon-fw fas icon-user mr-05"/>User Session</React.Fragment>);
         }
 
         const dropdownTitle = menuOptions.get(currCountBy);

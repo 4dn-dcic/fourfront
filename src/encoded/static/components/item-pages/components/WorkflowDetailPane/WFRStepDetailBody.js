@@ -192,7 +192,7 @@ export class WFRStepDetailBody extends React.PureComponent {
                     </div>
                 </Fade>
                 { typeof this.state.wfr === 'string' ?
-                    <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
+                    <div className="text-center"><br/><i className="icon icon-spin fas icon-circle-notch"/></div>
                     : null }
             </div>
         );

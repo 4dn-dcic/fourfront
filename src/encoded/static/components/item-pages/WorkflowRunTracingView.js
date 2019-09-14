@@ -147,13 +147,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         let tooltip = null;
 
         if (steps === null || loadingGraphSteps){
-            iconClass += 'circle-o-notch icon-spin';
+            iconClass += 'circle-notch fas icon-spin';
             tooltip = "Graph is loading";
         } else if (!Array.isArray(steps) || steps.length === 0) {
-            iconClass += 'times';
+            iconClass += 'times fas';
             tooltip = "Graph currently not available for this file. Please check back later.";
         } else {
-            iconClass += 'sitemap icon-rotate-90';
+            iconClass += 'sitemap icon-rotate-90 fas';
         }
 
         return {

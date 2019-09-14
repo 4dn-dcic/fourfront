@@ -94,7 +94,7 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
             <div className="btn-container">
                 <a href={object.itemUtil.atId(context)} className={cls}
                     data-tip="Open HiGlass display to add other data">
-                    <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
+                    <i className="icon icon-fw icon-eye fas"/>&nbsp;&nbsp;&nbsp;
                     Explore Data
                 </a>
             </div>

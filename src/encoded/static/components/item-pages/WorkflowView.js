@@ -102,7 +102,7 @@ export default class WorkflowView extends DefaultItemView {
         const width   = this.getTabViewWidth();
         const tabs    = !this.memoized.doValidAnalysisStepsExist(context.steps) ? [] : [
             {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
+                tab : <span><i className="icon icon-sitemap icon-rotate-90 fas icon-fw"/> Graph</span>,
                 key : 'graph',
                 content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} width={width} />
             }

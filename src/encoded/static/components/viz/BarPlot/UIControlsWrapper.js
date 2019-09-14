@@ -310,7 +310,7 @@ export class UIControlsWrapper extends React.PureComponent {
         const { isLoadingChartData, barplot_data_fields, availableFields_Subdivision, btnVariant } = this.props;
         let title;
         if (isLoadingChartData){
-            title = <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
+            title = <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-notch fas"/></span>;
         } else {
             const field = this.getFieldAtIndex(1);
             if (!field) title = "None";
@@ -364,7 +364,7 @@ export class UIControlsWrapper extends React.PureComponent {
 
         let xAxisDropdownTitle;
         if (isLoadingChartData){
-            xAxisDropdownTitle = <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-o-notch"/></span>;
+            xAxisDropdownTitle = <span style={{ opacity : 0.33 }}><i className="icon icon-spin icon-circle-notch fas"/></span>;
         } else {
             const field = this.getFieldAtIndex(0);
             xAxisDropdownTitle = <span>{(field.title || Schemas.Field.toName(field.field))}</span>;

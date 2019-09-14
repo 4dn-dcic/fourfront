@@ -88,7 +88,7 @@ class FileColumnActionsBtn extends React.PureComponent {
                 <div className="in-stacked-table-button-container" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
                     <button type="button" className="btn btn-xs btn-primary in-stacked-table-button"
                         data-tip="Visualize with HiGlass" onClick={onClick}>
-                        <i className="icon icon-fw icon-television"/>
+                        <i className="icon icon-fw icon-television fas"/>
                     </button>
                 </div>
             );
@@ -116,7 +116,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         return (
             <DropdownItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
-                JuiceBox <i className="icon icon-fw icon-external-link text-smaller"/>
+                JuiceBox <i className="icon icon-fw icon-external-link text-smaller fas"/>
             </DropdownItem>
         );
 
@@ -145,7 +145,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         return (
             <DropdownItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
-                Epigenome Browser <i className="icon icon-fw icon-external-link text-smaller"/>
+                Epigenome Browser <i className="icon icon-fw icon-external-link text-smaller fas"/>
             </DropdownItem>
         );
     }
@@ -168,7 +168,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         if (hasJBOrEpigenomeBtn){
             return (
                 <DropdownButton className="in-stacked-table-button-container" variant="primary" data-tip="Visualize this file..."
-                    data-place="right" title={<i className="icon icon-fw icon-television"/>} drop="up" size="xs">
+                    data-place="right" title={<i className="icon icon-fw icon-television fas"/>} drop="up" size="xs">
                     { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
                 </DropdownButton>
             );
@@ -264,7 +264,7 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
     return (
         <a className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
             href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
-            <i className="icon icon-fw icon-file-text-o" />
+            <i className="icon icon-fw icon-file-text far" />
         </a>
     );
 }
@@ -592,7 +592,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     static defaultProps = {
         'columnHeaders' : [
             { columnClass: 'experiment',  className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
-            //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
+            //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
             { columnClass: 'file',        className: 'has-checkbox',  title: 'File',      initialWidth: 135, render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 135, render: renderFileTypeSummaryColumn },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
@@ -737,14 +737,14 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
         if (val === 'PASS'){
             return (
                 <span>
-                    <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
+                    <i className="icon icon-check success fas" style={{ 'color' : 'green' }}/>
                     &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
                 </span>
             );
         } else if (val === 'FAIL'){
             return (
                 <span>
-                    <i className="icon icon-times" style={{ 'color' : 'red' }}/>
+                    <i className="icon icon-times fas" style={{ 'color' : 'red' }}/>
                     &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
                 </span>
             );

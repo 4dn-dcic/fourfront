@@ -147,7 +147,7 @@ class LegendViewContainer extends React.Component {
         var iconClass = this.props.expanded ? 'compress' : 'expand';
         return (
             <div className="expand-toggle text-center" onClick={this.props.onToggleExpand} data-tip={this.props.expanded ? "Collapse" : "Expand" } data-place="left">
-                <i className={"icon icon-fw icon-" + iconClass}/>
+                <i className={"icon icon-fw fas icon-" + iconClass}/>
             </div>
         );
     }

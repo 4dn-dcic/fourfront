@@ -325,7 +325,7 @@ class TabPlaceHolder extends React.PureComponent {
         return (
             <div>
                 <h3 className="text-400 mb-5 mt-5">
-                    <i className="icon icon-spin icon-circle-o-notch"/>
+                    <i className="icon icon-spin fas icon-circle-notch"/>
                 </h3>
             </div>
         );

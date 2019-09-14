@@ -19,7 +19,7 @@ const commonDefaultProps = {
     'lineHeight'        : 14,       // Pixels
     'maxLabelWidth'     : 1000,
     'extraHeight'       : 0,
-    'append'            : <i className="icon icon-caret-up"/>,
+    'append'            : <i className="icon icon-caret-up fas"/>,
     'appendOffset'      : 0,
     'deRotateAppend'    : true,
     'debug'             : false
@@ -291,7 +291,7 @@ export class RotatedLabel extends React.PureComponent {
 
                     <span className="inner" style={lineHeight ? { 'lineHeight' : lineHeight + 'px' } : null }>
                         { color ?
-                            <i className="icon icon-circle color-indicator" style={{ color }}/>
+                            <i className="icon icon-circle color-indicator fas" style={{ color }}/>
                             : null }
                         { expanded ? label : shortLabel || label }
                     </span>

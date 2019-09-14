@@ -14,12 +14,10 @@ export const LoginNavItem = React.memo(function LoginNavItem(props){
         <React.Fragment>
             <Nav.Link key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
                 { isLoading ? (
-                    <span className="pull-right">
-                        <i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/>
-                    </span>
+                    <i className="account-icon icon icon-spin icon-circle-notch fas align-middle"/>
                 ) : (
                     <React.Fragment>
-                        <i className="account-icon icon icon-user-o" />
+                        <i className="account-icon icon icon-user fas align-middle" />
                         <span>Log In</span>
                         <span className="d-none d-xl-inline"> / Register</span>
                     </React.Fragment>

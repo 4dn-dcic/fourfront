@@ -79,25 +79,26 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
             );
         }
 
-        const aboveTableControlsProps = _.extend(
-            _.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen', 'parentForceUpdate'),
-            {
-                "panelMap" : _.extend(
-                    {
-                        "filterFilesBy" : {
-                            "title" : <React.Fragment><i className="icon icon-fw icon-gear"/> Configure Visible Columns</React.Fragment>,
-                            "className" : "file-type-selector-panel",
-                            "body" : (
-                                <SelectedFilesFilterByContent {..._.pick(this.props, 'includeFileSets', 'selectedFiles')}
-                                    currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
-                            ),
-                            "close" : selectedFileCount === 0
-                        }
-                    },
-                    AboveTableControlsBase.getCustomColumnSelectorPanelMapDefinition(this.props)
-                )
+        const aboveTableControlsProps = {
+            ..._.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen', 'parentForceUpdate'),
+            "panelMap" : {
+                "filterFilesBy" : {
+                    "title" : (
+                        <React.Fragment>
+                            <i className="icon icon-fw icon-filter fas align-middle"/>
+                            <span className="title-contents">Filter Selected Files to Download by Type</span>
+                        </React.Fragment>
+                    ),
+                    "className" : "file-type-selector-panel",
+                    "body" : (
+                        <SelectedFilesFilterByContent {..._.pick(this.props, 'includeFileSets', 'selectedFiles')}
+                            currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
+                    ),
+                    "close" : selectedFileCount === 0
+                },
+                ...AboveTableControlsBase.getCustomColumnSelectorPanelMapDefinition(this.props)
             }
-        );
+        };
 
         return <AboveTableControlsBase {...aboveTableControlsProps}>{ wrappedLeftSectionControls }</AboveTableControlsBase>;
     }

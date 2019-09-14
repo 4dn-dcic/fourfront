@@ -99,7 +99,7 @@ class FileViewOverview extends React.PureComponent {
 
     static getTabObject({ context, schemas, windowWidth, href }, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
             'key' : 'file-overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
@@ -153,7 +153,7 @@ class FileViewOverview extends React.PureComponent {
 export class FileOverviewHeading extends React.PureComponent {
 
     static fileSizeTitleRenderFxn(field, value){
-        return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
+        return <span className="text-400"><i className="icon icon-fw icon-hdd far"/> { Schemas.Term.toName(field, value) }</span>;
     }
 
     constructor(props){
@@ -232,7 +232,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
             <button type="button" href={btnHref} className="btn btn-primary mr-05" tagret="_blank">
-                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small fas align-baseline"/>
             </button>
         );
     }
@@ -260,7 +260,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         return (
             <button type="button" href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
                 <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
-                <i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                <i className="icon icon-fw icon-external-link text-small fas align-baseline"/>
             </button>
         );
     }
@@ -349,7 +349,7 @@ export function QCMetricFromSummary(props){
                 </div>
                 <div className="col-8">
                     <div className="inner value">
-                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05" data-tip={tooltip} /> : null }
+                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
                         { value }
                     </div>
                 </div>
@@ -409,7 +409,7 @@ export class QualityControlResults extends React.PureComponent {
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
                             <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
-                            <i className="ml-05 icon icon-fw icon-external-link text-small"/>
+                            <i className="ml-05 icon icon-fw icon-external-link text-small fas"/>
                         </React.Fragment>
                     } />
                     : null }

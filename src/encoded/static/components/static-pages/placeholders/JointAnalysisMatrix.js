@@ -302,7 +302,7 @@ export class JointAnalysisMatrix extends React.PureComponent {
         if (isLoading){
             return (
                 <div>
-                    <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-o-notch"/></div>
+                    <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}><i className="mt-3 icon icon-spin icon-circle-notch fas"/></div>
                 </div>
             );
         }
@@ -457,7 +457,7 @@ class VisualBody extends React.PureComponent {
                     <div className="text-400">{groupingPropertyCurrentValue}</div>
                 </div>
                 <div className="mid-icon">
-                    <i className="icon icon-times"/>
+                    <i className="icon icon-times fas"/>
                 </div>
                 <div className="y-axis-title">
                     <div className="text-300">{yAxisGroupingTitle}</div>

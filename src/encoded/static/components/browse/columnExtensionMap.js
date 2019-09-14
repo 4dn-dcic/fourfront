@@ -29,7 +29,7 @@ function labDisplayTitleRenderFxn(result, columnDefinition, props, width, popLin
     }
     return (
         <span>
-            <i className="icon icon-fw icon-user-o user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
+            <i className="icon icon-fw icon-user user-icon fas" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
             { labLink }
         </span>
     );

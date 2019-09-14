@@ -36,7 +36,7 @@ export function HiGlassLoadingIndicator(props) {
     return (
         <React.Fragment>
             <h3>
-                <i className={"icon icon-lg icon-" + (icon || "television")}/>
+                <i className={"icon icon-lg icon-" + (icon || "television fas")}/>
             </h3>
             { title || "Initializing" }
         </React.Fragment>

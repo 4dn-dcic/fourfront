@@ -123,15 +123,7 @@ body .rc-tabs-top {
 
 			i.icon {
 				margin-right: 3px;
-
-				&.icon-th,
-				&.icon-list,
-				&.icon-warning,
-				&.icon-microchip,
-				&.icon-leaf {
-					position: relative;
-					top: 1px;
-				}
+				vertical-align: middle;
 
 				&.icon-warning {
 					color: $badge-color-warning;
@@ -1949,10 +1941,6 @@ $badge-item-min-height: 90px;
 
 		> a.btn-block.btn-lg {
 			font-weight: 400;
-			> i {
-				position: relative;
-				top: 1px;
-			}
 		}
 
 	}

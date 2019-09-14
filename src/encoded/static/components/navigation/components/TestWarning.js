@@ -27,11 +27,11 @@ export class TestWarning extends React.PureComponent {
                 <div className="container">
                     <div className="row">
                         <div className="col-10 text-container" style={{ fontSize : '13.5px' }}>
-                            <i className="icon icon-fw icon-info-circle circle-icon d-none d-md-inline-block"/>
+                            <i className="icon icon-fw icon-info-circle fas circle-icon d-none d-md-inline-block"/>
                             The data displayed on this page is not official and only for testing purposes.
                         </div>
                         <div className="col-2 close-button-container">
-                            <a className="test-warning-close icon icon-times" title="Hide" onClick={this.handleClose}/>
+                            <a className="test-warning-close icon icon-times fas" title="Hide" onClick={this.handleClose}/>
                         </div>
                     </div>
                 </div>

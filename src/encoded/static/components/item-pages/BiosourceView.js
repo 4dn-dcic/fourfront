@@ -49,7 +49,7 @@ const BiosourceViewOverview = React.memo(function BiosourceViewOverview({ contex
  */
 BiosourceViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon icon-file-text fas icon-fw"/> Overview</span>,
         'key' : 'biosource-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (
@@ -209,7 +209,7 @@ export class IndividualItemTitle extends React.PureComponent {
 
     toggleIcon(){
         if (!this.moreInfoExists()) return null;
-        return <i className={"icon clickable icon-caret-right" + (this.state.open ? " icon-rotate-90" : "")} onClick={this.toggle} />;
+        return <i className={"icon clickable fas icon-caret-right" + (this.state.open ? " icon-rotate-90" : "")} onClick={this.toggle} />;
     }
 
     moreInfoExists(){
@@ -241,9 +241,9 @@ export class IndividualItemTitle extends React.PureComponent {
         var sex = null;
         if (indv.sex && typeof indv.sex === "string"){
             if (indv.sex.toLowerCase() === "female"){
-                sex = <i className="icon icon-fw icon-venus" data-tip="Sex: Female" />;
+                sex = <i className="icon icon-fw icon-venus fas" data-tip="Sex: Female" />;
             } else if (indv.sex.toLowerCase() === "male"){
-                sex = <i className="icon icon-fw icon-mars" data-tip="Sex: Male" />;
+                sex = <i className="icon icon-fw icon-mars fas" data-tip="Sex: Male" />;
             }
         }
         var title = indv.display_title;

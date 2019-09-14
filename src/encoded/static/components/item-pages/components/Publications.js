@@ -171,7 +171,7 @@ export class Publications extends React.PureComponent {
             return null;
         }
         return (
-            <i className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
+            <i className={"icon abstract-toggle icon-fw fas icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
                 data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'} onClick={this.onToggleAbstractIconClick} />
         );
     }
