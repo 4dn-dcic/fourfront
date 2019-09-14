@@ -3,7 +3,7 @@
 import React from 'react';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { AboveTableControlsBase } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/above-table-controls/AboveTableControlsBase';
+import { AboveTableControlsBase } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/above-table-controls/AboveTableControlsBase';
 
 import { ChartDataController } from './../../../viz/chart-data-controller';
 import { SelectedFilesControls, SelectedFilesFilterByContent } from './SelectedFilesControls';

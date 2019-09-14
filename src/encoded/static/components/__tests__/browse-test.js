@@ -15,7 +15,7 @@ jest.autoMockOff();
 // Fixes https://github.com/facebook/jest/issues/78
 jest.dontMock('react');
 jest.dontMock('underscore');
-jest.mock('@hms-dbmi-bgm/shared-portal-components/src/components/util/ajax');
+jest.mock('@hms-dbmi-bgm/shared-portal-components/es/components/util/ajax');
 jest.mock('../viz/chart-data-controller');
 
 function mapStateToProps(store) {

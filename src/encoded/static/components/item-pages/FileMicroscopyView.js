@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';

@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FormattedInfoWrapper } from './FormattedInfoBlock';
 
 

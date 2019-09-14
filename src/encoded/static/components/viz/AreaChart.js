@@ -8,9 +8,9 @@ import url from 'url';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
 
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
-import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
 /**
  * Various utilities for helping to draw area charts.

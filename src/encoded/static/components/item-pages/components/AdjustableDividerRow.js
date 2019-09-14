@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Draggable from 'react-draggable';
-import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 
 export const DraggableVerticalBorder = React.memo(function DraggableVerticalBorder(props){

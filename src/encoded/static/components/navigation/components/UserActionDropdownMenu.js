@@ -6,8 +6,8 @@ import _ from 'underscore';
 import url from 'url';
 import { Nav, NavDropdown, Dropdown } from 'react-bootstrap';
 
-import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/LoginController';
+import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
 
 import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
 

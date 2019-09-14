@@ -37,22 +37,6 @@ if (mode === 'production') {
     devTool = 'inline-source-map';
 }
 
-let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
-
-if (mode === "development"){
-    let isLinked = false;
-    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
-        for (var i = 0; i < 10; i++) { // Incase multiple links.
-            sharedComponentPath = fs.readlinkSync(sharedComponentPath);
-            isLinked = true;
-        }
-    } catch (e){ /* .. */ }
-
-    console.log(
-        "`@hms-dbmi-bgm/shared-portal-components` directory is",
-        isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
-    );
-}
 
 const rules = [
     // Strip @jsx pragma in react-forms, which makes babel abort
@@ -69,8 +53,7 @@ const rules = [
     {
         test: /\.(js|jsx)$/,
         include: [
-            path.resolve(__dirname, 'src/encoded/static'),
-            sharedComponentPath
+            path.resolve(__dirname, 'src/encoded/static')
         ],
         use: [
             {

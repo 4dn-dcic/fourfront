@@ -5,9 +5,9 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 
-import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
 
 /**
  * Object containing components required to build header shown on Item pages.

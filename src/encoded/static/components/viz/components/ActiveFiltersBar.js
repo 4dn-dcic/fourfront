@@ -2,8 +2,8 @@
 
 import React from 'react';
 import _ from 'underscore';
-import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
-import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, navigate } from './../../util';
 
 

@@ -5,8 +5,8 @@ import _ from 'underscore';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import Graph from '@hms-dbmi-bgm/react-workflow-viz';
 

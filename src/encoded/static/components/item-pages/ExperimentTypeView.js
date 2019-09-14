@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import { Publications } from './components/Publications';
 import { SOPBelowHeaderRow, LinkBelowHeaderRow } from './components/LinkBelowHeaderRow';

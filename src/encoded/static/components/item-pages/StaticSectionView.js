@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { replaceString as placeholderReplacementFxn } from './../static-pages/placeholders';
 import { HomePageCarouselSlide } from './../static-pages/components/HomePageCarousel';
 

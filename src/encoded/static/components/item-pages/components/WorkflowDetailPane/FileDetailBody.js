@@ -4,11 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { fileUtil, expFxn } from './../../../util';
 
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { SimpleFilesTable } from './../tables/SimpleFilesTable';
 import { ExperimentSetTablesLoaded } from './../tables/ExperimentSetTables';

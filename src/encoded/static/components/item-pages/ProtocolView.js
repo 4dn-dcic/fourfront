@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 

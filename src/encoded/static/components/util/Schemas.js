@@ -3,13 +3,13 @@
 import _ from 'underscore';
 import React from 'react';
 
-import { linkFromItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/object';
-import { LocalizedTime, format as dateFormat } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/patched-console';
-import { getTitleForType, getSchemaProperty, schemasToItemTypeHierarchy } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
+import { linkFromItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/object';
+import { LocalizedTime, format as dateFormat } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
+import { getTitleForType, getSchemaProperty, schemasToItemTypeHierarchy } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import {
     capitalize, capitalizeSentence, bytesToLargerUnit, roundLargeNumber, roundDecimal, hrefToFilename
-} from '@hms-dbmi-bgm/shared-portal-components/src/components/util/value-transforms';
+} from '@hms-dbmi-bgm/shared-portal-components/es/components/util/value-transforms';
 
 let cachedSchemas = null;
 

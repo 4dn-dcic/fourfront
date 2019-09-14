@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
 

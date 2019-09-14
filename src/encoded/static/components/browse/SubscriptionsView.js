@@ -2,9 +2,9 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 
 /** @deprecated - DropDownButton, Button */
 /** @todo use HTML elem(s) */

@@ -5,10 +5,10 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { console, layout, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, layout, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas } from './../../util';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
-import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { Legend } from './../components';
 
 /**

@@ -8,8 +8,8 @@ import memoize from 'memoize-one';
 import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 
-import { console, ajax, JWT, typedefs } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, ajax, JWT, typedefs } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { uniqueFileCount, fileCountWithDuplicates, uniqueFileCountNonMemoized } from './../SelectedFilesController';
 
 

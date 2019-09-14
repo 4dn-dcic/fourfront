@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
 import { columnExtensionMap } from './../../../browse/columnExtensionMap';
 import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';

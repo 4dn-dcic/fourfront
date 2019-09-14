@@ -7,12 +7,12 @@ import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { get as getSchemas } from './../../../util/Schemas';
-import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
     HeadersRow, TableRowToggleOpenButton
-} from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
-import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultDetailPane';
+} from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
 
 
 /** @todo Move to shared components repo? */

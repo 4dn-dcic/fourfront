@@ -7,9 +7,9 @@ import serialize from 'form-serialize';
 import memoize from 'memoize-one';
 import { FormGroup, FormLabel, FormControl, Form } from 'react-bootstrap';
 
-import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/LinkToSelector';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 
 
 export default class UserRegistrationForm extends React.PureComponent {

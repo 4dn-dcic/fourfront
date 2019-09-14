@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { ItemPageTable } from './components/tables/ItemPageTable';
 import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';

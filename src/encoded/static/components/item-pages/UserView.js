@@ -8,10 +8,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Modal, FormControl } from 'react-bootstrap';
 
-import { console, object, JWT, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
-import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/EditableField';
+import { console, object, JWT, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 
 import { store } from './../../store';
 import { FormattedInfoBlock } from './components/FormattedInfoBlock';
