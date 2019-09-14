@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFileAttachment } from './../ItemFileAttachment';
 import { isNodeFile, isNodeGroup, isNodeParameter, isNodeQCMetric } from './WorkflowNodeElement';
 

@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
-import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserRegistrationModal } from './UserRegistrationModal';
 
 /** SPECIFIC to 4DN/CGAP - NOT COMMON */

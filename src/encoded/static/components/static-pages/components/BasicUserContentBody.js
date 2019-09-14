@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 import { replaceString as replacePlaceholderString } from './../placeholders';
 

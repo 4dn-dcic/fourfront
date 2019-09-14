@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 /**
  * Module-level consts shared between all ClinicianNotes instances to locally save

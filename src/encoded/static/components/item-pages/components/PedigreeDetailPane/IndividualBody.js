@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ClinicianNotes } from './ClinicianNotes';
 
 

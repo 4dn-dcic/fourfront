@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicUserContentBody, ExpandableStaticHeader } from './BasicUserContentBody';
 
 

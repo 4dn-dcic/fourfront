@@ -7,8 +7,8 @@
     "build-quick": "gulp build-quick",
     "build-scss": "gulp build-scss",
     "watch-scss": "gulp build-scss-dev && node-sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --recursive --output-style expanded",
-    "dev": "gulp dev",
     "dev-quick": "gulp dev-quick --preserve-symlinks",
+    "dev-analyzed": "gulp dev-analyzed --preserve-symlinks",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:open-local": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://localhost:8000",
@@ -57,6 +57,7 @@
     "collectCoverage": true
   },
   "devDependencies": {
+    "@babel/cli": "^7.6.0",
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-class-properties": "^7.3.3",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
@@ -99,8 +100,8 @@
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
-    "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.11",
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.12",
+    "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.12",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.2.0",
     "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",

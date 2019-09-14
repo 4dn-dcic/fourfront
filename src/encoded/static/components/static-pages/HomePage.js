@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, OnlyTitle } from './../PageTitleSection';
 
 

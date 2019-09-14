@@ -8,9 +8,9 @@ import App from './components';
 var domready = require('domready');
 import { store, mapStateToProps } from './store';
 import { Provider, connect } from 'react-redux';
-import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/patched-console';
-import * as JWT from '@hms-dbmi-bgm/shared-portal-components/src/components/util/json-web-token';
-import { BrowserFeat } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/layout';
+import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
+import * as JWT from '@hms-dbmi-bgm/shared-portal-components/es/components/util/json-web-token';
+import { BrowserFeat } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/layout';
 
 /**
  * Unset JWT/auth and reload page if missing user info which should be paired with otherwise valid JWT token.

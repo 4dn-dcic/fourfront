@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DropdownButton, DropdownItem } from 'react-bootstrap';
-import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { CollapsibleItemViewButtonToolbar } from './../CollapsibleItemViewButtonToolbar';
 
 export const WorkflowGraphSectionControls = React.memo(function WorkflowGraphSectionControls(props){
