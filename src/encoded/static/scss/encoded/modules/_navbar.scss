@@ -240,11 +240,13 @@ div#top-nav.navbar-fixed-top {
                     &:after {
                         content: "\f105";
                         font-family: $fa-font-family;
+                        font-weight: 900;
+                        text-shadow: none;
                         margin-left: 12px;
                         font-size: 1.25rem;
                         line-height: inherit;
                         vertical-align: bottom;
-                        color: $navbar-link-active-background-color;
+                        color: #aaa;
                     }
                 }
                 > .img-container > svg#fourfront_logo_svg {
@@ -799,7 +801,8 @@ div#top-nav.navbar-fixed-top {
 							color: #fff;
 							&:after {
 								content: "\f105";
-								font-family: $fa-font-family;
+                                font-family: $fa-font-family;
+                                font-weight: 900;
 								opacity: 0;
 								margin-left: 5px;
 							}
@@ -874,7 +877,8 @@ div#top-nav.navbar-fixed-top {
 								text-decoration: none;
 								background-color: #484848;
 								&:before {
-									font-family: $fa-font-family;
+                                    font-family: $fa-font-family;
+                                    font-weight: 900;
 									content: "\f105";
 									position: absolute;
 									left: 0px;

@@ -1020,6 +1020,7 @@ $download-button-width : 100px;
 	&:after {
 		content : "\f105";
 		font-family: $fa-font-family;
+		font-weight: 900;
 		padding-left: 6px;
 	}
 }
@@ -1093,6 +1094,7 @@ $download-button-width : 100px;
 	&.error-block.no-icon h5:before {
 		content: "\f06a";
 		font-family: $fa-font-family;
+		font-weight: 900;
 		margin-right: 6px;
 		color: #999;
 	}
@@ -1998,6 +2000,7 @@ $badge-item-min-height: 90px;
 			&:before {
 				content : "\f002";
 				font-family: $fa-font-family;
+				font-weight: 900;
 			}
 		}
 
