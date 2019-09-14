@@ -116,7 +116,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         return (
             <DropdownItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
-                JuiceBox <i className="icon icon-fw icon-external-link text-smaller fas"/>
+                JuiceBox <i className="icon icon-fw icon-external-link-alt text-smaller fas"/>
             </DropdownItem>
         );
 
@@ -145,7 +145,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         return (
             <DropdownItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
-                Epigenome Browser <i className="icon icon-fw icon-external-link text-smaller fas"/>
+                Epigenome Browser <i className="icon icon-fw icon-external-link-alt text-smaller fas"/>
             </DropdownItem>
         );
     }

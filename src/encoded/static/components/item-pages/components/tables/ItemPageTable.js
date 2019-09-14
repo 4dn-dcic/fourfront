@@ -6,6 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
+import { get as getSchemas } from './../../../util/Schemas';
 import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
@@ -38,28 +39,30 @@ export class ItemPageTable extends React.Component {
         'columnExtensionMap' : {
             'display_title' : {
                 'render' : function(result, columnDefinition, props, width){
-                    var title           = object.itemUtil.getTitleStringFromContext(result),
-                        link            = object.itemUtil.atId(result),
-                        isAnAccession   = false,
-                        tooltip;
+                    const { hideTypeTitle, renderDetailPane, detailOpen, toggleDetailOpen, schemas } = props;
+                    let title           = object.itemUtil.getTitleStringFromContext(result);
+                    const link          = object.itemUtil.atId(result);
+                    const isAnAccession = false;
+                    let tooltip;
 
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
 
                     if (link){ // Link instead of plaintext
-                        title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
+                        title = (
+                            <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')} data-tip={tooltip}>
+                                { title }
+                            </a>
+                        );
                     }
 
-                    var typeTitle = null;
-                    if (!props.hideTypeTitle){
-                        typeTitle = schemaTransforms.getItemTypeTitle(result);
-                        if (typeof typeTitle === 'string'){
-                            typeTitle += ' ';
-                        }
+                    let typeTitle = null;
+                    if (!hideTypeTitle){
+                        typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
                     }
 
-                    var toggleButton = null;
-                    if (typeof props.renderDetailPane === 'function'){
-                        toggleButton = <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />;
+                    let toggleButton = null;
+                    if (typeof renderDetailPane === 'function'){
+                        toggleButton = <TableRowToggleOpenButton open={detailOpen} onClick={toggleDetailOpen} />;
                     }
 
                     return (

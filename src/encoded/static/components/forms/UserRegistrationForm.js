@@ -410,7 +410,7 @@ class LookupLabField extends React.PureComponent {
                         rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                         { currentLabDetails.display_title }
                     </a>
-                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link fas text-small"/>
+                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt fas text-small"/>
                 </div>
             )
         ) || (

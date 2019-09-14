@@ -49,7 +49,7 @@ export class ViewMetricButton extends React.PureComponent {
         return (
             <a href={file.url} className={usedClassName} target="_blank" onClick={this.onClick} rel="noopener noreferrer"
                 {..._.omit(this.props, 'file', 'title', 'defaultBtnClassName', 'className', 'disabled', 'onClick', 'target', 'href')}>
-                <i className="icon icon-fw icon-external-link fas"/>{ title ? <span>&nbsp; { title }</span> : null }
+                <i className="icon icon-fw icon-external-link-alt fas"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
     }

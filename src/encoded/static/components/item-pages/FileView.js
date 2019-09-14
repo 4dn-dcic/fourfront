@@ -232,7 +232,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
             <button type="button" href={btnHref} className="btn btn-primary mr-05" tagret="_blank">
-                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small fas align-baseline"/>
+                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
             </button>
         );
     }
@@ -260,7 +260,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         return (
             <button type="button" href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
                 <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
-                <i className="icon icon-fw icon-external-link text-small fas align-baseline"/>
+                <i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
             </button>
         );
     }
@@ -409,7 +409,7 @@ export class QualityControlResults extends React.PureComponent {
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
                             <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
-                            <i className="ml-05 icon icon-fw icon-external-link text-small fas"/>
+                            <i className="ml-05 icon icon-fw icon-external-link-alt text-small fas"/>
                         </React.Fragment>
                     } />
                     : null }
