@@ -1,25 +1,25 @@
-var gulp        = require('gulp'),
-    PluginError = require('plugin-error'),
-    log         = require('fancy-log'),
-    webpack     = require('webpack'),
-    sass        = require('node-sass'),
-    fs          = require('fs');
+const gulp = require('gulp');
+const PluginError = require('plugin-error');
+const log = require('fancy-log');
+const webpack = require('webpack');
+const sass = require('node-sass');
+const fs = require('fs');
 
 
-var setProduction = (done) => {
+function setProduction(done){
     process.env.NODE_ENV = 'production';
     done();
-};
+}
 
-var setQuick = (done) => {
+function setQuick(done){
     process.env.NODE_ENV = 'quick';
     done();
-};
+}
 
-var setDevelopment = (done) => {
+function setDevelopment(done){
     process.env.NODE_ENV = 'development';
     done();
-};
+}
 
 function webpackOnBuild(done) {
     var start = Date.now();
@@ -36,22 +36,25 @@ function webpackOnBuild(done) {
     };
 }
 
-var doWebpack = (cb) => {
-    var webpackConfig = require('./webpack.config.js');
+function doWebpack(cb){
+    // Import in here so process.env.NODE_ENV changes are picked up.
+    const webpackConfig = require('./webpack.config.js');
     webpack(webpackConfig).run(webpackOnBuild(cb));
-};
+}
 
-var watch = () => {
-    var webpackConfig = require('./webpack.config.js');
+function watch(){
+    // Import in here so process.env.NODE_ENV changes are picked up.
+    const webpackConfig = require('./webpack.config.js');
     webpack(webpackConfig).watch(300, webpackOnBuild());
-};
+}
+
 
 
 // TODO: Just use command-line `node-sass` ?
 
 const cssOutputLocation = './src/encoded/static/css/style.css';
 
-var doSassBuild = (done, options = {}) => {
+const doSassBuild = (done, options = {}) => {
     sass.render({
         file: './src/encoded/static/scss/style.scss',
         outFile: './src/encoded/static/css/style-map.css', // sourceMap location
@@ -77,7 +80,7 @@ var doSassBuild = (done, options = {}) => {
             });
         }
     });
-}
+};
 
 
 const devSlow       = gulp.series(setDevelopment, doWebpack, watch);

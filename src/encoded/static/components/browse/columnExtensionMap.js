@@ -55,7 +55,11 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
         'render' : function googleAnalyticsDate(result, columnDefinition, props, width){
             if (!result.google_analytics || !result.google_analytics.for_date) return null;
-            return <LocalizedTime timestamp={result.google_analytics.for_date} formatType="date-sm" localize={false} />;
+            return (
+                <span className="value">
+                    <LocalizedTime timestamp={result.google_analytics.for_date} formatType="date-sm" localize={false} />
+                </span>
+            );
         }
     },
     'status' : {
@@ -65,10 +69,10 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'render' : function statusIndicator(result, columnDefinition, props, width){
             const statusFormatted = Schemas.Term.toName('status', result.status);
             return (
-                <React.Fragment>
+                <span className="value">
                     <i className="item-status-indicator-dot mr-07" data-status={result.status}/>
                     { statusFormatted }
-                </React.Fragment>
+                </span>
             );
         }
     },
@@ -79,9 +83,13 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             const { title }  = result.workflow;
             const link = object.itemUtil.atId(result.workflow);
             if (link){
-                return <a href={link}>{ title }</a>;
+                return (
+                    <span className="value">
+                        <a href={link}>{ title }</a>
+                    </span>
+                );
             } else {
-                return title;
+                return <span className="value">{ title }</span>;
             }
         }
     },
@@ -101,7 +109,11 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
         'render' : function publicRelease(result, columnDefinition, props, width){
             if (!result.public_release) return null;
-            return <LocalizedTime timestamp={result.public_release} formatType="date-sm" />;
+            return (
+                <span className="value">
+                    <LocalizedTime timestamp={result.public_release} formatType="date-sm" />
+                </span>
+            );
         },
         'order' : 505
     },

@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, DropdownItem, Dropdown, Button } from 'react-bootstrap';
+import { DropdownButton, DropdownItem, Dropdown, Button, Modal } from 'react-bootstrap';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
@@ -69,11 +69,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
+        this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
+        this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
 
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
@@ -91,7 +93,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'saveLoading'           : false,
             'cloneLoading'          : false,
             'releaseLoading'        : false,
-            'addFileLoading'        : false
+            'addFileLoading'        : false,
+            'modal'                 : null
         };
         this.higlassRef = React.createRef();
     }
@@ -174,7 +177,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     // }
 
     havePermissionToEdit(){
-        return !!(this.props.session && _.findWhere(this.props.context.actions || [], { 'name' : 'edit' }));
+        const { session, context : { actions = [] } } = this.props;
+        return !!(session && _.findWhere(actions, { 'name' : 'edit' }));
     }
 
     /**
@@ -184,7 +188,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     */
     handleSave(evt){
         const { href, context } = this.props;
-        const { genome_assembly } = this.state;
+        const { genome_assembly, modal } = this.state;
         evt.preventDefault();
 
         const hgc = this.getHiGlassComponent();
@@ -200,6 +204,23 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             throw new Error('No edit permissions.');
         }
 
+        if(modal == null && context.status && typeof context.status === 'string' &&
+            (context.status === 'released' || context.status === 'released_to_project')) {
+            this.setState({
+                'modal': (
+                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel}
+                        confirmButtonText="Save" cancelButtonText="Cancel" modalTitle="Confirm Save">
+                        You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?
+                        <br />Note that you can also clone this display and share the new copy.
+                    </ConfirmModal>
+                )
+            });
+            return;
+        }
+        //default window.confirm dialog
+        /*if(!confirm('You are overwriting a HiGlass Display Item that was previously shared with public. Are you sure?\r\n\r\nNote that you can also clone this display and share the new copy.'))
+            return;*/
+
         // We're updating this object's view conf and the genome assembly.
         const payload = { 'viewconfig' : currentViewConf };
 
@@ -210,7 +231,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             payload.genome_assembly = genome_assembly;
         }
 
-        this.setState({ 'saveLoading' : true }, ()=>{
+        this.setState({ 'saveLoading' : true, 'modal': null }, ()=>{
             ajax.load(
                 href,
                 (resp)=>{
@@ -342,6 +363,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
         );
 
+    }
+    /**
+    * Cancel/hide modal popup
+    * @returns {void}
+    */
+    handleModalCancel() {
+        this.setState({ 'modal': null });
     }
 
     /**
@@ -608,23 +636,18 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return null;
     }
 
-    extNonFullscreen(){
-        // TODO: temp add file text input box to go here
-        // we can use temp text input box which take @id and then iterate on it later
-        // in any case, we'll need logic to AJAX in the file, check its file_type, genome_assembly, higlass_uid, and craftfully extend hgc.api.exportAsViewConfString() with it.
-        // Would use/add to HiGlassConfigurator functions.
-
-
+    collapseButtonTitle(isOpen){
         return (
-            <div className="bottom-panel">
-
-            </div>
+            <span>
+                <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
+            </span>
         );
     }
 
     render(){
         const { isFullscreen, windowWidth, windowHeight, width, session } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig } = this.state;
+        const { addFileLoading, genome_assembly, viewConfig, modal } = this.state;
+
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
         // Setting the height of the HiGlass Component follows one of these rules:
         // - If it's Fullscreen it should almost take up the entire window.
@@ -648,13 +671,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <h3 className="tab-section-title">
                     <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
                         className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
-                    <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth} constantButtons={this.fullscreenButton()} collapseButtonTitle={function(isOpen){
-                        return (
-                            <span>
-                                <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
-                            </span>
-                        );
-                    }}>
+                    <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth}
+                        constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
                         {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
@@ -670,6 +688,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     </div>
                     { !isFullscreen ? this.extNonFullscreen() : null }
                 </div>
+                { modal }
             </div>
         );
     }
@@ -795,3 +814,35 @@ class CollapsibleViewConfOutput extends React.PureComponent {
         );
     }
 }
+
+/**
+ * Generic modal dialog popup. Customizable title, confirm/cancel button's text.
+ * TODO: this component can be moved to another file for generic use in portal.
+ */
+export const ConfirmModal = React.memo(function (props) {
+    const { handleConfirm, handleCancel, modalTitle, confirmButtonText, cancelButtonText } = props;
+    return (
+        <Modal show onHide={handleCancel}>
+            <Modal.Header closeButton>
+                <Modal.Title>{modalTitle || 'Confirm'}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {props.children || ''}
+            </Modal.Body>
+            <Modal.Footer>
+                <button type="button" onClick={handleConfirm} className="btn btn-success">
+                    <i className="icon icon-fw icon-check mr-08" />{confirmButtonText || 'OK'}
+                </button>
+                <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
+                    <i className="icon icon-fw icon-times mr-08" />{cancelButtonText || 'Cancel'}
+                </button>
+            </Modal.Footer>
+        </Modal>);
+});
+ConfirmModal.PropTypes = {
+    'handleConfirm' : PropTypes.func.isRequired,
+    'handleCancel': PropTypes.func.isRequired,
+    'modalTitle': PropTypes.string,
+    'confirmButtonText': PropTypes.string,
+    'cancelButtonText': PropTypes.string
+};
