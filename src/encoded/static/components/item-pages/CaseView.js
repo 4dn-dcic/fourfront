@@ -696,6 +696,7 @@ export class PedigreeTabViewBody extends React.PureComponent {
                     isBrowserFullscreen,
                     isPedigreeFullscreen: false
                 });
+                return;
             }
 
             const isPedigreeFullscreen = PedigreeTabViewBody.isViewFullscreen(windowHeight);
@@ -711,7 +712,10 @@ export class PedigreeTabViewBody extends React.PureComponent {
         const { dataset, windowWidth, windowHeight, renderDetailPane, visibleDiseases, scale = 1 } = this.props;
         const { isBrowserFullscreen, isPedigreeFullscreen } = this.state;
         const propName = (isBrowserFullscreen ? "height" : "minimumHeight");
-        const cls = (isPedigreeFullscreen ? "view-is-full-screen" : null);
+        const cls = (
+            (isBrowserFullscreen ? "browser-is-full-screen" : "") +
+            (isPedigreeFullscreen ? " view-is-full-screen" : "")
+        );
         let heightDiff = undefined;
         if (isPedigreeFullscreen){
             heightDiff = 0;
