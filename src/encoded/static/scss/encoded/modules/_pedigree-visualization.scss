@@ -86,8 +86,8 @@ $pedigree-disease-colors :
 
         // Center viz area
         display: flex;
-        align-items: center;
         justify-content: center;
+        align-items: center;
 
         > .viz-area {
             position: relative;
@@ -316,9 +316,8 @@ $pedigree-disease-colors :
     
         }
 
-    }
 
-    
+    }
 
 }
 
@@ -497,7 +496,9 @@ div#pedigree-viz-container-cgap {
 /** CGAP-specific full screen view styling **/
 
 div#pedigree-viz-container-cgap.view-is-full-screen {
+
     .pedigree-viz-container {
+
         @include media-breakpoint-up(md){
             > .detail-pane-container {
                 .detail-pane-inner {
@@ -505,5 +506,15 @@ div#pedigree-viz-container-cgap.view-is-full-screen {
                 }
             }
         }
+
+        &:not(.has-extra-height) {
+
+            .inner-container {
+                align-items: start;
+            }
+    
+        }
+
     }
+
 }

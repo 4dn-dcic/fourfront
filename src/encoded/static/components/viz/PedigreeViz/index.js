@@ -517,7 +517,8 @@ export class PedigreeVizView extends React.PureComponent {
 
         const cls = (
             "pedigree-viz-container" +
-            (currSelectedNodeId ? ' node-selected' : '')
+            (currSelectedNodeId ? ' node-selected' : '') +
+            (containerHeight > graphHeight ? " has-extra-height" : "")
         );
 
         const detailPanelCls = (
