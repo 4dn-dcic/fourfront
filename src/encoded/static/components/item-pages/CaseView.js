@@ -823,12 +823,13 @@ export class PedigreeFullScreenBtn extends React.PureComponent {
     }
 
     render(){
-        const { windowWidth } = this.props;
         const { visible } = this.state;
         if (!visible) return null;
         return (
-            <button type="button" className="btn btn-outline-dark ml-05" onClick={this.onClick}>
+            <button type="button" className="btn btn-outline-dark ml-05 d-none d-md-inline-block"
+                onClick={this.onClick} data-tip="Maximize pedigree to take up full screen">
                 <i className="icon icon-expand fas fw"/>
+                <span className="d-md-inline d-lg-none ml-08">Full Screen</span>
             </button>
         );
     }

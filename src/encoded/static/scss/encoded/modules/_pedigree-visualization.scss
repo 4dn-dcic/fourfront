@@ -108,7 +108,7 @@ $pedigree-disease-colors :
                         bottom: -19px;
                         opacity: 0;
                         z-index: -100;
-                        transition: z-index .0s .2s, opacity .2s, right .2s, bottom .2s;
+                        @include transition(z-index .0s .2s, opacity .2s, right .2s, bottom .2s);
                         > button {
                             display: block;
                             border: 1px solid transparent;
@@ -121,7 +121,7 @@ $pedigree-disease-colors :
                             padding: 0;
                             background: $brand-primary;
                             font-size: 0.9rem;
-                            transition: width 0s .2s, height 0s .2s;
+                            @include transition(width 0s .2s, height 0s .2s);
                         }
                     }
     
@@ -131,7 +131,7 @@ $pedigree-disease-colors :
                         //left: 100%;
                         //top: 100%;
                         padding: 0px 6px;
-                        transition: padding-top .2s;
+                        @include transition(padding-top .2s);
                         .line-item {
                             width: 100%;
                             display: block;
@@ -149,11 +149,11 @@ $pedigree-disease-colors :
                             opacity: 1;
                             z-index: 1;
                             right: -15px;
-                            transition: z-index 0s, opacity .2s, right .2s, bottom .2s;
+                            @include transition(z-index 0s, opacity .2s, right .2s, bottom .2s);
                             > button {
                                 width: 30px;
                                 height: 30px;
-                                transition: width 0s 0s, height 0s 0s;
+                                @include transition(width 0s 0s, height 0s 0s);
                             }
                         }
                         .detail-text {
@@ -191,7 +191,7 @@ $pedigree-disease-colors :
                     background-color: #521f1fad;
                     background: transparent;
                     padding: 9px;
-                    transition: padding .2s;
+                    @include transition(padding .2s);
                     cursor: pointer;
                     &:after {
                         content: '';
@@ -202,7 +202,7 @@ $pedigree-disease-colors :
                         border: 2px solid #521f1f;
                         border-radius: 50%;
                         display: block;
-                        transition: width .2s, height .2s;
+                        @include transition(width .2s, height .2s);
                     }
     
                     &.is-hovered-over:not(.is-selected) {
@@ -226,7 +226,7 @@ $pedigree-disease-colors :
                         // Shapes will inherit group styles unless overriding
                         stroke-width: 3px;
                         stroke: $pedigree-viz-node-stroke-color;
-                        transition: transform .2s;
+                        @include transition(transform .2s, -webkit-transform .2s);
     
                         .bg-shape-copy {
                             stroke-width: 0px;
@@ -236,7 +236,7 @@ $pedigree-disease-colors :
                         .fg-shape {
                             stroke-width: 3px;
                             fill: transparent;
-                            transition: stroke-width .2s;
+                            @include transition(stroke-width .2s);
                         }
     
                         text {
@@ -302,9 +302,9 @@ $pedigree-disease-colors :
                 }
     
                 > g.selected-node-identifier {
-                    transition: transform .3s;
+                    @include transition(transform .3s);
                     > g.identifier-corner {
-                        transition: transform .3s;
+                        @include transition(transform .3s);
                     }
                     path {
                         stroke: $pedigree-viz-node-stroke-color;
@@ -355,7 +355,7 @@ div#pedigree-viz-container-cgap {
             }
             > .detail-pane-container {
                 background-color: $pedigree-viz-bg-color;
-                transition: flex .3s, width .3s, background-color .2s;
+                @include transition(flex .3s, width .3s, background-color .2s);
                 &.has-selected-node {
                     background-color: #fff;
                     border-left-color: darken($pedigree-viz-bg-color, 10%) !important;
@@ -450,7 +450,7 @@ div#pedigree-viz-container-cgap {
                                 width: calc(100% + 8px);
                                 min-height: 100px;
                                 min-height: 15vh;
-                                transition: min-height .25s;
+                                @include transition(min-height .25s);
                                 font-size: 0.925em;
                                 border: 1px solid #ccc;
                                 padding: 3px;

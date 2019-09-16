@@ -103,9 +103,13 @@ hr.tab-section-title-horiz-divider {
         }
         > .mobile-size-elem {
             > .dropdown.btn-group,
-            > .dropdown.btn-group > button.btn,
+			> .dropdown.btn-group > button.btn,
+			> .dropdown,
+			> .dropdown > .btn,
             > button.btn {
-                width: 100%;
+				width: 100%;
+				margin-left: 0 !important;
+				margin-right: 0 !important;
                 text-align: left;
             }
         }
@@ -135,9 +139,30 @@ $tabbar-height: 46px;
 			background-color: $tabbar-bg-color;
 			height: $tabbar-height;
 			align-items: center;
+			overflow-x: auto;
+
+			// Firefox
+			scrollbar-width: 3px;
+			scrollbar-track-color: $tabbar-bg-color;
+			scrollbar-color: #777;
+
+			// Chrome, Safari
+			&::-webkit-scrollbar {
+				height: 3px;
+				width: 3px;
+				background-color: #fff;
+				background-color: $tabbar-bg-color;
+				border-bottom: 1px solid darken($tabbar-bg-color, 10%);
+			}
+
+			&::-webkit-scrollbar-thumb {
+				background-color: #777;
+			}
+
 			> .tab-item {
 				display: flex;
-    			align-items: center;
+				align-items: center;
+				flex-shrink: 0;
 				padding-left: 16px;
 				padding-right: 16px;
 				overflow: hidden;
@@ -145,8 +170,9 @@ $tabbar-height: 46px;
 				text-overflow: ellipsis;
 				max-width: 200px;
 				color: $tabbar-text-color;
-				height: inherit;
+				height: 100%;
 				border-bottom: 1px solid darken($tabbar-bg-color, 10%);
+				border-right: 1px solid transparent;
 
 				&:not(:first-child){
 					border-left: 1px solid darken($tabbar-bg-color, 20%);
@@ -176,6 +202,7 @@ $tabbar-height: 46px;
 				&.title-tab {
 					max-width: 320px;
 					background-color: lighten($tabbar-bg-color, 5%);
+					flex-shrink: 0;
 					> div.row {
 						max-width: inherit;
 						flex-wrap: nowrap;
@@ -213,6 +240,7 @@ $tabbar-height: 46px;
 				&.menu-tab {
 					max-width: none;
 					flex-grow: 1;
+					flex-shrink: 0;
 					justify-content: flex-end;
 					padding: 0; // Child of tab will have padding
 					.icon-container {
