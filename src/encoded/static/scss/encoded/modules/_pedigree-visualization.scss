@@ -495,7 +495,21 @@ div#pedigree-viz-container-cgap {
 
 /** CGAP-specific full screen view styling **/
 
-div#pedigree-viz-container-cgap.view-is-full-screen {
+div#pedigree-viz-container-cgap.browser-is-full-screen {
+    @include media-breakpoint-up(md){
+        position: fixed;
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+}
+
+div#pedigree-viz-container-cgap.view-is-full-screen,
+div#pedigree-viz-container-cgap.browser-is-full-screen {
 
     .pedigree-viz-container {
 

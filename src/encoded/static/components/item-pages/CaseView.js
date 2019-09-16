@@ -683,6 +683,7 @@ export class PedigreeTabViewBody extends React.PureComponent {
             isBrowserFullscreen : false,
             isPedigreeFullscreen : false
         };
+        //this.pedigreeContainerRef = React.createRef();
     }
 
     componentDidUpdate(pastProps){
@@ -717,7 +718,7 @@ export class PedigreeTabViewBody extends React.PureComponent {
             (isPedigreeFullscreen ? " view-is-full-screen" : "")
         );
         let heightDiff = undefined;
-        if (isPedigreeFullscreen){
+        if (isBrowserFullscreen || isPedigreeFullscreen){
             heightDiff = 0;
         }
 
