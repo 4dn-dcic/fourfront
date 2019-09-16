@@ -638,9 +638,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     collapseButtonTitle(isOpen){
         return (
-            <span>
-                <i className={"icon icon-fw fas icon-" + (isOpen ? 'angle-up' : 'navicon')}/>&nbsp; Menu
-            </span>
+            <React.Fragment>
+                <i className={"icon icon-fw fas icon-" + (isOpen ? 'angle-up' : 'bars')}/>&nbsp; Menu
+            </React.Fragment>
         );
     }
 
@@ -670,7 +670,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
-                        className="mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
+                        className="btn-success mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
                         {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
@@ -701,7 +701,12 @@ class AddFileButton extends React.PureComponent {
 
     static propTypes = {
         'onClick' : PropTypes.func.isRequired,
-        'loading' : PropTypes.bool.isRequired
+        'loading' : PropTypes.bool.isRequired,
+        'className' : PropTypes.string
+    };
+
+    static defaultProps = {
+        'className' : "btn-success"
     };
 
     constructor(props){
@@ -737,7 +742,7 @@ class AddFileButton extends React.PureComponent {
     }
 
     render(){
-        const { loading, genome_assembly } = this.props;
+        const { loading, genome_assembly, className, style } = this.props;
         const { isSelecting } = this.state;
         const tooltip         = "Search for a file and add it to the display.";
         const dropMessage     = "Drop a File here.";
@@ -745,13 +750,13 @@ class AddFileButton extends React.PureComponent {
             '/search/?currentAction=selection&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
             + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
         );
+        const cls = "btn" + (className ? " " + className : "");
 
         return (
             <React.Fragment>
-                <Button onClick={this.setIsSelecting} disabled={loading} bsStyle="success" key="addfilebtn" data-tip={tooltip}
-                    {..._.pick(this.props, 'className', 'style')}>
-                    <i className={"icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>&nbsp; Add Data
-                </Button>
+                <button type="button" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip} style={style} className={cls}>
+                    <i className={"mr-08 icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>Add Data
+                </button>
                 <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
             </React.Fragment>
         );
@@ -770,49 +775,6 @@ function StatusMenuItem(props){
     );
 }
 
-
-/**
- * Dont use. Was testing stuff. Not fun UX. Details tab is nicer.
- *
- * @deprecated
- * @class CollapsibleViewConfOutput
- * @extends {React.PureComponent}
- */
-class CollapsibleViewConfOutput extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.toggle = this.toggle.bind(this);
-        this.state = {
-            'open' : false
-        };
-    }
-
-    toggle(e){
-        e.preventDefault();
-        this.setState(function(currState){
-            return { 'open' : !currState.open };
-        });
-    }
-
-    render(){
-        const { viewConfig } = this.props;
-        const { open } = this.state;
-
-        return (
-            <div className="viewconfig-panel">
-                <hr/>
-                <h4 className="clickable inline-block text-400" onClick={this.toggle}>
-                    <i className={"icon icon-fw fas icon-" + (open ? 'minus' : 'plus' )} />&nbsp;&nbsp;
-                    { open ? 'Close' : 'View' } Configuration
-                </h4>
-                <Collapse in={open}>
-                    <pre>{ viewConfig }</pre>
-                </Collapse>
-            </div>
-        );
-    }
-}
 
 /**
  * Generic modal dialog popup. Customizable title, confirm/cancel button's text.

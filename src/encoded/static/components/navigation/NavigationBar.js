@@ -135,7 +135,7 @@ export class NavigationBar extends React.PureComponent {
                             </a>
 
                             <Navbar.Toggle>
-                                <i className="icon icon-navicon fas icon-fw align-middle" />
+                                <i className="icon icon-bars fas icon-fw align-middle" />
                             </Navbar.Toggle>
 
                             <CollapsedNav {...this.state} {...this.props} />
