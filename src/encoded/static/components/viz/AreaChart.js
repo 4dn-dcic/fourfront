@@ -264,11 +264,11 @@ export class GroupByController extends React.PureComponent {
 
     static defaultProps = {
         'groupByOptions' : {
-            'award.center_title'                 : <span><i className="icon icon-fw fas icon-institution"/>&nbsp; Center</span>,
-            'award.project'                      : <span><i className="icon icon-fw fas icon-institution"/>&nbsp; Project</span>,
+            'award.center_title'                 : <span><i className="icon icon-fw fas icon-university"/>&nbsp; Center</span>,
+            'award.project'                      : <span><i className="icon icon-fw fas icon-university"/>&nbsp; Project</span>,
             'lab.display_title'                  : <span><i className="icon icon-fw fas icon-users"/>&nbsp; Lab</span>,
             //'status'                             : <span><i className="icon icon-fw icon-circle"/>&nbsp; <span className="text-600">Current</span> Status</span>,
-            'experiments_in_set.experiment_type.display_title' : <span><i className="icon fas icon-fw icon-bar-chart"/>&nbsp; Experiment Type</span>
+            'experiments_in_set.experiment_type.display_title' : <span><i className="icon fas icon-fw icon-chart-bar"/>&nbsp; Experiment Type</span>
         },
         'initialGroupBy' : 'award.center_title'
     }

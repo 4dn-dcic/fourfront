@@ -46,6 +46,11 @@
     @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
     font-weight: 400;
     padding-top: 2px;
+    > i.icon:only-child {
+        // Special case - centers better / more consistently when no other text within btn.xs
+        vertical-align: baseline;
+        transform: none;
+    }
 }
 
 .btn-xs.rounded,
