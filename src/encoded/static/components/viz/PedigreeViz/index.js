@@ -180,6 +180,15 @@ export class PedigreeViz extends React.PureComponent {
         //"height" : null,
 
         /**
+         * Minimum height of parent container,
+         * if height is not set and want container to
+         * be at least a certain height.
+         *
+         * @optional
+         */
+        "minimumHeight" : 400,
+
+        /**
          * Width of parent container.
          * Will be scrollable left/right if greater than this.
          *
@@ -219,7 +228,10 @@ export class PedigreeViz extends React.PureComponent {
          *
          * @type {!string[]}
          */
-        "visibleDiseases": null
+        "visibleDiseases": null,
+
+
+        "scale" : 1
     };
 
     static initState(dataset){
@@ -346,7 +358,8 @@ class GraphTransformer extends React.PureComponent {
 export class PedigreeVizView extends React.PureComponent {
 
     static defaultProps = {
-        'width': 600
+        'width': 600,
+        "scale" : 1
     };
 
     constructor(props){
@@ -440,9 +453,11 @@ export class PedigreeVizView extends React.PureComponent {
         const {
             width: containerWidth,
             height: propHeight,
+            minimumHeight,
             objectGraph, dims, order, memoized,
             overlaysContainer, renderDetailPane, containerStyle,
             visibleDiseases = null,
+            scale = 1,
             ...passProps
         } = this.props;
         const { currSelectedNodeId } = this.state;
@@ -459,19 +474,21 @@ export class PedigreeVizView extends React.PureComponent {
 
         const graphHeight = memoized.getGraphHeight(order.orderByHeightIndex, dims);
         const graphWidth = memoized.getGraphWidth(objectGraph, dims);
-        const containerHeight = propHeight || graphHeight;
+        const containerHeight = propHeight || Math.max(minimumHeight, graphHeight);
         const orderedNodes = memoized.orderNodesBottomRightToTopLeft(objectGraph);
 
         const useContainerStyle = {
             //width: containerWidth,
-            height: "auto",
-            minHeight : containerHeight || "none",
+            height: propHeight || "auto",
+            minHeight : containerHeight,
             ...containerStyle
         };
 
         const vizAreaStyle = {
-            'width': graphWidth,
-            'height': graphHeight + 60 // Add extra to offset text @ bottom of nodes.
+            'width': graphWidth * scale,
+            // Add extra to offset text @ bottom of nodes.
+            'height': (graphHeight * scale) + 60,
+            'transform' : scale !== 1 ? "scale(" + scale + ")" : null
         };
 
         const commonChildProps = {
@@ -500,7 +517,8 @@ export class PedigreeVizView extends React.PureComponent {
 
         const cls = (
             "pedigree-viz-container" +
-            (currSelectedNodeId ? ' node-selected' : '')
+            (currSelectedNodeId ? ' node-selected' : '') +
+            (containerHeight > graphHeight ? " has-extra-height" : "")
         );
 
         const detailPanelCls = (

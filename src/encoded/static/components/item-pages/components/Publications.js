@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 

@@ -7,14 +7,15 @@ import _ from 'underscore';
 import url from 'url';
 import { DropdownButton, DropdownItem } from 'react-bootstrap';
 import DefaultItemView from './DefaultItemView';
-import { console, layout, ajax, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
-import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
+import { console, layout, ajax, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { PedigreeViz } from './../viz/PedigreeViz';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { FullHeightCalculator } from './components/FullHeightCalculator';
 import { PedigreeDetailPane } from './components/PedigreeDetailPane';
 import { Schemas } from './../util';
+import { isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/misc';
 
 
 
@@ -517,6 +518,7 @@ class PedigreeTabView extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.handleWheelMove = this.handleWheelMove.bind(this);
         this.handleToggleCheckbox = this.handleToggleCheckbox.bind(this);
         this.handleChangeShowAsDiseases = this.handleChangeShowAsDiseases.bind(this);
         this.renderDetailPane = this.renderDetailPane.bind(this);
@@ -524,14 +526,47 @@ class PedigreeTabView extends React.PureComponent {
             parseFamilyIntoDataset : memoize(parseFamilyIntoDataset),
             getPhenotypicFeatureStrings : memoize(PedigreeTabView.getPhenotypicFeatureStrings)
         };
+
         if (!(Array.isArray(props.context.families) && props.context.families.length > 0)){
             throw new Error("Expected props.context.families to be a non-empty Array.");
         }
 
         this.state = {
             showAllDiseases : false,
-            showAsDiseases: "Phenotypic Features" // todo - enum
+            showAsDiseases: "Phenotypic Features", // todo - enum
+            scale: 1
         };
+
+        this.tabViewRef = React.createRef();
+    }
+
+    /*
+    componentDidMount(){
+        if (this.tabViewRef.current){
+            this.tabViewRef.current.addEventListener("wheel", this.handleWheelMove);
+        }
+    }
+
+    componentWillUnmount(){
+        if (this.tabViewRef.current){
+            this.tabViewRef.current.removeEventListener("wheel", this.handleWheelMove);
+        }
+    }
+    */
+
+    handleWheelMove(evt){
+        const { deltaY, deltaX } = evt;
+        if (Math.abs(deltaX) > Math.abs(deltaY)){
+            return;
+        }
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.setState(function({ scale: prevScale = 1 }){
+            const scaleUnbounded = prevScale -= (deltaY * 0.001);
+            const scale = Math.min(1, Math.max(0.1, scaleUnbounded));
+            console.log('E2', prevScale, scaleUnbounded, scale);
+            return { scale };
+        });
     }
 
     handleToggleCheckbox(evt){
@@ -570,7 +605,7 @@ class PedigreeTabView extends React.PureComponent {
             schemas, windowWidth, windowHeight, innerOverlaysContainer, href,
             handleFamilySelect, pedigreeFamiliesIdx, pedigreeFamilies
         } = this.props;
-        const { showAllDiseases, showAsDiseases } = this.state;
+        const { showAllDiseases, showAsDiseases, scale } = this.state;
 
         const families = pedigreeFamilies || contextFamilies;
         const currentFamily = families[pedigreeFamiliesIdx];
@@ -578,9 +613,9 @@ class PedigreeTabView extends React.PureComponent {
 
         const dataset = this.memoized.parseFamilyIntoDataset(currentFamily);
 
-        console.log('DDD', dataset);
+        console.log('DDD', scale, dataset);
         return (
-            <div>
+            <div ref={this.tabViewRef}>
                 <div className="container-wide">
                     <h3 className="tab-section-title">
                         <span>Pedigree</span>
@@ -588,11 +623,12 @@ class PedigreeTabView extends React.PureComponent {
                             {/* <ColorAllDiseasesCheckbox checked={showAllDiseases} onChange={this.handleToggleCheckbox} /> */}
                             <ShowAsDiseasesDropdown onSelect={this.handleChangeShowAsDiseases} {...{ showAllDiseases, showAsDiseases }}  />
                             <FamilySelectionDropdown {...{ families, currentFamilyIdx: pedigreeFamiliesIdx }} onSelect={handleFamilySelect} />
+                            <PedigreeFullScreenBtn />
                         </CollapsibleItemViewButtonToolbar>
                     </h3>
                 </div>
                 <hr className="tab-section-title-horiz-divider"/>
-                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight }}
+                <PedigreeTabViewBody {...{ dataset, windowWidth, windowHeight, scale }}
                     renderDetailPane={this.renderDetailPane} visibleDiseases={phenotypicFeatureStrings} />
             </div>
         );
@@ -603,16 +639,99 @@ class PedigreeTabView extends React.PureComponent {
 /**
  * Given dataset and options, renders out a pedigree from dataset.
  * Reusable for any PedigreeTabView of any ItemView.
- * @todo Maybe move into item-pages/components? Maybe not.
  */
-export function PedigreeTabViewBody({ dataset, windowWidth, windowHeight, renderDetailPane, visibleDiseases }){
-    return (
-        <FullHeightCalculator {...{ windowWidth, windowHeight }}>
-            <PedigreeViz {...{ dataset, windowWidth, renderDetailPane, visibleDiseases }}
-                width={windowWidth} filterUnrelatedIndividuals={false}>
-            </PedigreeViz>
-        </FullHeightCalculator>
-    );
+export class PedigreeTabViewBody extends React.PureComponent {
+
+    // Maybe todo: make into class, on windowHeight/Width updates, check if full screen (=== screen.height, ...)
+    // And if so, set propName="height" instead.
+
+    /** @todo move to shared-portal-components/util/layout */
+    static isBrowserFullscreen(windowHeight){
+
+        if (!windowHeight){
+            console.error("No windowHeight available.");
+            return false;
+        }
+
+        let screenH = null;
+        if (window && window.screen){
+            screenH = window.screen.height;
+        }
+        if (!screenH){
+            console.error("Can't detect screen dimensions, ok if serverside, else unsupported browser.");
+            return false;
+        }
+
+        if (windowHeight === screenH){
+            return true;
+        }
+
+        return false;
+    }
+
+    static isViewFullscreen(windowHeight){
+        const pedigreeContainerElem = document.getElementById("pedigree-viz-container-cgap");
+        if (pedigreeContainerElem && pedigreeContainerElem.offsetHeight === windowHeight){
+            return true;
+        }
+        return false;
+    }
+
+    constructor(props){
+        super(props);
+        this.state = {
+            isBrowserFullscreen : false,
+            isPedigreeFullscreen : false
+        };
+    }
+
+    componentDidUpdate(pastProps){
+        const { windowHeight } = this.props;
+        if (windowHeight !== pastProps.windowHeight){
+            const isBrowserFullscreen = PedigreeTabViewBody.isBrowserFullscreen(windowHeight);
+            console.info("Went full screen?", isBrowserFullscreen);
+
+            if (!isBrowserFullscreen) {
+                this.setState({
+                    isBrowserFullscreen,
+                    isPedigreeFullscreen: false
+                });
+                return;
+            }
+
+            const isPedigreeFullscreen = PedigreeTabViewBody.isViewFullscreen(windowHeight);
+
+            this.setState({
+                isBrowserFullscreen,
+                isPedigreeFullscreen
+            });
+        }
+    }
+
+    render(){
+        const { dataset, windowWidth, windowHeight, renderDetailPane, visibleDiseases, scale = 1 } = this.props;
+        const { isBrowserFullscreen, isPedigreeFullscreen } = this.state;
+        const propName = (isBrowserFullscreen ? "height" : "minimumHeight");
+        const cls = (
+            (isBrowserFullscreen ? "browser-is-full-screen" : "") +
+            (isPedigreeFullscreen ? " view-is-full-screen" : "")
+        );
+        let heightDiff = undefined;
+        if (isPedigreeFullscreen){
+            heightDiff = 0;
+        }
+
+        return (
+            <div id="pedigree-viz-container-cgap" className={cls}>
+                <FullHeightCalculator {...{ windowWidth, windowHeight, propName, heightDiff }}>
+                    <PedigreeViz {...{ dataset, windowWidth, renderDetailPane, visibleDiseases, scale }}
+                        width={windowWidth} filterUnrelatedIndividuals={false}>
+                    </PedigreeViz>
+                </FullHeightCalculator>
+            </div>
+        );
+    }
+
 }
 
 
@@ -649,6 +768,70 @@ const ColorAllDiseasesCheckbox = React.memo(function ShowAllDiseasesCheckbox({ c
     );
 });
 
+export class PedigreeFullScreenBtn extends React.PureComponent {
+
+    static getReqFullscreenFxn(){
+        if (isServerSide()) { return null; }
+        const pedigreeContainerElem = document.getElementById("pedigree-viz-container-cgap");
+        if (!pedigreeContainerElem){
+            throw new Error("Container element not found");
+        }
+        return (
+            pedigreeContainerElem.requestFullscreen ||
+            pedigreeContainerElem.msRequestFullscreen ||
+            pedigreeContainerElem.mozRequestFullScreen ||
+            pedigreeContainerElem.webkitRequestFullscreen ||
+            null
+        );
+    }
+
+    constructor(props){
+        super(props);
+        this.onClick = this.onClick.bind(this);
+        this.state = {
+            visible: false
+        };
+    }
+
+    componentDidMount(){
+        const fxn = PedigreeFullScreenBtn.getReqFullscreenFxn();
+        if (typeof fxn === 'function') {
+            this.setState({ visible: true });
+        }
+    }
+
+    onClick(evt){
+        if (isServerSide()) { return false; }
+        const pedigreeContainerElem = document.getElementById("pedigree-viz-container-cgap");
+        if (pedigreeContainerElem.requestFullscreen){
+            pedigreeContainerElem.requestFullscreen();
+        } else if (pedigreeContainerElem.msRequestFullscreen){
+            pedigreeContainerElem.msRequestFullscreen();
+        } else if (pedigreeContainerElem.mozRequestFullScreen){
+            pedigreeContainerElem.mozRequestFullScreen();
+        } else if (pedigreeContainerElem.webkitRequestFullscreen){
+            pedigreeContainerElem.webkitRequestFullscreen();
+        } else {
+            console.error("Couldn't go full screen");
+            Alerts.queue({
+                'title' : "Couldn't go full screen",
+                'style' : "danger"
+            });
+            this.setState({ visible: false });
+        }
+    }
+
+    render(){
+        const { windowWidth } = this.props;
+        const { visible } = this.state;
+        if (!visible) return null;
+        return (
+            <button type="button" className="btn btn-outline-dark ml-05" onClick={this.onClick}>
+                <i className="icon icon-expand fas fw"/>
+            </button>
+        );
+    }
+}
 
 const ShowAsDiseasesDropdown = React.memo(function ShowAsDiseasesDropdown({ showAsDiseases, onSelect, showAllDiseases }){
     const title = (showAllDiseases ? "All " : "Case ") + showAsDiseases;

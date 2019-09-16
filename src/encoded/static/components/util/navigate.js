@@ -4,8 +4,8 @@ import url from 'url';
 import queryString from 'query-string';
 import _ from 'underscore';
 
-import { navigate as originalNavigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/navigate';
-import { expSetFiltersToURLQuery, contextFiltersToExpSetFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/search-filters';
+import { navigate as originalNavigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/navigate';
+import { expSetFiltersToURLQuery, contextFiltersToExpSetFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/search-filters';
 
 let store = null;
 

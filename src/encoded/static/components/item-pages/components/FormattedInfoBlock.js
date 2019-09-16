@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console, isServerSide, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/PartialList';
+import { ajax, console, isServerSide, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/PartialList';
 import { generateAddressString, generateContactPersonListItem } from './AttributionTabView';
 
 

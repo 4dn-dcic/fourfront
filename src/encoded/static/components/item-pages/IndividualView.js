@@ -3,10 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import DefaultItemView from './DefaultItemView';
-import { PedigreeTabViewBody, parseFamilyIntoDataset } from './CaseView';
+import { PedigreeTabViewBody, parseFamilyIntoDataset, PedigreeFullScreenBtn } from './CaseView';
 
 
 export default class IndividualView extends DefaultItemView {
@@ -34,6 +34,7 @@ export const PedigreeTabView = React.memo(function PedigreeTabView(props){
         <div>
             <h3 className="tab-section-title container-wide">
                 <span>Pedigree</span>
+                <PedigreeFullScreenBtn />
             </h3>
             <hr className="tab-section-title-horiz-divider"/>
             <PedigreeTabViewBody {...{ innerOverlaysContainer, windowWidth, windowHeight }} />

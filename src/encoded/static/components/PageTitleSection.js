@@ -6,10 +6,10 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import Registry from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/Registry';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import Registry from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/Registry';
 
 import { content_views } from './globals';
 import jsonScriptEscape from './../libs/jsonScriptEscape';

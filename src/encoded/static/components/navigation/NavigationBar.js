@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { CGAPLogo } from './../viz/CGAPLogo';
 import { productionHost } from './../globals';
 import { navigate } from './../util';

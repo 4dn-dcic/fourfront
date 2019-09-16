@@ -977,14 +977,24 @@ export function graphToDiseaseIndices(objectGraph){
 
 
 export function orderNodesBottomRightToTopLeft(originalObjectGraph){
-    return originalObjectGraph.slice().sort(function(a, b){
-        const { _drawing: { heightIndexA, orderByHeightIndexA } } = a;
-        const { _drawing: { heightIndexB, orderByHeightIndexB } } = b;
-        if (heightIndexA !== heightIndexB){
+    return originalObjectGraph.slice(0).sort(function(a, b){
+        const { _drawing: {
+            xCoord : xA,
+            yCoord: yA,
+            heightIndex: heightIndexA,
+            orderByHeightIndex: orderByHeightIndexA
+        } } = a;
+        const { _drawing: {
+            xCoord: xB,
+            yCoord: yB,
+            heightIndex: heightIndexB,
+            orderByHeightIndex: orderByHeightIndexB
+        } } = b;
+        if (yA !== yB){
             // Bottom to top
-            return heightIndexB - heightIndexA;
+            return yB - yA;
         }
         // Right to left
-        return orderByHeightIndexA - orderByHeightIndexB;
+        return xB - xA;
     });
 }

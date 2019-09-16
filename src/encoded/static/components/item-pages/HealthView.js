@@ -7,8 +7,8 @@ import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
 
-import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 
 /**

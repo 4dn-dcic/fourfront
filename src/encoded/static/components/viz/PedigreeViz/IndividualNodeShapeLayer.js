@@ -406,7 +406,7 @@ function UnderNodeText({ individual, width, height, shape, dims, diseaseToIndex 
             // Left align text, but from midpoint
             // txtProps.x = halfWidth;
         }
-        return <text {...txtProps} key={desc}>{ content }</text>;
+        return <text {...txtProps} key={desc + "-" + idx}>{ content }</text>;
     });
 
     // todo maybe make an array of 'rows' to map to <text>s with incremented y coord.
