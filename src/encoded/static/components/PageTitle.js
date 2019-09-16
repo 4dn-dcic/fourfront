@@ -298,7 +298,6 @@ export default class PageTitle extends React.PureComponent {
     render(){
         const { context, href, session, currentAction, windowWidth, alerts, schemas } = this.props;
         const { mounted } = this.state;
-        const displayBreadCrumb = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && (currentAction === 'multiselect'));
 
         let elementStyle;
 
@@ -329,20 +328,17 @@ export default class PageTitle extends React.PureComponent {
             subtitle = <div className={"page-subtitle smaller" + (subtitleEllipsis ? ' text-ellipsis-container' : '')}>{ subtitlePrepend }{ subtitle }{ subtitleAppend }</div>;
         }
 
-        var hasToc = (
+        const hasToc = (
             context && Array.isArray(context['@type'])
             && context['@type'].indexOf('StaticPage') > -1
             && context['table-of-contents']
             && context['table-of-contents'].enabled
         );
 
-        const containerClassName = displayBreadCrumb ? "container" : "container pt-1";
         elementStyle = PageTitle.getStyles(context, href, mounted, hasToc, windowWidth);
         return (
-            <div id="page-title-container" className={containerClassName}>
-                {displayBreadCrumb ?
-                    <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
-                    : null}
+            <div id="page-title-container" className="container">
+                <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
                 <PageTitleElement {... { title, subtitle, context, href, calloutTitle, hasToc, windowWidth } } mounted={mounted} style={elementStyle} />
                 <Alerts alerts={alerts} style={{ 'width' : elementStyle.width || null }} />
             </div>
@@ -535,7 +531,7 @@ export class StaticPageBreadcrumbs extends React.Component {
             crumbs = ancestors && _.map(ancestors, this.renderCrumb);
 
         return  (
-            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? 'empty' : '') + (hasToc ? ' page-has-toc' : '')}>
+            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? ' empty' : '') + (hasToc ? ' page-has-toc' : '')}>
                 { crumbs }
                 { this.editButton() }
                 { this.seoMetadata(ancestors) }
