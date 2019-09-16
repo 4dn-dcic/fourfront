@@ -28,6 +28,16 @@
     //}
 }
 
+.btn.btn-sm {
+    // overrides .25rem (on both) to better align inline text & icon fonts
+    padding-top: 0.3rem;
+    padding-bottom: 0.2rem;
+    > i.icon {
+        // Preserve vertical-align: middle; remove transform
+        transform: none;
+    }
+}
+
 /** Overrides for own styled btns **/
 
 /** Extending Bootstrap button w/ rounded & ext-padding class **/
@@ -36,11 +46,6 @@
     @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
     font-weight: 400;
     padding-top: 2px;
-    > i.icon {
-        // Unset btn style
-        transform: none;
-        vertical-align: baseline;
-    }
 }
 
 .btn-xs.rounded,
