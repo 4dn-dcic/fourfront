@@ -3,9 +3,9 @@
 import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { barplot_color_cycler } from './../ColorCycler';
-import { console, isServerSide, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, isServerSide, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas } from './../../util';
 import { CursorViewBounds } from './../ChartDetailCursor';
 import ReactTooltip from 'react-tooltip';
@@ -147,7 +147,7 @@ class LegendViewContainer extends React.Component {
         var iconClass = this.props.expanded ? 'compress' : 'expand';
         return (
             <div className="expand-toggle text-center" onClick={this.props.onToggleExpand} data-tip={this.props.expanded ? "Collapse" : "Expand" } data-place="left">
-                <i className={"icon icon-fw icon-" + iconClass}/>
+                <i className={"icon icon-fw fas icon-" + iconClass}/>
             </div>
         );
     }

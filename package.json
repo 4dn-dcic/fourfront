@@ -4,10 +4,9 @@
   "scripts": {
     "test": "jest",
     "build": "node --max-old-space-size=2048 ./node_modules/.bin/gulp build",
-    "build-quick": "gulp build-quick",
     "build-scss": "gulp build-scss",
     "watch-scss": "gulp build-scss-dev && node-sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --recursive --output-style expanded",
-    "dev": "gulp dev",
+    "dev-analyzed": "gulp dev-analyzed --preserve-symlinks",
     "dev-quick": "gulp dev-quick --preserve-symlinks",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
@@ -95,12 +94,13 @@
     "terser-webpack-plugin": "^1.2.2",
     "uglifyjs-webpack-plugin": "^2.1.1",
     "webpack": "4.28.4",
-    "webpack-bundle-analyzer": "^3.0.4",
+    "webpack-bundle-analyzer": "^3.5.0",
     "webpack-deadcode-plugin": "^0.1.10"
   },
   "dependencies": {
     "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.12",
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.1.12",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.2.0",
+    "@fortawesome/fontawesome-free": "^5.9.0",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.9.0",
     "detect-browser": "^3.0.1",

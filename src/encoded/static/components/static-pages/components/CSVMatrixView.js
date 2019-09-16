@@ -5,7 +5,7 @@ import _ from 'underscore';
 import MatrixView from './../../viz/MatrixView';
 import * as d3 from 'd3';
 
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
 export const CSVParsingUtilities = {

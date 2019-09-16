@@ -1,4 +1,6 @@
 const gulp = require('gulp');
+const path = require('path');
+const { spawn } = require('child_process');
 const PluginError = require('plugin-error');
 const log = require('fancy-log');
 const webpack = require('webpack');
@@ -48,6 +50,80 @@ function watch(){
     webpack(webpackConfig).watch(300, webpackOnBuild());
 }
 
+function getSharedPortalComponentsLink(){
+    let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
+    let isLinked = false;
+
+    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
+        for (var i = 0; i < 10; i++) { // Incase multiple links.
+            sharedComponentPath = fs.readlinkSync(sharedComponentPath);
+            isLinked = true;
+        }
+    } catch (e){
+        // ... not linked
+    }
+
+    console.log(
+        "`@hms-dbmi-bgm/shared-portal-components` directory is",
+        isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
+    );
+
+    return { isLinked, sharedComponentPath: isLinked ? sharedComponentPath : null };
+}
+
+function buildSharedPortalComponents(done){
+    const { isLinked, sharedComponentPath } = getSharedPortalComponentsLink();
+
+    if (!isLinked){ // Exit
+        done();
+        return;
+    }
+
+    // Same as shared-portal-components own build method, but with "--watch"
+    const subP = spawn(
+        path.join(sharedComponentPath, 'node_modules/.bin/babel'),
+        [
+            path.join(sharedComponentPath, 'src'),
+            "--out-dir",
+            path.join(sharedComponentPath, 'es'),
+            "--env-name",
+            "esm"
+        ],
+        { stdio: "inherit" }
+    );
+
+    subP.on("close", (code)=>{
+        done();
+    });
+}
+
+function watchSharedPortalComponents(done){
+    const { isLinked, sharedComponentPath } = getSharedPortalComponentsLink();
+
+    if (!isLinked){ // Exit
+        done();
+        return;
+    }
+
+    // Same as shared-portal-components own build method, but with "--watch"
+    const subP = spawn(
+        path.join(sharedComponentPath, 'node_modules/.bin/babel'),
+        [
+            path.join(sharedComponentPath, 'src'),
+            "--out-dir",
+            path.join(sharedComponentPath, 'es'),
+            "--env-name",
+            "esm",
+            "--watch"
+        ],
+        { stdio: "inherit" }
+    );
+
+    subP.on("close", (code)=>{
+        done();
+    });
+}
+
 
 
 // TODO: Just use command-line `node-sass` ?
@@ -83,16 +159,39 @@ const doSassBuild = (done, options = {}) => {
 };
 
 
-const devSlow       = gulp.series(setDevelopment, doWebpack, watch);
-const devQuick      = gulp.series(setQuick, doWebpack, watch);
-const build         = gulp.series(setProduction, doWebpack);
-const buildQuick    = gulp.series(setQuick, doWebpack);
+//const devSlow = gulp.series(setDevelopment, doWebpack, watch);
+//const buildQuick = gulp.series(setQuick, doWebpack);
 
-gulp.task('dev', devSlow);
+
+const devQuick = gulp.series(
+    setQuick,
+    doWebpack,
+    gulp.parallel(watch, watchSharedPortalComponents)
+    // `watchSharedPortalComponents` will update @hms-dbmi-bgm/shared-portal-components/es/,
+    // which will be picked up by `watch` and recompiled into bundle.js
+);
+
+const devAnalyzed = gulp.series(
+    setDevelopment,
+    buildSharedPortalComponents,
+    doWebpack
+);
+
+const build = gulp.series(
+    setProduction,
+    doWebpack
+);
+
+
+//gulp.task('dev', devSlow);
+//gulp.task('build-quick', buildQuick);
+
+
 gulp.task('default', devQuick);
 gulp.task('dev-quick', devQuick);
+gulp.task('dev-analyzed', devAnalyzed);
 gulp.task('build', build);
-gulp.task('build-quick', buildQuick);
+
 
 gulp.task('build-scss', (done) => doSassBuild(done, {}));
 gulp.task('build-scss-dev', (done) => {

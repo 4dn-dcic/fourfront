@@ -123,17 +123,9 @@ body .rc-tabs-top {
 
 			i.icon {
 				margin-right: 3px;
+				vertical-align: middle;
 
-				&.icon-th,
-				&.icon-list,
-				&.icon-warning,
-				&.icon-microchip,
-				&.icon-leaf {
-					position: relative;
-					top: 1px;
-				}
-
-				&.icon-warning {
+				&.icon-exclamation-triangle {
 					color: $badge-color-warning;
 				}
 
@@ -158,7 +150,7 @@ body .rc-tabs-top {
 
 			> span.rc-tabs-tab-prev-icon,
 			> span.rc-tabs-tab-next-icon {
-				top: 3px;
+				top: 5px;
 			}
 
 			&.rc-tabs-tab-btn-disabled {
@@ -166,11 +158,13 @@ body .rc-tabs-top {
 			}
 
 			> .rc-tabs-tab-next-icon:before {
-				font-family: FontAwesome;
+				font-family: $fa-font-family;
+				font-weight: 900;
 				content: "\f105";
 			}
 			> .rc-tabs-tab-prev-icon:before {
-				font-family: FontAwesome;
+				font-family: $fa-font-family;
+				font-weight: 900;
 				content: "\f104";
 			}
 
@@ -1025,7 +1019,8 @@ $download-button-width : 100px;
 
 	&:after {
 		content : "\f105";
-		font-family: "FontAwesome";
+		font-family: $fa-font-family;
+		font-weight: 900;
 		padding-left: 6px;
 	}
 }
@@ -1098,7 +1093,8 @@ $download-button-width : 100px;
 
 	&.error-block.no-icon h5:before {
 		content: "\f06a";
-		font-family: FontAwesome;
+		font-family: $fa-font-family;
+		font-weight: 900;
 		margin-right: 6px;
 		color: #999;
 	}
@@ -1919,7 +1915,7 @@ $badge-item-min-height: 90px;
 			.icon-exclamation-circle {
 				color : $badge-color-error;
 			}
-			.icon-warning {
+			.icon-exclamation-triangle {
 				color : $badge-color-warning;
 			}
 			.icon-check {
@@ -1949,10 +1945,6 @@ $badge-item-min-height: 90px;
 
 		> a.btn-block.btn-lg {
 			font-weight: 400;
-			> i {
-				position: relative;
-				top: 1px;
-			}
 		}
 
 	}
@@ -2007,7 +1999,8 @@ $badge-item-min-height: 90px;
 		.glyphicon.glyphicon-search {
 			&:before {
 				content : "\f002";
-				font-family: "FontAwesome";
+				font-family: $fa-font-family;
+				font-weight: 900;
 			}
 		}
 

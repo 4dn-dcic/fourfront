@@ -2,9 +2,9 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 
 /** @deprecated - DropDownButton, Button */
 /** @todo use HTML elem(s) */
@@ -87,7 +87,7 @@ export default class SubscriptionsView extends React.PureComponent {
         } else if (initialized){
             main_message = "No submissions to track; you are not a submitter nor associated with any labs.";
         } else {
-            main_message = <i className="icon icon-spin icon-circle-o-notch" style={{ 'opacity': '0.5' }}/>;
+            main_message = <i className="icon icon-spin icon-circle-notch fas" style={{ 'opacity': '0.5' }}/>;
         }
         return (
             <div id="content" className="container">
@@ -210,12 +210,12 @@ class SubscriptionEntry extends React.Component{
         const { open, data } = this.state;
         if (open && !data) {
             return (
-                <i className="icon icon-spin icon-circle-o-notch" style={{ 'marginLeft': '5px','opacity': '0.5' }}/>
+                <i className="icon icon-spin icon-circle-notch fas" style={{ 'marginLeft': '5px','opacity': '0.5' }}/>
             );
         } else {
             return (
                 <button type="button" className="btn btn-xs btn-outline-dark icon-container submission-btn" onClick={this.toggleOpen}>
-                    <i className={"icon icon-" + (open ? "minus" : "plus")}/>
+                    <i className={"icon fas icon-" + (open ? "minus" : "plus")}/>
                 </button>
             );
         }
@@ -269,19 +269,19 @@ class SubscriptionEntry extends React.Component{
                 <ButtonGroup>
                     <button type="button" disabled={changing_page || !num_pages  || page === 1}
                         className="btn btn-secondary" onClick={prevPageClick}>
-                        <i className="icon icon-angle-left icon-fw"/>
+                        <i className="icon icon-angle-left icon-fw fas"/>
                     </button>
 
                     <button type="button" className="btn btn-secondary" disabled style={{ 'minWidth': 120 }}>
                         { changing_page === true || !num_pages ?
-                            <i className="icon icon-spin icon-circle-o-notch" style={{ 'opacity': 0.5 }}/>
+                            <i className="icon icon-spin far icon-circle-notch" style={{ 'opacity': 0.5 }}/>
                             : 'Page ' + page + ' of ' + num_pages
                         }
                     </button>
 
                     <button type="button" disabled={changing_page || !num_pages || page === num_pages}
                         className="btn btn-secondary" onClick={nextPageClick}>
-                        <i className="icon icon-angle-right icon-fw"/>
+                        <i className="icon fas icon-angle-right icon-fw"/>
                     </button>
 
                 </ButtonGroup>

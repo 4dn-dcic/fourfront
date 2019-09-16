@@ -8,8 +8,8 @@ import memoize from 'memoize-one';
 import moment from 'moment';
 import { Modal, Button } from 'react-bootstrap';
 
-import { console, ajax, JWT, typedefs } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, ajax, JWT, typedefs } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { uniqueFileCount, fileCountWithDuplicates, uniqueFileCountNonMemoized } from './../SelectedFilesController';
 
 
@@ -52,7 +52,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     return (
         <SelectedFilesDownloadButton selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
             id="browse-view-download-files-btn" data-tip={tooltip} disabled={disabled} className={cls}>
-            <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
+            <i className="icon icon-download fas icon-fw mr-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
             <span className="d-none d-md-inline text-400"> Selected Files</span>
@@ -204,7 +204,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
                         <button type="button" className="btn btn-info" onClick={this.handleAcceptDisclaimer}>
-                            <i className="icon icon-fw icon-check mr-05"/>
+                            <i className="icon icon-fw icon-check mr-05 fas"/>
                             I have read and understand the notes.
                         </button>
                         :
@@ -249,7 +249,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
             <button type="submit" name="Download" className="btn btn-primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                <i className="icon icon-fw icon-file-text"/>&nbsp; Download metadata for files
+                <i className="icon icon-fw icon-file-alt fas"/>&nbsp; Download metadata for files
             </button>
         </form>
     );

@@ -4,9 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { Fade } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Fade';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
-import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { WorkflowStepDetailPurposesBox, WorkflowStepTitleBox } from './StepDetailBody';
 
 function tipIfLongString(tip){
@@ -192,7 +192,7 @@ export class WFRStepDetailBody extends React.PureComponent {
                     </div>
                 </Fade>
                 { typeof this.state.wfr === 'string' ?
-                    <div className="text-center"><br/><i className="icon icon-spin icon-circle-o-notch"/></div>
+                    <div className="text-center"><br/><i className="icon icon-spin fas icon-circle-notch"/></div>
                     : null }
             </div>
         );

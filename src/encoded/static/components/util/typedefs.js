@@ -111,7 +111,7 @@ export var ExperimentSet;
  * @property {JSX.Element}          content     Contents of the tab view. Should be a div with overflow: hidden style as wrapper.
  * @example
  *      {
- *          tab : <span><i className="icon icon-users icon-fw"/> Attribution</span>,
+ *          tab : <span><i className="icon icon-users fas icon-fw"/> Attribution</span>,
  *          key : "attribution",
  *          disabled : (!context.lab && !context.award && !context.submitted_by),
  *          content : (

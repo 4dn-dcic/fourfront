@@ -6,8 +6,8 @@ import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
 import memoize from 'memoize-one';
 
-import { console, object, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, object, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import Graph, { parseAnalysisSteps, parseBasicIOAnalysisSteps } from '@hms-dbmi-bgm/react-workflow-viz';
 
@@ -102,7 +102,7 @@ export default class WorkflowView extends DefaultItemView {
         const width   = this.getTabViewWidth();
         const tabs    = !this.memoized.doValidAnalysisStepsExist(context.steps) ? [] : [
             {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph</span>,
+                tab : <span><i className="icon icon-sitemap icon-rotate-90 fas icon-fw"/> Graph</span>,
                 key : 'graph',
                 content : <WorkflowGraphSection {...this.props} mounted={this.state.mounted} width={width} />
             }

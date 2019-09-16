@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Carousel from 'nuka-carousel';
-import { console, ajax, layout, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { console, ajax, layout, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { replaceString as placeholderReplacementFxn } from './../placeholders';
 
 
@@ -64,12 +64,12 @@ export class HomePageCarousel extends React.PureComponent {
             //'renderCenterRightControls' : null,
             'renderCenterLeftControls' : function({ previousSlide, currentSlide }){
                 if (currentSlide === 0) return null;
-                return <i className="icon icon-fw icon-angle-left" onClick={previousSlide} />;
+                return <i className="icon icon-fw fas icon-angle-left" onClick={previousSlide} />;
             },
             'renderCenterRightControls' : function(sliderProps){
                 var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
                 if (currentSlide >= slideCount - slidesToShow) return null;
-                return <i className="icon icon-fw icon-angle-right" onClick={nextSlide} />;
+                return <i className="icon icon-fw fas icon-angle-right" onClick={nextSlide} />;
             },
             'renderBottomCenterControls' : null,
             'autoGenerateStyleTag' : false,

@@ -13,7 +13,7 @@ jest.dontMock('underscore');
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
 

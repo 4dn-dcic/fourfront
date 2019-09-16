@@ -9,18 +9,32 @@
 
 .btn {
     font-weight: 500;
-    /* @include box-shadow(0 1px 3px rgba(0,0,0,.1), inset 0 -2px 3px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.3)); */
-    //@include box-shadow(0 1px 3px rgba(0,0,0,0.25),inset 0 -1px 4px rgba(0,0,0,0.2),inset 0 1px 4px rgba(255,255,255,0.3));
+
+    &:not(.btn-sm):not(.btn-xs):not(.btn-lg) {
+        // overrides .375rem to better align inline text & icon fonts
+        padding-top: .4rem;
+    }
 
     > i.icon {
-        transform: translate3d(0, 1.5px, 0);
+        vertical-align: middle;
+        transform: translate(0,-0.45px);
     }
 }
 
 .btn.btn-lg {
+    // > i.icon {
+    //    transform: translate3d(0, 2px, 0);
+    //    transform: translate3d(0, 1.75px, 0);
+    //}
+}
+
+.btn.btn-sm {
+    // overrides .25rem (on both) to better align inline text & icon fonts
+    padding-top: 0.3rem;
+    padding-bottom: 0.2rem;
     > i.icon {
-        transform: translate3d(0, 2px, 0);
-        transform: translate3d(0, 1.75px, 0);
+        // Preserve vertical-align: middle; remove transform
+        transform: none;
     }
 }
 
@@ -32,8 +46,9 @@
     @include button-size(1px, 5px, 0.825rem, 1.5, $border-radius-small);
     font-weight: 400;
     padding-top: 2px;
-    > i.icon {
-        // Unset btn style
+    > i.icon:only-child {
+        // Special case - centers better / more consistently when no other text within btn.xs
+        vertical-align: baseline;
         transform: none;
     }
 }
@@ -46,14 +61,6 @@
 
 .btn-xs.rounded {
 	border-radius: 11px;
-}
-
-
-.btn.btn-sm {
-    /* increased from 0.25rem */
-    // padding-top: 0.275rem;
-    padding-top: 0.3rem;
-    //padding-bottom: 0.2rem;
 }
 
 .btn.btn-primary-dark {
@@ -123,21 +130,7 @@
     }
 }
 
-/** Adding Bootstrap 4 CSS button 'Outline' styles **/
-/** Copied from https://v4-alpha.getbootstrap.com/components/buttons/ **/
-
-.btn-outline-primary,
-.btn-outline-secondary,
-.btn-outline-default,
-.btn-outline-success,
-.btn-outline-info,
-.btn-outline-warning,
-.btn-outline-danger,
-.btn-outline-dark,
-.btn-outline-white {
-    background-image: none;
-    background-color: transparent;
-}
+/** Extend btn styles with some extra ones **/
 
 .btn-outline-primary-light {
     @include button-outline-variant($brand-primary, $brand-primary);

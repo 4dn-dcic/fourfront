@@ -4,8 +4,8 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import DefaultItemView from './DefaultItemView';
@@ -112,7 +112,7 @@ export default class WorkflowRunView extends DefaultItemView {
         const width   = this.getTabViewWidth();
         const tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
             {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
+                tab : <span><i className="icon icon-sitemap fas icon-rotate-90 icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
                 content : <GraphSection {...this.props} mounted={this.state.mounted} width={width} />
             }

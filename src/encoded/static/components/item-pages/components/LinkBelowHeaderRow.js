@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FormattedInfoWrapper } from './FormattedInfoBlock';
 
 
@@ -9,7 +9,7 @@ export const SOPBelowHeaderRow = React.memo(function SOPBelowHeaderRow({ sop }){
     if (!sop) return null;
     const { description } = sop;
     return (
-        <FormattedInfoWrapper singularTitle="Approved SOP" isSingleItem noDetails={!description} iconClass="file">
+        <FormattedInfoWrapper singularTitle="Approved SOP" isSingleItem noDetails={!description} iconClass="file fas">
             <h5 className={"block-title" + ( description ? '' : ' mt-1' )}>
                 { object.itemUtil.generateLink(sop) }
             </h5>
@@ -31,5 +31,5 @@ export const LinkBelowHeaderRow = React.memo(function LinkBelowHeaderRow({ url, 
 });
 LinkBelowHeaderRow.defaultProps = {
     "singularTitle" : "Reference Protocol",
-    "iconClass" : "file"
+    "iconClass" : "file fas"
 };

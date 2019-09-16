@@ -6,8 +6,8 @@ import _ from 'underscore';
 import url from 'url';
 import { Nav, NavDropdown, Dropdown } from 'react-bootstrap';
 
-import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/src/components/navigation/components/LoginController';
+import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
 
 import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
 
@@ -34,7 +34,7 @@ export const UserActionDropdownMenu = React.memo(function UserActionDropdownMenu
         const { first_name: acctTitle = "Account", email } = userDetails;
         const acctIcon = (typeof email === 'string' && email.indexOf('@') > -1 && (
             object.itemUtil.User.gravatar(email, 30, { 'className' : 'account-icon-image' }, 'mm')
-        )) || <i className="account-icon icon icon-user-o" />;
+        )) || <i className="account-icon icon icon-user fas" />;
         const cls = 'user-account-item is-logged-in is-dropdown' + (acctIcon && acctIcon.type === 'img' ? ' has-image' : '');
 
         const renderedActions = _.map(userActions, function(action){

@@ -5,9 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
-import { console, object, isServerSide, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { console, object, isServerSide, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas, typedefs } from './../util';
 
 import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
@@ -111,7 +111,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         // Processed Files Table Tab
         if (processedFilesLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/>{ ' ' + processedFilesLen + " Processed File" + (processedFilesLen > 1 ? 's' : '') }</span>,
+                tab : <span><i className="icon icon-microchip fas icon-fw"/>{ ' ' + processedFilesLen + " Processed File" + (processedFilesLen > 1 ? 's' : '') }</span>,
                 key : 'processed-files',
                 content : (
                     <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
@@ -124,7 +124,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         // Raw files tab, if have experiments with raw files
         if (rawFilesLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-leaf icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
+                tab : <span><i className="icon icon-leaf fas icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
                 key : 'raw-files',
                 content : (
                     <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
@@ -147,7 +147,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         // Supplementary Files Tab
         if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
             tabs.push({
-                tab : <span><i className="icon icon-files-o icon-fw"/> Supplementary Files</span>,
+                tab : <span><i className="icon icon-copy far icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
                 content : <SupplementaryFilesTabView {...propsForTableSections} {...this.state} />
             });
@@ -203,7 +203,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
 
 // eslint-disable-next-line react/display-name
 function prependOverviewHeadingTitleIcon(open, props){
-    return <i className="expand-icon icon icon-th-list" />;
+    return <i className="expand-icon icon icon-list icon-fw fas" />;
 }
 
 const expCategorizerTitleRenderFxn = memoize(function(field, val, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
@@ -232,7 +232,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-raw-files-download-files-btn">
-                            <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
+                            <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
                             <span className="d-none d-sm-inline text-400"> Raw Files</span>
@@ -318,7 +318,7 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
                 return (
                     <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
                         data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
-                        <i className="icon icon-fw icon-television"/>
+                        <i className="icon icon-fw fas icon-tv"/>
                     </h5>
                 );
             }
@@ -485,7 +485,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-processed-files-download-files-btn">
-                            <i className="icon icon-download icon-fw shift-down-1 mr-07"/>
+                            <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
                             <span className="d-none d-sm-inline text-400"> Processed Files</span>
@@ -596,7 +596,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
                 { this.renderStatusIndicator() }
                 <h4>
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
+                        <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                         { title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
                 </h4>
@@ -658,7 +658,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
                 <h4 className="mb-15">
                     <span className="inline-block clickable" onClick={this.toggleOpen}>
-                        <i className={"text-normal icon icon-fw icon-" + (open ? 'minus' : 'plus')} />
+                        <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                         { filesLen + " Reference File" + (filesLen > 1 ? "s" : "") }
                     </span>
                 </h4>
