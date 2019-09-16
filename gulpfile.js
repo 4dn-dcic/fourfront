@@ -50,8 +50,7 @@ function watch(){
     webpack(webpackConfig).watch(300, webpackOnBuild());
 }
 
-function watchSharedPortalComponents(done){
-
+function getSharedPortalComponentsLink(){
     let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
     let isLinked = false;
 
@@ -69,25 +68,60 @@ function watchSharedPortalComponents(done){
         isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
     );
 
+    return { isLinked, sharedComponentPath: isLinked ? sharedComponentPath : null };
+}
+
+function buildSharedPortalComponents(done){
+    const { isLinked, sharedComponentPath } = getSharedPortalComponentsLink();
+
     if (!isLinked){ // Exit
         done();
+        return;
     }
 
     // Same as shared-portal-components own build method, but with "--watch"
-    const subP = spawn("npx", [
-        "babel",
-        path.join(sharedComponentPath, 'src'),
-        "--out-dir",
-        path.join(sharedComponentPath, 'es'),
-        "--env-name",
-        "esm",
-        "--watch"
-    ], { stdio: "inherit" });
+    const subP = spawn(
+        path.join(sharedComponentPath, 'node_modules/.bin/babel'),
+        [
+            path.join(sharedComponentPath, 'src'),
+            "--out-dir",
+            path.join(sharedComponentPath, 'es'),
+            "--env-name",
+            "esm"
+        ],
+        { stdio: "inherit" }
+    );
 
     subP.on("close", (code)=>{
         done();
     });
+}
 
+function watchSharedPortalComponents(done){
+    const { isLinked, sharedComponentPath } = getSharedPortalComponentsLink();
+
+    if (!isLinked){ // Exit
+        done();
+        return;
+    }
+
+    // Same as shared-portal-components own build method, but with "--watch"
+    const subP = spawn(
+        path.join(sharedComponentPath, 'node_modules/.bin/babel'),
+        [
+            path.join(sharedComponentPath, 'src'),
+            "--out-dir",
+            path.join(sharedComponentPath, 'es'),
+            "--env-name",
+            "esm",
+            "--watch"
+        ],
+        { stdio: "inherit" }
+    );
+
+    subP.on("close", (code)=>{
+        done();
+    });
 }
 
 
@@ -137,6 +171,12 @@ const devQuick = gulp.series(
     // which will be picked up by `watch` and recompiled into bundle.js
 );
 
+const devAnalyzed = gulp.series(
+    setDevelopment,
+    buildSharedPortalComponents,
+    doWebpack
+);
+
 const build = gulp.series(
     setProduction,
     doWebpack
@@ -149,6 +189,7 @@ const build = gulp.series(
 
 gulp.task('default', devQuick);
 gulp.task('dev-quick', devQuick);
+gulp.task('dev-analyzed', devAnalyzed);
 gulp.task('build', build);
 
 

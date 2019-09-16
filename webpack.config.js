@@ -14,6 +14,8 @@ const mode = (env === 'production' ? 'production' : 'development');
 
 const plugins = [];
 
+console.log("Opened webpack.config.js with env: " + env + " & mode: " + mode);
+
 // don't include momentjs locales (large)
 plugins.push(
     new webpack.IgnorePlugin({
@@ -110,6 +112,7 @@ serverPlugins.push(new webpack.DefinePlugin({
 
 
 if (env === 'development'){ // Skip for dev-quick
+    console.log("Will analyze resulting bundles...");
     webPlugins.push(
         new BundleAnalyzerPlugin({
             "analyzerMode" : "static",
