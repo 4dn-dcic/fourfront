@@ -5,13 +5,16 @@ import _ from 'underscore';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+
+import Graph from '@hms-dbmi-bgm/react-workflow-viz';
+
 import { WorkflowNodeElement } from './components/WorkflowNodeElement';
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import { WorkflowGraphSectionControls } from './components/WorkflowGraphSectionControls';
 import DefaultItemView from './DefaultItemView';
-import Graph, { parseAnalysisSteps, DEFAULT_PARSING_OPTIONS } from './../viz/Workflow';
+
 import { commonGraphPropsFromProps, WorkflowGraphSection, checkIfIndirectOrReferenceNodesExist } from './WorkflowView';
 import { mapEmbeddedFilesToStepRunDataIDs, allFilesForWorkflowRunMappedByUUID } from './WorkflowRunView';
 
@@ -144,13 +147,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         let tooltip = null;
 
         if (steps === null || loadingGraphSteps){
-            iconClass += 'circle-o-notch icon-spin';
+            iconClass += 'circle-notch fas icon-spin';
             tooltip = "Graph is loading";
         } else if (!Array.isArray(steps) || steps.length === 0) {
-            iconClass += 'times';
+            iconClass += 'times fas';
             tooltip = "Graph currently not available for this file. Please check back later.";
         } else {
-            iconClass += 'sitemap icon-rotate-90';
+            iconClass += 'sitemap icon-rotate-90 fas';
         }
 
         return {
@@ -193,18 +196,16 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         this.onToggleReferenceFiles     = _.throttle(this.onToggleReferenceFiles.bind(this), 1000, { trailing: false });
         this.onToggleAllRuns            = _.throttle(this.onToggleAllRuns.bind(this), 1000, { trailing: false });
         this.isNodeCurrentContext       = this.isNodeCurrentContext.bind(this);
-        this.state = _.extend({
+        this.state = {
             'showChart' : 'detail',
             'showIndirectFiles' : false,
             'showReferenceFiles' : false,
             'rowSpacingType' : 'stacked',
-            'showParameters' : false,
-            'anyIndirectPathIONodes' : true, // Overriden
-            'anyReferenceFileNodes' : true // Overriden
-        }, checkIfIndirectOrReferenceNodesExist(props.steps));
+            'showParameters' : false
+        };
 
         this.memoized = {
-            parseAnalysisSteps : memoize(parseAnalysisSteps),
+            ...this.memoized,
             anyGroupNodesExist : memoize(FileViewGraphSection.anyGroupNodesExist),
             allFilesForWorkflowRunsMappedByUUID : memoize(allFilesForWorkflowRunsMappedByUUID),
             mapEmbeddedFilesToStepRunDataIDs : memoize(mapEmbeddedFilesToStepRunDataIDs)
@@ -227,15 +228,16 @@ export class FileViewGraphSection extends WorkflowGraphSection {
             context : { workflow_run_outputs = [], workflow_run_inputs = [] }
         } = this.props;
         const { showReferenceFiles, showParameters, showIndirectFiles, rowSpacingType } = this.state;
-        const parsingOptions = { ...DEFAULT_PARSING_OPTIONS, showReferenceFiles, showParameters, showIndirectFiles };
+        const parsingOptions = { showReferenceFiles, showParameters, showIndirectFiles };
         const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
+        const { anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
         const { nodes: originalNodes, edges } = this.memoized.parseAnalysisSteps(steps, parsingOptions);
 
         if (!showParameters){
             delete legendItems['Input Parameter']; // Remove legend items which aren't relevant for this context.
         }
 
-        if (!showReferenceFiles || !this.state.anyReferenceFileNodes){
+        if (!showReferenceFiles || !anyReferenceFileNodes){
             delete legendItems['Input Reference File'];
         }
         if (allRuns || !this.memoized.anyGroupNodesExist(originalNodes)){
@@ -267,14 +269,20 @@ export class FileViewGraphSection extends WorkflowGraphSection {
 
     render(){
         const { steps, loadingGraphSteps, isFullscreen, allRuns, loading } = this.props;
-        const { showIndirectFiles, anyIndirectPathIONodes, anyReferenceFileNodes, showChart } = this.state;
+        const { showIndirectFiles, showChart } = this.state;
+        const { anyIndirectPathIONodes, anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
         const graphProps = Array.isArray(steps) ? this.commonGraphProps() : null;
         const isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes;
         const isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false);
         const isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
+        const outerCls = (
+            "tabview-container-fullscreen-capable workflow-view-container"
+            + " workflow-viewing-" + (showChart)
+            + (isFullscreen ? ' full-screen-view' : '')
+        );
 
         return (
-            <div className={"tabview-container-fullscreen-capable workflow-view-container workflow-viewing-" + (showChart) + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={outerCls}>
                 <h3 className="tab-section-title">
                     <span>Graph</span>
                     <WorkflowGraphSectionControls

@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
 import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView from './DefaultItemView';
@@ -48,7 +48,7 @@ class PublicationSummary extends React.PureComponent {
      */
     static getTabObject(props, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
             'key' : 'overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 
 /**
  * A collapsible panel that is meant to be shown near top of Item views.
@@ -28,7 +28,7 @@ export class OverviewHeadingContainer extends React.Component {
         'title'         : 'Properties',
         'prependTitleIcon' : false,
         'prependTitleIconFxn' : function(open, props){
-            return <i className={"expand-icon icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>;
+            return <i className={"expand-icon icon fas icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>;
         }
     };
 
@@ -64,7 +64,7 @@ export class OverviewHeadingContainer extends React.Component {
         return (
             <span>
                 { prependTitleIcon && prependTitleIconFxn ? prependTitleIconFxn(open, this.props) : null }
-                { title } &nbsp;<i className={"icon icon-angle-right" + (open ? ' icon-rotate-90' : '')}/>
+                { title } &nbsp;<i className={"icon fas icon-angle-right" + (open ? ' icon-rotate-90' : '')}/>
             </span>
         );
     }

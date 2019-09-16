@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, analytics, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { object, analytics, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
@@ -94,7 +94,7 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
             <div className="btn-container">
                 <a href={object.itemUtil.atId(context)} className={cls}
                     data-tip="Open HiGlass display to add other data">
-                    <i className="icon icon-fw icon-eye"/>&nbsp;&nbsp;&nbsp;
+                    <i className="icon icon-fw icon-eye fas"/>&nbsp;&nbsp;&nbsp;
                     Explore Data
                 </a>
             </div>

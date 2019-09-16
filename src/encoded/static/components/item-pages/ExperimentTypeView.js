@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import { Publications } from './components/Publications';
 import { SOPBelowHeaderRow, LinkBelowHeaderRow } from './components/LinkBelowHeaderRow';
@@ -92,7 +92,7 @@ const ExperimentTypeViewOverview = React.memo(function ExperimentTypeViewOvervie
 });
 ExperimentTypeViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
         'key' : 'overview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

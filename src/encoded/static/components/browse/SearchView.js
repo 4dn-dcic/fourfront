@@ -5,9 +5,9 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import url from 'url';
 
-import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
-import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/SearchView';
-import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
+import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
+import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { columnExtensionMap } from './columnExtensionMap';
 import { Schemas } from './../util';
 

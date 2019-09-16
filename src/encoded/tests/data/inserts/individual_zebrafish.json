@@ -1,0 +1,14 @@
+[
+    {
+        "aliases": ["dcic:zebrafish"],
+        "award": "1U01CA200059-01",
+        "zebrafish_strain": "TU",
+        "lab": "4dn-dcic-lab",
+        "zebrafish_life_stage": "embryonic stage",
+        "sex": "male",
+        "status": "in review by lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "https://zfin.org/action/genotype/view/ZDB-GENO-990623-3",
+        "uuid": "2dfe2618-368f-45a0-9aa9-a5277f1a56c7"
+    }
+]

@@ -4,9 +4,9 @@ import React from 'react';
 import _ from 'underscore';
 import url from 'url';
 
-import { unhighlightTerms } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
-import { object, layout, ajax, console, isServerSide, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { unhighlightTerms } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { object, layout, ajax, console, isServerSide, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { navigate } from '../../util';
 import { ChartDataController } from '../../viz/chart-data-controller';
@@ -231,7 +231,7 @@ export class FacetCharts extends React.PureComponent {
         if (!mounted){
             return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
                 <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height }}>
-                    <i className="icon icon-spin icon-circle-o-notch" style={{ 'top' : (height / 2 - 30) + 'px' }} />
+                    <i className="icon icon-spin icon-circle-notch fas" style={{ 'top' : (height / 2 - 30) + 'px' }} />
                 </div>
             );
         }

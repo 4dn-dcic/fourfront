@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { Navbar, Nav, NavItem } from 'react-bootstrap';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { productionHost } from './../globals';
 import { navigate } from './../util';
@@ -135,7 +135,7 @@ export class NavigationBar extends React.PureComponent {
                             </a>
 
                             <Navbar.Toggle>
-                                <i className="icon icon-bars icon-fw" />
+                                <i className="icon icon-bars fas icon-fw align-middle" />
                             </Navbar.Toggle>
 
                             <CollapsedNav {...this.state} {...this.props} />

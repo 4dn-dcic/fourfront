@@ -10,7 +10,7 @@ import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
@@ -22,14 +22,14 @@ export function getIconForCustomTab(tabName){
         case 'overview':
         case 'experiment-summaries':
         case 'experiment_summaries':
-            return 'file-text';
+            return 'file-alt';
         case 'data_processing':
-            return 'area-chart';
+            return 'area-chart fas';
         case 'processed_files':
-            return 'microchip';
+            return 'microchip fas';
         case 'higlass':
         case 'higlass_displays':
-            return 'television';
+            return 'tv fas';
         default:
             return null;
     }
@@ -69,6 +69,7 @@ export class TabbedView extends React.PureComponent {
 
     static renderTabPane(tabObj, tabIndex = 0){
         const { key, tab, placeholder, disabled = false, style = null, content } = tabObj;
+
         return (
             <Tabs.TabPane
                 key={key || tabIndex}
@@ -299,18 +300,18 @@ export class TabbedView extends React.PureComponent {
     render(){
         const { contents, extraTabContent, activeKey, animated, onChange, destroyInactiveTabPane, renderTabBar, windowWidth } = this.props;
 
-        var allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
-            tabsProps = {
-                onChange, destroyInactiveTabPane,
-                'renderTabBar'          : () => (
-                    <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
-                        className="extra-style-2" tabBarGutter={0} />
-                ),
-                'renderTabContent'      : () => <TabContent animated={animated} />,
-                'ref'                   : this.tabsRef,
-                'defaultActiveKey'      : TabbedView.getDefaultActiveKeyFromContents(contents),
-                'children'              : _.map(allTabs, TabbedView.renderTabPane)
-            };
+        const allTabs = TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
+        const tabsProps = {
+            onChange, destroyInactiveTabPane,
+            'renderTabBar': () => (
+                <ScrollableInkTabBar onTabClick={this.onTabClick} extraContent={extraTabContent}
+                    className="extra-style-2" tabBarGutter={0} />
+            ),
+            'renderTabContent': () => <TabContent animated={animated} />,
+            'ref': this.tabsRef,
+            'defaultActiveKey': TabbedView.getDefaultActiveKeyFromContents(contents),
+            'children': _.map(allTabs, TabbedView.renderTabPane)
+        };
 
         if (activeKey) tabsProps.activeKey = activeKey;
 
@@ -324,7 +325,7 @@ class TabPlaceHolder extends React.PureComponent {
         return (
             <div>
                 <h3 className="text-400 mb-5 mt-5">
-                    <i className="icon icon-spin icon-circle-o-notch"/>
+                    <i className="icon icon-spin fas icon-circle-notch"/>
                 </h3>
             </div>
         );

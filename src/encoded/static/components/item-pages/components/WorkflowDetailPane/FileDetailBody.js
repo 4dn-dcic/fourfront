@@ -4,11 +4,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { fileUtil, expFxn } from './../../../util';
 
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { SimpleFilesTable } from './../tables/SimpleFilesTable';
 import { ExperimentSetTablesLoaded } from './../tables/ExperimentSetTables';
@@ -163,7 +163,7 @@ export class FileDetailBody extends React.PureComponent {
                 body = (
                     <div>
                         <h4 className="text-400" style={{ color : '#777' }}>
-                            <i className="icon icon-times" style={{ color : '#8e0000' }}/>&nbsp; No View Permissions
+                            <i className="icon icon-times fas" style={{ color : '#8e0000' }}/>&nbsp; No View Permissions
                         </h4>
                         <hr/>
                     </div>

@@ -6,9 +6,9 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { console, object, JWT, layout, schemaTransforms, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { console, object, JWT, layout, schemaTransforms, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { content_views } from './globals';
 import { typedefs } from './util';
@@ -468,7 +468,7 @@ export class StaticPageBreadcrumbs extends React.Component {
         }
         return (
             <div className="static-breadcrumb" data-name={ancestor.name} key={ancestor['@id']}>
-                { index > 0 ? <i className="icon icon-fw icon-angle-right"/> : null }
+                { index > 0 ? <i className="icon icon-fw icon-angle-right fas"/> : null }
                 { inner }
             </div>
         );
@@ -488,7 +488,7 @@ export class StaticPageBreadcrumbs extends React.Component {
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
-                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
+                            <i className="icon icon-fw icon-pencil fas"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
                 }

@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console, isServerSide, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/PartialList';
+import { ajax, console, isServerSide, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/PartialList';
 import { generateAddressString, generateContactPersonListItem } from './AttributionTabView';
 
 
@@ -42,7 +42,7 @@ export const FormattedInfoWrapper =  React.memo(function FormattedInfoWrapper(pr
 FormattedInfoWrapper.defaultProps = {
     'isSingleItem'  : false,
     'singularTitle' : 'Publication',
-    'iconClass'     : 'book',
+    'iconClass'     : 'book fas',
     'className'     : null,
     'noDetails'     : false
 };
@@ -274,7 +274,7 @@ class FormattedInfoBlockList extends React.Component {
                 if (loading && !item){
                     return (
                         <li key={propertyName + '-' + i} className={propertyName + "-item"}>
-                            <i className="icon icon-spin icon-circle-o-notch"></i>
+                            <i className="icon icon-spin fas icon-circle-notch"></i>
                         </li>
                     );
                 }
@@ -284,7 +284,7 @@ class FormattedInfoBlockList extends React.Component {
             blocks = _.map(endpoints || [null], function(item,i){
                 return (
                     <li key={propertyName + '-' + i} className={propertyName + "-item"}>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                        <i className="icon icon-spin fas icon-circle-notch"></i>
                     </li>
                 );
             });
@@ -426,7 +426,7 @@ export class FormattedInfoBlock extends React.Component {
 
         return FormattedInfoBlock.generate(
             details_lab,                                                                                // detail
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null), // includeIcon
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users fas" : null), // includeIcon
             includeLabel ? "Lab" : null,                                                                // includeLabel
             innerContent,                                                                               // contents
             'lab',                                                                                      // extraContainerClassName
@@ -446,7 +446,7 @@ export class FormattedInfoBlock extends React.Component {
         }
         return FormattedInfoBlock.generate(
             details_award,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-university fas" : null),
             includeLabel ? "Award" : null,
             details_award && includeDetail ? details_award.project : null,
             'award',
@@ -466,7 +466,7 @@ export class FormattedInfoBlock extends React.Component {
         }
         return FormattedInfoBlock.generate(
             details_user,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user fas" : null),
             includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
             details_user && includeDetail ? (
                 (details_user.lab && details_user.lab.display_title) || details_user.job_title || details_user.timezone
@@ -480,7 +480,7 @@ export class FormattedInfoBlock extends React.Component {
     static Error(details_error, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
         return FormattedInfoBlock.generate(
             details_error.body,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle fas" : null),
             includeLabel ? "Error" : null,
             details_error && details_error.body && includeDetail ? details_error.body.detail : null,
             'error-block',
@@ -573,7 +573,7 @@ export class FormattedInfoBlock extends React.Component {
             innerContent = (
                 <div className="row">
                     <div className="col-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                        <i className="icon icon-spin fas icon-circle-notch"></i>
                     </div>
                 </div>
             );

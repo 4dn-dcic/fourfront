@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
-import { console, isServerSide, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+import { console, isServerSide, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { barplot_color_cycler } from './../ColorCycler';
 import { CursorViewBounds } from './../ChartDetailCursor';
 

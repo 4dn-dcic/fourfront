@@ -3,10 +3,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { NextPreviousPageSection } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/TableOfContents';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { NextPreviousPageSection } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/TableOfContents';
 import { parseSectionsContent, StaticEntryContent } from './StaticPage';
-import { StaticPageBase } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/StaticPageBase';
+import { StaticPageBase } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/StaticPageBase';
 
 
 export default class DirectoryPage extends React.PureComponent {
@@ -60,7 +60,7 @@ function DirectoryBodyGridItem(props){
                 { description ?
                     <div className={"page-description" + (childrenHaveChildren ? ' text-ellipsis-container' : '')}>{ description }</div> : null
                 }
-                { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-right">{ childPageCount }&nbsp; <i className={"icon icon-fw icon-file" + (childPageCount > 1 ? "s" : "") + "-o"}/></h6> : null }
+                { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-right">{ childPageCount }&nbsp; <i className={"icon icon-fw far icon-" + (childPageCount > 1 ? "copy" : "file")}/></h6> : null }
             </a>
         </div>
     );
