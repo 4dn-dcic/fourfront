@@ -18,7 +18,8 @@ from encoded.commands.owltools import (
     SomeValuesFrom,
     IntersectionOf,
     OnProperty,
-    Deprecated
+    Deprecated,
+    hasDbXref
 )
 from dcicutils.ff_utils import (
     get_authentication_with_server,
@@ -31,11 +32,21 @@ from pyramid.paster import get_app
 
 EPILOG = __doc__
 
-PART_OF = "http://purl.obolibrary.org/obo/BFO_0000050"
-DEVELOPS_FROM = "http://purl.obolibrary.org/obo/RO_0002202"
-HUMAN_TAXON = "http://purl.obolibrary.org/obo/NCBITaxon_9606"
-HAS_PART = "http://purl.obolibrary.org/obo/BFO_0000051"
-ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
+''' global lookups '''
+ITEM2OWL = {
+    'Disorder': {
+        'ontology_prefix': 'MONDO',
+        'id_field': 'disorder_id',
+        'name_field': 'disorder_name',
+        'url_field': 'disorder_url'
+    },
+    'Phenotype': {
+        'ontology_prefix': 'HP',
+        'id_field': 'hpo_id',
+        'name_field': 'phenotype_name',
+        'url_field': 'hpo_url'
+    }}
+# figure out if other fields should be added ezplicitly to this lookup
 
 
 def iterative_parents(nodes, terms, data):
@@ -60,17 +71,18 @@ def iterative_parents(nodes, terms, data):
     return list(set(results))
 
 
-def get_all_ancestors(term, terms, field):
+def get_all_ancestors(term, terms, field, itype):
     '''Adds a list of all the term's ancestors to a term up to the root
         of the ontology and adds to closure fields - used in adding slims
     '''
     closure = 'closure'
+    id_field = ITEM2OWL[itype].get('id_field')
     if closure not in term:
         term[closure] = []
     if field in term:
         words = iterative_parents(term[field], terms, field)
         term[closure].extend(words)
-    term[closure].append(term['hpo_id'])
+    term[closure].append(term[id_field])
     return term  # is this necessary
 
 
@@ -128,33 +140,35 @@ def get_term_name_from_rdf(class_, data):
     return name
 
 
-def create_term_dict(class_, termid, data):
+def create_term_dict(class_, termid, data, itype):
     '''Adds basic term info to the dictionary of all terms
     '''
-    term = {
-        'hpo_id': termid,
-        'hpo_url': class_.__str__(),
-    }
+    id_field = ITEM2OWL[itype].get('id_field')
+    url_field = ITEM2OWL[itype].get('url_field')
+    name_field = ITEM2OWL[itype].get('name_field')
+    term = {id_field: termid}
+    if url_field:
+        term[url_field] = class_.__str__()
     name = get_term_name_from_rdf(class_, data)
-    if name is not None:
-        term['phenotype_name'] = name
+    if name is not None and name_field:
+        term[name_field] = name
     return term
 
 
-def _add_term_and_info(class_, parent_uri, relationship, data, terms):
-    '''Internal function to add new terms that are part of an IntersectionOf
-        along with the appropriate relationships
-    '''
-    if not terms:
-        terms = {}
-    for subclass in data.rdfGraph.objects(class_, subClassOf):
-        term_id = get_termid_from_uri(parent_uri)
-        if terms.get(term_id) is None:
-            terms[term_id] = create_term_dict(parent_uri, term_id, data)
-        if terms[term_id].get(relationship) is None:
-            terms[term_id][relationship] = []
-        terms[term_id][relationship].append(get_termid_from_uri(subclass))
-    return terms
+# def _add_term_and_info(class_, parent_uri, relationship, data, terms, itype):
+#     '''Internal function to add new terms that are part of an IntersectionOf
+#         along with the appropriate relationships
+#     '''
+#     if not terms:
+#         terms = {}
+#     for subclass in data.rdfGraph.objects(class_, subClassOf):
+#         term_id = get_termid_from_uri(parent_uri)
+#         if terms.get(term_id) is None:
+#             terms[term_id] = create_term_dict(parent_uri, term_id, data, itype)
+#         if terms[term_id].get(relationship) is None:
+#             terms[term_id][relationship] = []
+#         terms[term_id][relationship].append(get_termid_from_uri(subclass))
+#     return terms
 
 
 # def process_intersection_of(class_, intersection, data, terms):
@@ -229,23 +243,8 @@ def process_parents(class_, data, terms):
     '''
     termid = get_termid_from_uri(class_)
     for parent in data.get_classDirectSupers(class_, excludeBnodes=False):
-        # rtypes = {PART_OF: 'part_of',
-        #           DEVELOPS_FROM: 'develops_from',
-        #           HAS_PART: 'has_part',
-        #           ACHIEVES_PLANNED_OBJECTIVE: 'achieves_planned_objective'}
         if isBlankNode(parent):
             continue
-        #     for s, v, o in data.rdfGraph.triples((parent, OnProperty, None)):
-        #         rel = o.__str__()
-        #         if rel in rtypes:
-        #             relation = None
-        #             has_part = None
-        #             if rtypes[rel] == 'has_part':
-        #                 has_part = True
-        #             if rtypes[rel] == 'develops_from':
-        #                 relation = rtypes[rel]
-        #             # terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
-        #             terms = _find_and_add_parent_of(parent, class_, data, terms, has_part, relation)
         else:
             if not terms[termid].get('parents'):
                 terms[termid]['parents'] = []
@@ -265,6 +264,12 @@ def get_definitions(class_, data, definition_terms):
     return getObjectLiteralsOfType(class_, data, definition_terms)
 
 
+def get_dbxrefs(class_, data):
+    '''Gets synonyms for the class as strings
+    '''
+    return getObjectLiteralsOfType(class_, data, [hasDbXref])
+
+
 def _cleanup_non_fields(terms):
     '''Removes unwanted fields and empty terms from final json'''
     to_delete = 'closure'
@@ -280,26 +285,29 @@ def _cleanup_non_fields(terms):
     return terms
 
 
-def add_slim_to_term(term, slim_terms):
+def add_slim_to_term(term, slim_terms, itype):
     '''Checks the list of ancestor terms to see if any are slim_terms
         and if so adds the slim_term to the term in slim_term slot
 
         for now checking both closure and closure_with_develops_from
         but consider having only single 'ancestor' list
     '''
+    id_field = ITEM2OWL[itype].get('id_field')
+    if not id_field:
+        return term
     slimterms2add = {}
     for slimterm in slim_terms:
-        if term.get('closure') and slimterm['hpo_id'] in term['closure']:
-            slimterms2add[slimterm['hpo_id']] = slimterm['hpo_id']
+        if term.get('closure') and slimterm[id_field] in term['closure']:
+            slimterms2add[slimterm[id_field]] = slimterm[id_field]
     if slimterms2add:
         term['slim_terms'] = list(slimterms2add.values())
     return term
 
 
-def add_slim_terms(terms, slim_terms):
+def add_slim_terms(terms, slim_terms, itype):
     for termid, term in terms.items():
-        term = get_all_ancestors(term, terms, 'parents')
-        term = add_slim_to_term(term, slim_terms)
+        term = get_all_ancestors(term, terms, 'parents', itype)
+        term = add_slim_to_term(term, slim_terms, itype)
     terms = _cleanup_non_fields(terms)
     return terms
 
@@ -346,35 +354,28 @@ def get_definition_term_uris(ontology, as_rdf=True):
     return get_syndef_terms_as_uri(ontology, 'definition_terms', as_rdf)
 
 
-def get_slim_terms(connection):
-    '''Retrieves phenotype jsons for those phenotypes that have 'is_slim_for'
+def get_slim_terms(connection, itype):
+    '''Retrieves all items from the provided type with 'is_slim_for'
         field populated
     '''
-    # currently need to hard code the categories of slims but once the ability
-    # to search all can add parameters to retrieve all or just the terms in the
-    # categories passed as a list
-    slim_categories = ['Phenotypic abnormality']
-    search_suffix = 'search/?type=Phenotype&is_slim_for='
-    slim_terms = []
-    for cat in slim_categories:
-        try:
-            terms = search_metadata(search_suffix + cat, connection)
-            slim_terms.extend(terms)
-        except TypeError as e:
-            print(e)
-            continue
-    return slim_terms
+    search_suffix = 'search/?type={}&is_slim_for!=No value'.format(itype)
+    try:
+        return search_metadata(search_suffix, connection)
+    except TypeError as e:
+        print(e)
+        return None
 
 
-def get_existing_phenotypes(connection):
-    '''Retrieves all existing phenotypes from db '''
-    search_suffix = 'search/?type=Phenotype'
+def get_existing_items(connection, itype):
+    '''Retrieves all existing items of itype from db '''
+    search_suffix = 'search/?type={}'.format(itype)
+    iid = ITEM2OWL[itype].get('id_field')
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
-    return {t['hpo_id']: t for t in db_terms}
+    return {t[iid]: t for t in db_terms}
 
 
 def get_ontology(connection, ont):
-    '''return HP ontology json retrieved from server
+    '''return MONDO ontology json retrieved from server
         ontology jsons are now fully embedded
     '''
     ontology = get_metadata('ontologys/' + ont, connection)
@@ -406,11 +407,12 @@ def connect2server(env=None, key=None):
     return auth
 
 
-def remove_obsoletes_and_unnamed(terms):
+def remove_obsoletes_and_unnamed(terms, itype):
+    name_field = ITEM2OWL[itype].get('name_field')
     terms = {termid: term for termid, term in terms.items()
              if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
     terms = {termid: term for termid, term in terms.items()
-             if 'phenotype_name' in term and (term['phenotype_name'] and not term['phenotype_name'].lower().startswith('obsolete'))}
+             if name_field in term and (term[name_field] and not term[name_field].lower().startswith('obsolete'))}
     return terms
 
 
@@ -522,7 +524,7 @@ def id_fields2patch(term, dbterm, rm_unch):
         return term
 
 
-def id_post_and_patch(terms, dbterms, rm_unchanged=True, set_obsoletes=True):
+def id_post_and_patch(terms, dbterms, itype, rm_unchanged=True, set_obsoletes=True):
     '''compares terms to terms that are already in db - if no change
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
@@ -574,17 +576,19 @@ def id_post_and_patch(terms, dbterms, rm_unchanged=True, set_obsoletes=True):
         # go through db terms and find which aren't in terms and set status
         # to obsolete by adding to to_patch
         # need a way to exclude our own terms and synonyms and definitions
+        id_field = ITEM2OWL[itype].get('id_field')
         for tid, term in dbterms.items():
             if tid not in terms:
-                source_onts = [so.get('uuid') for so in term['source_ontologies']]
-                if not source_onts or not [o for o in ontids if o in source_onts]:
-                    # don't obsolete terms that aren't in one of the ontologies being processed
-                    continue
+                if itype == 'OntologyTerm':
+                    source_onts = [so.get('uuid') for so in term.get('source_ontologies', [])]
+                    if not source_onts or not [o for o in ontids if o in source_onts]:
+                        # don't obsolete terms that aren't in one of the ontologies being processed
+                        continue
                 dbuid = term['uuid']
                 # add simple term with only status and uuid to to_patch
                 obsoletes += 1
                 to_update.append({'status': 'obsolete', 'uuid': dbuid})
-                tid2uuid[term['term_id']] = dbuid
+                tid2uuid[term[id_field]] = dbuid
                 to_patch += 1
     print("Will obsolete {} TERMS".format(obsoletes))
     print("{} TERMS ARE NEW".format(len(to_post)))
@@ -605,47 +609,15 @@ def _get_uuids_for_linked(term, idmap):
     return puuids
 
 
-# def add_uuids_and_combine(partitioned_terms):
-#     '''adds new uuids to terms to post and existing uuids to patch terms
-#         this function depends on the partitioned term dictionary that
-#         contains keys 'post', 'patch' and 'idmap'
-#     '''
-#     from uuid import uuid4
-#     # go through all the new terms and add uuids to them and idmap
-#     idmap = partitioned_terms.get('idmap', {})
-#     newterms = partitioned_terms.get('post', None)
-#     if newterms:
-#         for tid, term in newterms.items():
-#             uid = str(uuid4())
-#             idmap[tid] = uid
-#             term['uuid'] = uid
-#         # now that we should have all uuids go through again
-#         # and switch parent term ids for uuids
-#         for term in newterms.values():
-#             puuids = _get_uuids_for_linked(term, idmap)
-#             for rt, uuids in puuids.items():
-#                 term[rt] = uuids
-#     # and finally do the same for the patches
-#     patches = partitioned_terms.get('patch', None)
-#     if patches:
-#         for term in patches.values():
-#             puuids = _get_uuids_for_linked(term, idmap)
-#             for rt, uuids in puuids.items():
-#                 term[rt] = uuids
-#     try:
-#         post = list(newterms.values())
-#     except AttributeError:
-#         post = []
-#     try:
-#         patch = list(patches.values())
-#     except AttributeError:
-#         patch = []
-#     return post + patch
-
-
-def add_additional_term_info(terms, data, synonym_terms, definition_terms):
+def add_additional_term_info(terms, data, synonym_terms, definition_terms, itype):
+    url_field = ITEM2OWL[itype].get('url_field')
+    if not url_field:
+        return terms
     for termid, term in terms.items():
-        termuri = convert2URIRef(term['hpo_url'])
+        try:
+            termuri = convert2URIRef(term[url_field])
+        except Exception as e:
+            continue
 
         # add any missing synonyms
         synonyms = get_synonyms(termuri, data, synonym_terms)
@@ -661,6 +633,11 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
             definitions = get_definitions(termuri, data, definition_terms)
             if definitions:
                 term['definition'] = definitions[0]
+
+        dbxrefs = get_dbxrefs(termuri, data)
+        if dbxrefs:
+            term.setdefault('dbxrefs', []).extend(dbxrefs)
+
     return terms
 
 
@@ -673,12 +650,13 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, connection, terms, simple=False):
+def download_and_process_owl(ontology, itype, connection, terms, simple=False):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
     if not terms:
         terms = {}
+    name_field = ITEM2OWL[itype].get('name_field')
     for class_ in data.allclasses:
         if not _is_deprecated(class_, data):
             if isBlankNode(class_):
@@ -689,14 +667,14 @@ def download_and_process_owl(ontology, connection, terms, simple=False):
                 if simple and not termid.startswith(ontology.get('ontology_prefix')):
                     continue
                 if terms.get(termid) is None:
-                    terms[termid] = create_term_dict(class_, termid, data)
+                    terms[termid] = create_term_dict(class_, termid, data, itype)
                 else:
-                    if 'phenotype_name' not in terms[termid]:
-                        terms[termid]['phenotype_name'] = get_term_name_from_rdf(class_, data)
+                    if name_field not in terms[termid]:
+                        terms[termid][name_field] = get_term_name_from_rdf(class_, data)
                     # deal with parents
                 terms = process_parents(class_, data, terms)
     # add synonyms and definitions
-    terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
+    terms = add_additional_term_info(terms, data, synonym_terms, definition_terms, itype)
     return terms
 
 
@@ -718,6 +696,9 @@ def parse_args(args):
         epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    parser.add_argument('item_type',
+                        choices=['Disorder', 'Phenotype'],
+                        help="Item Types to generate from owl ontology - currently Phenotype or Disorder")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -736,9 +717,6 @@ def parse_args(args):
                         default='s3',
                         help="An access key dictionary including key, secret and server.\
                         {'key'='ABCDEF', 'secret'='supersecret', 'server'='http://fourfront-cgap.9wzadzju3p.us-east-1.elasticbeanstalk.com/'}")
-    parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
-    parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
-
     return parser.parse_args(args)
 
 
@@ -747,31 +725,15 @@ def owl_runner(value):
     return download_and_process_owl(*value)
 
 
-def last_ontology_load(app):
-    from webtest import TestApp
-    from webtest.app import AppError
-    import dateutil
-
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-    try:
-        sysinfo = testapp.get("/sysinfo/ffsysinfo").follow().json
-        return dateutil.parser.parse(sysinfo['ontology_updated'])
-    except AppError:
-        return datetime.datetime.min
-
-
 def main():
-    ''' Downloads latest HPO OWL file
+    ''' Downloads latest MONDO OWL file
         and Updates Terms by generating json inserts
     '''
     args = parse_args(sys.argv[1:])
+    itype = args.item_type
     postfile = args.outfile
     if not postfile:
-        postfile = 'phenotypes.json'
+        postfile = '{}.json'.format(itype)
     if '/' not in postfile:  # assume just a filename given
         from pkg_resources import resource_filename
         postfile = resource_filename('encoded', postfile)
@@ -780,17 +742,17 @@ def main():
 
     # fourfront connection
     connection = connect2server(args.env, args.key)
-    ontology = get_ontology(connection, 'HP')
-    slim_terms = get_slim_terms(connection)
-    db_terms = get_existing_phenotypes(connection)
+    ontology = get_ontology(connection, ITEM2OWL[itype].get('ontology_prefix'))
+    slim_terms = get_slim_terms(connection, itype)
+    db_terms = get_existing_items(connection, itype)
     terms = {}
 
     print('Processing: ', ontology['ontology_name'])
     if ontology.get('download_url', None) is not None:
-        # want only simple processing for HP
+        # want only simple processing
         simple = True
         # get all the terms for an ontology
-        terms = download_and_process_owl(ontology, connection, terms, simple)
+        terms = download_and_process_owl(ontology, itype, connection, terms, simple)
     else:
         # bail out
         print("Need url to download file from")
@@ -798,12 +760,12 @@ def main():
 
     # at this point we've processed the rdf of all the ontologies
     if terms:
-        terms = add_slim_terms(terms, slim_terms)
-        terms = remove_obsoletes_and_unnamed(terms)
+        terms = add_slim_terms(terms, slim_terms, itype)
+        terms = remove_obsoletes_and_unnamed(terms, itype)
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        terms2write = id_post_and_patch(terms, db_terms, filter_unchanged)
+        terms2write = id_post_and_patch(terms, db_terms, itype, filter_unchanged)
         # terms2write = add_uuids_and_combine(partitioned_terms)
         pretty = False
         if args.pretty:

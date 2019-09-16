@@ -11,6 +11,17 @@
         "definition_terms": ["111116bc-8535-4448-903e-854af460a233"]
     },
     {
+        "uuid": "a5e157f6-557a-448e-b272-5d206c04397f",
+        "ontology_name": "Monarch Disease Ontology",
+        "ontology_url": "https://github.com/monarch-initiative/mondo",
+        "download_url": "http://purl.obolibrary.org/obo/mondo.owl",
+        "namespace_url": "http://purl.obolibrary.org/obo/",
+        "ontology_prefix": "MONDO",
+        "description": "Mondo aims to harmonizes disease definitions across the world.",
+        "synonym_terms": ["111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233", "111114bc-8535-4448-903e-854af460a233"],
+        "definition_terms": ["111116bc-8535-4448-903e-854af460a233"]
+    },
+    {
         "uuid": "096bfe7f-803b-40da-ae1b-b011aa10101b",
         "ontology_name": "CGAP Controlled Vocabulary",
         "ontology_prefix": "CGAP",
