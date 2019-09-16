@@ -522,15 +522,15 @@ export default class StatisticsPageView extends React.PureComponent {
         const { browseBaseState } = this.props;
         const { aggregationsToChartData } = StatisticsPageView.viewOptions.submissions;
 
-        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw fas icon-institution mr-05"/>Project</span> };
+        const groupByOptions = { 'award.project' : <span><i className="icon icon-fw fas icon-university mr-05"/>Project</span> };
 
         let initialGroupBy = 'award.project';
 
         if (browseBaseState !== 'all'){
             _.extend(groupByOptions, {
-                'award.center_title'                 : <span><i className="icon icon-fw fas icon-institution mr-05"/>Center</span>,
+                'award.center_title'                 : <span><i className="icon icon-fw fas icon-university mr-05"/>Center</span>,
                 'lab.display_title'                  : <span><i className="icon icon-fw fas icon-users mr-05"/>Lab</span>,
-                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw fas icon-bar-chart mr-05"/>Experiment Type</span>
+                'experiments_in_set.experiment_type.display_title' : <span><i className="icon icon-fw fas icon-chart-bar mr-05"/>Experiment Type</span>
             });
             initialGroupBy = 'award.center_title';
         }

@@ -446,7 +446,7 @@ export class FormattedInfoBlock extends React.Component {
         }
         return FormattedInfoBlock.generate(
             details_award,
-            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution fas" : null),
+            typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-university fas" : null),
             includeLabel ? "Award" : null,
             details_award && includeDetail ? details_award.project : null,
             'award',
