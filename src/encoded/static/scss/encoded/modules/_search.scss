@@ -1,4 +1,129 @@
 
+
+/**********************/
+/**** Search Table ****/
+/**********************/
+
+$search-results-above-results-row-height: 42px;
+@import "./../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss";
+
+// Extensions to shared-portal-components searchview table(s):
+.search-result-row .result-table-row .search-result-column-block {
+	&[data-field="status"] {
+		> .inner {
+			i.item-status-indicator-dot {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
+		}
+	}
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"]{
+		> .inner {
+			text-align: left;
+		}
+		i.user-icon {
+			cursor: help;
+			margin-right: 5px;
+		}
+	}
+	&[data-field="display_title"]{
+		.expset-checkbox {
+			margin-right: 15px;
+			margin-top: -1px;
+			display: inline-block;
+			vertical-align: text-top;
+		}
+		.mono-text {
+			letter-spacing: 0.5px;
+		}
+		img.in-search-table-title-image {
+			margin-top: -10px;
+			margin-bottom: -8px;
+			border-radius: 4px;
+			margin-right: 10px;
+			filter: saturate(0.3);
+			transition: filter .2s, opacity .2s;
+			opacity: 0.85;
+		}
+		&:hover {
+			img.in-search-table-title-image {
+				filter: none;
+				opacity: 1;
+			}
+		}
+	}
+	&[data-field="experiments_in_set.experiment_categorizer.combined"]{
+		> .inner {
+			position: relative;
+			text-overflow: none;
+			white-space: normal;
+			div.exp-categorizer-cell {
+				text-align: left;
+
+				> small {
+					position: relative;
+					top: -9px;
+					font-weight: 500;
+				}
+				> div {
+					position: relative;
+					top: -8px;
+					width: 100%;
+				}
+			}
+
+		}
+	}
+}
+
+
+
+/*** FACETS CONTAINER STICKY ***/
+
+@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
+
+.search-page-container {
+
+    .facets-container {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 40px;
+        margin-bottom: 20px;
+        
+        .facets-body {
+            body.scrolled-past-80 & {
+                max-height: 90vh;
+                // 86 = 40 nav + 46 facet-list-header
+                max-height: calc(100vh - 86px);
+                overflow-y: auto;
+                overflow-x: hidden;
+
+                &::-webkit-scrollbar {
+					width: 6px;
+					height: 6px;
+					background-color: transparent;
+				}
+
+				&::-webkit-scrollbar-thumb {
+					background-color: #aaa;
+					border-radius: 3px;
+				}
+
+				&::-webkit-scrollbar-track {
+					margin-right: -1px;
+                }
+
+            }
+
+        }
+    }
+
+}
+
+
+
+
 /********
 COMMON SEARCH TABLE
 *********/

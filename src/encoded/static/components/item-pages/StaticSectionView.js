@@ -30,7 +30,7 @@ StaticSectionViewPreview.getTabObject = function({ context, windowWidth }){
         'key' : 'preview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (
-            <div className="overflow-hidden">
+            <div className="overflow-hidden container">
                 <h3 className="tab-section-title">
                     { context.title || 'Preview' }
                 </h3>

@@ -20,12 +20,12 @@
 @import "../../../../node_modules/@fortawesome/fontawesome-free/scss/brands";
 
 // Shared Components - own components might override or extend these
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
 
-// Imported in encoded/modules/_tables.scss:
+// Imported in encoded/modules/_search.scss:
+// @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 // @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss";
 
 // ENCODE Layout/Components
