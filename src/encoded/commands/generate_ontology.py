@@ -12,6 +12,7 @@ from rdflib.collection import Collection
 from encoded.commands.owltools import (
     Namespace,
     Owler,
+    OBO,
     splitNameFromNamespace,
     convert2URIRef,
     isURIRef,
@@ -128,7 +129,11 @@ def get_term_name_from_rdf(class_, data):
     '''Looks for label for class in the rdf graph'''
     name = None
     try:
-        name = data.rdfGraph.label(class_).__str__()
+        unique = data.rdfGraph.value(class_, OBO['IAO_0000589'])
+        if unique:
+            name = unique.__str__()
+        else:
+            name = data.rdfGraph.label(class_).__str__()
     except AttributeError:
         pass
     return name
@@ -473,7 +478,7 @@ def remove_obsoletes_and_unnamed(terms, deprecated):
 def _format_def_str(defdict):
     dstring = ''
     for val in sorted(set([', '.join(v) for v in defdict.values()])):
-        defstr = ' -- '.join([k for k in defdict.keys() if ', '.join(defdict[k]) == val])
+        defstr = ' -- '.join(sorted([k for k in defdict.keys() if ', '.join(defdict[k]) == val]))
     # for d, o in sorted(defdict.items()):
     #     ostr = ', '.join(sorted([ostr.strip() for ostr in o]))
     #     dstring += '{} ({}) '.format(d, ostr)
@@ -533,7 +538,8 @@ def _terms_match(t1, t2):
     '''
     for k, val in t1.items():
         if k not in t2:
-            return False
+            if val:
+                return False
         else:
             if k == 'parents' or k == 'slim_terms' or k == 'source_ontologies':
                 if len(val) != len(t2[k]):
@@ -787,10 +793,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         # need a way to exclude our own terms and synonyms and definitions
         for tid, term in use_terms.items():
             if tid not in terms and term['status'] != 'obsolete':
-                try:
-                    source_onts = [so.get('uuid') for so in term['source_ontologies']]
-                except KeyError:
-                    print(term)
+                source_onts = [so.get('uuid') for so in term['source_ontologies']]
                 if not source_onts or not [o for o in ontids if o in source_onts]:
                     # don't obsolete terms that aren't in one of the ontologies being processed
                     continue
@@ -839,7 +842,7 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms, prefi
         if definitions:
             if 'definitions' not in term:
                 term['definitions'] = {}
-            definitions = list(set([d.strip() for d in definitions]))
+            definitions = sorted(list(set([d.strip() for d in definitions])))
             term['definitions'].setdefault(prefix, []).extend(definitions)
     return terms
 
@@ -881,9 +884,12 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
                 if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
                     terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
             # deal with parents
-            terms = process_parents(class_, data, terms)
+            if ontology.get('ontology_name') != 'Sequence Ontology':
+                terms = process_parents(class_, data, terms)
 # add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms, ont_prefix)
+    if ontology.get('ontology_name') == 'Sequence Ontology':
+        terms = {k: v for k, v in terms.items() if k in ['SO:0000001', 'SO:0000104', 'SO:0000673', 'SO:0000704']}
     return terms, list(set(deprecated))
 
 
