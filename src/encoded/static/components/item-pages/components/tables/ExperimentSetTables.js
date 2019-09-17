@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
 import { columnExtensionMap } from './../../../browse/columnExtensionMap';
 import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
@@ -49,7 +49,7 @@ export class ExperimentSetTables extends React.PureComponent {
         if (loading || !Array.isArray(expSets)){
             return (
                 <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
+                    <i className="icon icon-fw fas icon-spin icon-circle-notch"/>
                 </div>
             );
         } else if (expSets.length === 0){
@@ -130,7 +130,7 @@ export class ExperimentSetTableTabView extends React.PureComponent {
      */
     static getTabObject(props, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
+            'tab' : <span><i className="icon icon-file-alt far icon-fw"/> Experiment Sets</span>,
             'key' : 'expsets-table',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (

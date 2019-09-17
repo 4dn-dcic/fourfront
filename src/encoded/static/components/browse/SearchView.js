@@ -5,8 +5,9 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import url from 'url';
 
-import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
-import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/SearchView';
+import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
+import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
+import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { columnExtensionMap } from './columnExtensionMap';
 import { Schemas } from './../util';
 
@@ -31,7 +32,7 @@ export default class SearchView extends React.PureComponent {
         if (facet.hide_from_view) return false;
 
         // Remove the @type facet while in selection mode.
-        if (facet.field === 'type' && currentAction === 'selection') return false;
+        if (facet.field === 'type' && isSelectAction(currentAction)) return false;
 
         // Most of these would only appear if manually entered into browser URL.
         if (facet.field.indexOf('experiments.experiment_sets.') > -1) return false;

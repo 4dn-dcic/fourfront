@@ -824,7 +824,7 @@ class WorkflowRun(Item):
                     # Contains things like dimension, ordinal, file_format, and so forth.
                     meta_dict = { k:v for (k,v) in io_dict.items() if k not in [ 'value', 'value_qc', 'type', 'workflow_argument_name' ] }
                     # There is a chance we do not have the file_format in the input_files list. Most often this would occur if multiple
-                    # files in input argument list 
+                    # files in input argument list
                     meta_list.append(meta_dict)
 
                 step_io_arg['run_data'] = {
@@ -948,14 +948,14 @@ def pseudo_run(context, request):
 
     # hand-off to tibanna for further processing
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
-    res = aws_lambda.invoke(FunctionName='run_workflow',
+    res = aws_lambda.invoke(FunctionName='run_workflow_pony',
                             Payload=json.dumps(input_json))
     res_decode = res['Payload'].read().decode()
     res_dict = json.loads(res_decode)
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
     for i in range(100):
-        res = aws_lambda.invoke(FunctionName='status_wfr',
+        res = aws_lambda.invoke(FunctionName='status_wfr_pony',
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)
@@ -995,14 +995,14 @@ def run_workflow(context, request):
 
     # hand-off to tibanna for further processing
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
-    res = aws_lambda.invoke(FunctionName='run_workflow',
+    res = aws_lambda.invoke(FunctionName='run_workflow_pony',
                             Payload=json.dumps(input_json))
     res_decode = res['Payload'].read().decode()
     res_dict = json.loads(res_decode)
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
     for _ in range(2):
-        res = aws_lambda.invoke(FunctionName='status_wfr',
+        res = aws_lambda.invoke(FunctionName='status_wfr_pony',
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)

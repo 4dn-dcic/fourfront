@@ -63,6 +63,12 @@
             "type": "string",
             "lookup": 411
         },
+        "ch04_coupling":{
+            "title": "Ch04 light source coupling",
+            "description": "e.g. fiber, light guide, direct",
+            "type": "string",
+            "lookup": 511
+        },
         "embedding_RI_measured":{
             "title": "Embedding medium RI (measured)",
             "description": "Refractive index of embedding medium (measured)",

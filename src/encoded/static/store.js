@@ -1,6 +1,6 @@
 import { createStore, combineReducers } from 'redux';
 import _ from 'underscore';
-import { JWT, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { JWT, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 // Create a redux store to manage state for the whole application
 // Not sure why everything is saved to & reduced from `action.type` but w/e .. this could likely

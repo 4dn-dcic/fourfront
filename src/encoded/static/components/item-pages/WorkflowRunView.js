@@ -2,9 +2,10 @@
 
 import React from 'react';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import DefaultItemView from './DefaultItemView';
@@ -111,7 +112,7 @@ export default class WorkflowRunView extends DefaultItemView {
         const width   = this.getTabViewWidth();
         const tabs    = !doValidAnalysisStepsExist(context.steps) ? [] : [
             {
-                tab : <span><i className="icon icon-sitemap icon-rotate-90 icon-fw"/> Graph & Summary</span>,
+                tab : <span><i className="icon icon-sitemap fas icon-rotate-90 icon-fw"/> Graph & Summary</span>,
                 key : 'graph',
                 content : <GraphSection {...this.props} mounted={this.state.mounted} width={width} />
             }
@@ -157,13 +158,21 @@ class GraphSection extends WorkflowGraphSection {
         super(props);
         this.commonGraphProps = this.commonGraphProps.bind(this);
         this.render = this.render.bind(this);
-        this.state = _.extend(this.state, {
+        this.state = {
+            ...this.state,
             'showChart' : 'detail'
-        });
+        };
+
+        this.memoized = {
+            ...this.memoized,
+            allFilesForWorkflowRunMappedByUUID : memoize(allFilesForWorkflowRunMappedByUUID),
+            mapEmbeddedFilesToStepRunDataIDs : memoize(mapEmbeddedFilesToStepRunDataIDs)
+        };
     }
 
     commonGraphProps(){
-        const graphData = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
+        const { context } = this.props;
+        const { nodes: origNodes, edges } = this.parseAnalysisSteps(); // Object with 'nodes' and 'edges' props.
 
         const legendItems = _.clone(WorkflowDetailPane.Legend.defaultProps.items);
         // Remove Items which aren't relevant for this context.
@@ -176,14 +185,17 @@ class GraphSection extends WorkflowGraphSection {
             delete legendItems['Intermediate File'];
         }
 
-        return _.extend(commonGraphPropsFromProps(
-            _.extend({ legendItems }, this.props)
-        ), {
+        const nodes = this.memoized.mapEmbeddedFilesToStepRunDataIDs(
+            origNodes,
+            this.memoized.allFilesForWorkflowRunMappedByUUID(context)
+        );
+
+        return {
+            ...commonGraphPropsFromProps({ ...this.props, legendItems }),
+            nodes, edges,
             'isNodeDisabled' : GraphSection.isNodeDisabled,
-            'nodes' : mapEmbeddedFilesToStepRunDataIDs( graphData.nodes, allFilesForWorkflowRunMappedByUUID(this.props.context) ),
-            'edges' : graphData.edges,
             'rowSpacingType' : this.state.rowSpacingType
-        });
+        };
     }
 
 }

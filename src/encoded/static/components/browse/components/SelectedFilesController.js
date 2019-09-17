@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { object, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../../util';
 
 

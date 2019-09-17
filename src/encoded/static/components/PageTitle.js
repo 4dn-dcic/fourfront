@@ -6,9 +6,9 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { console, object, JWT, layout, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { console, object, JWT, layout, schemaTransforms, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { content_views } from './globals';
 import { typedefs } from './util';
@@ -38,15 +38,21 @@ const TITLE_PATHNAME_MAP = {
     },
     '/search/' : {
         'title' : function(pathName, context, href, currentAction){
-            if (currentAction === 'selection') return 'Selecting';
+            if (isSelectAction(currentAction)) return 'Selecting';
             return 'Search';
         },
         'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
             var thisTypeTitle = schemaTransforms.getSchemaTypeFromSearchContext(context, schemas);
-            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ currentAction === 'selection' ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
+            return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ isSelectAction(currentAction) ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){
-            if (currentAction === 'selection') {
+            if (isSelectAction(currentAction)) {
+                if (currentAction === 'selection') {
+                    return 'Select or Drag & drop Item from this view into other window(s).';
+                } else if (currentAction === 'multiselect') {
+                    return 'Select one or more Items and click Apply button on the bottom.';
+                }
+                //default
                 return 'Drag and drop Items from this view into other window(s).';
             }
             return null;
@@ -322,7 +328,7 @@ export default class PageTitle extends React.PureComponent {
             subtitle = <div className={"page-subtitle smaller" + (subtitleEllipsis ? ' text-ellipsis-container' : '')}>{ subtitlePrepend }{ subtitle }{ subtitleAppend }</div>;
         }
 
-        var hasToc = (
+        const hasToc = (
             context && Array.isArray(context['@type'])
             && context['@type'].indexOf('StaticPage') > -1
             && context['table-of-contents']
@@ -330,7 +336,6 @@ export default class PageTitle extends React.PureComponent {
         );
 
         elementStyle = PageTitle.getStyles(context, href, mounted, hasToc, windowWidth);
-
         return (
             <div id="page-title-container" className="container">
                 <StaticPageBreadcrumbs {...{ context, session, hasToc, href, windowWidth }} key="breadcrumbs" pageTitleStyle={elementStyle} />
@@ -459,7 +464,7 @@ export class StaticPageBreadcrumbs extends React.Component {
         }
         return (
             <div className="static-breadcrumb" data-name={ancestor.name} key={ancestor['@id']}>
-                { index > 0 ? <i className="icon icon-fw icon-angle-right"/> : null }
+                { index > 0 ? <i className="icon icon-fw icon-angle-right fas"/> : null }
                 { inner }
             </div>
         );
@@ -479,7 +484,7 @@ export class StaticPageBreadcrumbs extends React.Component {
                 if (editAction && editAction.href){
                     return (
                         <div className="static-edit-button pull-right" style={_.pick(pageTitleStyle, 'marginTop')}>
-                            <i className="icon icon-fw icon-pencil"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
+                            <i className="icon icon-fw icon-pencil fas"/> <a href={editAction.href} data-tip="Edit this Static Page">Edit</a>
                         </div>
                     );
                 }
@@ -526,7 +531,7 @@ export class StaticPageBreadcrumbs extends React.Component {
             crumbs = ancestors && _.map(ancestors, this.renderCrumb);
 
         return  (
-            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? 'empty' : '') + (hasToc ? ' page-has-toc' : '')}>
+            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? ' empty' : '') + (hasToc ? ' page-has-toc' : '')}>
                 { crumbs }
                 { this.editButton() }
                 { this.seoMetadata(ancestors) }

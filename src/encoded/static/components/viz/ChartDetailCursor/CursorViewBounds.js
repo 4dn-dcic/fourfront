@@ -3,8 +3,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
-import { console, isServerSide, layout, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+import { console, isServerSide, layout, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { barplot_color_cycler } from './../ColorCycler';
 import ChartDetailCursor from './ChartDetailCursor';
 

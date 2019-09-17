@@ -10,7 +10,7 @@ import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 
 
@@ -22,14 +22,14 @@ export function getIconForCustomTab(tabName){
         case 'overview':
         case 'experiment-summaries':
         case 'experiment_summaries':
-            return 'file-text';
+            return 'file-alt';
         case 'data_processing':
-            return 'area-chart';
+            return 'area-chart fas';
         case 'processed_files':
-            return 'microchip';
+            return 'microchip fas';
         case 'higlass':
         case 'higlass_displays':
-            return 'television';
+            return 'tv fas';
         default:
             return null;
     }
@@ -325,7 +325,7 @@ class TabPlaceHolder extends React.PureComponent {
         return (
             <div>
                 <h3 className="text-400 mb-5 mt-5">
-                    <i className="icon icon-spin icon-circle-o-notch"/>
+                    <i className="icon icon-spin fas icon-circle-notch"/>
                 </h3>
             </div>
         );

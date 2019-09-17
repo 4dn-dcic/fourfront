@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.

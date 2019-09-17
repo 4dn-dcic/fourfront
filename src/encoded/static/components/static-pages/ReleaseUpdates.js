@@ -4,9 +4,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
-import { console, object, ajax, isServerSide, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { console, object, ajax, isServerSide, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import StaticPage from './StaticPage';
 
 
@@ -86,7 +86,7 @@ export default class ReleaseUpdates extends React.Component {
         if (updateData === null){
             return(
                 <div className="text-center mt-5 mb-5" style={{ fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="mt-3 icon icon-spin icon-circle-o-notch"/>
+                    <i className="mt-3 icon icon-spin icon-circle-notch fas"/>
                 </div>
             );
         } else if (updateData.length == 0){
@@ -236,7 +236,7 @@ class SingleUpdate extends React.Component {
         return (
             <div className={"overview-blocks-header with-background mb-1" + (open ? ' is-open' : ' is-closed')} style={styleObj}>
                 <h5 className="release-section-title clickable with-accent" onClick={this.toggle}>
-                    <span><i className={"expand-icon icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>{ updateData.summary } <i className={"icon icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
+                    <span><i className={"expand-icon fas icon icon-" + (open ? 'minus' : 'plus')} data-tip={open ? 'Collapse' : 'Expand'}/>{ updateData.summary } <i className={"icon fas icon-angle-right" + (this.state.open ? ' icon-rotate-90' : '')}/></span>
                 </h5>
                 <Collapse in={open} onEnter={onStartOpen} onEntered={onFinishOpen} onExit={onStartClose} onExited={onFinishClose}>
                     <div className="inner">

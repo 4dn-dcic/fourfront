@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
@@ -38,7 +38,7 @@ const ProtocolViewOverview = React.memo(function ProtocolViewOverview({ context,
 });
 ProtocolViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
         'key' : 'protocol-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (
