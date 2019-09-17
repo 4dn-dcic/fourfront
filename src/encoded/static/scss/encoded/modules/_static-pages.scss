@@ -365,7 +365,12 @@
 
 /***** Static Page Breadcrumbs ******/
 
-.breadcrumb-placeholder, .static-page-breadcrumbs {
+/** When empty or no crumbs, still exists on page and acts
+	as empty placeholder or spacing between navbar (or window top)
+	and page title.
+**/
+.breadcrumb-placeholder,
+.static-page-breadcrumbs {
 	min-height: 55px;
 }
 
@@ -383,6 +388,14 @@
 		vertical-align: middle;
 		font-size: 0.875rem;
 	}
+
+	body[data-current-action="multiselect"] &,
+	body[data-current-action="selection"] & {
+		// Decrease height by 15px
+		min-height: 40px;
+		padding-top: 14px;
+	}
+
 }
 
 

@@ -87,7 +87,9 @@ content_views.register(FourfrontSubmissionView, 'Search', 'add');
 content_views.register(BrowseView,              'Browse');
 content_views.register(SearchView,              'Search');
 content_views.register(SearchView,              'Search', 'selection');
+content_views.register(SearchView,              'Search', 'multiselect');
 content_views.register(SearchView,              'Browse', 'selection');
+content_views.register(SearchView,              'Browse', 'multiselect');
 content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
 
 

@@ -5,9 +5,8 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { DropdownItem, DropdownButton } from 'react-bootstrap';
-//import { DropdownItem, DropdownButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
-import { console, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, searchFilters, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
 
 
@@ -85,8 +84,8 @@ export class SearchBar extends React.PureComponent{
 
     onSearchInputChange(e){
         const newValue = e.target.value;
-        const state = { 'typedSearchQuery' : newValue };
-        if (!SearchBar.hasInput(newValue) && this.props.currentAction !== 'selection') {
+        const state = { 'typedSearchQuery': newValue };
+        if (!SearchBar.hasInput(newValue) && !isSelectAction(this.props.currentAction)) {
             state.searchAllItems = false;
         }
         this.setState(state);
@@ -114,7 +113,7 @@ export class SearchBar extends React.PureComponent{
     selectItemTypeDropdown(visible = false){
         const { currentAction } = this.props;
         const { searchAllItems } = this.state;
-        if (currentAction === 'selection') return null;
+        if (isSelectAction(currentAction)) return null;
         return (
             <Fade in={visible} appear>
                 <DropdownButton id="search-item-type-selector" bsSize="sm" pullRight
@@ -150,9 +149,9 @@ export class SearchBar extends React.PureComponent{
             searchBoxHasInput && 'has-input'
         ];
 
-        if (currentAction === 'selection'){
+        if (isSelectAction(currentAction)) {
             _.extend(query, _.omit(hrefParts.query || {}, 'q')); // Preserve facets (except 'q'), incl type facet.
-        } else if (searchAllItems && currentAction !== 'selection') {
+        } else if (searchAllItems && !isSelectAction(currentAction)) {
             _.extend(query, { 'type' : 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else {
             _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
@@ -177,7 +176,7 @@ export class SearchBar extends React.PureComponent{
 
 const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
     const { currentAction, searchAllItems, toggleSearchAllItems, visible } = props;
-    if (currentAction === 'selection' || !visible) return null;
+    if (isSelectAction(currentAction) || !visible) return null;
     return (
         <Fade in={visible} appear>
             <div className="search-item-type-wrapper">
