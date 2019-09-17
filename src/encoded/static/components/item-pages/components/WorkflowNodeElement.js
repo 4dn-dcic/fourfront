@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../../util';
 import { ViewMetricButton } from './WorkflowDetailPane/FileDetailBodyMetricsView';
 
@@ -110,44 +110,44 @@ export class WorkflowNodeElement extends React.PureComponent {
         let iconClass;
 
         if (nodeType === 'input-group' || nodeType === 'output-group'){
-            iconClass = 'folder-open';
+            iconClass = 'folder-open fas';
         } else if (nodeType === 'input' || nodeType === 'output'){
             // By file_format
             if (fileFormatAsString === 'zip' || fileFormatAsString === 'tar' || fileFormatAsString === 'gz') {
-                iconClass = 'file-zip-o';
+                iconClass = 'file-zip far';
             }
             // By meta.type & ioType
             else if (typeof ioType === 'undefined'){
-                iconClass = 'question';
+                iconClass = 'question fas';
             } else if (typeof ioType === 'string') {
                 if (WorkflowNodeElement.isNodeQCMetric(node)) {
-                    iconClass = 'check-square-o';
+                    iconClass = 'check-square far';
                 } else if (WorkflowNodeElement.isNodeParameter(node) || ioType.indexOf('int') > -1 || ioType.indexOf('string') > -1){
-                    iconClass = 'wrench';
+                    iconClass = 'wrench fas';
                 } else if (WorkflowNodeElement.isNodeFile(node)){
-                    iconClass = 'file-text-o';
+                    iconClass = 'file-alt far';
                 } else {
-                    iconClass = 'question';
+                    iconClass = 'question fas';
                 }
             } else if (Array.isArray(ioType)) { // Deprecated?
                 if (
                     ioType[0] === 'File' ||
                     (ioType[0] === 'null' && ioType[1] === 'File')
                 ){
-                    iconClass = 'file-text-o';
+                    iconClass = 'file-alt far';
                 } else if (
                     (ioType[0] === 'int' || ioType[0] === 'string') ||
                     (ioType[0] === 'null' && (ioType[1] === 'int' || ioType[1] === 'string'))
                 ){
-                    iconClass = 'wrench';
+                    iconClass = 'wrench fas';
                 }
             }
 
         } else if (nodeType === 'step'){
-            iconClass = 'cogs';
+            iconClass = 'cogs fas';
         }
         if (!iconClass) {
-            iconClass = 'question';
+            iconClass = 'question fas';
         }
         return <i className={"icon icon-fw icon-" + iconClass}/>;
     }

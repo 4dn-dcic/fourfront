@@ -5,8 +5,8 @@ import _ from 'underscore';
 import moment from 'moment';
 import ReactTooltip from 'react-tooltip';
 
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import Graph from '@hms-dbmi-bgm/react-workflow-viz';
 
@@ -147,13 +147,13 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         let tooltip = null;
 
         if (steps === null || loadingGraphSteps){
-            iconClass += 'circle-o-notch icon-spin';
+            iconClass += 'circle-notch fas icon-spin';
             tooltip = "Graph is loading";
         } else if (!Array.isArray(steps) || steps.length === 0) {
-            iconClass += 'times';
+            iconClass += 'times fas';
             tooltip = "Graph currently not available for this file. Please check back later.";
         } else {
-            iconClass += 'sitemap icon-rotate-90';
+            iconClass += 'sitemap icon-rotate-90 fas';
         }
 
         return {

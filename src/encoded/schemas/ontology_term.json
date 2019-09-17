@@ -4,7 +4,7 @@
     "id": "/profiles/ontology_term.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["term_id"],
+    "required": ["term_id", "source_ontologies"],
     "identifyingProperties": ["uuid", "term_id", "preferred_name"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -18,10 +18,16 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "1"
+            "default": "2"
         },
         "status": {
-            "default": "released"
+            "default": "released",
+            "enum": [
+                "released",
+                "current",
+                "obsolete",
+                "deleted"
+            ]
         },
         "term_url": {
             "title": "URL",
@@ -73,12 +79,16 @@
                 "permission": "import_items"
             }
         },
-        "source_ontology": {
-            "title": "Ontology that this term is part of",
-            "descripton": "The ontology from whence this term EFO, OBI, UBERON",
+        "source_ontologies": {
+            "title": "Ontologies that this term is part of",
+            "descripton": "The ontologies from whence this term EFO, OBI, UBERON",
             "permission": "import_items",
-            "type": "string",
-            "linkTo": "Ontology"
+            "type": "array",
+            "items": {
+                "title": "Ontology",
+                "type": "string",
+                "linkTo": "Ontology"
+            }
         },
         "namespace": {
             "title": "Term namespace",
@@ -117,7 +127,7 @@
         }
     },
     "facets": {
-        "source_ontology.ontology_name" : {
+        "source_ontologies.ontology_name" : {
             "title" : "Ontology"
         },
         "namespace": {
@@ -134,7 +144,7 @@
         "term_id": {
             "title": "Term ID"
         },
-        "source_ontology": {
+        "source_ontologies.ontology_name": {
             "title": "Ontology"
         }
     },

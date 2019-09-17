@@ -4,8 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlock';
 
 
@@ -171,7 +171,7 @@ export class Publications extends React.PureComponent {
             return null;
         }
         return (
-            <i className={"icon abstract-toggle icon-fw icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
+            <i className={"icon abstract-toggle icon-fw fas icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
                 data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'} onClick={this.onToggleAbstractIconClick} />
         );
     }

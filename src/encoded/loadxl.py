@@ -27,6 +27,7 @@ ORDER = [
     'award',
     'lab',
     'file_format',
+    'ontology',
     'ontology_term',  # validate_biosource_cell_line requires term_name
     'experiment_type',
     'biosource',

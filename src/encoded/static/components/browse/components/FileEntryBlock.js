@@ -5,9 +5,9 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 
-import { StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/StackedBlockTable';
-import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/IndeterminateCheckbox';
-import { object, typedefs } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
+import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
+import { object, typedefs } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas } from './../../util';
 
 // eslint-disable-next-line no-unused-vars

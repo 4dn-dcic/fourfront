@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { CSSTransition } from 'react-transition-group';
-import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 /** @todo make more reusable? */
 export class BigDropdownMenu extends React.PureComponent {

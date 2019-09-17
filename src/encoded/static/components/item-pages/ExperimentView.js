@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
@@ -56,7 +56,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
         if (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length > 0) {
             tabs.push({
-                tab : <span><i className="icon icon-leaf icon-fw"/> Raw Files</span>,
+                tab : <span><i className="icon icon-leaf fas icon-fw"/> Raw Files</span>,
                 key : 'raw-files',
                 content : <RawFilesTableSection
                     files={rawFilesWithViewPermissions}
@@ -71,7 +71,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
         if (procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0) {
             tabs.push({
-                tab : <span><i className="icon icon-microchip icon-fw"/> Processed Files</span>,
+                tab : <span><i className="icon icon-microchip fas icon-fw"/> Processed Files</span>,
                 key : 'processed-files',
                 content : <ProcessedFilesTableSection
                     files={procesedFilesWithViewPermissions}
@@ -205,7 +205,7 @@ ExperimentSetsViewOverview.propTypes = {
 };
 ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWidth }, width){
     return {
-        'tab' : <span><i className="icon icon-file-text icon-fw"/> Experiment Sets</span>,
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Experiment Sets</span>,
         'key' : 'experiments-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

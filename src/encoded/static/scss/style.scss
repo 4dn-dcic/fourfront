@@ -14,15 +14,18 @@
 @import "encoded/bootstrap-theme-overrides";
 
 // Font Awesome
-@import "fontawesome/font-awesome";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/solid";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/regular";
+@import "../../../../node_modules/@fortawesome/fontawesome-free/scss/brands";
 
 
 // Common shared portal components -
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/toggle-switch.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/editable-fields.scss";
 @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/submission-view.scss";
-@import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 
+// @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss"; is imported in encoded/modules/search.scss
 // @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table.scss"; is imported in encoded/modules/tables
 // @import "../../../../node_modules/@hms-dbmi-bgm/react-workflow-viz/src/styles.scss";
 

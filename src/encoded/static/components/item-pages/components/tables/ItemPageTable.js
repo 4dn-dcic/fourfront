@@ -6,12 +6,13 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
-import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { get as getSchemas } from './../../../util/Schemas';
+import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
     HeadersRow, TableRowToggleOpenButton
-} from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
-import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultDetailPane';
+} from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
 
 
 /** @todo Move to shared components repo? */
@@ -38,28 +39,30 @@ export class ItemPageTable extends React.Component {
         'columnExtensionMap' : {
             'display_title' : {
                 'render' : function(result, columnDefinition, props, width){
-                    var title           = object.itemUtil.getTitleStringFromContext(result),
-                        link            = object.itemUtil.atId(result),
-                        isAnAccession   = false,
-                        tooltip;
+                    const { hideTypeTitle, renderDetailPane, detailOpen, toggleDetailOpen, schemas } = props;
+                    let title           = object.itemUtil.getTitleStringFromContext(result);
+                    const link          = object.itemUtil.atId(result);
+                    const isAnAccession = false;
+                    let tooltip;
 
                     if (title && (title.length > 20 || width < 100)) tooltip = title;
 
                     if (link){ // Link instead of plaintext
-                        title = <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')}>{ title }</a>;
+                        title = (
+                            <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')} data-tip={tooltip}>
+                                { title }
+                            </a>
+                        );
                     }
 
-                    var typeTitle = null;
-                    if (!props.hideTypeTitle){
-                        typeTitle = schemaTransforms.getItemTypeTitle(result);
-                        if (typeof typeTitle === 'string'){
-                            typeTitle += ' ';
-                        }
+                    let typeTitle = null;
+                    if (!hideTypeTitle){
+                        typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
                     }
 
-                    var toggleButton = null;
-                    if (typeof props.renderDetailPane === 'function'){
-                        toggleButton = <TableRowToggleOpenButton open={props.detailOpen} onClick={props.toggleDetailOpen} />;
+                    let toggleButton = null;
+                    if (typeof renderDetailPane === 'function'){
+                        toggleButton = <TableRowToggleOpenButton open={detailOpen} onClick={toggleDetailOpen} />;
                     }
 
                     return (
@@ -99,7 +102,7 @@ export class ItemPageTable extends React.Component {
         if (loading || !Array.isArray(results)){
             return (
                 <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="icon icon-fw icon-spin icon-circle-o-notch"/>
+                    <i className="icon icon-fw icon-spin icon-circle-notch fas"/>
                 </div>
             );
         }

@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
@@ -29,7 +29,7 @@ class FileMicroscopyViewOverview extends React.Component {
 
     static getTabObject({ context, schemas, windowWidth }, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
             'key' : 'experiments-info',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import DefaultItemView from './DefaultItemView';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { replaceString as placeholderReplacementFxn } from './../static-pages/placeholders';
 import { HomePageCarouselSlide } from './../static-pages/components/HomePageCarousel';
 
@@ -49,7 +49,7 @@ const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ 
 });
 StaticSectionViewPreview.getTabObject = function({ context, windowWidth }){
     return {
-        'tab' : <span><i className="icon icon-image icon-fw"/> Preview</span>,
+        'tab' : <span><i className="icon icon-image far icon-fw"/> Preview</span>,
         'key' : 'preview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

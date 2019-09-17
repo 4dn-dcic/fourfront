@@ -96,6 +96,12 @@ $brand-primary-dark: $primary-dark;
 $brand-secondary: $secondary;
 
 
+/** FontAwesome Icon Stuff **/
+$fa-font-path: "/static/font/fontawesome5.9" !default;
+$fa-font-size-base: $font-size-base;
+$fa-css-prefix: icon;
+
+$fa-font-family: 'Font Awesome 5 Free';
 
 
 @mixin planned-submitted-cell-styles {

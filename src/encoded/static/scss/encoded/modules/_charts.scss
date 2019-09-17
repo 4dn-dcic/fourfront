@@ -129,10 +129,10 @@
                 //overflow: visible;
                 //right: auto;
                 //max-width: 320px;
-                width: 150px;
+                //width: 150px;
                 //box-shadow: 0px 5px 3px -4px rgba(0,0,0,0.2);
-                background-color: #fff;
-                border-top-color: #888;
+                //background-color: #fff;
+                border-top-color: #333;
             }
         }
         &:before {
@@ -173,6 +173,9 @@
             opacity: 0.5;
             &:hover {
                 opacity : 1;
+            }
+            > i.icon {
+                vertical-align: middle;
             }
         }
     }
@@ -239,7 +242,7 @@
                 &:after {
                     //content: '\f105';
                     content: '';
-                    //font-family: FontAwesome;
+                    //font-family: $fa-font-family;
                     position: absolute;
                     transform: rotateZ(45deg);
                     height: 18px;
@@ -1312,6 +1315,10 @@ $workflow-node-color-type-global-context: #ffb3b3;
                     //color: #000;
                     background-color: #227b86;
                     text-shadow: 0 0 0;
+                }
+                > i.icon {
+                    vertical-align: middle;
+                    transform: translate(0,-0.45px);
                 }
             }
         }

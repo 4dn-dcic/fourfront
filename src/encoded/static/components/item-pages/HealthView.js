@@ -7,8 +7,8 @@ import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
 
-import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/ItemDetailList';
+import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 
 /**
@@ -117,7 +117,7 @@ export default class HealthView extends React.PureComponent {
 
                 <button type="button" className="btn btn-outline-dark refresh-counts-button pull-right mt-2"
                     onClick={this.getCounts} disabled={db_es_total === 'loading...'}>
-                    <i className={"icon icon-fw icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
+                    <i className={"icon icon-fw fas icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
                 </button>
                 <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
 

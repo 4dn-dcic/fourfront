@@ -2,8 +2,8 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FileDownloadButton';
+import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
 
 
 /** @todo split into functonal components */
@@ -42,7 +42,7 @@ export class ItemFileAttachment extends React.PureComponent {
         const tip = this.attachmentTips().size;
         return (
             <div className="mb-1">
-                <i className="icon icon-fw icon-hdd-o" data-tip={(tip && tip.description) || null} />&nbsp; { valueTransforms.bytesToLargerUnit(attachment.size) }
+                <i className="icon icon-fw icon-hdd far" data-tip={(tip && tip.description) || null} />&nbsp; { valueTransforms.bytesToLargerUnit(attachment.size) }
             </div>
         );
     }

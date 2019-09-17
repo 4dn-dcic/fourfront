@@ -2,10 +2,10 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, ajax, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/PartialList';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/src/components/static-pages/BasicStaticSectionBody';
+import { console, ajax, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/PartialList';
+import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 
 
 /**
@@ -91,11 +91,16 @@ class AnnouncementsLoaded extends React.PureComponent {
     }
 
     render (){
-        if (Array.isArray(this.state.announcements)){
-            return <Announcements {...this.props} loaded={false} announcements={this.state.announcements} total={this.state.totalCount} />;
+        const { announcements, totalCount, mounted, loading } = this.state;
+        if (Array.isArray(announcements)){
+            return <Announcements {...this.props} loaded={false} announcements={announcements} total={totalCount} />;
         }
-        if (this.state.loading || !this.state.mounted){
-            return <h4 className="text-center mb-5" style={{ 'opacity' : 0.5 }}><i className="icon icon-spin icon-circle-o-notch"/></h4>;
+        if (loading || !mounted){
+            return (
+                <h4 className="text-center mb-5" style={{ 'opacity' : 0.5 }}>
+                    <i className="icon icon-spin icon-circle-notch fas"/>
+                </h4>
+            );
         }
         return <Announcements loaded={false} announcements={[]} total={0} />;
     }

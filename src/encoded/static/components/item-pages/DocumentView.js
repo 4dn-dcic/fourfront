@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
 
@@ -30,7 +30,7 @@ const DocumentViewOverview = React.memo(function DocumentViewOverview({ context,
 });
 DocumentViewOverview.getTabObject = function({ context, schemas }){
     return {
-        'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+        'tab' : <span><i className="icon far icon-file-alt icon-fw"/> Overview</span>,
         'key' : 'document-info',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (

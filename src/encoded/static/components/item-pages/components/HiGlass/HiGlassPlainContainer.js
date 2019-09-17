@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 
 /**
@@ -36,7 +36,7 @@ export function HiGlassLoadingIndicator(props) {
     return (
         <React.Fragment>
             <h3>
-                <i className={"icon icon-lg icon-" + (icon || "television")}/>
+                <i className={"icon icon-lg icon-" + (icon || "tv fas")}/>
             </h3>
             { title || "Initializing" }
         </React.Fragment>
