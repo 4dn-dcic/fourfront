@@ -377,7 +377,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     * @returns {void}
     */
     addFileToHiglass(files) {
-        const { context } = this.props;
+        const { context, href } = this.props;
         const hgc = this.getHiGlassComponent();
         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
         const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
@@ -388,7 +388,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         // Read the url of the higlass viewconfig and store the genome assembly.
         ajax.load(
-            this.props.href,
+            href,
             (resp)=>{
                 if(resp.success) {
                     this.setState({ 'genome_assembly' : resp.genome_assembly });
@@ -454,10 +454,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 return fallbackCallback(resp);
                             }
 
+                            const filesLen = files.length;
+
                             // Show alert indicating success
                             Alerts.queue({
-                                'title'     : "Added file",
-                                'message'   : "Added new file to Higlass display.",
+                                'title'     : "Added file" + (filesLen === 1 ? "" : "s"),
+                                'message'   : "Added " + filesLen + " new file" + (filesLen === 1 ? "" : "s") + " to Higlass display.",
                                 'style'     : 'success'
                             });
                         });
