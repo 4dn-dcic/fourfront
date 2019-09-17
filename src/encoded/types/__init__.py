@@ -108,6 +108,7 @@ class Sample(Item):
 
 @collection(
     name='disorders',
+    unique_key='disorder:disorder_id',
     properties={
         'title': 'Disorders',
         'description': 'Listing of Disorders',
@@ -120,6 +121,7 @@ class Disorder(Item):
         'associated_phenotypes.phenotype.hpo_id',
         'associated_phenotypes.phenotype.definition'
     ]
+    name_key = 'disorder_id'
 
     @calculated_property(schema={
         "title": "Display Title",

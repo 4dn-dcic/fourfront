@@ -5,8 +5,8 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["disorder_name", "disorder_id"],
-    "identifyingProperties": ["uuid", "aliases"],
-    "additionalProperties": true,
+    "identifyingProperties": ["uuid", "aliases", "disorder_id"],
+    "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
@@ -129,6 +129,15 @@
             "items": {
                 "title": "Synonym",
                 "type": "string"
+            }
+        },
+        "parents" : {
+            "title": "Parent Disorders",
+            "type" : "array",
+            "items": {
+                "title": "Parent",
+                "type": "string",
+                "linkTo": "Disorder"
             }
         },
         "disorder_url": {
