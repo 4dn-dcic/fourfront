@@ -1,7 +1,140 @@
 
-/********
-COMMON SEARCH TABLE
-*********/
+
+/** Import & extend styling of facet-list and search tables **/
+
+
+/**********************/
+/***** Facet List *****/
+/**********************/
+@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
+
+/** Make FacetList Sticky for newer browsers **/
+
+.search-page-container {
+    .facets-container.facets.with-header-bg {
+        position: sticky;
+        top: 40px;
+
+		.facets-body {
+			body.scrolled-past-80 & {
+				max-height: 90vh;
+				// 86 = 40 nav + 46 facet-list-header
+				max-height: calc(100vh - 86px);
+				overflow-y: auto;
+				overflow-x: hidden;
+
+				&::-webkit-scrollbar {
+					width: 6px;
+					height: 6px;
+					background-color: transparent;
+				}
+
+				&::-webkit-scrollbar-thumb {
+					background-color: #aaa;
+					border-radius: 3px;
+				}
+
+				&::-webkit-scrollbar-track {
+					margin-right: -1px;
+				}
+			}
+		}
+
+    }
+
+    &.browse-page-container {
+        .facets-container.facets.with-header-bg {
+			top: 78px;
+			.facets-body {
+				body.scrolled-past-80 & {
+					// 124 = 40 nav + 46 facet-list-header + 38 quickinfobar
+					max-height: calc(100vh - 124px);
+				}
+			}
+        }
+    }
+}
+
+
+/**********************/
+/**** Search Table ****/
+/**********************/
+
+$search-results-above-results-row-height: 40px;
+@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table";
+
+// Extensions to shared-portal-components searchview table(s):
+.search-result-row .result-table-row .search-result-column-block,
+.item-page-table-container .item-page-table-row-container .table-row > .column {
+	&[data-field="status"] {
+		> .inner {
+			i.item-status-indicator-dot {
+				margin-left: 4px;
+				margin-right: 2px;
+			}
+		}
+	}
+	&[data-field="lab.display_title"],
+	&[data-field="track_and_facet_info.lab_name"]{
+		> .inner {
+			text-align: left;
+		}
+		i.user-icon {
+			cursor: help;
+			margin-right: 5px;
+		}
+	}
+	&[data-field="display_title"]{
+		.expset-checkbox {
+			margin-right: 15px;
+			margin-top: -1px;
+			display: inline-block;
+			vertical-align: text-top;
+		}
+		.mono-text {
+			letter-spacing: 0.5px;
+		}
+		img.in-search-table-title-image {
+			margin-top: -10px;
+			margin-bottom: -8px;
+			border-radius: 4px;
+			margin-right: 10px;
+			filter: saturate(0.3);
+			transition: filter .2s, opacity .2s;
+			opacity: 0.85;
+		}
+		&:hover {
+			img.in-search-table-title-image {
+				filter: none;
+				opacity: 1;
+			}
+		}
+	}
+	&[data-field="experiments_in_set.experiment_categorizer.combined"]{
+		> .inner {
+			position: relative;
+			text-overflow: initial;
+			white-space: normal;
+			div.exp-categorizer-cell {
+				text-align: left;
+
+				> small {
+					position: relative;
+					font-weight: 500;
+				}
+				> div {
+					position: relative;
+					width: 100%;
+				}
+			}
+
+		}
+	}
+}
+
+/********************************/
+/***** Search Table Wrapper *****/
+/********************************/
 
 // Outer Wrapper
 // Inner stuff (cell, row styling, etc.) is located in _tables.scss
@@ -21,4 +154,5 @@ COMMON SEARCH TABLE
         min-width: 75%;
     }
 }
+
 
