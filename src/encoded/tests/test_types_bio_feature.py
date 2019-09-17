@@ -13,7 +13,7 @@ def protein_term(testapp, so_ont):
         'uuid': '8bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000104', 'term_name': 'polypeptide',
         'preferred_name': 'protein',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -22,7 +22,7 @@ def region_term(testapp, so_ont):
     gterm = {
         'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000001', 'term_name': 'region',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -31,7 +31,7 @@ def transcript_term(testapp, so_ont):
     gterm = {
         'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000673', 'term_name': 'transcript',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -40,7 +40,7 @@ def component_term(testapp, so_ont):
     gterm = {
         'uuid': '4bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'GO:0005575', 'term_name': 'cellular_component',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
