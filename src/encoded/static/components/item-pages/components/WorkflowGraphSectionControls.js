@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
-import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/Checkbox';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 
 
@@ -60,7 +60,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
                 <button type="button" onClick={onToggleFullScreenView} key="full-screen-btn"
                     className="btn btn-outline-dark for-state-fullscreenViewEnabled"
                     data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                    <i className={"icon icon-fw icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
+                    <i className={"icon icon-fw fas icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
                 </button>
             );
         }
@@ -136,7 +136,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
 
         return (
             <DropdownButton id="detail-granularity-selector" key="chart-type"
-                className="for-state-showChart" pullRight
+                className="for-state-showChart" variant="outline-dark"
                 onSelect={onChangeShowChartType}
                 title={WorkflowGraphSectionControls.keyTitleMap[showChartType]}>
                 { basic }{ detail }
@@ -164,26 +164,21 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         return (
             <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns}
                 disabled={isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
-                { loading ? <i className="icon icon-spin icon-fw icon-circle-o-notch" style={{ marginRight : 3 }}/> : '' } Collapse Similar Runs
+                { loading ? <i className="icon icon-spin icon-fw fas icon-circle-notch mr-03"/> : '' } Collapse Similar Runs
             </Checkbox>
         );
     }
 
-    /**
-     * @param {...JSX.Element} element - Element(s) to wrap in controls wrapper.
-     * @returns {JSX.Element} Workflow Controls Element.
-     */
-    wrapper(elems){
+    render(){
+        const { enabledControls, windowWidth } = this.props;
+        const elems = _.map(
+            enabledControls, (ctrlFuncName) => this[ctrlFuncName]()
+        );
         return (
-            <CollapsibleItemViewButtonToolbar constantButtons={this.fullScreenButton()} windowWidth={this.props.windowWidth}>
+            <CollapsibleItemViewButtonToolbar constantButtons={this.fullScreenButton()} windowWidth={windowWidth}>
                 { elems }
             </CollapsibleItemViewButtonToolbar>
         );
-    }
-
-    render(){
-        var { enabledControls } = this.props;
-        return this.wrapper(_.map(enabledControls, (ctrlFuncName) => this[ctrlFuncName]()));
     }
 }
 

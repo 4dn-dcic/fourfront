@@ -49,7 +49,7 @@ export class ViewMetricButton extends React.PureComponent {
         return (
             <a href={file.url} className={usedClassName} target="_blank" onClick={this.onClick} rel="noopener noreferrer"
                 {..._.omit(this.props, 'file', 'title', 'defaultBtnClassName', 'className', 'disabled', 'onClick', 'target', 'href')}>
-                <i className="icon icon-fw icon-external-link" style={{ top : 1, position: 'relative' }}/>{ title ? <span>&nbsp; { title }</span> : null }
+                <i className="icon icon-fw icon-external-link-alt fas"/>{ title ? <span>&nbsp; { title }</span> : null }
             </a>
         );
     }
@@ -83,11 +83,11 @@ function MetricsViewItemIcon({ resultStr = "UNKNOWN", extraIconClassName = "" })
     if (typeof resultStr !== 'string') return resultStr;
     switch(resultStr.toUpperCase()){
         case 'PASS':
-            return <i className={"icon icon-check " + extraIconClassName} data-tip={resultStr} />;
+            return <i className={"icon fas icon-check " + extraIconClassName} data-tip={resultStr} />;
         case 'WARN':
-            return <i className={"icon icon-warning " + extraIconClassName} data-tip={resultStr} />;
+            return <i className={"icon fas icon-exclamation-triangle " + extraIconClassName} data-tip={resultStr} />;
         case 'ERROR':
-            return <i className={"icon icon-exclamation-circle " + extraIconClassName} data-tip={resultStr} />;
+            return <i className={"icon fas icon-exclamation-circle " + extraIconClassName} data-tip={resultStr} />;
         default:
             return resultStr;
     }

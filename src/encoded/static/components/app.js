@@ -15,10 +15,10 @@ import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
 import { store } from './../store';
 
-import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
-import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
@@ -610,11 +610,11 @@ export default class App extends React.PureComponent {
         }
 
         // If we're submitting search form in selection mode, preserve selection mode at next URL.
-        if (currentAction === 'selection'){
-            if (search && search.indexOf('currentAction=selection') === -1){
-                search += '&currentAction=selection';
+        if (isSelectAction(currentAction)){
+            if (search && search.indexOf('currentAction=' + currentAction) === -1){
+                search += ('&currentAction=' + currentAction);
             } else if (!search) {
-                search = 'currentAction=selection';
+                search = ('currentAction=' + currentAction);
             }
         }
 
@@ -1308,7 +1308,7 @@ class HTMLTitle extends React.PureComponent {
 
 class ContentRenderer extends React.PureComponent {
     render(){
-        const { canonical, status, currentAction, context, routeLeaf, contentViews } = this.props;
+        const { canonical, status, currentAction, context, routeLeaf, contentViews, href } = this.props;
         const contextAtID     = object.itemUtil.atId(context);
         const key             = contextAtID && contextAtID.split('?')[0]; // Switching between collections may leave component in place
 
@@ -1349,7 +1349,7 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return <ContentErrorBoundary canonical={canonical}>{ content }</ContentErrorBoundary>;
+        return <ContentErrorBoundary canonical={canonical} href={href}>{ content }</ContentErrorBoundary>;
     }
 }
 
@@ -1727,25 +1727,51 @@ class BodyElement extends React.PureComponent {
         );
     }
 
+    bodyClassName(){
+        const { isLoading, context } = this.props;
+        const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
+        const bodyClassList = (classList && classList.slice(0)) || [];
+
+        // Common UI
+        if (isLoading)          bodyClassList.push("loading-request");
+        if (scrolledPastTop)    bodyClassList.push("scrolled-past-top");
+        if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
+        if (isFullscreen){
+            bodyClassList.push("is-full-screen");
+        }
+
+        // TODO migrate test-warning-visible class to here from NavBar (done on CGAP already).
+
+        // If is a typical ItemView, we want to show a full-width view.
+        // StaticPages, unless on ItemView for them, _do not_ contain "Item"
+        // in their @type field and instead have Portal, StaticPage, etc.
+        if (Array.isArray(context['@type'])){
+            if (context['@type'].indexOf('Item') > -1){
+                bodyClassList.push("is-item-view");
+            }
+        }
+
+        if (bodyClassList.length > 0){
+            return bodyClassList.join(' ');
+        } else {
+            return null;
+        }
+    }
+
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, hrefParts, isLoading, slowLoad } = this.props;
-        const { scrolledPastEighty, scrolledPastTop, windowWidth, windowHeight, classList, hasError, isFullscreen } = this.state;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad } = this.props;
+        const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
-        const bodyClassList = (classList && classList.slice(0)) || [];
         const overlaysContainer = this.overlaysContainerRef.current;
+        const displayNavBarAndFooter = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && (currentAction === 'multiselect'));
 
         if (hasError) return this.renderErrorState();
 
-        if (isLoading)          bodyClassList.push('loading-request');
-        if (scrolledPastTop)    bodyClassList.push('scrolled-past-top');
-        if (scrolledPastEighty) bodyClassList.push('scrolled-past-80');
-        if (isFullscreen)       bodyClassList.push('is-full-screen');
-
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={(bodyClassList.length > 0 && bodyClassList.join(' ')) || null}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
@@ -1756,18 +1782,23 @@ class BodyElement extends React.PureComponent {
 
                 <div id="slow-load-container" className={slowLoad ? 'visible' : null}>
                     <div className="inner">
-                        <i className="icon icon-circle-o-notch"/>
+                        <i className="icon icon-circle-notch fas"/>
                     </div>
                 </div>
 
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
-                                {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                    'context', 'updateUserInfo')} />
+                            {displayNavBarAndFooter ?
+                                <React.Fragment>
+                                    <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
+                                        {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
+                                            'context', 'updateUserInfo')} />
 
-                            <div id="pre-content-placeholder"/>
+                                    <div id="pre-content-placeholder" />
+                                </React.Fragment>
+                                : null
+                            }
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
 
@@ -1776,7 +1807,7 @@ class BodyElement extends React.PureComponent {
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
 
-                            <ContentErrorBoundary canonical={canonical}>
+                            <ContentErrorBoundary canonical={canonical} href={href}>
                                 <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                     registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
                                     overlaysContainer } } />
@@ -1784,7 +1815,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="layout-footer"/>
                         </div>
-                        <Footer version={context.app_version} />
+                        {displayNavBarAndFooter ? <Footer version={context.app_version} /> : null}
                     </div>
                 </div>
 

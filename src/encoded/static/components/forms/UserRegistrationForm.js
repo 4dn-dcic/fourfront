@@ -7,9 +7,9 @@ import serialize from 'form-serialize';
 import memoize from 'memoize-one';
 import { FormGroup, FormLabel, FormControl, Form } from 'react-bootstrap';
 
-import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/LinkToSelector';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
+import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/LinkToSelector';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 
 
 export default class UserRegistrationForm extends React.PureComponent {
@@ -246,7 +246,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     'left' : 0, 'right' : 0, 'bottom' : 0, 'top' : 0
                 }}>
                     <div className="text-center" style={{ 'width' : '100%' }}>
-                        <i className="icon icon-spin icon-circle-o-notch"/>
+                        <i className="icon icon-spin icon-circle-notch fas"/>
                     </div>
                 </div>
             );
@@ -254,7 +254,7 @@ export default class UserRegistrationForm extends React.PureComponent {
             errorIndicator = (
                 <div className="alert alert-success" role="alert">
                     <span className="text-500">
-                        <i className="icon icon-fw icon-circle-o-notch"/>&nbsp;&nbsp;{' '}
+                        <i className="icon icon-fw fas icon-circle-notch"/>&nbsp;&nbsp;{' '}
                         Registered account, logging in...
                     </span>
                 </div>
@@ -377,17 +377,21 @@ class LookupLabField extends React.PureComponent {
         });
     }
 
-    receiveItem(selectionAtID, selectionItemContext) {
-
-        // Is it blank? Do nothing.
-        if (!selectionAtID) {
+    receiveItem(items, endDataPost) {
+        if (!items || !Array.isArray(items) || items.length === 0 || !_.every(items, function (item) { return item.id && typeof item.id === 'string' && item.json; })) {
             return;
         }
+        endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+        if (items.length > 1) {
+            console.warn('Multiple labs selected but we only get a single item, since handler\'s multiple version not implemented yet!');
+        }
 
-        this.setState({ 'isSelecting' : false }, ()=>{
+        this.setState({ 'isSelecting' : !endDataPost }, ()=>{
             // Invoke the object callback function, using the text input.
             // eslint-disable-next-line react/destructuring-assignment
-            this.props.onSelect(selectionAtID, selectionItemContext);
+
+            // TODO: Currently, we support only a single lab selection. Add multiple version.
+            this.props.onSelect(items[0].id, items[0].json);
         });
     }
 
@@ -410,7 +414,7 @@ class LookupLabField extends React.PureComponent {
                         rel="noopener noreferrer" style={{ verticalAlign: "middle" }}>
                         { currentLabDetails.display_title }
                     </a>
-                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small"/>
+                    &nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt fas text-small"/>
                 </div>
             )
         ) || (

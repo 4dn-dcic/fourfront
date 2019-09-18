@@ -8,10 +8,11 @@ ORDER = [
     'publication_tracking', 'document', 'image', 'vendor', 'construct',
     'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
     'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
-    'individual_chicken', 'biosource', 'antibody', 'enzyme', 'treatment_rnai',
-    'treatment_agent', 'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck',
-    'quality_metric_bamqc', 'quality_metric_pairsqc',
-    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq',
+    'individual_chicken', 'individual_zebrafish', 'biosource', 'antibody', 'enzyme',
+    'treatment_rnai', 'treatment_agent',
+    'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck',
+    'quality_metric_bamqc', 'quality_metric_pairsqc', 'quality_metric_margi',
+    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq', 'quality_metric_workflowrun',
     'quality_metric_atacseq', 'microscope_setting_d1', 'microscope_setting_d2',
     'microscope_setting_a1', 'microscope_setting_a2', 'file_fastq',
     'file_processed', 'file_reference', 'file_calibration', 'file_microscopy',
@@ -23,8 +24,7 @@ ORDER = [
     'data_release_update', 'software', 'analysis_step', 'workflow',
     'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
     'sysinfo', 'tracking_item', 'quality_metric_flag',
-    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run',
-    'quality_metric_margi'
+    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
 ]
 
 
@@ -171,11 +171,12 @@ def lung_biosource(testapp, lab, award, lung_oterm):
 
 
 @pytest.fixture
-def de_term(testapp, lab, award):
+def de_term(testapp, uberon_ont, lab, award):
     item = {
         "term_id": "UBERON:0005439",
         "term_name": "definitive endoderm",
-        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439"
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0005439",
+        "source_ontologies": [uberon_ont['@id']]
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
 
@@ -225,7 +226,7 @@ def gene_term(testapp, so_ont):
     gterm = {
         'uuid': '7bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000704', 'term_name': 'gene',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -234,7 +235,7 @@ def region_term(testapp, so_ont):
     gterm = {
         'uuid': '6bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000001', 'term_name': 'region',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -244,7 +245,7 @@ def protein_term(testapp, so_ont):
         'uuid': '8bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000104', 'term_name': 'polypeptide',
         'preferred_name': 'protein',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -253,7 +254,7 @@ def transcript_term(testapp, so_ont):
     gterm = {
         'uuid': '5bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'SO:0000673', 'term_name': 'transcript',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -262,7 +263,7 @@ def component_term(testapp, so_ont):
     gterm = {
         'uuid': '4bea5bde-d860-49f8-b178-35d0dadbd644',
         'term_id': 'GO:0005575', 'term_name': 'cellular_component',
-        'source_ontology': so_ont['@id']}
+        'source_ontologies': [so_ont['@id']]}
     return testapp.post_json('/ontology_term', gterm).json['@graph'][0]
 
 
@@ -274,7 +275,7 @@ def cell_line_term(testapp, ontology):
         "term_id": "EFO:0000322",
         "term_name": "cell line",
         "uuid": "111189bc-8535-4448-903e-854af460a233",
-        "source_ontology": ontology['@id'],
+        "source_ontologies": [ontology['@id']],
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0000322"
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
@@ -286,7 +287,7 @@ def f123_oterm(testapp, ontology, cell_line_term):
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "term_name": "F123-CASTx129",
         "term_id": "EFO:0000008",
-        "source_ontology": ontology['@id'],
+        "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
@@ -298,7 +299,7 @@ def gm12878_oterm(testapp, ontology, cell_line_term):
         "uuid": "530056bc-8535-4448-903e-854af460b111",
         "term_name": "GM12878",
         "term_id": "EFO:0000009",
-        "source_ontology": ontology['@id'],
+        "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
@@ -518,8 +519,8 @@ def file_formats(testapp, lab, award):
                         "valid_item_types": ["FileProcessed"]},
         'bai': {'standard_file_extension': 'bam.bai',
                 "valid_item_types": ["FileProcessed"]},
-        'beddb' : {"standard_file_extension": "beddb",
-                "valid_item_types": ["FileProcessed", "FileReference"]},
+        'beddb': {"standard_file_extension": "beddb",
+                  "valid_item_types": ["FileProcessed", "FileReference"]},
     }
     format_info = {
         'fastq': {'standard_file_extension': 'fastq.gz',
@@ -541,14 +542,15 @@ def file_formats(testapp, lab, award):
         'chromsizes': {'standard_file_extension': 'chrom.sizes',
                        "valid_item_types": ["FileReference"]},
         'other': {'standard_file_extension': '',
-                  "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileReference", "FileCalibration"]},
+                  "valid_item_types": ["FileProcessed", "FileMicroscopy",
+                                       "FileReference", "FileCalibration"]},
         'bw': {'standard_file_extension': 'bw',
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
         'bg': {'standard_file_extension': 'bedGraph.gz',
                "valid_item_types": ["FileProcessed", "FileVistrack"]},
         'bigbed': {'standard_file_extension': 'bb',
-               "valid_item_types": ["FileProcessed", "FileReference"]},
-        'bed' : {"standard_file_extension": "bed.gz",
+                   "valid_item_types": ["FileProcessed", "FileReference"]},
+        'bed': {"standard_file_extension": "bed.gz",
                 "extrafile_formats": ['beddb'],
                 "valid_item_types": ["FileProcessed", "FileReference"]}
     }
@@ -1067,7 +1069,7 @@ def oterm(uberon_ont):
         "term_name": "lung",
         "term_id": "UBERON:0002048",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002048",
-        "source_ontology": uberon_ont['@id']
+        "source_ontologies": [uberon_ont['@id']]
     }
 
 
@@ -1078,7 +1080,7 @@ def lung_oterm(oterm, testapp):
 
 @pytest.fixture
 def quality_metric_fastqc(testapp, award, lab):
-    item =  {
+    item = {
         "uuid": "ed80c2a5-ae55-459b-ba1d-7b0971ce2613",
         "award": award['@id'],
         "lab": lab['@id']

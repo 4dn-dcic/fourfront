@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ajax, console, isServerSide, object, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { ajax, console, isServerSide, object, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../util';
 
 

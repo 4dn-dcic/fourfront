@@ -2,12 +2,9 @@
 """Load collections and determine the order."""
 import mimetypes
 import structlog
-import os.path
-import boto3
 import magic
 import json
 import os
-from dcicutils.beanstalk_utils import get_beanstalk_real_url
 from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
@@ -30,6 +27,7 @@ ORDER = [
     'award',
     'lab',
     'file_format',
+    'ontology',
     'ontology_term',  # validate_biosource_cell_line requires term_name
     'experiment_type',
     'biosource',
@@ -440,76 +438,12 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
     return None
 
 
-def generate_access_key(testapp, store_access_key, email='4dndcic@gmail.com'):
-    # get admin user and generate access keys
-    if store_access_key:
-        # we probably don't have elasticsearch index updated yet
-        admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
-
-        access_key_req = {
-            'user': admin['@id'],
-            'description': 'key for submit4dn',
-        }
-        res = testapp.post_json('/access_key', access_key_req).json
-        if store_access_key == 'local':
-            # for local storing we always connecting to local server
-            server = 'http://localhost:8000'
-        else:
-            health = testapp.get('/health?format=json').json
-            env = health.get('beanstalk_env')
-            server = get_beanstalk_real_url(env)
-            print("server is %s" % server)
-
-        akey = {'default':
-                {'secret': res['secret_access_key'],
-                 'key': res['access_key_id'],
-                 'server': server,
-                 }
-                }
-        return json.dumps(akey)
-
-
-def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
-        if (not keys):
-            return
-        # write to ~/keypairs.json
-        if store_access_key == 'local':
-            home_dir = os.path.expanduser('~')
-            keypairs_filename = os.path.join(home_dir, 'keypairs.json')
-
-            print("Storing access keys to %s", keypairs_filename)
-            with open(keypairs_filename, 'w') as keypairs:
-                    # write to file for local
-                    keypairs.write(keys)
-
-        elif store_access_key == 's3':
-            # if access_key_loc == 's3', always generate new keys
-            s3bucket = app.registry.settings['system_bucket']
-            secret = os.environ.get('AWS_SECRET_KEY')
-            if not secret:
-                print("no secrets for s3 upload, you probably shouldn't be doing"
-                      "this from your local machine")
-                print("halt and catch fire")
-                return
-
-            s3 = boto3.client('s3', region_name='us-east-1')
-            secret = secret[:32]
-
-            print("Uploading S3 object with SSE-C")
-            s3.put_object(Bucket=s3bucket,
-                          Key=s3_file_name,
-                          Body=keys,
-                          SSECustomerKey=secret,
-                          SSECustomerAlgorithm='AES256')
-
-
-def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
-              clear_tables=False, overwrite=False, use_master_inserts=True):
+def load_data(app, indir='inserts', docsdir=None, clear_tables=False,
+              overwrite=False, use_master_inserts=True):
     '''
     This function will take the inserts folder as input, and place them to the given environment.
     args:
         app:
-        access_key_loc (None):
         indir (inserts): inserts folder, should be relative to tests/data/
         docsdir (None): folder with attachment documents, relative to tests/data
         clear_tables (False): Not sure- clear existing database before loading inserts
@@ -562,23 +496,21 @@ def load_data(app, access_key_loc=None, indir='inserts', docsdir=None,
         print(LOAD_ERROR_MESSAGE)
         logger.error('load_data: failed to load from %s' % docsdir, error=res)
         return res
-    keys = generate_access_key(testapp, access_key_loc)
-    store_keys(app, access_key_loc, keys)
     return None  # unnecessary, but makes it more clear that no error was encountered
 
 
-def load_test_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
+def load_test_data(app, clear_tables=False, overwrite=False):
     """
     Load inserts and master-inserts
 
     Returns:
         None if successful, otherwise Exception encountered
     """
-    return load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+    return load_data(app, docsdir='documents', indir='inserts',
                      clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
+def load_local_data(app, clear_tables=False, overwrite=False):
     """
     Load temp-local-inserts. If not present, load inserts and master-inserts
 
@@ -593,19 +525,18 @@ def load_local_data(app, access_key_loc=None, clear_tables=False, overwrite=Fals
         use_temp_local = any([fn for fn in filenames if fn.endswith('.json')])
 
     if use_temp_local:
-        return load_data(app, access_key_loc, docsdir='documents', indir='temp-local-inserts',
+        return load_data(app, docsdir='documents', indir='temp-local-inserts',
                          clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
     else:
-        return load_data(app, access_key_loc, docsdir='documents', indir='inserts',
+        return load_data(app, docsdir='documents', indir='inserts',
                          clear_tables=clear_tables, overwrite=overwrite)
 
 
-def load_prod_data(app, access_key_loc=None, clear_tables=False, overwrite=False):
+def load_prod_data(app, clear_tables=False, overwrite=False):
     """
     Load master-inserts
 
     Returns:
         None if successful, otherwise Exception encountered
     """
-    return load_data(app, access_key_loc, indir='master-inserts',
-                     clear_tables=clear_tables, overwrite=overwrite)
+    return load_data(app, indir='master-inserts', clear_tables=clear_tables, overwrite=overwrite)

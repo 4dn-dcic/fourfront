@@ -6,9 +6,9 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
 
-import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/StackedBlockTable';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/DropdownButton';
-import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
+import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
@@ -85,10 +85,10 @@ class FileColumnActionsBtn extends React.PureComponent {
             );
         } else {
             return (
-                <div className="inline-block" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
+                <div className="in-stacked-table-button-container" style={{ 'position' : 'relative', 'zIndex' : 2 }}>
                     <button type="button" className="btn btn-xs btn-primary in-stacked-table-button"
                         data-tip="Visualize with HiGlass" onClick={onClick}>
-                        <i className="icon icon-fw icon-television"/>
+                        <i className="icon icon-fw icon-tv fas"/>
                     </button>
                 </div>
             );
@@ -116,7 +116,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         return (
             <DropdownItem data-tip="Visualize this file in TCGA's JuiceBox Browser" onClick={onClick} key="juicebox" className="text-left">
-                JuiceBox <i className="icon icon-fw icon-external-link text-smaller"/>
+                JuiceBox <i className="icon icon-fw icon-external-link-alt text-smaller fas"/>
             </DropdownItem>
         );
 
@@ -145,7 +145,7 @@ class FileColumnActionsBtn extends React.PureComponent {
 
         return (
             <DropdownItem data-tip="Visualize this file in WashU Epigenome Browser" onClick={onClick} key="epigenome" className="text-left">
-                Epigenome Browser <i className="icon icon-fw icon-external-link text-smaller"/>
+                Epigenome Browser <i className="icon icon-fw icon-external-link-alt text-smaller fas"/>
             </DropdownItem>
         );
     }
@@ -168,7 +168,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         if (hasJBOrEpigenomeBtn){
             return (
                 <DropdownButton className="in-stacked-table-button-container" variant="primary" data-tip="Visualize this file..."
-                    data-place="right" title={<i className="icon icon-fw icon-television"/>} drop="up" size="xs">
+                    data-place="right" title={<i className="icon icon-fw icon-tv fas"/>} drop="up" size="xs">
                     { juiceboxBtn }{ epigenomeBtn }{ higlassBtn }
                 </DropdownButton>
             );
@@ -262,10 +262,10 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
     }
     const filename = Schemas.Term.toName('quality_metric.url', file.quality_metric.url, false);
     return (
-        <button type="button" className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
+        <a className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
             href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
-            <i className="icon icon-fw icon-file-text-o" />
-        </button>
+            <i className="icon icon-fw icon-file-alt far" />
+        </a>
     );
 }
 
@@ -592,7 +592,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     static defaultProps = {
         'columnHeaders' : [
             { columnClass: 'experiment',  className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
-            //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download"></i> },
+            //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
             { columnClass: 'file',        className: 'has-checkbox',  title: 'File',      initialWidth: 135, render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox },
             { columnClass: 'file-detail', title: 'File Type', initialWidth: 135, render: renderFileTypeSummaryColumn },
             { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
@@ -737,14 +737,14 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
         if (val === 'PASS'){
             return (
                 <span>
-                    <i className="icon icon-check success" style={{ 'color' : 'green' }}/>
+                    <i className="icon icon-check success fas" style={{ 'color' : 'green' }}/>
                     &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Pass</a> : "Pass"}
                 </span>
             );
         } else if (val === 'FAIL'){
             return (
                 <span>
-                    <i className="icon icon-times" style={{ 'color' : 'red' }}/>
+                    <i className="icon icon-times fas" style={{ 'color' : 'red' }}/>
                     &nbsp; { linkToReport ? <a href={linkToReport} target="_blank" rel="noreferrer noopener">Fail</a> : "Fail"}
                 </span>
             );

@@ -48,6 +48,7 @@ ITEM_INDEX_ORDER = [
     'IndividualHuman',
     'IndividualMouse',
     'IndividualPrimate',
+    'IndividualZebrafish',
 
     'Image',
     'Modification',
@@ -88,6 +89,7 @@ ITEM_INDEX_ORDER = [
     'QualityMetricFlag',
     'QualityMetricPairsqc',
     'QualityMetricMargi',
+    'QualityMetricWorkflowrun',
 
     'ExperimentAtacseq',
     'ExperimentCaptureC',

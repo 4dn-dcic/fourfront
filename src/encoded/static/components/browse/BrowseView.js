@@ -6,13 +6,13 @@ import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/src/components/forms/components/IndeterminateCheckbox';
-import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/table-commons';
-import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/CustomColumnController';
-import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SearchResultTable';
-import { FacetList, performFilteringQuery } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/FacetList';
-import { SortController } from '@hms-dbmi-bgm/shared-portal-components/src/components/browse/components/SortController';
+import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
+import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
+import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
+import { FacetList, performFilteringQuery } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
+import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SortController';
 
 // We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
 // We could probably also create different 'browseState' module for it, however.

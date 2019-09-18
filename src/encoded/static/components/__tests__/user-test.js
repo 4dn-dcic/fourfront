@@ -3,7 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
-import { object } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 /* Basing off of browse.js to test user.js */
 

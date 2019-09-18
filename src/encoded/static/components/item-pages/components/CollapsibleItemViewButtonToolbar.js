@@ -5,8 +5,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ButtonToolbar } from 'react-bootstrap';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
-import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
 
@@ -14,7 +14,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
         'collapseButtonTitle' : function(isOpen){
             return (
                 <React.Fragment>
-                    <i className={"icon icon-fw icon-" + (isOpen ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options
+                    <i className={"icon icon-fw fas icon-" + (isOpen ? 'angle-up' : 'ellipsis-v')}/>&nbsp; Options
                 </React.Fragment>
             );
         }
@@ -51,7 +51,7 @@ export class CollapsibleItemViewButtonToolbar extends React.PureComponent {
         if (!mounted) {
             return (
                 <div className="pull-right pt-23 text-medium" key="loading-indicator">
-                    <i className="icon icon-fw icon-circle-o-notch icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i className="icon icon-fw icon-circle-notch fas icon-spin"/>&nbsp;&nbsp;&nbsp;&nbsp;
                 </div>
             );
         }

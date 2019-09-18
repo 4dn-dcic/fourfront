@@ -6,11 +6,12 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { isServerSide, console, object, layout, valueTransforms, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { isServerSide, console, object, layout, valueTransforms, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
 
-import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { ExperimentSetTablesLoaded, ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -51,11 +52,27 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
-        const { context } = this.props;
+        const { context, browseBaseState } = this.props;
         const width = this.getTabViewWidth();
         const tabs = [];
 
         tabs.push(FileViewOverview.getTabObject(this.props, width));
+
+        if(getItemType(context) === 'FileReference') {
+            const expSetTableProps = {
+                ...this.props,
+                'requestHref': (
+                    "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                    (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
+                    "experiments_in_set.reference_files.accession=" + context.accession
+                ),
+                'title': function (props, { totalCount }) {
+                    return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
+                }
+            };
+
+            tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
+        }
 
         if (this.shouldGraphExist(context)){
             tabs.push(FileViewGraphSection.getTabObject(this.props, this.state, this.handleToggleAllRuns, width));
@@ -82,7 +99,7 @@ class FileViewOverview extends React.PureComponent {
 
     static getTabObject({ context, schemas, windowWidth, href }, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
             'key' : 'file-overview',
             //'disabled' : !Array.isArray(context.experiments),
             'content' : (
@@ -136,7 +153,7 @@ class FileViewOverview extends React.PureComponent {
 export class FileOverviewHeading extends React.PureComponent {
 
     static fileSizeTitleRenderFxn(field, value){
-        return <span className="text-400"><i className="icon icon-fw icon-hdd-o"/> { Schemas.Term.toName(field, value) }</span>;
+        return <span className="text-400"><i className="icon icon-fw icon-hdd far"/> { Schemas.Term.toName(field, value) }</span>;
     }
 
     constructor(props){
@@ -215,7 +232,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
             <button type="button" href={btnHref} className="btn btn-primary mr-05" tagret="_blank">
-                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
             </button>
         );
     }
@@ -243,7 +260,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         return (
             <button type="button" href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
                 <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
-                <i className="icon icon-fw icon-external-link text-small" style={{ position: 'relative', 'top' : 1 }}/>
+                <i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
             </button>
         );
     }
@@ -332,7 +349,7 @@ export function QCMetricFromSummary(props){
                 </div>
                 <div className="col-8">
                     <div className="inner value">
-                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05" data-tip={tooltip} /> : null }
+                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
                         { value }
                     </div>
                 </div>
@@ -392,7 +409,7 @@ export class QualityControlResults extends React.PureComponent {
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
                             <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
-                            <i className="ml-05 icon icon-fw icon-external-link text-small"/>
+                            <i className="ml-05 icon icon-fw icon-external-link-alt text-small fas"/>
                         </React.Fragment>
                     } />
                     : null }

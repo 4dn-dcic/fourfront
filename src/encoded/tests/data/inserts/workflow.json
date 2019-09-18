@@ -660,7 +660,15 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "report"
+                "workflow_argument_name": "report",
+                "argument_to_be_attached_to": "pairs",
+                "qc_zipped": true,
+                "qc_html": true,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_html": "pairsqc_report.html",
+                "qc_zipped_tables": ["summary.out"],
+                "qc_type": "quality_metric_pairsqc"
             }
         ],
         "award": "1U01CA200059-01",
@@ -801,6 +809,18 @@
             {
                 "argument_type": "Output QC file",
                 "workflow_argument_name": "report"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "report",
+                "argument_to_be_attached_to": "pairs",
+                "qc_zipped": true,
+                "qc_html": true,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_html": "pairsqc_report.html",
+                "qc_zipped_tables": ["summary.out"],
+                "qc_type": "quality_metric_pairsqc"
             }
         ],
         "award": "1U01CA200059-01",
@@ -4973,7 +4993,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -5374,7 +5401,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -5782,7 +5816,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -6233,7 +6274,14 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "dedup_qc_report"
+                "workflow_argument_name": "dedup_qc_report",
+                "argument_to_be_attached_to": "filtered_sorted_deduped_bam",
+                "qc_zipped": true,
+                "qc_html": false,
+                "qc_json": false,
+                "qc_table": true,
+                "qc_zipped_tables": ["summary.txt"],
+                "qc_type": "quality_metric_dedupqc_repliseq"
             },
             {
                 "argument_format": "bg",
@@ -9634,11 +9682,17 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "chip.report"
+                "workflow_argument_name": "chip.report",
+                "qc_type": "quality_metric_chipseq",
+                "argument_to_be_attached_to": "chip.first_ta",
+                "qc_html": true
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "chip.qc_json"
+                "workflow_argument_name": "chip.qc_json",
+                "qc_type": "quality_metric_chipseq",
+                "argument_to_be_attached_to": "chip.first_ta",
+                "qc_json": true
             }
         ],
         "award": "1U01CA200059-01",
@@ -10054,11 +10108,17 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "chip.report"
+                "workflow_argument_name": "chip.report",
+                "qc_type": "quality_metric_chipseq",
+                "argument_to_be_attached_to": "chip.first_ta_ctl",
+                "qc_html": true
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "chip.qc_json"
+                "workflow_argument_name": "chip.qc_json",
+                "qc_type": "quality_metric_chipseq",
+                "argument_to_be_attached_to": "chip.first_ta_ctl",
+                "qc_json": true
             }
         ],
         "award": "1U01CA200059-01",
@@ -10463,11 +10523,17 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "chip.report"
+                "workflow_argument_name": "chip.report",
+                "qc_type": "quality_metric_chipseq",
+                "argument_to_be_attached_to": "chip.optimal_peak",
+                "qc_html": true
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "chip.qc_json"
+                "workflow_argument_name": "chip.qc_json",
+                "qc_type": "quality_metric_chipseq",
+                "argument_to_be_attached_to": "chip.optimal_peak",
+                "qc_json": true
             }
         ],
         "award": "1U01CA200059-01",
@@ -11271,11 +11337,17 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "atac.report"
+                "workflow_argument_name": "atac.report",
+                "qc_type": "quality_metric_atacseq",
+                "argument_to_be_attached_to": "atac.first_ta",
+                "qc_html": true
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "atac.qc_json"
+                "workflow_argument_name": "atac.qc_json",
+                "qc_type": "quality_metric_atacseq",
+                "argument_to_be_attached_to": "atac.first_ta",
+                "qc_json": true
             }
         ],
         "award": "1U01CA200059-01",
@@ -11642,11 +11714,17 @@
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "atac.report"
+                "workflow_argument_name": "atac.report",
+                "qc_type": "quality_metric_atacseq",
+                "argument_to_be_attached_to": "atac.optimal_peak",
+                "qc_html": true
             },
             {
                 "argument_type": "Output QC file",
-                "workflow_argument_name": "atac.qc_json"
+                "workflow_argument_name": "atac.qc_json",
+                "qc_type": "quality_metric_atacseq",
+                "argument_to_be_attached_to": "atac.optimal_peak",
+                "qc_json": true
             }
         ],
         "award": "1U01CA200059-01",

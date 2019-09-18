@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { Legend } from './Legend';
 import { FileDetailBody } from './FileDetailBody';
@@ -63,7 +63,7 @@ export class WorkflowDetailPane extends React.PureComponent {
                 commonDetailProps.minWidth = 800;
             }
 
-            if (node.meta && node.meta.run_data && node.meta.run_data.file && node.meta.run_data.file){
+            if (node.meta && node.meta.run_data && node.meta.run_data.file){
                 // File
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }

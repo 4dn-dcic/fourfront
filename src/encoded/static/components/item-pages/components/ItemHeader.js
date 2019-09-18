@@ -5,9 +5,9 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 
-import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/LocalizedTime';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
+import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -92,7 +92,7 @@ export class TopRow extends React.Component {
         var viewUrl = url.format(urlParts);
         return (
             <div className="indicator-item view-ajax-button">
-                <i className="icon icon-fw icon-file-code-o"/>{' '}
+                <i className="icon icon-fw icon-file-code far"/>{' '}
                 <a href={viewUrl}
                     className="inline-block" target="_blank" rel="noreferrer noopener"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
@@ -272,52 +272,34 @@ export class MiddleRow extends React.Component {
 
 /**
  * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.
- *
- * @memberof module:item-pages/components.ItemHeader
- * @namespace
- * @type {Component}
- * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
-export class BottomRow extends React.PureComponent {
+export const BottomRow = React.memo(function BottomRow(props){
+    const { context: { date_modified, date_created }, children } = props;
+    let dateToUse = null;
+    let tooltip = null;
 
-    constructor(props){
-        super(props);
-        this.parsedCreationDate = this.parsedDate.bind(this);
+    if (typeof date_modified === 'string'){
+        dateToUse = date_modified;
+        tooltip = 'Date last modified';
+    } else if (typeof date_created === 'string'){
+        dateToUse = date_created;
+        tooltip = 'Date Created';
     }
 
-    parsedDate(dateToUse){
-        var context = this.props.context,
-            tooltip = dateToUse === 'date_created' ? 'Date Created' : 'Date last modified';
-
-        if (!dateToUse){
-            return <span><i></i></span>;
-        }
-        return (
-            <span data-tip={tooltip} className="inline-block">
-                <i className="icon icon-calendar-o"></i>&nbsp; &nbsp;
-                <LocalizedTime timestamp={context[dateToUse]} formatType="date-time-md" dateTimeSeparator=" at " />
-            </span>
-        );
-    }
-
-    render(){
-        var { context, children } = this.props,
-            dateToUse = null;
-
-        if (typeof context.date_modified === 'string'){
-            dateToUse = 'date_modified';
-        } else if (typeof context.date_created === 'string'){
-            dateToUse = 'date_created';
-        }
-        return (
-            <div className="row clearfix bottom-row">
-                <div className="col text-300 set-type-indicators">{ children }</div>
-                <h5 className="col-md-auto text-300 date-indicator">{ this.parsedDate(dateToUse) }</h5>
-            </div>
-        );
-    }
-
-}
+    return (
+        <div className="row clearfix bottom-row">
+            <div className="col text-300 set-type-indicators">{ children }</div>
+            <h5 className="col-md-auto text-300 date-indicator">
+                { dateToUse?
+                    <span data-tip={tooltip} className="inline-block">
+                        <i className="icon icon-calendar far"></i>&nbsp; &nbsp;
+                        <LocalizedTime timestamp={dateToUse} formatType="date-time-md" dateTimeSeparator=" at " />
+                    </span>
+                    : <span><i></i></span> }
+            </h5>
+        </div>
+    );
+});
 
 /**
  * Use this to wrap ItemHeader.TopRow, .MiddleRow, and .BottomRow to create a complete ItemHeader.

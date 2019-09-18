@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { ItemPageTable } from './components/tables/ItemPageTable';
 import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
@@ -21,7 +21,8 @@ export default class BiosampleView extends DefaultItemView {
 
         initTabs.push(BiosampleViewOverview.getTabObject(this.props, width));
 
-        const expSetTableProps = _.extend({}, this.props, {
+        const expSetTableProps = {
+            ...this.props,
             'requestHref' : (
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
@@ -30,7 +31,7 @@ export default class BiosampleView extends DefaultItemView {
             'title' : function(props, { totalCount }){
                 return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
             }
-        });
+        };
 
         initTabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
 
@@ -90,7 +91,7 @@ class BiosampleViewOverview extends React.PureComponent {
 
     static getTabObject({ context, schemas, windowWidth }, width){
         return {
-            'tab' : <span><i className="icon icon-file-text icon-fw"/> Overview</span>,
+            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
             'key' : 'overview',
             'content' : (
                 <div className="overflow-hidden">

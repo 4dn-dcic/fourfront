@@ -37,7 +37,7 @@ Step 2: Install or update dependencies::
 
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
-    $ brew cask install homebrew/cask-versions/adoptopenjdk8
+    $ brew cask install adoptopenjdk8
     $ brew tap homebrew/versions
     $ brew install elasticsearch@5.6 node@10
 
@@ -66,6 +66,8 @@ Step 3: Run buildout::
     If you have issues with Pillow you may need to install new xcode command line tools:
     - First update Xcode from AppStore (reboot)
     $ xcode-select --install
+    If you are running macOS Mojave, you may need to run the below command as well:
+    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
 
 
 

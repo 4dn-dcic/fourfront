@@ -4,13 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/Collapse';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/src/components/ui/FlexibleDescriptionBox';
-import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { RawFilesStackedTable, ProcessedFilesStackedTable, renderFileTypeSummaryColumn } from './file-tables';
 import { expFxn } from './../../util';
 import { SelectedFilesController } from './SelectedFilesController';
+
+
 
 export class ExperimentSetDetailPane extends React.PureComponent {
 
@@ -65,6 +67,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         });
     }
 
+    /** @todo Make into functional component */
     renderRawFilesSection(paddingWidth){
         const { containerWidth, result, href, minimumWidth } = this.props;
 
@@ -78,8 +81,8 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         return (
             <div className="raw-files-table-section">
                 <h4 className="pane-section-title" onClick={this.toggleRawFilesOpen}>
-                    <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-leaf"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
+                    <i className={"toggle-open-icon icon icon-fw fas icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
+                    <i className="icon icon-fw icon-leaf fas"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
                 </h4>
                 <Collapse in={this.state.rawFilesOpen}>
                     <div>
@@ -97,6 +100,7 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         );
     }
 
+    /** @todo Make into functional component */
     renderProcessedFilesSection(paddingWidth){
         const { containerWidth, result, href, minimumWidth } = this.props;
         const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
@@ -107,8 +111,8 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         return (
             <div className="processed-files-table-section">
                 <h4 className="pane-section-title" onClick={this.toggleProcessedFilesOpen}>
-                    <i className={"toggle-open-icon icon icon-fw icon-" + (this.state.processedFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-microchip"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
+                    <i className={"toggle-open-icon icon icon-fw fas icon-" + (this.state.processedFilesOpen ? 'minus' : 'plus')} />
+                    <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
                 </h4>
                 <Collapse in={this.state.processedFilesOpen}>
                     <div>

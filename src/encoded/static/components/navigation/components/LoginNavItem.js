@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { NavItem, DropdownItem, Nav } from 'react-bootstrap';
-import { layout } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
+import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserRegistrationModal } from './UserRegistrationModal';
 
 
@@ -14,12 +14,10 @@ export const LoginNavItem = React.memo(function LoginNavItem(props){
         <React.Fragment>
             <Nav.Link key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
                 { isLoading ? (
-                    <span className="pull-right">
-                        <i className="account-icon icon icon-spin icon-circle-o-notch" style={{ verticalAlign : 'middle' }}/>
-                    </span>
+                    <i className="account-icon icon icon-spin icon-circle-notch fas align-middle"/>
                 ) : (
                     <React.Fragment>
-                        <i className="account-icon icon icon-user-o" />
+                        <i className="account-icon icon icon-user fas align-middle" />
                         <span>Log In</span>
                         <span className="d-none d-xl-inline"> / Register</span>
                     </React.Fragment>

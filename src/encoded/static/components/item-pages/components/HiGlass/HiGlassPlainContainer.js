@@ -3,8 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/src/components/util';
-import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/src/components/viz/utilities';
+import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 
 /**
@@ -36,7 +36,7 @@ export function HiGlassLoadingIndicator(props) {
     return (
         <React.Fragment>
             <h3>
-                <i className={"icon icon-lg icon-" + (icon || "television")}/>
+                <i className={"icon icon-lg icon-" + (icon || "tv fas")}/>
             </h3>
             { title || "Initializing" }
         </React.Fragment>
@@ -214,7 +214,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.5.7/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.6.7/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper">{ hiGlassInstance }</div>
             </div>

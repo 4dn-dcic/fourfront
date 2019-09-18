@@ -363,7 +363,7 @@ def clear_filters_setup(request, doc_types, forced_type):
 
     Make a URI path that clears all non-datatype filters
     and leaves in `q` (search query) params, if present.
-    Also preserves currentAction=selection, if is set.
+    Also preserves currentAction=selection (or multiselect), if is set.
 
     Returns:
         A URL path
@@ -377,8 +377,8 @@ def clear_filters_setup(request, doc_types, forced_type):
     clear_qs = types_url or ''
     if seach_query_url:
         clear_qs += '&' + seach_query_url
-    if current_action == 'selection':
-        clear_qs += '&currentAction=selection'
+    if current_action == 'selection' or current_action == 'multiselect':
+        clear_qs += ('&currentAction=' + current_action)
     current_search_sort = request.normalized_params.getall('sort')
     current_search_sort_url = urlencode([("sort", s) for s in current_search_sort])
     if current_search_sort_url:
@@ -1380,7 +1380,8 @@ def build_table_columns(request, schemas, doc_types):
     }
 
     # Add type column if any abstract types in search
-    if any_abstract_types and request.normalized_params.get('currentAction') != 'selection':
+    current_action = request.normalized_params.get('currentAction')
+    if any_abstract_types and current_action != 'selection' and current_action != 'multiselect':
         columns['@type'] = {
             "title" : "Item Type",
             "colTitle" : "Type",
