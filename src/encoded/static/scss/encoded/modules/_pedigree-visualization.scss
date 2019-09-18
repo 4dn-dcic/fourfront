@@ -80,6 +80,7 @@ $pedigree-disease-colors :
         transform: translate3d(0,0,0);
         background: $pedigree-viz-bg-color;
         overflow: auto;
+        –webkit-overflow-scrolling: touch;
         min-height: inherit;
         height: inherit;
         position: relative;
@@ -495,7 +496,7 @@ div#pedigree-viz-container-cgap {
 
 /** CGAP-specific full screen view styling **/
 
-div#pedigree-viz-container-cgap.browser-is-full-screen {
+div#pedigree-viz-container-cgap.view-is-full-screen {
     @include media-breakpoint-up(md){
         position: fixed;
         object-fit: contain;

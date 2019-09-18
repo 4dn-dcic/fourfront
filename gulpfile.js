@@ -76,14 +76,17 @@ function buildSharedPortalComponents(done){
     }
 
     // Same as shared-portal-components own build method
-    const subP = spawn("npx", [
-        "babel",
-        path.join(sharedComponentPath, 'src'),
-        "--out-dir",
-        path.join(sharedComponentPath, 'es'),
-        "--env-name",
-        "esm"
-    ], { stdio: "inherit" });
+    const subP = spawn(
+        path.join(sharedComponentPath, 'node_modules/.bin/babel'),
+        [
+            path.join(sharedComponentPath, 'src'),
+            "--out-dir",
+            path.join(sharedComponentPath, 'es'),
+            "--env-name",
+            "esm"
+        ],
+        { stdio: "inherit" }
+    );
 
     subP.on("close", (code)=>{
         done();
@@ -100,15 +103,18 @@ function watchSharedPortalComponents(done){
     }
 
     // Same as shared-portal-components own build method, but with "--watch"
-    const subP = spawn("npx", [
-        "babel",
-        path.join(sharedComponentPath, 'src'),
-        "--out-dir",
-        path.join(sharedComponentPath, 'es'),
-        "--env-name",
-        "esm",
-        "--watch"
-    ], { stdio: "inherit" });
+    const subP = spawn(
+        path.join(sharedComponentPath, 'node_modules/.bin/babel'),
+        [
+            path.join(sharedComponentPath, 'src'),
+            "--out-dir",
+            path.join(sharedComponentPath, 'es'),
+            "--env-name",
+            "esm",
+            "--watch"
+        ],
+        { stdio: "inherit" }
+    );
 
     subP.on("close", (code)=>{
         done();

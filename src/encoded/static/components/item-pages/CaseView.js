@@ -653,6 +653,18 @@ export class PedigreeTabViewBody extends React.PureComponent {
             return false;
         }
 
+        if (document) {
+            const isFullscreenState = (
+                document.fullscreen ||
+                document.fullscreenElement ||
+                document.mozIsFullscreen ||
+                document.mozFullscreenElement ||
+                document.webkitIsFullScreen ||
+                document.webkitFullscreenElement
+            );
+            if (isFullscreenState) return true;
+        }
+
         let screenH = null;
         if (window && window.screen){
             screenH = window.screen.height;
@@ -670,7 +682,16 @@ export class PedigreeTabViewBody extends React.PureComponent {
     }
 
     static isViewFullscreen(windowHeight){
+        if (!document) throw new Error("No document element available");
+        const fullscreenElem = (
+            document.fullscreenElement ||
+            document.mozFullscreenElement ||
+            document.webkitFullscreenElement
+        );
         const pedigreeContainerElem = document.getElementById("pedigree-viz-container-cgap");
+        if (fullscreenElem && pedigreeContainerElem && pedigreeContainerElem === fullscreenElem){
+            return true;
+        }
         if (pedigreeContainerElem && pedigreeContainerElem.offsetHeight === windowHeight){
             return true;
         }
@@ -700,12 +721,13 @@ export class PedigreeTabViewBody extends React.PureComponent {
                 return;
             }
 
-            const isPedigreeFullscreen = PedigreeTabViewBody.isViewFullscreen(windowHeight);
-
-            this.setState({
-                isBrowserFullscreen,
-                isPedigreeFullscreen
-            });
+            setTimeout(()=>{
+                const isPedigreeFullscreen = PedigreeTabViewBody.isViewFullscreen(windowHeight);
+                this.setState({
+                    isBrowserFullscreen,
+                    isPedigreeFullscreen
+                });
+            }, 500);
         }
     }
 
@@ -718,7 +740,7 @@ export class PedigreeTabViewBody extends React.PureComponent {
             (isPedigreeFullscreen ? " view-is-full-screen" : "")
         );
         let heightDiff = undefined;
-        if (isBrowserFullscreen || isPedigreeFullscreen){
+        if (isPedigreeFullscreen){
             heightDiff = 0;
         }
 

@@ -28,3 +28,12 @@
     padding-left: 7px;
     padding-right: 7px;
 }
+
+
+/** Overrides for form controls **/
+
+.form-control {
+    // Overrides 0.75rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
