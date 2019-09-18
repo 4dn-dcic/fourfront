@@ -205,7 +205,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         if(modal == null && context.status && typeof context.status === 'string' &&
-            (context.status === 'released' || context.status === 'released_to_project')) {
+            (context.status === 'released' || context.status === 'released to project')) {
             this.setState({
                 'modal': (
                     <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel}
