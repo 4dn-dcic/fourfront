@@ -1008,12 +1008,12 @@ def main():
     db_terms = get_existing_ontology_terms(connection)
     print('HAVE DB TERMS')
     terms = {}
-    # deprecated = []
+    deprecated = []
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
-            terms, v, deprecated = download_and_process_owl(ontology, connection, terms, simple)
+            terms, v, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, simple=args.simple)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
                     result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
