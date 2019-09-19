@@ -25,10 +25,10 @@ from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
 from dcicutils.s3_utils import s3Utils
 import requests
+import structlog
 import logging
-
-logging.getLogger('boto3').setLevel(logging.INFO)
-log = logging.getLogger(__name__)
+logging.getLogger('boto3').setLevel(logging.WARNING)
+log = structlog.getLogger(__name__)
 
 ONLY_ADMIN_VIEW_DETAILS = [
     (Allow, 'group.admin', ['view', 'view_details', 'edit']),
@@ -161,15 +161,15 @@ class User(Item):
         new_email = properties.get('email')
         update_email = new_email if prev_email != new_email else None
         if ff_env is not None and update_email is not None and 'webprod' in ff_env:
-            s3Obj = s3Utils(env='data')
-            jh_key = s3Obj.get_jupyterhub_key()
-            jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', update_email])
-            jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
             try:
+                s3Obj = s3Utils(env='data')
+                jh_key = s3Obj.get_jupyterhub_key()
+                jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', update_email])
+                jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
                 res = requests.post(jh_endpoint, headers=jh_headers)
             except Exception as jh_exc:
-                log.warning('Error posting user %s to JupyterHub' % update_email,
-                            error=str(jh_exc))
+                log.error('Error posting user %s to JupyterHub' % update_email,
+                          error=str(jh_exc))
             else:
                 log.info('Updating user %s on JupyterHub. Result: %s' % (update_email, res.text))
         super(User, self)._update(properties, sheets)
