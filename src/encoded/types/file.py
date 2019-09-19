@@ -57,8 +57,6 @@ import logging
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 log = structlog.getLogger(__name__)
 
-BEANSTALK_ENV_PATH = "/opt/python/current/env"
-
 file_workflow_run_embeds = [
     'workflow_run_inputs.workflow.title',
     'workflow_run_inputs.input_files.workflow_argument_name',
@@ -85,25 +83,6 @@ def show_upload_credentials(request=None, context=None, status=None):
     return request.has_permission('edit', context)
 
 
-def force_beanstalk_env(profile_name, config_file=None):
-    # set env variables if we are on elasticbeanstalk
-    if not config_file:
-        config_file = BEANSTALK_ENV_PATH
-    if os.path.exists(config_file):
-        if not os.environ.get("AWS_ACCESS_KEY_ID"):
-            import subprocess
-            command = ['bash', '-c', 'source ' + config_file + ' && env']
-            proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
-            for line in proc.stdout:
-                key, _, value = line.partition("=")
-                os.environ[key] = value[:-1]
-
-            proc.communicate()
-    conn = boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
-    return conn
-
-
 def external_creds(bucket, key, name=None, profile_name=None):
     '''
     if name is None, we want the link to s3 but no need to generate
@@ -126,7 +105,8 @@ def external_creds(bucket, key, name=None, profile_name=None):
             ]
         }
         # boto.set_stream_logger('boto3')
-        conn = force_beanstalk_env(profile_name)
+        conn = boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
         token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')

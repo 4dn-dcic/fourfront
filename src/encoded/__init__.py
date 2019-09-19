@@ -35,6 +35,9 @@ from dcicutils.log_utils import set_logging
 import structlog
 import logging
 
+# location of environment variables on elasticbeanstalk
+BEANSTALK_ENV_PATH = "/opt/python/current/env"
+
 
 def static_resources(config):
     from pkg_resources import resource_filename
@@ -90,10 +93,25 @@ def load_workbook(app, workbook_filename, docsdir):
     load_all(testapp, workbook_filename, docsdir)
 
 
+def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
+    """
+    set environment variables if we are on Elastic Beanstalk
+    AWS_ACCESS_KEY_ID is indicative of whether or not env vars are sourced
+
+    Args:
+        config_file (str): filepath to load env vars from
+    """
+    if os.path.exists(config_file) and not os.environ.get("AWS_ACCESS_KEY_ID"):
+        command = ['bash', '-c', 'source ' + config_file + ' && env']
+        proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
+        for line in proc.stdout:
+            key, _, value = line.partition("=")
+            os.environ[key] = value[:-1]
+        proc.communicate()
+
+
 def app_version(config):
     import hashlib
-    import os
-    import subprocess
     if not config.registry.settings.get('snovault.app_version'):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
@@ -164,7 +182,8 @@ def add_schemas_to_html_responses(config):
 
 
 def main(global_config, **local_config):
-    """ This function returns a Pyramid WSGI application.
+    """
+    This function returns a Pyramid WSGI application.
     """
 
     settings = global_config
@@ -172,6 +191,9 @@ def main(global_config, **local_config):
 
     set_logging(in_prod=settings.get('production'))
     # set_logging(settings.get('elasticsearch.server'), settings.get('production'))
+
+    # source environment variables on elastic beanstalk
+    source_beanstalk_env_vars()
 
     settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
