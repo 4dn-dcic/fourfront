@@ -323,12 +323,13 @@ def test_add_slim_terms(terms, slim_term_list):
 
 
 def test_remove_obsoletes_and_unnamed_obsoletes(terms):
+    db_terms = []
     terms['id10'] = {'term_id': 'id10', 'term_name': 'new_term that is deprecated'}
     ids = ['a_term1', 'id2', 'id3', 'id4', 'd_term1', 'id6', 'id7', 'id8', 'id9', 'id10']
     deprecated = 'id10'
     for i in ids:
         assert i in terms
-    terms = go.remove_obsoletes_and_unnamed(terms, deprecated)
+    terms = go.remove_obsoletes_and_unnamed(terms, deprecated, db_terms)
     remaining = ids.pop(0)
     assert remaining in terms
     for i in ids:

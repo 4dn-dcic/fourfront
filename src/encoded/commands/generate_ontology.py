@@ -468,7 +468,7 @@ def remove_obsoletes_and_unnamed(terms, deprecated, dbterms):
             term['parents'] = parents
 
         if not term.get('term_name'):
-            if not (termid in dbterms and len(dbterms[termid].get('source_ontologies')) > 1):
+            if not (termid in dbterms and len(dbterms[termid].get('source_ontologies', [])) > 1):
                 continue
         if 'term_name' in term and term['term_name'].lower().startswith('obsolete'):
             continue
@@ -1043,7 +1043,6 @@ def main():
                     v = release[release.index('>') + 1: release.index('</a>')].rstrip('/')
                 except Exception:
                     print('Unable to fetch Uberon version')
-            onts_to_update = {}
             if v and v != ontology.get('current_ontology_version', ''):
                 o_dict = {}
                 if ontology.get('current_ontology_version'):
