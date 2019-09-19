@@ -533,7 +533,7 @@ def _get_t_id(val):
         return val
 
 
-def _terms_match(t1, t2, all_onts=True):
+def _terms_match(t1, t2):
     '''check that all the fields in the first term t1 are in t2 and
         have the same values
     '''
@@ -544,8 +544,7 @@ def _terms_match(t1, t2, all_onts=True):
         else:
             if k == 'parents' or k == 'slim_terms' or k == 'source_ontologies':
                 if len(val) != len(t2[k]):
-                    if all_onts:
-                        return False
+                    return False
                 for p1 in val:
                     found = False
                     for p2 in t2[k]:
@@ -687,7 +686,7 @@ def update_definition(tdef, dbdef, ont):
     return _format_def_str(dbdefs)
 
 
-def id_fields2patch(term, dbterm, ont, ontids, prefixes, simple, rm_unch, connection=None):
+def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None):
     ''' Looks at 2 terms and depending on the type of processing - all or single ontology
         and simple or not determines what fields might need to be patched
     '''
@@ -722,7 +721,7 @@ def id_fields2patch(term, dbterm, ont, ontids, prefixes, simple, rm_unch, connec
                     dbdef = dbterm.get('definition')
                     if v in dbdef:  # checking to see if the string is in the db def string
                         continue
-                    elif all([part in dbdef for part in v.rstrip(' (' + prefixes[0] + ')').split(' -- ')]):
+                    elif all([part in dbdef for part in v.rstrip(' (' + ont + ')').split(' -- ')]):
                         continue
                     else:
                         prefix = term['term_id'][:term['term_id'].index(':')]
@@ -734,7 +733,7 @@ def id_fields2patch(term, dbterm, ont, ontids, prefixes, simple, rm_unch, connec
                 elif f == 'term_name':
                     if not v:
                         continue
-                    elif prefixes[0] not in term.get('term_id') and len(dbterm.get('source_ontologies')) > 1:
+                    elif ont not in term.get('term_id') and len(dbterm.get('source_ontologies')) > 1:
                         # skip if trying to change term name for term with multiple source ontologies
                         continue
                 elif isinstance(v, list):
@@ -794,13 +793,12 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
             term[rt] = list(set(uuids))  # to avoid redundant terms
 
     # now to determine what needs to be patched for patches
-    prefixes = [o.get('ontology_prefix', '') for o in ontologies]
     ontids = [o['uuid'] for o in ontologies]
     for tid, term in terms.items():
         if tid in to_post:
             continue  # it's a new term
         dbterm = dbterms[tid]
-        term = id_fields2patch(term, dbterm, ontarg, ontids, prefixes, simple, rm_unchanged, connection)
+        term = id_fields2patch(term, dbterm, ontarg, ontids, simple, rm_unchanged, connection)
         if not term:
             continue
         to_update.append(term)
