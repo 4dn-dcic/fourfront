@@ -25,6 +25,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('json_file', help="File containing terms to load")
+    parser.add_argument('--patch-only', default=False,
+                        action='store_true', help='Use if not posting any new items')
     parser.add_argument('--env', default='local',
                         help='FF environment to update from. Defaults to local')
     parser.add_argument('--local-key', help='Access key ID if using local')
@@ -45,13 +47,15 @@ def main():
     load_endpoint = '/'.join([auth['server'], 'load_data'])
     logger.info('load_ontology_terms: Starting POST to %s' % load_endpoint)
     json_data = {'config_uri': config_uri, 'itype': 'ontology_term',
-                 'overwrite': True, 'iter_response': True}
+                 'overwrite': True, 'iter_response': True, 'patch_only': args.patch_only}
     with open(args.json_file) as infile:
         all_items = json.load(infile)
         json_data['store'] = {'ontology_term': all_items['terms']}
     num_to_load = len(json_data['store']['ontology_term'])
     logger.info('Will attempt to load %s ontology terms to %s'
                 % (num_to_load, auth['server']))
+    if args.patch_only:
+        logger.info('Posting phase will be skipped, running patches only.')
     start = datetime.now()
     try:
         # sustained by returning Response.app_iter from loadxl.load_data
