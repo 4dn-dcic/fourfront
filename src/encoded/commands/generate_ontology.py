@@ -422,7 +422,7 @@ def get_ontologies(connection, ont_list):
         ontologies = [get_metadata('ontologys/' + ont_list, connection)]
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
-        print("we must not have got ontolgies... bailing")
+        print("we must not have got ontologies... bailing")
         import sys
         sys.exit()
     for i, ontology in enumerate(ontologies):
@@ -456,8 +456,6 @@ def connect2server(env=None, key=None):
 def remove_obsoletes_and_unnamed(terms, deprecated, dbterms):
     live_terms = {}
     for termid, term in terms.items():
-        # if termid == 'GO:0032626':
-        #     print('GO:0032626 in terms')
         if termid in deprecated:
             continue
         parents = term.get('parents')
@@ -722,21 +720,14 @@ def id_fields2patch(term, dbterm, ont, ontids, prefixes, simple, rm_unch, connec
                 elif f == 'definition':
                     # deal with definition parsing
                     dbdef = dbterm.get('definition')
-                    #     print(dbdef)
                     if v in dbdef:  # checking to see if the string is in the db def string
                         continue
                     elif all([part in dbdef for part in v.rstrip(' (' + prefixes[0] + ')').split(' -- ')]):
                         continue
-                    # else:
-                    #     #print(v.rstrip(' (' + prefixes[0] + ')').split(' -- '))
-                    #     parts = [part for part in v.rstrip(' (' + prefixes[0] + ')').split(' -- ')]
-                    #     found = True
-                    #     for part in parts:
-                    #         if part not in dbdef:
-                    #             print(part)
-                    #             found = False
-                    #     if found:
-                    #         continue
+                    else:
+                        prefix = term['term_id'][:term['term_id'].index(':')]
+                        if prefix in ['EFO', 'UBERON', 'SO', 'OBI'] and prefix != ont:
+                            continue
                     new_def = update_definition(v, dbdef, ont)
                     if new_def:
                         patch_term['definition'] = new_def
@@ -753,16 +744,11 @@ def id_fields2patch(term, dbterm, ont, ontids, prefixes, simple, rm_unch, connec
                     for val in v:
                         if val not in dbval:
                             to_add.append(val)
-                            if term['uuid'] == "ad82d599-6cbc-4d80-93a7-ed50cef66395":
-                                print(val)
                     if to_add:
                         dbval.extend(to_add)
                     if sorted(rawdbterm.get(f)) == sorted(dbval):
                         continue
                     patch_term[f] = dbval
-                    if term['uuid'] == "ad82d599-6cbc-4d80-93a7-ed50cef66395":
-                        print(v)
-                        print(dbval)
                 else:
                     patch_term[f] = v
         if patch_term:
@@ -917,7 +903,7 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
             if terms.get(termid) is None:
                 terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
             else:
-                if 'term_name' not in terms[termid]:
+                if 'term_name' not in terms[termid] or not terms[termid].get('term_name'):
                     terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
                 if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
                     terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
