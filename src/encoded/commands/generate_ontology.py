@@ -453,9 +453,11 @@ def connect2server(env=None, key=None):
     return auth
 
 
-def remove_obsoletes_and_unnamed(terms, deprecated):
+def remove_obsoletes_and_unnamed(terms, deprecated, dbterms):
     live_terms = {}
     for termid, term in terms.items():
+        # if termid == 'GO:0032626':
+        #     print('GO:0032626 in terms')
         if termid in deprecated:
             continue
         parents = term.get('parents')
@@ -468,7 +470,8 @@ def remove_obsoletes_and_unnamed(terms, deprecated):
             term['parents'] = parents
 
         if not term.get('term_name'):
-            continue
+            if not (termid in dbterms and len(dbterms[termid].get('source_ontologies')) > 1):
+                continue
         if 'term_name' in term and term['term_name'].lower().startswith('obsolete'):
             continue
         live_terms[termid] = term
@@ -532,7 +535,7 @@ def _get_t_id(val):
         return val
 
 
-def _terms_match(t1, t2):
+def _terms_match(t1, t2, all_onts=True):
     '''check that all the fields in the first term t1 are in t2 and
         have the same values
     '''
@@ -543,7 +546,8 @@ def _terms_match(t1, t2):
         else:
             if k == 'parents' or k == 'slim_terms' or k == 'source_ontologies':
                 if len(val) != len(t2[k]):
-                    return False
+                    if all_onts:
+                        return False
                 for p1 in val:
                     found = False
                     for p2 in t2[k]:
@@ -638,6 +642,8 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
         # that are in dbterm
         tpre, _ = termid.split(':')
         dp2chk = [p.get('uuid') for p in dpmeta if p.get('term_id', '').startswith(tpre)]
+    else:
+        dp2chk = [p.get('uuid') for p in dpmeta if ontid in p.get('source_ontologies', [])]
     for uid in dp2chk:
         if uid not in tparents:
             try:
@@ -683,7 +689,7 @@ def update_definition(tdef, dbdef, ont):
     return _format_def_str(dbdefs)
 
 
-def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None):
+def id_fields2patch(term, dbterm, ont, ontids, prefixes, simple, rm_unch, connection=None):
     ''' Looks at 2 terms and depending on the type of processing - all or single ontology
         and simple or not determines what fields might need to be patched
     '''
@@ -708,23 +714,55 @@ def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None)
                     # special treatment for parents depending on simple or not
                     parents = update_parents(term.get('term_id'), oid, v, dbterm.get(f), simple, connection)
                     if parents:
+                        if sorted(parents) == sorted(dbval):
+                            continue
+                        elif all([p in dbval for p in parents]):
+                            continue
                         patch_term['parents'] = parents
                 elif f == 'definition':
                     # deal with definition parsing
                     dbdef = dbterm.get('definition')
+                    #     print(dbdef)
                     if v in dbdef:  # checking to see if the string is in the db def string
                         continue
+                    elif all([part in dbdef for part in v.rstrip(' (' + prefixes[0] + ')').split(' -- ')]):
+                        continue
+                    # else:
+                    #     #print(v.rstrip(' (' + prefixes[0] + ')').split(' -- '))
+                    #     parts = [part for part in v.rstrip(' (' + prefixes[0] + ')').split(' -- ')]
+                    #     found = True
+                    #     for part in parts:
+                    #         if part not in dbdef:
+                    #             print(part)
+                    #             found = False
+                    #     if found:
+                    #         continue
                     new_def = update_definition(v, dbdef, ont)
                     if new_def:
                         patch_term['definition'] = new_def
+                elif f == 'term_name':
+                    if not v:
+                        continue
+                    elif prefixes[0] not in term.get('term_id') and len(dbterm.get('source_ontologies')) > 1:
+                        # skip if trying to change term name for term with multiple source ontologies
+                        continue
                 elif isinstance(v, list):
+                    if sorted(v) == sorted(rawdbterm.get(f)):
+                        continue
                     to_add = []
                     for val in v:
                         if val not in dbval:
                             to_add.append(val)
+                            if term['uuid'] == "ad82d599-6cbc-4d80-93a7-ed50cef66395":
+                                print(val)
                     if to_add:
                         dbval.extend(to_add)
+                    if sorted(rawdbterm.get(f)) == sorted(dbval):
+                        continue
                     patch_term[f] = dbval
+                    if term['uuid'] == "ad82d599-6cbc-4d80-93a7-ed50cef66395":
+                        print(v)
+                        print(dbval)
                 else:
                     patch_term[f] = v
         if patch_term:
@@ -776,7 +814,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         if tid in to_post:
             continue  # it's a new term
         dbterm = dbterms[tid]
-        term = id_fields2patch(term, dbterm, ontarg, ontids, simple, rm_unchanged, connection)
+        term = id_fields2patch(term, dbterm, ontarg, ontids, prefixes, simple, rm_unchanged, connection)
         if not term:
             continue
         to_update.append(term)
@@ -1039,7 +1077,7 @@ def main():
         print("SLIM TERMS ADDED")
         # doing this after adding slims in case an ontology is not in sync with one it imports
         # will preserve slimming but remove obsolete terms and parents in next step
-        terms = remove_obsoletes_and_unnamed(terms, deprecated)
+        terms = remove_obsoletes_and_unnamed(terms, deprecated, db_terms)
         terms = set_definition(terms, ontologies)
         print("OBS GONE and DEF SET")
         filter_unchanged = True
