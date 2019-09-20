@@ -1,5 +1,7 @@
 # Beanstalk Deployment
 
+**NOTE** Much of this document is outdated. As of September, 2019, deployments are managed through torb and dcicutils/beanstalk_utils. The Travis deployment section is still applicable.
+
 ## Beanstalk deployment through travis
 
 Currently Travis is set to deploy to beansalk on succesful build.
@@ -67,7 +69,7 @@ eb deploy
 sudo /opt/python/current/app/bin/dropdb
 
 # to bring things up again from back home
-git checkout production 
+git checkout production
 eb deploy
 
 ```
