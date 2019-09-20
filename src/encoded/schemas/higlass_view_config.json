@@ -4,7 +4,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,
-    "required": ["award", "lab"],
+    "required": [],
     "identifyingProperties": ["uuid", "name"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
