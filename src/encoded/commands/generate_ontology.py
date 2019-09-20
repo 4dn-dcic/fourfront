@@ -468,7 +468,11 @@ def remove_obsoletes_and_unnamed(terms, deprecated, dbterms):
             term['parents'] = parents
 
         if not term.get('term_name'):
-            if not (termid in dbterms and len(dbterms[termid].get('source_ontologies', [])) > 1):
+            if termid in dbterms:
+                db_onts = [o.get('uuid') for o in dbterms[termid].get('source_ontologies', [])]
+                if sorted(db_onts) == sorted(term.get('source_ontologies')):
+                    continue
+            else:
                 continue
         if 'term_name' in term and term['term_name'].lower().startswith('obsolete'):
             continue
@@ -639,8 +643,8 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
         # that are in dbterm
         tpre, _ = termid.split(':')
         dp2chk = [p.get('uuid') for p in dpmeta if p.get('term_id', '').startswith(tpre)]
-    else:
-        dp2chk = [p.get('uuid') for p in dpmeta if ontid in p.get('source_ontologies', [])]
+    # else:
+    #     dp2chk = [p.get('uuid') for p in dpmeta if ontid in p.get('source_ontologies', [])]
     for uid in dp2chk:
         if uid not in tparents:
             try:
@@ -731,9 +735,10 @@ def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None)
                     if new_def:
                         patch_term['definition'] = new_def
                 elif f == 'term_name':
+                    db_onts = [o.get('uuid') for o in dbterm.get('source_ontologies')]
                     if not v:
                         continue
-                    elif ont not in term.get('term_id') and len(dbterm.get('source_ontologies')) > 1:
+                    elif ont not in term.get('term_id') and sorted(ontids) != sorted(db_onts):
                         # skip if trying to change term name for term with multiple source ontologies
                         continue
                 elif isinstance(v, list):
@@ -1031,6 +1036,7 @@ def main():
     print('HAVE DB TERMS')
     terms = {}
     deprecated = []
+    new_versions = []
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
@@ -1044,13 +1050,14 @@ def main():
                 except Exception:
                     print('Unable to fetch Uberon version')
             if v and v != ontology.get('current_ontology_version', ''):
-                o_dict = {}
                 if ontology.get('current_ontology_version'):
                     if not ontology.get('ontology_versions'):
-                        o_dict['ontology_versions'] = [ontology['current_ontology_version']]
+                        prev = [ontology['current_ontology_version']]
                     else:
-                        o_dict['ontology_versions'] = [ontology['current_ontology_version']] + ontology['ontology_versions']
+                        prev = [ontology['current_ontology_version']] + ontology['ontology_versions']
                 ontology['current_ontology_version'] = v
+                ontology['ontology_versions'] = prev
+                new_versions.append(ontology)
 
 
     # at this point we've processed the rdf of all the ontologies
@@ -1075,7 +1082,7 @@ def main():
         out_dict = {
             'ontologies': {o['uuid']:
                 {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
-                for o in ontologies if o.get('current_ontology_version')
+                for o in new_versions
             },
             'terms': updates
         }
