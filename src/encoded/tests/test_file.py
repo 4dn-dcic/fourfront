@@ -1,5 +1,5 @@
 import pytest
-from encoded.types.file import FileFastq, post_upload, force_beanstalk_env
+from encoded.types.file import FileFastq, post_upload
 from pyramid.httpexceptions import HTTPForbidden
 import os
 import boto3
@@ -720,12 +720,17 @@ def test_no_experiment_set_rev_link_on_raw_file(testapp, fastq_json, experiment_
 
 
 def test_force_beanstalk_env(mocker):
+    """
+    This test is a bit outdated, since env variable loading has moved to
+    application __init__ from file.py. But let's keep the test...
+    """
+    import tempfile
+    from encoded import source_beanstalk_env_vars
     secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
     key = os.environ.get("AWS_ACCESS_KEY_ID")
     os.environ.pop("AWS_SECRET_ACCESS_KEY")
     os.environ.pop("AWS_ACCESS_KEY_ID")
 
-    import tempfile
     test_cfg = tempfile.NamedTemporaryFile(mode='w', delete=False)
     test_cfg.write('export AWS_SECRET_ACCESS_KEY="its a secret"\n')
     test_cfg.write('export AWS_ACCESS_KEY_ID="its a secret id"\n')
@@ -733,9 +738,11 @@ def test_force_beanstalk_env(mocker):
     test_cfg.close()
 
     # mock_boto
-    mock_boto = mocker.patch('encoded.types.file.boto3', autospec=True)
+    mock_boto = mocker.patch('encoded.tests.test_file.boto3', autospec=True)
 
-    force_beanstalk_env(profile_name=None, config_file=test_cfg_name)
+    source_beanstalk_env_vars(test_cfg_name)
+    boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                 aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
     # reset
     os.environ["AWS_SECRET_ACCESS_KEY"] = secret
     os.environ["AWS_ACCESS_KEY_ID"] = key

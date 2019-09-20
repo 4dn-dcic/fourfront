@@ -3,7 +3,7 @@
         "email": "4dndcic@gmail.com",
         "first_name": "4dn",
         "groups": ["admin"],
-        "job_title": "Admin",
+        "job_title": "Administrator",
         "lab": "4dn-dcic-lab",
         "last_name": "DCIC",
         "status": "current",
@@ -16,7 +16,7 @@
     {
         "email": "burak_alver@hms.harvard.edu",
         "first_name": "Burak",
-        "job_title": "4DN staff",
+        "job_title": "Project Coordinator / Manager",
         "lab": "4dn-dcic-lab",
         "last_name": "Alver",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
@@ -34,7 +34,7 @@
     {
         "email": "andrew_schroeder@hms.harvard.edu",
         "first_name": "Andy",
-        "job_title": "4DN staff",
+        "job_title": "Data Wrangler",
         "lab": "4dn-dcic-lab",
         "last_name": "Schroeder",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777",
@@ -46,7 +46,7 @@
     {
         "email": "johnsonjp@gmail.com",
         "first_name": "Jeremy",
-        "job_title": "4DN staff",
+        "job_title": "Software Developer",
         "lab": "4dn-dcic-lab",
         "last_name": "Johnson",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788",
@@ -57,7 +57,7 @@
     {
         "email": "duplexa@gmail.com",
         "first_name": "Soo",
-        "job_title": "4DN staff",
+        "job_title": "Senior Researcher",
         "lab": "4dn-dcic-lab",
         "last_name": "Lee",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267998888",
@@ -68,7 +68,7 @@
     {
         "email": "koray_kirli@hms.harvard.edu",
         "first_name": "Koray",
-        "job_title": "4DN staff",
+        "job_title": "Data Wrangler",
         "lab": "4dn-dcic-lab",
         "last_name": "Kirli",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
@@ -79,7 +79,7 @@
     {
         "email": "alexander_balashov@hms.harvard.edu",
         "first_name": "Alex",
-        "job_title": "4DN staff",
+        "job_title": "Software Developer",
         "lab": "4dn-dcic-lab",
         "last_name": "Balashov",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab245628888",
@@ -90,7 +90,7 @@
     {
         "email": "carl_vitzthum@hms.harvard.edu",
         "first_name": "Carl",
-        "job_title": "4DN staff",
+        "job_title": "Software Developer",
         "lab": "4dn-dcic-lab",
         "last_name": "Vitzthum",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988",
@@ -101,7 +101,7 @@
     {
         "email": "sarah_reiff@hms.harvard.edu",
         "first_name": "Sarah",
-        "job_title": "4DN staff",
+        "job_title": "Data Wrangler",
         "lab": "4dn-dcic-lab",
         "last_name": "Reiff",
         "uuid": "e2324f87-0625-4bbc-803b-d47677aebe08",
@@ -112,7 +112,7 @@
     {
         "email": "luisa_mercado@hms.harvard.edu",
         "first_name": "Luisa",
-        "job_title": "4DN staff",
+        "job_title": "Data Wrangler",
         "lab": "4dn-dcic-lab",
         "last_name": "Mercado",
         "uuid": "56c9c683-bb11-471b-b590-c656f7dc03c1",
@@ -124,7 +124,7 @@
     {
         "email": "shannon.ehmsen@gmail.com",
         "first_name": "Shannon",
-        "job_title": "Graphic designer",
+        "job_title": "Other",
         "lab": "4dn-dcic-lab",
         "last_name": "Ehmsen",
         "uuid": "52b6954c-c1cc-4f56-9e40-b8a777c8b42f",
@@ -137,7 +137,7 @@
         "status": "current",
         "uuid": "77a34077-262d-44ab-b387-c076cd0bf6f7",
         "lab": "4dn-dcic-lab",
-        "job_title": "Tester",
+        "job_title": "Other",
         "first_name": "Frontend",
         "last_name": "Test",
         "viewing_groups": ["4DN"],
@@ -146,7 +146,7 @@
     {
         "email": "william_ronchetti@hms.harvard.edu",
         "first_name": "Will",
-        "job_title": "4DN staff",
+        "job_title": "Software Developer",
         "lab": "4dn-dcic-lab",
         "last_name": "Ronchetti",
         "uuid": "1a12362f-4eb6-4a9c-8173-776667226988",

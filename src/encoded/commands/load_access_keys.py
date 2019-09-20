@@ -37,7 +37,7 @@ def get_existing_key_ids(testapp, user_uuid, key_desc):
     if len(search_res['@graph']) > 1:
         log.warning('load_access_keys: %s access keys found with '
                     'description %s and user.uuid %s.'
-                    % (len(search_res['@graph']), key_name, user_uuid))
+                    % (len(search_res['@graph']), key_desc, user_uuid))
     return [res['@id'] for res in search_res['@graph']]
 
 
