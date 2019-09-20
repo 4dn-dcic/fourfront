@@ -108,6 +108,7 @@ setup(
         migrate-attachments-aws = encoded.commands.migrate_attachments_aws:main
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
         load-data = encoded.commands.load_data:main
+        clear-db-es-contents = encoded.commands.clear_db_es_contents:main
         load-access-keys = encoded.commands.load_access_keys:main
         verify-item = encoded.commands.verify_item:main
         create-mapping-on-deploy = encoded.commands.create_mapping_on_deploy:main
