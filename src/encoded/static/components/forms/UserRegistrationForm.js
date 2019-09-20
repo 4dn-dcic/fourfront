@@ -471,6 +471,7 @@ function JobTitleField(props) {
                         <span className="text-400"> at { value_for_pending_lab_details.display_title}</span> }
                         <span className="text-300"> (Optional)</span>
                     </label>
+                    { formControl }
                 </div>
             </div>
         </Collapse>
