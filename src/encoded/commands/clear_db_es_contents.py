@@ -30,11 +30,9 @@ def clear_db_tables(app):
     meta = MetaData(bind=session.connection(), reflect=True)
     connection = session.connection().connect()
     try:
-        # connection.execute('SET FOREIGN_KEY_CHECKS = 0;')
         # truncate tables by only deleting contents
         for table in meta.sorted_tables:
             connection.execute(table.delete())
-        # connection.execute('SET FOREIGN_KEY_CHECKS = 1;')
     except Exception as e:
         log.error('clear_db_es_contents: error on DB drop_all/create_all.'
                   ' Error : %s' % str(e))
@@ -45,7 +43,6 @@ def clear_db_tables(app):
         mark_changed(session())
         transaction.commit()
         success = True
-    # transaction.begin()
     return success
 
 
