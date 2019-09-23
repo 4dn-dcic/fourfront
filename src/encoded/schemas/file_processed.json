@@ -20,6 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/higlass_defaults" },
         { "$ref": "file.json#/properties" }
     ],
     "mixinFacets": [

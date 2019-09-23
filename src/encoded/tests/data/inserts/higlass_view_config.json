@@ -34,7 +34,6 @@
                                 "uid": "top-annotation-track",
                                 "orientation": "1d-horizontal",
                                 "options": {
-                                    "plusStandColor": "blue",
                                     "valueScaling": "linear",
                                     "geneAnnotationHeight": 10,
                                     "showTooltip": false,
@@ -67,7 +66,7 @@
                                 "thumbnail": null,
                                 "orientation": "1d-horizontal",
                                 "options": {
-                                    "plusStandColor": "blue",
+                                    "plusStrandColor": "blue",
                                     "fontIsAligned": false,
                                     "color": "#777777",
                                     "labelColor": "#888",
