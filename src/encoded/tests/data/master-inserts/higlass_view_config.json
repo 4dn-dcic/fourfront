@@ -755,7 +755,7 @@
                                     "color": "#777777",
                                     "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
-                                    "plusStandColor": "blue",
+                                    "plusStrandColor": "blue",
                                     "coordSystem": "mm10",
                                     "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
