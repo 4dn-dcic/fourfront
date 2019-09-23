@@ -71,23 +71,6 @@
                 "dm6",
                 "galGal5"
             ]
-        },
-        "higlass_defaults" : {
-            "additionalProperties" : true,
-            "type" : "object",
-            "properties": {
-                "valueScaling" : {
-                    "type" : "string",
-                    "description": "Applicable for BigWig and other 1D track files.",
-                    "suggested_enum": ["linear", "log"]
-                },
-                "minusStrandColor" : {
-                    "type" : "string"
-                },
-                "plusStandColor" : {
-                    "type" : "string"
-                }
-            }
         }
     }
 }
