@@ -61,6 +61,19 @@
             "type": "string",
             "formInput": "textarea"
         },
+        "current_ontology_version": {
+            "title": "Current ontology version",
+            "type": "string"
+        },
+        "ontology_versions": {
+            "title": "Version History",
+            "description": "List of all deployed versions of ontology",
+            "type": "array",
+            "items": {
+                "title": "Version",
+                "type": "string"
+            }
+        },
         "synonym_terms" : {
             "title": "Synonym Terms",
             "decription": "Terms that are used to denote synonyms - eg. 'exact synonym', 'alternative term' ...",

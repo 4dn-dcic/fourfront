@@ -25,6 +25,8 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('json_file', help="File containing terms to load")
+    parser.add_argument('--patch-only', default=False,
+                        action='store_true', help='Use if not posting any new items')
     parser.add_argument('--env', default='local',
                         help='FF environment to update from. Defaults to local')
     parser.add_argument('--local-key', help='Access key ID if using local')
@@ -45,12 +47,15 @@ def main():
     load_endpoint = '/'.join([auth['server'], 'load_data'])
     logger.info('load_ontology_terms: Starting POST to %s' % load_endpoint)
     json_data = {'config_uri': config_uri, 'itype': 'ontology_term',
-                 'overwrite': True, 'iter_response': True}
+                 'overwrite': True, 'iter_response': True, 'patch_only': args.patch_only}
     with open(args.json_file) as infile:
-        json_data['store'] = {'ontology_term': json.load(infile)}
+        all_items = json.load(infile)
+        json_data['store'] = {'ontology_term': all_items['terms']}
     num_to_load = len(json_data['store']['ontology_term'])
     logger.info('Will attempt to load %s ontology terms to %s'
                 % (num_to_load, auth['server']))
+    if args.patch_only:
+        logger.info('Posting phase will be skipped, running patches only.')
     start = datetime.now()
     try:
         # sustained by returning Response.app_iter from loadxl.load_data
@@ -81,6 +86,21 @@ def main():
         if (len(load_res['POST']) + len(load_res['SKIP'])) > len(load_res['PATCH']):
             logger.error("The following items passed round I (POST/skip) but not round II (PATCH): %s"
                          % (set(load_res['POST'] + load_res['SKIP']) - set(load_res['PATCH'])))
+        elif not load_res['ERROR']:
+            if all_items['ontologies']:
+                o = {'patched': 0, 'not patched': 0}
+                for k, v in all_items['ontologies'].items():
+                    try:
+                        response = ff_utils.patch_metadata(v, k, key=auth)
+                        if response['status'] == 'success':
+                            o['patched'] += 1
+                        else:
+                            o['not patched'] += 1
+                    except Exception:
+                        o['not patched'] += 1
+                logger.info('Attempted to patch {} ontologies. Result: {} succeeded, {} failed'.format(
+                    len(all_items['ontologies'].keys()), o['patched'], o['not patched']
+                ))
     logger.info("Finished request in %s" % str(datetime.now() - start))
 
     # update sysinfo. Don't worry about doing this on local
