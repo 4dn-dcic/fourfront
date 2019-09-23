@@ -239,7 +239,7 @@
                                                             "type" : "string",
                                                             "default": "red"
                                                         },
-                                                        "plusStandColor" : {
+                                                        "plusStrandColor" : {
                                                             "type" : "string",
                                                             "default": "blue"
                                                         },
@@ -353,7 +353,7 @@
                                                             "type" : "string",
                                                             "default": "red"
                                                         },
-                                                        "plusStandColor" : {
+                                                        "plusStrandColor" : {
                                                             "type" : "string",
                                                             "default": "blue"
                                                         },
@@ -467,7 +467,7 @@
                                                             "type" : "string",
                                                             "default": "red"
                                                         },
-                                                        "plusStandColor" : {
+                                                        "plusStrandColor" : {
                                                             "type" : "string",
                                                             "default": "blue"
                                                         },
@@ -581,7 +581,7 @@
                                                             "type" : "string",
                                                             "default": "red"
                                                         },
-                                                        "plusStandColor" : {
+                                                        "plusStrandColor" : {
                                                             "type" : "string",
                                                             "default": "blue"
                                                         },
