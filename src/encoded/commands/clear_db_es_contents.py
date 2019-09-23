@@ -110,6 +110,15 @@ def main():
     # create db schema
     configure_dbsession(app)
 
+    # confirm with user if not providing a specific env
+    if not args.env:
+        disp_env = app.registry.settings.get('env.name', 'local')
+        name = input('This will completely clear DB contents for environment %s.'
+                     ' Type the env name to confirm: ' % disp_env)
+        if str(name) != disp_env:
+            print("Could not confirm env. Exiting...")
+            return
+
     # actually run. split this out for easy testing
     run_clear_db_es(app, args.env, args.skip_es)
 

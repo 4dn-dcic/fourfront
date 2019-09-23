@@ -12,26 +12,33 @@ def test_clear_db_tables(app, testapp):
     post_res = testapp.post_json('/testing-post-put-patch/', {'required': 'abc'},
                                  status=201)
     testapp.get(post_res.location, status=200)
-    clear_db_tables(app)
+    clear_res = clear_db_tables(app)
+    assert clear_res is True
     # item should no longer be present
     testapp.get(post_res.location, status=404)
 
 
-def test_run_clear_db_envs(app):
-    # if True, then it cleared DB
-    assert run_clear_db_es(app, None, True) == True
+def test_run_clear_db_envs(app, testapp):
+    assert run_clear_db_es(app, None, True) is True
     prev_env = app.registry.settings.get('env.name')
+
+    post_res = testapp.post_json('/testing-post-put-patch/', {'required': 'abc'},
+                                 status=201)
+    testapp.get(post_res.location, status=200)
 
     # should never run on these envs
     app.registry.settings['env.name'] = 'fourfront-webprod'
-    assert run_clear_db_es(app, None, True) == False
+    assert run_clear_db_es(app, None, True) is False
     app.registry.settings['env.name'] = 'fourfront-webprod2'
-    assert run_clear_db_es(app, None, True) == False
+    assert run_clear_db_es(app, None, True) is False
+    testapp.get(post_res.location, status=200)
 
     # test if we are only running on specific envs
     app.registry.settings['env.name'] = 'fourfront-test-env'
-    assert run_clear_db_es(app, 'fourfront-other-env', True) == False
-    assert run_clear_db_es(app, 'fourfront-test-env', True) == True
+    assert run_clear_db_es(app, 'fourfront-other-env', True) is False
+    testapp.get(post_res.location, status=200)
+    assert run_clear_db_es(app, 'fourfront-test-env', True) is True
+    testapp.get(post_res.location, status=404)
 
     # reset settings after test
     if prev_env is None:
