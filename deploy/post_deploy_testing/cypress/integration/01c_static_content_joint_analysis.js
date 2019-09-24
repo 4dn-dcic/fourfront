@@ -120,7 +120,7 @@ describe('Joint Analysis Page', function () {
 
         it("HiGlass initializes (very basic)", function(){
             cy.window().scrollTo('bottom').end()
-                .wait(2000).end().get('div.CenterTrack-module_center-track-3ptRW', { 'timeout' : (10 * 60 * 1000) }).wait(500);
+                .wait(2000).end().get('div.tiled-plot-div div.track-renderer-div div.center-track-container', { 'timeout' : (10 * 60 * 1000) }).wait(500);
         });
 
     });
