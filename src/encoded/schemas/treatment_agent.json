@@ -64,7 +64,7 @@
             "title": "Constructs",
             "description": "Plasmids used for biological treatment/transient transfection",
             "type":  "array",
-            "lookup": 50,
+            "lookup": 27,
             "items": {
                 "title": "Constructs",
                 "description": "A recombinant construct.",

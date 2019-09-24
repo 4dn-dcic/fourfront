@@ -70,7 +70,7 @@
               "title": "Expression Products",
               "description": "Proteins or transcripts the construct expresses, including modifications",
               "type": "array",
-              "lookup": 70,
+              "lookup": 55,
               "items": {
                   "title": "Feature",
                   "type": "string",
