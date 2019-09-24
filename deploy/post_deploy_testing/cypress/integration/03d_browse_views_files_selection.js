@@ -46,7 +46,7 @@ describe('Browse Views - Files Selection', function () {
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
                 .should('have.class', 'active')
                 .within(()=>{
-                    cy.get('i').should('have.class', 'icon-sort-desc');
+                    cy.get('i').should('have.class', 'icon-sort-down');
                 }).end()
                 // Close columns panel
                 .get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end();
@@ -76,7 +76,7 @@ describe('Browse Views - Files Selection', function () {
                 .click({ 'force' : true })
                 .should('have.class', 'active').end()
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon i')
-                .should('have.class', 'icon-sort-asc').end();
+                .should('have.class', 'icon-sort-up').end();
         });
 
         it('"Select All Files" button works & becomes "Deselect All" after.', function(){
