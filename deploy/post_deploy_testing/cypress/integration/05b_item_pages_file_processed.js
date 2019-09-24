@@ -23,7 +23,7 @@ describe("Individual Item Views", function(){
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
                 .should('have.class', 'active')
                 .within(()=>{
-                    cy.get('i').should('have.class', 'icon-sort-desc');
+                    cy.get('i').should('have.class', 'icon-sort-down');
                 });
         });
 
