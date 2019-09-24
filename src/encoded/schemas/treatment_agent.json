@@ -41,6 +41,7 @@
             "lookup": 20,
             "enum" : [
                 "Biological",
+                "Transient Transfection",
                 "Chemical",
                 "Heat Shock",
                 "Cold Shock",
