@@ -94,7 +94,6 @@ setup(
 
         add-date-created = encoded.commands.add_date_created:main
         check-rendering = encoded.commands.check_rendering:main
-        deploy = encoded.commands.deploy:main
         extract-test-data = encoded.commands.extract_test_data:main
         es-index-data = encoded.commands.es_index_data:main
         generate-ontology = encoded.commands.generate_ontology:main
@@ -109,11 +108,9 @@ setup(
         migrate-attachments-aws = encoded.commands.migrate_attachments_aws:main
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
         load-data = encoded.commands.load_data:main
+        clear-db-es-contents = encoded.commands.clear_db_es_contents:main
         load-access-keys = encoded.commands.load_access_keys:main
-        dropdb = encoded.commands.dropdb:main
         verify-item = encoded.commands.verify_item:main
-        clone-beanstalk = encoded.commands.clone_beanstalk_env:main
-        rm-beanstalk = encoded.commands.rm_beanstalk_env:main
         create-mapping-on-deploy = encoded.commands.create_mapping_on_deploy:main
         update-inserts-from-server = encoded.commands.update_inserts_from_server:main
         run-upgrade-on-inserts = encoded.commands.run_upgrader_on_inserts:main

@@ -447,34 +447,15 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
     return None
 
 
-def load_data(app, indir='inserts', docsdir=None, clear_tables=False,
-              overwrite=False, use_master_inserts=True):
+def load_data(app, indir='inserts', docsdir=None, overwrite=False,
+              use_master_inserts=True):
     '''
     This function will take the inserts folder as input, and place them to the given environment.
     args:
         app:
         indir (inserts): inserts folder, should be relative to tests/data/
         docsdir (None): folder with attachment documents, relative to tests/data
-        clear_tables (False): Not sure- clear existing database before loading inserts
     '''
-    if clear_tables:
-        from snovault import DBSESSION
-        from snovault.storage import Base
-        session = app.registry[DBSESSION]
-        # this can timeout if others are holding connection
-        # to database
-        import transaction
-        try:
-            Base.metadata.drop_all(session.connection().engine)
-            Base.metadata.create_all(session.connection().engine)
-        except Exception as e:
-            logger.error("load_data: error dropping tables: %s" % str(e))
-            transaction.abort()
-        else:
-            logger.warning("load_data: successfully dropped tables")
-            transaction.commit()
-        transaction.begin()
-
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -508,7 +489,7 @@ def load_data(app, indir='inserts', docsdir=None, clear_tables=False,
     return None  # unnecessary, but makes it more clear that no error was encountered
 
 
-def load_test_data(app, clear_tables=False, overwrite=False):
+def load_test_data(app, overwrite=False):
     """
     Load inserts and master-inserts
 
@@ -516,10 +497,10 @@ def load_test_data(app, clear_tables=False, overwrite=False):
         None if successful, otherwise Exception encountered
     """
     return load_data(app, docsdir='documents', indir='inserts',
-                     clear_tables=clear_tables, overwrite=overwrite)
+                     overwrite=overwrite)
 
 
-def load_local_data(app, clear_tables=False, overwrite=False):
+def load_local_data(app, overwrite=False):
     """
     Load temp-local-inserts. If not present, load inserts and master-inserts
 
@@ -535,17 +516,17 @@ def load_local_data(app, clear_tables=False, overwrite=False):
 
     if use_temp_local:
         return load_data(app, docsdir='documents', indir='temp-local-inserts',
-                         clear_tables=clear_tables, use_master_inserts=False, overwrite=overwrite)
+                         use_master_inserts=False, overwrite=overwrite)
     else:
         return load_data(app, docsdir='documents', indir='inserts',
-                         clear_tables=clear_tables, overwrite=overwrite)
+                         overwrite=overwrite)
 
 
-def load_prod_data(app, clear_tables=False, overwrite=False):
+def load_prod_data(app, overwrite=False):
     """
     Load master-inserts
 
     Returns:
         None if successful, otherwise Exception encountered
     """
-    return load_data(app, indir='master-inserts', clear_tables=clear_tables, overwrite=overwrite)
+    return load_data(app, indir='master-inserts', overwrite=overwrite)
