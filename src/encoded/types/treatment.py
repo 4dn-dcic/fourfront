@@ -9,7 +9,8 @@ from snovault import (
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
-    lab_award_attribution_embed_list
+    lab_award_attribution_embed_list,
+    get_item_if_you_can
 )
 
 
@@ -53,7 +54,7 @@ class TreatmentAgent(Treatment):
 
     item_type = 'treatment_agent'
     schema = load_schema('encoded:schemas/treatment_agent.json')
-    embedded_list = Treatment.embedded_list
+    embedded_list = Treatment.embedded_list + ['constructs.name']
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -61,8 +62,9 @@ class TreatmentAgent(Treatment):
         "type": "string"
     })
     def display_title(self, request, treatment_type=None, chemical=None,
-                      biological_agent=None, duration=None, duration_units=None,
-                      concentration=None, concentration_units=None, temperature=None):
+                      biological_agent=None, constructs=None, duration=None,
+                      duration_units=None, concentration=None,
+                      concentration_units=None, temperature=None):
         d_t = []
         conditions = ""
         if concentration and concentration_units:
@@ -78,7 +80,12 @@ class TreatmentAgent(Treatment):
 
         if chemical:
             dis_tit = chemical + " treatment" + conditions
-        elif biological_agent:
+        elif treatment_type == 'Transient Transfection' and constructs:
+            plasmids = ', '.join(
+                [get_item_if_you_can(request, construct).get('name') for construct in constructs]
+            )
+            dis_tit = 'Transient transfection of ' + plasmids + conditions
+        elif treatment_type == 'Biological' and biological_agent:
             dis_tit = biological_agent + " treatment" + conditions
         elif treatment_type == 'Other':
             dis_tit = "Other treatment" + conditions
