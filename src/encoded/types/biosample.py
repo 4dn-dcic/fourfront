@@ -70,7 +70,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'treatments.treatment_type',
         'treatments.description',
         'treatments.constructs.expression_products.relevant_genes',
-        'treatments.constructs.expression_products.feature_mods',
+        'treatments.constructs.expression_products.feature_mods.mod_type',
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
