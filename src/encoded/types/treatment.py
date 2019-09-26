@@ -30,20 +30,6 @@ class Treatment(Item):
 
 
 @collection(
-    name='treatments-chemical',
-    properties={
-        'title': 'Treatments-Chemicals',
-        'description': 'Listing Chemical or Drug Treatments',
-    })
-class TreatmentChemical(Treatment):
-    """Subclass of treatment for chemical treatments."""
-
-    item_type = 'treatment_chemical'
-    schema = load_schema('encoded:schemas/treatment_chemical.json')
-    embedded_list = Treatment.embedded_list
-
-
-@collection(
     name='treatments-agent',
     properties={
         'title': 'Treatments-Agentbased',
