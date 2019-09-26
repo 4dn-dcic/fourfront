@@ -162,9 +162,9 @@ class Owler(object):
                 else:
                     v = uris[0]
                 if return_as_string:
-                    return str(v[0])
+                    return str(v)
                 else:
-                    return v[0]
+                    return v
             except Exception:
                 return None
         return None
