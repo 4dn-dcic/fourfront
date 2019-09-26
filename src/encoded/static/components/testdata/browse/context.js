@@ -34,7 +34,7 @@ module.exports = {
                                 "rnai_type":"siRNA",
                                 "aliases":["Awesome:Treatment"],
                                 "target":"Pokemon",
-                                "rnai_constructs":["/constructs/131106bc-8535-4448-903e-854af460b211/"],
+                                "constructs":["/constructs/131106bc-8535-4448-903e-854af460b211/"],
                                 "date_created":"2016-09-29T20:16:06.701371+00:00",
                                 "@type":["TreatmentRnai","Treatment","Item"],
                                 "uuid":"686b362f-4eb6-4a9c-8173-3ab267307e3b",

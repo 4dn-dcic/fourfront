@@ -93,7 +93,7 @@ class TreatmentRnai(Treatment):
     schema = load_schema('encoded:schemas/treatment_rnai.json')
     embedded_list = Treatment.embedded_list + [
         'rnai_vendor.name',
-        'rnai_constructs.designed_to_target',
+        'constructs.designed_to_target',
     ]
 
     @calculated_property(schema={
