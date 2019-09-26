@@ -70,7 +70,6 @@ ITEM_INDEX_ORDER = [
     'TrackingItem',
 
     'TreatmentAgent',
-    'TreatmentChemical',
     'TreatmentRnai',
 
     'ImagingPath',

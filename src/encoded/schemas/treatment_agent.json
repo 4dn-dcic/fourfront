@@ -41,6 +41,7 @@
             "lookup": 20,
             "enum" : [
                 "Biological",
+                "Transient Transfection",
                 "Chemical",
                 "Heat Shock",
                 "Cold Shock",
@@ -58,6 +59,18 @@
             "description": "Biological agent the sample is being treated with",
             "type": "string",
             "lookup": 26
+        },
+        "constructs": {
+            "title": "Constructs",
+            "description": "Plasmids used for biological treatment/transient transfection",
+            "type":  "array",
+            "lookup": 27,
+            "items": {
+                "title": "Constructs",
+                "description": "A recombinant construct.",
+                "type": "string",
+                "linkTo": "Construct"
+            }
         },
         "concentration": {
             "title": "Concentration",

@@ -24,7 +24,7 @@ ORDER = [
     'data_release_update', 'software', 'analysis_step', 'workflow',
     'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
     'sysinfo', 'tracking_item', 'quality_metric_flag',
-    'summary_statistic', 'summary_statistic_hi_c', 'treatment_chemical', 'workflow_run'
+    'summary_statistic', 'summary_statistic_hi_c', 'workflow_run'
 ]
 
 
