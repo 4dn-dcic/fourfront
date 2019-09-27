@@ -71,18 +71,6 @@
               "type": "string",
               "lookup": 60,
               "linkTo": "Vendor"
-        },
-        "rnai_constructs": {
-            "title": "Constructs",
-            "description": "Recombinant constructs used for RNAi",
-            "type":  "array",
-            "lookup": 50,
-            "items": {
-                "title": "Constructs",
-                "description": "A recombinant construct.",
-                "type": "string",
-                "linkTo": "Construct"
-            }
         }
     }
 }

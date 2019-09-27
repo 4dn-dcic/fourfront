@@ -47,7 +47,7 @@ sop\_map.json | SopMap | sop-maps, sop\_map
 summary\_statistic.json | SummaryStatistic | summary-statistics, summary\_statistic
 summary\_statistic\_hi\_c.json | SummaryStatisticHiC | summary-statistics-hi-c, summary\_statistic\_hi\_c
 target.json | Target | target(s)
-treatment\_chemical.json | TreatmentChemical | treatments-chemical, treatment\_chemical
+treatment\_agent.json | TreatmentAgent | treatments-agent, treatment\_agent
 treatment\_rnai.json | TreatmentRnai | treatments-rnai, treatment\_rnai
 user.json | User | user(s)
 vendor.json | Vendor | vendor(s)
