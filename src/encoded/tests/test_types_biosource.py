@@ -41,7 +41,7 @@ def GM12878_twomod_biosource(testapp, lab, award, gm12878_oterm, basic_modificat
 
 @pytest.fixture
 def cell_lines(GM12878_biosource, F123_biosource, GM12878_mod_biosource, GM12878_twomod_biosource):
-    return [GM12878_biosource, F123_biosource, GM12878_mod_biosource, GM12878_twomod_biosource]
+    return [F123_biosource, GM12878_biosource, GM12878_mod_biosource, GM12878_twomod_biosource]
 
 
 @pytest.fixture
@@ -60,6 +60,60 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     bs = cell_lines
     bs.extend([lung_biosource, whole_biosource])
     return bs
+
+
+@pytest.fixture
+def human_biosource_data(testapp, lab, award, human_individual):
+    return {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'individual': human_individual['@id']
+    }
+
+
+@pytest.fixture
+def mouse_SC_biosrc(testapp, human_biosource_data, mouse_individual):
+    mouse_SC_biosrc_data = human_biosource_data.copy()
+    mouse_SC_biosrc_data['biosource_type'] = 'stem cell derived cell line'
+    mouse_SC_biosrc_data['individual'] = mouse_individual['@id']
+    return testapp.post_json('/biosource', mouse_SC_biosrc_data).json['@graph'][0]
+
+
+@pytest.fixture
+def hum_SC_biosrc(testapp, human_biosource_data):
+    hum_SC_biosrc_data = human_biosource_data.copy()
+    hum_SC_biosrc_data['biosource_type'] = 'stem cell derived cell line'
+    return testapp.post_json('/biosource', hum_SC_biosrc_data).json['@graph'][0]
+
+
+@pytest.fixture
+def thous_genomes_biosources(testapp, human_biosource_data, thousandgen_oterms, b_lymphocyte_oterm):
+    bsources = []
+    human_biosource_data['tissue'] = b_lymphocyte_oterm['@id']
+    human_biosource_data['biosource_type'] = 'immortalized cell line'
+    for ot in thousandgen_oterms:
+        bs_data = human_biosource_data.copy()
+        bs_data['cell_line'] = ot['@id']
+        bsources.append(testapp.post_json('/biosource', bs_data).json['@graph'][0])
+    return bsources
+
+
+def test_calculated_biosource_category_1000_gen(thous_genomes_biosources, GM12878_biosource):
+    assert GM12878_biosource.get('biosource_category') == 'GM12878'
+    for bs in thous_genomes_biosources:
+        assert bs.get('biosource_category') == '1000 genomes/Hap Map'
+
+
+def test_calculated_biosource_category_tiers(cell_lines):
+    bs1 = cell_lines.pop(0)
+    assert bs1.get('biosource_category') == 'Tier2'
+    for bs in cell_lines:
+        assert bs.get('biosource_category') == 'GM12878'
+
+
+def test_calculated_biosource_category_stem_cells(mouse_SC_biosrc, hum_SC_biosrc):
+    assert hum_SC_biosrc.get('biosource_category') == 'Human stem cell'
+    assert mouse_SC_biosrc.get('biosource_category') == 'Mouse stem cell'
 
 
 def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target):

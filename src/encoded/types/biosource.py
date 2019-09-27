@@ -113,6 +113,46 @@ class Biosource(Item):
         return biosource_type + mod_str
 
     @calculated_property(schema={
+        "title": "Biosource category",
+        "description": "Category for the biosource.",
+        "type": "string",
+    })
+    def biosource_category(self, request, biosource_type, individual=None,
+                           cell_line=None, cell_line_tier=None, tissue=None,
+                           modifications=None):
+        oterms = self.registry['collections']['OntologyTerm']
+        t1_name = ['GM12878', 'HFFc6', 'WTC-11', 'H1-hESC', 'IMR-90']
+        t2_name = [
+            'G4 mESC', 'F121:R26puroR-M2rtTA', 'JM8.N4', 'HCT116', 'F123-CASTx129',
+            'HAP-1', 'K562', 'H9', 'U2OS', 'HEK293', 'RPE-hTERT', 'F121-9-CASTx129'
+        ]
+        tiered_line_cat = {str(oterms.get(tn).uuid): tn for tn in t1_name if oterms.get(tn)}
+        tiered_line_cat.update({str(oterms.get(tn).uuid): 'Tier2' for tn in t2_name if oterms.get(tn)})
+        if cell_line:
+            cl_term = get_item_if_you_can(request, cell_line, 'ontology-terms')
+            cluid = cl_term.get('uuid')
+            if cluid and cluid in tiered_line_cat:
+                return tiered_line_cat[cluid]
+        if biosource_type in ['stem cell', 'induced pluripotent stem cell',
+                              'stem cell derived cell line']:
+            ind_at_type = get_item_if_you_can(request, individual, 'individuals').get('@type')
+            for at in ind_at_type:
+                if 'Human' in at:
+                    return 'Human stem cell'
+                if 'Mouse' in at:
+                    return 'Mouse stem cell'
+        if tissue:
+            tis_term = get_item_if_you_can(request, tissue, 'ontology-terms')
+            # case for 1000 genomes/Hap Map
+            if tis_term.get('preferred_name') == 'B-lymphocyte':
+                if cl_term:
+                    cl_name = cl_term.get('term_name')
+                    if cl_name.startswith('GM') or cl_name.startswith('HG'):
+                        return '1000 genomes/Hap Map'
+            return 'Tissue'
+        return 'Other'
+
+    @calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
         "type": "string"
