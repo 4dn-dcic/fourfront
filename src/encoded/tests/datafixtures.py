@@ -346,11 +346,12 @@ def F123_biosource(testapp, lab, award, f123_oterm):
 
 
 @pytest.fixture
-def GM12878_biosource(testapp, lab, award, gm12878_oterm):
+def GM12878_biosource(testapp, lab, award, gm12878_oterm, b_lymphocyte_oterm):
     item = {
         "accession": "4DNSROOOAAQ1",
         "biosource_type": "immortalized cell line",
         "cell_line": gm12878_oterm['@id'],
+        "tissue": b_lymphocyte_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }

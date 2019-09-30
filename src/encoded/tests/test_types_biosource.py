@@ -99,21 +99,24 @@ def thous_genomes_biosources(testapp, human_biosource_data, thousandgen_oterms, 
 
 
 def test_calculated_biosource_category_1000_gen(thous_genomes_biosources, GM12878_biosource):
-    assert GM12878_biosource.get('biosource_category') == 'GM12878'
+    assert 'GM12878' in GM12878_biosource.get('biosource_category')
+    thous_genomes_biosources.append(GM12878_biosource)
     for bs in thous_genomes_biosources:
-        assert bs.get('biosource_category') == '1000 genomes/Hap Map'
+        assert '1000 genomes/Hap Map' in bs.get('biosource_category')
 
 
 def test_calculated_biosource_category_tiers(cell_lines):
     bs1 = cell_lines.pop(0)
-    assert bs1.get('biosource_category') == 'Tier2'
+    assert 'Tier2' in bs1.get('biosource_category')
     for bs in cell_lines:
-        assert bs.get('biosource_category') == 'GM12878'
+        assert 'GM12878' in bs.get('biosource_category')
 
 
 def test_calculated_biosource_category_stem_cells(mouse_SC_biosrc, hum_SC_biosrc):
-    assert hum_SC_biosrc.get('biosource_category') == 'Human stem cell'
-    assert mouse_SC_biosrc.get('biosource_category') == 'Mouse stem cell'
+    assert 'Human stem cell' in hum_SC_biosrc.get('biosource_category')
+    assert 'Mouse stem cell' not in hum_SC_biosrc.get('biosource_category')
+    assert 'Mouse stem cell' in mouse_SC_biosrc.get('biosource_category')
+    assert 'Human stem cell' not in mouse_SC_biosrc.get('biosource_category')
 
 
 def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target):
