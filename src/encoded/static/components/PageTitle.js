@@ -48,9 +48,9 @@ const TITLE_PATHNAME_MAP = {
         'subtitle' : function(pathName, context, href, currentAction){
             if (isSelectAction(currentAction)) {
                 if (currentAction === 'selection') {
-                    return 'Select an Item and click Apply button on the bottom.';
+                    return 'Select an Item and click the Apply button.';
                 } else if (currentAction === 'multiselect') {
-                    return 'Select one or more Items and click Apply button on the bottom.';
+                    return 'Select one or more Items and click the Apply button.';
                 }
                 //default
                 return 'Drag and drop Items from this view into other window(s).';
