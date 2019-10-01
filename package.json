@@ -107,7 +107,7 @@
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
     "higlass": "^1.6.11",
-    "higlass-multivec": "^0.2.2",
+    "higlass-multivec": "github:higlass/higlass-multivec#es-modules-es",
     "higlass-register": "^0.1.0",
     "html-react-parser": "^0.4.7",
     "markdown-to-jsx": "^6.10.3",
