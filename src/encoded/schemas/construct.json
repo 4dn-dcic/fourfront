@@ -66,6 +66,17 @@
                   "type": "string"
               }
           },
+          "expression_products": {
+              "title": "Expression Products",
+              "description": "Proteins or transcripts the construct expresses, including modifications",
+              "type": "array",
+              "lookup": 55,
+              "items": {
+                  "title": "Feature",
+                  "type": "string",
+                  "linkTo": "BioFeature"
+              }
+          },
           "designed_to_target": {
               "title": "Designed to Target",
               "description": "The gene or genomic region that this construct is designed to target",

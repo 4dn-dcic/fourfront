@@ -186,7 +186,7 @@ module.exports = {
           "doc_count": 0
         },
         {
-          "key": "TreatmentChemical",
+          "key": "TreatmentAgent",
           "doc_count": 0
         },
         {
