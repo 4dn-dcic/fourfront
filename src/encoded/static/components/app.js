@@ -1765,7 +1765,7 @@ class BodyElement extends React.PureComponent {
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
-        const displayNavBarAndFooter = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && (currentAction === 'multiselect'));
+        const displayNavBarAndFooter = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && isSelectAction(currentAction));
 
         if (hasError) return this.renderErrorState();
 
