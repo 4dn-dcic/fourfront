@@ -684,17 +684,17 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
         "/file-formats/bg/" : {
             "dimensions": 1,
             "reference": None,
-            "function": add_bg_bw_bed_file,
+            "function": add_bg_bw_multivec_bed_file,
         },
         "/file-formats/bw/" : {
             "dimensions": 1,
             "reference": None,
-            "function": add_bg_bw_bed_file,
+            "function": add_bg_bw_multivec_bed_file,
         },
         "/file-formats/bed/" : {
             "dimensions": 1,
             "reference": None,
-            "function": add_bg_bw_bed_file,
+            "function": add_bg_bw_multivec_bed_file,
         },
         "/file-formats/bigbed/": {
             "dimensions": 1,
@@ -725,7 +725,7 @@ def add_single_file_to_higlass_viewconf(views, file, genome_assembly, higlass_vi
 
     file_format = file["file_format"]
     if file_format not in file_format_settings:
-        return None, "Unknown file format {file_format}".format(file_format = file_format)
+        return None, "Unknown file format {file_format}".format(file_format=file_format)
 
     file_settings = file_format_settings[file_format]
 
@@ -822,7 +822,7 @@ def get_view_content_info(view):
         "center_chromsize_index" : view_center_chromsize_index,
     }
 
-def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info, maximum_height):
+def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, maximum_height):
     """ Add the bedGraph, bed, or bigwig file to add to the given views.
     Args:
         views(list)         : All of the views from the view config.
@@ -854,6 +854,16 @@ def add_bg_bw_bed_file(views, file, genome_assembly, viewconfig_info, maximum_he
     # bed files use the bedlike type instead.
     if file["file_format"] == "/file-formats/bed/":
         new_track_base["type"] = "bedlike"
+
+    if file.get("extra_files"):
+        for extra_file in file["extra_files"]:
+            if extra_file["file_format"].endswith("bed.multires.mv5/"):
+                new_track_base["type"] = "horizontal-stacked-bar"
+                new_track_base["options"]["barBorder"] = False
+
+    if file.get("higlass_defaults"):
+        for hglass_default, val in file["higlass_defaults"].items():
+            new_track_base["options"][hglass_default] = val
 
     return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
@@ -901,6 +911,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
         "orientation": "1d-horizontal",
         "uid": uuid.uuid4(),
     }
+
 
     def get_color_by_index(color_index, known_colors):
         """Use linear interpolation to get a color for the given index.
@@ -984,6 +995,10 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
                 b=colors["blue"],
             )
         )
+
+    if file.get("higlass_defaults"):
+        for hglass_default, val in file["higlass_defaults"].items():
+            new_track_base["options"][hglass_default] = val
 
     return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
@@ -1107,6 +1122,10 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
         }
     }
 
+    if file.get("higlass_defaults"):
+        for hglass_default, val in file["higlass_defaults"].items():
+            new_track_base["options"][hglass_default] = val
+
     new_tracks_by_side = {
         "top": deepcopy(new_track_base),
         "left": deepcopy(new_track_base),
@@ -1139,6 +1158,7 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
             # Add in the 0th position if it doesn't exist already.
             view["tracks"][side].insert(0, new_track)
     return views, ""
+
 
 def update_genome_position_search_box(view, new_file):
     """ Update the genome position search box for this view so it uses the given file.
@@ -1361,6 +1381,10 @@ def create_2d_content(file, viewtype):
     contents["options"] = {}
     contents["options"]["coordSystem"] = file["genome_assembly"]
     contents["options"]["name"] = get_title(file)
+
+    if file.get("higlass_defaults"):
+        for hglass_default, val in file["higlass_defaults"].items():
+            contents["options"][hglass_default] = val
     return contents
 
 def copy_top_reference_tracks_into_left(target_view, views):
