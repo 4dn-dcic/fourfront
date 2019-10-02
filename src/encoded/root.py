@@ -223,7 +223,9 @@ class FourfrontRoot(Root):
             (Allow, Everyone, ['list', 'search']),
             (Allow, 'group.admin', ALL_PERMISSIONS),
             (Allow, 'remoteuser.EMBED', 'import_items'),
-        ] + Root.__acl__
+        ] + [(Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
+        (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
+        (Allow, Everyone, ['visible_for_edit'])]
         return acl
 
     def get(self, name, default=None):
