@@ -125,14 +125,33 @@ class Biosource(Item):
                            cell_line=None, cell_line_tier=None, tissue=None,
                            modifications=None):
         oterms = self.registry['collections']['OntologyTerm']
-        t1_name = ['GM12878', 'HFFc6', 'WTC-11', 'H1-hESC', 'IMR-90']
-        t2_name = [
-            'G4 mESC', 'F121:R26puroR-M2rtTA', 'JM8.N4', 'HCT116', 'F123-CASTx129',
-            'HAP-1', 'K562', 'H9', 'U2OS', 'HEK293', 'RPE-hTERT', 'F121-9-CASTx129'
-        ]
+        tid2cat = {
+            'EFO:0003042': 'H1-hESC',
+            'EFO:0002784': 'GM12878',
+            '4DN:0000014': 'HFFc6',
+            '4DN:0000005': 'WTC-11',
+            'EFO:0001196': 'IMR-90',
+            '4DN:0000260': 'Tier 2',
+            '4DN:0000250': 'Tier 2',
+            'EFO:0002824': 'Tier 2',
+            '4DN:0000003': 'Tier 2',
+            'EFO:0007598': 'Tier 2',
+            'EFO:0002067': 'Tier 2',
+            'EFO:0003045': 'Tier 2',
+            'EFO:0002869': 'Tier 2',
+            'EFO:0001182': 'Tier 2',
+            '4DN:0000004': 'Tier 2',
+            '4DN:0000002': 'Tier 2',
+            '4DN:0000262': 'Tier 2',
+            'EFO:0009319': 'Tier 2'
+        }
         category = []
-        tiered_line_cat = {str(oterms.get(tn).uuid): tn for tn in t1_name if oterms.get(tn)}
-        tiered_line_cat.update({str(oterms.get(tn).uuid): 'Tier2' for tn in t2_name if oterms.get(tn)})
+        tiered_line_cat = {}
+        for tid, cat in tid2cat.items():
+            oterm = oterms.get(tid)
+            if oterm:
+                tiered_line_cat[str(oterm.uuid)] = cat
+        # import pdb; pdb.set_trace()
         if cell_line:
             cl_term = get_item_if_you_can(request, cell_line, 'ontology-terms')
             cluid = cl_term.get('uuid')

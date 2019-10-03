@@ -107,7 +107,7 @@ def test_calculated_biosource_category_1000_gen(thous_genomes_biosources, GM1287
 
 def test_calculated_biosource_category_tiers(cell_lines):
     bs1 = cell_lines.pop(0)
-    assert 'Tier2' in bs1.get('biosource_category')
+    assert 'Tier 2' in bs1.get('biosource_category')
     for bs in cell_lines:
         assert 'GM12878' in bs.get('biosource_category')
 

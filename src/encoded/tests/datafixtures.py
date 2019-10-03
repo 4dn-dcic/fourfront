@@ -286,7 +286,7 @@ def f123_oterm(testapp, ontology, cell_line_term):
     item = {
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "term_name": "F123-CASTx129",
-        "term_id": "EFO:0000008",
+        "term_id": "EFO:0009319",
         "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
@@ -298,7 +298,7 @@ def gm12878_oterm(testapp, ontology, cell_line_term):
     item = {
         "uuid": "530056bc-8535-4448-903e-854af460b111",
         "term_name": "GM12878",
-        "term_id": "EFO:0000009",
+        "term_id": "EFO:0002784",
         "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
