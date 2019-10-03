@@ -857,13 +857,14 @@ def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, m
 
     if file.get("extra_files"):
         for extra_file in file["extra_files"]:
+            # handle multivec files
             if extra_file["file_format"].endswith("bed.multires.mv5/"):
                 new_track_base["type"] = "horizontal-stacked-bar"
                 new_track_base["options"]["barBorder"] = False
+                break
 
     if file.get("higlass_defaults"):
-        for hglass_default, val in file["higlass_defaults"].items():
-            new_track_base["options"][hglass_default] = val
+        new_track_base["options"].update(file["higlass_defaults"])
 
     return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
@@ -997,8 +998,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
         )
 
     if file.get("higlass_defaults"):
-        for hglass_default, val in file["higlass_defaults"].items():
-            new_track_base["options"][hglass_default] = val
+        new_track_base["options"].update(file["higlass_defaults"])
 
     return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
@@ -1123,8 +1123,7 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
     }
 
     if file.get("higlass_defaults"):
-        for hglass_default, val in file["higlass_defaults"].items():
-            new_track_base["options"][hglass_default] = val
+        new_track_base["options"].update(file["higlass_defaults"])
 
     new_tracks_by_side = {
         "top": deepcopy(new_track_base),
@@ -1210,6 +1209,9 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
             "coordSystem": file["genome_assembly"],
         }
     }
+
+    if file.get("higlass_defaults"):
+        new_track_base_1d["options"].update(file["higlass_defaults"])
 
     new_tracks_by_side = {
         "top": deepcopy(new_track_base_1d),
@@ -1383,8 +1385,8 @@ def create_2d_content(file, viewtype):
     contents["options"]["name"] = get_title(file)
 
     if file.get("higlass_defaults"):
-        for hglass_default, val in file["higlass_defaults"].items():
-            contents["options"][hglass_default] = val
+        contents["options"].update(file["higlass_defaults"])
+
     return contents
 
 def copy_top_reference_tracks_into_left(target_view, views):
