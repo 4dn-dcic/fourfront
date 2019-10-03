@@ -171,7 +171,7 @@ class Biosource(Item):
                     category.append('Mouse stem cell')
         elif biosource_type == 'primary cell':
             category.append('Primary Cells')
-        elif biosource_type in ['tissue', 'whole_organism']:
+        elif biosource_type in ['tissue', 'multicellular organism']:
             category.append('Multicellular Tissue')
         if tissue:
             tis_term = get_item_if_you_can(request, tissue, 'ontology-terms')

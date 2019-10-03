@@ -80,6 +80,13 @@ def mouse_SC_biosrc(testapp, human_biosource_data, mouse_individual):
 
 
 @pytest.fixture
+def primary_cell_biosource(testapp, human_biosource_data):
+    pc_biosrc_data = human_biosource_data.copy()
+    pc_biosrc_data['biosource_type'] = 'primary cell'
+    return testapp.post_json('/biosource', pc_biosrc_data).json['@graph'][0]
+
+
+@pytest.fixture
 def hum_SC_biosrc(testapp, human_biosource_data):
     hum_SC_biosrc_data = human_biosource_data.copy()
     hum_SC_biosrc_data['biosource_type'] = 'stem cell derived cell line'
@@ -96,6 +103,15 @@ def thous_genomes_biosources(testapp, human_biosource_data, thousandgen_oterms, 
         bs_data['cell_line'] = ot['@id']
         bsources.append(testapp.post_json('/biosource', bs_data).json['@graph'][0])
     return bsources
+
+
+def test_calculated_biosource_category_multicellular(lung_biosource, whole_biosource):
+    assert 'Multicellular Tissue' in lung_biosource.get('biosource_category')
+    assert 'Multicellular Tissue' in whole_biosource.get('biosource_category')
+
+
+def test_calculated_biosource_category_primary_cell(primary_cell_biosource):
+    assert 'Primary Cells' in primary_cell_biosource.get('biosource_category')
 
 
 def test_calculated_biosource_category_1000_gen(thous_genomes_biosources, GM12878_biosource):
