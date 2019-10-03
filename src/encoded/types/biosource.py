@@ -129,6 +129,7 @@ class Biosource(Item):
             'EFO:0003042': 'H1-hESC',
             'EFO:0002784': 'GM12878',
             '4DN:0000014': 'HFFc6',
+            'EFO:0009318': 'HFFc6',
             '4DN:0000005': 'WTC-11',
             'EFO:0001196': 'IMR-90',
             '4DN:0000260': 'Tier 2',
