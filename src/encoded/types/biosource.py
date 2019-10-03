@@ -169,6 +169,10 @@ class Biosource(Item):
                     category.append('Human stem cell')
                 elif 'Mouse' in at:
                     category.append('Mouse stem cell')
+        elif biosource_type == 'primary cell':
+            category.append('Primary Cells')
+        elif biosource_type in ['tissue', 'whole_organism']:
+            category.append('Multicellular Tissue')
         if tissue:
             tis_term = get_item_if_you_can(request, tissue, 'ontology-terms')
             # case for 1000 genomes/Hap Map
