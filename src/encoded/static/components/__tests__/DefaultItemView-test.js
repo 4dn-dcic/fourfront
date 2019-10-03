@@ -50,7 +50,7 @@ describe('Testing DefaultItemView.js', function() {
             href="https://data.4dnucleome.org/libraries/ENCLB055ZZZ/" />
         );
 
-        jest.runAllTimers();
+        //jest.runAllTimers();
 
     });
 
@@ -73,7 +73,7 @@ describe('Testing DefaultItemView.js', function() {
         server.respond();
         var objToggles = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'item-page-detail-toggle-button');
         var detailPanel = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'item-page-detail-panel');
-        jest.runAllTimers();
+        //jest.runAllTimers();
         var collapse = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'collapse');
         
         return;
@@ -86,7 +86,7 @@ describe('Testing DefaultItemView.js', function() {
         var objDefDesc = objToggles[0];
         // this is the biosamples link
         TestUtils.Simulate.click(objDefDesc);
-        jest.runAllTimers();
+        //jest.runAllTimers();
 
         expect(collapse[0].className.indexOf('in') > -1).toBe(true);
         var defTerms = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'item-label');

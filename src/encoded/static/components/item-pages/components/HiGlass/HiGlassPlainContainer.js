@@ -45,6 +45,8 @@ export function HiGlassLoadingIndicator(props) {
 
 /** Loaded upon componentDidMount; HiGlassComponent is not supported server-side. */
 let HiGlassComponent = null;
+let StackedBarTrack = null;
+let higlassRegister = null;
 
 export class HiGlassPlainContainer extends React.PureComponent {
 
@@ -102,9 +104,17 @@ export class HiGlassPlainContainer extends React.PureComponent {
 
                 // Load in HiGlass libraries as separate JS file due to large size.
                 // @see https://webpack.js.org/api/module-methods/#requireensure
-                require.ensure(['higlass/dist/hglib'], (require) => {
-                    const hglib = require('higlass/dist/hglib');
-                    HiGlassComponent = hglib.HiGlassComponent;
+                require.ensure(['higlass/dist/hglib', 'higlass-register', 'higlass-multivec/es/StackedBarTrack'], (require) => {
+                    HiGlassComponent = require('higlass/dist/hglib').HiGlassComponent;
+                    higlassRegister = require('higlass-register').default;
+                    StackedBarTrack = require('higlass-multivec/es/StackedBarTrack').default;
+                    // Possible todo: use pluginTracks prop to pass `"horizontal-stacked-bar" : StackedBarTrack`
+                    // in render method instead.
+                    higlassRegister({
+                        name: 'StackedBarTrack',
+                        track: StackedBarTrack,
+                        config: StackedBarTrack.config,
+                    });
                     finish();
                 }, "higlass-utils-bundle");
 
@@ -214,7 +224,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.6.7/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.6.11/dist/hglib.css" crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper">{ hiGlassInstance }</div>
             </div>
