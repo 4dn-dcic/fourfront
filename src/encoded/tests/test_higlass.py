@@ -2320,3 +2320,57 @@ def test_custom_display_height(testapp, higlass_blank_viewconf,
         ), "1D file is too big: height should be around 125, got {actual} instead.".
                     format(
                         actual=track["height"], ))
+
+
+def add_higlass_defaults(testapp, higlass_blank_viewconf, mcool_file_json):
+    """ Add an mcool file to a higlass display, with user-defined higlass options.
+    Make sure the view has the expected options.
+    """
+
+    genome_assembly = "GRCm38"
+    # Get a mcool file to add.
+    mcool_file_json['higlass_uid'] = "LTiacew8TjCOaP9gpDZwZw"
+    mcool_file_json['genome_assembly'] = genome_assembly
+    mcool_file_json['higlass_defaults'] = {'heatmapValueScaling': 'linear'}
+    mcool_file = testapp.post_json('/file_processed',
+                                   mcool_file_json).json['@graph'][0]
+
+    # Get the Higlass Viewconf that will be edited.
+    higlass_conf_uuid = "00000000-1111-0000-1111-000000000000"
+    response = testapp.get(
+        "/higlass-view-configs/{higlass_conf_uuid}/?format=json".format(
+            higlass_conf_uuid=higlass_conf_uuid))
+    higlass_json = response.json
+
+    # Try to add the mcool to the viewconf.
+    response = testapp.post_json(
+        "/add_files_to_higlass_viewconf/", {
+            'higlass_viewconfig': higlass_json["viewconfig"],
+            'genome_assembly': higlass_json["genome_assembly"],
+            'files': ["{uuid}".format(uuid=mcool_file['uuid'])]
+        })
+
+    assert_true(response.json["errors"] == '')
+    assert_true(response.json["success"])
+
+    # Get the new json.
+    new_higlass_options_viewconf_json = response.json["new_viewconfig"]
+
+    assert_true(len(new_higlass_options_viewconf_json["views"]) == 1)
+    view = new_higlass_options_viewconf_json["views"][0]
+
+    assert_true("center" in view["tracks"])
+    assert_true(len(view["tracks"]["center"]) == 1)
+
+    center_track = view["tracks"]["center"][0]
+    assert_true(center_track["type"] == "combined")
+    assert_true("contents" in center_track)
+
+    # The contents should have the mcool's heatmap
+    contents = center_track["contents"]
+    assert_true(len(contents) == 1)
+
+    # The central contents should have the mcool file and the user-defined higlass option should be there
+    if "tilesetUid" in contents and contents[0]["tilesetUid"] == mcool_file_json['higlass_uid']:
+        assert_true(contents[0]["type"] == "heatmap")
+        assert_true(contents[0]["options"]["heatmapValueScaling"] == 'linear')

@@ -868,6 +868,7 @@ def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, m
 
     return add_1d_file(views, new_track_base, genome_assembly, maximum_height)
 
+
 def get_title(file):
     """ Returns a string containing the title for the given file.
 
