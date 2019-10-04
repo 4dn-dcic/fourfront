@@ -50,11 +50,16 @@ export const parseSectionsContent = memoize(function(context){
         } else if (Array.isArray(section['@type']) && section['@type'].indexOf('HiglassViewConfig') > -1){
             // HiglassViewConfig Parsing
             if (!section.viewconfig) throw new Error('No viewconfig setup for this section.');
+            let hiGlassComponentHeight;
+            if (section.instance_height && section.instance_height > 0) {
+                hiGlassComponentHeight = section.instance_height;
+            }
+
             section =  _.extend({}, section, {
                 'content' : (
                     <React.Fragment>
                         <EmbeddedHiglassActions context={section} style={{ marginTop : -10 }} />
-                        <HiGlassPlainContainer viewConfig={section.viewconfig} mountDelay={4000} />
+                        <HiGlassPlainContainer viewConfig={section.viewconfig} mountDelay={4000} height={hiGlassComponentHeight} />
                     </React.Fragment>
                 )
             });
