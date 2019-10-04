@@ -163,6 +163,17 @@ class GenomicRegion(Item):
 
 
 @collection(
+    name='microscope-configurations',
+    properties={
+        'title': 'Microscope Configurations',
+        'description': 'Listing of all Microscope Configurations',
+    })
+class MicroscopeConfiguration(Item):
+    item_type = 'microscope_configuration'
+    schema = load_schema('encoded:schemas/microscope_configuration.json')
+
+
+@collection(
     name='organisms',
     unique_key='organism:taxon_id',
     lookup_key='name',
