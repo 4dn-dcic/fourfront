@@ -2322,7 +2322,7 @@ def test_custom_display_height(testapp, higlass_blank_viewconf,
                         actual=track["height"], ))
 
 
-def add_higlass_defaults(testapp, higlass_blank_viewconf, mcool_file_json):
+def test_add_higlass_defaults(testapp, higlass_blank_viewconf, mcool_file_json):
     """ Add an mcool file to a higlass display, with user-defined higlass options.
     Make sure the view has the expected options.
     """
