@@ -182,8 +182,6 @@ class Biosource(Item):
                     cl_name = cl_term.get('term_name')
                     if cl_name.startswith('GM') or cl_name.startswith('HG'):
                         category.append('1000 genomes/Hap Map')
-            if not cell_line:
-                category.append('Tissue')
         if not category:
             category.append('Other')
         return category
