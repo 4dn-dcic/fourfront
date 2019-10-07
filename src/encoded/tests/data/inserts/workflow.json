@@ -12925,48 +12925,6 @@
                     {
                         "meta": {
                             "cardinality": "single",
-                            "file_format": "rsemIndex",
-                            "global": true,
-                            "type": "reference file"
-                        },
-                        "name": "rna.rsem_index",
-                        "source": [
-                            {
-                                "name": "rna.rsem_index"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "chromsizes",
-                            "global": true,
-                            "type": "reference file"
-                        },
-                        "name": "rna.chrom_sizes",
-                        "source": [
-                            {
-                                "name": "rna.chrom_sizes"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "tsv",
-                            "global": true,
-                            "type": "reference file"
-                        },
-                        "name": "rna.rna_qc_tr_id_to_gene_type_tsv",
-                        "source": [
-                            {
-                                "name": "rna.rna_qc_tr_id_to_gene_type_tsv"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
                             "global": true,
                             "type": "parameter"
                         },
@@ -12983,10 +12941,118 @@
                             "global": true,
                             "type": "parameter"
                         },
-                        "name": "rna.strandedness",
+                        "name": "rna.cpu",
                         "source": [
                             {
-                                "name": "rna.strandedness"
+                                "name": "rna.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.memGB",
+                        "source": [
+                            {
+                                "name": "rna.memGB"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "alignment"
+                    ],
+                    "software_used": [
+                        "/software/4b36060c-719c-4ae7-9e14-e306345e8192"
+                    ]
+                },
+                "name": "align",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.genomebam",
+                        "target": [
+                            {
+                                "name": "rna.outbam"
+                            },
+                            {
+                                "name": "rna.genomebam",
+                                "step": "rsem_quant"
+                            },
+                            {
+                                "name": "rna.genomebam",
+                                "step": "bam_to_signals"
+                            }
+                            
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.annobam",
+                        "target": [
+                            {
+                                "name": "rna.annobam",
+                                "step": "rna_qc"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.genomebam",
+                        "source": [
+                            {
+                                "name": "rna.genomebam",
+                                "step": "align"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "rsemIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.rsem_index",
+                        "source": [
+                            {
+                                "name": "rna.rsem_index"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.endedness",
+                        "source": [
+                            {
+                                "name": "rna.endedness"
                             }
                         ]
                     },
@@ -13032,44 +13098,14 @@
                 ],
                 "meta": {
                     "analysis_step_types": [
-                        "alignment", "quantification", "binning", "counting", "QC calculation"
+                        "quantification"
                     ],
                     "software_used": [
-                        "/software/3f2d3b0e-0365-4212-9468-c16ad9531c4d",
-                        "/software/4b36060c-719c-4ae7-9e14-e306345e8192",
                         "/software/0d215f4c-62a6-481c-85b2-6eed19344016"
                     ]
                 },
-                "name": "rna",
+                "name": "rsem_quant",
                 "outputs": [
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bam",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "rna.outbam",
-                        "target": [
-                            {
-                                "name": "rna.outbam"
-                            }
-                        ]
-                    },
-                    {
-                        "meta": {
-                            "cardinality": "single",
-                            "file_format": "bw",
-                            "global": true,
-                            "type": "data file"
-                        },
-                        "name": "rna.outbw",
-                        "target": [
-                            {
-                                "name": "rna.outbw"
-                            }
-                        ]
-                    },
                     {
                         "meta": {
                             "cardinality": "single",
@@ -13097,7 +13133,146 @@
                                 "name": "rna.isoform_expression"
                             }
                         ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.genomebam",
+                        "source": [
+                            {
+                                "name": "rna.genomebam",
+                                "step": "align"
+                            }
+                        ]
                     },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.chrom_sizes",
+                        "source": [
+                            {
+                                "name": "rna.chrom_sizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.strandedness",
+                        "source": [
+                            {
+                                "name": "rna.strandedness"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.cpu",
+                        "source": [
+                            {
+                                "name": "rna.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.memGB",
+                        "source": [
+                            {
+                                "name": "rna.memGB"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "binning", "counting"
+                    ],
+                    "software_used": [
+                    ]
+                },
+                "name": "bam_to_signals",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.outbw",
+                        "target": [
+                            {
+                                "name": "rna.outbw"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.annobam",
+                        "source": [
+                            {
+                                "name": "rna.annobam",
+                                "step": "align"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "tsv",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.rna_qc_tr_id_to_gene_type_tsv",
+                        "source": [
+                            {
+                                "name": "rna.rna_qc_tr_id_to_gene_type_tsv"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "QC calculation"
+                    ],
+                    "software_used": [
+                    ]
+                },
+                "name": "rna_qc",
+                "outputs": [
                     {
                         "meta": {
                             "cardinality": "single",
