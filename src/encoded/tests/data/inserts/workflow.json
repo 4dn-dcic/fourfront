@@ -12849,6 +12849,7 @@
                 "argument_format": "tsv",
                 "argument_type": "Output processed file",
                 "workflow_argument_name": "rna.gene_expression"
+            },
             {
                 "argument_format": "tsv",
                 "argument_type": "Output processed file",
