@@ -13035,6 +13035,9 @@
                         "alignment", "quantification", "binning", "counting", "QC calculation"
                     ],
                     "software_used": [
+                        "/software/3f2d3b0e-0365-4212-9468-c16ad9531c4d",
+                        "/software/4b36060c-719c-4ae7-9e14-e306345e8192",
+                        "/software/0d215f4c-62a6-481c-85b2-6eed19344016"
                     ]
                 },
                 "name": "rna",
