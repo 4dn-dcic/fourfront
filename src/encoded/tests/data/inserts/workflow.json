@@ -12779,5 +12779,338 @@
                              "/workflows/c19ee11e-9d5a-454f-af50-600a0cf990b6"],
         "version_upgrade_log": "Hic2cool extract-norm MT chromosome handling bug fixed. Cooler convergence failure now doesn't throw error (store NaN instead). Nore, Nonorm, Norenonorm variants are now merged.",
         "aliases": ["4dn-dcic-lab:wf-hi-c-processing-pairs-0.2.7"]
+    },
+    {
+        "accession": "4DNWFVG24S9",
+        "app_name": "encode-rnaseq",
+        "app_version": "1.1",
+        "arguments": [
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rna.fastqs_R1"
+            },
+            {
+                "argument_format": "fastq",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rna.fastqs_R2"
+            },
+            {
+                "argument_format": "starIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rna.align_index"
+            },
+            {
+                "argument_format": "rsemIndex",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rna.rsem_index"
+            },
+            {
+                "argument_format": "chromsizes",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rna.chrom_sizes"
+            },
+            {
+                "argument_format": "tsv",
+                "argument_type": "Input file",
+                "workflow_argument_name": "rna.rna_qc_tr_id_to_gene_type_tsv"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "rna.endedness"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "rna.strandedness"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "rna.strandedness_direction"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "rna.cpu"
+            },
+            {
+                "argument_type": "parameter",
+                "workflow_argument_name": "rna.memGB"
+            },
+            {
+                "argument_format": "bam",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "rna.outbam"
+            },
+            {
+                "argument_format": "bw",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "rna.outbw"
+            },
+            {
+                "argument_format": "tsv",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "rna.gene_expression"
+            {
+                "argument_format": "tsv",
+                "argument_type": "Output processed file",
+                "workflow_argument_name": "rna.isoform_expression"
+            },
+            {
+                "argument_type": "Output QC file",
+                "workflow_argument_name": "rna.qc_json",
+                "qc_type": "quality_metric_rnaseq",
+                "argument_to_be_attached_to": "rna.outbw",
+                "qc_json": true
+            }
+        ],
+        "award": "1U01CA200059-01",
+        "wdl_child_filenames": [],
+        "wdl_directory_url": "https://raw.githubusercontent.com/4dn-dcic/rna-seq-pipeline/master/",
+        "wdl_main_filename": "rna-seq-pipeline.wdl",
+        "workflow_language": "WDL",
+        "experiment_types": [
+            "RNA-seq"
+        ],
+        "description": "RNA-seq data processing pipeline",
+        "docker_image_name": "quay.io/encode-dcc/rna-seq-pipeline:v1.0",
+        "docker_registry_url": "https://hub.docker.com/",
+        "lab": "4dn-dcic-lab",
+        "name": "encode-rnaseq",
+        "aliases": ["4dn-dcic-lab:wf-encode-rnaseq"],
+        "steps": [
+            {
+                "inputs": [
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.fastqs_R1",
+                        "source": [
+                            {
+                                "name": "rna.fastqs_R1"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "array",
+                            "file_format": "fastq",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.fastqs_R2",
+                        "source": [
+                            {
+                                "name": "rna.fastqs_R2"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "starIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.align_index",
+                        "source": [
+                            {
+                                "name": "rna.align_index"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "rsemIndex",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.rsem_index",
+                        "source": [
+                            {
+                                "name": "rna.rsem_index"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "chromsizes",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.chrom_sizes",
+                        "source": [
+                            {
+                                "name": "rna.chrom_sizes"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "tsv",
+                            "global": true,
+                            "type": "reference file"
+                        },
+                        "name": "rna.rna_qc_tr_id_to_gene_type_tsv",
+                        "source": [
+                            {
+                                "name": "rna.rna_qc_tr_id_to_gene_type_tsv"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.endedness",
+                        "source": [
+                            {
+                                "name": "rna.endedness"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.strandedness",
+                        "source": [
+                            {
+                                "name": "rna.strandedness"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.strandedness_direction",
+                        "source": [
+                            {
+                                "name": "rna.strandedness_direction"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.cpu",
+                        "source": [
+                            {
+                                "name": "rna.cpu"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "parameter"
+                        },
+                        "name": "rna.memGB",
+                        "source": [
+                            {
+                                "name": "rna.memGB"
+                            }
+                        ]
+                    }
+                ],
+                "meta": {
+                    "analysis_step_types": [
+                        "alignment", "quantification", "binning", "counting", "QC calculation"
+                    ],
+                    "software_used": [
+                    ]
+                },
+                "name": "rna",
+                "outputs": [
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bam",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.outbam",
+                        "target": [
+                            {
+                                "name": "rna.outbam"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "bw",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.outbw",
+                        "target": [
+                            {
+                                "name": "rna.outbw"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "tsv",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.gene_expression",
+                        "target": [
+                            {
+                                "name": "rna.gene_expression"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "file_format": "tsv",
+                            "global": true,
+                            "type": "data file"
+                        },
+                        "name": "rna.isoform_expression",
+                        "target": [
+                            {
+                                "name": "rna.isoform_expression"
+                            }
+                        ]
+                    },
+                    {
+                        "meta": {
+                            "cardinality": "single",
+                            "global": true,
+                            "type": "QC"
+                        },
+                        "name": "rna.qc_json",
+                        "target": [
+                            {
+                                "name": "rna.qc_json"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "title": "RNA-seq data processing pipeline, 1.1",
+        "uuid": "213c51ef-80ee-4ef9-8c86-dec5460c15e8"
     }
 ]
