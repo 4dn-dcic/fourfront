@@ -12999,7 +12999,6 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bam",
-                            "global": true,
                             "type": "data file"
                         },
                         "name": "rna.annobam",
@@ -13238,7 +13237,6 @@
                         "meta": {
                             "cardinality": "single",
                             "file_format": "bam",
-                            "global": true,
                             "type": "data file"
                         },
                         "name": "rna.annobam",
