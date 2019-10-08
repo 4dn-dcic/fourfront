@@ -101,10 +101,6 @@ export default class HealthView extends React.PureComponent {
                         title : "Data Loaded",
                         description : "Data which was loaded into database on initialization or boot."
                     },
-                    'ontology_updated' : {
-                        title : 'Last Ontology Update',
-                        description : "Last time ontologies were updated."
-                    },
                     'system_bucket' : {
                         title : 'System Bucket',
                         description : "Name of S3 Bucket used for system data."
