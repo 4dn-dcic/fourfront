@@ -16,7 +16,7 @@ The *Key* and *Link* tables are indexes used for performance optimziation.  Keys
 The *CurrentPropSheet* and *TransactionRecord* tables are used to track all changes made to objects via transactions.
 
 Local Machine Development
-=========================
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Booting Up Local Database
 -------------------------
@@ -28,7 +28,7 @@ This temporary PostgreSQL database exists in the filesystem in your Unix-based s
 By default, insert test data defined in Fourfront is loaded into the local database. See the `inserts <../src/encoded/tests/data/README.md>`_ documentation for more information.
 
 Backup & Loading of Production Database
-=======================================
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Purpose
 -------
@@ -142,7 +142,7 @@ If want to import into your local, there are a few extra steps needed, and a few
    Finally, run ``bin/pserve development.ini`` (if created a copy of development.ini, replace development.ini in command with your .ini filename). It should start indexing through tens of thousands of entries. Grab lunch while your laptop fans learn how to fly. Return to a local portal running with production data. Remember to revert your development.ini when want to load in test inserts instead of production data.
 
 Afterthoughts
-=============
+^^^^^^^^^^^^^^
 
 In lieu of PgAdmin, may use the command-line ``pg_dump`` tool to connect to production database (over SSH tunnel) and save output to SQL file. Ensure the same configuration (ASCII, no compression, CREATE/DROP DATABASE command, ...) is set as for PgAdmin when running it.
 

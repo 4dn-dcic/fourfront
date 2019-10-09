@@ -1,5 +1,5 @@
 
-Higlass Visualization endpoint
+Higlass Visualization
 ==============================
 
 This document explains the end to end behavior of the visualization endpoint.
@@ -123,7 +123,7 @@ If the files have mismatched genome assemblies, you'll get an error.
    }
 
 Fourfront display adjustment
-============================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 By default, Higlass Items are 600 pixels high. But Experiment Set pages allow 300 pixels for Higlass Items. Front end javascript will dynamically resize a copy of the viewconfig to fit.
 
@@ -134,7 +134,7 @@ By default, Higlass Items are 600 pixels high. But Experiment Set pages allow 30
 * 1D tracks will be scaled so they maintain the relative amount of space in the new container.
 
 Foursight Higlass checks
-========================
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Foursight uses the Fourfront endpoint to create and update HiglassItems.
 All of the checks work on a file or experiment set.

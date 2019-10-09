@@ -1,6 +1,6 @@
-
-Creating & Editing Static Pages
-===============================
+=================
+Static Pages
+=================
 
 Most static pages content - unless hard-coded for the front-end (in case of custom interactivity, etc.) - exists in HTML or Markdown files in the repository, in an S3 bucket, or in-line within an insert. Contents of a page is an array of linkTo StaticSection items loaded in the same way as other Items, and exists in the "content" property on the Page Item. The "name" property of the Page Item becomes the static page's path where it may be viewed.
 
@@ -87,7 +87,7 @@ The placeholder string should look like this (displayed in context of section de
 It will be the word "placeholder", followed by a colon, followed by any string you want -- though React JSX syntax is reccommended for clarity. On the front-end, in the view or template React component which handles that particular static page route, there must exist a function named *\ ``replacePlaceHolder(placeholderString)``\ *. This function will accept the string after ``placeholder:``\ , with spaces removed, and should return a valid JSX element. For clarity, it is suggested to have the placeholder string be the same as the React/JSX component output of that function for that string. Having replacePlaceHolder() allows us to avoid security risks inherent in calling 'eval(...)'.
 
 Best Practices
-==============
+^^^^^^^^^^^^^^^
 
 
 * DO split Pages into multiple StaticSections with proper title for each, if possible, rather than having Page that has just one big long Markdown section/file.
@@ -108,12 +108,12 @@ Best Practices
 * For images which desire to host externally (e.g. outside of repository or third-party URL), then it is suggested to upload images into a relevanet *sub-folder* (perhaps create an "/images/" folder for auxiliary images) of the **"4dn-dcic-public"** public S3 bucket. This bucket could also be used to host Markdown (.md) or other files, probably in the "/static-pages/" sub-folder, the URL of which can be used in the "file" field of StaticSections (will require a PATCH to Page or StaticSection to update 4DN Item content from file).
 
 Permissions
-===========
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Currently may set a ``status`` of "draft", "published", or "deleted" for any Page or StaticSection and permissions will work accordingly. Permissions by lab/user should work in same way as for other Items, but this hasn't yet been tested.
 
 StaticSections Above Search Results
-===================================
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Simplification & Future** \< THIS WILL SUPERCEDE SYSINFOS MAPPING &gt;
 ----------------------------------------------------------------------------
@@ -166,6 +166,6 @@ In order to allow such a link to your StaticSection, ensure the 'name' of it doe
 For example, in the case above the names are ``search-info-header.WorkflowRun``\ , ``search-info-header.Workflow``\ , & ``search-info-header.FileSetMicroscopeQc``. 
 
 Auto-Generated Help Dropdown Menu
-=================================
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Pages have an optional ``children`` field which holds an array of other Pages (as linkTos). Routes of child pages **MUST** extend the parent route. For example, page with ``name`` ==  "help/submitter-guide" must have children with ``name``\ s in the form of "help/submitter-guide/something". The (sub-)children of the top level "help" page are automatically added to the top Help menu dropdown.
