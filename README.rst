@@ -156,37 +156,29 @@ To build development bundles and continue updating them as you edit source files
 The development bundles are not minified, to speed up building.
 
 
-Notes on SASS/Compass
-=====================
+Notes on SASS/SCSS
+==================
 
-We use the `SASS <http://sass-lang.com/>`_ and `Compass <http://compass-style.org/>`_ CSS preprocessors.
-The buildout installs the SASS and Compass utilities and compiles the CSS.
+We use the `SASS <http://sass-lang.com/>`_ and `node-sass <https://github.com/sass/node-sass/>`_ CSS preprocessors.
+The buildout installs the SASS utilities and compiles the CSS.
 When changing the SCSS source files you must recompile the CSS using one of the following methods:
 
 Compiling "on the fly"
 ----------------------
 
-Compass can watch for any changes made to .scss files and instantly compile them to .css.
-To start this, from the root of the project (where config.rb is) do::
+Node-sass can watch for any changes made to .scss files and instantly compile them to .css.
+To start this, from the root of the project do::
 
-    $ bin/compass watch
+    $ npm run watch-scss
 
-You can specify whether the compiled CSS is minified or not in config.rb. (Currently, it is set to minify.)
 
 Force compiling
 ---------------
 
 ::
 
-    $ bin/compass compile
+    $ npm run build-scss
 
-Again, you can specify whether the compiled CSS is minified or not in config.rb.
-
-Also see the `Compass Command Line Documentation <http://compass-style.org/help/tutorials/command-line/>`_ and the `Configuration Reference <http://compass-style.org/help/tutorials/configuration-reference/>`_.
-
-And of course::
-
-    $ bin/compass help
 
 
 SublimeLinter

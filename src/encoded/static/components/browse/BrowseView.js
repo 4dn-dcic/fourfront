@@ -260,11 +260,9 @@ class ResultTableContainer extends React.PureComponent {
                             orientation="vertical" className="with-header-bg" filters={context.filters}
                             getTermStatus={this.getTermStatus} onFilter={this.onFilter}
                             itemTypeForSchemas="ExperimentSetReplicate" href={href} termTransformFxn={Schemas.Term.toName}
-                            onClearFilters={this.handleClearFilters} />
+                            onClearFilters={this.handleClearFilters} separateSingleTermFacets />
                     </div>
-                    :
-                    null
-                }
+                    : null }
                 <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
                     <AboveBrowseViewTableControls parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
                         {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',

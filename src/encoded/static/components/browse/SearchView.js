@@ -99,7 +99,7 @@ export default class SearchView extends React.PureComponent {
         return (
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
-                    termTransformFxn={Schemas.Term.toName} />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets />
             </div>
         );
     }
