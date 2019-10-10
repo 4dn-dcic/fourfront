@@ -105,6 +105,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.modifications_summary",
         "experiments_in_set.biosample.biosource_summary",
         "experiments_in_set.biosample.biosample_type",
+        "experiments_in_set.biosample.biosample_category"
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
@@ -113,7 +114,6 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
         "experiments_in_set.biosample.biosource.cell_line_tier",
-        "experiments_in_set.biosample.biosource.biosource_category",
         "experiments_in_set.biosample.biosource.individual.organism.name",
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
         "experiments_in_set.biosample.modifications.modification_type",

@@ -82,22 +82,22 @@ class Biosource(Item):
         ]
         mod_str = ''
         if modifications:
-            mod_str = ' with ' + ', '.join([request.embed(mod, '@@object').get('modification_name_short', '')
+            mod_str = ' with ' + ', '.join([get_item_if_you_can(request, mod, 'modifications').get('modification_name_short', '')
                                             for mod in modifications])
         # elif modifications and len(modifications) > 1:
         #     mod_str = ' with genetic modifications'
         if biosource_type == "tissue":
             if tissue:
-                tissue_props = request.embed(tissue, '@@object')
-                if tissue_props.get('term_name') is not None:
-                    return tissue_props.get('term_name') + mod_str
+                tissue_props = get_item_if_you_can(request, tissue, 'ontology_terms')
+                if tissue_props:
+                    return tissue_props.get('preferred_name') + mod_str
                 else:
                     return biosource_type + mod_str
         elif biosource_type in cell_line_types:
             if cell_line:
-                cell_line_props = request.embed(cell_line, '@@object')
-                if cell_line_props.get('term_name') is not None:
-                    cell_line_name = cell_line_props.get('term_name')
+                cell_line_props = get_item_if_you_can(request, cell_line, 'ontology_terms')
+                if cell_line_props:
+                    cell_line_name = cell_line_props.get('preferred_name')
                     if cell_line_tier:
                         if cell_line_tier != 'Unclassified':
                             return cell_line_name + ' (' + cell_line_tier + ')' + mod_str
@@ -105,10 +105,13 @@ class Biosource(Item):
             return biosource_type + mod_str
         elif biosource_type == "multicellular organism":
             if individual:
-                individual_props = request.embed(individual, '@@object')
-                organism = individual_props['organism']
-                organism_props = request.embed(organism, '@@object')
-                organism_name = organism_props['name']
+                organism_name = 'Unknown'
+                individual_props = get_item_if_you_can(request, individual, 'individuals')
+                if individual_props:
+                    organism = individual_props.get('organism')
+                    organism_props = get_item_if_you_can(request, organism, 'organisms')
+                    if organism_props:
+                        organism_name = organism_props['name']
                 return "whole " + organism_name + mod_str
         return biosource_type + mod_str
 

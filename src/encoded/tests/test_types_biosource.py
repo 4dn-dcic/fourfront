@@ -135,7 +135,7 @@ def test_calculated_biosource_category_stem_cells(mouse_SC_biosrc, hum_SC_biosrc
     assert 'Human stem cell' not in mouse_SC_biosrc.get('biosource_category')
 
 
-def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target):
+def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target, lung_oterm):
     for biosource in biosources:
         biotype = biosource['biosource_type']
         name = biosource['biosource_name']
@@ -152,7 +152,7 @@ def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target)
         elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
             assert name == 'GM12878 with Crispr, Stable Transfection'
         elif biotype == 'tissue':
-            assert name == 'lung'
+            assert name == lung_oterm.get('preferred_name')
         elif biotype == 'multicellular organism':
             assert name == 'whole human'
 
