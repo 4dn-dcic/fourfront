@@ -868,6 +868,10 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             # Use the last part of the split field to get the field title
             title_field = split_field[-1]
+            # workaround: if query has a '!=' condition, title_field ends with '!'. This prevents to find the proper display title.  
+            # TODO: instead of workaround, '!' could be excluded while generating query results
+            if title_field.endswith('!'):
+                title_field = title_field[:-1]
 
             # if searching for a display_title, use the title of parent object
             # use `is_object_title` to keep track of this
