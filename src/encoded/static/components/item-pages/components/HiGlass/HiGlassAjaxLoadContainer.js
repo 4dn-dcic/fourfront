@@ -122,8 +122,13 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         });
     }
     render(){
-        var { higlassItem, loading } = this.state;
-        var { height } = this.props;
+        const { higlassItem, loading } = this.state;
+        let { height } = this.props;
+
+        //if height not defined by container then use instance defined value
+        if (!height && higlassItem && higlassItem.instance_height && higlassItem.instance_height > 0) {
+            height = higlassItem.instance_height;
+        }
 
         // Use the height to make placeholder message when loading.
         var placeholderStyle = { "height" : height || 600 };
@@ -148,6 +153,6 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         // Scale the higlass config so it fits the given container.
         const adjustedViewconfig = HiGlassAjaxLoadContainer.scaleViewconfToHeight(higlassItem.viewconfig, height);
         // Pass the viewconfig to the HiGlassPlainContainer
-        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem')} viewConfig={adjustedViewconfig} ref={this.containerRef}/>;
+        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem', 'height')} viewConfig={adjustedViewconfig} ref={this.containerRef} height={height} />;
     }
 }

@@ -12,6 +12,6 @@ module.exports = function(api){
             "@babel/plugin-proposal-class-properties",
             "babel-plugin-minify-dead-code-elimination"
         ],
-        "comments": false
+        "comments": true
     };
 };

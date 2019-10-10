@@ -647,7 +647,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     render(){
-        const { isFullscreen, windowWidth, windowHeight, width, session } = this.props;
+        const { context, isFullscreen, windowWidth, windowHeight, width, session } = this.props;
         const { addFileLoading, genome_assembly, viewConfig, modal } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
@@ -659,7 +659,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             hiGlassComponentHeight = windowHeight - 120;
         }
         else {
-            hiGlassComponentHeight = 600;
+            if (context && context.instance_height && context.instance_height > 0) {
+                hiGlassComponentHeight = context.instance_height;
+            } else {
+                hiGlassComponentHeight = 600;
+            }
         }
 
         // If the user isn't logged in, add a tooltip reminding them to log in.
