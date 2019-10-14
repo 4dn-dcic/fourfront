@@ -131,7 +131,7 @@ export class SearchBar extends React.PureComponent{
     }
 
     render() {
-        const { href, currentAction } = this.props;
+        const { href, currentAction, displayOnlySearchBar } = this.props;
         const { searchAllItems, typedSearchQuery } = this.state;
         const hrefParts           = url.parse(href, true);
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
@@ -146,7 +146,8 @@ export class SearchBar extends React.PureComponent{
             'form-inline',
             'navbar-search-form-container',
             searchQueryFromHref && 'has-query',
-            searchBoxHasInput && 'has-input'
+            searchBoxHasInput && 'has-input',
+            displayOnlySearchBar && 'ml-auto'
         ];
 
         if (isSelectAction(currentAction)) {
@@ -169,6 +170,7 @@ export class SearchBar extends React.PureComponent{
                         <i className="icon icon-fw icon-search fas"/>
                     </button>
                 ) }
+                { SearchBar.renderHiddenInputsForURIQuery(query) }
             </form>
         );
     }

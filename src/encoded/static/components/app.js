@@ -1727,18 +1727,16 @@ class BodyElement extends React.PureComponent {
         );
     }
 
-    bodyClassName(){
+    bodyClassName(isSelectPage){
         const { isLoading, context } = this.props;
         const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
         const bodyClassList = (classList && classList.slice(0)) || [];
 
         // Common UI
-        if (isLoading)          bodyClassList.push("loading-request");
-        if (scrolledPastTop)    bodyClassList.push("scrolled-past-top");
+        if (isLoading) bodyClassList.push("loading-request");
+        if (scrolledPastTop || isSelectPage) bodyClassList.push("scrolled-past-top");
         if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
-        if (isFullscreen){
-            bodyClassList.push("is-full-screen");
-        }
+        if (isFullscreen) bodyClassList.push("is-full-screen");
 
         // TODO migrate test-warning-visible class to here from NavBar (done on CGAP already).
 
@@ -1765,13 +1763,13 @@ class BodyElement extends React.PureComponent {
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
-        const displayNavBarAndFooter = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && isSelectAction(currentAction));
+        const isSelectPage = (href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && isSelectAction(currentAction));
 
         if (hasError) return this.renderErrorState();
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName(isSelectPage)}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
@@ -1789,16 +1787,12 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            {displayNavBarAndFooter ?
-                                <React.Fragment>
-                                    <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
-                                        {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                            'context', 'updateUserInfo')} />
-
-                                    <div id="pre-content-placeholder" />
-                                </React.Fragment>
-                                : null
-                            }
+                            <React.Fragment>
+                                <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
+                                    {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
+                                        'context', 'updateUserInfo')} displayOnlySearchBar={isSelectPage} />
+                                {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
+                            </React.Fragment>
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
 
@@ -1815,7 +1809,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="layout-footer"/>
                         </div>
-                        {displayNavBarAndFooter ? <Footer version={context.app_version} /> : null}
+                        {!isSelectPage ? <Footer version={context.app_version} /> : null}
                     </div>
                 </div>
 

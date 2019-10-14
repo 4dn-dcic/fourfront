@@ -26,13 +26,18 @@ import { ChartDataController } from './../viz/chart-data-controller';
 export class NavigationBar extends React.PureComponent {
 
     static propTypes = {
-        'href'              : PropTypes.string,
-        'session'           : PropTypes.bool,
-        'updateUserInfo'    : PropTypes.func.isRequired,
-        'context'           : PropTypes.object,
-        'schemas'           : PropTypes.any,
-        'browseBaseState'   : PropTypes.string
+        'href': PropTypes.string,
+        'session': PropTypes.bool,
+        'updateUserInfo': PropTypes.func.isRequired,
+        'context': PropTypes.object,
+        'schemas': PropTypes.any,
+        'browseBaseState': PropTypes.string,
+        'displayOnlySearchBar': PropTypes.bool
     };
+    
+    static defaultProps = {
+        'displayOnlySearchBar': false
+    }
 
     constructor(props){
         super(props);
@@ -115,7 +120,7 @@ export class NavigationBar extends React.PureComponent {
 
     render() {
         const { testWarning, mobileDropdownOpen, mounted } = this.state;
-        const { href, context, schemas, browseBaseState, isFullscreen } = this.props;
+        const { href, context, schemas, browseBaseState, isFullscreen, displayOnlySearchBar } = this.props;
         const testWarningVisible = testWarning & !isFullscreen; // Hidden on full screen mode.
         const navClassName = (
             "navbar-container" +
@@ -125,41 +130,47 @@ export class NavigationBar extends React.PureComponent {
         return (
             <div className={navClassName}>
                 <div id="top-nav" className="navbar-fixed-top" role="navigation">
-                    <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
+                    {!displayOnlySearchBar ?
+                        <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
+                        : null}
                     <div className="navbar-inner-container">
                         <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon"
                             onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
+                            {!displayOnlySearchBar ?
+                                <React.Fragment>
+                                    <a className="navbar-brand" href="/">
+                                        <FourfrontLogo/>
+                                    </a>
 
-                            <a className="navbar-brand" href="/">
-                                <FourfrontLogo/>
-                            </a>
-
-                            <Navbar.Toggle>
-                                <i className="icon icon-bars fas icon-fw align-middle" />
-                            </Navbar.Toggle>
+                                    <Navbar.Toggle>
+                                        <i className="icon icon-bars fas icon-fw align-middle" />
+                                    </Navbar.Toggle>
+                                </React.Fragment>
+                                : null}
 
                             <CollapsedNav {...this.state} {...this.props} />
                         </Navbar>
                     </div>
-                    <ChartDataController.Provider id="quick_info_bar1">
-                        <QuickInfoBar {...{ href, schemas, context, browseBaseState }} />
-                    </ChartDataController.Provider>
+                    {!displayOnlySearchBar ?
+                        <ChartDataController.Provider id="quick_info_bar1">
+                            <QuickInfoBar {...{ href, schemas, context, browseBaseState }} />
+                        </ChartDataController.Provider> : null}
                 </div>
             </div>
         );
     }
 }
 
-const CollapsedNav = React.memo(function CollapsedNav(props){
-    const { href, currentAction } = props;
+const CollapsedNav = React.memo(function CollapsedNav(props) {
+    const { href, currentAction, displayOnlySearchBar } = props;
     const leftNavProps = _.pick(props, 'mobileDropdownOpen', 'windowWidth', 'windowHeight', 'browseBaseState', 'href',
         'mounted', 'overlaysContainer', 'session', 'testWarning', 'isFullscreen');
     const userActionNavProps = _.pick(props, 'session', 'href', 'updateUserInfo', 'mounted', 'overlaysContainer', 'schemas', 'windowWidth');
     return (
         <Navbar.Collapse>
-            <LeftNav {...leftNavProps} />
-            <SearchBar href={href} currentAction={currentAction} />
-            <UserActionDropdownMenu {...userActionNavProps} />
+            {!displayOnlySearchBar ? <LeftNav {...leftNavProps} /> : null}
+            <SearchBar href={href} currentAction={currentAction} displayOnlySearchBar={displayOnlySearchBar}  />
+            {!displayOnlySearchBar ? <UserActionDropdownMenu {...userActionNavProps} /> : null}
         </Navbar.Collapse>
     );
 });
