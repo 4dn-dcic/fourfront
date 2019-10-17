@@ -134,7 +134,7 @@ def health_check(config):
             "system_bucket": settings.get('system_bucket'),
             "elasticsearch": settings.get('elasticsearch.server'),
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
-            "load_data": settings.get('snovault.load_test_data'),
+            "load_data": settings.get('load_test_data'),
             "beanstalk_env": settings.get('env.name'),
             'ontology_updated': ont_date,
             "@type": ["Health", "Portal"],

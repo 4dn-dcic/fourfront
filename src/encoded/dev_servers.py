@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def nginx_server_process(prefix='', echo=False):
     args = [
         os.path.join(prefix, 'nginx'),
-        '-c', resource_filename('snovault', 'nginx-dev.conf'),
+        '-c', resource_filename('encoded', 'nginx-dev.conf'),
         '-g', 'daemon off;'
     ]
     process = subprocess.Popen(
@@ -63,7 +63,7 @@ def main():
 
     logging.basicConfig(format='')
     # Loading app will have configured from config file. Reconfigure here:
-    logging.getLogger('snovault').setLevel(logging.DEBUG)
+    logging.getLogger('encoded').setLevel(logging.INFO)
 
     # get the config and see if we want to connect to non-local servers
     config = get_appsettings(args.config_uri, args.app_name)
@@ -107,7 +107,7 @@ def main():
 
     if args.load:
         from pyramid.path import DottedNameResolver
-        load_test_data = app.registry.settings.get('snovault.load_test_data')
+        load_test_data = app.registry.settings.get('load_test_data')
         load_test_data = DottedNameResolver().resolve(load_test_data)
         load_res = load_test_data(app)
         if load_res:  # None if successful
