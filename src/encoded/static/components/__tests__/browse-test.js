@@ -50,7 +50,7 @@ describe('Testing browse.js for experiment set browser', function() {
                 setTimeout(()=> console.log(fxn(345, 345)), 2000);
                 setTimeout(()=> console.log(fxn(40, -305)), 5000);
                 console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
-                jest.runAllTimers();
+                //jest.runOnlyPendingTimers();
             }
         };
 

@@ -187,7 +187,7 @@ class ResultTableContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.isTermSelected = this.isTermSelected.bind(this);
+        this.getTermStatus = this.getTermStatus.bind(this);
         this.onFilter = this.onFilter.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
@@ -224,8 +224,8 @@ class ResultTableContainer extends React.PureComponent {
         );
     }
 
-    isTermSelected(term, facet){
-        return searchFilters.determineIfTermFacetSelected(term, facet, this.props);
+    getTermStatus(term, facet){
+        return searchFilters.getTermFacetStatus(term, facet, this.props);
     }
 
     handleClearFilters(evt){
@@ -258,13 +258,11 @@ class ResultTableContainer extends React.PureComponent {
                         <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />
                         <FacetList {...{ session, browseBaseState, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
                             orientation="vertical" className="with-header-bg" filters={context.filters}
-                            isTermSelected={this.isTermSelected} onFilter={this.onFilter}
+                            getTermStatus={this.getTermStatus} onFilter={this.onFilter}
                             itemTypeForSchemas="ExperimentSetReplicate" href={href} termTransformFxn={Schemas.Term.toName}
-                            onClearFilters={this.handleClearFilters} />
+                            onClearFilters={this.handleClearFilters} separateSingleTermFacets />
                     </div>
-                    :
-                    null
-                }
+                    : null }
                 <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
                     <AboveBrowseViewTableControls parentForceUpdate={this.forceUpdateOnSelf} columnDefinitions={columnDefinitions}
                         {..._.pick(this.props, 'hiddenColumns', 'addHiddenColumn', 'removeHiddenColumn',

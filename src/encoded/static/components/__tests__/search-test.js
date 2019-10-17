@@ -54,7 +54,7 @@ describe('Testing search.js', function() {
                 setTimeout(()=> console.log(fxn(345, 345)), 2000);
                 setTimeout(()=> console.log(fxn(40, -305)), 5000);
                 console.log("Will call `fxn(scrollTop, scrollTopVector)` which was registered to registerWindowOnScrollHandler in 2 & 5 seconds and print its return val. Fine if 'undefined'.");
-                jest.runAllTimers();
+                //jest.runAllTimers();
             }
         };
 

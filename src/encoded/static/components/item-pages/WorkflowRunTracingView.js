@@ -273,7 +273,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         const { anyIndirectPathIONodes, anyReferenceFileNodes } = this.memoized.checkIfIndirectOrReferenceNodesExist(steps);
         const graphProps = Array.isArray(steps) ? this.commonGraphProps() : null;
         const isReferenceFilesCheckboxDisabled = !anyReferenceFileNodes;
-        const isAllRunsCheckboxDisabled = loading || (!allRuns && !this.anyGroupNodesExist ? true : false);
+        const isAllRunsCheckboxDisabled = loading || !graphProps || (!allRuns && !this.memoized.anyGroupNodesExist(graphProps.nodes) ? true : false);
         const isShowMoreContextCheckboxDisabled = !showIndirectFiles && !anyIndirectPathIONodes;
         const outerCls = (
             "tabview-container-fullscreen-capable workflow-view-container"

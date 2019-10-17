@@ -704,6 +704,10 @@
                     }
                 }
             }
+        },
+        "instance_height": {
+            "type": "integer",
+            "default": 500
         }
     },
     "facets" : {

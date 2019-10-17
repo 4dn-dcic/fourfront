@@ -73,7 +73,7 @@ export class ItemFileAttachment extends React.PureComponent {
 
         if (hideIfNoValue && (!context || !attachment)) return null;
 
-        const { download = null, href: attachHref = '' } = attachment;
+        const { download = null, href: attachHref = '' } = attachment || {};
 
         const title = !includeTitle ? null : (
             <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'tips', 'schemas')} fallbackTitle="Attachment"
