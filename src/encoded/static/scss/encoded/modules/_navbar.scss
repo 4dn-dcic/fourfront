@@ -736,7 +736,27 @@ div#top-nav.navbar-fixed-top {
 
 }
 
-
+/** hide redundant navbar components for selection pages **/
+body[data-pathname="/search/"][data-current-action="selection"],
+body[data-pathname="/search/"][data-current-action="multiselect"] {
+    #top-nav {
+       a.navbar-brand,
+       .navbar-nav {
+           display: none;
+       }
+   }
+   .test-warning {display:none;}
+   .form-inline.navbar-search-form-container {
+        width: 100%;
+        input#navbar-search {
+            width: 100% !important;
+            margin-left: 0 !important;
+        }
+        .search-item-type-wrapper {
+            display: none; /* redundant since handled already in JS */
+        }
+    }
+}
 
 /**********************************************************
 		Big NavBar DropDown Menu

@@ -1389,6 +1389,10 @@ class BodyElement extends React.PureComponent {
         return stateChange;
     }
 
+    static isSearchPage(href){
+        return (href && typeof href === "string" && href.indexOf('/search/') > -1);
+    }
+
     /**
      * Instantiates the BodyElement component, binds functions.
      */
@@ -1427,6 +1431,10 @@ class BodyElement extends React.PureComponent {
             // we ironically must now clone href in state to be able to do comparisons...
             // See: https://stackoverflow.com/questions/49723019/compare-with-previous-props-in-getderivedstatefromprops
             'lastHref'              : props.href
+        };
+
+        this.memoized = {
+            isSearchPage: memoize(BodyElement.isSearchPage)
         };
 
         /**
@@ -1727,10 +1735,11 @@ class BodyElement extends React.PureComponent {
         );
     }
 
-    bodyClassName(isSelectPage){
-        const { isLoading, context } = this.props;
+    bodyClassName(){
+        const { isLoading, context, currentAction, href } = this.props;
         const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
         const bodyClassList = (classList && classList.slice(0)) || [];
+        const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
 
         // Common UI
         if (isLoading) bodyClassList.push("loading-request");
@@ -1763,13 +1772,13 @@ class BodyElement extends React.PureComponent {
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
-        const isSelectPage = (href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && isSelectAction(currentAction));
+        const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
 
         if (hasError) return this.renderErrorState();
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
-                data-pathname={hrefParts.pathname} className={this.bodyClassName(isSelectPage)}>
+                data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
@@ -1790,7 +1799,7 @@ class BodyElement extends React.PureComponent {
                             <React.Fragment>
                                 <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
                                     {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                        'context', 'updateUserInfo')} displayOnlySearchBar={isSelectPage} />
+                                        'context', 'updateUserInfo')} />
                                 {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
                             </React.Fragment>
 

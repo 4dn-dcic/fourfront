@@ -131,7 +131,7 @@ export class SearchBar extends React.PureComponent{
     }
 
     render() {
-        const { href, currentAction, displayOnlySearchBar } = this.props;
+        const { href, currentAction } = this.props;
         const { searchAllItems, typedSearchQuery } = this.state;
         const hrefParts           = url.parse(href, true);
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
@@ -146,8 +146,7 @@ export class SearchBar extends React.PureComponent{
             'form-inline',
             'navbar-search-form-container',
             searchQueryFromHref && 'has-query',
-            searchBoxHasInput && 'has-input',
-            displayOnlySearchBar && 'ml-auto'
+            searchBoxHasInput && 'has-input'
         ];
 
         if (isSelectAction(currentAction)) {
