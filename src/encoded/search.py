@@ -582,7 +582,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             }
         else:
             # fallback case, applies to all string type:string fields
-            sort['embedded.' + name + '.lower_case_sort.keyword'] = result_sort[name] = {
+            sort['embedded.' + name + '.lower_case_sort'] = result_sort[name] = {
                 'order': order,
                 'unmapped_type': 'keyword',
                 'missing': '_last'
@@ -604,7 +604,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
                 for k, v in type_schema['sort_by'].items():
                     # Should always sort on raw field rather than analyzed field
                     # OR search on lower_case_sort for case insensitive results
-                    sort['embedded.' + k + '.lower_case_sort.keyword'] = result_sort[k] = v
+                    sort['embedded.' + k + '.lower_case_sort'] = result_sort[k] = v
         # Default is most recent first, then alphabetical by label
         if not sort:
             sort['embedded.date_created.raw'] = result_sort['date_created'] = {
@@ -868,7 +868,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             # Use the last part of the split field to get the field title
             title_field = split_field[-1]
-            # workaround: if query has a '!=' condition, title_field ends with '!'. This prevents to find the proper display title.  
+            # workaround: if query has a '!=' condition, title_field ends with '!'. This prevents to find the proper display title.
             # TODO: instead of workaround, '!' could be excluded while generating query results
             if title_field.endswith('!'):
                 title_field = title_field[:-1]
