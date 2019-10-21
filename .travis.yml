@@ -92,6 +92,7 @@ script:
   fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
+- bin/wipe-test-indices $TRAVIS_JOB_ID search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
 after_success:
 - coveralls
 - ! "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n

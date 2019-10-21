@@ -114,6 +114,8 @@ setup(
         update-inserts-from-server = encoded.commands.update_inserts_from_server:main
         run-upgrade-on-inserts = encoded.commands.run_upgrader_on_inserts:main
 
+        wipe-test-indices = snovault.commands.wipe_test_indices:main
+
         [paste.app_factory]
         main = encoded:main
 
