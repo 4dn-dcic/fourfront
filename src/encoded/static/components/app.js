@@ -1742,10 +1742,11 @@ class BodyElement extends React.PureComponent {
         const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
 
         // Common UI
-        if (isLoading) bodyClassList.push("loading-request");
-        if (scrolledPastTop || isSelectPage) bodyClassList.push("scrolled-past-top");
-        if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
-        if (isFullscreen) bodyClassList.push("is-full-screen");
+        if (isLoading)              bodyClassList.push("loading-request");
+        if (scrolledPastTop)        bodyClassList.push("scrolled-past-top");
+        if (scrolledPastEighty)     bodyClassList.push("scrolled-past-80");
+        if (isSelectPage)           bodyClassList.push("is-select-page");
+        if (isFullscreen)           bodyClassList.push("is-full-screen");
 
         // TODO migrate test-warning-visible class to here from NavBar (done on CGAP already).
 
@@ -1796,12 +1797,10 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            <React.Fragment>
-                                <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
-                                    {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                        'context', 'updateUserInfo')} />
-                                {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
-                            </React.Fragment>
+                            <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
+                                {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
+                                    'context', 'updateUserInfo')} />
+                            {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
 

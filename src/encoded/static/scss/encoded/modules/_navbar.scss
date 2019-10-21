@@ -105,6 +105,7 @@ div#top-nav.navbar-fixed-top {
     @include navbar-fixed-position {
         position: fixed;
         background-color: rgba(255,255,255,0.933);
+        body.is-select-page &,
         body.scrolled-past-top &,
         body.is-full-screen .navbar-container & {
             border-color: #d4d4d4;
@@ -154,6 +155,7 @@ div#top-nav.navbar-fixed-top {
                 border-color $navbar-transition-length */;
 
             body.scrolled-past-top &,
+            body.is-select-page &,
             body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) .navbar-container & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
@@ -207,6 +209,7 @@ div#top-nav.navbar-fixed-top {
                     transition: padding $navbar-transition-length, transform $navbar-transition-length;
                     max-height: inherit;
                     @include navbar-fixed-position {
+                        body.is-select-page &,
                         body.scrolled-past-top & {
                             padding-top: 6px !important;
                             padding-bottom: 6px !important;
@@ -224,6 +227,7 @@ div#top-nav.navbar-fixed-top {
                     transition: font-size $navbar-transition-length, transform $navbar-transition-length;
         
                     @include navbar-fixed-position {
+                        body.is-select-page &,
                         body.scrolled-past-top & {
                             font-size: 1.25rem;
                             transform: translate3d(-5px,0,0);
@@ -783,6 +787,7 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
         }
 
         body.scrolled-past-top &,
+        body.is-select-page &,
         body.is-full-screen:not([data-pathname="/browse/"]):not([data-pathname="/search/"]) & {
             //height: $navbar-small-height;
             top: $navbar-small-height;

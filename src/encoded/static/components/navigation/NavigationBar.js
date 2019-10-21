@@ -129,15 +129,14 @@ export class NavigationBar extends React.PureComponent {
                     <div className="navbar-inner-container">
                         <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon"
                             onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
-                            <React.Fragment>
-                                <a className="navbar-brand" href="/">
-                                    <FourfrontLogo />
-                                </a>
 
-                                <Navbar.Toggle>
-                                    <i className="icon icon-bars fas icon-fw align-middle" />
-                                </Navbar.Toggle>
-                            </React.Fragment>
+                            <a className="navbar-brand" href="/">
+                                <FourfrontLogo />
+                            </a>
+
+                            <Navbar.Toggle>
+                                <i className="icon icon-bars fas icon-fw align-middle" />
+                            </Navbar.Toggle>
 
                             <CollapsedNav {...this.state} {...this.props} />
                         </Navbar>
