@@ -234,7 +234,7 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
             es_res = es.get(index='file_processed', doc_type='file_processed',
                             id=res['@graph'][0]['uuid'])
         except NotFoundError:
-            indexer_queue.send_message([to_queue], target_queue='primary')
+            indexer_queue.send_messages([to_queue], target_queue='primary')
             indexer_testapp.post_json('/index', {'record': True})
         counts += 1
     assert es_res
