@@ -60,8 +60,8 @@ export class BasicUserContentBody extends React.PureComponent {
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
-                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} />
+                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
+                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} scale1dTopTrack={false} />
                 </React.Fragment>
             );
         } else {
