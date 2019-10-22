@@ -101,7 +101,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         return (
             <Checkbox checked={showParameters} onChange={onToggleShowParameters}
                 className="checkbox-container for-state-showParameters" key="params-checkbox">
-                Show Parameters
+                <span className="align-middle">Show Parameters</span>
             </Checkbox>
         );
     }
@@ -153,7 +153,7 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
             <Checkbox checked={showIndirectFiles} onChange={onToggleIndirectFiles}
                 disabled={isShowMoreContextCheckboxDisabled} className="checkbox-container"
                 key="show-indirect-files-checkbox">
-                Show More Context
+                <span className="align-middle">Show More Context</span>
             </Checkbox>
         );
     }
@@ -164,7 +164,8 @@ export class WorkflowGraphSectionControls extends React.PureComponent {
         return (
             <Checkbox checked={!allRuns && !isAllRunsCheckboxDisabled} onChange={onToggleAllRuns}
                 disabled={isAllRunsCheckboxDisabled} className="checkbox-container" key="show-all-runs-checkbox">
-                { loading ? <i className="icon icon-spin icon-fw fas icon-circle-notch mr-03"/> : '' } Collapse Similar Runs
+                { loading ? <i className="icon icon-spin icon-fw fas icon-circle-notch mr-05"/> : '' }
+                <span className="align-middle">Collapse Similar Runs</span>
             </Checkbox>
         );
     }
