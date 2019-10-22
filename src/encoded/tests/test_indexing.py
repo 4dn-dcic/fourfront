@@ -25,7 +25,6 @@ def app(app_settings, use_collections=TEST_COLLECTIONS):
     """
     Use to pass kwargs for create_mapping to conftest app
     """
-    app_settings['indexer.namespace'] = os.environ.get('TRAVIS_JOB_ID', '') # set namespace for tests
     for app in conf_app(app_settings, collections=use_collections, skip_indexing=True):
         yield app
 
