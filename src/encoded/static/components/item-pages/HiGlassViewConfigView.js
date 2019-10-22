@@ -761,7 +761,7 @@ class AddFileButton extends React.PureComponent {
                 <button type="button" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip} style={style} className={cls}>
                     <i className={"mr-08 icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>Add Data
                 </button>
-                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} childWindowAlert={null} />
             </React.Fragment>
         );
     }
