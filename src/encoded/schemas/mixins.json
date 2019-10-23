@@ -641,6 +641,27 @@
             }
         }
     },
+    "sample_image": {
+        "sample_image": {
+            "title": "Sample Image",
+            "description": "Sample Image to be displayed on Experiment Set Item Page",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "image": {
+                    "title": "Image",
+                    "description": "Image Item to be displayed",
+                    "type": "string",
+                    "linkTo": "Image"
+                },
+                "omero_link": {
+                    "title": "OMERO link",
+                    "description": "Link to original file on OMERO, if Image was generated from an OMERO thumbnail",
+                    "type": "string"
+                }
+            }
+        }
+    },
     "facets_common" : {
         "award.project": {
             "title": "Project"
