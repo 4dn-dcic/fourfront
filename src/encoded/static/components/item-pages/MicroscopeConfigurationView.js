@@ -33,11 +33,21 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
  * function for re-usability.
  */
 function onLoadSchema(complete) {
+    /*
     ajax.load(
         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json",
-        complete
+        (res)=>{
+            console.log("RES", res);
+        },
+        "GET",
+        null,
+        null,
+        { },
+        ["Content-Type", "Accept", "X-Requested-With"]
     );
-    /*
+    */
+    ///*
+    window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
     window
         .fetch(
             "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json"
@@ -50,7 +60,7 @@ function onLoadSchema(complete) {
             var schema = JSON.parse(respText);
             complete(schema);
         });
-        */
+    // */
 }
 
 /**
