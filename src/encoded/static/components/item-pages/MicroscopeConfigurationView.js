@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
 
@@ -19,16 +19,25 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 
 
 /**
- * @todo
+ * @todo:
  * Make these be instance methods of MicroMetaTabView _or_ some other
  * component(s) & implement logic.
  * It might be useful to split into 2 components - 1 to handle logic &
  * render/clone out props.children with those functions, and
  * 1 to handle the view, but uncertain.
- *
  */
 
+/**
+ * Likely won't change much, maybe just to use own `ajax.load`
+ * instead of window.fetch. Can probably be kept as a static standalone
+ * function for re-usability.
+ */
 function onLoadSchema(complete) {
+    ajax.load(
+        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json",
+        complete
+    );
+    /*
     window
         .fetch(
             "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json"
@@ -41,12 +50,14 @@ function onLoadSchema(complete) {
             var schema = JSON.parse(respText);
             complete(schema);
         });
+        */
 }
 
 /**
  * Main function to implement
- * @todo
- * Get the context.microscope_setting
+ * @todo Nothing in this view
+ * Later, if on -collection- static page, present searchview to select a single microscope
+ * and then pass in under a single key/value, e.g. `{ "SelectedItem" : ...the thing... }`
  */
 function onLoadMicroscopes(complete) {
     const microscopesDB = {
@@ -54,6 +65,29 @@ function onLoadMicroscopes(complete) {
     };
     complete(microscopesDB);
 }
+
+/* Rough Idea for when on a static or collections page:
+class StaticPageMicrometaWrapper extends React.PureComponent {
+    constructor(props){
+        super(props);
+        this.state = {
+            isSelecting: false
+        };
+        this.completeOnLoad = null;
+    }
+    onLoadMicroscopes(complete){
+        this.setState({ isSelecting: true });
+        this.completeOnLoad = complete;
+    }
+    onReceiveMicroscopeConfig(res){
+        this.completeOnLoad(res);
+    }
+    render(){
+        if (this.state.isSelecting) {
+            return <LinkToSelector/>;
+        }
+}
+*/
 
 function onSaveMicroscope(microscope, complete) {
     // Do some stuff... show pane for people to browse/select schema.. etc.
@@ -135,12 +169,14 @@ export class MicroMetaTabView extends React.PureComponent {
             onLoadMicroscopes,
             onLoadSchema,
             onSaveMicroscope,
+            //visualizeImmediately: true,
+            //loadedMicroscopeConfiguration: { ... },
             imagesPath
         };
 
         return (
             <div className="container px-0">
-                <MicroscopyMetadataTool {...passProps} />
+                <MicroscopyMetadataTool {...passProps} loadedMicroscopeConfiguration={context.microscope_setting} />
             </div>
         );
     }
