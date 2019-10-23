@@ -212,8 +212,8 @@ export default class QuickInfoBar extends React.PureComponent {
                     <div className="crumbs-label">
                         Filtered by
                     </div>
-                    <ActiveFiltersBar {...{ filters, context, schemas, href }}
-                        showTitle={false} orderedFieldNames={null} onTermClick={this.handleActiveFilterTermClick}
+                    <ActiveFiltersBar {...{ filters, context, schemas }}
+                        onTermClick={this.handleActiveFilterTermClick}
                         termTransformFxn={Schemas.Term.toName} fieldTransformFxn={Schemas.Field.toName} />
                     <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
                         <i className="icon icon-pie-chart fas" style={{ opacity : 0.05 }} />
