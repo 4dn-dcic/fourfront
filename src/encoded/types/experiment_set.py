@@ -259,7 +259,15 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.file_classification",
         "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_size",
-        "experiments_in_set.reference_files.status"
+        "experiments_in_set.reference_files.status",
+
+        'sample_image.image.caption',
+        'sample_image.image.attachment.href',
+        'sample_image.image.attachment.type',
+        'sample_image.image.attachment.md5sum',
+        'sample_image.image.attachment.download',
+        'sample_image.image.attachment.width',
+        'sample_image.image.attachment.height'
     ]
 
     @calculated_property(schema={
