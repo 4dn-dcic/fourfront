@@ -2,7 +2,6 @@
 
 import React from 'react';
 import _ from 'underscore';
-//import MicroscopyMetadataTool from "4dn-microscopy-metadata-tool";
 import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
@@ -19,12 +18,17 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 }
 
 
-
+/**
+ * @todo
+ * Make these be instance methods of MicroMetaTabView _or_ some other
+ * component(s) & implement logic.
+ * It might be useful to split into 2 components - 1 to handle logic &
+ * render/clone out props.children with those functions, and
+ * 1 to handle the view, but uncertain.
+ *
+ */
 
 function onLoadSchema(complete) {
-    // Maybe some UI to select something...
-    // Not all browsers have `window.fetch`, used for demoing purposes.
-    // Also, window.fetch requires HTTP so we getting this from GitHub... lol
     window
         .fetch(
             "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json"
@@ -39,8 +43,15 @@ function onLoadSchema(complete) {
         });
 }
 
+/**
+ * Main function to implement
+ * @todo
+ * Get the context.microscope_setting
+ */
 function onLoadMicroscopes(complete) {
-    const microscopesDB = {};
+    const microscopesDB = {
+        "Test" : { "hello" : "world" }
+    };
     complete(microscopesDB);
 }
 
@@ -52,8 +63,9 @@ function onSaveMicroscope(microscope, complete) {
     });
 }
 
-const imagesPath = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/";
 
+/** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
+const imagesPath = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/";
 
 let MicroscopyMetadataTool = null;
 
@@ -119,7 +131,11 @@ export class MicroMetaTabView extends React.PureComponent {
         }
 
         const passProps = {
-            width, height, onLoadMicroscopes, onLoadSchema, onSaveMicroscope, imagesPath
+            width, height,
+            onLoadMicroscopes,
+            onLoadSchema,
+            onSaveMicroscope,
+            imagesPath
         };
 
         return (
