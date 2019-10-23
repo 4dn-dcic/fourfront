@@ -63,7 +63,7 @@ export default class FileView extends WorkflowRunTracingView {
                 ...this.props,
                 'requestHref': (
                     "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
-                    (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
+                    //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                     "experiments_in_set.reference_files.accession=" + context.accession
                 ),
                 'title': function (props, { totalCount }) {
