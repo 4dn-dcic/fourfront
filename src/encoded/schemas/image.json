@@ -33,6 +33,18 @@
             "type": "string",
             "lookup": 20,
             "formInput": "textarea"
+        },
+        "custom_link": {
+            "title": "Link",
+            "description": "Link to OMERO or other external resource, for microscopy thumbnails",
+            "type": "string",
+            "lookup": 30
+        },
+        "microscopy_file": {
+            "title": "Full Microscopy File",
+            "description": "For microscopy thumbnails, the File Item that this image is associated with",
+            "type": "string",
+            "linkTo": "FileMicroscopy"
         }
     },
     "boost_values": {
