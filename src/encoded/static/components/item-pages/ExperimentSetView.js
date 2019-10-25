@@ -193,13 +193,13 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
             <OverViewBodyItem {...commonProps} property="experiments_in_set.experiment_categorizer.combined" fallbackTitle="Assay Details"
                 titleRenderFxn={OverviewHeading.expCategorizerTitle} wrapInColumn="col-sm-6 col-md-3 pull-right" />
 
-            <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
-                wrapInColumn="col-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
-                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} hideIfNoValue />
-
             <OverViewBodyItem {...commonProps} property="sample_image.image" fallbackTitle="Sample Image"
                 wrapInColumn="col-12 col-md-6" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_image_attachment} hideIfNoValue />
+
+            <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
+                wrapInColumn="col-12 col-md-6" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} hideIfNoValue />
 
         </OverviewHeadingContainer>
     );

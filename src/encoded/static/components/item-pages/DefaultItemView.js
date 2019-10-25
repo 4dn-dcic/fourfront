@@ -421,6 +421,12 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
 
     if (!item || !linkToItem) return null;
 
+    const fileItem = object.itemUtil.atId(item.microscopy_file) || null;
+    var link = item.custom_link || linkToItem;
+    if (fileItem && item.microscopy_file.omerolink) {
+        link = item.microscopy_file.omerolink
+    };
+
     const { attachment = null } = item;
     const { href: attachmentHref = null, caption: attachmentCaption = null } = attachment || {};
     const filename = itemAttachmentFileName(item);
@@ -428,10 +434,15 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     if (!attachmentHref || !isAttachmentImage(filename)) return <EmbeddedItemWithAttachment {...props} />;
 
     const imageElem = (
-        <a href={linkToItem} className="image-wrapper">
+        <a href={link} className="image-wrapper">
             <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
+
+    // const itemLink = null;
+    // if (fileItem) {
+    //     itemLink = <a href={ fileItem }>View File Item - { item.microscopy_file.accession }</a>
+    // };
 
     const captionText = item.caption || item.description || attachmentCaption || filename;
 
@@ -440,6 +451,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             <div className="inner">
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
+                { fileItem && <a href={ fileItem }>View File Item - { item.microscopy_file.accession }</a> }
             </div>
         </div>
     );

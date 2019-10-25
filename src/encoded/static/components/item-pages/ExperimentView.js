@@ -274,6 +274,10 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
             <OverViewBodyItem {...commonBioProps} property="modifications_summary" fallbackTitle="Biosample Modifications" />
             <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
 
+            <OverViewBodyItem {...commonProps} property="sample_image.image" fallbackTitle="Sample Image"
+                wrapInColumn="col-12 col-md-6" singleItemClassName="block"
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_image_attachment} hideIfNoValue />
+
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-12 col-md-6 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
