@@ -735,6 +735,8 @@ class ExperimentMic(Experiment):
         "files.microscope_settings.ch03_lasers_diodes",
 
         'sample_image.image.caption',
+        'sample_image.image.microscopy_file.accession',
+        'sample_image.image.microscopy_file.omerolink',
         'sample_image.image.attachment.href',
         'sample_image.image.attachment.type',
         'sample_image.image.attachment.md5sum',
