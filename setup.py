@@ -113,6 +113,7 @@ setup(
         create-mapping-on-deploy = encoded.commands.create_mapping_on_deploy:main
         update-inserts-from-server = encoded.commands.update_inserts_from_server:main
         run-upgrade-on-inserts = encoded.commands.run_upgrader_on_inserts:main
+        configure-kibana-index = encoded.commands.configure_kibana_index:main
 
         [paste.app_factory]
         main = encoded:main
