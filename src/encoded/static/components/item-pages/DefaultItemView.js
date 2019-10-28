@@ -439,11 +439,6 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
         </a>
     );
 
-    // const itemLink = null;
-    // if (fileItem) {
-    //     itemLink = <a href={ fileItem }>View File Item - { item.microscopy_file.accession }</a>
-    // };
-
     const captionText = item.caption || item.description || attachmentCaption || filename;
 
     return (
