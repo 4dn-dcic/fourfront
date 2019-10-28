@@ -12,7 +12,7 @@ def delay_rerun(*args):
     return True
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing)]
+pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing]
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
