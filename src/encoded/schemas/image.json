@@ -28,6 +28,12 @@
         "schema_version": {
             "default": "1"
         },
+        "title": {
+            "title": "Title",
+            "description": "A title for the image",
+            "type": "string",
+            "lookup": 19
+        },
         "caption": {
             "title": "Caption",
             "type": "string",
