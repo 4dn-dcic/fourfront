@@ -3,7 +3,7 @@ Loading Inserts
 
 Fourfront has a set of json insert files that are used to load data in various environments. These are loaded using `bin/load-data`, which calls the functions defined in src/encoded/loadxl.py.
 
-The behavior of load-data depends on the current Fourfront environment and the `load_test_data` setting in the used .ini file. This documentation goes into some detail on those options; to read about which inserts are used, see [this documentation](../src/encoded/tests/data/README.md).
+The behavior of load-data depends on the current Fourfront environment and the `snovault.load_test_data` setting in the used .ini file. This documentation goes into some detail on those options; to read about which inserts are used, see [this documentation](../src/encoded/tests/data/README.md).
 
 ### bin/load-data
 
@@ -22,4 +22,4 @@ The arguments are as follows:
 
 ### App configuration
 
-The load function used is defined under `load_test_data` in the .ini configuration file. For local usage, this is `development.ini` and the default load function used is `encoded.loadxl:load_local_data`. For production environments, the value of this setting should be set as the `LOAD_FUNCTION` environment variable. This will probably be either `load_prod_data` for staging/data environments or `load_test_data` for test environments. Again, these configuration values correspond to the functions used in [loadxl.py](../src/encoded/loadxl.py).
+The load function used is defined under `snovault.load_test_data` in the .ini configuration file. For local usage, this is `development.ini` and the default load function used is `encoded.loadxl:load_local_data`. For production environments, the value of this setting should be set as the `LOAD_FUNCTION` environment variable. This will probably be either `load_prod_data` for staging/data environments or `load_test_data` for test environments. Again, these configuration values correspond to the functions used in [loadxl.py](../src/encoded/loadxl.py).
