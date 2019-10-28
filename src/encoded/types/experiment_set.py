@@ -261,15 +261,15 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.file_size",
         "experiments_in_set.reference_files.status",
 
-        'sample_image.image.caption',
-        'sample_image.image.microscopy_file.accession',
-        'sample_image.image.microscopy_file.omerolink',
-        'sample_image.image.attachment.href',
-        'sample_image.image.attachment.type',
-        'sample_image.image.attachment.md5sum',
-        'sample_image.image.attachment.download',
-        'sample_image.image.attachment.width',
-        'sample_image.image.attachment.height'
+        'sample_image.caption',
+        'sample_image.microscopy_file.accession',
+        'sample_image.microscopy_file.omerolink',
+        'sample_image.attachment.href',
+        'sample_image.attachment.type',
+        'sample_image.attachment.md5sum',
+        'sample_image.attachment.download',
+        'sample_image.attachment.width',
+        'sample_image.attachment.height'
     ]
 
     @calculated_property(schema={
