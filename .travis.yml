@@ -62,7 +62,7 @@ before_install:
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
-- nvm install 10
+- nvm install 10 || (echo "Retrying nvm install" && sleep 5 && nvm install 10)
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
