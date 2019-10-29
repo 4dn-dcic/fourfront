@@ -408,7 +408,12 @@ def get_existing_ontology_terms(connection):  # , ontologies=None):
     '''
     search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
-    return {t['term_id']: t for t in db_terms}
+    ignore = [
+        "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
+        "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
+        "111117bc-8535-4448-903e-854af460a233"
+    ]
+    return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
 
 
 def get_ontologies(connection, ont_list):
