@@ -34,7 +34,7 @@ def main():
 
     env = app.registry.settings.get('env.name', '')
 
-    load_test_data = app.registry.settings.get('load_test_data')
+    load_test_data = app.registry.settings.get('snovault.load_test_data')
     log.info("load_data: load_test_data function is %s" % (load_test_data))
     load_test_data = DottedNameResolver().resolve(load_test_data)
 

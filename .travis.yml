@@ -12,7 +12,6 @@ cache:
 addons:
   apt:
     packages:
-    - oracle-java9-set-default
     - bsdtar
     - build-essential
     - make
@@ -22,7 +21,6 @@ addons:
 env:
   global:
   - BOTO_CONFIG=/bogus
-  - JAVA_HOME=/usr/lib/jvm/java-8-oracle
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - USER="4dn-dcic"
@@ -79,14 +77,16 @@ install:
 - pip show pytest
 - pip install pytest==2.9.1
 - pip show pytest
+before_script:
+- bin/configure-kibana-index --es-endpoint search-fourfront-builds2-rh27qh5h3aw3zie3mmr4umxjwq.us-east-1.es.amazonaws.com:80
 script:
 - if test -n "$NPM"; then npm test; fi
 # setone is essentially all tests that are not indexing; change here for clarity
 - if test -n "$NPM"; then bin/test -v -v --aws-auth -m "not performance and not indexing and working" --durations=10
-  --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  --cov src/encoded --es search-fourfront-builds2-rh27qh5h3aw3zie3mmr4umxjwq.us-east-1.es.amazonaws.com:80;
   fi
 - if test -n "$UNIT"; then travis_wait 30 bin/test -v -v --aws-auth -m "not performance and indexing and working" --durations=10
-  --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80;
+  --cov src/encoded --es search-fourfront-builds2-rh27qh5h3aw3zie3mmr4umxjwq.us-east-1.es.amazonaws.com:80;
   fi
 - if test -n "$CYPRESS"; then travis_wait 30 deploy/run_cypress_tests_on_travis.sh;
   fi

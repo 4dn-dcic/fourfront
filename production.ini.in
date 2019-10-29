@@ -16,7 +16,7 @@ indexer = ${indexer}
 elasticsearch.aws_auth = true
 production = true
 
-load_test_data = ${load_test_data}
+snovault.load_test_data = ${load_test_data}
 sqlalchemy.url = ${sqlalchemy_url}
 [composite:indexer]
 use = config:base.ini#indexer

@@ -134,7 +134,7 @@ def health_check(config):
             "system_bucket": settings.get('system_bucket'),
             "elasticsearch": settings.get('elasticsearch.server'),
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
-            "load_data": settings.get('load_test_data'),
+            "load_data": settings.get('snovault.load_test_data'),
             "beanstalk_env": settings.get('env.name'),
             'ontology_updated': ont_date,
             "@type": ["Health", "Portal"],
@@ -223,9 +223,7 @@ class FourfrontRoot(Root):
             (Allow, Everyone, ['list', 'search']),
             (Allow, 'group.admin', ALL_PERMISSIONS),
             (Allow, 'remoteuser.EMBED', 'import_items'),
-        ] + [(Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
-        (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
-        (Allow, Everyone, ['visible_for_edit'])]
+        ] + Root.__acl__
         return acl
 
     def get(self, name, default=None):
