@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -72,6 +73,14 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         return viewconf;
     });
 
+    static propTypes = {
+        'scale1dTopTrack': PropTypes.bool.isRequired,
+    }
+
+    static defaultProps = {
+        'scale1dTopTrack': true
+    }
+
     constructor(props){
         super(props);
         this.getFullHiglassItem = this.getFullHiglassItem.bind(this);
@@ -123,6 +132,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
     }
     render(){
         const { higlassItem, loading } = this.state;
+        const { scale1dTopTrack } = this.props;
         let { height } = this.props;
 
         //if height not defined by container then use instance defined value
@@ -151,7 +161,7 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
         }
 
         // Scale the higlass config so it fits the given container.
-        const adjustedViewconfig = HiGlassAjaxLoadContainer.scaleViewconfToHeight(higlassItem.viewconfig, height);
+        const adjustedViewconfig = scale1dTopTrack ? HiGlassAjaxLoadContainer.scaleViewconfToHeight(higlassItem.viewconfig, height) : object.deepClone(higlassItem.viewconfig);
         // Pass the viewconfig to the HiGlassPlainContainer
         return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem', 'height')} viewConfig={adjustedViewconfig} ref={this.containerRef} height={height} />;
     }
