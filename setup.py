@@ -116,6 +116,8 @@ setup(
         run-upgrade-on-inserts = encoded.commands.run_upgrader_on_inserts:main
         configure-kibana-index = encoded.commands.configure_kibana_index:main
 
+        wipe-test-indices = snovault.commands.wipe_test_indices:main
+
         [paste.app_factory]
         main = encoded:main
 
