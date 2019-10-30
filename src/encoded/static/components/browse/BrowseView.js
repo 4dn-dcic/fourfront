@@ -273,9 +273,9 @@ class ResultTableContainer extends React.PureComponent {
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
                         ref={this.searchResultTableRef}
+                        termTransformFxn={Schemas.Term.toName}
                         results={context['@graph']}
-                        renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78} />
+                        renderDetailPane={this.browseExpSetDetailPane} />
                 </div>
             </div>
         );
