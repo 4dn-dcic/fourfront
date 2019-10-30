@@ -1996,6 +1996,12 @@ $badge-item-min-height: 90px;
 			}
 		}
 
+		div[class^="ViewConfigEditor-module_view-config-editor-"] {
+			textarea, pre, pre span {
+				font-family: $font-family-monospace !important;
+			}
+		}
+
 		.glyphicon.glyphicon-search {
 			&:before {
 				content : "\f002";

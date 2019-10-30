@@ -9,7 +9,7 @@ from snovault import TYPES
 
 def delay_rerun(*args):
     """ Rerun function for flaky """
-    time.sleep(120)
+    time.sleep(1)
     return True
 
 

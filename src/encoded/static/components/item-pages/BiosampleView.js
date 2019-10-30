@@ -25,7 +25,7 @@ export default class BiosampleView extends DefaultItemView {
             ...this.props,
             'requestHref' : (
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
-                (browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
+                //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                 "experiments_in_set.biosample.display_title=" + context.display_title
             ),
             'title' : function(props, { totalCount }){
