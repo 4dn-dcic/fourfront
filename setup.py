@@ -89,7 +89,7 @@ setup(
         [console_scripts]
         batchupgrade = snovault.batchupgrade:main
         create-mapping = encoded.elasticsearch.create_mapping:main
-        dev-servers = snovault.dev_servers:main
+        dev-servers = encoded.dev_servers:main
         es-index-listener = snovault.elasticsearch.es_index_listener:main
 
         add-date-created = encoded.commands.add_date_created:main
@@ -115,6 +115,8 @@ setup(
         update-inserts-from-server = encoded.commands.update_inserts_from_server:main
         run-upgrade-on-inserts = encoded.commands.run_upgrader_on_inserts:main
         configure-kibana-index = encoded.commands.configure_kibana_index:main
+
+        wipe-test-indices = snovault.commands.wipe_test_indices:main
 
         [paste.app_factory]
         main = encoded:main
