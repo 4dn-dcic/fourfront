@@ -449,7 +449,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             <div className="inner">
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
-                { fileItem && <a href={ fileItem }>View File Item - { item.microscopy_file.accession }</a> }
+                { fileMicroscopyID && <a href={fileMicroscopyID}>View File Item - { item.microscopy_file.accession }</a> }
             </div>
         </div>
     );
