@@ -11,6 +11,7 @@ from snovault import (
 from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from snovault.resource_views import collection_view_listing_db
 from snovault.util import (
     find_collection_subtypes,
@@ -91,7 +92,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # if doc_type is item, search all indexes by setting es_index to None
     # If multiple, search all specified
     if 'Item' in doc_types:
-        es_index = '_all'
+        es_index = get_namespaced_index(request, '*')
     else:
         es_index = find_index_by_doc_types(request, doc_types, ['Item'])
 
@@ -1329,7 +1330,8 @@ def find_index_by_doc_types(request, doc_types, ignore):
             continue
         else:
             result = find_collection_subtypes(request.registry, doc_type)
-            indexes.extend(result)
+            namespaced_results = map(lambda t: get_namespaced_index(request, t), result)
+            indexes.extend(namespaced_results)
     # remove any duplicates
     indexes = list(set(indexes))
     index_string = ','.join(indexes)
