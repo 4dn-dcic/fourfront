@@ -47,7 +47,7 @@
             "description": "The type of file based on the information in the file.",
             "type": "string",
             "lookup": 40,
-            "enum": [
+            "suggested_enum": [
                 "z-stack",
                 "time-series"
             ]
