@@ -2,17 +2,18 @@
 from .features.conftest import app_settings, app, workbook
 import pytest
 from encoded.commands.run_upgrader_on_inserts import get_inserts
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
 import json
 import time
 from snovault import TYPES
 
 def delay_rerun(*args):
     """ Rerun function for flaky """
-    time.sleep(120)
+    time.sleep(1)
     return True
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing] #pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
@@ -464,11 +465,12 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     for item_type in TYPE_LENGTH.keys():
         tries = 0
         item_len = None
+        namespaced_index = get_namespaced_index(app, item_type)
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
             if item_len != None:
                 create_mapping.run(app, collections=[item_type], strict=True, sync_index=True)
-                es.indices.refresh(index=item_type)
-            item_len = es.count(index=item_type, doc_type=item_type).get('count')
+                es.indices.refresh(index=namespaced_index)
+            item_len = es.count(index=namespaced_index, doc_type=item_type).get('count')
             print('... ES COUNT: %s' % item_len)
             print('... TYPE COUNT: %s' % TYPE_LENGTH[item_type])
             tries += 1
@@ -477,7 +479,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             res = res.follow()
             for item_res in res.json.get('@graph', []):
-                index_view_res = es.get(index=item_type, doc_type=item_type,
+                index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                         id=item_res['uuid'])['_source']
                 # make sure that the linked_uuids match the embedded data
                 assert 'linked_uuids_embedded' in index_view_res

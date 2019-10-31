@@ -100,7 +100,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@hms-dbmi-bgm/react-workflow-viz": "github:4dn-dcic/react-workflow-viz#0.0.0.15",
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.2.21",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.2.25",
     "4dn-microscopy-metadata-tool": "github:WU-BIMAC/4DNMicroscopyMetadataToolReact#0.0.0.2",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.12.0",

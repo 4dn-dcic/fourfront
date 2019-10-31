@@ -1,9 +1,7 @@
 """\
 Examples
 For the development.ini you must supply the paster app name:
-
     %(prog)s development.ini --app-name app --init --clear
-
 """
 from pkg_resources import resource_filename
 from pyramid.paster import get_app, get_appsettings
