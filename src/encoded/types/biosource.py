@@ -131,8 +131,9 @@ class Biosource(Item):
         tid2cat = {
             'EFO:0003042': 'H1-hESC',
             'EFO:0002784': 'GM12878',
-            '4DN:0000014': 'HFFc6',
-            'EFO:0009318': 'HFFc6',
+            '4DN:0000014': 'HFF (c6 or hTERT)',
+            'EFO:0009318': 'HFF (c6 or hTERT)',
+            '4DN:0000001': 'HFF (c6 or hTERT)',
             '4DN:0000005': 'WTC-11',
             'EFO:0001196': 'IMR-90',
             '4DN:0000260': 'Tier 2',
