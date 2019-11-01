@@ -706,6 +706,7 @@
             }
         },
         "instance_height": {
+            "title": "Instance Height",
             "type": "integer",
             "default": 500
         }
