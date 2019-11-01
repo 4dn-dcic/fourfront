@@ -318,9 +318,11 @@ def normalize_query(request, types, doc_types):
             return (key, types[val].name)
 
         # if key is sort, pass val as the key to this function
-        # if it appends display title we know its a linkTo and 
+        # if it appends display title we know its a linkTo and
         # should be treated as such
         if key == 'sort':
+            if val.startswith('-'): # strip '-' if present
+                val = val[1:]
             new_k, _ = normalize_param(val, None)
             if new_k != val:
                 return (key, new_k)
