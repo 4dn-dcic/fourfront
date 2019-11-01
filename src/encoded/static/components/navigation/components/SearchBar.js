@@ -169,6 +169,7 @@ export class SearchBar extends React.PureComponent{
                         <i className="icon icon-fw icon-search fas"/>
                     </button>
                 ) }
+                { SearchBar.renderHiddenInputsForURIQuery(query) }
             </form>
         );
     }

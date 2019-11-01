@@ -11,6 +11,7 @@ from snovault import (
 from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from snovault.resource_views import collection_view_listing_db
 from snovault.util import (
     find_collection_subtypes,
@@ -91,7 +92,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # if doc_type is item, search all indexes by setting es_index to None
     # If multiple, search all specified
     if 'Item' in doc_types:
-        es_index = '_all'
+        es_index = get_namespaced_index(request, '*')
     else:
         es_index = find_index_by_doc_types(request, doc_types, ['Item'])
 
@@ -738,7 +739,7 @@ def set_filters(request, search, result, principals, doc_types):
                     range_filters[query_field]['format'] = 'yyyy-MM-dd HH:mm'
 
             if range_direction in ('gt', 'gte', 'lt', 'lte'):
-                if len(term) == 10:
+                if range_type == "date" and len(term) == 10:
                     # Correct term to have hours, e.g. 00:00 or 23:59, if not otherwise supplied.
                     if range_direction == 'gt' or range_direction == 'lte':
                         term += ' 23:59'
@@ -856,8 +857,10 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
     ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
     used_facets = [ facet[0] for facet in facets + append_facets ]
-    used_facet_titles = [facet[1]['title'] for facet in facets + append_facets
-                         if 'title' in facet[1]]
+    used_facet_titles = used_facet_titles = [
+        facet[1]['title'] for facet in facets + append_facets
+        if 'title' in facet[1]
+    ]
     for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.') # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
@@ -884,16 +887,22 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
             if title_field in used_facets or title_field in disabled_facets:
                 # Cancel if already in facets or is disabled
                 continue
+            used_facets.append(title_field)
 
             # If we have a range filter in the URL,
             if title_field == 'from' or title_field == 'to':
-                if len(split_field) == 3:
-                    f_field = split_field[-2]
+                if len(split_field) >= 3:
+                    f_field = ".".join(split_field[1:-1])
                     field_schema = schema_for_field(f_field, request, doc_types)
+
                     if field_schema:
-                        title_field = f_field
-                        use_field = '.'.join(split_field[1:-1])
-                        aggregation_type = 'stats'
+                        is_date_field = determine_if_is_date_field(field, field_schema)
+                        is_numerical_field = field_schema['type'] in ("integer", "float", "number")
+
+                        if is_date_field or is_numerical_field:
+                            title_field = field_schema.get("title", f_field)
+                            use_field = f_field
+                            aggregation_type = 'stats'
 
             for schema in schemas:
                 if title_field in schema['properties']:
@@ -907,10 +916,11 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             # At moment is equivalent to `if aggregation_type == 'stats'`` until/unless more agg types are added for _facets_.
             if aggregation_type != 'terms':
-                facet_tuple[1]['hide_from_view'] = True # Temporary until we handle these better on front-end.
-                # Facet would be otherwise added twice if both `.from` and `.to` are requested.
-                if facet_tuple in facets:
+                # Remove completely if duplicate (e.g. .from and .to both present)
+                if use_field in used_facets:
                     continue
+                #facet_tuple[1]['hide_from_view'] = True # Temporary until we handle these better on front-end.
+                # Facet would be otherwise added twice if both `.from` and `.to` are requested.
 
             facets.append(facet_tuple)
 
@@ -1098,7 +1108,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
             if is_date_field:
                 facet['field_type'] = 'date'
             elif is_numerical_field:
-                facet['field_type'] = 'number'
+                facet['field_type'] = field_schema['type'] or "number"
 
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
@@ -1108,7 +1118,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
                         }
                     }
                 },
-                'filter': search_filters
+                'filter': {'bool': facet_filters}
             }
 
         else: # Default -- facetable terms
@@ -1320,7 +1330,8 @@ def find_index_by_doc_types(request, doc_types, ignore):
             continue
         else:
             result = find_collection_subtypes(request.registry, doc_type)
-            indexes.extend(result)
+            namespaced_results = map(lambda t: get_namespaced_index(request, t), result)
+            indexes.extend(namespaced_results)
     # remove any duplicates
     indexes = list(set(indexes))
     index_string = ','.join(indexes)
