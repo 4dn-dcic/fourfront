@@ -17,7 +17,6 @@ ITEM_INDEX_ORDER = [
     'Lab',
     'AccessKey',
     'User',
-    'Sysinfo',
 
     'Ontology',
     'OntologyTerm',
