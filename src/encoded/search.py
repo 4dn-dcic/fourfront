@@ -321,11 +321,12 @@ def normalize_query(request, types, doc_types):
         # if it appends display title we know its a linkTo and
         # should be treated as such
         if key == 'sort':
-            if val.startswith('-'): # strip '-' if present
-                val = val[1:]
-            new_k, _ = normalize_param(val, None)
-            if new_k != val:
-                return (key, new_k)
+            # do not use '-' if present
+            sort_val = val[1:] if val.startswith('-') else val
+            new_val, _ = normalize_param(sort_val, None)
+            if new_val != sort_val:
+                val = val.replace(sort_val, new_val)
+            return (key, val)
 
         # find schema for field parameter and drill down into arrays/subobjects
         field_schema = schema_for_field(key, request, doc_types)
