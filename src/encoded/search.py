@@ -311,10 +311,19 @@ def normalize_query(request, types, doc_types):
         Current rules:
         - for 'type', get name from types (from the registry)
         - append '.display_title' to any terminal linkTo query field
+        - append '.display_title' to sorts on fields
         """
         # type param is a special case. use the name from TypeInfo
         if key == 'type' and val in types:
             return (key, types[val].name)
+
+        # if key is sort, pass val as the key to this function
+        # if it appends display title we know its a linkTo and 
+        # should be treated as such
+        if key == 'sort':
+            new_k, _ = normalize_param(val, None)
+            if new_k != val:
+                return (key, new_k)
 
         # find schema for field parameter and drill down into arrays/subobjects
         field_schema = schema_for_field(key, request, doc_types)
