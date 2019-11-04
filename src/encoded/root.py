@@ -1,6 +1,5 @@
 import json
 import requests
-import datetime
 from re import escape
 from pyramid.decorator import reify
 from snovault import (

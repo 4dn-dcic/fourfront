@@ -448,6 +448,11 @@ def test_search_with_static_header(workbook, testapp):
     assert 'search_header' in res_json
     assert 'content' in res_json['search_header']
     assert res_json['search_header']['title'] == 'Workflow Information'
+    search = '/search/?type=workflow' # check type resolution
+    res_json = testapp.get(search, status=404).json
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
 
 
 #########################################

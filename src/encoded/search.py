@@ -83,9 +83,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         search_term = 'search-info-header.' + doc_types[0]
         static_section = request.registry['collections']['StaticSection'].get(search_term)
         if static_section:
-            item = static_section.model.source['embedded']
+            item = static_section.model.source['object']
             result['search_header'] = {}
-            result['search_header']['content'] = item['body']
+            result['search_header']['content'] = item['content']
             result['search_header']['title'] = item.get('title', item['display_title'])
 
     from_, size = get_pagination(request)
