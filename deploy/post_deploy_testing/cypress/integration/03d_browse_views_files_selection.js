@@ -18,14 +18,12 @@ let fileTypeSelectedTotalCount = 0;
 function fileTypeFilterCheckFileCheckbox(origSelectedCount, $checkBox) {
     return cy.wrap($checkBox).scrollToCenterElement().check({ 'force': true }).end()
         .getDownloadButton().invoke('text').then((downloadButtonTextContent) => {
-            let nextSelectedCount = downloadButtonTextContent.match(/\d/g);
-            nextSelectedCount = parseInt(nextSelectedCount.join(''));
-            fileTypeSelectedTotalCount = nextSelectedCount
-            return nextSelectedCount;
+            const nextSelectedCount = downloadButtonTextContent.match(/\d/g);
+            fileTypeSelectedTotalCount = parseInt(nextSelectedCount.join(''));
         });
 }
 function fileTypeFilterUnCheckFileCheckbox($checkBox) {
-    return cy.wrap($checkBox).scrollToCenterElement().uncheck({ 'force': true }).end()
+    return cy.wrap($checkBox).scrollToCenterElement().uncheck({ 'force': true }).end();
 }
 describe('Browse Views - Files Selection', function () {
 
@@ -45,52 +43,52 @@ describe('Browse Views - Files Selection', function () {
 
         });
 
-        it("Can add column for date_created to results table", function(){
-             // First we must add the column to the view
-             // Open column selector panel
-             cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
-                 // Check the 'Date Created' checkbox
-                 .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]')
-                 .scrollIntoView().click({ 'force' : true }).end()
-                 // Perform check for initial expected condition (sort by date_created -- descending)
-                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
-                 .should('have.class', 'active')
-                 .within(()=>{
-                     cy.get('i').should('have.class', 'icon-sort-down');
-                 }).end()
-                 // Close columns panel
-                 .get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end();
-         });
+        it("Can add column for date_created to results table", function () {
+            // First we must add the column to the view
+            // Open column selector panel
+            cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end()
+                // Check the 'Date Created' checkbox
+                .get('#content .search-result-config-panel div input[type="checkbox"][value="date_created"]')
+                .scrollIntoView().click({ 'force': true }).end()
+                // Perform check for initial expected condition (sort by date_created -- descending)
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
+                .should('have.class', 'active')
+                .within(() => {
+                    cy.get('i').should('have.class', 'icon-sort-down');
+                }).end()
+                // Close columns panel
+                .get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Configure visible columns"]').click().end();
+        });
 
-         it('Can press buttons at right & left to scroll to right side of search results table', function(){
-             cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button' : 0, 'force' : true })
-                 .should('have.class', 'faded-out') // Scroll until scrolling further is disabled.
-                 .trigger('mouseup', { 'force' : true }) // Might become invisible
-                 .wait(1000) // Wait for state changes re: layouting to take effect
-                 .end()
-                 .get('#content div.shadow-border-layer div.edge-scroll-button.left-edge:not(.faded-out)')
-                 .trigger('mousedown', { 'button' : 0, 'force' : true })
-                 .should('have.class', 'faded-out')
-                 .trigger('mouseup', { 'force' : true })
-                 .wait(1000)
-                 .end()
-                 .get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button' : 0, 'force' : true })
-                 .should('have.class', 'faded-out')
-                 .trigger('mouseup', { 'force' : true }) // Might become invisible
-                 .end();
-         });
+        it('Can press buttons at right & left to scroll to right side of search results table', function () {
+            cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button': 0, 'force': true })
+                .should('have.class', 'faded-out') // Scroll until scrolling further is disabled.
+                .trigger('mouseup', { 'force': true }) // Might become invisible
+                .wait(1000) // Wait for state changes re: layouting to take effect
+                .end()
+                .get('#content div.shadow-border-layer div.edge-scroll-button.left-edge:not(.faded-out)')
+                .trigger('mousedown', { 'button': 0, 'force': true })
+                .should('have.class', 'faded-out')
+                .trigger('mouseup', { 'force': true })
+                .wait(1000)
+                .end()
+                .get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button': 0, 'force': true })
+                .should('have.class', 'faded-out')
+                .trigger('mouseup', { 'force': true }) // Might become invisible
+                .end();
+        });
 
-         it('Can change to sort by date_created -- ascending', function(){
-             cy.scrollTo(0, 500)
-                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
-                 .click({ 'force' : true })
-                 .should('have.class', 'active').end()
-                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon i')
-                 .should('have.class', 'icon-sort-up').end();
-         });
+        it('Can change to sort by date_created -- ascending', function () {
+            cy.scrollTo(0, 500)
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
+                .click({ 'force': true })
+                .should('have.class', 'active').end()
+                .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon i')
+                .should('have.class', 'icon-sort-up').end();
+        });
 
         it('"Select All Files" button works & becomes "Deselect All" after.', function () {
-            
+
             cy.getSelectAllFilesButton().click().should('contain', "Deselect All").end()
                 .getDownloadButton().should('not.have.attr', 'disabled').end();
 
@@ -106,16 +104,16 @@ describe('Browse Views - Files Selection', function () {
                 });
             });
         });
-        
+
         it('File Type selection filtering by file type will likely change', function () {
 
-            cy.getFileTypePanelButton().click().should('not.contain', "Deselect All").end()
+            cy.getFileTypePanelButton().click().should('not.contain', "Deselect All").end();
             cy.getDownloadButton().invoke('text').then((downloadButtonTextContent) => {
                 let origSelectedCount = downloadButtonTextContent.match(/\d/g);
                 origSelectedCount = parseInt(origSelectedCount.join(''));
-                return cy.get('.search-result-config-panel  input[type="checkbox"]').each(($checkBox, idx) => {
-                    return fileTypeFilterCheckFileCheckbox(origSelectedCount, $checkBox);
-                });
+                return cy.get('.search-result-config-panel input[type="checkbox"]').each(($checkBox, idx) =>
+                    fileTypeFilterCheckFileCheckbox(origSelectedCount, $checkBox)
+                );
             });
         });
 
@@ -133,7 +131,7 @@ describe('Browse Views - Files Selection', function () {
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
                 .get('div.modal-dialog .modal-header button.close').click().wait(100).end();
-            return cy.get('.search-result-config-panel  input[type="checkbox"]').each(($checkBox, idx) => {
+            return cy.get('.search-result-config-panel input[type="checkbox"]').each(($checkBox, idx) => {
                 fileTypeFilterUnCheckFileCheckbox($checkBox);
             });
         });
