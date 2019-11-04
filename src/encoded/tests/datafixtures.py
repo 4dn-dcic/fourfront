@@ -286,7 +286,7 @@ def f123_oterm(testapp, ontology, cell_line_term):
     item = {
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "term_name": "F123-CASTx129",
-        "term_id": "EFO:0000008",
+        "term_id": "EFO:0009319",
         "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
     }
@@ -298,9 +298,37 @@ def gm12878_oterm(testapp, ontology, cell_line_term):
     item = {
         "uuid": "530056bc-8535-4448-903e-854af460b111",
         "term_name": "GM12878",
-        "term_id": "EFO:0000009",
+        "term_id": "EFO:0002784",
         "source_ontologies": [ontology['@id']],
         "slim_terms": [cell_line_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def thousandgen_oterm_data(ontology, cell_line_term):
+    return {"source_ontologies": [ontology['@id']],
+            "slim_terms": [cell_line_term['@id']]}
+
+
+@pytest.fixture
+def thousandgen_oterms(testapp, thousandgen_oterm_data):
+    oterms = []
+    names = {'HG12345': 'EFO:999998', 'GM12345': 'EFO:999999'}
+    for tn, tid in names.items():
+        thousandgen_oterm_data['term_name'] = tn
+        thousandgen_oterm_data['term_id'] = tid
+        oterms.append(testapp.post_json('/ontology_term', thousandgen_oterm_data).json['@graph'][0])
+    return oterms
+
+
+@pytest.fixture
+def b_lymphocyte_oterm(testapp, uberon_ont):
+    item = {
+        "term_name": "lymphocyte of B lineage",
+        "term_id": "CL:0000945",
+        "preferred_name": "B-lymphocyte",
+        "source_ontologies": [uberon_ont['@id']],
     }
     return testapp.post_json('/ontology_term', item).json['@graph'][0]
 
@@ -318,11 +346,12 @@ def F123_biosource(testapp, lab, award, f123_oterm):
 
 
 @pytest.fixture
-def GM12878_biosource(testapp, lab, award, gm12878_oterm):
+def GM12878_biosource(testapp, lab, award, gm12878_oterm, b_lymphocyte_oterm):
     item = {
         "accession": "4DNSROOOAAQ1",
         "biosource_type": "immortalized cell line",
         "cell_line": gm12878_oterm['@id'],
+        "tissue": b_lymphocyte_oterm['@id'],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -384,6 +413,22 @@ def mouse(testapp):
         'genome_assembly': 'GRCm38'
     }
     return testapp.post_json('/organism', item).json['@graph'][0]
+
+
+@pytest.fixture
+def mouse_individual(testapp, mouse, lab, award):
+    item = {
+        'uuid': '4731442b-f283-4fdf-ad8a-a69cf5a7c68a',
+        "age": 53,
+        "age_units": "day",
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': mouse['@id'],
+        "mouse_strain": "Balb-c",
+        "mouse_life_stage": "adult",
+        "sex": "female",
+    }
+    return testapp.post_json('/individual_mouse', item).json['@graph'][0]
 
 
 @pytest.fixture

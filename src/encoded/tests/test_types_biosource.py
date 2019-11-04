@@ -41,7 +41,7 @@ def GM12878_twomod_biosource(testapp, lab, award, gm12878_oterm, basic_modificat
 
 @pytest.fixture
 def cell_lines(GM12878_biosource, F123_biosource, GM12878_mod_biosource, GM12878_twomod_biosource):
-    return [GM12878_biosource, F123_biosource, GM12878_mod_biosource, GM12878_twomod_biosource]
+    return [F123_biosource, GM12878_biosource, GM12878_mod_biosource, GM12878_twomod_biosource]
 
 
 @pytest.fixture
@@ -62,7 +62,80 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     return bs
 
 
-def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target):
+@pytest.fixture
+def human_biosource_data(testapp, lab, award, human_individual):
+    return {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'individual': human_individual['@id']
+    }
+
+
+@pytest.fixture
+def mouse_SC_biosrc(testapp, human_biosource_data, mouse_individual):
+    mouse_SC_biosrc_data = human_biosource_data.copy()
+    mouse_SC_biosrc_data['biosource_type'] = 'stem cell derived cell line'
+    mouse_SC_biosrc_data['individual'] = mouse_individual['@id']
+    return testapp.post_json('/biosource', mouse_SC_biosrc_data).json['@graph'][0]
+
+
+@pytest.fixture
+def primary_cell_biosource(testapp, human_biosource_data):
+    pc_biosrc_data = human_biosource_data.copy()
+    pc_biosrc_data['biosource_type'] = 'primary cell'
+    return testapp.post_json('/biosource', pc_biosrc_data).json['@graph'][0]
+
+
+@pytest.fixture
+def hum_SC_biosrc(testapp, human_biosource_data):
+    hum_SC_biosrc_data = human_biosource_data.copy()
+    hum_SC_biosrc_data['biosource_type'] = 'stem cell derived cell line'
+    return testapp.post_json('/biosource', hum_SC_biosrc_data).json['@graph'][0]
+
+
+@pytest.fixture
+def thous_genomes_biosources(testapp, human_biosource_data, thousandgen_oterms, b_lymphocyte_oterm):
+    bsources = []
+    human_biosource_data['tissue'] = b_lymphocyte_oterm['@id']
+    human_biosource_data['biosource_type'] = 'immortalized cell line'
+    for ot in thousandgen_oterms:
+        bs_data = human_biosource_data.copy()
+        bs_data['cell_line'] = ot['@id']
+        bsources.append(testapp.post_json('/biosource', bs_data).json['@graph'][0])
+    return bsources
+
+
+def test_calculated_biosource_category_multicellular(lung_biosource, whole_biosource):
+    assert 'Multicellular Tissue' in lung_biosource.get('biosource_category')
+    assert 'Multicellular Tissue' in whole_biosource.get('biosource_category')
+
+
+def test_calculated_biosource_category_primary_cell(primary_cell_biosource):
+    assert 'Primary Cells' in primary_cell_biosource.get('biosource_category')
+
+
+def test_calculated_biosource_category_1000_gen(thous_genomes_biosources, GM12878_biosource):
+    assert 'GM12878' in GM12878_biosource.get('biosource_category')
+    thous_genomes_biosources.append(GM12878_biosource)
+    for bs in thous_genomes_biosources:
+        assert '1000 genomes/Hap Map' in bs.get('biosource_category')
+
+
+def test_calculated_biosource_category_tiers(cell_lines):
+    bs1 = cell_lines.pop(0)
+    assert 'Tier 2' in bs1.get('biosource_category')
+    for bs in cell_lines:
+        assert 'GM12878' in bs.get('biosource_category')
+
+
+def test_calculated_biosource_category_stem_cells(mouse_SC_biosrc, hum_SC_biosrc):
+    assert 'Human stem cell' in hum_SC_biosrc.get('biosource_category')
+    assert 'Mouse stem cell' not in hum_SC_biosrc.get('biosource_category')
+    assert 'Mouse stem cell' in mouse_SC_biosrc.get('biosource_category')
+    assert 'Human stem cell' not in mouse_SC_biosrc.get('biosource_category')
+
+
+def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target, lung_oterm):
     for biosource in biosources:
         biotype = biosource['biosource_type']
         name = biosource['biosource_name']
@@ -79,7 +152,7 @@ def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target)
         elif biotype == 'primary cell line' and biosource['accession'] == "4DNSROOOAAC2":
             assert name == 'GM12878 with Crispr, Stable Transfection'
         elif biotype == 'tissue':
-            assert name == 'lung'
+            assert name == lung_oterm.get('preferred_name')
         elif biotype == 'multicellular organism':
             assert name == 'whole human'
 

@@ -133,6 +133,9 @@
         "experiments_in_set.biosample.biosource.cell_line_tier": {
             "title": "Sample Tier"
         },
+        "experiments_in_set.biosample.biosample_category": {
+            "title": "Sample Category"
+        },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Sample"
         },

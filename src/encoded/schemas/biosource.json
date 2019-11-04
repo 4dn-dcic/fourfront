@@ -144,6 +144,9 @@
         },
         "modifications.modification_type": {
             "title": "Modification Type"
+        },
+        "biosource_category": {
+            "title": "Category"
         }
     },
     "columns": {

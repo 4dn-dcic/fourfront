@@ -105,6 +105,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.modifications_summary",
         "experiments_in_set.biosample.biosource_summary",
         "experiments_in_set.biosample.biosample_type",
+        "experiments_in_set.biosample.biosample_category",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
