@@ -400,6 +400,17 @@ def test_search_with_added_display_title(workbook, testapp, registry):
     exps2 = [exp['uuid'] for exp in res_json2['@graph']]
     assert set(exps) == set(exps2)
 
+    # 'sort' also adds display_title for ascending and descending queries
+    for use_sort in ['biosample', '-biosample']:
+        search = '/search/?type=ExperimentHiC&sort=%s' % use_sort
+        res_json = testapp.get(search, status=301).follow(status=200).json
+        assert res_json['@id'] == '/search/?type=ExperimentHiC&sort=%s.display_title' % use_sort
+
+    # regular sort queries remain unchanged
+    search = '/search/?type=ExperimentHiC&sort=uuid'
+    res_json = testapp.get(search).json
+    assert res_json['@id'] == '/search/?type=ExperimentHiC&sort=uuid'
+
     # check to see that added facet doesn't conflict with existing facet title
     # query below will change to file_format.display_title=fastq
     search = '/search/?type=File&file_format=fastq'

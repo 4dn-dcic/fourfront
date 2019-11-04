@@ -46,15 +46,15 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
         it("Can unselect currently-selected filters via QuickInfoBar filter panel", function(){
             cy.getQuickInfoBarCounts().then((origCounts)=>{
                 cy.get('#stats .any-filters.glance-label').hoverIn().wait(100).end()
-                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 2).end()
-                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="human"] i.icon-times').should('have.length', 1).click().wait(10).end()
-                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="human"] i.icon-times').should('have.length', 0).end()
-                    .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb').should('have.length', 1).end()
+                    .get('#stats .bottom-side .field-group .chart-crumb').should('have.length', 2).end()
+                    .get('#stats .bottom-side .field-group .chart-crumb[data-term="human"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                    .get('#stats .bottom-side .field-group .chart-crumb[data-term="human"] i.icon-times').should('have.length', 0).end()
+                    .get('#stats .bottom-side .field-group .chart-crumb').should('have.length', 1).end()
                     .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', 1).then(($allBarParts)=>{
                         const unfilteredOnceBarPartCount = $allBarParts.length;
                         cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', origCounts.experiment_sets).then((unfilteredOnceExpSetCount)=>{
-                            cy.get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
-                                .get('#stats .bottom-side .chart-breadcrumbs .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 0).end()
+                            cy.get('#stats .bottom-side .field-group .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 1).click().wait(10).end()
+                                .get('#stats .bottom-side .field-group .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 0).end()
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
                                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
                                 .location('search').should('include', 'award.project=4DN')
