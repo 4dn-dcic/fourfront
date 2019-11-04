@@ -71,7 +71,10 @@ class Biosource(Item):
     })
     def biosource_name(self, request, biosource_type, individual=None,
                        cell_line=None, cell_line_tier=None, tissue=None,
-                       modifications=None):
+                       modifications=None, override_biosource_name=None):
+        if override_biosource_name:
+            # if this field is present just return it
+            return override_biosource_name
         cell_line_types = [
             'primary cell',
             'primary cell line',
@@ -135,6 +138,7 @@ class Biosource(Item):
             'EFO:0009318': 'HFF (c6 or hTERT)',
             '4DN:0000001': 'HFF (c6 or hTERT)',
             '4DN:0000005': 'WTC-11',
+            'EFO:0009747': 'WTC-11',
             'EFO:0001196': 'IMR-90',
             '4DN:0000260': 'Tier 2',
             '4DN:0000250': 'Tier 2',
