@@ -574,7 +574,8 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         else:
             name = requested_sort
             order = 'asc'
-        sort_schema = type_schema.get('properties', {}).get(name) if type_schema else None
+        sort_schema = schema_for_field(name, request, doc_types)
+
         if sort_schema:
             sort_type = sort_schema.get('type')
         else:
@@ -591,6 +592,12 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             sort['embedded.' + name] = result_sort[name] = {
                 'order': order,
                 'unmapped_type': 'float',
+                'missing': '_last'
+            }
+        elif sort_schema and determine_if_is_date_field(name, sort_schema):
+            sort['embedded.' + name + '.raw'] = result_sort[name] = {
+                'order': order,
+                'unmapped_type': 'date',
                 'missing': '_last'
             }
         else:
@@ -954,7 +961,8 @@ def schema_for_field(field, request, doc_types, should_log=False):
     '''
     Find the schema for the given field (in embedded '.' format). Uses
     ff_utils.crawl_schema from snovault and logs any cases where there is an
-    error finding the field from the schema
+    error finding the field from the schema. Caches results based off of field
+    and doc types used
 
     Args:
         field (string): embedded field path, separated by '.'
