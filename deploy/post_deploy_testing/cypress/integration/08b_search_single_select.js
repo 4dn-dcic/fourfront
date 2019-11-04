@@ -10,9 +10,7 @@ function checkFileCheckbox($checkBox) {
 function unCheckFileCheckbox($checkBox) {
     return cy.wrap($checkBox).scrollToCenterElement().uncheck({ 'force': true }).end();
 }
-/**
-* Test higlass add data page single selected file.
-*/
+
 describe("Single Select Search Page (e.g. HiGlass Add File)", function () {
 
     context('Single select data', function () {
@@ -38,12 +36,21 @@ describe("Single Select Search Page (e.g. HiGlass Add File)", function () {
                 });
             });
         });
-        it('Checkbox unchecked ', function () {
+
+        it('Checkbox unchecked', function () {
 
             cy.get('.search-results-container .search-result-row .search-result-column-block input[type="checkbox"]').each(($checkBox, idx) =>
                 unCheckFileCheckbox($checkBox)
             );
         });
+
+        it('None of the rows selected and Nothing is displayed in footer', function () {
+            cy.get('.sticky-page-footer .mt-0.mb-0').then(($selectedFileNameFooterDisplay) => {
+                const selectedFileFooterDisplayName = $selectedFileNameFooterDisplay.text().replace('selected', '').trim();
+                expect(selectedFileFooterDisplayName).to.equal('Nothing');
+            });
+        });
+
         it('Search box input works on submit', function () {
             cy.get('.above-results-table-row .text-500').then(($origTotalResults) => {
 
@@ -65,5 +72,6 @@ describe("Single Select Search Page (e.g. HiGlass Add File)", function () {
                 .wait(1000).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .searchPageTotalResultCount().should('to.equal', allResultTotalCount);
         });
+
     });
 });

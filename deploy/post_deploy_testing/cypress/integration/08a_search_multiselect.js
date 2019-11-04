@@ -9,15 +9,14 @@ function checkFileCheckbox($checkBox) {
     selectedCheckFileNumberCount += 1;
     return cy.wrap($checkBox).scrollToCenterElement().check({ 'force': true }).end();
 }
+
 function unCheckFileCheckbox($checkBox) {
     selectedCheckFileNumberCount -= 1;
     if (selectedCheckFileNumberCount >= 0) {
         return cy.wrap($checkBox).scrollToCenterElement().uncheck({ 'force': true }).end();
     }
 }
-/**
-* Test  higlass add data page multi selected file.
-*/
+
 describe("Multiselect Search Page (e.g. HiGlass Add File)", function () {
 
 
