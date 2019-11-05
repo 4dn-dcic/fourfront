@@ -194,9 +194,6 @@ def main(global_config, **local_config):
 
     # source environment variables on elastic beanstalk
     source_beanstalk_env_vars()
-    # Set index namespace
-    # Eventually we will enable this
-    settings['indexer.namespace'] = settings.get('env.name', '')
 
     settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
