@@ -30,7 +30,7 @@ describe('Browse Views - Files Selection', function () {
     context('Ensure "Select All Files" & related features are functional.', function () {
 
         before(function () {
-            cy.visit('/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate');
+            cy.visit('/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate&experiments_in_set.experiment_type.display_title=CUT%26RUN');
         });
 
         it.skip('We have some counts in QuickInfoBar to compare selected file counts against.', function () {
@@ -61,6 +61,7 @@ describe('Browse Views - Files Selection', function () {
         });
 
         it('Can press buttons at right & left to scroll to right side of search results table', function () {
+
             cy.get('#content div.shadow-border-layer div.edge-scroll-button.right-edge:not(.faded-out)').trigger('mousedown', { 'button': 0, 'force': true })
                 .should('have.class', 'faded-out') // Scroll until scrolling further is disabled.
                 .trigger('mouseup', { 'force': true }) // Might become invisible
@@ -79,6 +80,7 @@ describe('Browse Views - Files Selection', function () {
         });
 
         it('Can change to sort by date_created -- ascending', function () {
+
             cy.scrollTo(0, 500)
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
                 .click({ 'force': true })
@@ -131,9 +133,7 @@ describe('Browse Views - Files Selection', function () {
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
                 .get('div.modal-dialog .modal-header button.close').click().wait(100).end();
-            return cy.get('.search-result-config-panel input[type="checkbox"]').each(($checkBox, idx) => {
-                fileTypeFilterUnCheckFileCheckbox($checkBox);
-            });
+
         });
 
         it('ExpSets checkboxes are checked & can be toggled', function () {
@@ -149,7 +149,6 @@ describe('Browse Views - Files Selection', function () {
         });
 
         it('ExpSets > FilePairs+Files checkboxes are checked & can be toggled.', function () {
-
             cy.getDownloadButton().invoke('text').then((downloadButtonTextContent) => {
                 let origSelectedCount = downloadButtonTextContent.match(/\d/g);
                 origSelectedCount = parseInt(origSelectedCount.join(''));
@@ -175,6 +174,7 @@ describe('Browse Views - Files Selection', function () {
         });
 
         it('Can click Download button, get modal with proper contents', function () {
+
             cy.getDownloadButton().click().wait(100).end()
                 .get('div.modal-dialog .modal-body button.btn-info').should('have.length', 1).should('contain', 'I have read').click().end()
                 .get('div.modal-dialog .modal-body form[method="POST"] input[type="hidden"][name="accession_triples"]').should('have.length', 1).end()
