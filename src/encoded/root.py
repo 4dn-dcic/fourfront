@@ -116,13 +116,6 @@ def health_check(config):
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
 
-        # when ontologies were imported
-        try:
-            si = request.embed('/sysinfos/ffsysinfo')
-            ont_date = si.json['ontology_updated']
-        except:  # pylint:disable
-            ont_date = "Never Generated"
-
         app_url = request.application_url
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
@@ -136,7 +129,6 @@ def health_check(config):
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('load_test_data'),
             "beanstalk_env": settings.get('env.name'),
-            'ontology_updated': ont_date,
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
