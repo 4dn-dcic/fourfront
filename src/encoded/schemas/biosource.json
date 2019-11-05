@@ -124,6 +124,12 @@
             "type": "string",
             "lookup": 100,
             "linkTo": "Protocol"
+        },
+        "override_biosource_name": {
+            "title": "Biosource Name Override",
+            "description": "A override name for the biosource that can be used as the biosource_name in place of the automatically generated one",
+            "type": "string",
+            "lookup": 1000
         }
     },
     "facets": {

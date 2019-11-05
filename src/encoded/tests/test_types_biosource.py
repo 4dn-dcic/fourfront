@@ -157,6 +157,11 @@ def test_calculated_biosource_name(testapp, biosources, mod_w_change_and_target,
             assert name == 'whole human'
 
 
+def test_calculated_biosource_name_override(testapp, GM12878_mod_biosource):
+    bs_w_or = testapp.patch_json(GM12878_mod_biosource['@id'], {'override_biosource_name': 'neat modified cell line'})
+    assert bs_w_or.json['@graph'][0]['biosource_name'] == 'neat modified cell line'
+
+
 def test_validate_biosource_tissue_no_tissue(testapp, award, lab, gm12878_oterm):
     biosource = {'award': award['@id'],
                  'lab': lab['@id'],
