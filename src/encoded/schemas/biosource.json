@@ -126,10 +126,10 @@
             "linkTo": "Protocol"
         },
         "override_biosource_name": {
-            "description": "A override name for the biosource",
+            "title": "Biosource Name Override",
+            "description": "A override name for the biosource that can be used as the biosource_name in place of the automatically generated one",
             "type": "string",
-            "lookup": 1000,
-            "comment": "If this field has a value this will be used as the biosource_name calc property"
+            "lookup": 1000
         }
     },
     "facets": {
