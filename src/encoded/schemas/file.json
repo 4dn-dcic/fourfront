@@ -379,8 +379,7 @@
             "title": "Generating Lab"
         },
         "file_size" : {
-            "title" : "File Size",
-            "default_hiddent": true
+            "title" : "File Size"
         },
         "date_created": {
             "default_hidden" : true

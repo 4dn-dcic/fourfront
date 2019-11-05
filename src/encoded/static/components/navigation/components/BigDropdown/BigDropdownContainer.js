@@ -8,13 +8,15 @@ import _ from 'underscore';
 import { CSSTransition } from 'react-transition-group';
 import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
-/** @todo make more reusable? */
-export class BigDropdownMenu extends React.PureComponent {
+
+export class BigDropdownContainer extends React.PureComponent {
 
     // TODO: Check openDropdownID vs ___MenuTree presence.
 
     static defaultProps = {
-        'windowHeight' : 500
+        'windowHeight' : 500,
+        'children' : <h5>HI!</h5>,
+        'introSection' : <h4>Hello World!</h4>
     };
 
     constructor(props){
@@ -124,7 +126,7 @@ export class BigDropdownMenu extends React.PureComponent {
     }
 
     introSection(){
-        var { menuTree, windowHeight } = this.props;
+        const { menuTree, windowHeight } = this.props;
         if (!menuTree || !menuTree.display_title || !menuTree.description || windowHeight < 800) return null;
         return (
             <div className="intro-section">
@@ -136,13 +138,17 @@ export class BigDropdownMenu extends React.PureComponent {
 
     render(){
         const { closing : stateClosing } = this.state;
-        const { id, windowWidth, windowHeight, scrolledPastTop, testWarning, open, overlaysContainer, className, closing: propClosing } = this.props;
+        const { children, introSection, id, scrolledPastTop, testWarning, open, overlaysContainer, className, closing: propClosing, ...passProps } = this.props;
+        const { windowWidth, windowHeight } = passProps;
         const closing = propClosing || stateClosing;
         let outerStyle = null;
         if (windowWidth >= 992){
             outerStyle = { 'maxHeight' : windowHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
         }
+
         const cls = "big-dropdown-menu-background" + (className ? ' ' + className : "");
+        const childProps = { ...passProps, onMenuItemClick: this.onMenuItemClick };
+        const body = React.Children.map(children, (child) => React.cloneElement(child, childProps));
 
         return ReactDOM.createPortal(
             <CSSTransition appear in={open && !closing} classNames="big-dropdown-menu-transition" unmountOnExit
@@ -150,8 +156,8 @@ export class BigDropdownMenu extends React.PureComponent {
                 <div className={cls} onClick={this.onMenuItemClick}>
                     <div className={"big-dropdown-menu" + (open ? ' is-open' : '')} data-open-id={id} style={outerStyle}>
                         <div className="container">
-                            { this.introSection() }
-                            { this.renderMenuItems() }
+                            {/* this.introSection() */}
+                            { body }
                         </div>
                     </div>
                 </div>

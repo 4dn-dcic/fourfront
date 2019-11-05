@@ -48,9 +48,6 @@ export class NavigationBar extends React.PureComponent {
          * @property {boolean} state.testWarning        Whether Test Data warning banner is visible. Initially determined according to if are on production hostname.
          * @property {boolean} state.mounted            Whether are mounted.
          * @property {boolean} state.mobileDropdownOpen Helper state to keep track of if menu open on mobile because mobile menu doesn't auto-close after navigation.
-         * @property {!string} state.openDropdown       ID of currently-open dropdown menu. Use for BigDropdown(s) e.g. Help menu directory.
-         * @property {Object}  state.helpMenuTree       JSON representation of menu tree.
-         * @property {boolean} state.isLoadingHelpMenuTree - Whether menu tree is currently being loaded.
          */
         this.state = {
             'testWarning'           : !productionHost[url.parse(props.href).hostname] || false,
