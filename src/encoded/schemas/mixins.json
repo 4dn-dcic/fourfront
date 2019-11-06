@@ -641,6 +641,14 @@
             }
         }
     },
+    "sample_image": {
+        "sample_image": {
+            "title": "Sample Image",
+            "description": "Sample Image to be displayed on Experiment Set Item Page",
+            "type": "string",
+            "linkTo": "Image"
+        }
+    },
     "facets_common" : {
         "award.project": {
             "title": "Project"
