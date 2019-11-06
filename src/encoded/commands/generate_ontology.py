@@ -987,23 +987,6 @@ def owl_runner(value):
     return download_and_process_owl(*value)
 
 
-def last_ontology_load(app):
-    from webtest import TestApp
-    from webtest.app import AppError
-    import dateutil
-
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-    try:
-        sysinfo = testapp.get("/sysinfo/ffsysinfo").follow().json
-        return dateutil.parser.parse(sysinfo['ontology_updated'])
-    except AppError:
-        return datetime.datetime.min
-
-
 def main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts

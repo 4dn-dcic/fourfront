@@ -229,22 +229,6 @@ class Protocol(Item, ItemWithAttachment):
 
 
 @collection(
-    name='sysinfos',
-    unique_key='sysinfo:name',
-    properties={
-        'title': 'Sysinfo',
-        'description': 'Just for internal use',
-    })
-class Sysinfo(Item):
-    """sysinfo class."""
-
-    item_type = 'sysinfo'
-    schema = load_schema('encoded:schemas/sysinfo.json')
-    name_key = 'name'
-    embedded_list = []
-
-
-@collection(
     name='tracking-items',
     properties={
         'title': 'TrackingItem',

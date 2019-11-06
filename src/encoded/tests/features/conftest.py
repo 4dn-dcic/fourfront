@@ -72,7 +72,9 @@ def workbook(app):
     from ...loadxl import load_all
     from pkg_resources import resource_filename
     # just load the workbook inserts
-    load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
+    load_res = load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
+    if load_res:
+        raise(load_res)
 
     testapp.post_json('/index', {})
     yield

@@ -13,6 +13,7 @@ env.name = ${env_name}
 encoded_version = ${encoded_version}
 mpindexer = ${mpindexer}
 indexer = ${indexer}
+indexer.namespace = ${env_name}
 elasticsearch.aws_auth = true
 production = true
 
