@@ -18,6 +18,7 @@ import { TabbedView } from './components/TabbedView';
 import { Publications } from './components/Publications';
 import { AttributionTabView } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
+import { standardizeUserIconString } from './../static-pages/components/BasicUserContentBody';
 
 import { ExpandableStaticHeader } from './../static-pages/components';
 
@@ -362,7 +363,7 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
                         title={title || 'Informational Notice ' + (i + 1)}
                         context={section}
                         defaultOpen={options.default_open || false} key={name || i} index={i}
-                        titleIcon={options.title_icon} />
+                        titleIcon={standardizeUserIconString(options.title_icon)} />
                 );
             })}
             <hr />

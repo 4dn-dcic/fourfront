@@ -208,11 +208,11 @@ class PublicationSummary extends React.PureComponent {
     }
 
     render(){
-        var { context } = this.props,
-            abstractCol = this.abstract(),
-            staticContent = _.pluck(_.filter(context.static_content || [], function(s){
-                return s.content && !s.content.error && s.location === 'tab:overview';
-            }), 'content');
+        const { context } = this.props;
+        const abstractCol = this.abstract();
+        const staticContent = _.pluck(_.filter(context.static_content || [], function(s){
+            return s.content && !s.content.error && s.location === 'tab:overview';
+        }), 'content');
 
         return (
             <div>

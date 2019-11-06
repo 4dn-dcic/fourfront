@@ -12,6 +12,7 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
 import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
+import { standardizeUserIconString } from './../../static-pages/components/BasicUserContentBody';
 
 
 /** This file/component is specific to 4DN portal */
@@ -159,17 +160,16 @@ export class TabbedView extends React.PureComponent {
         // Content with position : 'tab' gets its own tab.
         //
 
-        var staticTabContentSingles = _.filter(staticContentList, function(s){
+        const staticTabContentSingles = _.filter(staticContentList, function(s){
             return s.content && !s.content.error && s.location === 'tab';
         });
 
 
-        _.forEach(staticTabContentSingles, function(s, idx){
-            var content = s.content,
-                title   = content.title || 'Custom Tab ' + (idx + 1),
-                tabKey  = title.toLowerCase().split(' ').join('_'),
-                icon    = (content.options && content.options.title_icon) || null;
-
+        staticTabContentSingles.forEach(function(s, idx){
+            const { content : { title = null, options : { title_icon = null } = {} } } = s;
+            const useTitle = title || 'Custom Tab ' + (idx + 1);
+            const tabKey = useTitle.toLowerCase().split(' ').join('_');
+            const icon = standardizeUserIconString(title_icon);
             resultArr.push(TabbedView.createTabObject(tabKey, title, icon, [s], { 'hideTitles' : true }));
         });
 
