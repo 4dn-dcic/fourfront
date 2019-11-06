@@ -441,6 +441,20 @@ def test_search_with_no_value(workbook, testapp):
     assert(set(res_ids2) <= set(res_ids))
 
 
+def test_search_with_static_header(workbook, testapp):
+    """ Performs a search which should be accompanied by a search header """
+    search = '/search/?type=Workflow'
+    res_json = testapp.get(search, status=404).json # no items, just checking hdr
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
+    search = '/search/?type=workflow' # check type resolution
+    res_json = testapp.get(search, status=404).json
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
+
+
 #########################################
 ## Tests for collections (search 301s) ##
 #########################################

@@ -78,6 +78,18 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     principals = request.effective_principals
     es = request.registry[ELASTIC_SEARCH]
 
+    # Get static section (if applicable) when searching a single item type
+    # Note: Because we rely on 'source', if the static_section hasn't been indexed
+    # into Elasticsearch it will not be loaded
+    if (len(doc_types) == 1) and 'Item' not in doc_types:
+        search_term = 'search-info-header.' + doc_types[0]
+        static_section = request.registry['collections']['StaticSection'].get(search_term)
+        if static_section and hasattr(static_section.model, 'source'):
+            item = static_section.model.source['object']
+            result['search_header'] = {}
+            result['search_header']['content'] = item['content']
+            result['search_header']['title'] = item.get('title', item['display_title'])
+
     from_, size = get_pagination(request)
 
     # get desired frame for this search

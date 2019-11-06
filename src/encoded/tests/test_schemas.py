@@ -124,7 +124,7 @@ def test_load_schema(schema, master_mixins, registry):
             ]
             no_alias_or_attribution = [
                 'user.json', 'award.json', 'lab.json', 'organism.json',
-                'ontology.json', 'ontology_term.json', 'sysinfo.json', 'page.json',
+                'ontology.json', 'ontology_term.json', 'page.json',
                 'static_section.json', 'badge.json', 'tracking_item.json',
                 'file_format.json', 'experiment_type.json', 'higlass_view_config.json'
             ]
