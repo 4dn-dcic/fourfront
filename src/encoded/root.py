@@ -129,6 +129,7 @@ def health_check(config):
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('load_test_data'),
             "beanstalk_env": settings.get('env.name'),
+            "namespace": settings.get('indexer.namespace'),
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
