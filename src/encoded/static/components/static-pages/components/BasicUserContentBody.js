@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { object, analytics, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
+import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
@@ -44,7 +45,7 @@ export class BasicUserContentBody extends React.PureComponent {
     }
 
     render(){
-        var { context, markdownCompilerOptions, parentComponentType } = this.props;
+        const { context, markdownCompilerOptions, parentComponentType, windowWidth } = this.props;
         if (this.state.hasError){
             return (
                 <div className="error">
@@ -56,7 +57,7 @@ export class BasicUserContentBody extends React.PureComponent {
         var itemType = this.itemType();
 
         if (itemType === 'StaticSection') {
-            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} />;
+            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} windowWidth={windowWidth} placeholderReplacementFxn={placeholderReplacementFxn} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
@@ -124,14 +125,14 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
         'prependTitleIcon' : true
     });
 
-    renderInnerBody(){
-        const { context, href } = this.props;
+    renderInnerBody() {
+        const { context, href, windowWidth } = this.props;
         const { open } = this.state;
         const isHiGlass = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} />
+                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} windowWidth={windowWidth} />
             </div>
         );
     }

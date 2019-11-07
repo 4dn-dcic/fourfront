@@ -701,7 +701,16 @@
         }
     },
 
-
+    {
+        "name" : "page-carousel.test",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af4600028",
+        "title": "Page Carousel Test",
+        "body" : "<PageCarousel />",
+        "status" : "released",
+        "options": {
+            "filetype" : "jsx"
+        }
+    },
 
     {
         "name" : "joint-analysis-data-plans.matrix-1",

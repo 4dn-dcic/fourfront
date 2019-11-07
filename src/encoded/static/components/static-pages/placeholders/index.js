@@ -6,16 +6,19 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 
 import { SlideCarousel } from './SlideCarousel';
+import { PageCarousel } from './PageCarousel';
 import { JointAnalysisMatrix } from './JointAnalysisMatrix';
 
-export { SlideCarousel, JointAnalysisMatrix };
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+
+export { SlideCarousel, PageCarousel, JointAnalysisMatrix };
 
 
 /**
  * Any placeholder(s) used in a StaticSection _must_ get imported here
  * and be available here.
  */
-const placeholders = { SlideCarousel, JointAnalysisMatrix };
+const placeholders = { SlideCarousel, JointAnalysisMatrix, PageCarousel };
 
 export const replaceString = memoize(function(placeholderString, props){
 

@@ -537,6 +537,13 @@ $carousel-height : 240px;
 		}
 	}
 
+	&.disable-carousel-background {
+		&:before {
+			background: none;
+			box-shadow: none;
+		}
+	}
+
 	.slider-slide {
 
 		.homepage-carousel-slide {
@@ -656,6 +663,15 @@ $carousel-height : 240px;
 		right: -35px !important;
 	}
 
+	.slider{
+		.slider-control-bottomcenter {
+			bottom: -50px !important;
+			.paging-dot {
+				width:10px !important; 
+				height:10px !important;
+			}
+		}
+	}
 }
 
 

@@ -9,7 +9,7 @@ import { BasicUserContentBody, ExpandableStaticHeader } from './BasicUserContent
 
 
 export const UserContentBodyList = React.memo(function UserContentBodyList(props){
-    const { contents, headerElement, headerProps, allCollapsible, href, hideTitles } = props;
+    const { contents, headerElement, headerProps, allCollapsible, href, hideTitles, windowWidth } = props;
     if (!contents || !Array.isArray(contents) || contents.length === 0) return null;
 
     const renderedContent = _.filter(_.map(contents, function(c,i,all){
@@ -22,9 +22,9 @@ export const UserContentBodyList = React.memo(function UserContentBodyList(props
             <div className="static-content-item" key={c.name || c.uuid || object.itemUtil.atId(c) || i}>
                 { !hideTitles && c.title && !isCollapsible ? React.createElement(headerElement, headerProps, c.title) : null }
                 { isCollapsible ?
-                    <ExpandableStaticHeader context={c} defaultOpen={c.options.default_open} title={c.title} href={href} titleTip={c.description} />
+                    <ExpandableStaticHeader context={c} defaultOpen={c.options.default_open} title={c.title} {...{ href, windowWidth }} titleTip={c.description} />
                     :
-                    <BasicUserContentBody context={c} href={href} />
+                    <BasicUserContentBody context={c} {...{ href, windowWidth }} />
                 }
             </div>
         );
