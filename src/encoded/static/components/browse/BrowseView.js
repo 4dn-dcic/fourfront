@@ -256,7 +256,7 @@ class ResultTableContainer extends React.PureComponent {
                 { facets && facets.length > 0 ?
                     <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
                         <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />
-                        <FacetList {...{ session, browseBaseState, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
+                        <FacetList {...{ session, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
                             orientation="vertical" className="with-header-bg" filters={context.filters}
                             getTermStatus={this.getTermStatus} onFilter={this.onFilter}
                             itemTypeForSchemas="ExperimentSetReplicate" href={href} termTransformFxn={Schemas.Term.toName}

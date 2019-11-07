@@ -2,6 +2,7 @@
 
 export { SearchBar } from './SearchBar';
 export { TestWarning } from './TestWarning';
-export { HelpNavItem } from './HelpNavItem';
+export { LeftNav, HelpNavItem, ResourcesNavItem } from './LeftNav';
 export { LoginNavItem } from './LoginNavItem';
-export { UserActionDropdownMenu, isActionActive, getActionURL } from './UserActionDropdownMenu';
+export { AccountNav, isActionActive, getActionURL } from './AccountNav';
+export * from './BigDropdown';

@@ -124,6 +124,8 @@ class Experiment(Item):
         "biosample.badges.badge.badge_icon",
         "biosample.badges.messages",
 
+        "experiment_type.experiment_category",
+
         "files.href",
         "files.accession",
         "files.uuid",

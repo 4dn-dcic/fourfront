@@ -13,18 +13,23 @@ import { BigDropdownContainer } from './BigDropdownContainer';
 export class BigDropdownNavItem extends React.PureComponent {
 
     static defaultProps = {
-        'id'                : 'help-menu-item',
-        'session'           : false,
-        'isFullscreen'      : false,
-        'testWarning'       : false,
-        'navItemHref'       : "/help/",
+        'id'                : 'help-menu-item', // MUST be supplied
+        'testWarningVisible': false,
+        'navItemHref'       : null,
         'navItemContent'    : <React.Fragment>Hello World</React.Fragment>,
         'overlaysContainer' : null,
-        'children'          : <div>Hello World Again</div>
+        'children'          : <div>Hello World Again</div>,
+        'className'         : null,
+        'mounted'           : true,
+        'active'            : null, // Will override navItemHref check to determine `active` if is bool
+        'windowWidth'       : undefined,
+        'windowHeight'      : undefined,
+        'addToBodyClassList' : null,
+        'removeFromBodyClassList' : null
     };
 
     /** Relatively arbitrary point where wanna show/enable the big dropdown */
-    static isDesktopView = memoize(function(windowWidth){
+    static isDesktopView = memoize(function(windowWidth = 0){
         return windowWidth > 768;
     });
 
@@ -40,22 +45,19 @@ export class BigDropdownNavItem extends React.PureComponent {
     }
 
     onCloseDropdown(cb){
-        this.setState(function({ isDropdownVisible }){
-            if (!isDropdownVisible && !closingDropdown) return null;
-            return { 'isDropdownVisible' : false, 'closingDropdown' : false };
-        }, cb);
+        const { visibleDropdownID, onCloseDropdown, id } = this.props;
+
+        if (typeof visibleDropdownID !== "undefined" && typeof onCloseDropdown === "function") {
+            // Defer to BigDropdownGroupController
+            onCloseDropdown(id);
+        }
     }
 
     handleToggle(e){
         e && e.preventDefault();
-        this.setState(function({ isDropdownVisible }){
-            if (!isDropdownVisible){
-                return { 'isDropdownVisible' : true };
-            } else {
-                // CSSTransition in BigDropdownMenu will transition out then call this.onCloseDropdown()
-                return { 'closingDropdown' : true };
-            }
-        });
+        e && e.stopPropagation();
+        const { visibleDropdownID, onToggleDropdown, id = null } = this.props;
+        onToggleDropdown(id);
     }
 
 
@@ -64,34 +66,44 @@ export class BigDropdownNavItem extends React.PureComponent {
             children,
             navItemContent,
             mounted,
-            isFullscreen = false,
-            testWarning = false,
-            //menuTree = null,
+            testWarningVisible = false,
+            menuTree = null,
             isLoadingMenuTree = false,
             href = "/",
-            navItemHref = null,
+            active: propActive = null,
+            navItemHref: propNavItemHref = null,
             id = "help",
             overlaysContainer,
+            visibleDropdownID,
+            closingDropdownID,
+            className = null,
             ...passProps
         } = this.props;
         const { windowHeight, windowWidth } = passProps;
-        const { isDropdownVisible, closingDropdown } = this.state;
+
+        const open = visibleDropdownID === id;
+        const closing = closingDropdownID === id;
         const isDesktopView = BigDropdownNavItem.isDesktopView(windowWidth);
-        const active = href.indexOf(navItemHref) > -1;
+        const navItemHref = propNavItemHref || menuTree && menuTree.name || null;
+        const active = (
+            typeof propActive === "boolean" ? propActive
+                : typeof navItemHref === "string" && typeof href === "string" ? (href.indexOf(navItemHref) > -1)
+                    : false
+        );
 
         const navItemProps = {
             id, active,
             "key" : id,
             "href": navItemHref,
-            'className' : "id-" + id,
+            'className' : "clickable id-" + id + (className ? " " + className : ""),
         };
 
-        if (!children || !mounted || !isDesktopView || isLoadingMenuTree) {
+        if (!children || !mounted || isLoadingMenuTree) {
             // Normal link to 'href'
             return <Nav.Link {...navItemProps} disabled={!(href)}>{ navItemContent }</Nav.Link>;
         }
 
-        navItemProps.className += " dropdown-toggle" + (isDropdownVisible ? " dropdown-open-for" : "");
+        navItemProps.className += " big-dropdown-toggle dropdown-toggle" + (open ? " dropdown-open-for" : "");
 
         const navItem = (
             <Nav.Link {...navItemProps} onClick={this.handleToggle}>
@@ -99,31 +111,39 @@ export class BigDropdownNavItem extends React.PureComponent {
             </Nav.Link>
         );
 
-        const inclBigMenu = children && isDropdownVisible && isDesktopView;
+        const childProps = { ...passProps, menuTree };
+        const dropdownBody = React.Children.map(children, function(child){
+            return React.cloneElement(child, childProps);
+        });
 
-        if (!inclBigMenu){
-            return navItem;
-        } else {
-            const testWarningVisible = testWarning & !isFullscreen;
+        const dropdownContainerProps = {
+            href, overlaysContainer, id, open, closing,
+            isDesktopView, testWarningVisible,
+            windowWidth, windowHeight,
+            'onClose' : this.onCloseDropdown,
+            'onToggle': this.handleToggle,
+            'otherDropdownOpen' : !!(visibleDropdownID && !open),
+            'otherDropdownClosing' : !!(open && closingDropdownID && closingDropdownID !== id)
+        };
+
+        const dropdownMenu = <BigDropdownContainer {...dropdownContainerProps}>{ dropdownBody }</BigDropdownContainer>;
+
+        /*
+        if (children && open) {
+            const childProps = { ...passProps, menuTree };
             const dropdownBody = React.Children.map(children, function(child){
-                return React.cloneElement(child, passProps);
+                return React.cloneElement(child, childProps);
             });
-            return (
-                <React.Fragment>
-                    { navItem }
-                    <BigDropdownContainer {...{ windowWidth, windowHeight, href, overlaysContainer, id }}
-                        className={testWarningVisible ? 'test-warning-visible' : null}
-                        onClose={this.onCloseDropdown} open={isDropdownVisible} closing={closingDropdown}>
-                        {/*
-                        <BigDropdownPageTreeMenuIntroduction menuTree={menuTree} />
-                        <BigDropdownPageTreeMenu menuTree={menuTree} />
-                        */}
-                        { dropdownBody }
-                    </BigDropdownContainer>
-                </React.Fragment>
+            openMenu = (
+                <BigDropdownContainer {...{ windowWidth, windowHeight, href, overlaysContainer, id, open, closing, isDesktopView, testWarningVisible }}
+                    onClose={this.onCloseDropdown}>
+                    { dropdownBody }
+                </BigDropdownContainer>
             );
         }
+        */
 
+        return <React.Fragment>{ navItem }{ dropdownMenu }</React.Fragment>;
     }
 
 }

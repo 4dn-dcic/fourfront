@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { CSSTransition } from 'react-transition-group';
+import ReactTooltip from 'react-tooltip';
 import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
@@ -19,151 +20,77 @@ export class BigDropdownContainer extends React.PureComponent {
         'introSection' : <h4>Hello World!</h4>
     };
 
-    constructor(props){
-        super(props);
-        this.onMenuItemClick = _.throttle(this.onMenuItemClick.bind(this), 400);
-        this.onFinishTransitionOut = this.onFinishTransitionOut.bind(this);
-        this.renderMenuItems = this.renderMenuItems.bind(this);
-        this.state = { 'closing' : false };
-    }
-
     componentDidUpdate(pastProps){
-        const { href } = this.props;
-        if (href !== pastProps.href){
-            this.onMenuItemClick();
-        }
-    }
-
-    onMenuItemClick(e){
-        if (!e || !e.metaKey){
-            this.setState(function({ closing }){
-                if (closing) return null;
-                return { 'closing' : true };
-            });
-        }
-        // TODO: Google Analytics Hook-In
-    }
-
-    renderMenuItems(){
-        const { menuTree, windowWidth, href } = this.props;
-        const onMenuItemClick = this.onMenuItemClick;
-        /*
-        var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
-            return (c.children || []).length > 0;
-        }).length >= parseInt(helpMenuTree.children.length / 2);
-        */
-
-        const urlParts = url.parse(href);
-
-        function filterOutChildren(child){
-            return !child.error && child.display_title && child.name;
-        }
-
-        const level1ChildrenToRender = _.filter(menuTree.children, function(child){
-            const childValid = filterOutChildren(child);
-            if (!childValid) return false;
-            if ((child.content || []).length > 0) return true;
-            if ((child.children || []).length === 0) return false;
-            const filteredChildren = _.filter(child.children || [], filterOutChildren);
-            if (filteredChildren.length > 0) return true;
-            return false;
-        });
-
-        function childColumnsRenderer(childLevel1){
-            var level1Children = _.filter(childLevel1.children || [], filterOutChildren);
-            var hasChildren = level1Children.length > 0;
-            return (
-                <div className={"help-menu-tree level-1 col-12 col-md-6 col-lg-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
-                    <div className="level-1-title-container">
-                        <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
-                            data-delay-show={1000} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
-                            { childLevel1.display_title }
-                        </a>
-                    </div>
-                    { hasChildren ?
-                        _.map(level1Children, function(childLevel2){
-                            return (
-                                <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
-                                    href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={1000}
-                                    key={childLevel2.name} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
-                                    { childLevel2.display_title }
-                                </a>
-                            );
-                        })
-                        : null }
-                </div>
-            );
-        }
-
-        let columnsPerRow;
-        const rgs = layout.responsiveGridState(windowWidth);
-        if (rgs === 'xs'){
-            columnsPerRow = 1;
-        } else if (rgs === 'md'){
-            columnsPerRow = 2;
-        } else { // md & greater
-            columnsPerRow = 3;
-        }
-
-
-        var rowsOfLevel1Children = [];
-        _.forEach(level1ChildrenToRender, function(child, i, all){
-            var groupIdx = parseInt(i / columnsPerRow);
-            if (!Array.isArray(rowsOfLevel1Children[groupIdx])) rowsOfLevel1Children.push([]);
-            rowsOfLevel1Children[groupIdx].push(child);
-        });
-
-        return _.map(rowsOfLevel1Children, function(childrenInRow, rowIdx){
-            return <div className="row help-menu-row" key={rowIdx} children={_.map(childrenInRow, childColumnsRenderer)}/>;
-        });
-    }
-
-    onFinishTransitionOut(nodeElement){
-        const { onClose } = this.props;
-        this.setState({ 'closing' : false }, function(){
+        const { href, windowWidth, open, onClose } = this.props;
+        const { open: pastOpen, href: pastHref, windowWidth: pastWindowWidth } = pastProps;
+        if (href !== pastHref){
             onClose();
-        });
-    }
+            return;
+        }
 
-    introSection(){
-        const { menuTree, windowHeight } = this.props;
-        if (!menuTree || !menuTree.display_title || !menuTree.description || windowHeight < 800) return null;
-        return (
-            <div className="intro-section">
-                <h4><a href={'/' + menuTree.name} onClick={this.onMenuItemClick}>{ menuTree.display_title }</a></h4>
-                <div className="description">{ menuTree.description }</div>
-            </div>
-        );
+        if (open && !pastOpen) {
+            ReactTooltip.rebuild();
+        }
+        // Seems CSSTransition might reset on resizes to mobile (need to look into, likely re: `key` or something)
+        // So for now we just close menu if changed grid breakpoint size.
+        /*
+        if (open && windowWidth !== pastWindowWidth){
+            const rgs = layout.responsiveGridState(windowWidth);
+            const pastRgs = layout.responsiveGridState(pastWindowWidth);
+            if (rgs !== pastRgs) {
+                //this.onStartClose();
+            }
+        }
+        */
     }
 
     render(){
-        const { closing : stateClosing } = this.state;
-        const { children, introSection, id, scrolledPastTop, testWarning, open, overlaysContainer, className, closing: propClosing, ...passProps } = this.props;
-        const { windowWidth, windowHeight } = passProps;
-        const closing = propClosing || stateClosing;
-        let outerStyle = null;
-        if (windowWidth >= 992){
-            outerStyle = { 'maxHeight' : windowHeight - (scrolledPastTop ? 40 : 80) - (testWarning ? 52 : 0) };
-        }
+        const {
+            children,
+            id,
+            scrolledPastTop,
+            testWarning,
+            open,
+            overlaysContainer = null,
+            className,
+            closing,
+            isDesktopView = true,
+            testWarningVisible = false,
+            otherDropdownOpen = false,
+            otherDropdownClosing = false,
+            onClose,
+            ...passProps
+        } = this.props;
 
-        const cls = "big-dropdown-menu-background" + (className ? ' ' + className : "");
-        const childProps = { ...passProps, onMenuItemClick: this.onMenuItemClick };
+        const outerCls = "big-dropdown-menu-background" + (className ? ' ' + className : "");
+        const innerCls = "big-dropdown-menu" + (open ? " is-open" : "");
+        const childProps = { ...passProps, onMenuItemClick: onClose };
         const body = React.Children.map(children, (child) => React.cloneElement(child, childProps));
-
-        return ReactDOM.createPortal(
-            <CSSTransition appear in={open && !closing} classNames="big-dropdown-menu-transition" unmountOnExit
-                timeout={{ appear: 0, exit: 250 }} key={id} onExited={this.onFinishTransitionOut}>
-                <div className={cls} onClick={this.onMenuItemClick}>
-                    <div className={"big-dropdown-menu" + (open ? ' is-open' : '')} data-open-id={id} style={outerStyle}>
+        const renderedElem = (
+            <CSSTransition appear in={open || closing} classNames="big-dropdown-menu-transition" unmountOnExit mountOnEnter
+                timeout={{ appear: 0, exit: otherDropdownOpen ? 0 : 300 }} key="dropdown-transition-container">
+                <div className={outerCls} onClick={onClose} key="dropdown-transition-container-inner"
+                    data-is-mobile-view={!isDesktopView}
+                    data-is-test-warning-visible={testWarningVisible}
+                    data-is-closing={closing}
+                    data-is-other-dropdown-closing={otherDropdownClosing}>
+                    <div className={innerCls} data-open-id={id}>
                         <div className="container">
-                            {/* this.introSection() */}
                             { body }
+                            <div className="mobile-close-button d-block d-md-none" onClick={onClose}>
+                                <i className="icon icon-2x icon-times fas"/>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </CSSTransition>,
-            overlaysContainer
+            </CSSTransition>
         );
+
+        if (overlaysContainer){
+            return ReactDOM.createPortal(renderedElem, overlaysContainer);
+        }
+
+        return renderedElem;
     }
 
 }

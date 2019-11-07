@@ -5,24 +5,31 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { CSSTransition } from 'react-transition-group';
-import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { BigDropdownIntroductionWrapper } from './BigDropdownIntroductionWrapper';
 
 
 export function BigDropdownPageTreeMenuIntroduction(props) {
-    const { menuTree, windowHeight, onMenuItemClick } = props;
+    const { menuTree, windowHeight, windowWidth, onMenuItemClick, titleIcon = null } = props;
     if (!menuTree || !menuTree.display_title || !menuTree.description || windowHeight < 800) return null;
+
+    console.log('TTT', windowWidth, windowHeight);
+
     return (
-        <div className="intro-section">
-            <h4><a href={'/' + menuTree.name} onClick={onMenuItemClick}>{ menuTree.display_title }</a></h4>
+        <BigDropdownIntroductionWrapper {...{ windowHeight, windowWidth, titleIcon }}>
+            <h4 className="mt-0 mb-0">
+                <a href={'/' + menuTree.name} onClick={onMenuItemClick}>{ menuTree.display_title }</a>
+            </h4>
             <div className="description">{ menuTree.description }</div>
-        </div>
+        </BigDropdownIntroductionWrapper>
     );
 }
 
 
 export function BigDropdownPageTreeMenu(props) {
     const { menuTree, windowWidth, href, onMenuItemClick } = props;
+
+    if (!menuTree) return null;
 
     /*
     var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
@@ -36,62 +43,84 @@ export function BigDropdownPageTreeMenu(props) {
         return !child.error && child.display_title && child.name;
     }
 
-    const level1ChildrenToRender = _.filter(menuTree.children, function(child){
+    const level1ChildrenWithoutSubChildren = [];
+    const level1ChildrenWithSubChildren = _.filter(menuTree.children, function(child){
         const childValid = filterOutChildren(child);
         if (!childValid) return false;
-        if ((child.content || []).length > 0) return true;
-        if ((child.children || []).length === 0) return false;
         const filteredChildren = _.filter(child.children || [], filterOutChildren);
-        if (filteredChildren.length > 0) return true;
-        return false;
+        if (filteredChildren.length > 0){
+            return true;
+        } else {
+            if ((child.content || []).length > 0) {
+                level1ChildrenWithoutSubChildren.push(child);
+            }
+            return false;
+        }
     });
 
-    let columnsPerRow;
-    const rgs = layout.responsiveGridState(windowWidth);
-    if (rgs === 'xs'){
-        columnsPerRow = 1;
-    } else if (rgs === 'md'){
-        columnsPerRow = 2;
-    } else { // md & greater
-        columnsPerRow = 3;
+    const hasLevel2Children = level1ChildrenWithSubChildren.length > 0;
+    let topLeftMenuCol = null;
+
+    if (level1ChildrenWithoutSubChildren.length > 0){
+        topLeftMenuCol = (
+            <div key="reserved"
+                className={"help-menu-tree level-1-no-child-links level-1 col-12" + (!hasLevel2Children? " col-lg-8" : " col-lg-4")}>
+                { level1ChildrenWithoutSubChildren.map(function(child){
+                    const active = (urlParts.pathname.indexOf(child.name) > -1 ? ' active' : '');
+                    return (
+                        <div className={"level-1-title-container" + (active? " active" : "")} key={child.name}>
+                            <a className="level-1-title text-medium" href={'/' + child.name} data-tip={child.description}
+                                data-delay-show={500} onClick={onMenuItemClick} id={"menutree-linkto-" + child.name.replace(/\//g, '_')} >
+                                <span>{ child.display_title }</span>
+                            </a>
+                        </div>
+                    );
+                }) }
+            </div>
+        );
     }
 
-    const rowsOfLevel1Children = [];
-    _.forEach(level1ChildrenToRender, function(child, i, all){
-        const groupIdx = Math.floor(i / columnsPerRow);
-        if (!Array.isArray(rowsOfLevel1Children[groupIdx])){
-            rowsOfLevel1Children.push([]);
-        }
-        rowsOfLevel1Children[groupIdx].push(child);
-    });
-
-
-    return _.map(rowsOfLevel1Children, function(childrenInRow, rowIdx){
-        const childrenInRowRendered = childrenInRow.map(function childColumnsRenderer(childLevel1){
-            const level1Children = _.filter(childLevel1.children || [], filterOutChildren);
-            const hasChildren = level1Children.length > 0;
-            return (
-                <div className={"help-menu-tree level-1 col-12 col-md-6 col-lg-4" + (hasChildren ? ' has-children' : '')} key={childLevel1.name}>
-                    <div className="level-1-title-container">
-                        <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
-                            data-delay-show={1000} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
-                            { childLevel1.display_title }
-                        </a>
-                    </div>
-                    { hasChildren ?
-                        level1Children.map(function(childLevel2){
-                            return (
-                                <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
-                                    href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={1000}
-                                    key={childLevel2.name} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
-                                    { childLevel2.display_title }
-                                </a>
-                            );
-                        })
-                        : null }
+    const childItems = level1ChildrenWithSubChildren.map(function(childLevel1){
+        const level1Children = _.filter(childLevel1.children || [], filterOutChildren);
+        const hasChildren = level1Children.length > 0;
+        const active = urlParts.pathname.indexOf(childLevel1.name) > -1;
+        const outerCls = (
+            "help-menu-tree level-1 col-12 col-md-6 col-lg-4" +
+            (hasChildren ? ' has-children' : '')
+        );
+        return (
+            <div className={outerCls} key={childLevel1.name}>
+                <div className={"level-1-title-container" + (active ? " active" : "")}>
+                    <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
+                        data-delay-show={500} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
+                        <span>{ childLevel1.display_title }</span>
+                    </a>
                 </div>
-            );
-        });
-        return <div className="row help-menu-row" key={rowIdx}>{ childrenInRowRendered }</div>;
+                { hasChildren ?
+                    level1Children.map(function(childLevel2){
+                        return (
+                            <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
+                                href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={500}
+                                key={childLevel2.name} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
+                                { childLevel2.display_title }
+                            </a>
+                        );
+                    })
+                    : null }
+            </div>
+        );
     });
+    const childItemsLen = childItems.length;
+    const cls = (
+        "tree-menu-container row" +
+        (!hasLevel2Children ? " no-level-2-children" : "") +
+        (!topLeftMenuCol ? "" : (childItemsLen < 3 ? "" : ((childItemsLen + 1) % 3 === 1 ? " justify-content-lg-center" : " justify-content-lg-end")))
+    );
+
+    return (
+        <div className={cls}>
+            { topLeftMenuCol }
+            { childItems }
+        </div>
+    );
 }

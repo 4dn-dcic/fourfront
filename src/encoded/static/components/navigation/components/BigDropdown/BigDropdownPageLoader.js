@@ -48,7 +48,7 @@ export class BigDropdownPageLoader extends React.PureComponent {
         }
         this.setState({ 'isLoadingMenuTree' : true }, ()=>{
             ajax.load(treeURL, (res)=>{
-                if (res && res.children){
+                if (res && res.name){
                     this.setState({ 'menuTree' : res, 'isLoadingMenuTree' : false });
                 } else {
                     this.setState({ 'menuTree' : null, 'isLoadingMenuTree' : false });
