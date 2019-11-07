@@ -734,7 +734,17 @@ class ExperimentMic(Experiment):
         "files.microscope_settings.ch00_lasers_diodes",
         "files.microscope_settings.ch01_lasers_diodes",
         "files.microscope_settings.ch02_lasers_diodes",
-        "files.microscope_settings.ch03_lasers_diodes"
+        "files.microscope_settings.ch03_lasers_diodes",
+
+        'sample_image.caption',
+        'sample_image.microscopy_file.accession',
+        'sample_image.microscopy_file.omerolink',
+        'sample_image.attachment.href',
+        'sample_image.attachment.type',
+        'sample_image.attachment.md5sum',
+        'sample_image.attachment.download',
+        'sample_image.attachment.width',
+        'sample_image.attachment.height'
     ]
     name_key = 'accession'
 

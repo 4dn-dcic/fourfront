@@ -28,7 +28,10 @@ class Image(ItemWithAttachment, Item):
         'image/jpeg',
         'image/gif',
     ]
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        'microscopy_file.accession',
+        'microscopy_file.omerolink'
+    ]
 
     def unique_keys(self, properties):
         """smth."""
