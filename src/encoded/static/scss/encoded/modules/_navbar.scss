@@ -893,16 +893,6 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                                 &:after {
                                     opacity: 1;
                                 }
-                                /*
-                                &:before {
-                                    font-family: $fa-font-family;
-                                    font-weight: 900;
-                                    content: "\f105";
-                                    position: absolute;
-                                    left: -15px;
-                                    top: 2px;
-                                }
-                                */
                             }
                         }
                     }
@@ -959,7 +949,7 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                                         content: "\f105";
                                         position: absolute;
                                         left: -15px;
-                                        top: 87px;
+                                        top: 9px;
                                     }
                                 }
                             }
