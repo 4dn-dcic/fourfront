@@ -8,8 +8,9 @@ import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ActiveFiltersBar } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/ActiveFiltersBar';
-import { Filters, navigate, Schemas } from '../util';
+import { Filters, navigate, Schemas } from './../util';
 import { Toggle } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Toggle';
+import { memoizedUrlParse } from './../globals';
 
 
 
@@ -29,9 +30,9 @@ export default class QuickInfoBar extends React.PureComponent {
 
     static isInvisibleForHref(href){
         // If have href, only show for /browse/, /search/, and / & /home
-        var urlParts = url.parse(href);
+        const urlParts = memoizedUrlParse(href);
         // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
-        var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
+        const pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
         if (pathParts[0] === 'browse') return false;
         if (pathParts.length === 1 && pathParts[0] === 'statistics') {
             if (!urlParts.hash || urlParts.hash === '#submissions'){

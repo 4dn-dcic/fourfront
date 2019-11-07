@@ -32,6 +32,22 @@ export const portalConfig = {
     }
 };
 
+/**
+ * `url.parse`, but globally memoized for performance.
+ * **ONLY** pass in the _current_ `props.href` here.
+ * Use regular `url.parse` for e.g. `pastProps.href`.
+ *
+ * If are re-using or transforming the resulting url parts or any
+ * of its properties, such as the `query` property, be sure to
+ * **clone** it first (since result is cached/memoized for other calls).
+ *
+ * @param {string} href - Current href.
+ */
+export const memoizedUrlParse = memoize(function urlParse(href){
+    console.warn("memoizedUrlParse called with", href);
+    return url.parse(href, true);
+});
+
 
 
 /**

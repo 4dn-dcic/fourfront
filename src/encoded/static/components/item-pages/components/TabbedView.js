@@ -13,6 +13,7 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
+import { memoizedUrlParse } from './../../globals';
 
 
 /** This file/component is specific to 4DN portal */
@@ -252,18 +253,18 @@ export class TabbedView extends React.PureComponent {
     }
 
     maybeSwitchTabAccordingToHref(props = this.props){
-        var { contents, href } = props,
-            hrefParts       = url.parse(href),
-            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            currKey         = this.getActiveKey();
+        const { contents, href } = props;
+        const hrefParts = memoizedUrlParse(href);
+        const hash = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1);
+        const currKey = this.getActiveKey();
 
         if (currKey === hash){
             console.log('Already on tab', hash);
             return false;
         }
 
-        var allContentObjs  = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
-            foundContent    = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
+        const allContentObjs = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
+        const foundContent = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
 
         if (!foundContent){
             console.error('Could not find', hash);

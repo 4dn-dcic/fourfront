@@ -8,6 +8,7 @@ import { Nav, NavDropdown, Dropdown } from 'react-bootstrap';
 
 import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
+import { memoizedUrlParse } from './../../globals';
 
 import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
 import { BigDropdownNavItem, BigDropdownIntroductionWrapper } from './BigDropdown';
@@ -175,7 +176,7 @@ function LogoutLink({ performLogout }){
  * @returns {boolean} Whether this action is to be displayed as active or not.
  */
 export function isActionActive(action, currentHref){
-    const hrefParts = url.parse(currentHref);
+    const hrefParts = memoizedUrlParse(currentHref);
     const hrefPath = (hrefParts.pathname || '/') + (hrefParts.search || '');
     return (
         (typeof action.active === 'function' && action.active(hrefPath)) ||
@@ -194,7 +195,7 @@ export function getActionURL(action, currentHref){
     if (typeof action.url === 'string')     return action.url;
     if (typeof action.href === 'string')    return action.href;
 
-    const hrefParts = url.parse(currentHref);
+    const hrefParts = memoizedUrlParse(currentHref);
     if (typeof action.url === 'function')   return action.url(hrefParts);
     if (typeof action.href === 'function')  return action.href(hrefParts);
     return '#';

@@ -7,6 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Nav } from 'react-bootstrap';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { memoizedUrlParse } from './../../../globals';
 import { BigDropdownContainer } from './BigDropdownContainer';
 
 
@@ -29,9 +30,10 @@ export class BigDropdownNavItem extends React.PureComponent {
     };
 
     /** Relatively arbitrary point where wanna show/enable the big dropdown */
-    static isDesktopView = memoize(function(windowWidth = 0){
+    /** Number comparisons are slightly faster than reference comparisons in JS so no point in memoizing. */
+    static isDesktopView = function(windowWidth = 0){
         return windowWidth > 768;
-    });
+    }
 
     constructor(props){
         super(props);
@@ -42,6 +44,7 @@ export class BigDropdownNavItem extends React.PureComponent {
             'isDropdownVisible': false,
             'closingDropdown': false
         };
+
     }
 
     onCloseDropdown(cb){
@@ -87,7 +90,7 @@ export class BigDropdownNavItem extends React.PureComponent {
         const navItemHref = propNavItemHref || menuTree && menuTree.name || null;
         const active = (
             typeof propActive === "boolean" ? propActive
-                : typeof navItemHref === "string" && typeof href === "string" ? (href.indexOf(navItemHref) > -1)
+                : typeof navItemHref === "string" && typeof href === "string" ? (memoizedUrlParse(href).pathname.indexOf(navItemHref) > -1)
                     : false
         );
 
@@ -111,7 +114,7 @@ export class BigDropdownNavItem extends React.PureComponent {
             </Nav.Link>
         );
 
-        const childProps = { ...passProps, menuTree };
+        const childProps = { ...passProps, menuTree, 'isActive': active };
         const dropdownBody = React.Children.map(children, function(child){
             return React.cloneElement(child, childProps);
         });

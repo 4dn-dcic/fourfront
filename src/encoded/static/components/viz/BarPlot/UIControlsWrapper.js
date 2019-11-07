@@ -10,6 +10,7 @@ import { Schemas } from './../../util';
 import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { Legend } from './../components';
+import { memoizedUrlParse } from './../../globals';
 
 /**
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
@@ -29,8 +30,8 @@ export class UIControlsWrapper extends React.PureComponent {
 
     static contextualView = memoize(function(href){
         if (href){
-            // Hide on homepage.
-            const hrefParts = url.parse(href);
+            // Hide on homepage. I guess could have used PageTitle.isHomePage here instead.
+            const hrefParts = memoizedUrlParse(href);
             if (hrefParts.pathname === '/' || hrefParts.pathname === '/home'){
                 return 'home';
             }

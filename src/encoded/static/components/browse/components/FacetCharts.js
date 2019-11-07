@@ -8,9 +8,10 @@ import { unhighlightTerms } from '@hms-dbmi-bgm/shared-portal-components/es/comp
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
 import { object, layout, ajax, console, isServerSide, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
-import { navigate } from '../../util';
-import { ChartDataController } from '../../viz/chart-data-controller';
-import * as BarPlot from '../../viz/BarPlot';
+import { navigate } from './../../util';
+import { memoizedUrlParse } from './../../globals';
+import { ChartDataController } from './../../viz/chart-data-controller';
+import * as BarPlot from './../../viz/BarPlot';
 
 
 /**
@@ -122,7 +123,7 @@ export class FacetCharts extends React.PureComponent {
         if (typeof props.show === 'function') {
             var show;
             if (typeof props.href === 'string') {
-                var urlParts = url.parse(props.href);
+                const urlParts = memoizedUrlParse(props.href);
                 show = props.show(urlParts.pathname, urlParts.search, urlParts.hash);
             } else {
                 show = props.show();

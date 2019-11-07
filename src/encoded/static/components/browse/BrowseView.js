@@ -19,6 +19,7 @@ import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/compon
 import { navigate, typedefs, Schemas } from './../util';
 
 import { store } from './../../store';
+import { memoizedUrlParse } from './../globals';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { ChartDataController } from './../viz/chart-data-controller';
 import { columnExtensionMap } from './columnExtensionMap';
@@ -451,7 +452,7 @@ export default class BrowseView extends React.Component {
      */
     componentDidMount(){
         const { href, context } = this.props;
-        const hrefParts = url.parse(href, true);
+        const hrefParts = memoizedUrlParse(href);
         const { query = {} } = hrefParts;
 
         if (query['award.project'] !== '4DN'){
@@ -491,7 +492,7 @@ export default class BrowseView extends React.Component {
      */
     componentDidUpdate(pastProps){
         const { context, href } = this.props;
-        const hrefParts = url.parse(href, true);
+        const hrefParts = memoizedUrlParse(href);
 
         BrowseView.checkResyncChartData(hrefParts, context);
     }
@@ -557,7 +558,7 @@ export default class BrowseView extends React.Component {
      */
     render() {
         const { context, href, session, browseBaseState, schemas, navigate : propNavigate } = this.props;
-        const hrefParts = url.parse(href, true);
+        const hrefParts = memoizedUrlParse(href);
         const countExternalSets = BrowseView.externalDataSetsCount(context);
         const facets = BrowseView.transformedFacets(context, browseBaseState, session);
         const defaultHiddenColumns = defaultHiddenColumnMapFromColumns(context.columns);

@@ -11,6 +11,7 @@ import { portalConfig } from './../globals';
 import { SearchBar, TestWarning, LeftNav, AccountNav, BigDropdownGroupController } from './components';
 import QuickInfoBar from './../viz/QuickInfoBar';
 import { ChartDataController } from './../viz/chart-data-controller';
+import { memoizedUrlParse } from './../globals';
 
 
 
@@ -42,7 +43,7 @@ export class NavigationBar extends React.PureComponent {
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
 
         let testWarning = true;
-        const initHostName = (props.hrefParts || url.parse(props.href)).hostname;
+        const initHostName = memoizedUrlParse(props.href).hostname;
         if (initHostName && portalConfig.productionHosts.indexOf(initHostName) > -1) {
             testWarning = false;
         }

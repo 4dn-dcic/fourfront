@@ -9,6 +9,7 @@ import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/e
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { columnExtensionMap } from './columnExtensionMap';
+import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
 
 
@@ -63,7 +64,7 @@ export default class SearchView extends React.PureComponent {
             return facets; // Facet not present, return.
         }
 
-        hrefQuery = url.parse(href, true).query;
+        hrefQuery = _.extend({}, memoizedUrlParse(href).query || {});
         if (typeof hrefQuery.type === 'string') hrefQuery.type = [hrefQuery.type];
         itemTypesInSearch = _.without(hrefQuery.type, 'Item');
 

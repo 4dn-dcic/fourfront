@@ -12,6 +12,7 @@ import { console, isServerSide, analytics, object, commonFileUtil, navigate } fr
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
+import { memoizedUrlParse } from './../../globals';
 import { expFxn, Schemas, typedefs, fileUtil } from './../../util';
 
 
@@ -24,7 +25,7 @@ const { Item, ExperimentSet } = typedefs;
 class FileColumnActionsBtn extends React.PureComponent {
 
     static hostFromHref = memoize(function(href){
-        const hrefParts = (href && url.parse(href)) || null;
+        const hrefParts = (href && memoizedUrlParse(href)) || null;
         const host = hrefParts && (
             (hrefParts.protocol || '') +
             (hrefParts.hostname ? '//' +  hrefParts.hostname + (hrefParts.port ? ':' + hrefParts.port : '') : '')

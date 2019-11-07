@@ -7,20 +7,19 @@ import url from 'url';
 import _ from 'underscore';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BigDropdownIntroductionWrapper } from './BigDropdownIntroductionWrapper';
-
+import { memoizedUrlParse } from './../../../globals';
 
 export function BigDropdownPageTreeMenuIntroduction(props) {
-    const { menuTree, windowHeight, windowWidth, onMenuItemClick, titleIcon = null } = props;
-    if (!menuTree || !menuTree.display_title || !menuTree.description || windowHeight < 800) return null;
-
-    console.log('TTT', windowWidth, windowHeight);
+    const { menuTree, windowHeight, windowWidth, onMenuItemClick, titleIcon = null, isActive = false } = props;
+    const { display_title, name: pathName, description } = menuTree || {};
+    if (!menuTree || !menuTree.display_title || windowHeight < 800) return null;
 
     return (
-        <BigDropdownIntroductionWrapper {...{ windowHeight, windowWidth, titleIcon }}>
+        <BigDropdownIntroductionWrapper {...{ windowHeight, windowWidth, titleIcon, isActive }}>
             <h4 className="mt-0 mb-0">
-                <a href={'/' + menuTree.name} onClick={onMenuItemClick}>{ menuTree.display_title }</a>
+                <a href={'/' + pathName} onClick={onMenuItemClick}>{ display_title }</a>
             </h4>
-            <div className="description">{ menuTree.description }</div>
+            { description ? <div className="description">{ description }</div> : null }
         </BigDropdownIntroductionWrapper>
     );
 }
@@ -28,8 +27,9 @@ export function BigDropdownPageTreeMenuIntroduction(props) {
 
 export function BigDropdownPageTreeMenu(props) {
     const { menuTree, windowWidth, href, onMenuItemClick } = props;
+    const { display_title, name: pathName, children = [] } = menuTree || {};
 
-    if (!menuTree) return null;
+    if (!pathName || !display_title) return null;
 
     /*
     var mostChildrenHaveChildren = _.filter(helpMenuTree.children, function(c){
@@ -37,14 +37,14 @@ export function BigDropdownPageTreeMenu(props) {
     }).length >= parseInt(helpMenuTree.children.length / 2);
     */
 
-    const urlParts = url.parse(href);
+    const urlParts = memoizedUrlParse(href);
 
     function filterOutChildren(child){ // Ensure Item has view permission, title, and name (route/URL).
         return !child.error && child.display_title && child.name;
     }
 
     const level1ChildrenWithoutSubChildren = [];
-    const level1ChildrenWithSubChildren = _.filter(menuTree.children, function(child){
+    const level1ChildrenWithSubChildren = _.filter(children, function(child){
         const childValid = filterOutChildren(child);
         if (!childValid) return false;
         const filteredChildren = _.filter(child.children || [], filterOutChildren);

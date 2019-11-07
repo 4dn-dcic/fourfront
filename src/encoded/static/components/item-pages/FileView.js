@@ -10,6 +10,7 @@ import { isServerSide, console, object, layout, valueTransforms, commonFileUtil 
 import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
+import { memoizedUrlParse } from './../globals';
 
 import { ExperimentSetTablesLoaded, ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
@@ -277,7 +278,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
         }
 
         const fileFormat = commonFileUtil.getFileFormatStr(file);
-        const hrefParts = url.parse(href || (store && store.getState().href));
+        const hrefParts = memoizedUrlParse(href || (store && store.getState().href));
         const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
 
 

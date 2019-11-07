@@ -8,6 +8,7 @@ import queryString from 'query-string';
 import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { memoizedUrlParse } from './../../globals';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -85,11 +86,12 @@ export class TopRow extends React.Component {
      * @returns {Element|null} <span> element, or null if no props.href.
      */
     viewJSONButton(){
-        if (!this.props.href) return null;
+        const { href } = this.props;
+        if (!href) return null; // Shouldn't occur.
 
-        var urlParts = url.parse(this.props.href, true);
-        urlParts.search = '?' + queryString.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
-        var viewUrl = url.format(urlParts);
+        const urlParts = _.extend({}, memoizedUrlParse(href));
+        urlParts.search = '?' + queryString.stringify(_.extend({}, urlParts.query, { 'format' : 'json' }));
+        const viewUrl = url.format(urlParts);
         return (
             <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code far"/>{' '}

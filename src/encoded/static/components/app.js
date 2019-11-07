@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID } from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, memoizedUrlParse } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
@@ -226,7 +226,6 @@ export default class App extends React.PureComponent {
         // Load up analytics
         // Load up analytics & perform initial pageview track
         const analyticsID = getGoogleAnalyticsTrackingID(href);
-        console.log('TTT', analyticsID);
         if (analyticsID){
             analytics.initializeGoogleAnalytics(analyticsID, context);
         }
@@ -387,7 +386,7 @@ export default class App extends React.PureComponent {
         if (!href) {
             href = propHref;
         }
-        const query = url.parse(href, true).query || {};
+        const query =  memoizedUrlParse(href).query || {};
         let action = query.currentAction || null;
 
         // Handle list of values, e.g. if `currentAction=selection&currentAction=selection&currentAction=edit` or something is in URL.
@@ -486,18 +485,18 @@ export default class App extends React.PureComponent {
         if (this.historyEnabled) {
             event.preventDefault();
 
-            var tHrefParts   = url.parse(targetHref),
-                pHrefParts   = url.parse(href),
-                tHrefHash    = tHrefParts.hash,
-                samePath     = pHrefParts.path === tHrefParts.path,
-                navOpts      = {
-                    // Same pathname & search but maybe different hash. Don't add history entry etc.
-                    'replace'           : samePath,
-                    'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
-                    'dontScrollToTop'   : samePath
-                },
-                targetOffset = target.getAttribute('data-target-offset'),
-                noCache      = target.getAttribute('data-no-cache');
+            const tHrefParts   = url.parse(targetHref);
+            const pHrefParts   = memoizedUrlParse(href);
+            let tHrefHash    = tHrefParts.hash;
+            const samePath     = pHrefParts.path === tHrefParts.path;
+            const navOpts      = {
+                // Same pathname & search but maybe different hash. Don't add history entry etc.
+                'replace'           : samePath,
+                'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
+                'dontScrollToTop'   : samePath
+            };
+            let targetOffset = target.getAttribute('data-target-offset');
+            const noCache      = target.getAttribute('data-no-cache');
 
             // Don't cache requests to user profile.
             if (noCache) navOpts.cache = false;
@@ -525,7 +524,7 @@ export default class App extends React.PureComponent {
     handleSubmit(event) {
         const { href } = this.props;
         const { target } = event;
-        const hrefParts = url.parse(href);
+        const hrefParts = memoizedUrlParse(href);
 
         // Skip POST forms
         if (target.method !== 'get') return;
@@ -1097,7 +1096,7 @@ export default class App extends React.PureComponent {
      */
     render() {
         const { context, lastCSSBuildTime, href, contextRequest } = this.props;
-        const hrefParts       = url.parse(href);
+        const hrefParts       = memoizedUrlParse(href);
         const routeList       = hrefParts.pathname.split("/");
         const routeLeaf       = routeList[routeList.length - 1];
         const currentAction   = this.currentAction();
@@ -1328,8 +1327,8 @@ class BodyElement extends React.PureComponent {
         var stateChange = { 'lastHref' : props.href };
         // Unset full screen if moving away to different pathname.
         if (state.isFullscreen && stateChange.lastHref !== state.lastHref){
-            var currParts = url.parse(state.lastHref),
-                nextParts = url.parse(stateChange.lastHref);
+            const currParts = url.parse(state.lastHref);
+            const nextParts = memoizedUrlParse(stateChange.lastHref);
 
             if (currParts.pathname !== nextParts.pathname){
                 stateChange.isFullscreen = false;

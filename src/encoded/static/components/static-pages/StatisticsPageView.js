@@ -12,6 +12,7 @@ import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/f
 import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 import { console, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../util';
+import { memoizedUrlParse } from './../globals';
 import {
     StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator
@@ -507,7 +508,7 @@ export default class StatisticsPageView extends React.PureComponent {
     maybeUpdateCurrentTabFromHref(){
         const { href } = this.props;
         this.setState(function({ currentTab }){
-            const hrefParts = href && url.parse(href);
+            const hrefParts = href && memoizedUrlParse(href);
             const hash = hrefParts && hrefParts.hash && hrefParts.hash.replace('#', '');
             if (hash && hash !== currentTab && hash.charAt(0) !== '!'){
                 if (typeof StatisticsPageView.viewOptions[hash] !== 'undefined'){

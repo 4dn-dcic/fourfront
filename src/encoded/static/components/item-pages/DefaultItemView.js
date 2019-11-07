@@ -12,6 +12,7 @@ import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/compone
 import { console, object, layout, ajax, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
 import { Schemas, fileUtil, typedefs } from './../util';
+import { memoizedUrlParse } from './../globals';
 
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { TabbedView } from './components/TabbedView';
@@ -100,7 +101,7 @@ export default class DefaultItemView extends React.PureComponent {
         const { href, context } = this.props;
         if (!href) return;
 
-        let { query : { redirected_from = null } = { redirected_from : null } } = url.parse(href, true);
+        let { query : { redirected_from = null } = { redirected_from : null } } = memoizedUrlParse(href);
 
         if (Array.isArray(redirected_from)){
             redirected_from = redirected_from[0];

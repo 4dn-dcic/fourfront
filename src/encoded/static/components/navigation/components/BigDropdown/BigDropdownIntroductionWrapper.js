@@ -3,8 +3,9 @@
 import React from 'react';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
+
 export function BigDropdownIntroductionWrapper(props){
-    const { children, titleIcon = null, windowHeight, windowWidth, className } = props;
+    const { children, titleIcon = null, windowHeight, windowWidth, className, isActive = false } = props;
     if (!children || windowHeight < 800) return null;
 
     const textCol = (
@@ -17,20 +18,20 @@ export function BigDropdownIntroductionWrapper(props){
 
     if (typeof titleIcon === "string") {
         iconCol = (
-            <div className="col-auto pr-0 text-right" style={windowWidth > 1600 ? { width: 60, marginLeft: -60 } : null}>
+            <div className="col-auto icon-beside-column text-right">
                 <i className={"icon icon-fw icon-2x icon-" + titleIcon}/>
             </div>
         );
     } else if (React.isValidElement(titleIcon)){
         iconCol = (
-            <div className="col-auto pr-0 text-right" style={windowWidth > 1600 ? { width: 60, marginLeft: -60 } : null}>
+            <div className="col-auto icon-beside-column text-right">
                 { titleIcon }
             </div>
         );
     }
 
     return (
-        <div className={"intro-section" + (className? " " + className : "")}>
+        <div className={"intro-section" + (className? " " + className : "") + (isActive? " active" : "")}>
             <div className="row align-items-center">
                 { iconCol }
                 { textCol }
