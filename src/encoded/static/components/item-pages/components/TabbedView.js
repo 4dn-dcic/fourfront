@@ -12,7 +12,7 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
 import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
-import { standardizeUserIconString } from './../../static-pages/components/BasicUserContentBody';
+import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
 
 
 /** This file/component is specific to 4DN portal */

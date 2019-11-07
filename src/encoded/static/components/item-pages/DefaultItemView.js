@@ -18,7 +18,7 @@ import { TabbedView } from './components/TabbedView';
 import { Publications } from './components/Publications';
 import { AttributionTabView } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
-import { standardizeUserIconString } from './../static-pages/components/BasicUserContentBody';
+import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
 
 import { ExpandableStaticHeader } from './../static-pages/components';
 
