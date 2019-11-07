@@ -62,7 +62,7 @@ export const DataNavItem = React.memo(function DataNavItem(props){
     // Figure out if any items are active
     const { query = {}, pathname = "/a/b/c/d/e" } = memoizedUrlParse(href);
     const browseHref = navigate.getBrowseBaseHref(browseBaseState);
-    const seqencingDataHref = "/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate&experiments_in_set.experiment_type.experiment_category=Sequencing";
+    const seqencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
     const microscopyDataHref = "/microscopy-data-overview";
     const isMicroscopyActive = pathname === microscopyDataHref;
     let isBrowseActive = pathname === "/browse/";
