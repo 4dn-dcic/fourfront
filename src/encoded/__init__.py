@@ -205,7 +205,7 @@ def main(global_config, **local_config):
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.es'] = os.environ.get('mirrorEnvEs')
+    settings['mirror.env.name'] = os.environ.get('mirrorEnvEs')
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
