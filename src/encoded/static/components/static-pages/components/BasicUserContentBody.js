@@ -131,7 +131,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody context={context} href={href} height={isHiGlass ? 300 : null} parentComponentType={ExpandableStaticHeader} />
+                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} />
             </div>
         );
     }
