@@ -60,7 +60,7 @@ export default class HomePage extends React.PureComponent {
                     </div>
                     <div className="mt-4">
                         <h2 className="homepage-section-title">Announcements</h2>
-                        <Announcements session={this.props.session} announcements={this.props.context.announcements || null} />
+                        <Announcements session={this.props.session} announcements={this.props.context.announcements || null} {..._.pick(this.props, 'windowWidth')} />
                     </div>
                 </div>
 

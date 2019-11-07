@@ -19,7 +19,7 @@ export default class StaticSectionView extends DefaultItemView {
 
 }
 
-const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ context }){
+const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ context, windowWidth }){
 
     if (context.section_type === "Home Page Slide"){
         const slideContainerStyle = {
@@ -38,6 +38,7 @@ const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ 
 
     const passProps = {
         placeholderReplacementFxn,
+        windowWidth,
         ..._.pick(context, 'content', 'filetype')
     };
 
