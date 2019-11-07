@@ -33,7 +33,7 @@ describe('Browse Views - Files Selection', function () {
             cy.visit('/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate&experiments_in_set.experiment_type.display_title=CUT%26RUN');
         });
 
-        it.skip('We have some counts in QuickInfoBar to compare selected file counts against.', function () {
+        it('We have some counts in QuickInfoBar to compare selected file counts against.', function () {
 
             cy.get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
                 .getQuickInfoBarCounts().then((counts) => {
