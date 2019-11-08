@@ -15,20 +15,23 @@ export class PageCarousel extends React.PureComponent {
                 'description': 'In less than 60 seconds, you can provide feedback on your data portal experience.',
                 'title': 'We are listening!',
                 'badge': null,
+                'badgeBgColor': null,
                 'link': 'https://goo.gl/forms/IQeOkONbeP9QsfzU2'
             },
             {
                 'img': 'https://s3.amazonaws.com/4dn-dcic-public/static-pages/carousel-images/jupyterhub_w_border.png',
                 'description': 'The new Jupyter Notebook Service for registered users provides immediate access to all 4DN data.',
                 'title': '4DN JupyterHub',
-                'badge': '<div class="slide-label">BETA</div>',
+                'badge': 'BETA',
+                'badgeBgColor': null,
                 'link': '/jupyterhub'
             },
             {
                 'img': 'https://s3.amazonaws.com/4dn-dcic-public/static-pages/carousel-images/carousel-higlass.png',
                 'description': 'Powered by HiGlass.',
                 'title': '4DN Visualization Workspace',
-                'badge': '<div class="slide-label">BETA</div>',
+                'badge': 'BETA',
+                'badgeBgColor': null,
                 'link': '/visualization/index'
             },
             {
@@ -36,6 +39,7 @@ export class PageCarousel extends React.PureComponent {
                 'description': 'Finn et. al. utilize high throughput imaging to study heterogeneity in 3D genome structure.',
                 'title': 'Data Highlight',
                 'badge': null,
+                'badgeBgColor': null,
                 'link': '/publications/80007b23-7748-4492-9e49-c38400acbe60/'
             }
         ],
@@ -44,6 +48,7 @@ export class PageCarousel extends React.PureComponent {
         'slideIndex': 0,
         'autoPlay': false,
         'pauseOnHover': true,
+        'wrapAround': true,
         'renderCenterLeftControls': function ({ previousSlide, currentSlide }) {
             if (currentSlide === 0) return null;
             return <i className="icon icon-fw fas icon-angle-left icon-2x" onClick={previousSlide} />;
@@ -53,12 +58,9 @@ export class PageCarousel extends React.PureComponent {
             if (currentSlide >= slideCount - slidesToShow) return null;
             return <i className="icon icon-fw fas icon-angle-right icon-2x" onClick={nextSlide} />;
         },
-        // 'renderBottomRightControls': function (sliderProps) {
-        //     var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
-        //     return <div>Slide: {currentSlide}</div>;
-        // },
         'dragging': false,
         'showBackground': false,
+        'navControlPosition': 'outside' //possible values are 'outside', 'inside'
     };
 
     static propTypes = {
@@ -73,6 +75,7 @@ export class PageCarousel extends React.PureComponent {
         'dragging': PropTypes.bool.isRequired,
         'windowWidth': PropTypes.number,
         'showBackground': PropTypes.bool,
+        'navControlPosition': PropTypes.string
     };
 
     static refFunc(elem) {
@@ -83,25 +86,26 @@ export class PageCarousel extends React.PureComponent {
     }
 
     renderSlide(slide) {
-        const { img, description, title, badge, link } = slide;
+        const { img, description, title, badge, badgeBgColor, link } = slide;
 
-        const showTitle = (!title ? null : (
-            <div className="title-container">
-                <h4 className="mt-0">{title}</h4>
-                {description ? <p>{description}</p> : null}
-            </div>
-        ));
-
-        const inner = (
+        const content = ((title || description) ?
+            (
+                <div className="title-container">
+                    {title ? <h4 className="mt-0">{title}</h4> : null}
+                    {description ? <p>{description}</p> : null}
+                </div>
+            ) : null);
+        const badgeStyle = badgeBgColor ? { backgroundColor: badgeBgColor } : null;
+        const innerFrame = (
             <React.Fragment>
                 <div className="inner-container">
                     <div className="bg-image" style={img ? { 'backgroundImage': 'url(' + img + ')' } : null} />
-                    {showTitle}
+                    {content}
                 </div>
                 <div className="inner-body">
                     {badge ?
                         <div className="inner-body">
-                            <span dangerouslySetInnerHTML={{ __html: badge || '<em>Untitled</em>' }} />
+                            <div className="slide-label" style={badgeStyle}>{badge}</div>
                         </div>
                         : null}
                 </div>
@@ -112,16 +116,16 @@ export class PageCarousel extends React.PureComponent {
             const isExternalLink = link.slice(0, 4) === 'http';
             return (
                 <a className="homepage-carousel-slide is-link" href={link} target={isExternalLink ? '_blank' : null} rel={isExternalLink ? 'noopener noreferrer' : null}>
-                    { inner }
+                    { innerFrame }
                 </a>
             );
         }
 
-        return <div className="homepage-carousel-slide">{inner}</div>;
+        return <div className="homepage-carousel-slide">{innerFrame}</div>;
     }
 
     render() {
-        const { slides, showBackground, windowWidth } = this.props;
+        const { slides, showBackground, navControlPosition, windowWidth } = this.props;
 
         let settings = _.extend({}, _.pick(this.props,
             'slidesToShow',
@@ -129,13 +133,13 @@ export class PageCarousel extends React.PureComponent {
             'slideIndex',
             'autoPlay',
             'pauseOnHover',
+            'wrapAround',
             'renderCenterLeftControls',
             'renderCenterRightControls',
             'dragging'));
 
-        // Do some responsive stuff
+        //adjustments for responsive display
         const gridState = layout.responsiveGridState(windowWidth || null);
-
         if (gridState === 'sm' || gridState === 'md' || slides.length === 2) {
             settings = _.extend({}, settings, {
                 'slidesToShow': 2
@@ -146,7 +150,9 @@ export class PageCarousel extends React.PureComponent {
             });
         }
 
-        const wrapperClass = !showBackground ? "homepage-carousel-wrapper disable-carousel-background" : "homepage-carousel-wrapper";
+        const wrapperClass = "homepage-carousel-wrapper"
+            + (!showBackground ? " disable-carousel-background" : "")
+            + (navControlPosition === 'inside' ? " carousel-nav-inside" : "");
 
         return (
             <div className={wrapperClass} ref={PageCarousel.refFunc} style={{ 'opacity': 0 }} key="carousel">

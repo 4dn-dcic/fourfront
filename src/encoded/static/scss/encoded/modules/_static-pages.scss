@@ -656,11 +656,23 @@ $carousel-height : 240px;
 	}
 
 	.slider-control-centerleft {
-		left: -35px !important;
+		left: -50px !important;
 	}
 
 	.slider-control-centerright {
-		right: -35px !important;
+		right: -50px !important;
+	}
+
+	&.carousel-nav-inside {
+		.slider-control-centerleft {
+			left: 0px !important;
+			opacity: 0.5 !important;
+		}
+	
+		.slider-control-centerright {
+			right: 0px !important;
+			opacity: 0.5 !important;
+		}
 	}
 
 	.slider{
