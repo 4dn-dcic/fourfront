@@ -88,7 +88,7 @@ setup(
     entry_points='''
         [console_scripts]
         batchupgrade = snovault.batchupgrade:main
-        create-mapping = encoded.elasticsearch.create_mapping:main
+        create-mapping = snovault.elasticsearch.create_mapping:main
         dev-servers = encoded.dev_servers:main
         es-index-listener = snovault.elasticsearch.es_index_listener:main
 
