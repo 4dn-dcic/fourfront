@@ -187,7 +187,7 @@ class ResultTableContainer extends React.PureComponent {
 
     constructor(props){
         super(props);
-        this.isTermSelected = this.isTermSelected.bind(this);
+        this.getTermStatus = this.getTermStatus.bind(this);
         this.onFilter = this.onFilter.bind(this);
         this.handleClearFilters = this.handleClearFilters.bind(this);
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
@@ -224,8 +224,8 @@ class ResultTableContainer extends React.PureComponent {
         );
     }
 
-    isTermSelected(term, facet){
-        return searchFilters.determineIfTermFacetSelected(term, facet, this.props);
+    getTermStatus(term, facet){
+        return searchFilters.getTermFacetStatus(term, facet, this.props);
     }
 
     handleClearFilters(evt){
@@ -258,7 +258,7 @@ class ResultTableContainer extends React.PureComponent {
                         <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />
                         <FacetList {...{ session, browseBaseState, schemas, windowWidth, windowHeight, facets, showClearFiltersButton }}
                             orientation="vertical" className="with-header-bg" filters={context.filters}
-                            isTermSelected={this.isTermSelected} onFilter={this.onFilter}
+                            getTermStatus={this.getTermStatus} onFilter={this.onFilter}
                             itemTypeForSchemas="ExperimentSetReplicate" href={href} termTransformFxn={Schemas.Term.toName}
                             onClearFilters={this.handleClearFilters} separateSingleTermFacets />
                     </div>
@@ -273,9 +273,9 @@ class ResultTableContainer extends React.PureComponent {
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
                         {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
                         ref={this.searchResultTableRef}
+                        termTransformFxn={Schemas.Term.toName}
                         results={context['@graph']}
-                        renderDetailPane={this.browseExpSetDetailPane}
-                        stickyHeaderTopOffset={-78} />
+                        renderDetailPane={this.browseExpSetDetailPane} />
                 </div>
             </div>
         );

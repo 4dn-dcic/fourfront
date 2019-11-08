@@ -1189,7 +1189,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_cell(
 
 
 def test_track_and_file_facet_info_file_link_to_expt_biosample_tissue(
-        testapp, proc_file_json, experiment_data, tissue_biosample):
+        testapp, proc_file_json, experiment_data, tissue_biosample, lung_oterm):
     pfile = testapp.post_json('/file_processed', proc_file_json, status=201).json['@graph'][0]
     experiment_data['biosample'] = tissue_biosample['@id']
     experiment_data['processed_files'] = [pfile['@id']]
@@ -1197,7 +1197,7 @@ def test_track_and_file_facet_info_file_link_to_expt_biosample_tissue(
     res = testapp.get(pfile['@id']).json
     tf_info = res.get('track_and_facet_info')
     assert tf_info['experiment_type'] == 'in situ Hi-C'
-    assert tf_info['biosource_name'] == 'lung'
+    assert tf_info['biosource_name'] == lung_oterm.get('preferred_name')
 
 
 def test_track_and_file_facet_info_file_fastq_link_to_expt(

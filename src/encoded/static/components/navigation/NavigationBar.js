@@ -26,12 +26,12 @@ import { ChartDataController } from './../viz/chart-data-controller';
 export class NavigationBar extends React.PureComponent {
 
     static propTypes = {
-        'href'              : PropTypes.string,
-        'session'           : PropTypes.bool,
-        'updateUserInfo'    : PropTypes.func.isRequired,
-        'context'           : PropTypes.object,
-        'schemas'           : PropTypes.any,
-        'browseBaseState'   : PropTypes.string
+        'href': PropTypes.string,
+        'session': PropTypes.bool,
+        'updateUserInfo': PropTypes.func.isRequired,
+        'context': PropTypes.object,
+        'schemas': PropTypes.any,
+        'browseBaseState': PropTypes.string
     };
 
     constructor(props){
@@ -131,7 +131,7 @@ export class NavigationBar extends React.PureComponent {
                             onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
 
                             <a className="navbar-brand" href="/">
-                                <FourfrontLogo/>
+                                <FourfrontLogo />
                             </a>
 
                             <Navbar.Toggle>
@@ -150,7 +150,7 @@ export class NavigationBar extends React.PureComponent {
     }
 }
 
-const CollapsedNav = React.memo(function CollapsedNav(props){
+const CollapsedNav = React.memo(function CollapsedNav(props) {
     const { href, currentAction } = props;
     const leftNavProps = _.pick(props, 'mobileDropdownOpen', 'windowWidth', 'windowHeight', 'browseBaseState', 'href',
         'mounted', 'overlaysContainer', 'session', 'testWarning', 'isFullscreen');

@@ -60,8 +60,8 @@ export class BasicUserContentBody extends React.PureComponent {
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
-                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody}/>
-                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} />
+                    <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
+                    <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} scale1dTopTrack={false} />
                 </React.Fragment>
             );
         } else {
@@ -131,7 +131,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody context={context} href={href} height={isHiGlass ? 300 : null} parentComponentType={ExpandableStaticHeader} />
+                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} />
             </div>
         );
     }

@@ -105,6 +105,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.modifications_summary",
         "experiments_in_set.biosample.biosource_summary",
         "experiments_in_set.biosample.biosample_type",
+        "experiments_in_set.biosample.biosample_category",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
@@ -259,7 +260,17 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.file_classification",
         "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_size",
-        "experiments_in_set.reference_files.status"
+        "experiments_in_set.reference_files.status",
+
+        'sample_image.caption',
+        'sample_image.microscopy_file.accession',
+        'sample_image.microscopy_file.omerolink',
+        'sample_image.attachment.href',
+        'sample_image.attachment.type',
+        'sample_image.attachment.md5sum',
+        'sample_image.attachment.download',
+        'sample_image.attachment.width',
+        'sample_image.attachment.height'
     ]
 
     @calculated_property(schema={

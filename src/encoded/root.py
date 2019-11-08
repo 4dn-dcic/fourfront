@@ -116,13 +116,6 @@ def health_check(config):
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
 
-        # when ontologies were imported
-        try:
-            si = request.embed('/sysinfos/ffsysinfo')
-            ont_date = si.json['ontology_updated']
-        except:  # pylint:disable
-            ont_date = "Never Generated"
-
         app_url = request.application_url
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
@@ -134,9 +127,9 @@ def health_check(config):
             "system_bucket": settings.get('system_bucket'),
             "elasticsearch": settings.get('elasticsearch.server'),
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
-            "load_data": settings.get('snovault.load_test_data'),
+            "load_data": settings.get('load_test_data'),
             "beanstalk_env": settings.get('env.name'),
-            'ontology_updated': ont_date,
+            "namespace": settings.get('indexer.namespace'),
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
@@ -223,7 +216,9 @@ class FourfrontRoot(Root):
             (Allow, Everyone, ['list', 'search']),
             (Allow, 'group.admin', ALL_PERMISSIONS),
             (Allow, 'remoteuser.EMBED', 'import_items'),
-        ] + Root.__acl__
+        ] + [(Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
+        (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
+        (Allow, Everyone, ['visible_for_edit'])]
         return acl
 
     def get(self, name, default=None):

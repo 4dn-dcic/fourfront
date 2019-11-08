@@ -408,7 +408,12 @@ def get_existing_ontology_terms(connection):  # , ontologies=None):
     '''
     search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
-    return {t['term_id']: t for t in db_terms}
+    ignore = [
+        "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
+        "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
+        "111117bc-8535-4448-903e-854af460a233"
+    ]
+    return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
 
 
 def get_ontologies(connection, ont_list):
@@ -980,23 +985,6 @@ def parse_args(args):
 def owl_runner(value):
     print('Processing: ', value[0]['ontology_name'])
     return download_and_process_owl(*value)
-
-
-def last_ontology_load(app):
-    from webtest import TestApp
-    from webtest.app import AppError
-    import dateutil
-
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-    try:
-        sysinfo = testapp.get("/sysinfo/ffsysinfo").follow().json
-        return dateutil.parser.parse(sysinfo['ontology_updated'])
-    except AppError:
-        return datetime.datetime.min
 
 
 def main():

@@ -23,7 +23,8 @@
         { "$ref": "mixins.json#/tags" },
         { "$ref": "mixins.json#/supplementary_files" },
         { "$ref": "mixins.json#/badges" },
-        { "$ref": "mixins.json#/static_embeds" }
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/sample_image" }
     ],
     "mixinFacets" : [
         { "$ref": "mixins.json#/facets_common" },
@@ -132,6 +133,9 @@
         },
         "experiments_in_set.biosample.biosource.cell_line_tier": {
             "title": "Sample Tier"
+        },
+        "experiments_in_set.biosample.biosample_category": {
+            "title": "Sample Category"
         },
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Sample"
