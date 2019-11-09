@@ -310,11 +310,13 @@
         },
         "file_type" : {
             "title" : "File Type",
-            "descripton" : "Type or categorization of this file."
+            "descripton" : "Type or categorization of this file.",
+            "grouping" : "File Properties"
         },
         "file_format.file_format": {
             "title" : "File Format",
-            "description" : "Format of the file, i.e. the file extension."
+            "description" : "Format of the file, i.e. the file extension.",
+            "grouping" : "File Properties"
         },
         "track_and_facet_info.lab_name": {
             "title": "Generating Lab"
@@ -334,7 +336,8 @@
                 10737418240,
                 107374182400
             ],
-            "disabled" : false
+            "disabled" : false,
+            "grouping" : "File Properties"
         },
         "public_release" : {
             "title" : "Public Release Date",
