@@ -114,7 +114,7 @@ export class HomePageCarousel extends React.PureComponent {
 
 
         return (
-            <div className="homepage-carousel-wrapper" ref={HomePageCarousel.refFunc} style={{ 'opacity' : 0 }} key="carousel">
+            <div className="homepage-carousel-wrapper carousel-background-frame" ref={HomePageCarousel.refFunc} style={{ 'opacity' : 0 }} key="carousel">
                 <div className="container">
                     <div className="row">
                         <Carousel {...settings} children={_.map(sections, this.renderSlide)} />

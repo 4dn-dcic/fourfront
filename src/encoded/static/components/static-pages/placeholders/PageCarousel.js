@@ -58,9 +58,14 @@ export class PageCarousel extends React.PureComponent {
             if (currentSlide >= slideCount - slidesToShow) return null;
             return <i className="icon icon-fw fas icon-angle-right icon-2x" onClick={nextSlide} />;
         },
+        'renderBottomLeftControls': function ({ currentSlide, slideCount }) {
+            return <div>Slide <strong>{currentSlide + 1}</strong> of <strong>{slideCount}</strong></div>;
+        },
         'dragging': false,
-        'showBackground': false,
-        'navControlPosition': 'outside' //possible values are 'outside', 'inside'
+        'navControlPosition': 'outside', //possible values are 'outside', 'inside'
+        'slideHeight': 240,
+        'adjustImageHeight': true, //true: best for single display power point slides, otherwise set it as false (recommended)
+        'showSlideCount': true, //true only valid if slidesToShow is 1
     };
 
     static propTypes = {
@@ -72,10 +77,13 @@ export class PageCarousel extends React.PureComponent {
         'pauseOnHover': PropTypes.bool.isRequired,
         'renderCenterLeftControls': PropTypes.func.isRequired,
         'renderCenterRightControls': PropTypes.func.isRequired,
+        'renderBottomLeftControls': PropTypes.func.isRequired,
         'dragging': PropTypes.bool.isRequired,
         'windowWidth': PropTypes.number,
-        'showBackground': PropTypes.bool,
-        'navControlPosition': PropTypes.string
+        'navControlPosition': PropTypes.string,
+        'slideHeight': PropTypes.number.isRequired,
+        'adjustImageHeight': PropTypes.bool.isRequired,
+        'showSlideCount': PropTypes.bool.isRequired,
     };
 
     static refFunc(elem) {
@@ -87,6 +95,7 @@ export class PageCarousel extends React.PureComponent {
 
     renderSlide(slide) {
         const { img, description, title, badge, badgeBgColor, link } = slide;
+        const { slideHeight, adjustImageHeight } = this;
 
         const content = ((title || description) ?
             (
@@ -95,11 +104,12 @@ export class PageCarousel extends React.PureComponent {
                     {description ? <p>{description}</p> : null}
                 </div>
             ) : null);
+        const containerStyle = { height: slideHeight + 'px' };
         const badgeStyle = badgeBgColor ? { backgroundColor: badgeBgColor } : null;
         const innerFrame = (
-            <React.Fragment>
-                <div className="inner-container">
-                    <div className="bg-image" style={img ? { 'backgroundImage': 'url(' + img + ')' } : null} />
+            <div style={containerStyle}>
+                <div className="inner-container" style={containerStyle}>
+                    <div className="bg-image" style={img ? { 'backgroundImage': 'url(' + img + ')', 'backgroundSize': adjustImageHeight ? 'auto 100%' : 'cover' } : null} />
                     {content}
                 </div>
                 <div className="inner-body">
@@ -109,7 +119,7 @@ export class PageCarousel extends React.PureComponent {
                         </div>
                         : null}
                 </div>
-            </React.Fragment>
+            </div>
         );
 
         if (link){
@@ -125,7 +135,7 @@ export class PageCarousel extends React.PureComponent {
     }
 
     render() {
-        const { slides, showBackground, navControlPosition, windowWidth } = this.props;
+        const { slides, slidesToShow, navControlPosition, slideHeight, adjustImageHeight, showSlideCount, windowWidth } = this.props;
 
         let settings = _.extend({}, _.pick(this.props,
             'slidesToShow',
@@ -136,6 +146,7 @@ export class PageCarousel extends React.PureComponent {
             'wrapAround',
             'renderCenterLeftControls',
             'renderCenterRightControls',
+            'renderBottomLeftControls',
             'dragging'));
 
         //adjustments for responsive display
@@ -149,16 +160,35 @@ export class PageCarousel extends React.PureComponent {
                 'slidesToShow': 1
             });
         }
+        //slide height
+        let wrapperStyle = { opacity: '0' };
+        if (slideHeight > 0) {
+            // settings = _.extend({}, settings, {
+            //     'initialSlideHeight': slideHeight,
+            // });
+            settings = _.extend({}, settings, {
+                'heightMode': 'max'
+            });
+            wrapperStyle = _.extend({}, wrapperStyle, { height: (slideHeight + 30).toString() + 'px' });
+        } else {
+            settings = _.extend({}, settings, {
+                'heightMode': 'max'
+            });
+        }
+        //slide count
+        if(showSlideCount === true && slidesToShow > 1){
+            settings = _.extend({}, settings, {
+                'renderBottomLeftControls': null
+            });
+        }
 
         const wrapperClass = "homepage-carousel-wrapper"
-            + (!showBackground ? " disable-carousel-background" : "")
             + (navControlPosition === 'inside' ? " carousel-nav-inside" : "");
-
         return (
-            <div className={wrapperClass} ref={PageCarousel.refFunc} style={{ 'opacity': 0 }} key="carousel">
+            <div className={wrapperClass} ref={PageCarousel.refFunc} style={wrapperStyle} key="carousel">
                 <div className="container">
                     <div className="row">
-                        <Carousel {...settings} children={_.map(slides, this.renderSlide)} />
+                        <Carousel {...settings} children={_.map(slides, this.renderSlide, { slideHeight, adjustImageHeight })} />
                     </div>
                 </div>
             </div>

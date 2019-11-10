@@ -518,36 +518,32 @@ $carousel-height : 240px;
 	margin-top: 45px;
 	margin-bottom: 60px;
 
-	&:before {
-		content: "";
-		left: 0;
-		position: absolute;
-		top: -15px;
-		right: 0;
-		height: $carousel-height + 30px;
-		background: #f6f6f6;
-		box-shadow: inset 0 0 3px rgba(0,0,0,0.25);
-		//@include gradient-vertical(rgba(233,233,233,0.6), rgba(255,255,255,0), 0, 1);
-		transition: background-color .7s;
-	}
 
-	&:hover {
+
+	&.carousel-background-frame {
 		&:before {
-			background-color: #eee;
+			content: "";
+			left: 0;
+			position: absolute;
+			top: -15px;
+			right: 0;
+			height: $carousel-height + 30px;
+			background: #f6f6f6;
+			box-shadow: inset 0 0 3px rgba(0,0,0,0.25);
+			//@include gradient-vertical(rgba(233,233,233,0.6), rgba(255,255,255,0), 0, 1);
+			transition: background-color .7s;
 		}
-	}
 
-	&.disable-carousel-background {
-		&:before {
-			background: none;
-			box-shadow: none;
+		&:hover {
+			&:before {
+				background-color: #eee;
+			}
 		}
 	}
 
 	.slider-slide {
 
 		.homepage-carousel-slide {
-			//background: #eee;
 			display: block;
 			position: relative;
 			outline: none;
@@ -558,43 +554,38 @@ $carousel-height : 240px;
 			&:hover, &:active {
 				text-decoration: none;
 			}
-			> .inner-container {
+			.inner-container {
 				position: relative;
 				min-height: $carousel-height - 10px;
 				background: #fff;
 				display: flex;
 				flex-direction: column;
-				//box-shadow: 0 1px 4px -1px rgba(0,0,0,0.5);
 				box-shadow: 0 1px 7px -2px rgba(0,0,0,0.5);
 				border-radius: 2px;
 				transition: box-shadow .5s;
 				background-color: #fff;
 				justify-content: center;
-				> .bg-image {
+				.bg-image {
 					background-color: #fff;
+					background-repeat: no-repeat;
 					opacity: 1;
 					left: 0;
 					top: 0;
 					bottom: 65px; //0;
 					right: 0;
-					background-size: cover;
-					background-position: 50%;
+					// background-size: cover;
+					background-position-x: 50%;
 					transition: opacity 0.4s;
 					flex: 1;
 					border-radius: 2px 2px 0 0;
 				}
-				> .title-container {
-					//position: absolute;
+				.title-container {
 					left: 0;
 					right: 0;
 					bottom: 0;
-					//padding: 16px 0px 12px 0px;
 					padding: 16px 18px 12px 18px;
 					background: #fff;
-					//border-top: 1px solid #ccc;
 					border-bottom: 1px solid #ddd;
-					//background: rgba(244, 244, 244, 0.933);
-					//@include gradient-vertical(rgba(244, 244, 244,0), rgba(244, 244, 244, 0.933), 0, 0.5);
 					border-radius: 0 0 2px 2px;
 					> h4 {
 						font-weight: 600;
@@ -607,7 +598,7 @@ $carousel-height : 240px;
 					}
 				}
 			}
-			> .inner-body {
+			.inner-body {
 				position: absolute;
 				left: 10px;
 				top: 5px;
@@ -626,10 +617,6 @@ $carousel-height : 240px;
 			&.is-link:hover {
 				transform: translate3d(0, -3px, 0);
 				> .inner-container {
-					//outline: 1px solid orange;
-					//outline-offset: 4px;
-					//box-shadow: 0 1px 4px rgba(0,0,0,0.5);
-					//box-shadow: 0 2px 6px -1px rgba(0,0,0,0.7);
 					box-shadow: 0 2px 8px -2px rgba(0,0,0,0.7);
 					> .title-container {
 						> h4 {
@@ -647,7 +634,7 @@ $carousel-height : 240px;
 		font-size: 1.65rem;
 		cursor: pointer;
 		/* Works around glitch where parent slider has wrong height temp assigned and top: 50% isn't acccurate */
-		top: $carousel-height / 2 - 12px !important;
+		// top: $carousel-height / 2 - 12px !important;
 		transform: none !important;
 		transition: transform .4s;
 		&:hover {
@@ -675,14 +662,17 @@ $carousel-height : 240px;
 		}
 	}
 
-	.slider{
-		.slider-control-bottomcenter {
-			bottom: -50px !important;
-			.paging-dot {
-				width:10px !important; 
-				height:10px !important;
-			}
+	.slider-control-bottomcenter {
+		bottom: -50px !important;
+		.paging-dot {
+			width:10px !important; 
+			height:10px !important;
 		}
+	}
+
+	.slider-control-bottomleft {
+		left: 10px !important;
+		bottom: -40px !important;
 	}
 }
 
