@@ -467,5 +467,15 @@
         "title": "Portal Statistics (BETA)",
         "content": [],
         "schema_version": "3"
+    },
+    {
+        "name": "carousel-test",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b3",
+        "title": "Carousel Slide Show",
+        "content": [
+            "carousel-single.test",
+            "carousel-multi.test"
+        ],
+        "schema_version": "3"
     }
 ]

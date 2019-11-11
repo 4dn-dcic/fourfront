@@ -49,18 +49,6 @@ export class PageCarousel extends React.PureComponent {
         'autoPlay': false,
         'pauseOnHover': true,
         'wrapAround': true,
-        'renderCenterLeftControls': function ({ previousSlide, currentSlide }) {
-            if (currentSlide === 0) return null;
-            return <i className="icon icon-fw fas icon-angle-left icon-2x" onClick={previousSlide} />;
-        },
-        'renderCenterRightControls': function (sliderProps) {
-            var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
-            if (currentSlide >= slideCount - slidesToShow) return null;
-            return <i className="icon icon-fw fas icon-angle-right icon-2x" onClick={nextSlide} />;
-        },
-        'renderBottomLeftControls': function ({ currentSlide, slideCount }) {
-            return <div>Slide <strong>{currentSlide + 1}</strong> of <strong>{slideCount}</strong></div>;
-        },
         'dragging': false,
         'navControlPosition': 'outside', //possible values are 'outside', 'inside'
         'slideHeight': 240,
@@ -75,9 +63,6 @@ export class PageCarousel extends React.PureComponent {
         'slideIndex': PropTypes.number.isRequired,
         'autoPlay': PropTypes.bool.isRequired,
         'pauseOnHover': PropTypes.bool.isRequired,
-        'renderCenterLeftControls': PropTypes.func.isRequired,
-        'renderCenterRightControls': PropTypes.func.isRequired,
-        'renderBottomLeftControls': PropTypes.func.isRequired,
         'dragging': PropTypes.bool.isRequired,
         'windowWidth': PropTypes.number,
         'navControlPosition': PropTypes.string,
@@ -93,6 +78,10 @@ export class PageCarousel extends React.PureComponent {
         }, 10);
     }
 
+    /**
+     * this function renders a slide and customize it based on title/description/badge/link and image
+     * @param {Object} slide    Carousel slide to be displayed
+     */
     renderSlide(slide) {
         const { img, description, title, badge, badgeBgColor, link } = slide;
         const { slideHeight, adjustImageHeight } = this;
@@ -144,46 +133,50 @@ export class PageCarousel extends React.PureComponent {
             'autoPlay',
             'pauseOnHover',
             'wrapAround',
-            'renderCenterLeftControls',
-            'renderCenterRightControls',
-            'renderBottomLeftControls',
             'dragging'));
 
         //adjustments for responsive display
         const gridState = layout.responsiveGridState(windowWidth || null);
         if (gridState === 'sm' || gridState === 'md' || slides.length === 2) {
-            settings = _.extend({}, settings, {
-                'slidesToShow': 2
-            });
+            settings = _.extend({}, settings, { 'slidesToShow': 2 });
         } else if (gridState === 'xs' || slides.length === 1) {
-            settings = _.extend({}, settings, {
-                'slidesToShow': 1
-            });
+            settings = _.extend({}, settings, { 'slidesToShow': 1 });
         }
-        //slide height
         let wrapperStyle = { opacity: '0' };
+        //slide height
         if (slideHeight > 0) {
-            // settings = _.extend({}, settings, {
-            //     'initialSlideHeight': slideHeight,
-            // });
-            settings = _.extend({}, settings, {
-                'heightMode': 'max'
-            });
+            settings = _.extend({}, settings, { 'heightMode': 'max' });
             wrapperStyle = _.extend({}, wrapperStyle, { height: (slideHeight + 30).toString() + 'px' });
         } else {
-            settings = _.extend({}, settings, {
-                'heightMode': 'max'
-            });
+            settings = _.extend({}, settings, { 'heightMode': 'max' });
         }
         //slide count
-        if(showSlideCount === true && slidesToShow > 1){
+        if ((showSlideCount === false) || (showSlideCount === true && slidesToShow > 1)) {
             settings = _.extend({}, settings, {
                 'renderBottomLeftControls': null
             });
         }
+        else {
+            settings = _.extend({}, settings, {
+                'renderBottomLeftControls': function ({ currentSlide, slideCount }) {
+                    return <div>Slide <strong>{currentSlide + 1}</strong> of <strong>{slideCount}</strong></div>;
+                }
+            });
+        }
+        //left and right nav controls
+        settings = _.extend({}, settings, {
+            'renderCenterLeftControls': function ({ previousSlide, currentSlide }) {
+                if (currentSlide === 0) return null;
+                return <i className="icon icon-fw fas icon-angle-left icon-2x" onClick={previousSlide} />;
+            },
+            'renderCenterRightControls': function (sliderProps) {
+                var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
+                if (currentSlide >= slideCount - slidesToShow) return null;
+                return <i className="icon icon-fw fas icon-angle-right icon-2x" onClick={nextSlide} />;
+            }
+        });
 
-        const wrapperClass = "homepage-carousel-wrapper"
-            + (navControlPosition === 'inside' ? " carousel-nav-inside" : "");
+        const wrapperClass = 'homepage-carousel-wrapper' + (navControlPosition === 'inside' ? ' carousel-nav-inside' : '');
         return (
             <div className={wrapperClass} ref={PageCarousel.refFunc} style={wrapperStyle} key="carousel">
                 <div className="container">

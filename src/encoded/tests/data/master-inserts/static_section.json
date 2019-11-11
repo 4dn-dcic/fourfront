@@ -702,10 +702,21 @@
     },
 
     {
-        "name" : "page-carousel.test",
+        "name" : "carousel-single.test",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af4600028",
-        "title": "Page Carousel Test",
-        "body" : "<PageCarousel />",
+        "title": "Page Carousel Single Test",
+        "body" : "<PageCarousel\r\n    slides={[\r\n\t\t\t{\r\n\t\t\t\t'img':'\/static\/img\/Metadata_structure_slides\/Slide01.png',\r\n \t\t\t \t'title': '',\r\n                'description': '',\r\n                'badge': 'BETA',\r\n                'badgeBgColor': '',\r\n                'link': 'https:\/\/data.4dnucleome.org'\r\n\t\t\t},\r\n\t\t\t{\r\n\t\t\t\t'img':'\/static\/img\/Metadata_structure_slides\/Slide02.png',\r\n \t\t\t \t'title': '',\r\n                'description': '',\r\n                'badge': '',\r\n                'badgeBgColor': '',\r\n                'link': ''\r\n\t\t\t},\r\n\t\t\t{\r\n\t\t\t\t'img':'\/static\/img\/Metadata_structure_slides\/Slide03.png',\r\n \t\t\t \t'title': '',\r\n                'description': '',\r\n                'badge': '',\r\n                'badgeBgColor': '',\r\n                'link': ''\r\n\t\t\t}\r\n\t]}\r\n    slidesToShow={1}\r\n    slidesToScroll={1}\r\n    slideIndex={0}\r\n    autoPlay={true}\r\n    pauseOnHover={true}\r\n    windowWidth={windowWidth}\r\n    navControlPosition='inside'\r\n    slideHeight={540}\r\n    adjustImageHeight={true}\r\n    showSlideCount={true}\r\n\/>",
+        "status" : "released",
+        "options": {
+            "filetype" : "jsx"
+        }
+    },
+
+    {
+        "name" : "carousel-multi.test",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af4600029",
+        "title": "Page Carousel Multi Test",
+        "body" : "<PageCarousel\r\n    slides={[\r\n            {\r\n                'img': 'https:\/\/humanoriginproject.com\/wp-content\/uploads\/2018\/12\/human-chromosome-function.jpg',\r\n                'title': 'We are listening!',\r\n                'description': 'In less than 60 seconds, you can provide feedback on your data portal experience.',\r\n                'badge': 'ALPHA',\r\n                'badgeBgColor': '#7e4544',\r\n                'link': 'https:\/\/goo.gl\/forms\/IQeOkONbeP9QsfzU2'\r\n            },\r\n            {\r\n                'img': 'https:\/\/res.cloudinary.com\/dyd911kmh\/image\/upload\/f_auto,q_auto:best\/v1508152648\/Jupyter-notebook-Definitive-Guide_ul01sa.png',\r\n                'title': '4DN JupyterHub',\r\n                'description': 'The new Jupyter Notebook Service for registered users provides immediate access to all 4DN data.',\r\n                'badge': 'BETA',\r\n                'link': '\/jupyterhub'\r\n            },\r\n            {\r\n                'img': 'https:\/\/static.independent.co.uk\/s3fs-public\/thumbnails\/image\/2018\/05\/25\/18\/dna-structure.jpg?w968',\r\n                'title': 'Data Highlight',\r\n                'description': 'Finn et. al. utilize high throughput imaging to study heterogeneity in 3D genome structure.',\r\n                'badge': null,\r\n                'link': '\/publications\/80007b23-7748-4492-9e49-c38400acbe60\/'\r\n            },\r\n            {\r\n                'img': 'https:\/\/s3.amazonaws.com\/4dn-dcic-public\/static-pages\/carousel-images\/carousel-higlass.png',\r\n                'title': '4DN Visualization Workspace',\r\n                'description': 'Powered by HiGlass.',\r\n                'badge': 'BETA',\r\n                'link': '\/visualization\/index'\r\n            }\r\n        ]}\r\n    slidesToShow={3}\r\n    slidesToScroll={1}\r\n    slideIndex={0}\r\n    autoPlay={true}\r\n    pauseOnHover={true}\r\n    windowWidth={windowWidth}\r\n    showBackground={false}\r\n    navControlPosition='inside'\r\n    slideHeight={240}\r\n    adjustImageHeight={false}\r\n    showSlideCount={false}\r\n\/>",
         "status" : "released",
         "options": {
             "filetype" : "jsx"
