@@ -43,17 +43,17 @@ export class PageCarousel extends React.PureComponent {
                 'link': '/publications/80007b23-7748-4492-9e49-c38400acbe60/'
             }
         ],
-        'slidesToShow': 3,
-        'slidesToScroll': 1,
-        'slideIndex': 0,
-        'autoPlay': false,
+        'slidesToShow': 3, //integer: Number of slides to show at once
+        'slidesToScroll': 1, //integer: Slides to scroll at once
+        'slideIndex': 0, //integer: the index of the slide to be shown
+        'autoPlay': false, //bool: starts slide show automatically. not working yet due to a bug.
         'pauseOnHover': true,
         'wrapAround': true,
         'dragging': false,
-        'navControlPosition': 'outside', //possible values are 'outside', 'inside'
-        'slideHeight': 240,
-        'adjustImageHeight': true, //true: best for single display power point slides, otherwise set it as false (recommended)
-        'showSlideCount': true, //true only valid if slidesToShow is 1
+        'navControlPosition': 'outside', //left and right nav controls position. Possible values: 'outside' or 'inside'
+        'slideHeight': 240, //integer: Slide height in px. If not defined default is 240.
+        'adjustImageHeight': true, //boolean: if true, resizes slide image's height to container. best for single display power point slides, otherwise set it as false (recommended)
+        'showSlideCount': true, //boolean: displays [Slide x of n] at the bottom left corner. Valid if slidesToShow is defined as 1
     };
 
     static propTypes = {
