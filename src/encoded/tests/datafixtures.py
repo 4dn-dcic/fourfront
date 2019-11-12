@@ -10,7 +10,7 @@ ORDER = [
     'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
     'individual_chicken', 'individual_zebrafish', 'biosource', 'antibody', 'enzyme',
     'treatment_rnai', 'treatment_agent',
-    'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck',
+    'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck', 'quality_metric_rnaseq',
     'quality_metric_bamqc', 'quality_metric_pairsqc', 'quality_metric_margi',
     'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq', 'quality_metric_workflowrun',
     'quality_metric_atacseq', 'microscope_setting_d1', 'microscope_setting_d2',

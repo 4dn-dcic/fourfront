@@ -161,6 +161,20 @@ class QualityMetricAtacseq(QualityMetric):
 
 
 @collection(
+    name='quality-metrics-rnaseq',
+    properties={
+        'title': 'QC Quality Metrics for RNA-seq',
+        'description': 'Listing of QC Quality Metrics for RNA-seq',
+    })
+class QualityMetricRnaseq(QualityMetric):
+    """Subclass of quality matrics for rna-seq"""
+
+    item_type = 'quality_metric_rnaseq'
+    schema = load_schema('encoded:schemas/quality_metric_rnaseq.json')
+    embedded_list = QualityMetric.embedded_list
+
+
+@collection(
     name='quality-metrics-margi',
     properties={
         'title': 'QC Quality metrics for MARGI',
