@@ -21,27 +21,27 @@ import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
  */
 
 
- const FFAuth0Options = {
-     auth: {
-         sso: false,
-         redirect: false,
-         responseType: 'token',
-         params: {
-             scope: 'openid email',
-             prompt: 'select_account'
-         }
-     },
-     socialButtonStyle: 'big',
-     theme: {
-         logo: '/static/img/4dn_logo.svg',
-         icon: '/static/img/4dn_logo.svg',
-         primaryColor: '#009aad'
-     },
-     allowedConnections: ['github', 'google-oauth2'],
-     languageDictionary: {
-         title: 'Log In'
-     }
- };
+const FFAuth0Options = {
+    auth: {
+        sso: false,
+        redirect: false,
+        responseType: 'token',
+        params: {
+            scope: 'openid email',
+            prompt: 'select_account'
+        }
+    },
+    socialButtonStyle: 'big',
+    theme: {
+        logo: '/static/img/4dn_logo.svg',
+        icon: '/static/img/4dn_logo.svg',
+        primaryColor: '#009aad'
+    },
+    allowedConnections: ['github', 'google-oauth2'],
+    languageDictionary: {
+        title: 'Log In'
+    }
+};
 
 
 /**
