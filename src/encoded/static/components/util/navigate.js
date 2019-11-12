@@ -6,6 +6,7 @@ import _ from 'underscore';
 
 import { navigate as originalNavigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/navigate';
 import { expSetFiltersToURLQuery, contextFiltersToExpSetFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/search-filters';
+import { memoizedUrlParse } from './../globals';
 
 let store = null;
 
@@ -149,7 +150,7 @@ navigate.setBrowseBaseStateAndRefresh = function(
         if (_.keys(currentExpSetFilters).length > 0){
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + expSetFiltersToURLQuery(currentExpSetFilters);
         }
-        const hrefParts = url.parse(currentHref, true);
+        const hrefParts = memoizedUrlParse(currentHref);
         if (hrefParts.query.q) {
             nextBrowseHref += navigate.determineSeparatorChar(nextBrowseHref) + 'q=' + encodeURIComponent(hrefParts.query.q);
         }
