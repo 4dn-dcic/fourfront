@@ -20,6 +20,30 @@ import { LoginNavItem, LogoutDropdownItem } from './LoginNavItem';
  * @property {boolean|function} active - Whether action is currently active.
  */
 
+
+ const FFAuth0Options = {
+     auth: {
+         sso: false,
+         redirect: false,
+         responseType: 'token',
+         params: {
+             scope: 'openid email',
+             prompt: 'select_account'
+         }
+     },
+     socialButtonStyle: 'big',
+     theme: {
+         logo: '/static/img/4dn_logo.svg',
+         icon: '/static/img/4dn_logo.svg',
+         primaryColor: '#009aad'
+     },
+     allowedConnections: ['github', 'google-oauth2'],
+     languageDictionary: {
+         title: 'Log In'
+     }
+ };
+
+
 /**
  * React-Bootstrap Dropdown with User Action menu items.
  *
@@ -56,7 +80,8 @@ export const UserActionDropdownMenu = React.memo(function UserActionDropdownMenu
         );
     } else {
         acctBtn = (
-            <LoginController {..._.pick(props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}>
+            <LoginController {..._.pick(props, 'session', 'href', 'updateUserInfo', 'overlaysContainer', 'schemas', 'windowWidth')}
+            auth0Options={FFAuth0Options}>
                 <LoginNavItem key="login-register" className="user-account-item" />
             </LoginController>
         );
