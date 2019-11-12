@@ -102,20 +102,6 @@ def main():
                     len(all_items['ontologies'].keys()), o['patched'], o['not patched']
                 ))
     logger.info("Finished request in %s" % str(datetime.now() - start))
-
-    # update sysinfo. Don't worry about doing this on local
-    if args.env != 'local':
-        data = {"name": "ffsysinfo", "ontology_updated": datetime.today().isoformat()}
-        try:
-            found_info = ff_utils.get_metadata('/sysinfos/' + data['name'], key=auth)
-        except Exception:
-            found_info = None
-
-        if found_info:
-            ff_utils.patch_metadata(data, found_info['uuid'], key=auth)
-        else:
-            ff_utils.post_metadata(data, 'sysinfos', key=auth)
-        logger.info("Updated sysinfo with name %s" % data['name'])
     logger.info("DONE!")
 
 if __name__ == "__main__":

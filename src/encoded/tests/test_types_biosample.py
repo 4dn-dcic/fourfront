@@ -156,3 +156,24 @@ def test_biosample_treatments_summary(biosample_w_treatment):
 
 def test_biosample_treatments_summary_no_treatment(biosample_1):
     assert biosample_1.get('treatments_summary') == 'None'
+
+
+def test_biosample_category_undifferentiated_stem_cells(testapp, biosample_1, human_biosource):
+    scl = testapp.patch_json(human_biosource['@id'], {'biosource_type': 'stem cell derived cell line'}).json['@graph'][0]
+    bios = testapp.patch_json(biosample_1['@id'], {'biosource': [scl['@id']]}).json['@graph'][0]
+    assert 'Human stem cell' in bios.get('biosample_category')
+
+
+def test_biosample_category_differentiated_stem_cells(testapp, biosample_1, human_biosource, biosample_cc_w_diff):
+    scl = testapp.patch_json(human_biosource['@id'], {'biosource_type': 'stem cell derived cell line'}).json['@graph'][0]
+    bios = testapp.patch_json(biosample_1['@id'], {'biosource': [scl['@id']], 'cell_culture_details': [biosample_cc_w_diff['@id']]}).json['@graph'][0]
+    cats = bios.get('biosample_category')
+    assert 'Human stem cell' not in cats
+    assert 'In vitro Differentiation' in cats
+
+
+def test_biosample_biosource_category_two_biosource(testapp, biosample_1, human_biosource, lung_biosource):
+    res = testapp.patch_json(biosample_1['@id'], {'biosource': [human_biosource['@id'], lung_biosource['@id']]}).json['@graph'][0]
+    cat = res.get('biosample_category')
+    assert len(cat) == 1
+    assert cat[0] == 'Mixed samples'

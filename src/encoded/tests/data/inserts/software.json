@@ -753,5 +753,38 @@
         "uuid": "5de38570-68bf-4545-98b6-d7d51ae08db9",
         "source_url": "https://github.com/higlass/clodius",
         "title": "clodius_0.10.2"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "samtools",
+        "software_type": [
+            "file format converter"
+        ],
+        "title": "samtools_1.9",
+        "uuid": "3f2d3b0e-0365-4212-9468-c16ad9531c4d",
+        "version": "1.9"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "STAR",
+        "software_type": [
+            "aligner"
+        ],
+        "title": "STAR_2.5.1b",
+        "uuid": "4b36060c-719c-4ae7-9e14-e306345e8192",
+        "version": "2.5.1b"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "name": "RSEM",
+        "software_type": [
+            "qualification"
+        ],
+        "title": "RSEM_1.2.31",
+        "uuid": "0d215f4c-62a6-481c-85b2-6eed19344016",
+        "version": "1.2.31"
     }
 ]

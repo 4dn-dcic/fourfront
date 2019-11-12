@@ -194,9 +194,6 @@ def main(global_config, **local_config):
 
     # source environment variables on elastic beanstalk
     source_beanstalk_env_vars()
-    # Set index namespace
-    # Eventually we will enable this
-    #settings['indexer.namespace'] = settings['env.name']
 
     settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
@@ -208,7 +205,7 @@ def main(global_config, **local_config):
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.es'] = os.environ.get('mirrorEnvEs')
+    settings['mirror.env.name'] = os.environ.get('MIRROR_ENV_NAME')
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY

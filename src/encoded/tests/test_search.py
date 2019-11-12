@@ -400,6 +400,17 @@ def test_search_with_added_display_title(workbook, testapp, registry):
     exps2 = [exp['uuid'] for exp in res_json2['@graph']]
     assert set(exps) == set(exps2)
 
+    # 'sort' also adds display_title for ascending and descending queries
+    for use_sort in ['biosample', '-biosample']:
+        search = '/search/?type=ExperimentHiC&sort=%s' % use_sort
+        res_json = testapp.get(search, status=301).follow(status=200).json
+        assert res_json['@id'] == '/search/?type=ExperimentHiC&sort=%s.display_title' % use_sort
+
+    # regular sort queries remain unchanged
+    search = '/search/?type=ExperimentHiC&sort=uuid'
+    res_json = testapp.get(search).json
+    assert res_json['@id'] == '/search/?type=ExperimentHiC&sort=uuid'
+
     # check to see that added facet doesn't conflict with existing facet title
     # query below will change to file_format.display_title=fastq
     search = '/search/?type=File&file_format=fastq'
@@ -428,6 +439,20 @@ def test_search_with_no_value(workbook, testapp):
     assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
+
+
+def test_search_with_static_header(workbook, testapp):
+    """ Performs a search which should be accompanied by a search header """
+    search = '/search/?type=Workflow'
+    res_json = testapp.get(search, status=404).json # no items, just checking hdr
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
+    search = '/search/?type=workflow' # check type resolution
+    res_json = testapp.get(search, status=404).json
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
 
 
 #########################################

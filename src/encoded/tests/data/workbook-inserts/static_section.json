@@ -1,0 +1,7 @@
+[{
+    "name" : "search-info-header.Workflow",
+    "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b001",
+    "section_type" : "Search Info Header",
+    "title" : "Workflow Information",
+    "body" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>"
+}]

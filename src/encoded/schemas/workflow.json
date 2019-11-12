@@ -147,6 +147,11 @@
             "description": "Name of the main WDL file for the workflow",
             "type": "string"
         },
+        "wdl_option_filename": {
+            "title": "WDL option file name",
+            "description": "Name of the option file for the WDL workflow",
+            "type": "string"
+        },
         "wdl_child_filenames": {
             "title": "WDL child file names",
             "description": "Names of the other WDL files used by the main WDL file for the workflow",
