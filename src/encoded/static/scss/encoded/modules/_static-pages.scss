@@ -580,6 +580,7 @@ $carousel-height : 240px;
 					border-radius: 2px 2px 0 0;
 				}
 				.title-container {
+					position: absolute;
 					left: 0;
 					right: 0;
 					bottom: 0;
@@ -587,6 +588,7 @@ $carousel-height : 240px;
 					background: #fff;
 					border-bottom: 1px solid #ddd;
 					border-radius: 0 0 2px 2px;
+					overflow: hidden;
 					> h4 {
 						font-weight: 600;
 						margin-bottom: 3px;
@@ -667,6 +669,7 @@ $carousel-height : 240px;
 		.paging-dot {
 			width:10px !important; 
 			height:10px !important;
+			background-color: $primary-dark !important;
 		}
 	}
 

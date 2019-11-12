@@ -54,6 +54,7 @@ export class PageCarousel extends React.PureComponent {
         'slideHeight': 240, //integer: Slide height in px. If not defined default is 240.
         'adjustImageHeight': true, //boolean: if true, resizes slide image's height to container. best for single display power point slides, otherwise set it as false (recommended)
         'showSlideCount': true, //boolean: displays [Slide x of n] at the bottom left corner. Valid if slidesToShow is defined as 1
+        'textPosition': 'bottom', //'bottom/top/left/right': position of title & description on slide
     };
 
     static propTypes = {
@@ -69,6 +70,7 @@ export class PageCarousel extends React.PureComponent {
         'slideHeight': PropTypes.number.isRequired,
         'adjustImageHeight': PropTypes.bool.isRequired,
         'showSlideCount': PropTypes.bool.isRequired,
+        'textPosition': PropTypes.bool.isRequired,
     };
 
     static refFunc(elem) {
@@ -84,15 +86,31 @@ export class PageCarousel extends React.PureComponent {
      */
     renderSlide(slide) {
         const { img, description, title, badge, badgeBgColor, link } = slide;
-        const { slideHeight, adjustImageHeight } = this;
+        const { slideHeight, adjustImageHeight, textPosition } = this;
 
+        //todo: move css rules to _static-pages.scss after usability tests
+        let titleContainerStyle = null, badgeOuterStyle = null;
+        if (textPosition === 'bottom') {
+            titleContainerStyle = { left: 0, right: 0, top: 'unset', bottom: 0 };
+            badgeOuterStyle = { left: '10px', right: 'unset' };
+        } else if (textPosition === 'top') {
+            titleContainerStyle = { left: 0, right: 0, top: 0, bottom: 'unset' };
+            badgeOuterStyle = { left: 'unset', right: '10px' };
+        } else if (textPosition === 'left') {
+            titleContainerStyle = { left: 0, right: 'unset', top: 0, bottom: 0, width: '35%' };
+            badgeOuterStyle = { left: 'unset', right: '10px' };
+        } else if (textPosition === 'right') {
+            titleContainerStyle = { left: 'unset', right: 0, top: 0, bottom: 0, width: '35%' };
+            badgeOuterStyle = { left: '10px', right: 'unset' };
+        }
         const content = ((title || description) ?
             (
-                <div className="title-container">
+                <div className="title-container" style={titleContainerStyle}>
                     {title ? <h4 className="mt-0">{title}</h4> : null}
                     {description ? <p>{description}</p> : null}
                 </div>
             ) : null);
+
         const containerStyle = { height: slideHeight + 'px' };
         const badgeStyle = badgeBgColor ? { backgroundColor: badgeBgColor } : null;
         const innerFrame = (
@@ -103,7 +121,7 @@ export class PageCarousel extends React.PureComponent {
                 </div>
                 <div className="inner-body">
                     {badge ?
-                        <div className="inner-body">
+                        <div className="inner-body" style={badgeOuterStyle}>
                             <div className="slide-label" style={badgeStyle}>{badge}</div>
                         </div>
                         : null}
@@ -111,11 +129,11 @@ export class PageCarousel extends React.PureComponent {
             </div>
         );
 
-        if (link){
+        if (link) {
             const isExternalLink = link.slice(0, 4) === 'http';
             return (
                 <a className="homepage-carousel-slide is-link" href={link} target={isExternalLink ? '_blank' : null} rel={isExternalLink ? 'noopener noreferrer' : null}>
-                    { innerFrame }
+                    {innerFrame}
                 </a>
             );
         }
@@ -124,7 +142,7 @@ export class PageCarousel extends React.PureComponent {
     }
 
     render() {
-        const { slides, slidesToShow, navControlPosition, slideHeight, adjustImageHeight, showSlideCount, windowWidth } = this.props;
+        const { slides, slidesToShow, navControlPosition, slideHeight, adjustImageHeight, showSlideCount, textPosition, windowWidth } = this.props;
 
         let settings = _.extend({}, _.pick(this.props,
             'slidesToShow',
@@ -181,7 +199,7 @@ export class PageCarousel extends React.PureComponent {
             <div className={wrapperClass} ref={PageCarousel.refFunc} style={wrapperStyle} key="carousel">
                 <div className="container">
                     <div className="row">
-                        <Carousel {...settings} children={_.map(slides, this.renderSlide, { slideHeight, adjustImageHeight })} />
+                        <Carousel {...settings} children={_.map(slides, this.renderSlide, { slideHeight, adjustImageHeight, textPosition })} />
                     </div>
                 </div>
             </div>
