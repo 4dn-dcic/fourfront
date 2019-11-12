@@ -9,46 +9,42 @@ import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/e
 import { replaceString as placeholderReplacementFxn } from './../placeholders';
 
 
-export class HomePageCarouselSlide extends React.PureComponent {
 
-    render(){
-        const { options, content, title, description, filetype } = this.props;
-
-        const link        = (options && options.link) || null;
-        const image       = (options && options.image) || null;
-        const showTitle   = (!title ? null : (
-            <div className="title-container">
-                <h4 className="mt-0">{ title }</h4>
-                { description ? <p>{ description }</p> : null }
+export const HomePageCarouselSlide = React.memo(function HomePageCarouselSlide(props){
+    const { options, content, title, description, filetype } = props;
+    const link        = (options && options.link) || null;
+    const image       = (options && options.image) || null;
+    const showTitle   = (!title ? null : (
+        <div className="title-container">
+            <h4 className="mt-0">{ title }</h4>
+            { description ? <p>{ description }</p> : null }
+        </div>
+    ));
+    const inner = (
+        <React.Fragment>
+            <div className="inner-container">
+                <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
+                { showTitle }
             </div>
-        ));
-        const inner = (
-            <React.Fragment>
-                <div className="inner-container">
-                    <div className="bg-image" style={image ? { 'backgroundImage' : 'url(' + image + ')' } : null} />
-                    { showTitle }
+            { content ?
+                <div className="inner-body">
+                    <BasicStaticSectionBody {...{ filetype, content, placeholderReplacementFxn }} />
                 </div>
-                { content ?
-                    <div className="inner-body">
-                        <BasicStaticSectionBody {...{ filetype, content, placeholderReplacementFxn }} />
-                    </div>
-                    : null }
-            </React.Fragment>
+                : null }
+        </React.Fragment>
+    );
+
+    if (link){
+        const isExternalLink = link.slice(0, 4) === 'http';
+        return (
+            <a className="homepage-carousel-slide is-link" href={link} target={isExternalLink ? '_blank' : null} rel={isExternalLink ? 'noopener noreferrer' : null}>
+                { inner }
+            </a>
         );
-
-        if (link){
-            const isExternalLink = link.slice(0, 4) === 'http';
-            return (
-                <a className="homepage-carousel-slide is-link" href={link} target={isExternalLink ? '_blank' : null} rel={isExternalLink ? 'noopener noreferrer' : null}>
-                    { inner }
-                </a>
-            );
-        }
-
-        return <div className="homepage-carousel-slide">{ inner }</div>;
-
     }
-}
+
+    return <div className="homepage-carousel-slide">{ inner }</div>;
+});
 
 
 export class HomePageCarousel extends React.PureComponent {
@@ -86,30 +82,22 @@ export class HomePageCarousel extends React.PureComponent {
         }, 10);
     }
 
-    renderSlide(section, idx){
-        return <HomePageCarouselSlide {...section} key={object.itemUtil.atId(section) || idx} />;
-    }
-
     render(){
-
-        var { settings, windowWidth, context } = this.props,
-            sections = context && context.carousel;
+        const { settings: propSettings, windowWidth, context } = this.props;
+        const sections = context && context.carousel;
+        const settings = _.clone(propSettings);
 
         if (!sections || !Array.isArray(sections) || sections.length === 0){
             return null;
         }
 
         // Do some responsive stuff
-        var gridState = layout.responsiveGridState(windowWidth);
+        const gridState = layout.responsiveGridState(windowWidth);
 
         if (gridState === 'sm' || gridState === 'md' || sections.length === 2){
-            settings = _.extend({}, settings, {
-                'slidesToShow' : 2
-            });
+            settings.slidesToShow = 2;
         } else if (gridState === 'xs' || sections.length === 1){
-            settings = _.extend({}, settings, {
-                'slidesToShow' : 1
-            });
+            settings.slidesToShow = 1;
         }
 
 
@@ -117,7 +105,9 @@ export class HomePageCarousel extends React.PureComponent {
             <div className="homepage-carousel-wrapper carousel-background-frame" ref={HomePageCarousel.refFunc} style={{ 'opacity' : 0 }} key="carousel">
                 <div className="container">
                     <div className="row">
-                        <Carousel {...settings} children={_.map(sections, this.renderSlide)} />
+                        <Carousel {...settings}>
+                            { sections.map(function(s){ return <HomePageCarouselSlide {...s} key={object.itemUtil.atId(s) || idx} />; }) }
+                        </Carousel>
                     </div>
                 </div>
             </div>

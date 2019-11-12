@@ -25,7 +25,7 @@ const Announcement = React.memo(function Announcement(props){
             </div>
             <AnnouncementSubTitle {...props}/>
             <div className="announcement-content">
-                <BasicStaticSectionBody content={section.content} filetype={filetype} placeholderReplacementFxn={placeholderReplacementFxn} windowWidth={windowWidth} />
+                <BasicStaticSectionBody content={section.content} {...{ filetype, placeholderReplacementFxn, windowWidth }} />
             </div>
         </div>
     );

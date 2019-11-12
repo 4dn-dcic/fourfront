@@ -43,10 +43,12 @@ export default class HomePage extends React.PureComponent {
      * @returns {Element} A React <div> element.
      */
     render() {
+        const { windowWidth, context, session } = this.props;
+        const { announcements = null } = context || {};
         return (
             <div className="homepage-wrapper">
 
-                <HomePageCarousel {..._.pick(this.props, 'windowWidth', 'context')} />
+                <HomePageCarousel {...{ windowWidth, context }} />
 
                 <div className="container home-content-area" id="content">
                     <div className="row">
@@ -55,12 +57,12 @@ export default class HomePage extends React.PureComponent {
                             { this.introText() }
                         </div>
                         <div className="col-12 col-md-4 pull-right">
-                            <LinksColumn {..._.pick(this.props, 'session', 'windowWidth')} />
+                            <LinksColumn {...{ session, windowWidth }} />
                         </div>
                     </div>
                     <div className="mt-4">
                         <h2 className="homepage-section-title">Announcements</h2>
-                        <Announcements session={this.props.session} announcements={this.props.context.announcements || null} {..._.pick(this.props, 'windowWidth')} />
+                        <Announcements {...{ session, announcements, windowWidth }} />
                     </div>
                 </div>
 

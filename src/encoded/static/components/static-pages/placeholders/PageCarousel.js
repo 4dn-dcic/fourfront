@@ -52,9 +52,9 @@ export class PageCarousel extends React.PureComponent {
         'dragging': false,
         'navControlPosition': 'outside', //left and right nav controls position. Possible values: 'outside' or 'inside'
         'slideHeight': 240, //integer: Slide height in px. If not defined default is 240.
-        'adjustImageHeight': true, //boolean: if true, resizes slide image's height to container. best for single display power point slides, otherwise set it as false (recommended)
+        //'adjustImageHeight': true, //boolean: if true, resizes slide image's height to container. best for single display power point slides, otherwise set it as false (recommended)
         'showSlideCount': true, //boolean: displays [Slide x of n] at the bottom left corner. Valid if slidesToShow is defined as 1
-        'textPosition': 'bottom', //'bottom/top/left/right': position of title & description on slide
+        //'textPosition': 'bottom', //'bottom/top/left/right': position of title & description on slide
     };
 
     static propTypes = {
@@ -68,10 +68,15 @@ export class PageCarousel extends React.PureComponent {
         'windowWidth': PropTypes.number,
         'navControlPosition': PropTypes.string,
         'slideHeight': PropTypes.number.isRequired,
-        'adjustImageHeight': PropTypes.bool.isRequired,
+        //'adjustImageHeight': PropTypes.bool.isRequired,
         'showSlideCount': PropTypes.bool.isRequired,
-        'textPosition': PropTypes.bool.isRequired,
+        //'textPosition': PropTypes.bool.isRequired,
     };
+
+    constructor(props){
+        super(props);
+        this.renderSlide = this.renderSlide.bind(this);
+    }
 
     static refFunc(elem) {
         setTimeout(() => {
@@ -86,42 +91,43 @@ export class PageCarousel extends React.PureComponent {
      */
     renderSlide(slide) {
         const { img, description, title, badge, badgeBgColor, link } = slide;
-        const { slideHeight, adjustImageHeight, textPosition } = this;
+        const { slideHeight, adjustImageHeight, textPosition } = this.props;
 
         //todo: move css rules to _static-pages.scss after usability tests
-        let titleContainerStyle = null, badgeOuterStyle = null;
-        if (textPosition === 'bottom') {
-            titleContainerStyle = { left: 0, right: 0, top: 'unset', bottom: 0 };
-            badgeOuterStyle = { left: '10px', right: 'unset' };
-        } else if (textPosition === 'top') {
-            titleContainerStyle = { left: 0, right: 0, top: 0, bottom: 'unset' };
-            badgeOuterStyle = { left: 'unset', right: '10px' };
-        } else if (textPosition === 'left') {
-            titleContainerStyle = { left: 0, right: 'unset', top: 0, bottom: 0, width: '35%' };
-            badgeOuterStyle = { left: 'unset', right: '10px' };
-        } else if (textPosition === 'right') {
-            titleContainerStyle = { left: 'unset', right: 0, top: 0, bottom: 0, width: '35%' };
-            badgeOuterStyle = { left: '10px', right: 'unset' };
-        }
+        // let titleContainerStyle = null;
+        // let badgeOuterStyle = null;
+        // if (textPosition === 'bottom') {
+        //     titleContainerStyle = { left: 0, right: 0, top: 'unset', bottom: 0 };
+        //     badgeOuterStyle = { left: '10px', right: 'unset' };
+        // } else if (textPosition === 'top') {
+        //     titleContainerStyle = { left: 0, right: 0, top: 0, bottom: 'unset' };
+        //     badgeOuterStyle = { left: 'unset', right: '10px' };
+        // } else if (textPosition === 'left') {
+        //     titleContainerStyle = { left: 0, right: 'unset', top: 0, bottom: 0, width: '35%' };
+        //     badgeOuterStyle = { left: 'unset', right: '10px' };
+        // } else if (textPosition === 'right') {
+        //     titleContainerStyle = { left: 'unset', right: 0, top: 0, bottom: 0, width: '35%' };
+        //     badgeOuterStyle = { left: '10px', right: 'unset' };
+        // }
         const content = ((title || description) ?
             (
-                <div className="title-container" style={titleContainerStyle}>
+                <div className="title-container">
                     {title ? <h4 className="mt-0">{title}</h4> : null}
                     {description ? <p>{description}</p> : null}
                 </div>
             ) : null);
 
-        const containerStyle = { height: slideHeight + 'px' };
+        const containerStyle = { height: slideHeight };
         const badgeStyle = badgeBgColor ? { backgroundColor: badgeBgColor } : null;
         const innerFrame = (
             <div style={containerStyle}>
                 <div className="inner-container" style={containerStyle}>
-                    <div className="bg-image" style={img ? { 'backgroundImage': 'url(' + img + ')', 'backgroundSize': adjustImageHeight ? 'auto 100%' : 'cover' } : null} />
+                    <div className="bg-image" style={img ? { 'backgroundImage': 'url(' + img + ')' } : null} />
                     {content}
                 </div>
                 <div className="inner-body">
                     {badge ?
-                        <div className="inner-body" style={badgeOuterStyle}>
+                        <div className="inner-body">
                             <div className="slide-label" style={badgeStyle}>{badge}</div>
                         </div>
                         : null}
@@ -151,7 +157,8 @@ export class PageCarousel extends React.PureComponent {
             'autoPlay',
             'pauseOnHover',
             'wrapAround',
-            'dragging'));
+            'dragging'
+        ));
 
         //adjustments for responsive display
         const gridState = layout.responsiveGridState(windowWidth || null);
@@ -199,7 +206,7 @@ export class PageCarousel extends React.PureComponent {
             <div className={wrapperClass} ref={PageCarousel.refFunc} style={wrapperStyle} key="carousel">
                 <div className="container">
                     <div className="row">
-                        <Carousel {...settings} children={_.map(slides, this.renderSlide, { slideHeight, adjustImageHeight, textPosition })} />
+                        <Carousel {...settings}>{ slides.map(this.renderSlide) }</Carousel>
                     </div>
                 </div>
             </div>
