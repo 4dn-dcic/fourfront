@@ -167,7 +167,7 @@ export class PageCarousel extends React.PureComponent {
         } else if (gridState === 'xs' || slides.length === 1) {
             settings = _.extend({}, settings, { 'slidesToShow': 1 });
         }
-        let wrapperStyle = { opacity: '0' };
+        let wrapperStyle = { opacity: 0 };
         //slide height
         if (slideHeight > 0) {
             settings = _.extend({}, settings, { 'heightMode': 'max' });

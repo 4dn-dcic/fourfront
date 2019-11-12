@@ -634,8 +634,8 @@ $carousel-height : 240px;
 	.slider-control-centerright {
 		font-size: 1.65rem;
 		cursor: pointer;
-		/* Works around glitch where parent slider has wrong height temp assigned and top: 50% isn't acccurate */
-		// top: $carousel-height / 2 - 12px !important;
+		top: 50%;
+		margin-top: -23px; // `icon-2x` height is 46px.
 		transform: none !important;
 		transition: transform .4s;
 		&:hover {
