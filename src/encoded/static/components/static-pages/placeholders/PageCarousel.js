@@ -150,7 +150,7 @@ export class PageCarousel extends React.PureComponent {
     render() {
         const { slides, slidesToShow, navControlPosition, slideHeight, adjustImageHeight, showSlideCount, textPosition, windowWidth } = this.props;
 
-        let settings = _.extend({}, _.pick(this.props,
+        const settings = _.extend({}, _.pick(this.props,
             'slidesToShow',
             'slidesToScroll',
             'slideIndex',
@@ -163,43 +163,39 @@ export class PageCarousel extends React.PureComponent {
         //adjustments for responsive display
         const gridState = layout.responsiveGridState(windowWidth || null);
         if (gridState === 'sm' || gridState === 'md' || slides.length === 2) {
-            settings = _.extend({}, settings, { 'slidesToShow': 2 });
+            settings.slidesToShow = Math.min(2, slidesToShow); // Don't increase if default for larger sizes is 1 already.
         } else if (gridState === 'xs' || slides.length === 1) {
-            settings = _.extend({}, settings, { 'slidesToShow': 1 });
+            settings.slidesToShow = Math.min(1, slidesToShow);
         }
-        let wrapperStyle = { opacity: 0 };
-        //slide height
+
+        const wrapperStyle = { opacity: 0 };
+
+        // slide height
         if (slideHeight > 0) {
-            settings = _.extend({}, settings, { 'heightMode': 'max' });
-            wrapperStyle = _.extend({}, wrapperStyle, { height: (slideHeight + 30).toString() + 'px' });
+            settings.heightMode = "max";
+            wrapperStyle.height = slideHeight + 30; // React automatically converts to px by default.
         } else {
-            settings = _.extend({}, settings, { 'heightMode': 'max' });
+            settings.heightMode = "max";
         }
-        //slide count
+        // slide count
         if ((showSlideCount === false) || (showSlideCount === true && slidesToShow > 1)) {
-            settings = _.extend({}, settings, {
-                'renderBottomLeftControls': null
-            });
+            settings.renderBottomLeftControls = null;
+        } else {
+            settings.renderBottomLeftControls = function ({ currentSlide, slideCount }) {
+                return <div>Slide <strong>{currentSlide + 1}</strong> of <strong>{slideCount}</strong></div>;
+            };
         }
-        else {
-            settings = _.extend({}, settings, {
-                'renderBottomLeftControls': function ({ currentSlide, slideCount }) {
-                    return <div>Slide <strong>{currentSlide + 1}</strong> of <strong>{slideCount}</strong></div>;
-                }
-            });
-        }
+
         //left and right nav controls
-        settings = _.extend({}, settings, {
-            'renderCenterLeftControls': function ({ previousSlide, currentSlide }) {
-                if (currentSlide === 0) return null;
-                return <i className="icon icon-fw fas icon-angle-left icon-2x" onClick={previousSlide} />;
-            },
-            'renderCenterRightControls': function (sliderProps) {
-                var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
-                if (currentSlide >= slideCount - slidesToShow) return null;
-                return <i className="icon icon-fw fas icon-angle-right icon-2x" onClick={nextSlide} />;
-            }
-        });
+        settings.renderCenterLeftControls = function ({ previousSlide, currentSlide }) {
+            if (currentSlide === 0) return null;
+            return <i className="icon icon-fw fas icon-angle-left icon-2x" onClick={previousSlide} />;
+        };
+        settings.renderCenterRightControls = function (sliderProps) {
+            var { nextSlide, currentSlide, slideCount, slidesToShow } = sliderProps;
+            if (currentSlide >= slideCount - slidesToShow) return null;
+            return <i className="icon icon-fw fas icon-angle-right icon-2x" onClick={nextSlide} />;
+        };
 
         const wrapperClass = 'homepage-carousel-wrapper' + (navControlPosition === 'inside' ? ' carousel-nav-inside' : '');
         return (
