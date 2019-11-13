@@ -50,7 +50,7 @@ export const reducers = {
         return state;
     },
 
-    'browseBaseState' : function(state='only_4dn', action){
+    'browseBaseState' : function(state='all', action){
         return (action.type && action.type.browseBaseState) || state;
     }
 };

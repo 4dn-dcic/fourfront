@@ -13,6 +13,7 @@ import {
     HeadersRow, TableRowToggleOpenButton
 } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
+import { memoizedUrlParse } from './../../../globals';
 
 
 /** @todo Move to shared components repo? */
@@ -284,14 +285,14 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
     /** We set the default number of results to get here to be 7, unless is overriden in href */
     static getLimit = memoize(function(href){
         // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
-        const { query : { limit = 0 } = { limit : 0 } } = url.parse(href, true);
+        const { query : { limit = 0 } = { limit : 0 } } = memoizedUrlParse(href);
         return (limit && parseInt(limit)) || 7;
     });
 
     static hrefWithoutLimit = memoize(function(href){
         // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
-        const hrefParts = url.parse(href, true);
-        const { query = {} } = hrefParts;
+        const hrefParts = _.clone(memoizedUrlParse(href));
+        const query = (hrefParts.query && _.clone(hrefParts.query) || {});
         delete query.limit;
         hrefParts.search = '?' + queryString.stringify(query);
         return url.format(hrefParts);
@@ -301,8 +302,8 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
         // TODO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
         // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
 
-        const hrefParts = url.parse(href, true);
-        const { query = {} } = hrefParts;
+        const hrefParts = _.clone(memoizedUrlParse(href));
+        const query = (hrefParts.query && _.clone(hrefParts.query) || {});
         query.limit = query.limit || limit || ItemPageTableSearchLoader.getLimit(href);
         hrefParts.search = '?' + queryString.stringify(query);
         return url.format(hrefParts);

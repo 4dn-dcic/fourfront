@@ -45,8 +45,10 @@ export class BasicUserContentBody extends React.PureComponent {
     }
 
     render(){
-        var { context, markdownCompilerOptions, parentComponentType } = this.props;
-        if (this.state.hasError){
+        const { context, markdownCompilerOptions, parentComponentType, windowWidth } = this.props;
+        const { hasError } = this.state;
+        const { content, filetype } = context || {};
+        if (hasError){
             return (
                 <div className="error">
                     <h4>Error parsing content.</h4>
@@ -57,7 +59,7 @@ export class BasicUserContentBody extends React.PureComponent {
         var itemType = this.itemType();
 
         if (itemType === 'StaticSection') {
-            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} placeholderReplacementFxn={placeholderReplacementFxn} />;
+            return <BasicStaticSectionBody {...{ content, filetype, markdownCompilerOptions, windowWidth, placeholderReplacementFxn }} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
@@ -125,14 +127,14 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
         'prependTitleIcon' : true
     });
 
-    renderInnerBody(){
-        const { context, href } = this.props;
+    renderInnerBody() {
+        const { context, href, windowWidth } = this.props;
         const { open } = this.state;
         const isHiGlass = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} />
+                <BasicUserContentBody {...{ context, href, windowWidth }} parentComponentType={ExpandableStaticHeader} />
             </div>
         );
     }

@@ -442,6 +442,24 @@ h1.page-title + .page-subtitle {
 	overflow: hidden;
 }
 
+.overflow-xs-hidden {
+	@include media-breakpoint-only(xs){
+		overflow: hidden;
+	}
+}
+
+.overflow-sm-hidden {
+	@include media-breakpoint-only(sm){
+		overflow: hidden;
+	}
+}
+
+.overflow-md-hidden {
+	@include media-breakpoint-only(md){
+		overflow: hidden;
+	}
+}
+
 .clickable {
 	cursor: pointer;
 	> label {
