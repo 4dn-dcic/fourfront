@@ -99,6 +99,10 @@ export class SearchBar extends React.PureComponent {
                 }
 
             }
+            else
+            {
+                return { 'searchItemsTypes': 'sets' };
+            }
         });
     }
     onSearchInputChange(e) {
@@ -138,7 +142,7 @@ export class SearchBar extends React.PureComponent {
             case 'within':
                 return '';
             default:
-                return '';
+                return "/browse/";
         }
     }
     selectItemTypeDropdown(visible = false) {
@@ -206,13 +210,15 @@ export class SearchBar extends React.PureComponent {
         } else if (searchItemsTypes === 'all' && !isSelectAction(currentAction)) {
             _.extend(query, { 'type': 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else if (searchItemsTypes === 'sets') {
+            delete hrefParts.query['experiments_in_set.experiment_type.display_title'];
             _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
         }
         else if (searchItemsTypes === 'within') {
             _.extend(query, _.omit(hrefParts.query || {}, 'q'));
         }
         else {
-            _.extend(query, _.omit(hrefParts.query || {}, 'q'));
+            delete hrefParts.query['experiments_in_set.experiment_type.display_title'];
+            _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams);
         }
 
         return ( // Form submission gets serialized and AJAXed via onSubmit handlers in App.js
