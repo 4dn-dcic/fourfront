@@ -11,6 +11,7 @@ from snovault import (
 from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from snovault.resource_views import collection_view_listing_db
 from snovault.util import (
     find_collection_subtypes,
@@ -77,6 +78,18 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     principals = request.effective_principals
     es = request.registry[ELASTIC_SEARCH]
 
+    # Get static section (if applicable) when searching a single item type
+    # Note: Because we rely on 'source', if the static_section hasn't been indexed
+    # into Elasticsearch it will not be loaded
+    if (len(doc_types) == 1) and 'Item' not in doc_types:
+        search_term = 'search-info-header.' + doc_types[0]
+        static_section = request.registry['collections']['StaticSection'].get(search_term)
+        if static_section and hasattr(static_section.model, 'source'):
+            item = static_section.model.source['object']
+            result['search_header'] = {}
+            result['search_header']['content'] = item['content']
+            result['search_header']['title'] = item.get('title', item['display_title'])
+
     from_, size = get_pagination(request)
 
     # get desired frame for this search
@@ -91,7 +104,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # if doc_type is item, search all indexes by setting es_index to None
     # If multiple, search all specified
     if 'Item' in doc_types:
-        es_index = '_all'
+        es_index = get_namespaced_index(request, '*')
     else:
         es_index = find_index_by_doc_types(request, doc_types, ['Item'])
 
@@ -192,7 +205,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 DEFAULT_BROWSE_PARAM_LISTS = {
     'type'                  : ["ExperimentSetReplicate"],
     'experimentset_type'    : ['replicate'],
-    'award.project'         : ['4DN']
+    # Uncomment if changing back to showing external data: false by default
+    # 'award.project'         : ['4DN']
 }
 
 @view_config(route_name='browse', request_method='GET', permission='search')
@@ -310,10 +324,22 @@ def normalize_query(request, types, doc_types):
         Current rules:
         - for 'type', get name from types (from the registry)
         - append '.display_title' to any terminal linkTo query field
+        - append '.display_title' to sorts on fields
         """
         # type param is a special case. use the name from TypeInfo
         if key == 'type' and val in types:
             return (key, types[val].name)
+
+        # if key is sort, pass val as the key to this function
+        # if it appends display title we know its a linkTo and
+        # should be treated as such
+        if key == 'sort':
+            # do not use '-' if present
+            sort_val = val[1:] if val.startswith('-') else val
+            new_val, _ = normalize_param(sort_val, None)
+            if new_val != sort_val:
+                val = val.replace(sort_val, new_val)
+            return (key, val)
 
         # find schema for field parameter and drill down into arrays/subobjects
         field_schema = schema_for_field(key, request, doc_types)
@@ -561,7 +587,8 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         else:
             name = requested_sort
             order = 'asc'
-        sort_schema = type_schema.get('properties', {}).get(name) if type_schema else None
+        sort_schema = schema_for_field(name, request, doc_types)
+
         if sort_schema:
             sort_type = sort_schema.get('type')
         else:
@@ -580,9 +607,15 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
                 'unmapped_type': 'float',
                 'missing': '_last'
             }
+        elif sort_schema and determine_if_is_date_field(name, sort_schema):
+            sort['embedded.' + name + '.raw'] = result_sort[name] = {
+                'order': order,
+                'unmapped_type': 'date',
+                'missing': '_last'
+            }
         else:
             # fallback case, applies to all string type:string fields
-            sort['embedded.' + name + '.lower_case_sort.keyword'] = result_sort[name] = {
+            sort['embedded.' + name + '.lower_case_sort'] = result_sort[name] = {
                 'order': order,
                 'unmapped_type': 'keyword',
                 'missing': '_last'
@@ -604,7 +637,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
                 for k, v in type_schema['sort_by'].items():
                     # Should always sort on raw field rather than analyzed field
                     # OR search on lower_case_sort for case insensitive results
-                    sort['embedded.' + k + '.lower_case_sort.keyword'] = result_sort[k] = v
+                    sort['embedded.' + k + '.lower_case_sort'] = result_sort[k] = v
         # Default is most recent first, then alphabetical by label
         if not sort:
             sort['embedded.date_created.raw'] = result_sort['date_created'] = {
@@ -738,7 +771,7 @@ def set_filters(request, search, result, principals, doc_types):
                     range_filters[query_field]['format'] = 'yyyy-MM-dd HH:mm'
 
             if range_direction in ('gt', 'gte', 'lt', 'lte'):
-                if len(term) == 10:
+                if range_type == "date" and len(term) == 10:
                     # Correct term to have hours, e.g. 00:00 or 23:59, if not otherwise supplied.
                     if range_direction == 'gt' or range_direction == 'lte':
                         term += ' 23:59'
@@ -856,8 +889,10 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
     ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
     used_facets = [ facet[0] for facet in facets + append_facets ]
-    used_facet_titles = [facet[1]['title'] for facet in facets + append_facets
-                         if 'title' in facet[1]]
+    used_facet_titles = used_facet_titles = [
+        facet[1]['title'] for facet in facets + append_facets
+        if 'title' in facet[1]
+    ]
     for field in prepared_terms:
         if field.startswith('embedded'):
             split_field = field.strip().split('.') # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
@@ -868,6 +903,10 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             # Use the last part of the split field to get the field title
             title_field = split_field[-1]
+            # workaround: if query has a '!=' condition, title_field ends with '!'. This prevents to find the proper display title.
+            # TODO: instead of workaround, '!' could be excluded while generating query results
+            if title_field.endswith('!'):
+                title_field = title_field[:-1]
 
             # if searching for a display_title, use the title of parent object
             # use `is_object_title` to keep track of this
@@ -880,16 +919,22 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
             if title_field in used_facets or title_field in disabled_facets:
                 # Cancel if already in facets or is disabled
                 continue
+            used_facets.append(title_field)
 
             # If we have a range filter in the URL,
             if title_field == 'from' or title_field == 'to':
-                if len(split_field) == 3:
-                    f_field = split_field[-2]
+                if len(split_field) >= 3:
+                    f_field = ".".join(split_field[1:-1])
                     field_schema = schema_for_field(f_field, request, doc_types)
+
                     if field_schema:
-                        title_field = f_field
-                        use_field = '.'.join(split_field[1:-1])
-                        aggregation_type = 'stats'
+                        is_date_field = determine_if_is_date_field(field, field_schema)
+                        is_numerical_field = field_schema['type'] in ("integer", "float", "number")
+
+                        if is_date_field or is_numerical_field:
+                            title_field = field_schema.get("title", f_field)
+                            use_field = f_field
+                            aggregation_type = 'stats'
 
             for schema in schemas:
                 if title_field in schema['properties']:
@@ -903,10 +948,11 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
 
             # At moment is equivalent to `if aggregation_type == 'stats'`` until/unless more agg types are added for _facets_.
             if aggregation_type != 'terms':
-                facet_tuple[1]['hide_from_view'] = True # Temporary until we handle these better on front-end.
-                # Facet would be otherwise added twice if both `.from` and `.to` are requested.
-                if facet_tuple in facets:
+                # Remove completely if duplicate (e.g. .from and .to both present)
+                if use_field in used_facets:
                     continue
+                #facet_tuple[1]['hide_from_view'] = True # Temporary until we handle these better on front-end.
+                # Facet would be otherwise added twice if both `.from` and `.to` are requested.
 
             facets.append(facet_tuple)
 
@@ -928,7 +974,8 @@ def schema_for_field(field, request, doc_types, should_log=False):
     '''
     Find the schema for the given field (in embedded '.' format). Uses
     ff_utils.crawl_schema from snovault and logs any cases where there is an
-    error finding the field from the schema
+    error finding the field from the schema. Caches results based off of field
+    and doc types used
 
     Args:
         field (string): embedded field path, separated by '.'
@@ -1094,7 +1141,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
             if is_date_field:
                 facet['field_type'] = 'date'
             elif is_numerical_field:
-                facet['field_type'] = 'number'
+                facet['field_type'] = field_schema['type'] or "number"
 
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
@@ -1104,7 +1151,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
                         }
                     }
                 },
-                'filter': search_filters
+                'filter': {'bool': facet_filters}
             }
 
         else: # Default -- facetable terms
@@ -1316,7 +1363,8 @@ def find_index_by_doc_types(request, doc_types, ignore):
             continue
         else:
             result = find_collection_subtypes(request.registry, doc_type)
-            indexes.extend(result)
+            namespaced_results = map(lambda t: get_namespaced_index(request, t), result)
+            indexes.extend(namespaced_results)
     # remove any duplicates
     indexes = list(set(indexes))
     index_string = ','.join(indexes)

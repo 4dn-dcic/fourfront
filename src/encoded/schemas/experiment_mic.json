@@ -25,6 +25,7 @@
         { "$ref": "mixins.json#/badges" },
         { "$ref": "mixins.json#/supplementary_files" },
         { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "mixins.json#/sample_image" },
         { "$ref": "experiment.json#/properties"}
     ],
     "mixinFacets": [

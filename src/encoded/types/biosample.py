@@ -6,13 +6,9 @@ from snovault import (
 )
 from .base import (
     Item,
-    lab_award_attribution_embed_list
+    lab_award_attribution_embed_list,
+    get_item_if_you_can
 )
-
-# from .shared_calculated_properties import (
-#    CalculatedBiosampleSlims,
-#    CalculatedBiosampleSynonyms
-# )
 
 
 @collection(
@@ -86,9 +82,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     def modifications_summary(self, request, modifications=None):
         if modifications:
             ret_str = ''
-            for i in range(len(modifications)):
-                mod_props = request.embed(modifications[i], '@@object')
-                ret_str += (mod_props['modification_name'] + ' and ') if mod_props['modification_name'] else ''
+            for mod in modifications:
+                mod_props = get_item_if_you_can(request, mod, 'modifications')
+                if mod_props and mod_props.get('modification_name'):
+                    ret_str += (mod_props['modification_name'] + ' and ')
             if len(ret_str) > 0:
                 return ret_str[:-5]
             else:
@@ -103,8 +100,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     def modifications_summary_short(self, request, modifications=None):
         if modifications:
             # use only the first modification
-            mod_props = request.embed(modifications[0], '@@object')
-            return mod_props['modification_name_short']
+            mod_props = get_item_if_you_can(request, modifications[0], 'modifications')
+            if mod_props and mod_props.get('modification_name_short'):
+                return mod_props['modification_name_short']
         return 'None'
 
     @calculated_property(schema={
@@ -115,10 +113,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     def treatments_summary(self, request, treatments=None):
         if treatments:
             treat_list = []
-            for i in range(len(treatments)):
-                treat_props = request.embed(treatments[i], '@@object')
-                treat_list.append(treat_props.get('display_title', ''))
-            return ' and '.join(sorted(treat_list))
+            for tmt in treatments:
+                treat_props = get_item_if_you_can(request, tmt, 'treatments')
+                treat_list.append(treat_props.get('display_title'))
+            return ' and '.join(sorted([t for t in treat_list if t]))
         return 'None'
 
     @calculated_property(schema={
@@ -128,14 +126,15 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     })
     def biosource_summary(self, request, biosource, cell_culture_details=None):
         ret_str = ''
-        for i in range(len(biosource)):
-            bios_props = request.embed(biosource[i], '@@object')
-            ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
+        for bios in biosource:
+            bios_props = get_item_if_you_can(request, bios, 'biosources')
+            if bios_props and bios_props.get('biosource_name'):
+                ret_str += (bios_props['biosource_name'] + ' and ')
         if len(ret_str) > 0:
             ret_str = ret_str[:-5]
             if cell_culture_details and len(cell_culture_details) == 1:
-                cc_props = request.embed(cell_culture_details[0], '@@embedded')
-                if 'tissue' in cc_props:
+                cc_props = get_item_if_you_can(request, cell_culture_details[0], 'biosample_cell_cultures', frame='embedded')
+                if cc_props and 'tissue' in cc_props:
                     ret_str = ret_str + ' differentiated to ' + cc_props['tissue'].get('display_title')
             return ret_str
         return 'None'  # pragma: no cover
@@ -149,9 +148,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         biosource_types = []
         for bs in biosource:
             # silliness in case we ever have multiple biosources
-            biosource = request.embed(bs, '@@object')
-            btype = biosource.get('biosource_type')
-            if btype is not None:  # pragma: no cover
+            biosource = get_item_if_you_can(request, bs, 'biosources')
+            if biosource:
+                btype = biosource.get('biosource_type')
                 biosource_types.append(btype)
         biosource_types = list(set(biosource_types))
         if len(biosource_types) > 1:
@@ -163,10 +162,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
 
         # we've got a single type of biosource
         if cell_culture_details:  # this is now an array but just check the first
-            cell_culture = request.embed(cell_culture_details[0], '@@object')
-            differentiated = cell_culture.get('in_vitro_differentiated')
-            if differentiated == "Yes":
-                return 'in vitro differentiated cells'
+            cell_culture = get_item_if_you_can(request, cell_culture_details[0], 'biosample_cell_cultures')
+            if cell_culture:
+                if cell_culture.get('in_vitro_differentiated') == 'Yes':
+                    return 'in vitro differentiated cells'
 
         biosource_type = biosource_types[0]
         if biosource_type == 'multicellular organism':
@@ -178,6 +177,27 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         if biosource_type == 'tissue':
             return biosource_type
         return biosource_type + 's'
+
+    @calculated_property(schema={
+        "title": "Sample Category",
+        "description": "The category of biosample used in an experiment.",
+        "type": "string",
+    })
+    def biosample_category(self, request, biosource, cell_culture_details=None):
+        if len(biosource) > 1:
+            return ['Mixed samples']
+        categories = []
+        biosource = get_item_if_you_can(request, biosource[0], 'biosources')
+        if biosource:
+            categories = biosource.get('biosource_category', [])
+        if cell_culture_details:  # this is now an array but just check the first
+            cell_culture = get_item_if_you_can(request, cell_culture_details[0], 'biosample_cell_cultures')
+            if cell_culture:
+                if cell_culture.get('in_vitro_differentiated') == 'Yes':
+                    categories.append('In vitro Differentiation')
+                    return [c for c in categories if 'stem cell' not in c]
+        if categories:
+            return categories
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties

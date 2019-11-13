@@ -39,10 +39,11 @@ _app_settings = {
     'load_test_only': True,
     'testing': True,
     'indexer': True,
-    'mpindexer': True,
+    'mpindexer': False,
     'production': True,
     'pyramid.debug_authorization': True,
     'postgresql.statement_timeout': 20,
+    'sqlalchemy.url': 'dummy@dummy',
     'retry.attempts': 3,
     'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
     # some file specific stuff for testing

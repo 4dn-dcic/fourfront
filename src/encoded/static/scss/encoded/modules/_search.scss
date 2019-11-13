@@ -11,9 +11,13 @@
 /** Make FacetList Sticky for newer browsers **/
 
 .search-page-container {
+
     .facets-container.facets.with-header-bg {
-        position: sticky;
-        top: 40px;
+		position: sticky;
+		top: 0px;
+		@include navbar-fixed-position {
+			top: 40px;
+		}
 
 		.facets-body {
 			body.scrolled-past-80 & {
@@ -40,18 +44,35 @@
 			}
 		}
 
-    }
+	}
+	
+	.search-headers-row {
+		position: sticky;
+		top: 0px;
+		@include navbar-fixed-position {
+			top: 40px;
+		}
+	}
 
     &.browse-page-container {
-        .facets-container.facets.with-header-bg {
-			top: 78px;
-			.facets-body {
-				body.scrolled-past-80 & {
-					// 124 = 40 nav + 46 facet-list-header + 38 quickinfobar
-					max-height: calc(100vh - 124px);
+		@include navbar-fixed-position {
+			.facets-container.facets.with-header-bg {
+				top: 78px;
+				.facets-body {
+					body.scrolled-past-80 & {
+						// 124 = 40 nav + 46 facet-list-header + 38 quickinfobar
+						max-height: calc(100vh - 124px);
+					}
 				}
 			}
-        }
+		}
+		
+		.search-headers-row {
+			@include navbar-fixed-position {
+				top: 78px;
+			}
+		}
+
     }
 }
 
@@ -155,4 +176,18 @@ $search-results-above-results-row-height: 40px;
     }
 }
 
+/********************************/
+/****** Active Filters Bar ******/
+/********************************/
+
+@import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/active-filters-bar.scss";
+
+/** Quick Info Bar placement **/
+
+#stats {
+	.active-filters-bar {
+		height: 26px;
+    	line-height: 26px;
+	}
+}
 

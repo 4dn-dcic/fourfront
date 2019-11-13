@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import * as globals from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, memoizedUrlParse } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
@@ -26,59 +26,6 @@ import PageTitle from './PageTitle';
 
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
-
-
-/**
- * Top bar navigation & link schema definition.
- *
- * @private
- * @constant
- * @type {Object}
- */
-const portal = {
-    "portal_title": '4DN Data Portal',
-    "global_sections": [ // DEPRECATED ?
-        {
-            'id': 'browse-menu-item', 'sid':'sBrowse', 'title': 'Browse',
-            'url' : function(hrefParts){
-                return navigate.getBrowseBaseHref();
-            },
-            'active' : function(currentWindowPath){ return currentWindowPath && currentWindowPath.indexOf('/browse/') > -1; }
-        },
-        {
-            'id': 'help-menu-item', 'sid':'sHelp', 'title': 'Help',
-            'children': [
-                { id: 'introduction-menu-item',     title: 'Introduction to 4DN Metadata',      url: '/help' },
-                { id: 'getting-started-menu-item',  title: 'Data Submission - Getting Started', url: '/help/getting-started' },
-                { id: 'cell-culture-menu-item',     title: 'Biosample Metadata',                url: '/help/biosample' },
-                { id: 'web-submission-menu-item',   title: 'Online Submission',                 url: '/help/web-submission' },
-                { id: 'spreadsheet-menu-item',      title: 'Spreadsheet Submission',            url: '/help/spreadsheet' },
-                { id: 'rest-api-menu-item',         title: 'REST API',                          url: '/help/rest-api' },
-                { id: 'about-menu-item',            title: 'About',                             url: '/about' }
-            ]
-        }
-    ]
-};
-
-const getGoogleAnalyticsTrackingID = memoize(function(href){
-    if (!href && !isServerSide()){
-        href = window.location.href;
-    }
-    const { host } = url.parse(href);
-    if (host.indexOf('testportal.4dnucleome') > -1){
-        return 'UA-86655305-2';
-    }
-    if (host.indexOf('data.4dnucleome') > -1){
-        return 'UA-86655305-1';
-    }
-    if (host.indexOf('localhost') > -1){
-        return 'UA-86655305-3';
-    }
-    if (host.indexOf('4dn-web-alex') > -1){
-        return 'UA-86655305-4';
-    }
-    return null;
-});
 
 
 /**
@@ -439,7 +386,7 @@ export default class App extends React.PureComponent {
         if (!href) {
             href = propHref;
         }
-        const query = url.parse(href, true).query || {};
+        const query =  memoizedUrlParse(href).query || {};
         let action = query.currentAction || null;
 
         // Handle list of values, e.g. if `currentAction=selection&currentAction=selection&currentAction=edit` or something is in URL.
@@ -538,18 +485,18 @@ export default class App extends React.PureComponent {
         if (this.historyEnabled) {
             event.preventDefault();
 
-            var tHrefParts   = url.parse(targetHref),
-                pHrefParts   = url.parse(href),
-                tHrefHash    = tHrefParts.hash,
-                samePath     = pHrefParts.path === tHrefParts.path,
-                navOpts      = {
-                    // Same pathname & search but maybe different hash. Don't add history entry etc.
-                    'replace'           : samePath,
-                    'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
-                    'dontScrollToTop'   : samePath
-                },
-                targetOffset = target.getAttribute('data-target-offset'),
-                noCache      = target.getAttribute('data-no-cache');
+            const tHrefParts   = url.parse(targetHref);
+            const pHrefParts   = memoizedUrlParse(href);
+            let tHrefHash    = tHrefParts.hash;
+            const samePath     = pHrefParts.path === tHrefParts.path;
+            const navOpts      = {
+                // Same pathname & search but maybe different hash. Don't add history entry etc.
+                'replace'           : samePath,
+                'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
+                'dontScrollToTop'   : samePath
+            };
+            let targetOffset = target.getAttribute('data-target-offset');
+            const noCache      = target.getAttribute('data-no-cache');
 
             // Don't cache requests to user profile.
             if (noCache) navOpts.cache = false;
@@ -577,7 +524,7 @@ export default class App extends React.PureComponent {
     handleSubmit(event) {
         const { href } = this.props;
         const { target } = event;
-        const hrefParts = url.parse(href);
+        const hrefParts = memoizedUrlParse(href);
 
         // Skip POST forms
         if (target.method !== 'get') return;
@@ -1149,7 +1096,7 @@ export default class App extends React.PureComponent {
      */
     render() {
         const { context, lastCSSBuildTime, href, contextRequest } = this.props;
-        const hrefParts       = url.parse(href);
+        const hrefParts       = memoizedUrlParse(href);
         const routeList       = hrefParts.pathname.split("/");
         const routeLeaf       = routeList[routeList.length - 1];
         const currentAction   = this.currentAction();
@@ -1268,24 +1215,25 @@ class HTMLTitle extends React.PureComponent {
     }
 
     render() {
-        var { canonical, currentAction, context, status, contentViews } = this.props,
-            title;
+        const { canonical, currentAction, context, status, contentViews } = this.props;
+        const { title: portalTitle } = portalConfig;
+        let title;
 
         if (canonical === "about:blank"){   // first case is fallback
-            title = portal.portal_title;
+            title = portalTitle;
         } else if (status) {                // error catching
             title = 'Error';
         } else if (context) {               // What should occur (success)
 
-            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
+            var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
 
             // Set browser window title.
             title = object.itemUtil.getTitleStringFromContext(context);
 
             if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
+                title = title + ' – ' + portalTitle;
             } else {
-                title = portal.portal_title;
+                title = portalTitle;
             }
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
@@ -1330,7 +1278,7 @@ class ContentRenderer extends React.PureComponent {
             content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
 
-            var ContentView = (contentViews || globals.content_views).lookup(context, currentAction);
+            var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
@@ -1379,14 +1327,18 @@ class BodyElement extends React.PureComponent {
         var stateChange = { 'lastHref' : props.href };
         // Unset full screen if moving away to different pathname.
         if (state.isFullscreen && stateChange.lastHref !== state.lastHref){
-            var currParts = url.parse(state.lastHref),
-                nextParts = url.parse(stateChange.lastHref);
+            const currParts = url.parse(state.lastHref);
+            const nextParts = memoizedUrlParse(stateChange.lastHref);
 
             if (currParts.pathname !== nextParts.pathname){
                 stateChange.isFullscreen = false;
             }
         }
         return stateChange;
+    }
+
+    static isSearchPage(href){
+        return (href && typeof href === "string" && href.indexOf('/search/') > -1);
     }
 
     /**
@@ -1427,6 +1379,10 @@ class BodyElement extends React.PureComponent {
             // we ironically must now clone href in state to be able to do comparisons...
             // See: https://stackoverflow.com/questions/49723019/compare-with-previous-props-in-getderivedstatefromprops
             'lastHref'              : props.href
+        };
+
+        this.memoized = {
+            isSearchPage: memoize(BodyElement.isSearchPage)
         };
 
         /**
@@ -1574,18 +1530,29 @@ class BodyElement extends React.PureComponent {
      * @param {function} [callback]     Optional callback to be executed after state change.
      * @returns {void}
      */
-    addToBodyClassList(className, callback){
+    addToBodyClassList(...classNames){
+        let callback = classNames.pop();
+        if (typeof callback !== 'function'){
+            classNames.push(callback);
+            callback = null;
+        }
         this.setState(function({ classList }){
-            const foundIdx = classList.indexOf(className);
-            if (foundIdx > -1){
-                console.warn('ClassName already set', className);
-                return null;
-            } else {
-                const nextClassList = classList.slice(0);
-                nextClassList.push(className);
-                console.info('Adding "' + className + '" to body classList');
+            const nextClassList = classList.slice(0);
+            let anyAdded = false;
+            classNames.forEach(function(className){
+                const foundIdx = nextClassList.indexOf(className);
+                if (foundIdx > -1){
+                    console.warn('ClassName already set', className);
+                } else {
+                    nextClassList.push(className);
+                    anyAdded = true;
+                    console.info('Adding "' + className + '" to body classList');
+                }
+            });
+            if (anyAdded) {
                 return { "classList" : nextClassList };
             }
+            return null;
         }, callback);
     }
 
@@ -1598,18 +1565,31 @@ class BodyElement extends React.PureComponent {
      * @param {function} [callback]     Optional callback to be executed after state change.
      * @returns {void}
      */
-    removeFromBodyClassList(className, callback){
+
+    removeFromBodyClassList(...classNames){
+        let callback = classNames.pop();
+        if (typeof callback !== 'function'){
+            classNames.push(callback);
+            callback = null;
+        }
         this.setState(function({ classList }){
-            const foundIdx = classList.indexOf(className);
-            if (foundIdx === -1){
-                console.warn('ClassName not in list', className);
-                return null;
-            } else {
-                const nextClassList = classList.slice(0);
-                nextClassList.splice(foundIdx, 1);
-                console.info('Removing "' + className + '" from body classList');
+
+            const nextClassList = classList.slice(0);
+            let anyRemoved = false;
+            classNames.forEach(function(className){
+                const foundIdx = nextClassList.indexOf(className);
+                if (foundIdx === -1){
+                    console.warn('ClassName not in list', className);
+                } else {
+                    nextClassList.splice(foundIdx, 1);
+                    anyRemoved = true;
+                    console.info('Removing "' + className + '" from body classList');
+                }
+            });
+            if (anyRemoved) {
                 return { "classList" : nextClassList };
             }
+            return null;
         }, callback);
     }
 
@@ -1728,17 +1708,17 @@ class BodyElement extends React.PureComponent {
     }
 
     bodyClassName(){
-        const { isLoading, context } = this.props;
-        const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen, testWarningPresent } = this.state;
+        const { isLoading, context, currentAction, href } = this.props;
+        const { scrolledPastEighty, scrolledPastTop, classList, isFullscreen } = this.state;
         const bodyClassList = (classList && classList.slice(0)) || [];
+        const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
 
         // Common UI
-        if (isLoading)          bodyClassList.push("loading-request");
-        if (scrolledPastTop)    bodyClassList.push("scrolled-past-top");
-        if (scrolledPastEighty) bodyClassList.push("scrolled-past-80");
-        if (isFullscreen){
-            bodyClassList.push("is-full-screen");
-        }
+        if (isLoading)              bodyClassList.push("loading-request");
+        if (scrolledPastTop)        bodyClassList.push("scrolled-past-top");
+        if (scrolledPastEighty)     bodyClassList.push("scrolled-past-80");
+        if (isSelectPage)           bodyClassList.push("is-select-page");
+        if (isFullscreen)           bodyClassList.push("is-full-screen");
 
         // TODO migrate test-warning-visible class to here from NavBar (done on CGAP already).
 
@@ -1760,14 +1740,20 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad } = this.props;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateUserInfo, browseBaseState } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
-        const displayNavBarAndFooter = !(href && typeof href === 'string' && (href.indexOf('/search/') >= 0) && isSelectAction(currentAction));
+        const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
 
         if (hasError) return this.renderErrorState();
+
+        const navbarProps = {
+            href, context, currentAction, hrefParts, session, schemas,
+            browseBaseState, updateUserInfo, addToBodyClassList, removeFromBodyClassList,
+            windowWidth, windowHeight, isFullscreen, overlaysContainer
+        };
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
@@ -1789,16 +1775,10 @@ class BodyElement extends React.PureComponent {
                 <div id="slot-application">
                     <div id="application" className={appClass}>
                         <div id="layout">
-                            {displayNavBarAndFooter ?
-                                <React.Fragment>
-                                    <NavigationBar {...{ portal, windowWidth, windowHeight, isFullscreen, toggleFullScreen, overlaysContainer }}
-                                        {..._.pick(this.props, 'href', 'currentAction', 'session', 'schemas', 'browseBaseState',
-                                            'context', 'updateUserInfo')} />
 
-                                    <div id="pre-content-placeholder" />
-                                </React.Fragment>
-                                : null
-                            }
+                            <NavigationBar {...navbarProps} />
+
+                            {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
 
                             <PageTitle {...this.props} windowWidth={windowWidth} />
 
@@ -1815,11 +1795,11 @@ class BodyElement extends React.PureComponent {
 
                             <div id="layout-footer"/>
                         </div>
-                        {displayNavBarAndFooter ? <Footer version={context.app_version} /> : null}
+                        {!isSelectPage ? <Footer version={context.app_version} /> : null}
                     </div>
                 </div>
 
-                <div id="overlays-container" ref={this.overlaysContainerRef}/>
+                <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
                 <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
 

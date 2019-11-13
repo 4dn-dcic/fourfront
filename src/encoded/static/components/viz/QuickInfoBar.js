@@ -7,9 +7,10 @@ import url from 'url';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
 import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { Filters, navigate } from '../util';
+import { ActiveFiltersBar } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/ActiveFiltersBar';
+import { Filters, navigate, Schemas } from './../util';
 import { Toggle } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Toggle';
-import { ActiveFiltersBar } from './components/ActiveFiltersBar';
+import { memoizedUrlParse } from './../globals';
 
 
 
@@ -29,9 +30,9 @@ export default class QuickInfoBar extends React.PureComponent {
 
     static isInvisibleForHref(href){
         // If have href, only show for /browse/, /search/, and / & /home
-        var urlParts = url.parse(href);
+        const urlParts = memoizedUrlParse(href);
         // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
-        var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
+        const pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
         if (pathParts[0] === 'browse') return false;
         if (pathParts.length === 1 && pathParts[0] === 'statistics') {
             if (!urlParts.hash || urlParts.hash === '#submissions'){
@@ -51,8 +52,20 @@ export default class QuickInfoBar extends React.PureComponent {
         return { current, total };
     }
 
+    /** We memoize the static method because we don't anticipate there to be more than instance of this per page ever. */
     static expSetFilters = memoize(function(contextFilters, browseBaseParams){
         return searchFilters.contextFiltersToExpSetFilters(contextFilters, browseBaseParams);
+    });
+
+    /** We memoize the static method because we don't anticipate there to be more than instance of this per page ever. */
+    static contextFiltersToInclude = memoize(function(contextFilters, browseBaseParams = {}){
+        return (contextFilters|| []).filter(function({ field, term }){
+            // Exclude some.
+            if (browseBaseParams[field] && browseBaseParams[field].indexOf(term) > -1) {
+                return false;
+            }
+            return true;
+        });
     });
 
     static defaultProps = {
@@ -89,6 +102,7 @@ export default class QuickInfoBar extends React.PureComponent {
         this.onIconMouseEnter = _.debounce(this.onIconMouseEnter.bind(this), 500, true);
         this.onBrowseStateToggle = _.throttle(this.onBrowseStateToggle.bind(this), 1000, { trailing: false });
         this.onPanelAreaMouseLeave = this.onPanelAreaMouseLeave.bind(this);
+        this.handleActiveFilterTermClick = this.handleActiveFilterTermClick.bind(this);
         this.state = {
             'mounted'               : false,
             'show'                  : false,
@@ -176,19 +190,32 @@ export default class QuickInfoBar extends React.PureComponent {
         });
     }
 
+    handleActiveFilterTermClick(evt, field, term){
+        const { context } = this.props;
+        const browseBaseParams = navigate.getBrowseBaseParams();
+        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
+        searchFilters.changeFilter(field, term, expSetFilters, null, false, null, browseBaseParams);
+        analytics.event('QuickInfoBar', 'Unset Filter', {
+            'eventLabel' : `Field: ${field}, Term: ${term}`,
+            'dimension1' : analytics.getStringifiedCurrentFilters(expSetFilters)
+        });
+    }
+
     renderHoverBar(){
         const { context, browseBaseState, href, schemas } = this.props;
         const { show, reallyShow } = this.state;
         const browseBaseParams = navigate.getBrowseBaseParams();
-        const expSetFilters = QuickInfoBar.expSetFilters((context && context.filters) || null, browseBaseParams);
+        const filters = QuickInfoBar.contextFiltersToInclude(context.filters, browseBaseParams);
+
         if (show === 'activeFilters' || (show === false && reallyShow)) {
             return (
                 <div className="bottom-side">
                     <div className="crumbs-label">
                         Filtered by
                     </div>
-                    <ActiveFiltersBar expSetFilters={expSetFilters} orderedFieldNames={null}
-                        href={href} showTitle={false} schemas={schemas} context={context} />
+                    <ActiveFiltersBar {...{ filters, context, schemas }}
+                        onTermClick={this.handleActiveFilterTermClick}
+                        termTransformFxn={Schemas.Term.toName} fieldTransformFxn={Schemas.Field.toName} />
                     <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
                         <i className="icon icon-pie-chart fas" style={{ opacity : 0.05 }} />
                     </div>

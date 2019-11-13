@@ -2,17 +2,18 @@
 from .features.conftest import app_settings, app, workbook
 import pytest
 from encoded.commands.run_upgrader_on_inserts import get_inserts
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
 import json
 import time
 from snovault import TYPES
 
 def delay_rerun(*args):
     """ Rerun function for flaky """
-    time.sleep(120)
+    time.sleep(1)
     return True
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing] #pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
@@ -399,6 +400,17 @@ def test_search_with_added_display_title(workbook, testapp, registry):
     exps2 = [exp['uuid'] for exp in res_json2['@graph']]
     assert set(exps) == set(exps2)
 
+    # 'sort' also adds display_title for ascending and descending queries
+    for use_sort in ['biosample', '-biosample']:
+        search = '/search/?type=ExperimentHiC&sort=%s' % use_sort
+        res_json = testapp.get(search, status=301).follow(status=200).json
+        assert res_json['@id'] == '/search/?type=ExperimentHiC&sort=%s.display_title' % use_sort
+
+    # regular sort queries remain unchanged
+    search = '/search/?type=ExperimentHiC&sort=uuid'
+    res_json = testapp.get(search).json
+    assert res_json['@id'] == '/search/?type=ExperimentHiC&sort=uuid'
+
     # check to see that added facet doesn't conflict with existing facet title
     # query below will change to file_format.display_title=fastq
     search = '/search/?type=File&file_format=fastq'
@@ -427,6 +439,20 @@ def test_search_with_no_value(workbook, testapp):
     assert(check_item.get('description') == 'GM12878 prepared for HiC')
     res_ids2 = [r['uuid'] for r in res_json2['@graph'] if 'uuid' in r]
     assert(set(res_ids2) <= set(res_ids))
+
+
+def test_search_with_static_header(workbook, testapp):
+    """ Performs a search which should be accompanied by a search header """
+    search = '/search/?type=Workflow'
+    res_json = testapp.get(search, status=404).json # no items, just checking hdr
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
+    search = '/search/?type=workflow' # check type resolution
+    res_json = testapp.get(search, status=404).json
+    assert 'search_header' in res_json
+    assert 'content' in res_json['search_header']
+    assert res_json['search_header']['title'] == 'Workflow Information'
 
 
 #########################################
@@ -464,11 +490,12 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     for item_type in TYPE_LENGTH.keys():
         tries = 0
         item_len = None
+        namespaced_index = get_namespaced_index(app, item_type)
         while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
             if item_len != None:
                 create_mapping.run(app, collections=[item_type], strict=True, sync_index=True)
-                es.indices.refresh(index=item_type)
-            item_len = es.count(index=item_type, doc_type=item_type).get('count')
+                es.indices.refresh(index=namespaced_index)
+            item_len = es.count(index=namespaced_index, doc_type=item_type).get('count')
             print('... ES COUNT: %s' % item_len)
             print('... TYPE COUNT: %s' % TYPE_LENGTH[item_type])
             tries += 1
@@ -477,7 +504,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
             res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
             res = res.follow()
             for item_res in res.json.get('@graph', []):
-                index_view_res = es.get(index=item_type, doc_type=item_type,
+                index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                         id=item_res['uuid'])['_source']
                 # make sure that the linked_uuids match the embedded data
                 assert 'linked_uuids_embedded' in index_view_res

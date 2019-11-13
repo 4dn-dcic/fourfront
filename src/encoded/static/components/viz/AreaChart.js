@@ -12,6 +12,8 @@ import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-compon
 import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
+import { memoizedUrlParse } from './../globals';
+
 /**
  * Various utilities for helping to draw area charts.
  *
@@ -67,7 +69,7 @@ export class StatsViewController extends React.PureComponent {
     performAggRequests(){
         const { searchURIs, href } = this.props;
         const resultStateToSet = {};
-        const hrefParts = href && url.parse(href); // href may not be passed in.
+        const hrefParts = href && memoizedUrlParse(href); // href may not be passed in.
         const ownHost = hrefParts && hrefParts.host;
 
         const chartUrisAsPairs = _.pairs(searchURIs);

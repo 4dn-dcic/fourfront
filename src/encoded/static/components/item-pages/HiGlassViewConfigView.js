@@ -326,6 +326,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'title'          : viewConfTitle,
             'description'    : viewConfDesc,
             'viewconfig'     : currentViewConf,
+            'instance_height': context.instance_height,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
             // Lab and award do not carry over as current user might be from different lab.
@@ -761,7 +762,7 @@ class AddFileButton extends React.PureComponent {
                 <button type="button" onClick={this.setIsSelecting} disabled={loading} data-tip={tooltip} style={style} className={cls}>
                     <i className={"mr-08 icon icon-fw fas icon-" + (loading ? 'circle-notch icon-spin' : 'plus')}/>Add Data
                 </button>
-                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveFile} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} childWindowAlert={null} />
             </React.Fragment>
         );
     }

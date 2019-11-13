@@ -12,6 +12,7 @@ def external_tx():
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
     from ..conftest import _app_settings
+    import os
     settings = _app_settings.copy()
     settings['create_tables'] = True
     settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
@@ -20,6 +21,7 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server,
     settings['collection_datastore'] = 'elasticsearch'
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
+    settings['indexer.namespace'] = os.environ.get('TRAVIS_JOB_ID', '') # set namespace for tests
 
     # use aws auth to access elasticsearch
     if aws_auth:
@@ -70,7 +72,9 @@ def workbook(app):
     from ...loadxl import load_all
     from pkg_resources import resource_filename
     # just load the workbook inserts
-    load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
+    load_res = load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
+    if load_res:
+        raise(load_res)
 
     testapp.post_json('/index', {})
     yield
