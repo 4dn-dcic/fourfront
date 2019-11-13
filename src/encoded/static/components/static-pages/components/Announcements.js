@@ -6,7 +6,7 @@ import { console, ajax, valueTransforms } from '@hms-dbmi-bgm/shared-portal-comp
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/PartialList';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
-
+import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 
 /**
  * A single Announcement block/view.
@@ -24,7 +24,7 @@ const Announcement = React.memo(function Announcement(props){
             </div>
             <AnnouncementSubTitle {...props}/>
             <div className="announcement-content">
-                <BasicStaticSectionBody content={section.content} filetype={filetype} />
+                <BasicStaticSectionBody content={section.content} {...{ filetype, placeholderReplacementFxn }} />
             </div>
         </div>
     );

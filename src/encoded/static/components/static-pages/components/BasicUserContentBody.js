@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { object, analytics, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
+import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
@@ -56,7 +57,7 @@ export class BasicUserContentBody extends React.PureComponent {
         var itemType = this.itemType();
 
         if (itemType === 'StaticSection') {
-            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} />;
+            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} placeholderReplacementFxn={placeholderReplacementFxn} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
