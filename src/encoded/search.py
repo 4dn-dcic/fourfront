@@ -205,7 +205,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 DEFAULT_BROWSE_PARAM_LISTS = {
     'type'                  : ["ExperimentSetReplicate"],
     'experimentset_type'    : ['replicate'],
-    'award.project'         : ['4DN']
+    # Uncomment if changing back to showing external data: false by default
+    # 'award.project'         : ['4DN']
 }
 
 @view_config(route_name='browse', request_method='GET', permission='search')

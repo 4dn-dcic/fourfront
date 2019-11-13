@@ -14,17 +14,17 @@
         "schema_version": "3"
     },
     {
-        "name": "help/analysis/file-formats",
+        "name": "resources/analysis/file-formats",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000000",
         "title": "File Formats",
         "description": "Documentation and information about the file formats which we support.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-overview",
-            "help.analysis.file-formats.fastq",
-            "help.analysis.file-formats.bam",
-            "help.analysis.file-formats.pairs",
-            "help.analysis.file-formats.cool-and-mcool",
-            "help.analysis.file-formats.hic"
+            "resources.analysis.file-formats.fastq",
+            "resources.analysis.file-formats.bam",
+            "resources.analysis.file-formats.pairs",
+            "resources.analysis.file-formats.cool-and-mcool",
+            "resources.analysis.file-formats.hic"
         ],
         "table-of-contents": {
             "enabled": true,
@@ -34,15 +34,15 @@
         "schema_version": "3"
     },
     {
-        "name": "help/analysis/hi-c-pipeline",
+        "name": "resources/analysis/hi-c-pipeline",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000001",
         "title": "Hi-C Pipeline",
         "description": "Documentation and information about file transformation and analysis pipelines.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-overview",
-            "help.analysis.hi-c-pipeline.alignment",
-            "help.analysis.hi-c-pipeline.step-ii",
-            "help.analysis.hi-c-pipeline.step-iii-options"
+            "resources.analysis.hi-c-pipeline.alignment",
+            "resources.analysis.hi-c-pipeline.step-ii",
+            "resources.analysis.hi-c-pipeline.step-iii-options"
         ],
         "table-of-contents": {
             "enabled": true,
@@ -52,16 +52,16 @@
         "schema_version": "3"
     },
     {
-        "name": "help/analysis/reference-files",
+        "name": "resources/analysis/reference-files",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000002",
         "title": "Reference Files",
         "description": "How to define and supply reference files for use by pipelines.",
         "content": [
             "reusable-dummy-sections.lorem-ipsum-0",
-            "help.analysis.reference-files.human-genome-bwa",
+            "resources.analysis.reference-files.human-genome-bwa",
             "00000000-1111-0000-1111-000000000002",
-            "help.analysis.reference-files.mouse-genome-bwa",
-            "help.analysis.reference-files.rest-enzyme-file"
+            "resources.analysis.reference-files.mouse-genome-bwa",
+            "resources.analysis.reference-files.rest-enzyme-file"
         ],
         "table-of-contents": {
             "enabled": true
@@ -70,7 +70,7 @@
         "schema_version": "3"
     },
     {
-        "name": "help/analysis/cwl-docker",
+        "name": "resources/analysis/cwl-docker",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000003",
         "title": "CWL + Docker",
         "description": "Information about the Common Workflow Language definitions (CWLs) and Docker Images used in our pipelines.",
@@ -83,7 +83,7 @@
         "schema_version": "3"
     },
     {
-        "name": "help/analysis/tibanna",
+        "name": "resources/analysis/tibanna",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff000004",
         "title": "Tibanna",
         "description": "Documentation for the software which runs and manages our pipelines.",
@@ -104,14 +104,14 @@
         "uuid": "cb2dda1c-a53f-4ec5-bf94-8a866ca836fc",
         "content": [],
         "redirect": {
-            "target": "/help/analysis/cwl-docker",
+            "target": "/resources/analysis/cwl-docker",
             "enabled": true,
             "code": 307
         },
         "schema_version": "3"
     },
     {
-        "name": "help/analysis",
+        "name": "resources/analysis",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000000",
         "title": "Analysis",
         "description": "Documentation for performing analyses.",
@@ -325,7 +325,7 @@
         "schema_version": "3"
     },
     {
-        "name": "help/visualization/higlass",
+        "name": "resources/visualization/higlass",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff030000",
         "title": "HiGlass",
         "content": [
@@ -341,7 +341,7 @@
         "schema_version": "3"
     },
     {
-        "name": "help/visualization/hipiler",
+        "name": "resources/visualization/hipiler",
         "uuid": "f0f0f0f0-0000-0000-0000-ffffff030001",
         "title": "HiPiler",
         "content": [
@@ -357,7 +357,7 @@
         "schema_version": "3"
     },
     {
-        "name": "help/visualization",
+        "name": "resources/visualization",
         "uuid": "f0f0f0f0-0000-0000-0000-aaaaaa000005",
         "title": "Visualization",
         "description": "Guides for visualizing files and other data using the 4DN Data Portal.",
@@ -374,10 +374,25 @@
         "description": "Documentation for using the 4DN Data Portal",
         "children": [
             "f0f0f0f0-0000-0000-0000-aaaaaa000001",
-            "f0f0f0f0-0000-0000-0000-aaaaaa000000",
             "f0f0f0f0-0000-0000-0000-aaaaaa000002",
             "f0f0f0f0-0000-0000-0000-aaaaaa000003",
-            "f0f0f0f0-0000-0000-0000-aaaaaa000004",
+            "f0f0f0f0-0000-0000-0000-aaaaaa000004"
+        ],
+        "content": [
+            "reusable-dummy-sections.lorem-ipsum-overview"
+        ],
+        "schema_version": "3"
+    },
+
+
+
+    {
+        "name": "resources",
+        "uuid": "276fdd58-c72a-4dd6-8a5f-a29eb8edeb84",
+        "title": "Resources",
+        "description": "Resources & Information",
+        "children": [
+            "f0f0f0f0-0000-0000-0000-aaaaaa000000",
             "f0f0f0f0-0000-0000-0000-aaaaaa000005"
         ],
         "content": [
@@ -385,6 +400,9 @@
         ],
         "schema_version": "3"
     },
+
+
+
     {
         "name": "error/login-failed",
         "uuid": "5f7e0c7a-d31a-4f77-a109-508f0c9a4553",

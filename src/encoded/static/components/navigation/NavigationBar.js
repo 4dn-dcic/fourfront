@@ -4,14 +4,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { Navbar, Nav, NavItem } from 'react-bootstrap';
+import { Navbar } from 'react-bootstrap';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
-import { productionHost } from './../globals';
-import { navigate } from './../util';
-import { SearchBar, TestWarning, HelpNavItem, UserActionDropdownMenu } from './components';
+import { portalConfig } from './../globals';
+import { SearchBar, TestWarning, LeftNav, AccountNav, BigDropdownGroupController } from './components';
 import QuickInfoBar from './../viz/QuickInfoBar';
 import { ChartDataController } from './../viz/chart-data-controller';
+import { memoizedUrlParse } from './../globals';
+
 
 
 /**
@@ -31,7 +32,8 @@ export class NavigationBar extends React.PureComponent {
         'updateUserInfo': PropTypes.func.isRequired,
         'context': PropTypes.object,
         'schemas': PropTypes.any,
-        'browseBaseState': PropTypes.string
+        'browseBaseState': PropTypes.string,
+        'isFullscreen' : PropTypes.bool
     };
 
     constructor(props){
@@ -39,6 +41,12 @@ export class NavigationBar extends React.PureComponent {
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
+
+        let testWarning = true;
+        const initHostName = memoizedUrlParse(props.href).hostname;
+        if (initHostName && portalConfig.productionHosts.indexOf(initHostName) > -1) {
+            testWarning = false;
+        }
 
         /**
          * Navbar state.
@@ -48,12 +56,9 @@ export class NavigationBar extends React.PureComponent {
          * @property {boolean} state.testWarning        Whether Test Data warning banner is visible. Initially determined according to if are on production hostname.
          * @property {boolean} state.mounted            Whether are mounted.
          * @property {boolean} state.mobileDropdownOpen Helper state to keep track of if menu open on mobile because mobile menu doesn't auto-close after navigation.
-         * @property {!string} state.openDropdown       ID of currently-open dropdown menu. Use for BigDropdown(s) e.g. Help menu directory.
-         * @property {Object}  state.helpMenuTree       JSON representation of menu tree.
-         * @property {boolean} state.isLoadingHelpMenuTree - Whether menu tree is currently being loaded.
          */
         this.state = {
-            'testWarning'           : !productionHost[url.parse(props.href).hostname] || false,
+            testWarning,
             'mounted'               : false,
             'mobileDropdownOpen'    : false
         };
@@ -116,7 +121,7 @@ export class NavigationBar extends React.PureComponent {
     render() {
         const { testWarning, mobileDropdownOpen, mounted } = this.state;
         const { href, context, schemas, browseBaseState, isFullscreen } = this.props;
-        const testWarningVisible = testWarning & !isFullscreen; // Hidden on full screen mode.
+        const testWarningVisible = !!(testWarning & !isFullscreen); // Hidden on full screen mode.
         const navClassName = (
             "navbar-container" +
             (testWarningVisible ? ' test-warning-visible' : '')
@@ -138,7 +143,7 @@ export class NavigationBar extends React.PureComponent {
                                 <i className="icon icon-bars fas icon-fw align-middle" />
                             </Navbar.Toggle>
 
-                            <CollapsedNav {...this.state} {...this.props} />
+                            <CollapsedNav {...this.props} {...{ testWarningVisible, mounted }} />
                         </Navbar>
                     </div>
                     <ChartDataController.Provider id="quick_info_bar1">
@@ -151,30 +156,31 @@ export class NavigationBar extends React.PureComponent {
 }
 
 const CollapsedNav = React.memo(function CollapsedNav(props) {
-    const { href, currentAction } = props;
-    const leftNavProps = _.pick(props, 'mobileDropdownOpen', 'windowWidth', 'windowHeight', 'browseBaseState', 'href',
-        'mounted', 'overlaysContainer', 'session', 'testWarning', 'isFullscreen');
-    const userActionNavProps = _.pick(props, 'session', 'href', 'updateUserInfo', 'mounted', 'overlaysContainer', 'schemas', 'windowWidth');
+    const {
+        href, currentAction, session, mounted,
+        overlaysContainer, windowWidth, windowHeight,
+        browseBaseState, testWarningVisible,
+        addToBodyClassList, removeFromBodyClassList,
+        schemas, updateUserInfo
+    } = props;
+
+    const leftNavProps = {
+        windowWidth, windowHeight, href, mounted, overlaysContainer, session,
+        testWarningVisible, browseBaseState//, addToBodyClassList, removeFromBodyClassList
+    };
+
+    const userActionNavProps = {
+        windowWidth, windowHeight, href, mounted, overlaysContainer, session,
+        schemas, updateUserInfo, testWarningVisible
+    };
+
     return (
         <Navbar.Collapse>
-            <LeftNav {...leftNavProps} />
-            <SearchBar href={href} currentAction={currentAction} />
-            <UserActionDropdownMenu {...userActionNavProps} />
+            <BigDropdownGroupController {...{ addToBodyClassList, removeFromBodyClassList }}>
+                <LeftNav {...leftNavProps} />
+                <SearchBar {...{ href, currentAction }} />
+                <AccountNav {...userActionNavProps} />
+            </BigDropdownGroupController>
         </Navbar.Collapse>
-    );
-});
-
-const LeftNav = React.memo(function LeftNav(props){
-    const { href, browseBaseState, ...passProps } = props;
-    const browseHref = navigate.getBrowseBaseHref(browseBaseState);
-    const isBrowseActive =  href && href.indexOf('/browse/') > -1;
-    //const passProps ={ mobileDropdownOpen, mounted, overlaysContainer, windowHeight, windowWidth ..? }
-    return (
-        <Nav className="mr-auto">
-            <Nav.Link key="browse-menu-item" href={browseHref} active={isBrowseActive} className="browse-nav-btn">
-                Browse
-            </Nav.Link>
-            <HelpNavItem {...passProps} href={href} />
-        </Nav>
     );
 });
