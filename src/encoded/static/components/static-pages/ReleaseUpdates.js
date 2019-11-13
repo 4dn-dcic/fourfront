@@ -8,6 +8,7 @@ import { console, object, ajax, isServerSide, JWT, analytics } from '@hms-dbmi-b
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import StaticPage from './StaticPage';
+import { memoizedUrlParse } from './../globals';
 
 
 export default class ReleaseUpdates extends React.Component {
@@ -27,10 +28,10 @@ export default class ReleaseUpdates extends React.Component {
     }
 
     componentDidMount(){
-        var thisUrl = url.parse(this.props.href, true);
-        var updateTag = thisUrl.query['update_tag'] || null;
-        var updateParam = thisUrl.query['parameters'] || null;
-        var isAdmin = JWT.isLoggedInAsAdmin();
+        const thisUrl = memoizedUrlParse(this.props.href);
+        const updateTag = thisUrl.query['update_tag'] || null;
+        const updateParam = thisUrl.query['parameters'] || null;
+        const isAdmin = JWT.isLoggedInAsAdmin();
         this.setState({
             'mounted' : true,
             'updateTag': updateTag,

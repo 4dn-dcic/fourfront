@@ -14,6 +14,7 @@ import { content_views } from './globals';
 import { typedefs } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
+import { memoizedUrlParse } from './globals';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
@@ -114,7 +115,7 @@ export default class PageTitle extends React.PureComponent {
             currentPathRoot, title,
             atId = object.atIdFromObject(context),
             currentHref = isMounted ? (window && window.location && window.location.href) || href : href,
-            currentHrefParts = url.parse(currentHref);
+            currentHrefParts = memoizedUrlParse(currentHref);
 
         if (typeof atId === 'string'){
             currentPathName = url.parse(atId).pathname;
@@ -359,7 +360,7 @@ const isStaticPage = memoize(function(context){
 });
 
 const isHomePage = memoize(function(href){
-    const currentHrefParts = url.parse(href, false);
+    const currentHrefParts = memoizedUrlParse(href);
     const pathName = currentHrefParts.pathname;
     if (pathName === '/' || pathName === '/home'){
         return true;
@@ -504,8 +505,9 @@ export class StaticPageBreadcrumbs extends React.Component {
      * @returns {JSX.Element} A script element containing JSON-LD data.
      */
     seoMetadata(ancestors){
+        const { href } = this.props;
         if (!ancestors || !Array.isArray(ancestors) || ancestors.length < 2) return null;
-        var hrefParts = url.parse(this.props.href),
+        var hrefParts = memoizedUrlParse(href),
             baseDomain = (hrefParts.protocol || '') + '//' + hrefParts.host,
             structuredJSON = {
                 "@context": "http://schema.org",

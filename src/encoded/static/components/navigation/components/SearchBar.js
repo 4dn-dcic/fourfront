@@ -8,6 +8,7 @@ import { DropdownItem, DropdownButton } from 'react-bootstrap';
 import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
 import { console, searchFilters, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
+import { memoizedUrlParse } from './../../globals';
 
 
 export class SearchBar extends React.PureComponent{
@@ -62,13 +63,6 @@ export class SearchBar extends React.PureComponent{
         }
     }
 
-    getCurrentResultsSearchQuery(hrefParts){
-        if (!hrefParts){
-            hrefParts = url.parse(this.props.href, true);
-        }
-        return (hrefParts && hrefParts.query && hrefParts.query.q) || null;
-    }
-
     toggleSearchAllItems(willSearchAllItems = !this.state.searchAllItems){
         this.setState(function({ searchAllItems }){
             if (typeof willSearchAllItems === 'boolean'){
@@ -99,7 +93,9 @@ export class SearchBar extends React.PureComponent{
     }
 
     onResetSearch (e){
-        var hrefParts = url.parse(this.props.href, true);
+        const { href } = this.props;
+        const hrefParts = _.clone(memoizedUrlParse(href));
+        hrefParts.query = _.clone(hrefParts.query || {});
         if (typeof hrefParts.search === 'string'){
             delete hrefParts.query['q'];
             delete hrefParts.search;
@@ -133,15 +129,15 @@ export class SearchBar extends React.PureComponent{
     render() {
         const { href, currentAction } = this.props;
         const { searchAllItems, typedSearchQuery } = this.state;
-        const hrefParts           = url.parse(href, true);
+        const hrefParts = memoizedUrlParse(href);
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
-        const searchTypeFromHref  = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
+        const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
         const showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery) && (
             (searchTypeFromHref === 'Item' && searchAllItems) || (searchTypeFromHref === 'ExperimentSetReplicate' && !searchAllItems)
         );
-        const searchBoxHasInput   = SearchBar.hasInput(typedSearchQuery);
-        const query               = {}; // Don't preserve facets.
-        const browseBaseParams    = navigate.getBrowseBaseParams();
+        const searchBoxHasInput = SearchBar.hasInput(typedSearchQuery);
+        const query = {}; // Don't preserve facets.
+        const browseBaseParams = navigate.getBrowseBaseParams();
         const formClasses = [
             'form-inline',
             'navbar-search-form-container',
