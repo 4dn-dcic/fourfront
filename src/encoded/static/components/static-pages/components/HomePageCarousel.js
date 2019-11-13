@@ -118,4 +118,3 @@ export class HomePageCarousel extends React.PureComponent {
 }
 
 
-

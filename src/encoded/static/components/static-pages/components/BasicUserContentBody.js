@@ -31,7 +31,7 @@ export class BasicUserContentBody extends React.PureComponent {
 
     /** Determines the item type from the context. */
     itemType(){
-        var { context, itemType } = this.props;
+        const { context, itemType } = this.props;
         if (itemType && typeof itemType === 'string') return itemType;
         if (!Array.isArray(context['@type'])) throw new Error('Expected an @type on context.');
         if (context['@type'].indexOf('StaticSection') > -1){
@@ -46,7 +46,9 @@ export class BasicUserContentBody extends React.PureComponent {
 
     render(){
         const { context, markdownCompilerOptions, parentComponentType, windowWidth } = this.props;
-        if (this.state.hasError){
+        const { hasError } = this.state;
+        const { content, filetype } = context || {};
+        if (hasError){
             return (
                 <div className="error">
                     <h4>Error parsing content.</h4>
@@ -54,10 +56,10 @@ export class BasicUserContentBody extends React.PureComponent {
             );
         }
 
-        var itemType = this.itemType();
+        const itemType = this.itemType();
 
         if (itemType === 'StaticSection') {
-            return <BasicStaticSectionBody content={context.content} filetype={context.filetype} markdownCompilerOptions={markdownCompilerOptions} windowWidth={windowWidth} placeholderReplacementFxn={placeholderReplacementFxn} />;
+            return <BasicStaticSectionBody {...{ content, filetype, markdownCompilerOptions, windowWidth, placeholderReplacementFxn }} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (
                 <React.Fragment>
@@ -132,7 +134,7 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody context={context} href={href} parentComponentType={ExpandableStaticHeader} windowWidth={windowWidth} />
+                <BasicUserContentBody {...{ context, href, windowWidth }} parentComponentType={ExpandableStaticHeader} />
             </div>
         );
     }
