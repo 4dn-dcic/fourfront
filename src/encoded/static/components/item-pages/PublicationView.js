@@ -208,9 +208,9 @@ class PublicationSummary extends React.PureComponent {
     }
 
     render(){
-        const { context } = this.props;
+        const { context, windowWidth } = this.props;
         const abstractCol = this.abstract();
-        const staticContent = _.pluck(_.filter(context.static_content || [], function(s){
+        const staticContent = _.pluck(_.filter(context.static_content || [], function (s) {
             return s.content && !s.content.error && s.location === 'tab:overview';
         }), 'content');
 
@@ -230,7 +230,7 @@ class PublicationSummary extends React.PureComponent {
                 { staticContent.length > 0 ? (
                     <div className="mt-2">
                         <hr/>
-                        <UserContentBodyList contents={staticContent} />
+                        <UserContentBodyList contents={staticContent} windowWidth={windowWidth} />
                     </div>
                 ) : null }
             </div>
