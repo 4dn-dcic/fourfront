@@ -6,6 +6,7 @@ import { console, ajax, valueTransforms } from '@hms-dbmi-bgm/shared-portal-comp
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/PartialList';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
+import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 
 
 /**
@@ -14,7 +15,7 @@ import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/e
  */
 
 const Announcement = React.memo(function Announcement(props){
-    const { section } = props;
+    const { section, windowWidth } = props;
     if (!section || !section.content) return null;
     const filetype = section.filetype || 'html';
     return (
@@ -24,7 +25,7 @@ const Announcement = React.memo(function Announcement(props){
             </div>
             <AnnouncementSubTitle {...props}/>
             <div className="announcement-content">
-                <BasicStaticSectionBody content={section.content} filetype={filetype} />
+                <BasicStaticSectionBody content={section.content} {...{ filetype, placeholderReplacementFxn, windowWidth }} />
             </div>
         </div>
     );
@@ -135,7 +136,7 @@ export class Announcements extends React.PureComponent {
     }
 
     render(){
-        const { loaded, announcements, initiallyVisible, className, id, total : propTotal, onSeeMoreClick } = this.props;
+        const { loaded, announcements, initiallyVisible, className, id, total : propTotal, onSeeMoreClick, windowWidth } = this.props;
         const { open } = this.state;
         if (loaded) return <AnnouncementsLoaded {...this.props} />;
 
@@ -147,8 +148,8 @@ export class Announcements extends React.PureComponent {
         let persistent;
         let collapsible = null;
 
-        function createAnnouncement(announce, idx){
-            return <Announcement key={announce.title} index={idx} section={announce} icon={collapsible ? true : false} />;
+        function createAnnouncement(announce, idx) {
+            return <Announcement key={announce.title} index={idx} section={announce} icon={collapsible ? true : false} windowWidth={windowWidth} />;
         }
 
         if (announcementsLength === 0){
@@ -168,9 +169,9 @@ export class Announcements extends React.PureComponent {
             <div className={(className || '') + " clearfix"} id={id}>
                 {
                     collapsible ? [
-                        <PartialList key="list" open={open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)}/>,
+                        <PartialList key="list" open={open} collapsible={collapsible.map(createAnnouncement)} persistent={persistent.map(createAnnouncement)} windowWidth={windowWidth} />,
                         <button type="button" key="button" className="pull-right btn-sm btn-outline-dark" onClick={onSeeMoreButtonClick}>
-                            { !open ? 'See ' + (total - persistent.length) + ' More' : 'Hide' }
+                            {!open ? 'See ' + (total - persistent.length) + ' More' : 'Hide'}
                         </button>
                     ] : persistent.map(createAnnouncement)
                 }

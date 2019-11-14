@@ -21,7 +21,7 @@
         "static_headers": [
             "item-page-headers.ExperimentSet.data-usage-guidelines",
             "release-updates.TEST1",
-            "help.analysis.file-formats.hic",
+            "resources.analysis.file-formats.hic",
             "00000000-1111-0000-1111-000000000001"
         ]
     },

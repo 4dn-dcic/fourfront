@@ -10,6 +10,8 @@ import _ from 'underscore';
 import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
+import { memoizedUrlParse } from './../globals';
+
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -65,7 +67,7 @@ export default class HealthView extends React.PureComponent {
     render() {
         var { context, schemas, session, windowWidth, href } = this.props,
             { db_es_compare, db_es_total, mounted } = this.state,
-            title = typeof context.title === "string" ? context.title : url.parse(href).path,
+            title = typeof context.title === "string" ? context.title : memoizedUrlParse(href).path,
             width = layout.gridContainerWidth(windowWidth);
 
         return (

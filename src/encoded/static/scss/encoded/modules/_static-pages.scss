@@ -510,19 +510,22 @@ $carousel-height : 240px;
 }
 
 .homepage-carousel-wrapper {
-	position: relative;
-	height: $carousel-height;
-	transition: opacity 1s;
-	transform: translate3d(0,0,0);
+	/** Applicable only to HomePage Carousel, unless noted **/
+	position: relative; 					// Probably useful for other carousels.
+	height: $carousel-height + 30px;
+	transition: opacity 1s;					// Probably useful for other carousels.
+	transform: translate3d(0,0,0);			// Probably useful for other carousels.
 
 	margin-top: 45px;
-	margin-bottom: 60px;
+	margin-bottom: 30px;
+	overflow-x: hidden;
 
 	&:before {
 		content: "";
 		left: 0;
 		position: absolute;
-		top: -15px;
+		top: 0;
+		bottom: 0;
 		right: 0;
 		height: $carousel-height + 30px;
 		background: #f6f6f6;
@@ -537,13 +540,18 @@ $carousel-height : 240px;
 		}
 	}
 
+	> .container {
+		padding-top: 15px;
+		padding-bottom: 15px;
+	}
+
 	.slider-slide {
 
 		.homepage-carousel-slide {
 			//background: #eee;
-			display: block;
-			position: relative;
-			outline: none;
+			display: block;				// Probably useful for other carousels (assuming not .homepage-carousel-slide className).
+			position: relative;			// Probably useful for other carousels.
+			outline: none;				// Probably useful for other carousels (overrides default :focus style on Chrome for elements with accessibility attributes (?)).
 			color: #333;
 			text-decoration: none;
 			padding: 5px 10px;
@@ -635,12 +643,15 @@ $carousel-height : 240px;
 
 	}
 
-	.slider-control-centerleft,
+	.slider-control-centerleft,				// Maybe useful for other carousels.
 	.slider-control-centerright {
 		font-size: 1.65rem;
 		cursor: pointer;
-		/* Works around glitch where parent slider has wrong height temp assigned and top: 50% isn't acccurate */
-		top: $carousel-height / 2 - 12px !important;
+
+		///* Works around glitch where parent slider has wrong height temp assigned and top: 50% isn't acccurate */
+		//top: $carousel-height / 2 - 12px !important;
+		top: 50%;
+		margin-top: -23px; // Half of 46px, which is height of icon-2x.
 		transform: none !important;
 		transition: transform .4s;
 		&:hover {
@@ -648,12 +659,12 @@ $carousel-height : 240px;
 		}
 	}
 
-	.slider-control-centerleft {
-		left: -35px !important;
+	.slider-control-centerleft {			// Maybe useful for other carousels.
+		left: -50px !important;
 	}
 
-	.slider-control-centerright {
-		right: -35px !important;
+	.slider-control-centerright {			// Maybe useful for other carousels.
+		right: -50px !important;
 	}
 
 }
