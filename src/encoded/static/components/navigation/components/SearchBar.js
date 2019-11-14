@@ -191,7 +191,7 @@ export class SearchBar extends React.PureComponent {
 
     render() {
         const { href, currentAction } = this.props;
-        const { searchItemsTypes typedSearchQuery } = this.state;
+        const { searchItemsTypes, typedSearchQuery } = this.state;
         const hrefParts = memoizedUrlParse(href);
 
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
