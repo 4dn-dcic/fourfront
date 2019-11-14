@@ -138,6 +138,20 @@
                     }
                 }
             }
+        },
+        "ACTB_sense_count":{
+            "title": "ACTB sense strand count",
+            "description": "Number of reads that match a 21kmer of the ACTB gene in the sense strand (RNA-seq experiments)",
+            "type": "integer",
+            "permission": "import_items",
+            "lookup": 1000
+        },
+        "ACTB_antisense_count":{
+            "title": "ACTB anti-sense strand count",
+            "description": "Number of reads that match a 21kmer of the ACTB gene in the anti-sense strand (RNA-seq experiments)",
+            "type": "integer",
+            "permission": "import_items",
+            "lookup": 1000
         }
     }
 }
