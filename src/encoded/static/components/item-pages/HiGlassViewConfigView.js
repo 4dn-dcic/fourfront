@@ -326,6 +326,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'title'          : viewConfTitle,
             'description'    : viewConfDesc,
             'viewconfig'     : currentViewConf,
+            'instance_height': context.instance_height,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
             // Lab and award do not carry over as current user might be from different lab.

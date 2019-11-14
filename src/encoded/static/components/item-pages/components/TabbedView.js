@@ -12,6 +12,8 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
 import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
+import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
+import { memoizedUrlParse } from './../../globals';
 
 
 /** This file/component is specific to 4DN portal */
@@ -159,17 +161,16 @@ export class TabbedView extends React.PureComponent {
         // Content with position : 'tab' gets its own tab.
         //
 
-        var staticTabContentSingles = _.filter(staticContentList, function(s){
+        const staticTabContentSingles = _.filter(staticContentList, function(s){
             return s.content && !s.content.error && s.location === 'tab';
         });
 
 
-        _.forEach(staticTabContentSingles, function(s, idx){
-            var content = s.content,
-                title   = content.title || 'Custom Tab ' + (idx + 1),
-                tabKey  = title.toLowerCase().split(' ').join('_'),
-                icon    = (content.options && content.options.title_icon) || null;
-
+        staticTabContentSingles.forEach(function(s, idx){
+            const { content : { title = null, options : { title_icon = null } = {} } } = s;
+            const useTitle = title || 'Custom Tab ' + (idx + 1);
+            const tabKey = useTitle.toLowerCase().split(' ').join('_');
+            const icon = standardizeUserIconString(title_icon);
             resultArr.push(TabbedView.createTabObject(tabKey, title, icon, [s], { 'hideTitles' : true }));
         });
 
@@ -252,18 +253,18 @@ export class TabbedView extends React.PureComponent {
     }
 
     maybeSwitchTabAccordingToHref(props = this.props){
-        var { contents, href } = props,
-            hrefParts       = url.parse(href),
-            hash            = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1),
-            currKey         = this.getActiveKey();
+        const { contents, href } = props;
+        const hrefParts = memoizedUrlParse(href);
+        const hash = typeof hrefParts.hash === 'string' && hrefParts.hash.length > 0 && hrefParts.hash.slice(1);
+        const currKey = this.getActiveKey();
 
         if (currKey === hash){
             console.log('Already on tab', hash);
             return false;
         }
 
-        var allContentObjs  = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents),
-            foundContent    = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
+        const allContentObjs = hash && TabbedView.combineSystemAndCustomTabs(this.additionalTabs(), contents);
+        const foundContent = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
 
         if (!foundContent){
             console.error('Could not find', hash);

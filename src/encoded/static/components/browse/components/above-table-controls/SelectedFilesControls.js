@@ -12,6 +12,7 @@ import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';
+import { memoizedUrlParse } from './../../../globals';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
@@ -71,7 +72,7 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         this.setState({ 'selecting' : true }, () => raf(()=>{
             if (!this.isAllSelected()){
-                const currentHrefParts = url.parse(href, true);
+                const currentHrefParts = memoizedUrlParse(href);
                 const currentHrefQuery = _.extend({}, currentHrefParts.query);
                 currentHrefQuery.field = SelectAllFilesButton.fieldsToRequest;
                 currentHrefQuery.limit = 'all';

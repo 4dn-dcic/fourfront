@@ -17,7 +17,6 @@ ITEM_INDEX_ORDER = [
     'Lab',
     'AccessKey',
     'User',
-    'Sysinfo',
 
     'Ontology',
     'OntologyTerm',
@@ -88,6 +87,7 @@ ITEM_INDEX_ORDER = [
     'QualityMetricFlag',
     'QualityMetricPairsqc',
     'QualityMetricMargi',
+    'QualityMetricRnaseq',
     'QualityMetricWorkflowrun',
 
     'ExperimentAtacseq',

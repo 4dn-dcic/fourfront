@@ -71,7 +71,10 @@ class Biosource(Item):
     })
     def biosource_name(self, request, biosource_type, individual=None,
                        cell_line=None, cell_line_tier=None, tissue=None,
-                       modifications=None):
+                       modifications=None, override_biosource_name=None):
+        if override_biosource_name:
+            # if this field is present just return it
+            return override_biosource_name
         cell_line_types = [
             'primary cell',
             'primary cell line',
@@ -82,22 +85,22 @@ class Biosource(Item):
         ]
         mod_str = ''
         if modifications:
-            mod_str = ' with ' + ', '.join([request.embed(mod, '@@object').get('modification_name_short', '')
+            mod_str = ' with ' + ', '.join([get_item_if_you_can(request, mod, 'modifications').get('modification_name_short', '')
                                             for mod in modifications])
         # elif modifications and len(modifications) > 1:
         #     mod_str = ' with genetic modifications'
         if biosource_type == "tissue":
             if tissue:
-                tissue_props = request.embed(tissue, '@@object')
-                if tissue_props.get('term_name') is not None:
-                    return tissue_props.get('term_name') + mod_str
+                tissue_props = get_item_if_you_can(request, tissue, 'ontology_terms')
+                if tissue_props:
+                    return tissue_props.get('preferred_name') + mod_str
                 else:
                     return biosource_type + mod_str
         elif biosource_type in cell_line_types:
             if cell_line:
-                cell_line_props = request.embed(cell_line, '@@object')
-                if cell_line_props.get('term_name') is not None:
-                    cell_line_name = cell_line_props.get('term_name')
+                cell_line_props = get_item_if_you_can(request, cell_line, 'ontology_terms')
+                if cell_line_props:
+                    cell_line_name = cell_line_props.get('preferred_name')
                     if cell_line_tier:
                         if cell_line_tier != 'Unclassified':
                             return cell_line_name + ' (' + cell_line_tier + ')' + mod_str
@@ -105,12 +108,91 @@ class Biosource(Item):
             return biosource_type + mod_str
         elif biosource_type == "multicellular organism":
             if individual:
-                individual_props = request.embed(individual, '@@object')
-                organism = individual_props['organism']
-                organism_props = request.embed(organism, '@@object')
-                organism_name = organism_props['name']
+                organism_name = 'Unknown'
+                individual_props = get_item_if_you_can(request, individual, 'individuals')
+                if individual_props:
+                    organism = individual_props.get('organism')
+                    organism_props = get_item_if_you_can(request, organism, 'organisms')
+                    if organism_props:
+                        organism_name = organism_props['name']
                 return "whole " + organism_name + mod_str
         return biosource_type + mod_str
+
+    @calculated_property(schema={
+        "title": "Biosource categories",
+        "description": "Categories for the biosource.",
+        "type": "array",
+        "items": {
+            "title": "Category",
+            "type": "string"
+        }
+    })
+    def biosource_category(self, request, biosource_type, individual=None,
+                           cell_line=None, cell_line_tier=None, tissue=None,
+                           modifications=None):
+        oterms = self.registry['collections']['OntologyTerm']
+        tid2cat = {
+            'EFO:0003042': 'H1-hESC',
+            'EFO:0002784': 'GM12878',
+            '4DN:0000014': 'HFF (c6 or hTERT)',
+            'EFO:0009318': 'HFF (c6 or hTERT)',
+            '4DN:0000001': 'HFF (c6 or hTERT)',
+            '4DN:0000005': 'WTC-11',
+            'EFO:0009747': 'WTC-11',
+            'EFO:0001196': 'IMR-90',
+            '4DN:0000260': 'Tier 2',
+            '4DN:0000250': 'Tier 2',
+            'EFO:0002824': 'Tier 2',
+            '4DN:0000003': 'Tier 2',
+            'EFO:0007598': 'Tier 2',
+            'EFO:0002067': 'Tier 2',
+            'EFO:0003045': 'Tier 2',
+            'EFO:0002869': 'Tier 2',
+            'EFO:0001182': 'Tier 2',
+            '4DN:0000004': 'Tier 2',
+            '4DN:0000002': 'Tier 2',
+            '4DN:0000262': 'Tier 2',
+            'EFO:0009319': 'Tier 2'
+        }
+        category = []
+        tiered_line_cat = {}
+        for tid, cat in tid2cat.items():
+            oterm = oterms.get(tid)
+            if oterm:
+                tiered_line_cat[str(oterm.uuid)] = cat
+        # import pdb; pdb.set_trace()
+        if cell_line:
+            cl_term = get_item_if_you_can(request, cell_line, 'ontology-terms')
+            cluid = cl_term.get('uuid')
+            if cluid and cluid in tiered_line_cat:
+                category.append(tiered_line_cat[cluid])
+        if biosource_type in ['stem cell', 'induced pluripotent stem cell',
+                              'stem cell derived cell line']:
+            ind = get_item_if_you_can(request, individual, 'individuals')
+            try:
+                ind_at_type = ind.get('@type', [])
+            except AttributeError:
+                ind_at_type = []
+            for at in ind_at_type:
+                if 'Human' in at:
+                    category.append('Human stem cell')
+                elif 'Mouse' in at:
+                    category.append('Mouse stem cell')
+        elif biosource_type == 'primary cell':
+            category.append('Primary Cells')
+        elif biosource_type in ['tissue', 'multicellular organism']:
+            category.append('Multicellular Tissue')
+        if tissue:
+            tis_term = get_item_if_you_can(request, tissue, 'ontology-terms')
+            # case for 1000 genomes/Hap Map
+            if tis_term.get('preferred_name') == 'B-lymphocyte':
+                if cl_term:
+                    cl_name = cl_term.get('term_name')
+                    if cl_name.startswith('GM') or cl_name.startswith('HG'):
+                        category.append('1000 genomes/Hap Map')
+        if not category:
+            category.append('Other')
+        return category
 
     @calculated_property(schema={
         "title": "Display Title",

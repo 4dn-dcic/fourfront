@@ -12,12 +12,14 @@ import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/compone
 import { console, object, layout, ajax, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
 import { Schemas, fileUtil, typedefs } from './../util';
+import { memoizedUrlParse } from './../globals';
 
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { TabbedView } from './components/TabbedView';
 import { Publications } from './components/Publications';
 import { AttributionTabView } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
+import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
 
 import { ExpandableStaticHeader } from './../static-pages/components';
 
@@ -99,7 +101,7 @@ export default class DefaultItemView extends React.PureComponent {
         const { href, context } = this.props;
         if (!href) return;
 
-        let { query : { redirected_from = null } = { redirected_from : null } } = url.parse(href, true);
+        let { query : { redirected_from = null } = { redirected_from : null } } = memoizedUrlParse(href);
 
         if (Array.isArray(redirected_from)){
             redirected_from = redirected_from[0];
@@ -362,7 +364,7 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
                         title={title || 'Informational Notice ' + (i + 1)}
                         context={section}
                         defaultOpen={options.default_open || false} key={name || i} index={i}
-                        titleIcon={options.title_icon} />
+                        titleIcon={standardizeUserIconString(options.title_icon)} />
                 );
             })}
             <hr />
@@ -421,6 +423,15 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
 
     if (!item || !linkToItem) return null;
 
+    const {
+        microscopy_file : {
+            '@id' : fileMicroscopyID = null,
+            omerolink = null
+        } = {},
+        custom_link = null
+    } = item;
+
+    const linkHref = (fileMicroscopyID && omerolink) || custom_link || linkToItem;
     const { attachment = null } = item;
     const { href: attachmentHref = null, caption: attachmentCaption = null } = attachment || {};
     const filename = itemAttachmentFileName(item);
@@ -428,7 +439,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     if (!attachmentHref || !isAttachmentImage(filename)) return <EmbeddedItemWithAttachment {...props} />;
 
     const imageElem = (
-        <a href={linkToItem} className="image-wrapper">
+        <a href={linkHref} className="image-wrapper">
             <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
@@ -440,6 +451,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             <div className="inner">
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
+                { fileMicroscopyID && <a href={fileMicroscopyID}>View File Item - { item.microscopy_file.accession }</a> }
             </div>
         </div>
     );

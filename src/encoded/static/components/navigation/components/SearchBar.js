@@ -8,6 +8,7 @@ import { DropdownItem, DropdownButton } from 'react-bootstrap';
 import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
 import { console, searchFilters, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
+import { memoizedUrlParse } from './../../globals';
 
 
 export class SearchBar extends React.PureComponent {
@@ -121,9 +122,11 @@ export class SearchBar extends React.PureComponent {
         }
     }
 
-    onResetSearch(e) {
-        var hrefParts = url.parse(this.props.href, true);
-        if (typeof hrefParts.search === 'string') {
+    onResetSearch (e){
+        const { href } = this.props;
+        const hrefParts = _.clone(memoizedUrlParse(href));
+        hrefParts.query = _.clone(hrefParts.query || {});
+        if (typeof hrefParts.search === 'string'){
             delete hrefParts.query['q'];
             delete hrefParts.search;
         }
@@ -188,8 +191,9 @@ export class SearchBar extends React.PureComponent {
 
     render() {
         const { href, currentAction } = this.props;
-        const { searchItemsTypes, typedSearchQuery } = this.state;
-        const hrefParts = url.parse(href, true);
+        const { searchItemsTypes typedSearchQuery } = this.state;
+        const hrefParts = memoizedUrlParse(href);
+
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
         const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
         const showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery) && (

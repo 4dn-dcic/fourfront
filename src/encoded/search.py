@@ -78,6 +78,18 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     principals = request.effective_principals
     es = request.registry[ELASTIC_SEARCH]
 
+    # Get static section (if applicable) when searching a single item type
+    # Note: Because we rely on 'source', if the static_section hasn't been indexed
+    # into Elasticsearch it will not be loaded
+    if (len(doc_types) == 1) and 'Item' not in doc_types:
+        search_term = 'search-info-header.' + doc_types[0]
+        static_section = request.registry['collections']['StaticSection'].get(search_term)
+        if static_section and hasattr(static_section.model, 'source'):
+            item = static_section.model.source['object']
+            result['search_header'] = {}
+            result['search_header']['content'] = item['content']
+            result['search_header']['title'] = item.get('title', item['display_title'])
+
     from_, size = get_pagination(request)
 
     # get desired frame for this search
@@ -193,7 +205,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 DEFAULT_BROWSE_PARAM_LISTS = {
     'type'                  : ["ExperimentSetReplicate"],
     'experimentset_type'    : ['replicate'],
-    'award.project'         : ['4DN']
+    # Uncomment if changing back to showing external data: false by default
+    # 'award.project'         : ['4DN']
 }
 
 @view_config(route_name='browse', request_method='GET', permission='search')
@@ -311,10 +324,22 @@ def normalize_query(request, types, doc_types):
         Current rules:
         - for 'type', get name from types (from the registry)
         - append '.display_title' to any terminal linkTo query field
+        - append '.display_title' to sorts on fields
         """
         # type param is a special case. use the name from TypeInfo
         if key == 'type' and val in types:
             return (key, types[val].name)
+
+        # if key is sort, pass val as the key to this function
+        # if it appends display title we know its a linkTo and
+        # should be treated as such
+        if key == 'sort':
+            # do not use '-' if present
+            sort_val = val[1:] if val.startswith('-') else val
+            new_val, _ = normalize_param(sort_val, None)
+            if new_val != sort_val:
+                val = val.replace(sort_val, new_val)
+            return (key, val)
 
         # find schema for field parameter and drill down into arrays/subobjects
         field_schema = schema_for_field(key, request, doc_types)
@@ -562,7 +587,8 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         else:
             name = requested_sort
             order = 'asc'
-        sort_schema = type_schema.get('properties', {}).get(name) if type_schema else None
+        sort_schema = schema_for_field(name, request, doc_types)
+
         if sort_schema:
             sort_type = sort_schema.get('type')
         else:
@@ -579,6 +605,12 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
             sort['embedded.' + name] = result_sort[name] = {
                 'order': order,
                 'unmapped_type': 'float',
+                'missing': '_last'
+            }
+        elif sort_schema and determine_if_is_date_field(name, sort_schema):
+            sort['embedded.' + name + '.raw'] = result_sort[name] = {
+                'order': order,
+                'unmapped_type': 'date',
                 'missing': '_last'
             }
         else:
@@ -942,7 +974,8 @@ def schema_for_field(field, request, doc_types, should_log=False):
     '''
     Find the schema for the given field (in embedded '.' format). Uses
     ff_utils.crawl_schema from snovault and logs any cases where there is an
-    error finding the field from the schema
+    error finding the field from the schema. Caches results based off of field
+    and doc types used
 
     Args:
         field (string): embedded field path, separated by '.'
