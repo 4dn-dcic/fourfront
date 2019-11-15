@@ -217,14 +217,13 @@ export class SearchBar extends React.PureComponent {
         } else if (searchItemType === 'all' && !isSelectAction(currentAction)) {
             _.extend(query, { 'type': 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
         } else if (searchItemType === 'sets')  {
-            delete hrefParts.query;
-            _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams); // Preserve facets (except 'q') & browse base params.
+            _.extend(query, browseBaseParams);
         }
         else if (searchItemType === 'within') {
             _.extend(query, _.omit(hrefParts.query || {}, 'q'));
         }
         else {
-            _.extend(query, _.omit(hrefParts.query || {}, 'q'), browseBaseParams);
+            _.extend(query, browseBaseParams);
         }
 
         return ( // Form submission gets serialized and AJAXed via onSubmit handlers in App.js
