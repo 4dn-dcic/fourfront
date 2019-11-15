@@ -328,6 +328,7 @@ const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
         };
     }
 
+    // Get all files which have expUUID in experiments.uuid[] excluding reference and processed files.
     const requestHref = `/search/?type=File&experiments.uuid=${encodeURIComponent(expUUID)}&type%21=FileProcessed&type%21=FileReference`;
 
     return (

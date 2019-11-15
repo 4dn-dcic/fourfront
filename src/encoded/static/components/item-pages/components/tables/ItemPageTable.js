@@ -78,7 +78,7 @@ export class ItemPageTable extends React.Component {
                         <React.Fragment>
                             { toggleButton }
                             <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
-                                { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
+                                { typeTitle ? <div className="type-title text-ellipsis-container">{ typeTitle }</div> : null }
                                 { title }
                             </span>
                         </React.Fragment>
@@ -393,21 +393,27 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
 
 export function ViewMoreResultsBtn(props){
     const { countTotalResults, results, itemTypeTitle = "Item", hrefWithoutLimit } = props;
-    if (typeof countTotalResults === 'number'){
-        const visibleResultCount = results.length;
-        if (countTotalResults > visibleResultCount){
-            if (hrefWithoutLimit){
-                return (
-                    <a type="button" className="mt-2 btn btn-lg btn-primary" href={hrefWithoutLimit}>
-                        { `View all ${itemTypeTitle}s (${countTotalResults - visibleResultCount} more)` })
-                    </a>
-                );
-            } else {
-                return (countTotalResults - visibleResultCount) + ' more ' + itemTypeTitle + 's';
-            }
-        }
+    if (!Array.isArray(results)) {
+        return null;
     }
-    return null;
+    if (typeof countTotalResults !== 'number') {
+        // Passed in from ItemPageTableSearchLoader
+        return null;
+    }
+    const visibleResultCount = results.length;
+    if (visibleResultCount >= countTotalResults) {
+        // Shouldn't ever be greater, but just incase I guess..
+        return null;
+    }
+    if (hrefWithoutLimit){
+        return (
+            <a className="mt-2 btn btn-lg btn-primary" href={hrefWithoutLimit}>
+                { `View all ${itemTypeTitle}s (${countTotalResults - visibleResultCount} more)` }
+            </a>
+        );
+    } else {
+        return (countTotalResults - visibleResultCount) + ' more ' + itemTypeTitle + 's';
+    }
 }
 
 
