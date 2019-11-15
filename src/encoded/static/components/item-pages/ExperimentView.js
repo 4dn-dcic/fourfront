@@ -9,7 +9,7 @@ import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/compo
 import { expFxn } from './../util';
 
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
-import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
+import { SimpleFilesTable, SimpleFilesTableLoaded, FilesTableLoadedFromSearch } from './components/tables/SimpleFilesTable';
 import { Publications } from './components/Publications';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 
@@ -19,7 +19,7 @@ import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTraci
 
 export default class ExperimentView extends WorkflowRunTracingView {
 
-    static procesedFilesWithViewPermissions = memoize(function(context){
+    static processedFilesWithViewPermissions = memoize(function(context){
         return Array.isArray(context.processed_files) && _.filter(context.processed_files, function(rf){
             if (rf.error && !object.itemUtil.atId(rf)) return false;
             return true;
@@ -40,8 +40,8 @@ export default class ExperimentView extends WorkflowRunTracingView {
 
     shouldGraphExist(){
         const { context } = this.props;
-        const procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
-        return !!(procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0);
+        const processedFilesWithViewPermissions = ExperimentView.processedFilesWithViewPermissions(context);
+        return !!(processedFilesWithViewPermissions && processedFilesWithViewPermissions.length > 0);
     }
 
     getFilesTabs(){
@@ -53,10 +53,16 @@ export default class ExperimentView extends WorkflowRunTracingView {
             if (rf.error && !object.itemUtil.atId(rf)) return false;
             return true;
         });
+        const rawFilesLen = (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length) || 0;
 
-        if (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length > 0) {
+        if (rawFilesLen > 0) {
             tabs.push({
-                tab : <span><i className="icon icon-leaf fas icon-fw"/> Raw Files</span>,
+                tab : (
+                    <span>
+                        <i className="icon icon-leaf fas icon-fw"/>
+                        { rawFilesLen + " Raw File" + (rawFilesLen === 1 ? "" : "s") }
+                    </span>
+                ),
                 key : 'raw-files',
                 content : <RawFilesTableSection
                     files={rawFilesWithViewPermissions}
@@ -67,14 +73,20 @@ export default class ExperimentView extends WorkflowRunTracingView {
             });
         }
 
-        const procesedFilesWithViewPermissions = ExperimentView.procesedFilesWithViewPermissions(context);
+        const processedFilesWithViewPermissions = ExperimentView.processedFilesWithViewPermissions(context);
+        const processedFilesLen = (processedFilesWithViewPermissions && processedFilesWithViewPermissions.length) || 0;
 
-        if (procesedFilesWithViewPermissions && procesedFilesWithViewPermissions.length > 0) {
+        if (processedFilesLen > 0) {
             tabs.push({
-                tab : <span><i className="icon icon-microchip fas icon-fw"/> Processed Files</span>,
+                tab : (
+                    <span>
+                        <i className="icon icon-microchip fas icon-fw"/>
+                        { processedFilesLen + " Processed File" + (processedFilesLen === 1 ? "" : "s") }
+                    </span>
+                ),
                 key : 'processed-files',
                 content : <ProcessedFilesTableSection
-                    files={procesedFilesWithViewPermissions}
+                    files={processedFilesWithViewPermissions}
                     width={width}
                     {..._.pick(this.props, 'context', 'schemas')}
                     {...this.state}
@@ -290,9 +302,9 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
 
 
 const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
-    const { files, context } = props;
-    const fileUrls    = _.map(files, object.itemUtil.atId);
-    const columns     = _.clone(SimpleFilesTable.defaultProps.columns);
+    const { files, context, width, schemas } = props;
+    const { uuid: expUUID } = context || {};
+    const columns = _.clone(SimpleFilesTable.defaultProps.columns);
 
     columns['related_files'] = {
         'title' : 'Relations',
@@ -316,12 +328,14 @@ const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
         };
     }
 
+    const requestHref = `/search/?type=File&experiments.uuid=${encodeURIComponent(expUUID)}&type%21=FileProcessed&type%21=FileReference`;
+
     return (
         <div className="raw-files-table-section">
             <h3 className="tab-section-title">
                 <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
             </h3>
-            <SimpleFilesTableLoaded {..._.pick(props, 'schemas', 'width')} columns={columns} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
+            <FilesTableLoadedFromSearch {...{ width, schemas, columns, requestHref }} id={object.itemUtil.atId(context)} />
         </div>
     );
 });

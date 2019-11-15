@@ -6,7 +6,7 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
-import { get as getSchemas } from './../../../util/Schemas';
+import { get as getSchemas, Term } from './../../../util/Schemas';
 import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
@@ -20,6 +20,14 @@ import { memoizedUrlParse } from './../../../globals';
 
 /** @todo - refactor. Not too important since parent components almost always a PureComponent so perf gain would b minimal */
 export class ItemPageTable extends React.Component {
+
+    static scaleColumnDefinitionWidths(realWidth, columnDefinitions){
+        const baseWidth = ItemPageTableRow.totalColumnsBaseWidth(columnDefinitions);
+        const scale = realWidth / baseWidth;
+        return _.map(columnDefinitions, function(c){
+            return _.extend({}, c, { 'width' : Math.floor(scale * c.baseWidth) });
+        });
+    }
 
     static propTypes = {
         'results' : PropTypes.arrayOf(PropTypes.shape({
@@ -67,11 +75,18 @@ export class ItemPageTable extends React.Component {
                     }
 
                     return (
-                        <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
+                        <React.Fragment>
                             { toggleButton }
-                            { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
-                            { title }
-                        </span>
+                            <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
+                                { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
+                                { title }
+                            </span>
+                        </React.Fragment>
+                        // <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
+                        //     { toggleButton }
+                        //     { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
+                        //     { title }
+                        // </span>
                     );
                 }
             }
@@ -90,6 +105,9 @@ export class ItemPageTable extends React.Component {
     constructor(props){
         super(props);
         this.state = { 'mounted' : false };
+        this.memoized = {
+            scaleColumnDefinitionWidths : memoize(ItemPageTable.scaleColumnDefinitionWidths)
+        };
     }
 
     componentDidMount(){
@@ -117,9 +135,8 @@ export class ItemPageTable extends React.Component {
             throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
-        columnDefinitions = ItemPageTableRow.scaleColumnDefinitionWidths(
-            useWidth,
-            columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
+        columnDefinitions = this.memoized.scaleColumnDefinitionWidths(
+            useWidth, columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
         );
 
         const commonRowProps = { width: useWidth, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
@@ -151,14 +168,6 @@ class ItemPageTableRow extends React.PureComponent {
         }, 0);
     }
 
-    static scaleColumnDefinitionWidths = memoize(function(realWidth, columnDefinitions){
-        var baseWidth = ItemPageTableRow.totalColumnsBaseWidth(columnDefinitions),
-            scale = realWidth / baseWidth;
-        return _.map(columnDefinitions, function(c){
-            return _.extend({}, c, { 'width' : Math.floor(scale * c.baseWidth) });
-        });
-    });
-
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
@@ -171,34 +180,34 @@ class ItemPageTableRow extends React.PureComponent {
         });
     }
 
-    renderValue(colDefinition, result, columnIndex){
-        return (
-            <ResultRowColumnBlockValue {...this.props}
-                columnDefinition={colDefinition} columnNumber={columnIndex}
-                key={colDefinition.field} schemas={this.props.schemas || null}
-                result={result} tooltip={true}
-                className={colDefinition.field === 'display_title' && this.state.open ? 'open' : null}
-                detailOpen={this.state.open} toggleDetailOpen={this.toggleOpen}
-                renderDetailPane={this.props.renderDetailPane}
-            />
-        );
-    }
-
     renderRowOfColumns(){
-        var { columnDefinitions, result, renderDetailPane } = this.props;
+        const { columnDefinitions, result, renderDetailPane, ...passProps } = this.props;
+        const { open } = this.state;
 
         if (!Array.isArray(columnDefinitions)) {
             console.error('No columns defined.');
             return null;
         }
 
+        const renderedCols = columnDefinitions.map((col, index) => {
+            const { width, field } = col;
+            return (
+                <div style={{ width }} className={"column column-for-" + field} data-field={field} key={field || index}>
+                    <ResultRowColumnBlockValue
+                        {...passProps} {...{ result, renderDetailPane }}
+                        columnDefinition={col} columnNumber={index}
+                        key={field} tooltip
+                        className={field === 'display_title' && open ? 'open' : null}
+                        detailOpen={open} toggleDetailOpen={this.toggleOpen}
+                        termTransformFxn={Term.toName}
+                    />
+                </div>
+            );
+        });
+
         return (
             <div className={"table-row clearfix" + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
-                { _.map(columnDefinitions, (col, index) =>
-                    <div style={{ 'width' : col.width }} className={"column column-for-" + col.field} data-field={col.field} key={col.field || index}>
-                        { this.renderValue(col, result, index) }
-                    </div>
-                )}
+                { renderedCols }
             </div>
         );
     }
@@ -283,22 +292,22 @@ export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
 export class ItemPageTableSearchLoader extends React.PureComponent {
 
     /** We set the default number of results to get here to be 7, unless is overriden in href */
-    static getLimit = memoize(function(href){
+    static getLimit(href){
         // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
         const { query : { limit = 0 } = { limit : 0 } } = memoizedUrlParse(href);
         return (limit && parseInt(limit)) || 7;
-    });
+    }
 
-    static hrefWithoutLimit = memoize(function(href){
+    static hrefWithoutLimit(href){
         // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
         const hrefParts = _.clone(memoizedUrlParse(href));
         const query = (hrefParts.query && _.clone(hrefParts.query) || {});
         delete query.limit;
         hrefParts.search = '?' + queryString.stringify(query);
         return url.format(hrefParts);
-    });
+    }
 
-    static hrefWithLimit = memoize(function(href, limit=null){
+    static hrefWithLimit(href, limit=null){
         // TODO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
         // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
 
@@ -307,7 +316,7 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
         query.limit = query.limit || limit || ItemPageTableSearchLoader.getLimit(href);
         hrefParts.search = '?' + queryString.stringify(query);
         return url.format(hrefParts);
-    });
+    }
 
     static propTypes = {
         "requestHref" : PropTypes.string.isRequired,
@@ -324,6 +333,11 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
             'results' : null,
             'countTotalResults' : null
         };
+        this.memoized = {
+            getLimit: memoize(ItemPageTableSearchLoader.getLimit),
+            hrefWithoutLimit: memoize(ItemPageTableSearchLoader.hrefWithoutLimit),
+            hrefWithLimit: memoize(ItemPageTableSearchLoader.hrefWithLimit)
+        };
     }
 
     componentDidMount(){
@@ -339,8 +353,10 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
 
     doRequest(){
         const { requestHref } = this.props;
+        const limit = this.memoized.getLimit(requestHref);
+        const hrefWithLimit = this.memoized.hrefWithLimit(requestHref, limit);
         this.setState({ 'loading' : true }, ()=>{
-            ajax.load(requestHref, this.handleResponse, 'GET', this.handleResponse);
+            ajax.load(hrefWithLimit, this.handleResponse, 'GET', this.handleResponse);
         });
     }
 
@@ -362,9 +378,9 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
         const { requestHref, children } = this.props;
         if (!requestHref) return null;
 
-        const limit = ItemPageTableSearchLoader.getLimit(requestHref);
-        const hrefWithLimit = ItemPageTableSearchLoader.hrefWithLimit(requestHref, limit);
-        const hrefWithoutLimit = ItemPageTableSearchLoader.hrefWithoutLimit(requestHref, limit);
+        const limit = this.memoized.getLimit(requestHref);
+        const hrefWithLimit = this.memoized.hrefWithLimit(requestHref, limit);
+        const hrefWithoutLimit = this.memoized.hrefWithoutLimit(requestHref, limit);
 
         return React.cloneElement(
             children,
@@ -372,6 +388,26 @@ export class ItemPageTableSearchLoader extends React.PureComponent {
         );
     }
 
+}
+
+
+export function ViewMoreResultsBtn(props){
+    const { countTotalResults, results, itemTypeTitle = "Item", hrefWithoutLimit } = props;
+    if (typeof countTotalResults === 'number'){
+        const visibleResultCount = results.length;
+        if (countTotalResults > visibleResultCount){
+            if (hrefWithoutLimit){
+                return (
+                    <a type="button" className="mt-2 btn btn-lg btn-primary" href={hrefWithoutLimit}>
+                        { `View all ${itemTypeTitle}s (${countTotalResults - visibleResultCount} more)` })
+                    </a>
+                );
+            } else {
+                return (countTotalResults - visibleResultCount) + ' more ' + itemTypeTitle + 's';
+            }
+        }
+    }
+    return null;
 }
 
 
