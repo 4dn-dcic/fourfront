@@ -793,7 +793,7 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
         z-index: -1000;
         
         transform: translate3d(0px,0px,0px);
-        transition: opacity .2s linear, z-index 0s .25s, top $navbar-transition-length $navbar-transition-easing;
+        transition: opacity .2s 0.05s linear, z-index 0s .25s, top $navbar-transition-length $navbar-transition-easing;
 
         // Uncomment if moving from Portal to directly be rendered under/by NavBar -
         //line-height: normal; // Unset line-height: 40/80px from NavBar

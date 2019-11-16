@@ -5,8 +5,8 @@ import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/ut
 
 
 export function BigDropdownIntroductionWrapper(props){
-    const { children, titleIcon = null, windowHeight, windowWidth, className, isActive = false } = props;
-    if (!children || windowHeight < 800) return null;
+    const { children, titleIcon = null, className, isActive = false } = props;
+    if (!children) return null;
 
     const textCol = (
         <div className="col">

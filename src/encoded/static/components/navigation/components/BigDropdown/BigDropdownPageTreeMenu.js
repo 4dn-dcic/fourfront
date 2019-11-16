@@ -12,7 +12,13 @@ import { memoizedUrlParse } from './../../../globals';
 export function BigDropdownPageTreeMenuIntroduction(props) {
     const { menuTree, windowHeight, windowWidth, onMenuItemClick, titleIcon = null, isActive = false } = props;
     const { display_title, name: pathName, description } = menuTree || {};
-    if (!menuTree || !menuTree.display_title || windowHeight < 800) return null;
+
+    if (!menuTree || !menuTree.display_title || windowHeight < 600) {
+        // Hide this link to top-level page on smaller heights.
+        // TODO: Reconsider and maybe remove this; works currently for /help and /resources since they serve
+        // as "directory" pages without much useful content themselves.
+        return null;
+    }
 
     return (
         <BigDropdownIntroductionWrapper {...{ windowHeight, windowWidth, titleIcon, isActive }}>
