@@ -196,7 +196,7 @@ export class SearchBar extends React.PureComponent {
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
         const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
         const showingCurrentQuery = (searchQueryFromHref && searchQueryFromHref === typedSearchQuery) && (
-            (searchTypeFromHref === 'Item' && searchItemType === 'all') || (searchTypeFromHref === 'ExperimentSetReplicate' && searchItemType === 'sets') || (searchTypeFromHref === 'ExperimentSetReplicate' && searchItemType === 'within')
+            (searchTypeFromHref === 'Item' && searchItemType === 'all') || (searchTypeFromHref === 'ExperimentSetReplicate' && searchItemType === 'sets') || (/*searchTypeFromHref === 'ExperimentSetReplicate' &&*/ searchItemType === 'within')
         );
         const searchBoxHasInput = SearchBar.hasInput(typedSearchQuery);
         const query = {}; // Don't preserve facets.
