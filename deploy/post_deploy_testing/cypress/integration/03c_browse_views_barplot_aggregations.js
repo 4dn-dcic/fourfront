@@ -34,7 +34,7 @@ describe('Browse Views - BarPlotChart II', function () {
                         .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
                         .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
                         .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
-                        .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', initialCounts.experiment_sets).wait(1000).end()
+                        .getQuickInfoBarCounts().its('experiment_sets').should('be.lessThan', initialCounts.experiment_sets).wait(1000).end()
                         .then(()=>{
                             compareQuickInfoCountsVsBarPlotCounts({ 'countChildTypes' : true });
                         });
