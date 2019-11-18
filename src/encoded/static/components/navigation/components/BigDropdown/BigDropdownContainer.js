@@ -8,6 +8,7 @@ import _ from 'underscore';
 import { CSSTransition } from 'react-transition-group';
 import ReactTooltip from 'react-tooltip';
 import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { elementIsChildOfLink } from './../../../globals';
 
 
 export class BigDropdownContainer extends React.PureComponent {
@@ -20,6 +21,11 @@ export class BigDropdownContainer extends React.PureComponent {
         'introSection' : <h4>Hello World!</h4>
     };
 
+    constructor(props){
+        super(props);
+        this.onBackgroundClick = this.onBackgroundClick.bind(this);
+    }
+
     componentDidUpdate(pastProps){
         const { href, windowWidth, open, onClose } = this.props;
         const { open: pastOpen, href: pastHref, windowWidth: pastWindowWidth } = pastProps;
@@ -31,17 +37,34 @@ export class BigDropdownContainer extends React.PureComponent {
         if (open && !pastOpen) {
             ReactTooltip.rebuild();
         }
-        // Seems CSSTransition might reset on resizes to mobile (need to look into, likely re: `key` or something)
-        // So for now we just close menu if changed grid breakpoint size.
-        /*
-        if (open && windowWidth !== pastWindowWidth){
-            const rgs = layout.responsiveGridState(windowWidth);
-            const pastRgs = layout.responsiveGridState(pastWindowWidth);
-            if (rgs !== pastRgs) {
-                //this.onStartClose();
-            }
+    }
+
+    /**
+     * Close dropdown on clock on semi-opaque background only (not menu items, etc.)
+     *
+     * Conditionally prevent click event from bubbling up past this background.
+     * Makes it easier in BigDropdownGroupController to close dropdown on any click in window (outside of menu).
+     */
+    onBackgroundClick(evt){
+        const targetElem = (evt && evt.target) || null;
+
+        if (elementIsChildOfLink(targetElem)){
+            // Let bubble up - app.js will catch and navigate via handleClick and BigDropdownGroupController will catch and hide menu.
+            return false;
         }
-        */
+
+        const targetElemCls = (targetElem && targetElem.className) || null;
+        const targetElemClassList = (targetElemCls && targetElemCls.split(' ')) || null;
+
+        if (Array.isArray(targetElemClassList) && targetElemClassList.indexOf("big-dropdown-menu-background") > -1){
+            // Clicked on semi-opaque background - close.
+            // Let click event bubble up to be caught by BigDropdownGroupController window click handler and dropdown closed.
+            return false;
+        }
+
+        // Else is presumed click on bg div pane but not on a link - _prevent_ event bubbling & transitive closing of menu
+        evt.stopPropagation();
+        evt.preventDefault();
     }
 
     render(){
@@ -64,12 +87,11 @@ export class BigDropdownContainer extends React.PureComponent {
 
         const outerCls = "big-dropdown-menu-background" + (className ? ' ' + className : "");
         const innerCls = "big-dropdown-menu" + (open ? " is-open" : "");
-        const childProps = { ...passProps, onMenuItemClick: onClose };
-        const body = React.Children.map(children, (child) => React.cloneElement(child, childProps));
+        const body = React.Children.map(children, (child) => React.cloneElement(child, passProps));
         const renderedElem = (
             <CSSTransition appear in={open || closing} classNames="big-dropdown-menu-transition" unmountOnExit mountOnEnter
                 timeout={{ appear: 0, exit: otherDropdownOpen ? 0 : 300 }} key="dropdown-transition-container">
-                <div className={outerCls} onClick={onClose} key="dropdown-transition-container-inner"
+                <div className={outerCls} onClick={this.onBackgroundClick} key="dropdown-transition-container-inner"
                     data-is-mobile-view={!isDesktopView}
                     data-is-test-warning-visible={testWarningVisible}
                     data-is-closing={closing}
@@ -77,7 +99,7 @@ export class BigDropdownContainer extends React.PureComponent {
                     <div className={innerCls} data-open-id={id}>
                         <div className="container">
                             { body }
-                            <div className="mobile-close-button d-block d-md-none" onClick={onClose}>
+                            <div className="mobile-close-button" onClick={onClose}>
                                 <i className="icon icon-2x icon-times fas"/>
                             </div>
                         </div>
