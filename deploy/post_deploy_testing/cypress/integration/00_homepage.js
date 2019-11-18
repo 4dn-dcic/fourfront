@@ -36,11 +36,11 @@ describe('Home Page', function () {
 
         cy.window().scrollTo('top').wait(100).end()
             .getQuickInfoBarCounts().then((initialCounts)=>{
-                return cy.get('#stats .browse-base-state-toggle-container input[type="checkbox"]').should('not.be.checked').check({ force: true }).wait(1500).end()
+                return cy.get('#stats .browse-base-state-toggle-container input[type="checkbox"]').should('be.checked').uncheck({ force: true }).wait(1500).end()
                     .getQuickInfoBarCounts().then((nextCounts)=>{
-                        expect(nextCounts.experiment_sets).to.be.greaterThan(initialCounts.experiment_sets);
-                        expect(nextCounts.experiments).to.be.greaterThan(initialCounts.experiments);
-                        expect(nextCounts.files).to.be.greaterThan(initialCounts.files);
+                        expect(nextCounts.experiment_sets).to.be.lessThan(initialCounts.experiment_sets);
+                        expect(nextCounts.experiments).to.be.lessThan(initialCounts.experiments);
+                        expect(nextCounts.files).to.be.lessThan(initialCounts.files);
                     }).end();
             });
 
