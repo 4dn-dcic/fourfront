@@ -31,7 +31,7 @@ export const FormattedInfoWrapper =  React.memo(function FormattedInfoWrapper(pr
         <div className={outerClassName}>
             <h6 className="publication-label">{ singularTitle }{ isSingleItem ? '' : 's' }</h6>
             <div className="row">
-                <div className="icon-container col-2 col-lg-1">
+                <div className="icon-container col-2 col-lg-1 px-0">
                     <i className={"icon icon-" + iconClass} />
                 </div>
                 <div className={"col-10 col-lg-11" + (isSingleItem && noDetails ? ' no-more-details' : '')}>{ children }</div>
@@ -580,7 +580,7 @@ export class FormattedInfoBlock extends React.Component {
         } else {
             innerContent = (
                 <div className="row loaded">
-                    { iconClass ? <div className="col-2 col-lg-1 icon-container"><i className={"icon " + iconClass}/></div> : null }
+                    { iconClass ? <div className="col-2 col-lg-1 icon-container px-0"><i className={"icon " + iconClass}/></div> : null }
                     <div className={"details-col " + (iconClass ? "col-10 col-lg-11" : "col-sm-12") + (!detailContent && !children ? ' no-more-details' : '')}>
                         { title ?
                             titleHref ?

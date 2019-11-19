@@ -27,9 +27,11 @@ $navbar-link-hover-bg: #d7d7d7 !default;
 
     i.icon {
         font-size: 1.15rem;
+        transform: translate(0px, -1px);
     }
 
     &.active {
+        // If on page that == this Nav Link or is within its dropdown contents
         color: $navbar-link-active-color; /* Set in _base.scss */
         //text-shadow: 0 0 0px $navbar-link-active-color;
         background-color: $navbar-link-active-bg;
@@ -39,9 +41,9 @@ $navbar-link-hover-bg: #d7d7d7 !default;
         }
     }
 
-    &:focus,
     &:hover,
     &.dropdown-open-for {
+        // If hovering over or dropdown is open for this Nav Link
         color: $navbar-link-hover-color; /* Set in _base.scss */
         text-shadow: 0 0 0px $navbar-link-hover-color;
         background-color: $navbar-link-hover-bg;
@@ -177,7 +179,7 @@ div#top-nav.navbar-fixed-top {
             padding: 0px !important;
             // margin-left: -50px !important;
             color: $navbar-default-brand-color;
-            min-width: 270px;
+            min-width: 225px;
             height: inherit;
             line-height: inherit;
             max-height: $navbar-full-height;
@@ -185,12 +187,8 @@ div#top-nav.navbar-fixed-top {
             text-decoration: none;
             margin-right: 0;
 
-            @include navbar-fixed-position { // = md
-                min-width: 225px;
-            }
-
-            @include media-breakpoint-up(lg) {
-                min-width: 260px;
+            @include media-breakpoint-up(xl) {
+                min-width: 285px; // Attempt to align with FacetList for prettiness on Search and Browse views.
             }
 
             @include navbar-static-position { // Unsure if needed
@@ -304,6 +302,12 @@ div#top-nav.navbar-fixed-top {
                 
                 > a {
                     @include navbar-link-button-item;
+                    // &.id-data-menu-item {
+                    //     &:not(:hover):not(.active){
+                    //         // override defaults to make appear more prominent --
+                    //         color: $gray-600;
+                    //     }
+                    // }
                 }
 
                 @include navbar-fixed-position {
@@ -813,6 +817,18 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
             //height: calc(100vh - #{$navbar-small-height});
         }
 
+        @mixin after-big-link-append {
+            &:after {
+                content: "\f105";
+                font-family: $fa-font-family;
+                font-weight: 900;
+                opacity: 0;
+                margin-left: 5px;
+                position: absolute;
+                right: -15px;
+            }
+        }
+
 		.big-dropdown-menu {
 			z-index: -100;
 			border-top: 2px solid #333;
@@ -830,7 +846,9 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
             overflow-y: auto;
             max-height: calc(100vh - 80px);
 	
-            h1,h2,h3,h4,h5,h6 { color: #eee; }
+            h1, h2, h3, h4, h5, h6 {
+                color: #eee;
+            }
 	
 			> .container {
                 padding-bottom: 25px;
@@ -845,30 +863,85 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                         color: #999;
                     }
                 }
-	
-				.intro-section {
-                    padding-top: 18px;
-					padding-bottom: 18px;
-					border-bottom: 1px solid #5d5d5d;
-					h4 {
-						font-weight: 300;
+
+                .intro-section,
+                .big-link {
+                    display: block;
+                    border-bottom: 1px solid #5d5d5d;
+                    > div.row {
+                        padding-top: 18px;
+                        padding-bottom: 18px;
+                    }
+                    h4 {
+                        font-weight: 300;
 						margin-top: 0px;
                         margin-bottom: 0px;
                         position: relative;
+                    }
+                    .icon-beside-column {
+                        > i.icon {
+                            font-size: 2em;
+                        }
+                    }
+
+                    &.bottom-edge-child {
+                        margin-bottom: -20px; // Negate (most of) container's padding-bottom
+                        border-bottom: none;
+                    }
+                }
+
+                // Same size, similar styling as intro-section
+                a.big-link {
+                    color: inherit;
+                    position: relative;
+                    &:hover {
+                        color: #5d8a8e;
+                        text-shadow: 0 0 0;
+                        text-decoration: none;
+                        &:after {
+                            opacity: 1;
+                        }
+                    }
+                    > div,
+                    > div > div,
+                    > div > div > h3,
+                    > div > div > h5,
+                    > div > div > h4 {
+                        color: inherit;
+                    }
+                    > div > div > h3,
+                    > div > div > h5,
+                    > div > div > h4 {
+                        color: #eee;
+                        display: inline-block;
+                        @include after-big-link-append;
+                    }
+                    &:hover {
+                        > div > div > h3,
+                        > div > div > h5,
+                        > div > div > h4 {
+                            color: inherit; // Highlight color
+                            &:after {
+                                opacity: 1;
+                            }
+                        }
+                    }
+                    &.primary-big-link {
+                        // "Browse All"
+                        h4 {
+                            font-weight: 600;
+                        }
+                    }
+                }
+	
+				.intro-section {
+					h4 {
                         > a,
                         > span {
-							display: inline-block;
+                            display: inline-block;
                             color: #fff;
                             position: relative;
-							&:after {
-								content: "\f105";
-                                font-family: $fa-font-family;
-                                font-weight: 900;
-								opacity: 0;
-                                margin-left: 5px;
-                                position: absolute;
-                                right: -15px;
-							}
+							@include after-big-link-append;
 							&:hover {
 								color: #5d8a8e;
 								text-shadow: 0 0 0;
@@ -878,12 +951,6 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
 								}
 							}
 						}
-                    }
-                    
-                    .icon-beside-column {
-                        > i.icon {
-                            font-size: 2em;
-                        }
                     }
 
                     &.active {
@@ -1050,7 +1117,8 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                 @media screen and (min-width: 1600px) {
                     padding-left: 85px;
                     transition: padding-left $navbar-transition-length $navbar-transition-easing;
-                    .intro-section {
+                    .intro-section,
+                    .big-link {
                         .icon-beside-column {
                             width: 75px;
                             margin-left: -75px;

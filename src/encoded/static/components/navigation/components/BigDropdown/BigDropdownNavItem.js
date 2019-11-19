@@ -52,7 +52,7 @@ export class BigDropdownNavItem extends React.PureComponent {
 
         if (typeof visibleDropdownID !== "undefined" && typeof onCloseDropdown === "function") {
             // Defer to BigDropdownGroupController
-            onCloseDropdown(id);
+            onCloseDropdown();
         }
     }
 
