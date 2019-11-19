@@ -4,11 +4,10 @@ describe('Browse Views - Basic Tests', function () {
 
     context('Navigation and Redirection', function(){
 
-        it('If start from home page, clicking on Browse nav menu item gets us to Browse page.', function(){
-            const dataNavBarItemSelectorStr = '#top-nav div.navbar-collapse .navbar-nav a.id-data-menu-item';
+        it('If start from home page, clicking on Browse All nav menu item gets us to Browse page.', function(){
             cy.visit('/');
-            cy.get(dataNavBarItemSelectorStr).click().wait(500).then(()=>{
-                
+            cy.get('#top-nav div.navbar-collapse .navbar-nav a.id-data-menu-item').click().wait(500).then(()=>{
+
             });
 
             cy.get(navBrowseBtnSelector).click().then(()=>{
@@ -17,14 +16,14 @@ describe('Browse Views - Basic Tests', function () {
 
         });
 
-        it('Only shows award.project=4DN results & "Include External Data" is off', function(){           
+        it('Show external data including all results & "Include External Data" is on', function(){
             cy.location('search').should('include', 'ExperimentSetReplicate');
             cy.get('#stats .browse-base-state-toggle-container input[type="checkbox"]').should('be.checked');
 
         });
 
 
-        it('If point browser to /browse/ page (no URL params), we also get redirected to Include External Data  correctly.', function(){
+        it('If point browser to /browse/ page (no URL params), we also get redirected to Include External Data correctly.', function(){
 
             cy.visit('/');
             cy.visit('/browse/', { "failOnStatusCode" : false });
