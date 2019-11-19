@@ -122,6 +122,13 @@
             "type": "number",
             "lookup": 113,
             "use_for": ["MARGI"]
+        },
+        "rna_strandness":{
+            "title": "RNA strand-specific direction",
+            "description": "The direction of the RNA strand used for library preparation",
+            "type": "string",
+            "enum": ["forward", "reverse", "unstranded"],
+            "lookup": 113
         }
     },
     "columns": {
