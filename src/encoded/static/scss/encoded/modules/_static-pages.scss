@@ -509,8 +509,11 @@
 	  	bottom: -50px !important;
 
 		.paging-item {
-			button > svg.paging-dot {
-				transform: scale(1.5);
+			button {
+				> svg.paging-dot,
+				> span.paging-dot {
+					transform: scale(1.5);
+				}
 			}
 			&.active {
 				button > svg.paging-dot {
@@ -518,6 +521,10 @@
 					> circle {
 						fill: $brand-primary !important;
 					}
+				}
+				button > span.paging-dot {
+					transform: scale(2);
+					background-color: $brand-primary !important;
 				}
 			}
 		}

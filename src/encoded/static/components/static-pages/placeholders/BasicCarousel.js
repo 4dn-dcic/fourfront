@@ -7,11 +7,12 @@ import Carousel from 'nuka-carousel';
 
 /** @see https://www.npmjs.com/package/nuka-carousel for documentation of all props/options allowed */
 const defaultCarouselOptions = {
-    'initialSlideHeight' : 540,
-    'initialSlideWidth' : 720,
+    //'initialSlideHeight' : 540,
+    //'initialSlideWidth' : 720,
     'autoplay': false,
     'autoplayInterval': 5000,
     'cellSpacing': 20,
+    'cellAlign': "center",
     'heightMode' : "max",
     'slidesToShow': 1,
     'slidesToScroll': 1,
@@ -44,9 +45,14 @@ export class BasicCarousel extends React.PureComponent {
     };
 
     static propTypes = {
-        'slides': PropTypes.array.isRequired,
-        'showSlideCount': PropTypes.bool.isRequired,
-        'autoPlay': PropTypes.bool.isRequired,
+        'slides': PropTypes.arrayOf(PropTypes.shape({
+            'img' : PropTypes.string.isRequired,
+            'alt' : PropTypes.string
+        })).isRequired,
+        'showSlideCount': PropTypes.bool,
+        'autoplay': PropTypes.bool,
+        'slideHeight': PropTypes.number,
+        'slideWidth': PropTypes.number,
         /** @see https://www.npmjs.com/package/nuka-carousel for documentation of all props/options allowed */
         'carouselOptions' : PropTypes.shape({
             'autoplay' : PropTypes.bool,
@@ -94,7 +100,15 @@ export class BasicCarousel extends React.PureComponent {
     }
 
     render() {
-        const { slides, showSlideCount, carouselOptions } = this.props;
+        const {
+            slides = [],
+            showSlideCount,
+            carouselOptions,
+            slideHeight = null,
+            slideWidth = null,
+            autoplay = null
+        } = this.props;
+
         const carouselProps = _.extend(
             {
                 renderCenterLeftControls: this.renderCenterLeftControls,
@@ -108,18 +122,38 @@ export class BasicCarousel extends React.PureComponent {
             carouselProps.renderBottomLeftControls = this.renderBottomLeftControls;
         }
 
-        //style
-        //const style = { 'width': slideWidth, 'height': slideHeight };
-        const style = {};
+        let commonImageStyle = null;
+
+        if (typeof autoplay === "boolean") {
+            carouselProps.autoplay = autoplay;
+        }
+
+        if (typeof slideHeight === "number" && typeof slideWidth === "number") {
+            // I forgot if Nuka Carousel can automatically resize itself without presence of slideHeight/slideWidth, but think so.
+            // If we set the below values, then will see multiple slides at once (e.g. current one, + slices of previous/next)
+            // SEE: https://gyazo.com/35f4efc58d428bc18a335bbe3f1228e7
+            // carouselProps.slideHeight = slideHeight + "px"; // Nuka Carousel requires "px" appended and treats floats as percentages, unlike React elements.
+            // carouselProps.slideWidth = slideWidth + "px";
+
+            // Instead we set initialSlideWidth and initialSlideHeight which keeps the 1 current slide visible and others hidden.
+            // Nuka Carousel I believe might then resize slides if needed (?) idk. Or atleast stretch slide containers to be
+            // 100% width of parent container or something.
+            carouselProps.initialSlideHeight = 720;
+            carouselProps.initialSlideWidth = 540;
+            commonImageStyle = { // This maybe isn't needed (?)
+                height: slideHeight,
+                width: slideWidth
+            };
+        }
 
         return (
             <div className="basic-carousel-wrapper" ref={BasicCarousel.refFunc} style={{ opacity: '0' }}>
                 <Carousel {...carouselProps}>
                     {
-                        _.map(slides, function (slide, index) {
+                        slides.map(function({ img: src, alt }, index) {
                             return (
-                                <div className="text-center" key={'slide-' + index}>
-                                    <img {...{ src: slide.img, style, alt: slide.alt }} />
+                                <div className="text-center" key={index}>
+                                    <img {...{ src, alt }} style={commonImageStyle} />
                                 </div>
                             );
                         })
