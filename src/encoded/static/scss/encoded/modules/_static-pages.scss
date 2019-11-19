@@ -484,6 +484,50 @@
 
 
 /**********************************************************
+		Static Page Carousel
+***********************************************************/
+
+.basic-carousel-wrapper {
+	margin-bottom: 50px;
+  
+	.slider-control-centerleft,
+	.slider-control-centerright {
+		cursor: pointer;
+		opacity: 0.7;
+  
+		&:hover{
+			opacity: 1;
+		}
+	}
+  
+	.slider-control-bottomleft {
+		left: 10px !important;
+		bottom: -40px !important;
+	}
+	
+	.slider-control-bottomcenter {
+	  	bottom: -50px !important;
+
+		.paging-item {
+			button > svg.paging-dot {
+				transform: scale(1.5);
+			}
+			&.active {
+				button > svg.paging-dot {
+					transform: scale(2);
+					> circle {
+						fill: $brand-primary !important;
+					}
+				}
+			}
+		}
+
+	}
+}
+
+
+
+/**********************************************************
 		Misc Static Pages
 ***********************************************************/
 
@@ -494,7 +538,9 @@
 	margin-top: 30px;
 }
 
-/*** Carousel ***/
+/**********************************************************
+		HomePage Carousel
+***********************************************************/
 
 $carousel-height : 240px;
 

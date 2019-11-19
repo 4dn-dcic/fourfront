@@ -195,34 +195,3 @@
   color: $carousel-caption-color;
   text-align: center;
 }
-
-.basic-carousel-wrapper {
-  margin-bottom: 50px;
-
-  .slider-control-centerleft,
-	.slider-control-centerright {
-    cursor: pointer;
-    opacity: 0.7;
-
-    &:hover{
-      opacity: 1;
-    }
-  }
-
-  .slider-control-bottomleft {
-    left: 10px !important;
-    bottom: -40px !important;
-  }
-  
-  .slider-control-bottomcenter {
-    bottom: -50px !important;
-    .paging-dot {
-      width: 12px !important;
-      height: 12px !important;
-      background-color: $primary-dark !important;
-    }
-    .paging-item.active .paging-dot{
-      transform: scale(1.2);
-    }
-  }
-}
