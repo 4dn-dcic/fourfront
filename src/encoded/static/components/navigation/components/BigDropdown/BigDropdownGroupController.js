@@ -5,10 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Nav } from 'react-bootstrap';
 import { console, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
-import { BigDropdownContainer } from './BigDropdownContainer';
 
 
 export class BigDropdownGroupController extends React.PureComponent {
@@ -17,6 +14,7 @@ export class BigDropdownGroupController extends React.PureComponent {
         super(props);
         this.handleToggle = _.throttle(this.handleToggle.bind(this), 500);
         this.onCloseDropdown = this.onCloseDropdown.bind(this);
+        this.onWindowClick = this.onWindowClick.bind(this);
 
         this.state = {
             visibleDropdownID: null,
@@ -24,6 +22,18 @@ export class BigDropdownGroupController extends React.PureComponent {
         };
 
         this.timeout = null;
+    }
+
+    componentDidMount(){
+        // React catches DOM events using 1 own native event handler and then passes down
+        // SyntheticEvents to event handlers bound directly to JSX elements via props.
+        // This occurs at the `document.body` level (?) so clicks that are intercepted
+        // via SyntheticEvent handlers (stopPropagation) do not bubble up to window seemingly.
+        window.addEventListener("click", this.onWindowClick);
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener("click", this.onWindowClick);
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -36,18 +46,38 @@ export class BigDropdownGroupController extends React.PureComponent {
 
         // Primarily for mobile use cases when menu might be longer than window
         if (pastVisible !== null && currVisible === null) {
-            removeFromBodyClassList("overflow-sm-hidden", "overflow-md-hidden", "overflow-xs-hidden");
+            removeFromBodyClassList("overflow-sm-hidden", "overflow-xs-hidden");
         } else if (currVisible !== null && pastVisible === null){
-            addToBodyClassList("overflow-sm-hidden", "overflow-md-hidden", "overflow-xs-hidden");
+            addToBodyClassList("overflow-sm-hidden", "overflow-xs-hidden");
         }
     }
 
-    onCloseDropdown(closeID = null, cb){
+    /**
+     * To avoid placing this BigDropdownGroupController as wrapper of NavigationBar,
+     * will attempt to listen to clicks to NavigationBar here instead.
+     * If click on a non-nav item, we should close.
+     *
+     * Clicks within menu itself (as well as Nav Items) should not bubble up to here due to `event.stopPropagation` calls
+     * in e.g. `this.onBackgroundClick` in BigDropdownContainer. In effect, when visibleDropdownID is not null, we'll only
+     * get click events from NavBar and maybe TestWarning.
+     *
+     * @param {MouseEvent} mouseEvt - Click event.
+     */
+    onWindowClick(mouseEvt){
+        if (this.state.visibleDropdownID === null){
+            return false;
+        }
+        this.onCloseDropdown(mouseEvt);
+        return false;
+    }
+
+    onCloseDropdown(mouseEvt = null, cb){
+        if (mouseEvt){
+            mouseEvt.stopPropagation && mouseEvt.stopPropagation();
+            mouseEvt.preventDefault && mouseEvt.preventDefault();
+        }
         this.setState(function({ visibleDropdownID, closingDropdown }){
             if (visibleDropdownID === null && !closingDropdown) return null;
-            //if (visibleDropdownID !== null && closeID !== null && visibleDropdownID !== closeID) {
-            //    return { 'closingDropdownID' : null };
-            //}
             return { 'visibleDropdownID' : null, 'closingDropdownID' : null };
         }, cb);
     }

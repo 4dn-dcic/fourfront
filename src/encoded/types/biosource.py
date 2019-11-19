@@ -200,9 +200,9 @@ class Biosource(Item):
         "type": "string"
     })
     def display_title(self, request, biosource_type, individual=None,
-                      cell_line=None, cell_line_tier=None, tissue=None, modifications=None):
+                      cell_line=None, cell_line_tier=None, tissue=None, modifications=None, override_biosource_name=None):
         return self.add_accession_to_title(self.biosource_name(request, biosource_type, individual, cell_line,
-                                                               cell_line_tier, tissue, modifications))
+                                                               cell_line_tier, tissue, modifications, override_biosource_name))
 
     class Collection(Item.Collection):
         pass
