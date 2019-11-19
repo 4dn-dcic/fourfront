@@ -123,8 +123,7 @@ const DataNavItemBody = React.memo(function DataNavItemBody(props) {
                 </div>
             </BigDropdownBigLink>
 
-            <BigDropdownBigLink href={microscopyDataHref} isActive={isMicroscopyActive} titleIcon="microscope fas"
-                className="pb-0 border-0">
+            <BigDropdownBigLink href={microscopyDataHref} isActive={isMicroscopyActive} titleIcon="microscope fas" className="bottom-edge-child">
                 <h4>View Microscopy Data</h4>
                 <div className="description">
                     View Microscopy Datasets in the 4D Nucleome Database

@@ -31,6 +31,7 @@ $navbar-link-hover-bg: #d7d7d7 !default;
     }
 
     &.active {
+        // If on page that == this Nav Link or is within its dropdown contents
         color: $navbar-link-active-color; /* Set in _base.scss */
         //text-shadow: 0 0 0px $navbar-link-active-color;
         background-color: $navbar-link-active-bg;
@@ -40,9 +41,9 @@ $navbar-link-hover-bg: #d7d7d7 !default;
         }
     }
 
-    &:focus,
     &:hover,
     &.dropdown-open-for {
+        // If hovering over or dropdown is open for this Nav Link
         color: $navbar-link-hover-color; /* Set in _base.scss */
         text-shadow: 0 0 0px $navbar-link-hover-color;
         background-color: $navbar-link-hover-bg;
@@ -867,8 +868,10 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                 .big-link {
                     display: block;
                     border-bottom: 1px solid #5d5d5d;
-                    padding-top: 18px;
-                    padding-bottom: 18px;
+                    > div.row {
+                        padding-top: 18px;
+                        padding-bottom: 18px;
+                    }
                     h4 {
                         font-weight: 300;
 						margin-top: 0px;
@@ -879,6 +882,11 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                         > i.icon {
                             font-size: 2em;
                         }
+                    }
+
+                    &.bottom-edge-child {
+                        margin-bottom: -20px; // Negate (most of) container's padding-bottom
+                        border-bottom: none;
                     }
                 }
 

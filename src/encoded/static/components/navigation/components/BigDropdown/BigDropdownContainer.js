@@ -3,8 +3,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import url from 'url';
-import _ from 'underscore';
 import { CSSTransition } from 'react-transition-group';
 import ReactTooltip from 'react-tooltip';
 import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -12,8 +10,6 @@ import { elementIsChildOfLink } from './../../../globals';
 
 
 export class BigDropdownContainer extends React.PureComponent {
-
-    // TODO: Check openDropdownID vs ___MenuTree presence.
 
     static defaultProps = {
         'windowHeight' : 500,
@@ -27,20 +23,32 @@ export class BigDropdownContainer extends React.PureComponent {
     }
 
     componentDidUpdate(pastProps){
-        const { href, windowWidth, open, onClose } = this.props;
-        const { open: pastOpen, href: pastHref, windowWidth: pastWindowWidth } = pastProps;
-        if (href !== pastHref){
-            onClose();
-            return;
-        }
+        const { id, open } = this.props;
+        const { open: pastOpen } = pastProps;
+
+        // if (href !== pastHref){
+        //     // Navigated away. Should already be closed via BigDropdownGroupController onWindowClick.
+        //     // onClose();
+        //     return;
+        // }
 
         if (open && !pastOpen) {
+            // Need to regenerate tooltips as current dropdown elem w. `data-tooltip` wasn't present on init build.
             ReactTooltip.rebuild();
+
+            // Set focus to first focusable elem for accessibility.
+            setTimeout(()=>{
+                const containerSelectorStr = `.big-dropdown-menu[data-open-id=${id}]`;
+                const firstFocusableElem = document.querySelector(containerSelectorStr + " a, " + containerSelectorStr + " input");
+                if (firstFocusableElem) {
+                    firstFocusableElem.focus();
+                }
+            }, 250);
         }
     }
 
     /**
-     * Close dropdown on clock on semi-opaque background only (not menu items, etc.)
+     * Close dropdown on click on semi-opaque background only (not menu items, etc.)
      *
      * Conditionally prevent click event from bubbling up past this background.
      * Makes it easier in BigDropdownGroupController to close dropdown on any click in window (outside of menu).
