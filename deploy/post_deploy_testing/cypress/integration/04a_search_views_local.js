@@ -60,7 +60,7 @@ describe('Deployment/CI Search View Tests', function () {
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container span.title').should('have.text', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
                 .location('search')
-                .should('include', 'award.project=4DN')
+                .should('include', 'ExperimentSetReplicate')
                 .should('include', 'q=mouse');
         });
 

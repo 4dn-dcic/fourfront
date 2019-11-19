@@ -27,11 +27,11 @@ function labDisplayTitleRenderFxn(result, columnDefinition, props, width, popLin
     if (!result.submitted_by || !result.submitted_by.display_title){
         return labLink;
     }
-    return (
-        <span>
+    return ( // Is wrapped by div.inner which is flexbox
+        <React.Fragment>
             <i className="icon icon-fw icon-user user-icon fas" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
             { labLink }
-        </span>
+        </React.Fragment>
     );
 }
 
@@ -128,7 +128,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             if (!number_of_experiments){
                 number_of_experiments = 0;
             }
-            return <span key="val">{ number_of_experiments }</span>;
+            return <span className="value">{ number_of_experiments }</span>;
         }
     },
     'number_of_files' : {
@@ -143,7 +143,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             if (!number_of_files){
                 number_of_files = 0;
             }
-            return <span key="val">{ number_of_files }</span>;
+            return <span className="value">{ number_of_files }</span>;
         }
 
     },
