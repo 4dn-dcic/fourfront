@@ -25,7 +25,6 @@ export default class PublicationView extends DefaultItemView {
             const expSetTableProps = _.extend({}, this.props, {
                 'requestHref' : (
                     "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
-                    //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                     "publications_of_set.display_title=" + encodeURIComponent(context.display_title)
                 )
             });

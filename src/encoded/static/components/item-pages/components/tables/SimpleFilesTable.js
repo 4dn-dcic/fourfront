@@ -4,19 +4,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemPageTable, ItemPageTableIndividualUrlLoader } from './ItemPageTable';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, ViewMoreResultsBtn } from './ItemPageTable';
 import { expFxn } from './../../../util';
 
-
+/**
+ * @todo
+ *   - Maybe make custom detail pane for type=File
+ *   - Maybe wrap in container element to match ExperimentSetTables counterpart, idk.
+ */
 export const SimpleFilesTable = React.memo(function SimpleFilesTable(props){
-    const { results, loading } = props;
+    const { results, loading, countTotalResults, hrefWithoutLimit } = props;
     const reducedFiles = expFxn.reduceProcessedFilesWithExperimentsAndSets(results);
     return (
-        <ItemPageTable {...props} results={reducedFiles} loading={loading && (!reducedFiles || !reducedFiles.length)}
-            //renderDetailPane={(es, rowNum, width)=> <ExperimentSetDetailPane result={es} containerWidth={width || null} paddingWidthMap={{
-            //    'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
-            //}} />}
-        />
+        <React.Fragment>
+            <ItemPageTable {...props} results={reducedFiles} loading={loading && (!reducedFiles || !reducedFiles.length)} />
+            <ViewMoreResultsBtn {...{ results, countTotalResults, hrefWithoutLimit }} itemTypeTitle="File" />
+        </React.Fragment>
     );
 });
 SimpleFilesTable.propTypes = {
@@ -48,6 +51,17 @@ SimpleFilesTable.defaultProps = {
         "file_type"         : { "title" : "File Type" },
     }
 };
+
+
+export const FilesTableLoadedFromSearch = React.memo(function FilesTableLoadedFromSearch(props){
+    return (
+        <ItemPageTableSearchLoader {..._.pick(props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
+            <SimpleFilesTable {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
+        </ItemPageTableSearchLoader>
+    );
+});
+
+
 
 export const SimpleFilesTableLoaded = React.memo(function SimpleFilesTableLoaded(props){
     const { fileUrls, id } = props;
