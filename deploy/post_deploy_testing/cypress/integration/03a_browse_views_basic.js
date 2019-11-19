@@ -7,10 +7,7 @@ describe('Browse Views - Basic Tests', function () {
         it('If start from home page, clicking on Browse All nav menu item gets us to Browse page.', function(){
             cy.visit('/');
             cy.get('#top-nav div.navbar-collapse .navbar-nav a.id-data-menu-item').click().wait(500).then(()=>{
-
-            });
-
-            cy.get(navBrowseBtnSelector).click().then(()=>{
+            }).get(navBrowseBtnSelector).click().then(()=>{
                 cy.get('#page-title-container .page-title span.title').should('have.text', 'Data Browser');
             });
 
@@ -34,14 +31,14 @@ describe('Browse Views - Basic Tests', function () {
         });
 
         it('There is at least 100 ExpSets in default browse view.', function(){
-            cy.getQuickInfoBarCounts().its('experiment_sets').should('be.lessThan', 99);
+            cy.getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 99);
         });
 
-        it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 35 < x < 50 results.', function(){
+        it('"/browse/?public_release.to=2017-10-31" redirects to correct URL, includes 100 < x < 150 results.', function(){
             cy.visit('/browse/?public_release.to=2017-10-31').end()
                 .location('search').should('include','ExperimentSetReplicate' ).should('include', 'public_release.to=2017-10-31').end()
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0).end()
-                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 35).should('be.lessThan', 50);
+                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 100).should('be.lessThan', 150);
         });
 
         it('There is at least one Replaced item under the Status facet', function(){
