@@ -4,7 +4,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ButtonToolbar } from 'react-bootstrap';
+import ButtonToolbar from 'react-bootstrap/es/ButtonToolbar';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 

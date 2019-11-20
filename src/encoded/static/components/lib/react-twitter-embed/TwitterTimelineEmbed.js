@@ -82,42 +82,46 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
     }
     
     renderWidget(options) {
-        const { onLoad, sourceType, screenName, userId, ownerScreenName, slug, id, widgetId, url } = this.props
-        if (!this.isMountCanceled) {
-            window.twttr.widgets.createTimeline(
-                {
-                    sourceType,
-                    screenName,
-                    userId,
-                    ownerScreenName,
-                    slug,
-                    id: id || widgetId,
-                    url
-                },
-                this.embedContainerRef.current,
-                options
-                ).then((element) => {
-                    // `element` here is the iframe that TwitterJS created.
-                    this.setState({
-                        isLoading: false
-                    }, () => {
-                        this.embedContainerRef.current.style.opacity = 1;
-                        // Cleanup analytics iframes from Twitter
-                        //this.cleanupTwitterScripts();
-                    });
-                    if (onLoad) {
-                        onLoad(element)
-                    }
-                    // Prevent contents of iframe from being navigateble-to via [shift + ] tab key.
-                    element.setAttribute("tabindex", -1);
-                })
-        }
+        const { onLoad, sourceType, screenName, userId, ownerScreenName, slug, id, widgetId, url } = this.props;
+
+        if (this.isMountCanceled) return;
+
+        window.twttr.widgets.createTimeline(
+            {
+                sourceType,
+                screenName,
+                userId,
+                ownerScreenName,
+                slug,
+                id: id || widgetId,
+                url
+            },
+            this.embedContainerRef.current,
+            options
+            ).then((element) => {
+                // `element` here is the iframe that TwitterJS created.
+                this.setState({
+                    isLoading: false
+                }, () => {
+                    this.embedContainerRef.current.style.opacity = 1;
+                    // Cleanup analytics iframes from Twitter
+                    //this.cleanupTwitterScripts();
+                });
+                if (onLoad) {
+                    onLoad(element)
+                }
+                // Prevent contents of iframe from being navigateble-to via [shift + ] tab key.
+                element.setAttribute("tabindex", -1);
+            })
     }
         
     componentDidMount() {
         const { twitterJSURL } = this.props;
 
         const initWidget = () => {
+            if (this.isMountCanceled) {
+                return;
+            }
             if (!window.twttr) {
                 console.error('Failure to load window.twttr in TwitterTimelineEmbed, aborting load.')
                 return;

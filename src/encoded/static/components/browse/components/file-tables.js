@@ -7,7 +7,9 @@ import memoize from 'memoize-one';
 import url from 'url';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import DropdownButton from 'react-bootstrap/es/DropdownButton';
+import DropdownItem from 'react-bootstrap/es/DropdownItem';
+
 import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';

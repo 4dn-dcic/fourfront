@@ -7,9 +7,10 @@ import { stringify } from 'query-string';
 import url from 'url';
 import * as d3 from 'd3';
 import moment from 'moment';
+import DropdownButton from 'react-bootstrap/es/DropdownButton';
+import DropdownItem from 'react-bootstrap/es/DropdownItem';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 import { console, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../util';
 import { memoizedUrlParse } from './../globals';

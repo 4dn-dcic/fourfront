@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import { Nav } from 'react-bootstrap';
+import Nav from 'react-bootstrap/es/Nav';
 import url from 'url';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util'; // Extended w. browseBaseHref & related fxns.

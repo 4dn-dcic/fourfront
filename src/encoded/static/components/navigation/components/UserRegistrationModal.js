@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal } from 'react-bootstrap';
+import Modal from 'react-bootstrap/es/Modal';
 
 import { JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import UserRegistrationForm from './../../forms/UserRegistrationForm';

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { Navbar } from 'react-bootstrap';
+import Navbar from 'react-bootstrap/es/Navbar';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { portalConfig } from './../globals';

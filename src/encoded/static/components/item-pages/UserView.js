@@ -6,7 +6,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, FormControl } from 'react-bootstrap';
+import Modal from 'react-bootstrap/es/Modal';
+import FormControl from 'react-bootstrap/es/FormControl';
 
 import { console, object, JWT, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';

@@ -4,11 +4,15 @@ import React from 'react';
 import _ from 'underscore';
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
 
+import DropdownButton from 'react-bootstrap/es/DropdownButton';
+import DropdownItem from 'react-bootstrap/es/DropdownItem';
 /** @deprecated - DropDownButton, Button */
 /** @todo use HTML elem(s) */
-import { ButtonToolbar, ButtonGroup } from 'react-bootstrap';
+import ButtonToolbar from 'react-bootstrap/es/ButtonToolbar';
+import ButtonGroup from 'react-bootstrap/es/ButtonGroup';
+
+
 
 /**
  * @typedef {Object} Subscription

@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { NavItem, DropdownItem, Nav } from 'react-bootstrap';
+import DropdownItem from 'react-bootstrap/es/DropdownItem';
+import Nav from 'react-bootstrap/es/Nav';
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserRegistrationModal } from './UserRegistrationModal';
 

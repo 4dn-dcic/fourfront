@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { Nav } from 'react-bootstrap';
+import Nav from 'react-bootstrap/es/Nav';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { memoizedUrlParse } from './../../../globals';
 import { BigDropdownContainer } from './BigDropdownContainer';

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { OverlayTrigger } from 'react-bootstrap';
+import OverlayTrigger from 'react-bootstrap/es/OverlayTrigger';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 

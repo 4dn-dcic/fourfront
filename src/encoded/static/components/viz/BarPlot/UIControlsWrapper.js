@@ -7,7 +7,8 @@ import memoize from 'memoize-one';
 
 import { console, layout, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas } from './../../util';
-import { DropdownButton, DropdownItem } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/DropdownButton';
+import DropdownButton from 'react-bootstrap/es/DropdownButton';
+import DropdownItem from 'react-bootstrap/es/DropdownItem';
 import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { Legend } from './../components';
 import { memoizedUrlParse } from './../../globals';
