@@ -4,7 +4,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
     context('Filtering using visualization elements', function(){
 
         before(()=>{
-            cy.visit('/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate')
+            cy.visit('/browse/?experimentset_type=replicate&type=ExperimentSetReplicate')
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
         });
 
@@ -57,7 +57,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                                 .get('#stats .bottom-side .field-group .chart-crumb[data-term="2-stage Repli-seq"] i.icon-times').should('have.length', 0).end()
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
                                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
-                                .location('search').should('include', 'award.project=4DN')
+                                .location('search').should('include', 'experimentset_type=replicate')
                                 .should('not.include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=human');
                         });
                     });

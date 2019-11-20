@@ -84,6 +84,12 @@
 $search-results-above-results-row-height: 40px;
 @import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/search-view-table";
 
+.item-page-table-container {
+	// So screen doesn't jump a lot when switching between tabs where
+	// results likely not yet loaded.
+	min-height: 360px;
+}
+
 // Extensions to shared-portal-components searchview table(s):
 .search-result-row .result-table-row .search-result-column-block,
 .item-page-table-container .item-page-table-row-container .table-row > .column {
