@@ -4,8 +4,15 @@ import React from 'react';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
-export function BigDropdownIntroductionWrapper(props){
-    const { children, titleIcon = null, className, isActive = false } = props;
+export function BigDropdownBigLink(props){
+    const {
+        children,
+        titleIcon = null,
+        className = null,
+        isActive = false,
+        ...passProps // Contains: `href`, `rel`, `onClick`, etc.
+    } = props;
+
     if (!children) return null;
 
     const textCol = (
@@ -31,11 +38,11 @@ export function BigDropdownIntroductionWrapper(props){
     }
 
     return (
-        <div className={"intro-section" + (className? " " + className : "") + (isActive? " active" : "")}>
+        <a {...passProps} className={"big-link" + (className? " " + className : "") + (isActive? " active" : "")}>
             <div className="row align-items-center">
                 { iconCol }
                 { textCol }
             </div>
-        </div>
+        </a>
     );
 }

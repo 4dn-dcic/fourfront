@@ -10,7 +10,7 @@ import {
     BigDropdownPageLoader,
     BigDropdownPageTreeMenu,
     BigDropdownPageTreeMenuIntroduction,
-    BigDropdownIntroductionWrapper
+    BigDropdownBigLink
 } from './BigDropdown';
 import { memoizedUrlParse } from '../../globals';
 
@@ -83,8 +83,16 @@ export const DataNavItem = React.memo(function DataNavItem(props){
     }
     const isAnyActive = isBrowseActive || isMicroscopyActive || isSequencingActive;
     // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
+
+    const navLink = (
+        <React.Fragment>
+            <i className="icon icon-fw icon-database fas mr-05 align-middle" />
+            <span className="text-black">Data</span>
+        </React.Fragment>
+    );
+
     return (
-        <BigDropdownNavItem {...navItemProps} id="data-menu-item" navItemHref={browseHref} navItemContent="Data" active={isAnyActive}>
+        <BigDropdownNavItem {...navItemProps} id="data-menu-item" navItemHref={browseHref} navItemContent={navLink} active={isAnyActive}>
             <DataNavItemBody {...{ browseHref, seqencingDataHref, microscopyDataHref, isBrowseActive, isSequencingActive, isMicroscopyActive }} />
         </BigDropdownNavItem>
     );
@@ -96,40 +104,32 @@ const DataNavItemBody = React.memo(function DataNavItemBody(props) {
         isBrowseActive = false,
         isSequencingActive = false,
         isMicroscopyActive = false,
-        onMenuItemClick, windowWidth, windowHeight, ...passProps
+        ...passProps
     } = props;
     return (
         <React.Fragment>
-            <BigDropdownIntroductionWrapper titleIcon="th fas" {...{ windowWidth, windowHeight }} isActive={isBrowseActive}>
-                <h4>
-                    <a href={browseHref} onClick={onMenuItemClick}>
-                        Browse All
-                    </a>
-                </h4>
+
+            <BigDropdownBigLink href={browseHref} isActive={isBrowseActive} titleIcon="th fas" className="primary-big-link">
+                <h4>Browse All</h4>
                 <div className="description">
                     Search All Experiment Sets in the 4D Nucleome Database
                 </div>
-            </BigDropdownIntroductionWrapper>
-            <BigDropdownIntroductionWrapper titleIcon="dna fas" {...{ windowWidth, windowHeight }} isActive={isSequencingActive}>
-                <h4>
-                    <a href={seqencingDataHref} onClick={onMenuItemClick}>
-                        Browse Sequencing Data
-                    </a>
-                </h4>
+            </BigDropdownBigLink>
+
+            <BigDropdownBigLink href={seqencingDataHref} isActive={isSequencingActive} titleIcon="dna fas">
+                <h4>Browse Sequencing Data</h4>
                 <div className="description">
                     Search Sequencing Experiment Sets in the 4D Nucleome Database
                 </div>
-            </BigDropdownIntroductionWrapper>
-            <BigDropdownIntroductionWrapper titleIcon="microscope fas" {...{ windowWidth, windowHeight }} isActive={isMicroscopyActive} className="pb-0 border-0">
-                <h4>
-                    <a href={microscopyDataHref} onClick={onMenuItemClick}>
-                        View Microscopy Data
-                    </a>
-                </h4>
+            </BigDropdownBigLink>
+
+            <BigDropdownBigLink href={microscopyDataHref} isActive={isMicroscopyActive} titleIcon="microscope fas" className="bottom-edge-child">
+                <h4>View Microscopy Data</h4>
                 <div className="description">
                     View Microscopy Datasets in the 4D Nucleome Database
                 </div>
-            </BigDropdownIntroductionWrapper>
+            </BigDropdownBigLink>
+
         </React.Fragment>
     );
 });

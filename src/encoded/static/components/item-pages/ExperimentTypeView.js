@@ -22,7 +22,6 @@ export default class ExperimentTypeView extends DefaultItemView {
         const expSetTableProps = _.extend({}, this.props, {
             'requestHref' : (
                 "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
-                //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                 "experiments_in_set.experiment_type.display_title=" + encodeURIComponent(context.display_title)
             ),
             'title' : function(props, { totalCount }){

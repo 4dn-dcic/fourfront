@@ -24,7 +24,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                     expect(accountListItem.text()).to.contain('Frontend');
                 }).end()
                 .get(navUserAcctDropdownBtnSelector).click().end()
-                .get(navUserAcctDropdownBtnSelector + " + .dropdown-menu.show").contains('Profile').click().end()
+                .get('#overlays-container .big-dropdown-menu .help-menu-tree .level-1-title-container').contains('a', 'Profile').click().end()
                 .get('.page-container .user-title-row-container h1.user-title').should('contain', "Frontend").end() // Test only for first name as we're editing last name & it may change re: delayed indexing, etc.
                 .get('.page-container .access-keys-container h3').should('contain', "Access Keys").end()
                 .get('.page-container .access-keys-container #add-access-key').scrollToCenterElement().click({ force : true }).wait(100).end()
@@ -48,7 +48,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                     expect(accountListItem.text()).to.contain('Frontend');
                 }).end()
                 .get(navUserAcctDropdownBtnSelector).click().end()
-                .get(navUserAcctDropdownBtnSelector + " + .dropdown-menu.show").contains('Profile').click().end()
+                .get('#overlays-container .big-dropdown-menu .help-menu-tree .level-1-title-container').contains('a', 'Profile').click().end()
                 .get('.page-container .user-title-row-container h1.user-title').invoke('text').should('include', "Frontend").end() // Test only for first name as we're editing last name & it may change re: delayed indexing, etc.
                 .url().then(function(currUrl){
                     return cy.visit(currUrl + '?datastore=database').end() // Edit last name ON DATASTORE=DATABASE TO PREVENT ERRORS DUE TO INDEXING NOT BEING CAUGHT UP FROM PRIOR TEST

@@ -10,14 +10,20 @@ import { BigDropdownIntroductionWrapper } from './BigDropdownIntroductionWrapper
 import { memoizedUrlParse } from './../../../globals';
 
 export function BigDropdownPageTreeMenuIntroduction(props) {
-    const { menuTree, windowHeight, windowWidth, onMenuItemClick, titleIcon = null, isActive = false } = props;
+    const { menuTree, windowHeight, windowWidth, titleIcon = null, isActive = false } = props;
     const { display_title, name: pathName, description } = menuTree || {};
-    if (!menuTree || !menuTree.display_title || windowHeight < 800) return null;
+
+    if (!menuTree || !menuTree.display_title || windowHeight < 600) {
+        // Hide this link to top-level page on smaller heights.
+        // TODO: Reconsider and maybe remove this; works currently for /help and /resources since they serve
+        // as "directory" pages without much useful content themselves.
+        return null;
+    }
 
     return (
         <BigDropdownIntroductionWrapper {...{ windowHeight, windowWidth, titleIcon, isActive }}>
             <h4 className="mt-0 mb-0">
-                <a href={'/' + pathName} onClick={onMenuItemClick}>{ display_title }</a>
+                <a href={'/' + pathName}>{ display_title }</a>
             </h4>
             { description ? <div className="description">{ description }</div> : null }
         </BigDropdownIntroductionWrapper>
@@ -26,7 +32,7 @@ export function BigDropdownPageTreeMenuIntroduction(props) {
 
 
 export function BigDropdownPageTreeMenu(props) {
-    const { menuTree, windowWidth, href, onMenuItemClick } = props;
+    const { menuTree, href } = props;
     const { display_title, name: pathName, children = [] } = menuTree || {};
 
     if (!pathName || !display_title) return null;
@@ -70,7 +76,7 @@ export function BigDropdownPageTreeMenu(props) {
                     return (
                         <div className={"level-1-title-container" + (active? " active" : "")} key={child.name}>
                             <a className="level-1-title text-medium" href={'/' + child.name} data-tip={child.description}
-                                data-delay-show={500} onClick={onMenuItemClick} id={"menutree-linkto-" + child.name.replace(/\//g, '_')} >
+                                data-delay-show={500} id={"menutree-linkto-" + child.name.replace(/\//g, '_')} >
                                 <span>{ child.display_title }</span>
                             </a>
                         </div>
@@ -92,7 +98,7 @@ export function BigDropdownPageTreeMenu(props) {
             <div className={outerCls} key={childLevel1.name}>
                 <div className={"level-1-title-container" + (active ? " active" : "")}>
                     <a className="level-1-title text-medium" href={'/' + childLevel1.name} data-tip={childLevel1.description}
-                        data-delay-show={500} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
+                        data-delay-show={500} id={"menutree-linkto-" + childLevel1.name.replace(/\//g, '_')} >
                         <span>{ childLevel1.display_title }</span>
                     </a>
                 </div>
@@ -101,7 +107,7 @@ export function BigDropdownPageTreeMenu(props) {
                         return (
                             <a className={"level-2-title text-small" + (urlParts.pathname.indexOf(childLevel2.name) > -1 ? ' active' : '')}
                                 href={'/' + childLevel2.name} data-tip={childLevel2.description} data-delay-show={500}
-                                key={childLevel2.name} onClick={onMenuItemClick} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
+                                key={childLevel2.name} id={"menutree-linkto-" + childLevel2.name.replace(/\//g, '_')}>
                                 { childLevel2.display_title }
                             </a>
                         );
