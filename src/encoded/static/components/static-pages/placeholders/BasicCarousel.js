@@ -14,9 +14,9 @@ const defaultCarouselOptions = {
     'autoplay': false,
     'autoplayInterval': 5000,
     'cellSpacing': 20,
-    'cellAlign': "center",
+    'cellAlign': 'center',
     // Set if no image slide dimensions are supplied.
-    //'heightMode' : "max",
+    //'heightMode' : 'max',
     'slidesToShow': 1,
     'slidesToScroll': 1,
     'slideIndex': 0,
@@ -32,15 +32,21 @@ export class BasicCarousel extends React.PureComponent {
         'slides': [
             {
                 'img': '/static/img/Metadata_structure_slides/Slide01.png',
-                'alt': 'Slide 1 alt text'
+                'alt': 'Slide 1 alt text',
+                'width': 720,
+                'height': 540
             },
             {
                 'img': '/static/img/Metadata_structure_slides/Slide02.png',
-                'alt': 'Slide 2 alt text'
+                'alt': 'Slide 2 alt text',
+                'width': 720,
+                'height': 540
             },
             {
                 'img': '/static/img/Metadata_structure_slides/Slide03.png',
-                'alt': 'Slide 3 alt text'
+                'alt': 'Slide 3 alt text',
+                'width': 720,
+                'height': 540
             }
         ],
         'showSlideCount': true,
