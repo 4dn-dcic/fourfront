@@ -464,6 +464,15 @@
         "schema_version": "3"
     },
     {
+        "name": "basic-carousel-slide",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4137d90560b3",
+        "title": "Basic Carousel Slide",
+        "content": [
+            "basic-carousel.slide"
+        ],
+        "schema_version": "3"
+    },
+    {
         "name": "privacy-policy",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-9991d90560b0",
         "title": "Privacy Policy",

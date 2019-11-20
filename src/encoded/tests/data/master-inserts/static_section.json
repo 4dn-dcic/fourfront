@@ -958,7 +958,16 @@
     },
 
 
-
+    {
+        "name" : "basic-carousel.slide",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af4600028",
+        "body" : "<BasicCarousel\n    slides={[\n\t\t\t{\n                'img': '/static/img/Metadata_structure_slides/Slide01.png',\n                'alt': 'Slide 1 alt text',\n                'width': 720,\n                'height': 540\n            },\n            {\n                'img': '/static/img/Metadata_structure_slides/Slide02.png',\n                'alt': 'Slide 2 alt text',\n                'width': 720,\n                'height': 540\n            },\n            {\n                'img': '/static/img/Metadata_structure_slides/Slide03.png',\n                'alt': 'Slide 3 alt text',\n                'width': 720,\n                'height': 540\n            }\n\t]}\n    slideWidth={720}\n    slideHeight={540}\n    showSlideCount={true}\n    autoPlay={true}\n    carouselOptions={{\n  \t\t'autoplay': false,\n    \t'autoplayInterval': 5000,\n    \t'cellSpacing': 20,\n    \t'cellAlign': 'center',\n    \t'slidesToShow': 1,\n    \t'slidesToScroll': 1,\n    \t'slideIndex': 0,\n    \t'speed': 700,\n    \t'dragging': true,\n    \t'easing': 'easeLinear',\n    \t'transitionMode': 'scroll'\n    }}\n    key='random-basic-carousel-key'\n/>",
+        "status" : "released",
+        "title" : "Basic Carousel Test",
+        "options": {
+            "filetype" : "jsx"
+        }
+    },
 
 
     {
