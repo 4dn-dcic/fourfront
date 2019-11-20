@@ -123,9 +123,9 @@
             "lookup": 113,
             "use_for": ["MARGI"]
         },
-        "rna_strandness":{
-            "title": "RNA strand-specific direction",
-            "description": "The direction of the RNA strand used for library preparation",
+        "strandedness":{
+            "title": "RNA library strandedness",
+            "description": "For RNA libraries, do reads correspond to the forward RNA strand, the complementary reverse strand or both (unstranded)",
             "type": "string",
             "enum": ["forward", "reverse", "unstranded"],
             "lookup": 113
