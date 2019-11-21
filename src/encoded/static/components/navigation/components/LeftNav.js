@@ -79,14 +79,14 @@ function DataNavItem(props){
         // Figure out if any items are active
         const { query = {}, pathname = "/a/b/c/d/e" } = memoizedUrlParse(href);
         const browseHref = navigate.getBrowseBaseHref(browseBaseState);
-        const seqencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
+        const sequencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
         const microscopyDataHref = "/microscopy-data-overview";
         const isMicroscopyActive = pathname === microscopyDataHref;
         let isBrowseActive = pathname === "/browse/";
         let isSequencingActive = false;
         if (isBrowseActive) {
             isSequencingActive = true;
-            const { query: sequencingQuery = {} } = url.parse(seqencingDataHref, true);
+            const { query: sequencingQuery = {} } = url.parse(sequencingDataHref, true);
             const seqKeys = Object.keys(sequencingQuery);
             for (var i = 0; i < seqKeys.length; i++){
                 if (sequencingQuery[seqKeys[i]] !== query[seqKeys[i]]){
@@ -98,7 +98,7 @@ function DataNavItem(props){
                 isBrowseActive = false;
             }
         }
-        return { browseHref, seqencingDataHref, microscopyDataHref, isMicroscopyActive, isBrowseActive, isSequencingActive };
+        return { browseHref, sequencingDataHref, microscopyDataHref, isMicroscopyActive, isBrowseActive, isSequencingActive };
     }, [ href, browseBaseState ]);
 
     const isAnyActive = (bodyProps.isBrowseActive || bodyProps.isMicroscopyActive || bodyProps.isSequencingActive);
@@ -119,7 +119,7 @@ function DataNavItem(props){
 
 const DataNavItemBody = React.memo(function DataNavItemBody(props) {
     const {
-        browseHref, seqencingDataHref, microscopyDataHref,
+        browseHref, sequencingDataHref, microscopyDataHref,
         isBrowseActive = false,
         isSequencingActive = false,
         isMicroscopyActive = false,
@@ -135,7 +135,7 @@ const DataNavItemBody = React.memo(function DataNavItemBody(props) {
                 </div>
             </BigDropdownBigLink>
 
-            <BigDropdownBigLink href={seqencingDataHref} isActive={isSequencingActive} titleIcon="dna fas">
+            <BigDropdownBigLink href={sequencingDataHref} isActive={isSequencingActive} titleIcon="dna fas">
                 <h4>Browse Sequencing Data</h4>
                 <div className="description">
                     Search Sequencing Experiment Sets in the 4D Nucleome Database
