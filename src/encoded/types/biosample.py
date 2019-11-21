@@ -13,7 +13,7 @@ from .base import (
 
 @collection(
     name='biosamples',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Biosamples',
         'description': 'Biosamples used in the 4DN project',

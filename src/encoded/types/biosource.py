@@ -27,7 +27,7 @@ from .base import (
 
 @collection(
     name='biosources',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Biosources',
         'description': 'Cell lines and tissues used for biosamples',

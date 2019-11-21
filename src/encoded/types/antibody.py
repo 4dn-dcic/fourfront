@@ -16,7 +16,7 @@ import re
 
 @collection(
     name='antibodys',
-    unique_key='antibody:antibody_id',
+    traversal_key='antibody:antibody_id',
     properties={
         'title': 'Antibodies',
         'description': 'Listing of antibodies',

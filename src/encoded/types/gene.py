@@ -77,7 +77,7 @@ def map_ncbi2schema(geneinfo):
 
 @collection(
     name='genes',
-    unique_key='gene:geneid',
+    traversal_key='gene:geneid',
     lookup_key='preferred_symbol',
     properties={
         'title': 'Genes',

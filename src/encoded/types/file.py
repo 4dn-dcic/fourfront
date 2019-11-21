@@ -142,7 +142,7 @@ def property_closure(request, propname, root_uuid):
 
 @collection(
     name='file-sets',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'File Sets',
         'description': 'Listing of File Sets',
@@ -156,7 +156,7 @@ class FileSet(Item):
 
 @collection(
     name='file-set-calibrations',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Calibration File Sets',
         'description': 'Listing of File Sets',
@@ -181,7 +181,7 @@ class FileSetCalibration(FileSet):
 
 @collection(
     name='file-set-microscope-qcs',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Microscope QC File Sets',
         'description': 'Listing of File Sets',
@@ -206,7 +206,7 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
 
 @abstract_collection(
     name='files',
-    unique_key='accession',
+    traversal_key='accession',
     acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': 'Files',
@@ -728,7 +728,7 @@ class File(Item):
 
 @collection(
     name='files-fastq',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'FASTQ Files',
         'description': 'Listing of FASTQ Files',
@@ -778,7 +778,7 @@ class FileFastq(File):
 
 @collection(
     name='files-processed',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Processed Files',
         'description': 'Listing of Processed Files',
@@ -880,7 +880,7 @@ class FileProcessed(File):
 
 @collection(
     name='files-reference',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Reference Files',
         'description': 'Listing of Reference Files',
@@ -895,7 +895,7 @@ class FileReference(File):
 
 @collection(
     name='files-vistrack',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Visualization Track Files',
         'description': 'Listing of External Files available as HiGlass visualization tracks',
@@ -972,7 +972,7 @@ class FileVistrack(File):
 
 @collection(
     name='files-calibration',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Calibration Files',
         'description': 'Listing of Calibration Files',
@@ -987,7 +987,7 @@ class FileCalibration(ItemWithAttachment, File):
 
 @collection(
     name='files-microscopy',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Microscopy Files',
         'description': 'Listing of Microscopy Files',

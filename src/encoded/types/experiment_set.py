@@ -33,7 +33,7 @@ import datetime
 
 @collection(
     name='experiment-sets',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiment Sets',
         'description': 'Listing Experiment Sets',
@@ -314,7 +314,7 @@ class ExperimentSet(Item):
 
 @collection(
     name='experiment-set-replicates',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Replicate Experiment Sets',
         'description': 'Experiment set covering biological and technical experiments',

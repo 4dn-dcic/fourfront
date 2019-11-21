@@ -11,7 +11,7 @@ from .base import (
 
 @collection(
     name='experiment-types',
-    unique_key='experiment_type:experiment_name',
+    traversal_key='experiment_type:experiment_name',
     lookup_key='title',
     properties={
         'title': 'Experiment Types',

@@ -20,7 +20,7 @@ import re
 
 @collection(
     name='awards',
-    unique_key='award:name',
+    traversal_key='award:name',
     properties={
         'title': 'Awards (Grants)',
         'description': 'Listing of awards (aka grants)',

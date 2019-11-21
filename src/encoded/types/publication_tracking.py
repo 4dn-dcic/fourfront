@@ -13,7 +13,7 @@ from .base import (
 
 @collection(
     name='publication-trackings',
-    unique_key='publication:PMID',
+    traversal_key='publication:PMID',
     properties={
         'title': 'Publication Tracking',
         'description': 'Abstract title collection for future 4DN publications',

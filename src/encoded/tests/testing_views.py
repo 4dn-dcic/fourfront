@@ -75,7 +75,7 @@ class TestingDownload(ItemWithAttachment):
         'title': 'Test keys',
         'description': 'Testing. Testing. 1, 2, 3.',
     },
-    unique_key='testing_accession',
+    traversal_key='testing_accession',
 )
 class TestingKey(Item):
     item_type = 'testing_key'
@@ -94,7 +94,7 @@ class TestingKey(Item):
     }
 
 
-@collection('testing-link-sources', unique_key='testing_link_sources:name')
+@collection('testing-link-sources', traversal_key='testing_link_sources:name')
 class TestingLinkSource(Item):
     item_type = 'testing_link_source'
     schema = {
@@ -120,7 +120,7 @@ class TestingLinkSource(Item):
     }
 
 
-@collection('testing-link-targets', unique_key='testing_link_target:name')
+@collection('testing-link-targets', traversal_key='testing_link_target:name')
 class TestingLinkTarget(Item):
     item_type = 'testing_link_target'
     name_key = 'name'

@@ -13,7 +13,7 @@ from .base import (
 
 @collection(
     name='badges',
-    unique_key='badge:badge_name',
+    traversal_key='badge:badge_name',
     properties={
         'title': 'Badges',
         'description': 'Listing of badges for 4DN items',

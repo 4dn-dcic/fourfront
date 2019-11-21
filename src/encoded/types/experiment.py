@@ -51,7 +51,7 @@ EXP_CATEGORIZER_SCHEMA = {
 
 @abstract_collection(
     name='experiments',
-    unique_key='accession',
+    traversal_key='accession',
     acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': "Experiments",
@@ -344,7 +344,7 @@ class Experiment(Item):
 
 @collection(
     name='experiments-hi-c',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments Hi-C',
         'description': 'Listing Hi-C Experiments',
@@ -384,7 +384,7 @@ class ExperimentHiC(Experiment):
 
 @collection(
     name='experiments-capture-c',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments Capture Hi-C',
         'description': 'Listing Capture Hi-C Experiments',
@@ -447,7 +447,7 @@ class ExperimentCaptureC(Experiment):
 
 @collection(
     name='experiments-repliseq',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments Repli-seq',
         'description': 'Listing of Repli-seq Experiments',
@@ -504,7 +504,7 @@ class ExperimentRepliseq(Experiment):
 
 @collection(
     name='experiments-atacseq',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments ATAC-seq',
         'description': 'Listing ATAC-seq Experiments',
@@ -540,7 +540,7 @@ class ExperimentAtacseq(Experiment):
 
 @collection(
     name='experiments-chiapet',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments CHIA-pet',
         'description': 'Listing CHIA-pet and PLAC-seq Experiments',
@@ -584,7 +584,7 @@ class ExperimentChiapet(Experiment):
 
 @collection(
     name='experiments-damid',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments DAM-ID',
         'description': 'Listing DAM-ID Experiments',
@@ -629,7 +629,7 @@ class ExperimentDamid(Experiment):
 
 @collection(
     name='experiments-seq',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments CHIPseq, RNAseq ...',
         'description': 'Listing of ChIP and RNA seq type experiments',
@@ -673,7 +673,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
 
 @collection(
     name='experiments-tsaseq',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Experiments TSA-Seq',
         'description': 'Listing of TSA-seq type experiments',
@@ -717,7 +717,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
 
 @collection(
     name='experiments-mic',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Microscopy Experiments',
         'description': 'Listing of Microscopy Experiments',

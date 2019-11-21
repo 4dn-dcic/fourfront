@@ -30,7 +30,7 @@ def includeme(config):
 
 @collection(
     name='analysis-steps',
-    unique_key='analysis_step:name',
+    traversal_key='analysis_step:name',
     properties={
         'title': 'AnalysisSteps',
         'description': 'Listing of analysis steps for 4DN analyses',
@@ -94,7 +94,7 @@ class Document(ItemWithAttachment, Item):
 
 @collection(
     name='enzymes',
-    unique_key='enzyme:name',
+    traversal_key='enzyme:name',
     properties={
         'title': 'Enzymes',
         'description': 'Listing of enzymes',
@@ -110,7 +110,7 @@ class Enzyme(Item):
 
 @collection(
     name='file-formats',
-    unique_key='file_format:file_format',
+    traversal_key='file_format:file_format',
     lookup_key='file_format',
     properties={
         'title': 'File Formats',
@@ -169,7 +169,7 @@ class GenomicRegion(Item):
 
 @collection(
     name='organisms',
-    unique_key='organism:taxon_id',
+    traversal_key='organism:taxon_id',
     lookup_key='name',
     properties={
         'title': 'Organisms',
@@ -318,7 +318,7 @@ class TrackingItem(Item):
 
 @collection(
     name='vendors',
-    unique_key='vendor:name',
+    traversal_key='vendor:name',
     properties={
         'title': 'Vendors',
         'description': 'Listing of sources and vendors for 4DN material',

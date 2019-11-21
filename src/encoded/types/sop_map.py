@@ -11,7 +11,7 @@ from .base import (
 
 @collection(
     name='sop-maps',
-    unique_key='sop_map:mapid',
+    traversal_key='sop_map:mapid',
     properties={
         'title': 'SOP and field mappings',
         'description': 'Listing of SOPs with the default values for fields from them',

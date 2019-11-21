@@ -15,7 +15,7 @@ from .base import (
 
 @abstract_collection(
     name='individuals',
-    unique_key='accession',
+    traversal_key='accession',
     acl=ALLOW_SUBMITTER_ADD,
     properties={
         'title': "Individuals",
@@ -32,7 +32,7 @@ class Individual(Item):
 
 @collection(
     name='individuals-human',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Individuals-Humans',
         'description': 'Listing Biosample Human Individuals',
@@ -47,7 +47,7 @@ class IndividualHuman(Individual):
 
 @collection(
     name='individuals-primate',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Individuals-Primates',
         'description': 'Listing Biosample Primate Individuals',
@@ -62,7 +62,7 @@ class IndividualPrimate(Individual):
 
 @collection(
     name='individuals-mouse',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Individuals-Mice',
         'description': 'Listing Biosample Mouse Individuals',
@@ -77,7 +77,7 @@ class IndividualMouse(Individual):
 
 @collection(
     name='individuals-fly',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Individuals-Flies',
         'description': 'Listing Biosample Fly Individuals',
@@ -92,7 +92,7 @@ class IndividualFly(Individual):
 
 @collection(
     name='individuals-chicken',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Individuals-Chickens',
         'description': 'Listing Biosample Chicken Individuals',
@@ -107,7 +107,7 @@ class IndividualChicken(Individual):
 
 @collection(
     name='individuals-zebrafish',
-    unique_key='accession',
+    traversal_key='accession',
     properties={
         'title': 'Individuals-Zebrafish',
         'description': 'Listing Zebrafish Sources',

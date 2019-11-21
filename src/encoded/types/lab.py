@@ -41,7 +41,7 @@ ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
 
 @collection(
     name='labs',
-    unique_key='lab:name',
+    traversal_key='lab:name',
     properties={
         'title': 'Labs',
         'description': 'Listing of 4D Nucleome labs',

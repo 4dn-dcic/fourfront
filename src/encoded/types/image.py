@@ -13,7 +13,7 @@ from snovault.attachment import ItemWithAttachment
 
 @collection(
     name='images',
-    unique_key='image:filename',
+    traversal_key='image:filename',
     properties={
         'title': 'Image',
         'description': 'Listing of portal images',

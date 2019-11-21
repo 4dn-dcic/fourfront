@@ -57,7 +57,7 @@ USER_DELETED = [
 
 @collection(
     name='users',
-    unique_key='user:email',
+    traversal_key='user:email',
     properties={
         'title': '4D Nucleome Users',
         'description': 'Listing of current 4D Nucleome DCIC users',
