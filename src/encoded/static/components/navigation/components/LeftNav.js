@@ -1,6 +1,6 @@
 'use strict';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Nav } from 'react-bootstrap';
 import url from 'url';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -21,6 +21,7 @@ export const LeftNav = React.memo(function LeftNav(props){
     return (
         <Nav className="mr-auto">
             <DataNavItem {...props} />
+            <ToolsNavItem {...props} />
             <ResourcesNavItem {...props} />
             <HelpNavItem {...props} />
         </Nav>
@@ -29,7 +30,7 @@ export const LeftNav = React.memo(function LeftNav(props){
 
 
 
-export function HelpNavItem(props){
+function HelpNavItem(props){
     const { session, ...navItemProps } = props;
     // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
     return (
@@ -43,7 +44,7 @@ export function HelpNavItem(props){
 }
 
 
-export function ResourcesNavItem(props){
+function ResourcesNavItem(props){
     const { session, ...navItemProps } = props;
     // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
     return (
@@ -56,34 +57,51 @@ export function ResourcesNavItem(props){
     );
 }
 
-export const DataNavItem = React.memo(function DataNavItem(props){
+
+function ToolsNavItem(props){
+    const { session, ...navItemProps } = props;
+    // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
+    return (
+        <BigDropdownPageLoader treeURL="/tools" session={session}>
+            <BigDropdownNavItem {...navItemProps} id="tools-menu-item" navItemHref="/tools" navItemContent="Tools">
+                <BigDropdownPageTreeMenuIntroduction titleIcon="tools fas" />
+                <BigDropdownPageTreeMenu />
+            </BigDropdownNavItem>
+        </BigDropdownPageLoader>
+    );
+}
+
+function DataNavItem(props){
     const { href, browseBaseState, ...navItemProps } = props;
 
-    // Figure out if any items are active
-    const { query = {}, pathname = "/a/b/c/d/e" } = memoizedUrlParse(href);
-    const browseHref = navigate.getBrowseBaseHref(browseBaseState);
-    const seqencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
-    const microscopyDataHref = "/microscopy-data-overview";
-    const isMicroscopyActive = pathname === microscopyDataHref;
-    let isBrowseActive = pathname === "/browse/";
-    let isSequencingActive = false;
-    if (isBrowseActive) {
-        isSequencingActive = true;
-        const { query: sequencingQuery = {} } = url.parse(seqencingDataHref, true);
-        const seqKeys = Object.keys(sequencingQuery);
-        for (var i = 0; i < seqKeys.length; i++){
-            if (sequencingQuery[seqKeys[i]] !== query[seqKeys[i]]){
-                isSequencingActive = false;
-                break;
+    /** @see https://reactjs.org/docs/hooks-reference.html#usememo */
+    const bodyProps = useMemo(function(){
+        // Figure out if any items are active
+        const { query = {}, pathname = "/a/b/c/d/e" } = memoizedUrlParse(href);
+        const browseHref = navigate.getBrowseBaseHref(browseBaseState);
+        const seqencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
+        const microscopyDataHref = "/microscopy-data-overview";
+        const isMicroscopyActive = pathname === microscopyDataHref;
+        let isBrowseActive = pathname === "/browse/";
+        let isSequencingActive = false;
+        if (isBrowseActive) {
+            isSequencingActive = true;
+            const { query: sequencingQuery = {} } = url.parse(seqencingDataHref, true);
+            const seqKeys = Object.keys(sequencingQuery);
+            for (var i = 0; i < seqKeys.length; i++){
+                if (sequencingQuery[seqKeys[i]] !== query[seqKeys[i]]){
+                    isSequencingActive = false;
+                    break;
+                }
+            }
+            if (isSequencingActive) { // Show only 1 of these as active, if both are (since isSequencing is subset of browse all)
+                isBrowseActive = false;
             }
         }
-        if (isSequencingActive) { // Show only 1 of these as active, if both are (since isSequencing is subset of browse all)
-            isBrowseActive = false;
-        }
-    }
-    const isAnyActive = isBrowseActive || isMicroscopyActive || isSequencingActive;
-    // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
+        return { browseHref, seqencingDataHref, microscopyDataHref, isMicroscopyActive, isBrowseActive, isSequencingActive };
+    }, [ href, browseBaseState ]);
 
+    const isAnyActive = (bodyProps.isBrowseActive || bodyProps.isMicroscopyActive || bodyProps.isSequencingActive);
     const navLink = (
         <React.Fragment>
             <i className="icon icon-fw icon-database fas mr-05 align-middle" />
@@ -91,12 +109,13 @@ export const DataNavItem = React.memo(function DataNavItem(props){
         </React.Fragment>
     );
 
-    return (
-        <BigDropdownNavItem {...navItemProps} id="data-menu-item" navItemHref={browseHref} navItemContent={navLink} active={isAnyActive}>
-            <DataNavItemBody {...{ browseHref, seqencingDataHref, microscopyDataHref, isBrowseActive, isSequencingActive, isMicroscopyActive }} />
+    return ( // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
+        <BigDropdownNavItem {...navItemProps} id="data-menu-item" navItemHref={bodyProps.browseHref} navItemContent={navLink}
+            active={isAnyActive}>
+            <DataNavItemBody {...bodyProps} />
         </BigDropdownNavItem>
     );
-});
+}
 
 const DataNavItemBody = React.memo(function DataNavItemBody(props) {
     const {
