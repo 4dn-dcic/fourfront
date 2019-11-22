@@ -63,7 +63,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     doc_types = set_doc_types(request, types, search_type)
     # calculate @type
     search_types = [dt + 'SearchResults' for dt in doc_types if dt != 'Item']
-    search_types.append('Search')  # the old base search type
+    search_types.append(forced_type)  # the old base search type
     # sets request.normalized_params
     search_base = normalize_query(request, types, doc_types)
     ### INITIALIZE RESULT.
