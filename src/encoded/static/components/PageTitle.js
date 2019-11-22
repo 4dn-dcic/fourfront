@@ -43,7 +43,11 @@ const TITLE_PATHNAME_MAP = {
             return 'Search';
         },
         'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
-            var thisTypeTitle = schemaTransforms.getSchemaTypeFromSearchContext(context, schemas);
+            const thisTypeTitle = (
+                schemaTransforms.getTitleForType(
+                    schemaTransforms.getSchemaTypeFromSearchContext(context), schemas
+                )
+            );
             return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ isSelectAction(currentAction) ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){

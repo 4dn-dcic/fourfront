@@ -197,3 +197,15 @@ $search-results-above-results-row-height: 40px;
 	}
 }
 
+
+
+/*************************************************************/
+/**** Row Height & Similar Overrides for Publication View ****/
+/*************************************************************/
+
+.search-page-container[data-search-item-type="Publication"] {
+	.search-results-outer-container .search-results-container .inner-container .scrollable-container .search-result-row > .columns.result-table-row > .search-result-column-block > .inner {
+		height: 174px; // MUST be aligned to value in PublicationSearchView.js, minus 1 (for border)
+		white-space: unset; // Allow lines to wrap for abstract
+	}
+}
