@@ -286,3 +286,11 @@ div[role="dialog"] {
 	}
 }
 
+// Would think Bootstrap would do this already, but w.e.
+.image-wrapper.img-thumbnail {
+	position: relative;
+	> img {
+		max-width: 100%;
+	}
+}
+
