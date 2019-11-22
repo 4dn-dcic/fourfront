@@ -8,7 +8,6 @@ import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/component
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 
-
 /**
  * A single Announcement block/view.
  * @todo refactor into functional components, if not getting rid of

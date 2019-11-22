@@ -341,24 +341,30 @@
         }
     },
     "library": {
+        "library_prep_kit": {
+            "title": "Library Prep Kit",
+            "description": "Name of the library prep kit used to generate library",
+            "type": "string",
+            "lookup": 200
+        },
         "average_fragment_size": {
             "title": "Average Fragment Size (bp)",
             "description": "Size of average fragment in base pairs after fragmentation step",
             "type": "integer",
-            "lookup": 202
+            "lookup": 203
         },
         "fragment_size_range": {
             "title": "Fragment size range",
             "description": "The measured size range of the purified nucleic acid, in bp.",
             "type": "string",
-            "lookup": 203,
+            "lookup": 204,
             "pattern": "(^[0-9]+-[0-9]+$|^[<>][0-9]+$)"
         },
         "fragmentation_method": {
             "title": "Fragmentation method",
             "description": "A short description or reference of the nucleic acid fragmentation protocol used in library preparation, if applicable.",
             "type": "string",
-            "lookup": 200,
+            "lookup": 201,
             "enum": [
               "chemical",
               "shearing",
@@ -373,7 +379,7 @@
             "title": "Size selection method",
             "description": "A short description or reference of the size selection protocol used in library preparation, if applicable.",
             "type": "string",
-            "lookup": 201,
+            "lookup": 202,
             "enum": [
               "gel",
               "see document",
