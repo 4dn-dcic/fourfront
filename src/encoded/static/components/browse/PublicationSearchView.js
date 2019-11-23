@@ -20,6 +20,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     // And awesomer.
     "display_title" : {
         "widthMap" : { "sm" : 320, "md" : 520, "lg" : 670 },
+        'minColumnWidth' : 200,
         "render" : function(result, columnDefinition, props, termTransformFxn){
             return <PublicationSearchResultTitle {...props} {...{ result }} />;
         }
@@ -125,7 +126,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
     render(){
         const { result, detailOpen, toggleDetailOpen, rowNumber, href, navigate = spcNavigate, width: colWidth } = this.props;
         const { title: origTitle, "@id" : id, abstract, authors = null } = result; // We use "title" here, not "display_title" (which contains year+author, also)
-        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth);
+        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 16); // -16px for table cell padding (8px left + right)
         const titleLen = origTitle.length;
         const titleMaxLen = charsPerLine * 3; // 3 lines max for it
         let title = origTitle;
@@ -188,7 +189,7 @@ const AuthorsBlock = React.memo(function AuthorsBlock(props){
 const JournalTitle = React.memo(function JournalTitle({ journal, width: colWidth }){
 
     // Not memoized since this component itself is memoized with only real dynamic prop being colWidth.
-    const maxCharsPerLine = maxCharsToShowPerLine(colWidth);
+    const maxCharsPerLine = maxCharsToShowPerLine(colWidth - 16);
     const maxChars = maxCharsPerLine * 5;
     const journalLen = journal.length;
 
