@@ -171,11 +171,16 @@
         }
     },
     "columns": {
+        "nonexistent_year_field" : {
+            "title" : "Year",
+            "notes": "We use date_published here but only render out year."
+        },
         "journal": {
             "title": "Journal"
         },
         "date_published": {
-            "title": "Publication Date"
+            "title": "Publication Date",
+            "default_hidden" : true
         },
         "number_of_experiment_sets": {
             "title": "# Experiment Sets"
