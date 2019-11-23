@@ -218,6 +218,8 @@ $search-results-above-results-row-height: 40px;
 					div.authors-list {
 						margin-top: 3px;
 						line-height: 1.325rem;
+						font-size: 0.9625em;
+						font-weight: 500;
 						> .author-name {
 							&:not(:last-child):after {
 								content: ","; // We do it here instead of in text/JS in case we want to use bullet points or something else later. E.g. If we need to handle "Hamill, Mark" formatting of author names for example.

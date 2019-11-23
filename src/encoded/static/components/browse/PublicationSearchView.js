@@ -69,7 +69,8 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
  */
 function maxCharsToShowPerLine(colWidth){
     const charWidth = 6; // Rough upper estimate (excl "i", "l", ".", etc.) for this font/size/weight
-    const textAreaWidth = colWidth - 90; // Account for ToggleButton + cell padding, and line splitting on spaces (not in middle of words)
+    // -16px for table cell padding (8px left + right)
+    const textAreaWidth = colWidth - 60 - 16; // Account for line splitting on spaces (not in middle of words)
     return Math.floor(textAreaWidth / charWidth);
 }
 
@@ -125,13 +126,26 @@ class PublicationSearchResultTitle extends React.PureComponent {
 
     render(){
         const { result, detailOpen, toggleDetailOpen, rowNumber, href, navigate = spcNavigate, width: colWidth } = this.props;
-        const { title: origTitle, "@id" : id, abstract, authors = null } = result; // We use "title" here, not "display_title" (which contains year+author, also)
-        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 16); // -16px for table cell padding (8px left + right)
+        const {
+            title: origTitle, // We use "title" here, not "display_title" (which contains year+author, also)
+            "@id" : id,
+            abstract: origAbstract = null,
+            authors = null
+        } = result;
+        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 45); // -45 re: ToggleBtn width
         const titleLen = origTitle.length;
         const titleMaxLen = charsPerLine * 3; // 3 lines max for it
         let title = origTitle;
         if (titleLen > titleMaxLen) {
             title = title.slice(0, titleMaxLen) + "...";
+        }
+        let abstract = null, abstractMaxLen;
+        if (origAbstract && (!authors || authors.length < charsPerLine) && titleLen < charsPerLine){
+            abstractMaxLen = titleMaxLen;
+            abstract = origAbstract;
+            if (abstract.length > abstractMaxLen) {
+                abstract = abstract.slice(0, abstractMaxLen) + "...";
+            }
         }
         return (
             <React.Fragment>
@@ -141,6 +155,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
                         <a href={id} onClick={this.onClickTrack}>{ title }</a>
                     </h5>
                     <AuthorsBlock authors={authors} maxCharacters={titleMaxLen} />
+                    { abstract ? <p className="abstract mb-0 mt-08">{ abstract }</p> : null }
                 </div>
             </React.Fragment>
         );
@@ -184,12 +199,14 @@ const AuthorsBlock = React.memo(function AuthorsBlock(props){
     );
 });
 
-
+const AbstractBlock = React.memo(function AbstractBlock(props){
+    const { abstract = null } = props;
+});
 
 const JournalTitle = React.memo(function JournalTitle({ journal, width: colWidth }){
 
     // Not memoized since this component itself is memoized with only real dynamic prop being colWidth.
-    const maxCharsPerLine = maxCharsToShowPerLine(colWidth - 16);
+    const maxCharsPerLine = maxCharsToShowPerLine(colWidth);
     const maxChars = maxCharsPerLine * 5;
     const journalLen = journal.length;
 
