@@ -37,11 +37,12 @@ export class SearchBar extends React.PureComponent {
         return href && typeof href === 'string' && (href.indexOf('/browse/') > -1 || href.indexOf('/search/') > -1);
     }
 
-    static deriveSearchItemTypeFromHref(href){
-        if (typeof href === 'string') {
-            if (navigate.isSearchHref(href)) {
-                return "all";
-            }
+    static deriveSearchItemTypeFromHref(href, searchItemType = null){
+        if (searchItemType === "within" && SearchBar.isBrowseOrSearchPage(href)) {
+            return "within";
+        }
+        if (navigate.isSearchHref(href)) {
+            return "all";
         }
         return "sets";
     }
@@ -60,6 +61,7 @@ export class SearchBar extends React.PureComponent {
         } else {
             throw new Error("No valid searchItemType provided");
         }
+        return query;
     }
 
     constructor(props) {
@@ -83,7 +85,7 @@ export class SearchBar extends React.PureComponent {
         };
 
         this.state = {
-            'searchItemType'    : this.memoized.deriveSearchItemTypeFromHref(props.href),
+            'searchItemType'    : this.memoized.deriveSearchItemTypeFromHref(props.href, null),
             'typedSearchQuery'  : initialQuery,
             'isVisible'         : isSelectAction(props.currentAction) || SearchBar.hasInput(initialQuery) || false
         };
@@ -102,7 +104,7 @@ export class SearchBar extends React.PureComponent {
                     // We don't want to hide if was already open.
                     isVisible : isSelectAction(currentAction) || isVisible || SearchBar.hasInput(typedSearchQuery) || false,
                     typedSearchQuery,
-                    searchItemType: searchItemType === "within" ? "within" : this.memoized.deriveSearchItemTypeFromHref(href)
+                    searchItemType: this.memoized.deriveSearchItemTypeFromHref(href, searchItemType)
                 };
             });
         }
@@ -166,7 +168,7 @@ export class SearchBar extends React.PureComponent {
             const state = { 'typedSearchQuery': newValue };
             // Resetting this might be counterintuitive.. commenting out for now.
             // if (searchItemType !== "within" && !SearchBar.hasInput(newValue) && !isSelectAction(currentAction)) {
-            //     state.searchItemType = this.memoized.deriveSearchItemTypeFromHref(href);
+            //     state.searchItemType = this.memoized.deriveSearchItemTypeFromHref(href, searchItemType);
             // }
             return state;
         });
@@ -196,10 +198,12 @@ export class SearchBar extends React.PureComponent {
             delete hrefParts.query.q;
             delete hrefParts.search;
         }
-        this.setState({
-            'searchItemType': this.memoized.deriveSearchItemTypeFromHref(href),
-            'typedSearchQuery' : '',
-            'isVisible' : isSelectAction(currentAction) || false
+        this.setState(({ searchItemType })=>{
+            return {
+                'searchItemType': this.memoized.deriveSearchItemTypeFromHref(href, searchItemType),
+                'typedSearchQuery' : '',
+                'isVisible' : isSelectAction(currentAction) || false
+            };
         }, () => { // Doesn't refer to `this` so could be plain/pure function; but navigation is kind of big 'side effect' so... eh
             navigate(url.format(hrefParts));
         });
