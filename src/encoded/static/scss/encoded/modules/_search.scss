@@ -212,6 +212,7 @@ $search-results-above-results-row-height: 40px;
 		}
 
 		&[data-field="display_title"] {
+			position: relative;
 			> .inner {
 				white-space: unset; // Allow lines to wrap
 				.title-inner {
@@ -226,6 +227,13 @@ $search-results-above-results-row-height: 40px;
 								margin-right: 5px;
 							}
 						}
+					}
+					.abstract-exists-indicator {
+						position: absolute;
+						right: 4px;
+						bottom: 3px;
+						font-size: 0.8rem;
+						color: $gray-500;
 					}
 				}
 			}

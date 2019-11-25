@@ -50,7 +50,8 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
         }
     },
     "number_of_experiment_sets" : {
-        "widthMap" : { "sm" : 50, "md" : 50, "lg" : 50 },
+        "colTitle" : "Exp Sets",
+        "widthMap" : { "sm" : 50, "md" : 70, "lg" : 80 },
         "render" : function(result, columnDefinition, props, termTransformFxn){
             const { number_of_experiment_sets: numSets = null } = result;
             if (numSets === null) return null;
@@ -79,36 +80,13 @@ class PublicationSearchResultTitle extends React.PureComponent {
 
     static maxCharsToShowPerLine = memoize(maxCharsToShowPerLine);
 
-    static buildAuthorsElement(maxCharLen, authors = []){
-        const initAuthorsLen = authors.length;
-        if (initAuthorsLen === 0) return null;
-        const initAuthors = authors.slice(0);
-        const authorsToKeep = [];
-        let charCount = 0;
-        while (charCount < maxCharLen && initAuthors.length){
-            const author = initAuthors.shift();
-            const authorLen = author.length;
-            charCount += authorLen;
-            if (charCount < maxCharLen) {
-                authorsToKeep.push(author);
-            } else {
-                break;
-            }
-        }
-        const authorsToKeepLen = authorsToKeep.length;
-        if (initAuthorsLen === authorsToKeepLen) {
-            return authorsToKeep.join(" &bull; ");
-        } else {
-            return authorsToKeep.join(", ") + `, et al.`;
-        }
-    }
+    static defaultProps = {
+        "showAbstractBlock" : false
+    };
 
     constructor(props){
         super(props);
         this.onClickTrack = this.onClickTrack.bind(this);
-        this.memoized = {
-            buildAuthorsString : memoize(PublicationSearchResultTitle.buildAuthorsString)
-        };
     }
 
     onClickTrack(evt){
@@ -125,11 +103,11 @@ class PublicationSearchResultTitle extends React.PureComponent {
     }
 
     render(){
-        const { result, detailOpen, toggleDetailOpen, rowNumber, href, navigate = spcNavigate, width: colWidth } = this.props;
+        const { result, detailOpen, toggleDetailOpen, rowNumber, href, navigate = spcNavigate, width: colWidth, showAbstractBlock } = this.props;
         const {
             title: origTitle, // We use "title" here, not "display_title" (which contains year+author, also)
             "@id" : id,
-            abstract: origAbstract = null,
+            abstract = null,
             authors = null
         } = result;
         const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 45); // -45 re: ToggleBtn width
@@ -139,14 +117,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
         if (titleLen > titleMaxLen) {
             title = title.slice(0, titleMaxLen) + "...";
         }
-        let abstract = null, abstractMaxLen;
-        if (origAbstract && (!authors || authors.length < charsPerLine) && titleLen < charsPerLine){
-            abstractMaxLen = titleMaxLen;
-            abstract = origAbstract;
-            if (abstract.length > abstractMaxLen) {
-                abstract = abstract.slice(0, abstractMaxLen) + "...";
-            }
-        }
+
         return (
             <React.Fragment>
                 <TableRowToggleOpenButton onClick={toggleDetailOpen} open={detailOpen} />
@@ -155,12 +126,56 @@ class PublicationSearchResultTitle extends React.PureComponent {
                         <a href={id} onClick={this.onClickTrack}>{ title }</a>
                     </h5>
                     <AuthorsBlock authors={authors} maxCharacters={titleMaxLen} />
-                    { abstract ? <p className="abstract mb-0 mt-08">{ abstract }</p> : null }
+                    <AbstractBlock enabled={showAbstractBlock} {...{ abstract, charsPerLine, titleLen, authors, colWidth, titleMaxLen }} />
                 </div>
             </React.Fragment>
         );
     }
 }
+
+const AbstractBlock = React.memo(function({ enabled, authors, titleLen, titleMaxLen, abstract: origAbstract, charsPerLine, colWidth }){
+    if (!enabled) return null;
+
+    const authorsLen = useMemo(function(){
+        if (!Array.isArray(authors)) return 0;
+        const initAuthors = authors.slice(0);
+        let charCount = 0;
+        while (initAuthors.length){
+            const author = initAuthors.shift();
+            const authorLen = author.length;
+            charCount += authorLen;
+            charCount += 2; // Space & comma
+        }
+        charCount -2;
+        return charCount;
+    }, [authors]);
+
+    const titleFitsOnOneLine = titleLen < charsPerLine;
+    const authorsFitOnOneLine = authorsLen < charsPerLine;
+
+    let showAbstract = null;
+    let abstractMaxLen;
+    if (origAbstract && authorsFitOnOneLine && titleFitsOnOneLine){
+        abstractMaxLen = titleMaxLen;
+        showAbstract = origAbstract;
+        if (showAbstract.length > abstractMaxLen) {
+            showAbstract = showAbstract.slice(0, abstractMaxLen) + "...";
+        }
+    }
+
+    if (showAbstract) {
+        return <p className="abstract mb-0 mt-08">{ showAbstract }</p>;
+    }
+
+    const doubleCharsPerLine = charsPerLine * 2;
+    const titleFitsOn2Lines = titleLen < doubleCharsPerLine;
+    const authorsFitOn2Lines = authorsLen < doubleCharsPerLine;
+
+    if (origAbstract && colWidth > 450 && (titleFitsOn2Lines || authorsFitOn2Lines)){
+        return  <div className="abstract-exists-indicator">Expand column width to see more</div>;
+    }
+
+});
 
 
 const AuthorsBlock = React.memo(function AuthorsBlock(props){
@@ -180,6 +195,9 @@ const AuthorsBlock = React.memo(function AuthorsBlock(props){
         const author = initAuthors.shift();
         const authorLen = author.length;
         charCount += authorLen;
+        if (initAuthors.length > 0){
+            charCount += 2; // Comma + space
+        }
         if (charCount < maxCharLen) {
             authorsToKeep.push(author);
         } else {
