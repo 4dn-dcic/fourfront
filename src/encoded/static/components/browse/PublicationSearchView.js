@@ -25,7 +25,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
             return <PublicationSearchResultTitle {...props} {...{ result }} />;
         }
     },
-    "nonexistent_year_field" : {
+    "date_published" : {
         "widthMap" : { "sm" : 60, "md" : 60, "lg" : 60 },
         "render" : function(result, columnDefinition, props, termTransformFxn){
             const { date_published = null } = result;
