@@ -62,7 +62,7 @@ export class SearchBar extends React.PureComponent {
             const query = searchFilters.searchQueryStringFromHref(href) || '';
             this.setState(function ({ typedSearchQuery }) {
                 if (query !== typedSearchQuery) {
-                    return { 'typedSearchQuery': query };
+                    return { 'typedSearchQuery': query, 'searchItemType': 'sets' };
                 }
                 return null;
             });
@@ -80,9 +80,6 @@ export class SearchBar extends React.PureComponent {
         const { href } = this.props;
         const { searchItemType } = this.state;
 
-        if (!SearchBar.isBrowseOrSearchPage(href) && searchItemType === 'within') {
-            this.setState({ 'searchItemType': 'sets' });
-        }
         switch (searchItemType) {
             case 'sets':
                 return 'Experiment Sets';
