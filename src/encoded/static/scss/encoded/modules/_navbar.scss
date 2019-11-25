@@ -402,31 +402,66 @@ div#top-nav.navbar-fixed-top {
             // Navbar search
             > form.form-inline.navbar-search-form-container {
                 position: relative;
+                width: 100%;
 
-                > input#navbar-search {
-                    font-size: 1em;
-                    width: 140px;
-                    color: rgba(0,0,0,0.5);
-                    border-radius: 3px;
-                    border: 1px solid rgb(125,125,125);
+                > .form-inputs-container {
+                    display: flex; // Made visible on mobile size or if open/visible at desktop size
+                    position: relative; // Overriden to be absolute if fixed-position navbar
+                    align-items: center;
+
+                    > input#navbar-search {
+                        flex-grow: 1;
+                        font-size: 1em;
+                        color: rgba(0,0,0,0.5);
+                        width: 100%;
+                        border-radius: 3px;
+                        border: 1px solid rgb(125,125,125);
+                        height: 30px;
+                        padding: 4px 5px 4px 5px;
+                        @include transition(opacity .15s .25s ease-out);
+                        &::-webkit-search-cancel-button {
+                            display: none;
+                        }
+                    }
+
+                }
+
+                > .form-visibility-toggle {
+                    display: none; // Visible only if SearchBar input itself is hidden. At non-mobile sizes.
                     height: inherit;
-                    padding: 4px 5px 3px 5px;
-                    -ms-transition: width 0.3s ease-out;
-                    -moz-transition: width 0.3s ease-out;
-                    -webkit-transition: width 0.3s ease-out;
-                    transition: width 0.3s ease-out;
-                    margin-left: 5px;
-                    &::-webkit-search-cancel-button {
-                        display: none;
+                    position: relative;
+                    z-index: 100;
+                    width: 50px;
+                    // Similar in look to .search-icon-button
+                    > button {
+                        display: block;
+                        line-height: 14px;
+                        font-size: 1.25rem;
+                        opacity: 0.5;
+                        border: none;
+                        background: none;
+                        outline: none;
+                        padding: 0;
+                        width: inherit;
+                        height: inherit;
+                        &:hover:not(:disabled) {
+                            opacity: 1;
+                            background-color: $navbar-link-hover-bg;
+                        }
                     }
                 }
 
                 .search-item-type-wrapper {
+                    padding-right: 5px;
                     > div.dropdown {
-                        > #search-item-type-selector {
+                        > button#search-item-type-selector {
                             height: 30px; // Match that of navbar-search <input>
                             margin-top: -1px;
                             padding-top: 5px;
+
+                            &:disabled {
+                                color: $gray-600; // Slightly darker than default
+                            }
 
                             + .dropdown-menu {
                                 line-height: $line-height-base;
@@ -445,19 +480,55 @@ div#top-nav.navbar-fixed-top {
                     border-top: 1px solid #ddd;
                     border-bottom: 1px solid #ddd;
 
-                    > input#navbar-search {
+                    > .form-inputs-container {
+                        width: 100%;
                         flex-grow: 1;
                     }
+
                 }
 
                 @include navbar-fixed-position {
 
-                    .search-item-type-wrapper {
-                        display: none; // Hidden until lg size
+                    // Enough width for search icon to fit
+                    width: 50px;
+                    text-align: center;
+                    justify-content: flex-end;
+                    height: inherit;
+
+                    > .form-inputs-container {
+                        position: absolute;
+                        right: -7px;
+                        width: 360px;
+                        height: inherit;
+                        @include transition(width 0.4s ease-out, opacity 0.25s 0.05s ease-out);
+                        background-color: #f8f8f8; // Matches NavBar itself
+                        padding: 0 20px;
+                        border-left: 1px solid #d0d0d0;
+                        //border-right: 1px solid #d0d0d0;
+                        background-color: #f8f8f8; //$navbar-link-active-bg;
+                        box-shadow: -4px 0px 5px -5px #bbb;
                     }
 
-                    input#navbar-search {
-                        width: 150px;
+                    &:not(.form-is-visible) {
+                        > .form-inputs-container {
+                            @include transition(width 0.75s ease-in, opacity 0.5s 0.05s ease-out);
+                            width: 0px !important;
+                            opacity: 0;
+                            pointer-events: none;
+                            z-index: 0;
+                            overflow: hidden;
+                            > #navbar-search {
+                                opacity: 0;
+                                @include transition(opacity .2s ease-out);
+                            }
+                        }
+                        > .form-visibility-toggle {
+                            display: block;
+                        }
+                    }
+    
+                    &.form-is-visible {
+                        width: auto;
                     }
 
                     &.has-input #navbar-search,
@@ -470,11 +541,8 @@ div#top-nav.navbar-fixed-top {
                 }
 
                 @include media-breakpoint-up(lg){
-                    .search-item-type-wrapper {
-                        display: block;
-                    }
-                    input#navbar-search {
-                        width: 200px;
+                    > .form-inputs-container {
+                        width: 420px;
                     }
                     &.has-input input#navbar-search,
                     input#navbar-search:focus {
@@ -487,7 +555,11 @@ div#top-nav.navbar-fixed-top {
                     position: absolute;
                     top: 50%;
                     margin-top: -7px;
+                    margin-top: -6.5px;
                     right: 10px;
+                    @include navbar-fixed-position {
+                        right: 30px;
+                    }
                     opacity: 0.33;
                     cursor: pointer;
                     &:hover {
@@ -500,12 +572,15 @@ div#top-nav.navbar-fixed-top {
                     line-height: 14px;
                     position: absolute;
                     top: 50%;
-                    margin-top: -12px;
+                    margin-top: -11px;
                     right: 2px;
+                    @include navbar-fixed-position {
+                        right: 22px;
+                    }
                     opacity: 0.25;
                     border: none;
                     background: none;
-                    padding: 4px 4px 2px;
+                    padding: 4px;
                 }
 
             }
@@ -766,16 +841,23 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
            display: none;
        }
    }
-   .test-warning {display:none;}
+   .test-warning {
+       display: none;
+    }
    .form-inline.navbar-search-form-container {
-        width: 100%;
-        input#navbar-search {
+        width: 100% !important;
+        > .form-inputs-container {
+            position: relative !important; // Override position absolute (default for navbar-fixed-position)
+            right: 0 !important;
             width: 100% !important;
-            margin-left: 0 !important;
+            border-left: none !important;
+            box-shadow: none !important;
+            .search-item-type-wrapper {
+                display: none; /* redundant since handled already in JS */
+            }
+                
         }
-        .search-item-type-wrapper {
-            display: none; /* redundant since handled already in JS */
-        }
+        
     }
 }
 
@@ -916,7 +998,8 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                         display: inline-block;
                         @include after-big-link-append;
                     }
-                    &:hover {
+                    &:hover,
+                    &.active {
                         > div > div > h3,
                         > div > div > h5,
                         > div > div > h4 {

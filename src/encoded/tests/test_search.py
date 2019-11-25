@@ -70,7 +70,7 @@ def test_collections_redirect_to_search(workbook, testapp):
     # we removed the collections page and redirect to search of that type
     # redirected_from is not used for search
     res = testapp.get('/biosamples/', status=301).follow(status=200)
-    assert res.json['@type'] == ['Search']
+    assert res.json['@type'] == ['BiosampleSearchResults', 'Search']
     assert res.json['@id'] == '/search/?type=Biosample'
     assert 'redirected_from' not in res.json['@id']
     assert res.json['@context'] == '/terms/'
@@ -106,6 +106,7 @@ def test_search_with_embedding(workbook, testapp):
 def test_search_with_simple_query(workbook, testapp):
     # run a simple query with type=Organism and q=mouse
     res = testapp.get('/search/?type=Organism&q=mouse').json
+    assert res['@type'] == ['OrganismSearchResults', 'Search']
     assert len(res['@graph']) > 0
     # get the uuids from the results
     mouse_uuids = [org['uuid'] for org in res['@graph'] if 'uuid' in org]
@@ -249,6 +250,13 @@ def test_search_query_string_AND_NOT_cancel_out(workbook, testapp):
     # if you use + and - with same field you should get no result
     search = '/search/?q=cell+-cell&type=Biosource'
     assert testapp.get(search, status=404)
+
+
+def test_search_multiple_types(workbook, testapp):
+    # multiple types work with @type in response
+    search = '/search/?type=Biosample&type=ExperimentHiC'
+    res = testapp.get(search).json
+    assert res['@type'] == ['BiosampleSearchResults', 'ExperimentHiCSearchResults', 'Search']
 
 
 def test_search_query_string_with_booleans(workbook, testapp):
