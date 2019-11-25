@@ -1,6 +1,6 @@
 'use strict';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
 import memoize from 'memoize-one';
@@ -46,16 +46,31 @@ export class SearchBar extends React.PureComponent {
         return "sets";
     }
 
+    static buildURIQuery(searchItemType, currentAction, browseBaseState = "all", hrefParts = {}){
+        const query = {};
+        if (searchItemType === 'within' || isSelectAction(currentAction)) {  // Preserve filters, incl type facet.
+            _.extend(query,
+                _.omit(hrefParts.query || {}, 'q')  // Remove 'q' as is provided via the <input name="q" .../> element.
+            );
+        } else if (searchItemType === 'all') {      // Don't preserve _any_ filters (expsettype=replicates, type=expset, etc.) - reinit with type=Item
+            _.extend(query, { 'type': 'Item' });
+        } else if (searchItemType === 'sets') {     // Don't preserve non-Browse facets - reinit with expsettype=replicates, type=expset, ...
+            const browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+            _.extend(query, browseBaseParams);
+        } else {
+            throw new Error("No valid searchItemType provided");
+        }
+    }
+
     constructor(props) {
         super(props);
         this.onToggleVisibility     = this.onToggleVisibility.bind(this);
-        this.toggleSearchAllItems   = this.toggleSearchAllItems.bind(this);
+        this.onChangeSearchItemType = this.onChangeSearchItemType.bind(this);
         this.onSearchInputChange    = this.onSearchInputChange.bind(this);
         this.onResetSearch          = this.onResetSearch.bind(this);
         this.onSearchInputBlur      = this.onSearchInputBlur.bind(this);
-        this.selectItemTypeDropdown = this.selectItemTypeDropdown.bind(this);
-        this.getDropdownTitleText = this.getDropdownTitleText.bind(this);
-        this.getActionType = this.getActionType.bind(this);
+        this.getDropdownTitleText   = this.getDropdownTitleText.bind(this);
+        this.getActionType          = this.getActionType.bind(this);
 
         let initialQuery = '';
         if (props.href){
@@ -63,7 +78,8 @@ export class SearchBar extends React.PureComponent {
         }
 
         this.memoized = {
-            deriveSearchItemTypeFromHref: memoize(SearchBar.deriveSearchItemTypeFromHref)
+            deriveSearchItemTypeFromHref: memoize(SearchBar.deriveSearchItemTypeFromHref),
+            buildURIQuery: memoize(SearchBar.buildURIQuery)
         };
 
         this.state = {
@@ -92,13 +108,6 @@ export class SearchBar extends React.PureComponent {
         }
     }
 
-    getCurrentResultsSearchQuery(hrefParts) {
-        if (!hrefParts) {
-            hrefParts = url.parse(this.props.href, true);
-        }
-        return (hrefParts && hrefParts.query && hrefParts.query.q) || null;
-    }
-
     getDropdownTitleText() {
         const { href } = this.props;
         const { searchItemType } = this.state;
@@ -115,7 +124,7 @@ export class SearchBar extends React.PureComponent {
         }
     }
 
-    toggleSearchAllItems(searchItemEventKey) {
+    onChangeSearchItemType(searchItemEventKey) {
         this.setState(function () {
             if (typeof searchItemEventKey === 'string') {
 
@@ -184,7 +193,7 @@ export class SearchBar extends React.PureComponent {
         const hrefParts = _.clone(memoizedUrlParse(href));
         hrefParts.query = _.clone(hrefParts.query || {});
         if (typeof hrefParts.search === 'string'){
-            delete hrefParts.query['q'];
+            delete hrefParts.query.q;
             delete hrefParts.search;
         }
         this.setState({
@@ -210,35 +219,8 @@ export class SearchBar extends React.PureComponent {
         }
     }
 
-    selectItemTypeDropdown(visible = false) {
-        const { currentAction, href } = this.props;
-        const { searchItemType } = this.state;
-
-        if (isSelectAction(currentAction)) return null;
-
-        return (
-            <Fade in={visible} appear>
-                <DropdownButton id="search-item-type-selector" bsSize="sm" pullRight
-                    onSelect={(eventKey, evt) => { toggleSearchAllItems(eventKey); }}
-                    title={this.getDropdownTitleText()}>
-                    <DropdownItem eventKey="sets" data-key="sets" active={searchItemType === "sets" ? true : false}>
-                        Experiment Sets
-                    </DropdownItem>
-                    <DropdownItem eventKey="all" data-key="all" active={searchItemType === "all" ? true : false}>
-                        All Items (advanced)
-                    </DropdownItem>
-                    {SearchBar.isBrowseOrSearchPage(href) ?
-                        <DropdownItem eventKey="within" data-key="within" active={searchItemType === "within" ? true : false}>
-                            Within Results
-                        </DropdownItem>
-                        : null}
-                </DropdownButton>
-            </Fade>
-        );
-    }
-
     render() {
-        const { href, currentAction } = this.props;
+        const { href, currentAction, browseBaseState } = this.props;
         const { searchItemType, typedSearchQuery, isVisible } = this.state;
         const hrefParts = memoizedUrlParse(href);
 
@@ -248,8 +230,7 @@ export class SearchBar extends React.PureComponent {
             (searchTypeFromHref === 'Item' && searchItemType === 'all') || (searchTypeFromHref === 'ExperimentSetReplicate' && searchItemType === 'sets') || (/*searchTypeFromHref === 'ExperimentSetReplicate' &&*/ searchItemType === 'within')
         );
         const searchBoxHasInput = SearchBar.hasInput(typedSearchQuery);
-        const query = {}; // Don't preserve facets.
-        const browseBaseParams = navigate.getBrowseBaseParams();
+        const query = this.memoized.buildURIQuery(searchItemType, currentAction, browseBaseState, hrefParts);
         const formClasses = [
             "form-inline",
             "navbar-search-form-container",
@@ -258,25 +239,11 @@ export class SearchBar extends React.PureComponent {
             isVisible && "form-is-visible"
         ];
 
-        if (isSelectAction(currentAction)) {
-            _.extend(query, _.omit(hrefParts.query || {}, 'q')); // Preserve facets (except 'q'), incl type facet.
-        } else if (searchItemType === 'all' && !isSelectAction(currentAction)) {
-            _.extend(query, { 'type': 'Item' });                // Don't preserve facets (expsettype=replicates, type=expset, etc.)
-        } else if (searchItemType === 'sets')  {
-            _.extend(query, browseBaseParams);
-        }
-        else if (searchItemType === 'within') {
-            _.extend(query, _.omit(hrefParts.query || {}, 'q'));
-        }
-        else {
-            _.extend(query, browseBaseParams);
-        }
-
         return ( // Form submission gets serialized and AJAXed via onSubmit handlers in App.js
             <form className={_.filter(formClasses).join(' ')} action={this.getActionType()} method="GET">
                 <div className="form-inputs-container">
                     <SelectItemTypeDropdownBtn {...{ currentAction, searchItemType, href }} disabled={!(searchBoxHasInput || searchQueryFromHref)}
-                        toggleSearchAllItems={this.toggleSearchAllItems} getDropdownTitleText={this.getDropdownTitleText} currentPageType={this.currentPageType} />
+                        onChangeSearchItemType={this.onChangeSearchItemType} getDropdownTitleText={this.getDropdownTitleText} currentPageType={this.currentPageType} />
                     <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search" ref={this.inputElemRef}
                         name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                     { showingCurrentQuery ? <i className="reset-button icon icon-times fas" onClick={this.onResetSearch} /> : null }
@@ -298,21 +265,26 @@ export class SearchBar extends React.PureComponent {
 }
 
 const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
-    const { currentAction, searchItemType, toggleSearchAllItems, href, getDropdownTitleText, disabled = true } = props;
+    const { currentAction, searchItemType, onChangeSearchItemType, href, getDropdownTitleText, disabled = true } = props;
     if (isSelectAction(currentAction)) return null;
+
+    const showWithinResultsOption = useMemo(function(){
+        return SearchBar.isBrowseOrSearchPage(href);
+    }, [href]);
+
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="sm" variant="outline-secondary" disabled={disabled}
-                onSelect={(eventKey, evt) => { toggleSearchAllItems(eventKey); }}
+                onSelect={(eventKey, evt) => { onChangeSearchItemType(eventKey); }}
                 title={getDropdownTitleText()}>
-                <DropdownItem eventKey="sets" data-key="sets" active={"sets" === searchItemType ? true : false}>
+                <DropdownItem eventKey="sets" data-key="sets" active={searchItemType === "sets"}>
                         Experiment Sets
                 </DropdownItem>
-                <DropdownItem eventKey="all" data-key="all" active={"all" === searchItemType ? true : false}>
+                <DropdownItem eventKey="all" data-key="all" active={searchItemType === "all"}>
                     All Items (advanced)
                 </DropdownItem>
-                { SearchBar.isBrowseOrSearchPage(href) ?
-                    <DropdownItem eventKey="within" data-key="within" active={searchItemType === "within" ? true : false}>
+                { showWithinResultsOption ?
+                    <DropdownItem eventKey="within" data-key="within" active={searchItemType === "within"}>
                         Within Results
                     </DropdownItem>
                     : null }
