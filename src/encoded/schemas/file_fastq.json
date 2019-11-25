@@ -138,6 +138,22 @@
                     }
                 }
             }
+        },
+        "beta_actin_sense_count":{
+            "title": "Beta-actin count in the sense strand",
+            "description": "Number of reads that match a 21kmer of the Beta-actin encoding gene in the sense strand (RNA-seq experiments)",
+            "type": "integer",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "permission": "import_items",
+            "lookup": 1000
+        },
+        "beta_actin_antisense_count":{
+            "title": "Beta-actin count in the anti-sense strand",
+            "description": "Number of reads that match a 21kmer of the Beta-actin encoding gene in the anti-sense strand (RNA-seq experiments)",
+            "type": "integer",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "permission": "import_items",
+            "lookup": 1001
         }
     }
 }

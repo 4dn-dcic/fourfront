@@ -122,6 +122,13 @@
             "type": "number",
             "lookup": 113,
             "use_for": ["MARGI"]
+        },
+        "strandedness":{
+            "title": "RNA library strandedness",
+            "description": "For RNA libraries, do reads correspond to the forward RNA strand, the complementary reverse strand or both (unstranded)",
+            "type": "string",
+            "enum": ["forward", "reverse", "unstranded"],
+            "lookup": 113
         }
     },
     "columns": {
