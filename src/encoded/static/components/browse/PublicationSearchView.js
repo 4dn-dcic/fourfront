@@ -199,9 +199,6 @@ const AuthorsBlock = React.memo(function AuthorsBlock(props){
     );
 });
 
-const AbstractBlock = React.memo(function AbstractBlock(props){
-    const { abstract = null } = props;
-});
 
 const JournalTitle = React.memo(function JournalTitle({ journal, width: colWidth }){
 

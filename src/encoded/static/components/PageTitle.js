@@ -25,6 +25,7 @@ const { Item, JSONContentResponse, SearchResponse } = typedefs;
 
 /**
  * A hardcoded mapping of URIs to title string or function.
+ * This is difficult and unintuitive to manage - we need to migrate/refactor over to approach used currently in CGAP (or some better alternative) ASAP.
  *
  * @private
  * @ignore
@@ -40,14 +41,17 @@ const TITLE_PATHNAME_MAP = {
     '/search/' : {
         'title' : function(pathName, context, href, currentAction){
             if (isSelectAction(currentAction)) return 'Selecting';
+            if (schemaTransforms.getSchemaTypeFromSearchContext(context) === "Publication") {
+                return "Publications";
+            }
             return 'Search';
         },
         'calloutTitle' : function searchViewCalloutTitle(pathName, context, href, currentAction, schemas){
-            const thisTypeTitle = (
-                schemaTransforms.getTitleForType(
-                    schemaTransforms.getSchemaTypeFromSearchContext(context), schemas
-                )
-            );
+            const searchType = schemaTransforms.getSchemaTypeFromSearchContext(context);
+            const thisTypeTitle = schemaTransforms.getTitleForType(searchType, schemas);
+            if (searchType === "Publication" && !isSelectAction(currentAction)) {
+                return null;
+            }
             return thisTypeTitle ? <span><small style={{ 'fontWeight' : 300 }}>{ isSelectAction(currentAction) ? '' : 'for' }</small> { thisTypeTitle }</span>: null;
         },
         'subtitle' : function(pathName, context, href, currentAction){
