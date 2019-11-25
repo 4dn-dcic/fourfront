@@ -171,11 +171,11 @@
         }
     },
     "columns": {
+        "date_published": {
+            "title": "Year"
+        },
         "journal": {
             "title": "Journal"
-        },
-        "date_published": {
-            "title": "Publication Date"
         },
         "number_of_experiment_sets": {
             "title": "# Experiment Sets"

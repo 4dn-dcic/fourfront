@@ -1156,6 +1156,7 @@ export default class App extends React.PureComponent {
             status,
             routeLeaf,
             hrefParts,
+            lastCSSBuildTime,
             'updateUploads'  : this.updateUploads,
             'updateUserInfo' : this.updateUserInfo,
             'setIsSubmitting': this.setIsSubmitting,
@@ -1177,20 +1178,16 @@ export default class App extends React.PureComponent {
                     <meta name="twitter:dnt" content="on" />
                     <HTMLTitle {...{ context, currentAction, canonical, status }} />
                     {base ? <base href={base}/> : null}
-                    <link rel="canonical" href={canonical} />
-                    <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
-                    }}/>
-                    <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
-                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} />
+                    <link rel="stylesheet" href={'/static/css/style.css?build=' + (lastCSSBuildTime || 0)} type="text/css" />
                     <link rel="preconnect" href="https://unpkg.com" />
                     <link rel="preconnect" href="https://fonts.googleapis.com/" />
                     <link rel="preconnect" href="//www.google-analytics.com" />
-                    <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" />
+                    <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" type="text/css" />
                     <SEO.CurrentContext {...{ context, hrefParts, baseDomain }} />
-                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet"/>
-                    <script async type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
+                    <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet" type="text/css"/>
+                    <script defer type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <script defer type="application/javascript" src="//www.google-analytics.com/analytics.js" />
+                    <link rel="canonical" href={canonical} />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
                 <React.StrictMode>
@@ -1741,7 +1738,7 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateUserInfo, browseBaseState } = this.props;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateUserInfo, browseBaseState, lastCSSBuildTime } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
@@ -1759,6 +1756,12 @@ class BodyElement extends React.PureComponent {
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
                 data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
+
+                <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
+
+                <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
+                    __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
+                }}/>
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))
