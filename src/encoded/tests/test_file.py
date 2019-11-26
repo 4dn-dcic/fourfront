@@ -420,6 +420,7 @@ def pairs_file_json(award, experiment, lab, file_formats, quality_metric_pairsqc
         'md5sum': '00000000000000000000000000000001',
         'filename': 'my.pairs.pairs.gz',
         'status': 'uploaded',
+        'accession': '4DNFIAAAAAAP',
         'quality_metric': quality_metric_pairsqc['@id']
     }
     return item
