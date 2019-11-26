@@ -3,8 +3,10 @@
 import React from 'react';
 import _ from 'underscore';
 import { DropdownButton, DropdownItem, Dropdown } from 'react-bootstrap';
-import { console, object, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+
+import { JWT, console, object, layout, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
@@ -145,6 +147,8 @@ export class MicroMetaTabView extends React.PureComponent {
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
+        this.handleClone = _.throttle(this.handleClone.bind(this), 3000);
+        this.handleStatusChange = this.handleStatusChange.bind(this);
         this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
 
@@ -189,7 +193,7 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     /**
-        * Update the current higlass viewconfig for the user, based on the current data.
+        * Update the current microscope configuration for the user, based on the current data.
         * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
         * @returns {void}
     */
@@ -199,9 +203,11 @@ export class MicroMetaTabView extends React.PureComponent {
         evt.preventDefault();
 
         const mtc = this.getMicroscopyMetadataToolComponent();
+        const currentConfStr = mtc.api.exportMicroscopeConfString();
+        const currentConf = currentConfStr && JSON.parse(currentConfStr);
 
-        if (!mtc || !mtc.api) {
-            throw new Error('Could not get current MicroscopyMetadataToolComponent api.');
+        if (!currentConf){
+            throw new Error('Could not get current configuration.');
         }
 
         if (!this.havePermissionToEdit()) {
@@ -223,7 +229,200 @@ export class MicroMetaTabView extends React.PureComponent {
             return;
         }
 
-        mtc.api.saveMicroscope();
+        // We're updating this object's microscope_settings.
+        const payload = { 'microscope_settings': currentConf };
+
+        this.setState({ 'saveLoading': true, 'modal': null }, () => {
+            ajax.load(
+                href,
+                (resp) => {
+                    // Success callback... maybe update state.originalViewConfigString or something...
+                    // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
+                    Alerts.queue({
+                        'title': "Saved " + currentConf.Name,
+                        'message': "This Microscope Configuration Item has been updated with the current viewport. This may take a few minutes to take effect.",
+                        'style': 'success'
+                    });
+                    this.setState({ 'saveLoading': false });
+                },
+                'PATCH',
+                () => {
+                    // Error callback
+                    Alerts.queue({
+                        'title': "Failed to save display.",
+                        'message': "Sorry, can you try to save again?",
+                        'style': 'danger'
+                    });
+                    this.setState({ 'saveLoading': false });
+                },
+                JSON.stringify(payload)
+            );
+        });
+
+    }
+
+    /**
+        * Create a new higlass viewconfig for the user, based on the current data.
+        * @returns {void}
+    */
+    handleClone(evt) {
+        const { context } = this.props;
+        evt.preventDefault();
+
+        const mtc = this.getMicroscopyMetadataToolComponent();
+        const currentConfStr = mtc.api.exportMicroscopeConfString();
+        const currentConf = currentConfStr && JSON.parse(currentConfStr);
+
+        if (!currentConf) {
+            throw new Error('Could not get current configuration.');
+        }
+
+        // Generate a new title and description based on the current display.
+        const userDetails = JWT.getUserDetails();
+        let userFirstName = "Unknown";
+
+        if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
+
+        const microConfTitleAppendStr = " - " + userFirstName + "'s copy";
+        const microConfDesc = context.description;
+        let microConfTitle = context.display_title + microConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
+
+        // Check if our title already has " - user's copy" substring and if so,
+        // increment an appended counter instead of re-adding the substring.
+        if (context.display_title.indexOf(microConfTitleAppendStr) > -1) {
+            const regexCheck = new RegExp('(' + microConfTitleAppendStr + ')\\s\\(\\d+\\)');
+            const regexMatches = context.display_title.match(regexCheck);
+
+            if (regexMatches && regexMatches.length === 2) {
+                // regexMatches[0] ==> " - user's copy (int)"
+                // regexMatches[1] ==> " - user's copy"
+                let copyCount = parseInt(
+                    regexMatches[0].replace(regexMatches[1], '')
+                        .trim()
+                        .replace('(', '')
+                        .replace(')', '')
+                );
+
+                copyCount++;
+                microConfTitle = (
+                    context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
+                    + microConfTitleAppendStr + ' (' + copyCount + ')'  // Add new count
+                );
+            } else {
+                // Our title already has " - user's copy" substring, but not an " (int)"
+                microConfTitle = context.display_title + ' (2)';
+            }
+        }
+
+        const fallbackCallback = (errResp, xhr) => {
+            // Error callback
+            Alerts.queue({
+                'title': "Failed to save configuration.",
+                'message': "Sorry, can you try to save again?",
+                'style': 'danger'
+            });
+            this.setState({ 'cloneLoading': false });
+        };
+
+        const payload = {
+            'title': microConfTitle,
+            'description': microConfDesc,
+            'award': context.award.uuid,
+            'lab': context.lab.uuid,
+            'microscope_settings': currentConf,
+            // We don't include other properties and let them come from schema default values.
+            // For example, default status is 'draft', which will be used.
+            // Lab and award do not carry over as current user might be from different lab.
+        };
+
+        // Try to POST/PUT a new viewconf.
+        this.setState(
+            { 'cloneLoading': true },
+            () => {
+                ajax.load(
+                    '/microscope-configurations/',
+                    (resp) => { // We're likely to get a status code of 201 - Created.
+                        this.setState({ 'cloneLoading': false }, () => {
+                            const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
+
+                            // Redirect the user to the new Microscope display.
+                            navigate(newItemHref, {}, (resp) => {
+                                // Show alert on new Item page
+                                Alerts.queue({
+                                    'title': "Saved " + microConfTitle,
+                                    'message': "Saved new display.",
+                                    'style': 'success'
+                                });
+                            });
+                        });
+                    },
+                    'POST',
+                    fallbackCallback,
+                    JSON.stringify(payload)
+                );
+            }
+        );
+
+    }
+
+    /**
+        * Copies current URL to clipbard.
+        * Sets the microscope display status to released if it isn't already.
+        *
+        * @returns {void}
+   */
+    handleStatusChange(statusToSet = 'released', evt) {
+        evt.preventDefault();
+
+        const { context, href } = this.props;
+        const mtc = this.getMicroscopyMetadataToolComponent();
+        const confTitle = context.title || context.display_title;
+
+        // If the view config has already been released, just copy the URL to the clipboard and return.
+        if (context.status === statusToSet) {
+            return;
+        }
+
+        if (!this.havePermissionToEdit()) {
+            throw new Error('No edit permissions.');
+        }
+
+        // PATCH `status: released` to current href, then in a callback, copy the URL to the clipboard.
+        this.setState(
+            { 'releaseLoading': true },
+            () => {
+                ajax.load(
+                    href,
+                    (resp) => {
+                        // Success! Generate an alert telling the user it's successful
+                        this.setState({ 'releaseLoading': false });
+                        Alerts.queue({
+                            'title': "Updated Status for " + confTitle,
+                            'message': (
+                                <p className="mb-02">
+                                    Changed Display status to <b>{statusToSet}</b>.
+                                    It may take some time for this edit to take effect.
+                                </p>
+                            ),
+                            'style': 'info'
+                        });
+                    },
+                    'PATCH',
+                    (resp) => {
+                        // Error callback
+                        this.setState({ 'releaseLoading': false });
+                        Alerts.queue({
+                            'title': "Failed to release display.",
+                            'message': "Sorry, can you try to share again?",
+                            'style': 'danger'
+                        });
+                    },
+                    JSON.stringify({
+                        'status': statusToSet
+                    })
+                );
+            }
+        );
     }
 
     statusChangeButton(){
@@ -311,44 +510,11 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     onSaveMicroscope(microscope, complete) {
-        // // Do some stuff... show pane for people to browse/select schema.. etc.
-        // setTimeout(function() {
-        //     console.log(microscope);
-        //     complete(microscope.Name);
-        // });
-
-        const { context, href } = this.props;
-        // We're updating this object's microscope_settings.
-        const payload = { 'microscope_settings': microscope };
-        console.log(microscope);
-
-        this.setState({ 'saveLoading': true, 'modal': null }, () => {
-            ajax.load(
-                href,
-                (resp) => {
-                    // Success callback... maybe update state.originalViewConfigString or something...
-                    // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
-                    Alerts.queue({
-                        'title': "Saved " + microscope.Name,
-                        'message': "This Microscope Configuration Item has been updated with the current viewport. This may take a few minutes to take effect.",
-                        'style': 'success'
-                    });
-                    this.setState({ 'saveLoading': false });
-                },
-                'PATCH',
-                () => {
-                    // Error callback
-                    Alerts.queue({
-                        'title': "Failed to save display.",
-                        'message': "Sorry, can you try to save again?",
-                        'style': 'danger'
-                    });
-                    this.setState({ 'saveLoading': false });
-                },
-                JSON.stringify(payload)
-            );
+        // Do some stuff... show pane for people to browse/select schema.. etc.
+        setTimeout(function() {
+            console.log(microscope);
+            complete(microscope.Name);
         });
-        complete(microscope.Name);
     }
 
     render(){
