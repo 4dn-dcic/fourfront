@@ -21,9 +21,7 @@
   "license": "MIT",
   "files": [],
   "repository": "4dn-dcic/fourfront",
-  "sideEffects": [
-    "src/encoded/static/components/app.js"
-  ],
+  "sideEffects": false,
   "jest": {
     "rootDir": "src/encoded/static",
     "setupFiles": [
