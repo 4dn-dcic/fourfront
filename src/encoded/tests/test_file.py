@@ -411,6 +411,18 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
     assert props['uuid'] in fastq_res.text
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
+@pytest.fixture
+def pairs_file_json(award, experiment, lab, file_formats, quality_metric_pairsqc):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'file_format': file_formats.get('pairs').get('uuid'),
+        'md5sum': '00000000000000000000000000000000',
+        'filename': 'my.cool.pairs.gz',
+        'status': 'uploaded',
+        'quality_metric': quality_metric_pairsqc['@id']
+    }
+    return item
 
 @pytest.fixture
 def mcool_file_json(award, experiment, lab, file_formats):
@@ -1343,3 +1355,8 @@ def test_track_and_file_facet_info_file_patch_override_fields(
     res2 = testapp.get(pfile['@id']).json
     tf_info = res2.get('track_and_facet_info')
     assert tf_info['experiment_type'] == 'new type'
+
+
+def test_pairs_file_qc_tsv_link(testapp, pairs_file_json):
+    res = testapp.post_json('/file_processed', pairs_file_json).json['@graph'][0]
+    assert testapp.get(res['pairsqc_table']).endswith('%s.plot_table.out' % testapp.get(resobj['href']))

@@ -61,6 +61,17 @@ def another_lab(testapp, award):
 
 
 @pytest.fixture
+def quality_metric_pairsqc(testapp, lab, award):
+    item = {
+        'name': 'quality_metric_pairsqc',
+        'title': 'Quality Metric PairsQC',
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/quality_metric_pairsqc', item).json['@graph'][0]
+
+
+@pytest.fixture
 def admin(testapp):
     item = {
         'first_name': 'Test',

@@ -881,7 +881,7 @@ class FileProcessed(File):
            s3_url = 'https://s3.amazonaws.com/{bucket}/{accession}/{accession}.plot_table.out'
            return s3_url.format(bucket=bucket, accession=accession)
        else:
-           return ''
+           return None
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
