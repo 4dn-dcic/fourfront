@@ -44,6 +44,7 @@ import FourfrontSubmissionView  from './forms/FourfrontSubmissionView';
 import BrowseView               from './browse/BrowseView';
 import SearchView               from './browse/SearchView';
 import MicroscopySearchView     from './browse/MicroscopySearchView';
+import PublicationSearchView    from './browse/PublicationSearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
 
 
@@ -89,11 +90,15 @@ content_views.register(FourfrontSubmissionView, 'Search', 'add');
 
 content_views.register(BrowseView,              'Browse');
 content_views.register(SearchView,              'Search');
+content_views.register(PublicationSearchView,   'PublicationSearchResults');
+// Use SearchView for all currentAction=selection/multiselect - reassess later re: Publications
 content_views.register(SearchView,              'Search', 'selection');
 content_views.register(SearchView,              'Search', 'multiselect');
 content_views.register(SearchView,              'Browse', 'selection');
 content_views.register(SearchView,              'Browse', 'multiselect');
 content_views.register(MicroscopySearchView,    'MicroscopeConfigurationSearchResults');
+content_views.register(SearchView,              'PublicationSearchResults', 'selection');
+content_views.register(SearchView,              'PublicationSearchResults', 'multiselect');
 content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
 
 

@@ -197,3 +197,57 @@ $search-results-above-results-row-height: 40px;
 	}
 }
 
+
+
+/*************************************************************/
+/**** Row Height & Similar Overrides for Publication View ****/
+/*************************************************************/
+
+.search-page-container[data-search-item-type="Publication"] {
+
+	.search-results-outer-container .search-results-container .inner-container .scrollable-container .search-result-row > .columns.result-table-row > .search-result-column-block {
+
+		> .inner {
+			height: 149px; // MUST be aligned to value in PublicationSearchView.js, minus 1 (for border)
+		}
+
+		&[data-field="display_title"] {
+			position: relative;
+			> .inner {
+				white-space: unset; // Allow lines to wrap
+				.title-inner {
+					div.authors-list {
+						margin-top: 3px;
+						line-height: 1.325rem;
+						font-size: 0.9625em;
+						font-weight: 500;
+						> .author-name {
+							&:not(:last-child):after {
+								content: ","; // We do it here instead of in text/JS in case we want to use bullet points or something else later. E.g. If we need to handle "Hamill, Mark" formatting of author names for example.
+								margin-right: 5px;
+							}
+						}
+					}
+					.abstract-exists-indicator {
+						position: absolute;
+						right: 4px;
+						bottom: 3px;
+						font-size: 0.8rem;
+						color: $gray-500;
+					}
+				}
+			}
+		}
+
+		&[data-field="journal"]{
+			> .inner {
+				white-space: unset; // Allow lines to wrap
+				> span.value {
+					white-space: unset; // Allow lines to wrap
+				}
+			}
+		}
+
+	}
+
+}
