@@ -59,6 +59,7 @@ def test_search_with_no_query(workbook, testapp):
     assert res.json['total'] > 0
     assert 'facets' in res
     # test default facets (data type and status)
+    import pdb; pdb.set_trace()
     default_facets = [facet['field'] for facet in res.json['facets']]
     assert 'type' in default_facets
     assert 'status' in default_facets

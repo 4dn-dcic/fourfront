@@ -20,6 +20,7 @@ from snovault.util import (
 from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
+from elasticsearch_dsl.utils import AttrDict
 from elasticsearch import (
     TransportError,
     RequestError,
@@ -152,14 +153,19 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Execute the query
     if size == 'all':
         es_results = execute_search_for_all_results(search)
+        meta_search = search[0]
+        meta = search.execute()
     else:
         size_search = search[from_:from_ + size]
         es_results = execute_search(size_search)
+        meta_search = search[0]
+        meta = search.execute()
 
     ### Record total number of hits
-    result['total'] = total = es_results['hits']['total']
-    result['facets'] = format_facets(es_results, facets, total, search_frame)
-    result['aggregations'] = format_extra_aggregations(es_results)
+    import pdb; pdb.set_trace()
+    result['total'] = total = len(es_results)
+    result['facets'] = format_facets(meta, facets, total, search_frame)
+    result['aggregations'] = format_extra_aggregations(meta)
 
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
@@ -190,7 +196,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['notification'] = 'Success'
 
     ### Format results for JSON-LD
-    graph = format_results(request, es_results['hits']['hits'], search_frame)
+    graph = format_results(request, es_results, search_frame)
 
     if request.__parent__ is not None or return_generator:
         if return_generator:
@@ -278,28 +284,10 @@ def get_pagination(request):
     return from_, size
 
 
-def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
-    from_ = 0
-    while extra_requests_needed_count > 0:
-        #print(str(extra_requests_needed_count) + " requests left to get all results.")
-        from_ = from_ + size_increment
-        subsequent_search = search[from_:from_ + size_increment]
-        subsequent_search_result = execute_search(subsequent_search)
-        extra_requests_needed_count -= 1
-        for hit in subsequent_search_result['hits'].get('hits', []):
-            yield hit
-
 def execute_search_for_all_results(search):
-    size_increment = 100 # Decrease this to like 5 or 10 to test.
-
-    first_search = search[0:size_increment] # get aggregations from here
-    es_result = execute_search(first_search)
-
-    total_results_expected = es_result['hits'].get('total',0)
-    extra_requests_needed_count = int(math.ceil(total_results_expected / size_increment)) - 1 # Decrease by 1 (first es_result already happened)
-
-    if extra_requests_needed_count > 0:
-        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, size_increment))
+    es_result = []
+    for hit in search.scan():
+        es_result.append(hit.to_dict())
     return es_result
 
 
@@ -1238,7 +1226,9 @@ def execute_search(search):
     """
     err_exp = None
     try:
-        es_results = search.execute().to_dict()
+        es_results = []
+        for hit in search.scan():
+            es_results.append(hit.to_dict())
     except ConnectionTimeout as exc:
         err_exp = 'The search failed due to a timeout. Please try a different query.'
     except RequestError as exc:
@@ -1310,8 +1300,13 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 if len(result_facet.get('terms', [])) < 1:
                     continue
 
-            if len(aggregations[full_agg_name].keys()) > 2:
-                result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
+            # XXX: es_dsl sometimes gives an AttrDict ?
+            if type(aggregations) == AttrDict:
+                aggregations_dict = aggregations.to_dict()
+            else:
+                aggregations_dict = aggregations
+            if len(aggregations_dict[full_agg_name].keys()) > 2:
+                result_facet['extra_aggs'] = { k:v for k,v in aggregations_dict[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
 
         result.append(result_facet)
 
@@ -1320,7 +1315,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
 def format_extra_aggregations(es_results):
     if 'aggregations' not in es_results:
         return {}
-    return { k:v for k,v in es_results['aggregations'].items() if k != 'all_items' }
+    return { k:v for k,v in es_results['aggregations'].to_dict().items() if k != 'all_items' }
 
 
 def format_results(request, hits, search_frame):
@@ -1336,17 +1331,16 @@ def format_results(request, hits, search_frame):
         frame = search_frame
     else:
         frame = 'embedded'
-
     if frame in ['embedded', 'object', 'raw']:
         # transform 'raw' to 'properties', which is what is stored in ES
         if frame == 'raw':
             frame = 'properties'
         for hit in hits:
-            frame_result = hit['_source'][frame]
-            if 'validation_errors' in hit['_source'] and 'validation_errors' not in frame_result:
-                frame_result['validation_errors'] = hit['_source']['validation_errors']
-            if 'aggregated_items' in hit['_source'] and 'aggregated_items' not in frame_result:
-                frame_result['aggregated_items'] = hit['_source']['aggregated_items']
+            frame_result = hit[frame]
+            if 'validation_errors' in hit and 'validation_errors' not in frame_result:
+                frame_result['validation_errors'] = hit['validation_errors']
+            if 'aggregated_items' in hit and 'aggregated_items' not in frame_result:
+                frame_result['aggregated_items'] = hit['aggregated_items']
             yield frame_result
         return
 
