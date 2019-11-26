@@ -417,8 +417,8 @@ def pairs_file_json(award, experiment, lab, file_formats, quality_metric_pairsqc
         'award': award['@id'],
         'lab': lab['@id'],
         'file_format': file_formats.get('pairs').get('uuid'),
-        'md5sum': '00000000000000000000000000000000',
-        'filename': 'my.cool.pairs.gz',
+        'md5sum': '00000000000000000000000000000001',
+        'filename': 'my.pairs.pairs.gz',
         'status': 'uploaded',
         'quality_metric': quality_metric_pairsqc['@id']
     }
