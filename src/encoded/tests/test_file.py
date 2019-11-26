@@ -1359,4 +1359,4 @@ def test_track_and_file_facet_info_file_patch_override_fields(
 
 def test_pairs_file_qc_tsv_link(testapp, pairs_file_json):
     res = testapp.post_json('/file_processed', pairs_file_json).json['@graph'][0]
-    assert testapp.get(res['pairsqc_table']).endswith('%s.plot_table.out' % testapp.get(resobj['href']))
+    assert testapp.get(res['pairsqc_table']).endswith('%s.plot_table.out' % testapp.get(res['accession']))
