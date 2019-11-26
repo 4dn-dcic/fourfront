@@ -94,7 +94,7 @@ AccountNav.propTypes = {
 
 
 function UserActionsMenu(props){
-    const { userActions, href, updateUserInfo, userDetails, onMenuItemClick, windowWidth, windowHeight } = props;
+    const { userActions, href, updateUserInfo, userDetails, windowWidth, windowHeight } = props;
     const { first_name: firstName = "Account", last_name: lastName = null } = userDetails;
     const introTitle = firstName + (lastName ? " " + lastName : "");
 
@@ -117,7 +117,7 @@ function UserActionsMenu(props){
         return (
             <div className={"level-1-title-container" + (isActive ? " active" : "")} key={actionID}>
                 <a className="level-1-title text-medium d-block" href={getActionURL(action, href)}
-                    onClick={onMenuItemClick} id={"menutree-linkto-" + targetHref.replace(/\//g, '_')} >
+                    id={"menutree-linkto-" + targetHref.replace(/\//g, '_')} >
                     { prepend }
                     <span>{ actionTitle }</span>
                 </a>
@@ -128,7 +128,7 @@ function UserActionsMenu(props){
     const introBlock = (
         <BigDropdownIntroductionWrapper titleIcon="user fas" className="mb-0 border-0" {...{ windowWidth, windowHeight }}>
             <h4 className="mb-0 mt-0 text-ellipsis-container">
-                <a href={viewProfileURL} onClick={onMenuItemClick}>
+                <a href={viewProfileURL}>
                     { introTitle }
                 </a>
             </h4>

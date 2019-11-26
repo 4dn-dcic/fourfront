@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, } from './ItemPageTable';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, ViewMoreResultsBtn } from './ItemPageTable';
 import { columnExtensionMap } from './../../../browse/columnExtensionMap';
 import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
 
@@ -43,7 +43,7 @@ export class ExperimentSetTables extends React.PureComponent {
     }
 
     render(){
-        const { loading, title, experiment_sets, results, countTotalResults, hrefWithoutLimit } = this.props;
+        const { loading, title, experiment_sets, results } = this.props;
         const expSets = experiment_sets || results;
 
         if (loading || !Array.isArray(expSets)){
@@ -58,22 +58,6 @@ export class ExperimentSetTables extends React.PureComponent {
                     Not used in any Experiment Sets
                 </div>
             );
-        }
-
-        let viewMoreAppend;
-        if (typeof countTotalResults === 'number'){
-            const visibleResultCount = expSets.length;
-            if (countTotalResults > visibleResultCount){
-                if (hrefWithoutLimit){
-                    viewMoreAppend = (
-                        <a type="button" className="mt-2 btn btn-lg btn-primary" href={hrefWithoutLimit}>
-                            View all Experiment Sets ({ countTotalResults - visibleResultCount + ' more' })
-                        </a>
-                    );
-                } else {
-                    viewMoreAppend = (countTotalResults - visibleResultCount) + ' more Experiment Sets';
-                }
-            }
         }
 
         return (
@@ -92,7 +76,7 @@ export class ExperimentSetTables extends React.PureComponent {
                     }}
                     {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')}
                 />
-                { viewMoreAppend }
+                <ViewMoreResultsBtn {..._.pick(this.props, 'countTotalResults', 'hrefWithoutLimit')} results={expSets} itemTypeTitle="Experiment Set" />
             </div>
         );
     }

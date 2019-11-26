@@ -60,7 +60,7 @@ describe('Deployment/CI Search View Tests', function () {
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container span.title').should('have.text', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
                 .location('search')
-                .should('include', 'award.project=4DN')
+                .should('include', 'ExperimentSetReplicate')
                 .should('include', 'q=mouse');
         });
 
@@ -85,8 +85,9 @@ describe('Deployment/CI Search View Tests', function () {
         it('Wildcard query string returns all results.', function(){
             cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
                 cy.get('input[name="q"]').focus().clear().type('*').wait(10).end()
+                    .get('form.navbar-search-form-container').submit().end()
                     .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                    .get('form.navbar-search-form-container div.dropdown-menu a:last-child').click().end() // Select 'All Items'
+                    .get('form.navbar-search-form-container div.dropdown-menu a:not(.active)').click().end()                    
                     .get('form.navbar-search-form-container').submit().end()
                     // handle url encoding
                     .location('search').should('include', '%2A').wait(300).end()

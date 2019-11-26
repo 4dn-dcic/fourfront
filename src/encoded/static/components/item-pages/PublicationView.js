@@ -25,7 +25,6 @@ export default class PublicationView extends DefaultItemView {
             const expSetTableProps = _.extend({}, this.props, {
                 'requestHref' : (
                     "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
-                    //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                     "publications_of_set.display_title=" + encodeURIComponent(context.display_title)
                 )
             });
@@ -208,9 +207,9 @@ class PublicationSummary extends React.PureComponent {
     }
 
     render(){
-        const { context } = this.props;
+        const { context, windowWidth } = this.props;
         const abstractCol = this.abstract();
-        const staticContent = _.pluck(_.filter(context.static_content || [], function(s){
+        const staticContent = _.pluck(_.filter(context.static_content || [], function (s) {
             return s.content && !s.content.error && s.location === 'tab:overview';
         }), 'content');
 
@@ -230,7 +229,7 @@ class PublicationSummary extends React.PureComponent {
                 { staticContent.length > 0 ? (
                     <div className="mt-2">
                         <hr/>
-                        <UserContentBodyList contents={staticContent} />
+                        <UserContentBodyList contents={staticContent} windowWidth={windowWidth} />
                     </div>
                 ) : null }
             </div>
