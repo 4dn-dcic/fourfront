@@ -2,9 +2,14 @@
 
 import React from 'react';
 import _ from 'underscore';
+import { DropdownButton, DropdownItem, Dropdown } from 'react-bootstrap';
 import { console, object, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { ItemFileAttachment } from './components/ItemFileAttachment';
 import DefaultItemView from './DefaultItemView';
+import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
+import { ConfirmModal } from './HiGlassViewConfigView';
+import { timingSafeEqual } from 'crypto';
 
 
 export default class MicroscopeConfigurationView extends DefaultItemView {
@@ -99,13 +104,13 @@ class StaticPageMicrometaWrapper extends React.PureComponent {
 }
 */
 
-function onSaveMicroscope(microscope, complete) {
-    // Do some stuff... show pane for people to browse/select schema.. etc.
-    setTimeout(function() {
-        console.log(microscope);
-        complete(microscope.Name);
-    });
-}
+// function onSaveMicroscope(microscope, complete) {
+//     // Do some stuff... show pane for people to browse/select schema.. etc.
+//     setTimeout(function() {
+//         console.log(microscope);
+//         complete(microscope.Name);
+//     });
+// }
 
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
@@ -134,9 +139,25 @@ export class MicroMetaTabView extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.fullscreenButton = this.fullscreenButton.bind(this);
+        this.saveButton = this.saveButton.bind(this);
+        this.cloneButton = this.cloneButton.bind(this);
+        this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
+        this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
+        this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
+        this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
+        this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
+
         this.state = {
-            mounted: false
+            'mounted'               : false,
+            'saveLoading'           : false,
+            'cloneLoading'          : false,
+            'releaseLoading'        : false,
+            'addFileLoading'        : false,
+            'modal'                 : null
         };
+
+        this.microMetaToolRef = React.createRef();
     }
 
     componentDidMount(){
@@ -158,11 +179,183 @@ export class MicroMetaTabView extends React.PureComponent {
         }
     }
 
+    getMicroscopyMetadataToolComponent(){
+        return (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current) || null;
+    }
+
+    havePermissionToEdit(){
+        const { session, context : { actions = [] } } = this.props;
+        return !!(session && _.findWhere(actions, { 'name' : 'edit' }));
+    }
+
+    /**
+        * Update the current higlass viewconfig for the user, based on the current data.
+        * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
+        * @returns {void}
+    */
+    handleSave(evt) {
+        const { href, context } = this.props;
+        const { modal } = this.state;
+        evt.preventDefault();
+
+        const mtc = this.getMicroscopyMetadataToolComponent();
+
+        if (!mtc || !mtc.api) {
+            throw new Error('Could not get current MicroscopyMetadataToolComponent api.');
+        }
+
+        if (!this.havePermissionToEdit()) {
+            // I guess would also get caught in ajax error callback.
+            throw new Error('No edit permissions.');
+        }
+
+        if (modal == null && context.status && typeof context.status === 'string' &&
+            (context.status === 'released' || context.status === 'released to project')) {
+            this.setState({
+                'modal': (
+                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel}
+                        confirmButtonText="Save" cancelButtonText="Cancel" modalTitle="Confirm Save">
+                        You are overwriting a Microscope Configuration Item that was previously shared with public. Are you sure?
+                        <br />Note that you can also clone this display and share the new copy.
+                    </ConfirmModal>
+                )
+            });
+            return;
+        }
+
+        mtc.api.saveMicroscope();
+    }
+
+    statusChangeButton(){
+        const { session, context } = this.props;
+        const { saveLoading, cloneLoading, releaseLoading } = this.state;
+        const editPermission = this.havePermissionToEdit();
+
+        if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
+
+        const btnProps  = {
+            'onSelect'      : this.handleStatusChange,
+            //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
+            'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
+            'disabled'      : releaseLoading,
+            'key'           : 'statuschangebtn',
+            'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
+            'title'         : (
+                <React.Fragment>
+                    <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-notch fas icon-spin' : 'id-badge far')}/>&nbsp; Manage
+                </React.Fragment>
+            ),
+            'pullRight'     : true
+        };
+
+        return (
+            <DropdownButton {...btnProps}>
+                <StatusMenuItem eventKey="released" context={context}>Visible by Everyone</StatusMenuItem>
+                <StatusMenuItem eventKey="released to project" context={context}>Visible by Network</StatusMenuItem>
+                <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
+                <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
+                <Dropdown.Divider />
+                {/* These statuses currently not available.
+                <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
+                <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
+                */}
+                <StatusMenuItem eventKey="deleted" context={context}>Delete</StatusMenuItem>
+            </DropdownButton>
+        );
+    }
+
+    saveButton(){
+        const { session, context } = this.props;
+        const { saveLoading } = this.state;
+        const tooltip = "Save the current view shown below to this display";
+
+        const editPermission  = this.havePermissionToEdit();
+
+        return (
+            <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
+                <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-notch icon-spin fas' : 'save fas')}/>&nbsp; Save
+            </button>
+        );
+    }
+
+    cloneButton(){
+        const { session } = this.props;
+        const { cloneLoading } = this.state;
+        const tooltip = "Create your own new HiGlass Display based off of this one";
+
+        return (
+            <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
+                <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Clone
+            </button>
+        );
+    }
+
+    /**
+     * Is used to call {function} `props.toggleFullScreen` which is passed down from app.js BodyElement.
+     */
+    handleFullscreenToggle(){
+        const { isFullscreen, toggleFullScreen } = this.props;
+        setTimeout(toggleFullScreen, 0, !isFullscreen);
+    }
+
+    fullscreenButton(){
+        const { isFullscreen, toggleFullScreen } = this.props;
+        if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
+            return (
+                <button type="button" className="btn btn-outline-dark" onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
+                    <i className={"icon icon-fw fas icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
+                </button>
+            );
+        }
+        return null;
+    }
+
+    onSaveMicroscope(microscope, complete) {
+        // // Do some stuff... show pane for people to browse/select schema.. etc.
+        // setTimeout(function() {
+        //     console.log(microscope);
+        //     complete(microscope.Name);
+        // });
+
+        const { context, href } = this.props;
+        // We're updating this object's microscope_settings.
+        const payload = { 'microscope_settings': microscope };
+        console.log(microscope);
+
+        this.setState({ 'saveLoading': true, 'modal': null }, () => {
+            ajax.load(
+                href,
+                (resp) => {
+                    // Success callback... maybe update state.originalViewConfigString or something...
+                    // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
+                    Alerts.queue({
+                        'title': "Saved " + microscope.Name,
+                        'message': "This Microscope Configuration Item has been updated with the current viewport. This may take a few minutes to take effect.",
+                        'style': 'success'
+                    });
+                    this.setState({ 'saveLoading': false });
+                },
+                'PATCH',
+                () => {
+                    // Error callback
+                    Alerts.queue({
+                        'title': "Failed to save display.",
+                        'message': "Sorry, can you try to save again?",
+                        'style': 'danger'
+                    });
+                    this.setState({ 'saveLoading': false });
+                },
+                JSON.stringify(payload)
+            );
+        });
+        complete(microscope.Name);
+    }
+
     render(){
         const { schemas, context, windowWidth, windowHeight } = this.props;
         const { mounted } = this.state;
-        const tips = object.tipsFromSchema(schemas, context);
-        const result = context;
+        // const tips = object.tipsFromSchema(schemas, context);
+        // const result = context;
         const width = layout.gridContainerWidth(windowWidth);
         const height = Math.max(windowHeight / 2, 600);
 
@@ -178,17 +371,42 @@ export class MicroMetaTabView extends React.PureComponent {
             width, height,
             onLoadMicroscopes,
             onLoadSchema,
-            onSaveMicroscope,
+            onSaveMicroscope: this.onSaveMicroscope,
             //visualizeImmediately: true,
             //loadedMicroscopeConfiguration: { ... },
             imagesPath
         };
 
         return (
-            <div className="container px-0">
-                <MicroscopyMetadataTool {...passProps} loadedMicroscopeConfiguration={context.microscope_setting} />
+            <div className="overflow-hidden tabview-container-fullscreen-capable">
+                <h3 className="tab-section-title">
+                    {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
+                        className="btn-success mt-17" style={{ 'paddingLeft': 30, 'paddingRight': 30 }} /> */}
+                    <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}
+                        constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
+                        {this.saveButton()}
+                        {this.cloneButton()}
+                        {this.statusChangeButton()}
+                    </CollapsibleItemViewButtonToolbar>
+                </h3>
+                <hr className="tab-section-title-horiz-divider" />
+                <div className="container px-0">
+                    <MicroscopyMetadataTool {...passProps} microscope={context.microscope_settings} ref={this.microMetaToolRef} />
+                </div>
             </div>
         );
     }
 
+}
+
+function StatusMenuItem(props){
+    const { eventKey, context, children } = props;
+    const active = context.status === eventKey;
+    return (
+        <DropdownItem {..._.omit(props, 'context')} active={active}>
+            <span className={active ? "text-500" : null}>
+                <i className="item-status-indicator-dot" data-status={eventKey} />&nbsp;  { children }
+            </span>
+        </DropdownItem>
+    );
 }

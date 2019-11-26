@@ -31,7 +31,21 @@
         "microscope_settings" : {
             "type" : "object",
             "title" : "Settings",
-            "additionalProperties": true
+            "additionalProperties": true,
+            "properties": {
+                "schema_id": {
+                    "title": "Schema ID",
+                    "type": "string"
+                }
+            }
         }
-    }
+    },
+    "facets" : {
+    },
+    "columns" : {
+        "submitted_by.display_title" : {
+            "title" : "Creator"
+        }
+    },
+    "excludedColumns" : ["lab.display_title"]
 }
