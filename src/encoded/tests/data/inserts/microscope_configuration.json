@@ -4,6 +4,19 @@
         "description": "Test microscope tier A1 info",
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
-        "award": "1U01CA200059-01"
+        "award": "1U01CA200059-01",
+        "microscope": {
+            "ID": "f812d6e5-de31-43b6-8ee0-47236494253a",
+            "Schema_ID": "Microscope.json",
+            "components": [],
+            "ValidationTier": 1,
+            "Version": "1.06.5",
+            "Tier": 1,
+            "Name": "4DN Microscope",
+            "Manufacturer": "Nikon",
+            "Model": "Eclipse 50i",
+            "Serial": "MBA85020",
+            "Type": "Custom Made"
+        }
     }
 ]

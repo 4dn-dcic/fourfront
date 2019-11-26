@@ -83,37 +83,6 @@ function onLoadMicroscopes(complete) {
     complete(microscopesDB);
 }
 
-/* Rough Idea for when on a static or collections page:
-class StaticPageMicrometaWrapper extends React.PureComponent {
-    constructor(props){
-        super(props);
-        this.state = {
-            isSelecting: false
-        };
-        this.completeOnLoad = null;
-    }
-    onLoadMicroscopes(complete){
-        this.setState({ isSelecting: true });
-        this.completeOnLoad = complete;
-    }
-    onReceiveMicroscopeConfig(res){
-        this.completeOnLoad(res);
-    }
-    render(){
-        if (this.state.isSelecting) {
-            return <LinkToSelector/>;
-        }
-}
-*/
-
-// function onSaveMicroscope(microscope, complete) {
-//     // Do some stuff... show pane for people to browse/select schema.. etc.
-//     setTimeout(function() {
-//         console.log(microscope);
-//         complete(microscope.Name);
-//     });
-// }
-
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
 const imagesPath = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/";
@@ -193,72 +162,22 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     /**
-        * Update the current microscope configuration for the user, based on the current data.
-        * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
-        * @returns {void}
+      * Update the current microscope configuration for the user, based on the current data.
+      * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
+      * @returns {void}
     */
     handleSave(evt) {
-        const { href, context } = this.props;
-        const { modal } = this.state;
         evt.preventDefault();
 
         const mtc = this.getMicroscopyMetadataToolComponent();
-        const currentConfStr = mtc.api.exportMicroscopeConfString();
-        const currentConf = currentConfStr && JSON.parse(currentConfStr);
+        const microscopeStr = mtc.api.exportMicroscopeConfString();
+        const microscope = microscopeStr && JSON.parse(microscopeStr);
 
-        if (!currentConf){
+        if (!microscope){
             throw new Error('Could not get current configuration.');
         }
 
-        if (!this.havePermissionToEdit()) {
-            // I guess would also get caught in ajax error callback.
-            throw new Error('No edit permissions.');
-        }
-
-        if (modal == null && context.status && typeof context.status === 'string' &&
-            (context.status === 'released' || context.status === 'released to project')) {
-            this.setState({
-                'modal': (
-                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel}
-                        confirmButtonText="Save" cancelButtonText="Cancel" modalTitle="Confirm Save">
-                        You are overwriting a Microscope Configuration Item that was previously shared with public. Are you sure?
-                        <br />Note that you can also clone this display and share the new copy.
-                    </ConfirmModal>
-                )
-            });
-            return;
-        }
-
-        // We're updating this object's microscope_settings.
-        const payload = { 'microscope_settings': currentConf };
-
-        this.setState({ 'saveLoading': true, 'modal': null }, () => {
-            ajax.load(
-                href,
-                (resp) => {
-                    // Success callback... maybe update state.originalViewConfigString or something...
-                    // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
-                    Alerts.queue({
-                        'title': "Saved " + currentConf.Name,
-                        'message': "This Microscope Configuration Item has been updated with the current viewport. This may take a few minutes to take effect.",
-                        'style': 'success'
-                    });
-                    this.setState({ 'saveLoading': false });
-                },
-                'PATCH',
-                () => {
-                    // Error callback
-                    Alerts.queue({
-                        'title': "Failed to save display.",
-                        'message': "Sorry, can you try to save again?",
-                        'style': 'danger'
-                    });
-                    this.setState({ 'saveLoading': false });
-                },
-                JSON.stringify(payload)
-            );
-        });
-
+        this.onSaveMicroscope(microscope);
     }
 
     /**
@@ -270,10 +189,10 @@ export class MicroMetaTabView extends React.PureComponent {
         evt.preventDefault();
 
         const mtc = this.getMicroscopyMetadataToolComponent();
-        const currentConfStr = mtc.api.exportMicroscopeConfString();
-        const currentConf = currentConfStr && JSON.parse(currentConfStr);
+        const microscopeStr = mtc.api.exportMicroscopeConfString();
+        const microscope = microscopeStr && JSON.parse(microscopeStr);
 
-        if (!currentConf) {
+        if (!microscope) {
             throw new Error('Could not get current configuration.');
         }
 
@@ -327,9 +246,9 @@ export class MicroMetaTabView extends React.PureComponent {
         const payload = {
             'title': microConfTitle,
             'description': microConfDesc,
-            'award': context.award.uuid,
-            'lab': context.lab.uuid,
-            'microscope_settings': currentConf,
+            'award': context.award.uuid,//??
+            'lab': context.lab.uuid,//??
+            'microscope': microscope,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
             // Lab and award do not carry over as current user might be from different lab.
@@ -370,7 +289,7 @@ export class MicroMetaTabView extends React.PureComponent {
         * Sets the microscope display status to released if it isn't already.
         *
         * @returns {void}
-   */
+    */
     handleStatusChange(statusToSet = 'released', evt) {
         evt.preventDefault();
 
@@ -510,11 +429,64 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     onSaveMicroscope(microscope, complete) {
-        // Do some stuff... show pane for people to browse/select schema.. etc.
-        setTimeout(function() {
-            console.log(microscope);
-            complete(microscope.Name);
+        const { href, context } = this.props;
+        const { modal } = this.state;
+
+        if (!this.havePermissionToEdit()) {
+            // I guess would also get caught in ajax error callback.
+            throw new Error('No edit permissions.');
+        }
+
+        if (modal == null && context.status && typeof context.status === 'string' &&
+            (context.status === 'released' || context.status === 'released to project')) {
+            this.setState({
+                'modal': (
+                    <ConfirmModal handleConfirm={this.handleSave} handleCancel={this.handleModalCancel}
+                        confirmButtonText="Save" cancelButtonText="Cancel" modalTitle="Confirm Save">
+                        You are overwriting a Microscope Configuration Item that was previously shared with public. Are you sure?
+                        <br />Note that you can also clone this display and share the new copy.
+                    </ConfirmModal>
+                )
+            });
+            return;
+        }
+
+        // We're updating this object's microscope.
+        const payload = {
+            'title': microscope.Name,
+            'microscope': microscope
+        };
+
+        this.setState({ 'saveLoading': true, 'modal': null }, () => {
+            ajax.load(
+                href,
+                (resp) => {
+                    // Success callback... maybe update state.originalViewConfigString or something...
+                    // At this point we're saved maybe just notify user somehow if UI update re: state.saveLoading not enough.
+                    Alerts.queue({
+                        'title': "Saved " + microscope.Name,
+                        'message': "This Microscope Configuration Item has been updated with the current viewport. This may take a few minutes to take effect.",
+                        'style': 'success'
+                    });
+                    this.setState({ 'saveLoading': false });
+                },
+                'PATCH',
+                () => {
+                    // Error callback
+                    Alerts.queue({
+                        'title': "Failed to save display.",
+                        'message': "Sorry, can you try to save again?",
+                        'style': 'danger'
+                    });
+                    this.setState({ 'saveLoading': false });
+                },
+                JSON.stringify(payload)
+            );
         });
+
+        if (complete) {
+            complete(microscope.Name);
+        }
     }
 
     render(){
@@ -557,7 +529,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 </h3>
                 <hr className="tab-section-title-horiz-divider" />
                 <div className="container px-0">
-                    <MicroscopyMetadataTool {...passProps} microscope={context.microscope_settings} ref={this.microMetaToolRef} />
+                    <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                 </div>
             </div>
         );

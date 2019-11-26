@@ -28,23 +28,91 @@
         "schema_version": {
             "default": "1"
         },
-        "microscope_settings" : {
+        "title": {
+            "title": "Title",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description" : "Description of microscope configuration.",
+            "type": "string"
+        },
+        "microscope" : {
             "type" : "object",
             "title" : "Settings",
             "additionalProperties": true,
-            "properties": {
-                "schema_id": {
-                    "title": "Schema ID",
+            "properties":{
+                "Name": {
+                    "title": "Name",
+                    "comment": "Title for the Microscope Configuration",
                     "type": "string"
+                },
+                "Tier": {
+                    "title": "Tier",
+                    "description": "Configuration tier of microscope",
+                    "type" : "integer",
+                    "default" : 1,
+                    "enum" : [1, 2, 3, 4, 5]
+                },
+                "ValidationTier": {
+                    "title": "Validation Tier",
+                    "description": "Configuration validation tier of microscope",
+                    "type" : "integer",
+                    "default" : 1,
+                    "enum" : [1, 2, 3, 4, 5]
+                },
+                "Manufacturer": {
+                    "title": "Manufacturer",
+                    "description": "Manufacturer of microscope",
+                    "type" : "string"
+                },
+                "Model": {
+                    "title": "Model",
+                    "description": "Model of microscope",
+                    "type" : "string"
+                },
+                "SerialNumber": {
+                    "title": "Serial Number",
+                    "description": "Serial number of microscope",
+                    "type" : "string"
+                },
+                "Type": {
+                    "title": "Type",
+                    "description": "Type of microscope",
+                    "type" : "string"
                 }
             }
         }
     },
     "facets" : {
+        "microscope.Tier":{ 
+            "title": "Tier"
+        },
+        "microscope.Manufacturer":{ 
+            "title": "Manufacturer"
+        },
+        "microscope.Model":{ 
+            "title": "Model"
+        },
+        "microscope.Type":{ 
+            "title": "Type"
+        }
     },
     "columns" : {
         "submitted_by.display_title" : {
             "title" : "Creator"
+        },
+        "microscope.Tier":{ 
+            "title": "Tier"
+        },
+        "microscope.Manufacturer":{ 
+            "title": "Manufacturer"
+        },
+        "microscope.Model":{ 
+            "title": "Model"
+        },
+        "microscope.Type":{ 
+            "title": "Type"
         }
     },
     "excludedColumns" : ["lab.display_title"]
