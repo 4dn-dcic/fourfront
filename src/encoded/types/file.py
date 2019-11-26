@@ -875,7 +875,7 @@ class FileProcessed(File):
         "description": "Link to a PairsQC quality metric table tsv file",
         "type": "string"
     })
-    def pairsqc_table(self, request, file_format, accession=None, quality_metric=None):
+    def pairsqc_table(self, request, file_format, accession, quality_metric=None):
        if file_format.endswith('pairs/') and quality_metric:
            bucket = request.registry.settings.get('file_wfout_bucket')
            s3_url = 'https://s3.amazonaws.com/{bucket}/{accession}/{accession}.plot_table.out'
