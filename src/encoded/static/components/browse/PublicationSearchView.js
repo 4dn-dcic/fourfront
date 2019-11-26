@@ -1,13 +1,16 @@
 'use strict';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import memoize from 'memoize-one';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
 
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 import { console, analytics, object, navigate as spcNavigate, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { TableRowToggleOpenButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
+import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { columnExtensionMap } from './columnExtensionMap';
 import { Schemas } from './../util';
@@ -19,7 +22,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     // We override display_title for this view to be wider.
     // And awesomer.
     "display_title" : {
-        "widthMap" : { "sm" : 320, "md" : 520, "lg" : 670 },
+        "widthMap" : { "sm" : 320, "md" : 520, "lg" : 640 },
         'minColumnWidth' : 200,
         "render" : function(result, columnDefinition, props, termTransformFxn){
             return <PublicationSearchResultTitle {...props} {...{ result }} />;
@@ -61,7 +64,10 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
                 </span>
             );
         }
-    }
+    },
+    "award.project" : {
+        "widthMap" : { "sm" : 60, "md" : 70, "lg" : 80 }
+    },
 });
 
 /**
@@ -90,7 +96,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
     }
 
     onClickTrack(evt){
-        const { result, href, navigate = spcNavigate } = this.props;
+        const { result, href, navigate = spcNavigate, rowNumber } = this.props;
         evt.preventDefault();
         evt.stopPropagation();
         analytics.productClick(result, {
@@ -103,7 +109,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
     }
 
     render(){
-        const { result, detailOpen, toggleDetailOpen, rowNumber, href, navigate = spcNavigate, width: colWidth, showAbstractBlock } = this.props;
+        const { result, detailOpen, toggleDetailOpen, width: colWidth, showAbstractBlock } = this.props;
         const {
             title: origTitle, // We use "title" here, not "display_title" (which contains year+author, also)
             "@id" : id,
@@ -133,6 +139,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
     }
 }
 
+/** Currently disabled */
 const AbstractBlock = React.memo(function({ enabled, authors, titleLen, titleMaxLen, abstract: origAbstract, charsPerLine, colWidth }){
     if (!enabled) return null;
 
@@ -253,13 +260,55 @@ const JournalTitle = React.memo(function JournalTitle({ journal, width: colWidth
 });
 
 
+
+export function PublicationDetailPane(props){
+    const { result, schemas } = props;
+    const { abstract = null } = result;
+
+    // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
+    // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
+    useEffect(function(){
+        ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
+    }, []);
+
+    return (
+        <div className="mr-1">
+            { !abstract ? null : (
+                <div className="flex-description-container">
+                    <h5><i className="icon icon-fw icon-align-left fas"/>&nbsp; Abstract</h5>
+                    <p className="text-normal ml-22 mt-1">{ abstract }</p>
+                    <hr className="desc-separator" />
+                </div>
+            )}
+            <div className="item-page-detail">
+                <h5 className="text-500"><i className="icon icon-fw icon-list fas"/>&nbsp; Details</h5>
+                <Detail context={result} open={false} schemas={schemas} excludedKeys={PublicationDetailPane.excludedKeys} />
+            </div>
+        </div>
+    );
+}
+PublicationDetailPane.excludedKeys = [
+    ...Detail.defaultProps.excludedKeys,
+    "title", "abstract", "authors", "short_attribution", "static_content",
+    "submitted_by", "published_by", "journal"
+];
+
+
 export default class PublicationSearchView extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.renderDetailPane = this.renderDetailPane.bind(this);
         this.memoized = {
             transformedFacets: memoize(transformedFacets)
         };
+    }
+
+    renderDetailPane(result){
+        const { schemas } = this.props;
+        return (
+            <PublicationDetailPane {...{ result, schemas }} />
+        );
     }
 
     render(){
@@ -269,7 +318,7 @@ export default class PublicationSearchView extends React.PureComponent {
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
             <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }}
+                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }} renderDetailPane={this.renderDetailPane}
                     termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={175} columnExtensionMap={publicationColExtensionMap} />
             </div>
         );
