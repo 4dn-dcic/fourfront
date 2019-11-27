@@ -212,6 +212,7 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
         'file_format': file_formats.get('mcool').get('uuid'),
         'lab': lab['uuid'],
         'award': award['uuid'],
+        'accession': '4DNFIBBBBBBB',
         'higlass_uid': 1  # validation error -- higlass_uid should be string
     }
     res = testapp.post_json('/files-processed/?validate=false&upgrade=False',
