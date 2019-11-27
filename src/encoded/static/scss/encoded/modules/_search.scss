@@ -212,7 +212,7 @@ $search-results-above-results-row-height: 40px;
 		}
 
 		&[data-field="display_title"] {
-			position: relative;
+			// position: relative;
 			> .inner {
 				white-space: unset; // Allow lines to wrap
 				.title-inner {

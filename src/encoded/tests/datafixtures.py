@@ -1132,3 +1132,13 @@ def quality_metric_fastqc(testapp, award, lab):
         "lab": lab['@id']
     }
     return testapp.post_json('/quality_metric_fastqc', item).json['@graph'][0]
+
+
+@pytest.fixture
+def quality_metric_pairsqc(testapp, lab, award):
+    item = {
+        'uuid': 'fdc5ca7f-35bc-421e-ab1f-00f9e5146041',
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/quality_metric_pairsqc', item).json['@graph'][0]

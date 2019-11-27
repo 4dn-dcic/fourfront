@@ -34,6 +34,12 @@ const { TabObject, Item } = typedefs;
  */
 
 
+export const EmbeddedItemPropType = PropTypes.shape({ // Might not be present. Might be present and only contain { "error" : "no view permissions" }.
+    "display_title" : PropTypes.string,
+    "@id": PropTypes.string,
+    "error": PropTypes.string,
+});
+
 /**
  * The DefaultItemView class extends React.Component to provide some helper functions to be used from an Item View page.
  *
@@ -64,7 +70,16 @@ export default class DefaultItemView extends React.PureComponent {
         'windowWidth' : PropTypes.number,
         'schemas' : PropTypes.object,
         'href' : PropTypes.string,
-        'width' : PropTypes.number
+        'width' : PropTypes.number,
+        'context' : PropTypes.shape({
+            "display_title" : PropTypes.string.isRequired,
+            "@id": PropTypes.string.isRequired,
+            "lab" : EmbeddedItemPropType,
+            "award" : EmbeddedItemPropType,
+            "submitted_by" : EmbeddedItemPropType,
+            "publications_of_set" : PropTypes.arrayOf(EmbeddedItemPropType),
+            "produced_in_pub" : PropTypes.arrayOf(EmbeddedItemPropType)
+        }).isRequired
     };
 
     /**
@@ -155,15 +170,21 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {TabObject[]}
      */
     getCommonTabs(){
-        const { context, schemas, windowWidth } = this.props;
+        const { context, schemas = null, windowWidth = null } = this.props;
+        const {
+            lab: { display_title: labTitle } = {},
+            submitted_by: { display_title: submitterTitle } = {},
+            publications_of_set,
+            produced_in_pub
+        } = context;
         const returnArr = [];
 
         // Attribution Tab
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+        if (labTitle || submitterTitle || publications_of_set || produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
 
-        returnArr.push(ItemDetailList.getTabObject(this.props));
+        returnArr.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Schemas.Term.toName }));
 
         // Badges, if any
         const badges = BadgesTabView.getBadgesList(context);
@@ -182,10 +203,19 @@ export default class DefaultItemView extends React.PureComponent {
      * @protected
      */
     getDefaultTabs(){
-        const { context } = this.props;
+        const {
+            context : {
+                lab: { display_title: labTitle } = {},
+                submitted_by: { display_title: submitterTitle } = {},
+                publications_of_set,
+                produced_in_pub
+            }
+        } = this.props;
         const returnArr = [];
-        returnArr.push(ItemDetailList.getTabObject(this.props));
-        if (context.lab || context.submitted_by || context.publications_of_set || context.produced_in_pub){
+
+        returnArr.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Schemas.Term.toName }));
+
+        if (labTitle || submitterTitle || publications_of_set || produced_in_pub){
             returnArr.push(AttributionTabView.getTabObject(this.props));
         }
         return returnArr;

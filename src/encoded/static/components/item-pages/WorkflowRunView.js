@@ -7,6 +7,7 @@ import memoize from 'memoize-one';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
+import { Term } from './../util/Schemas';
 import { WorkflowDetailPane } from './components/WorkflowDetailPane';
 import DefaultItemView from './DefaultItemView';
 
@@ -118,7 +119,7 @@ export default class WorkflowRunView extends DefaultItemView {
             }
         ];
 
-        tabs.push(ItemDetailList.getTabObject(this.props));
+        tabs.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Term.toName }));
 
         return _.map(tabs, (tabObj) => // Common properties
             _.extend(tabObj, {
