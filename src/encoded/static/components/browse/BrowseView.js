@@ -272,7 +272,7 @@ class ResultTableContainer extends React.PureComponent {
                             'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen', 'isFullscreen'
                         )} showSelectedFileCount />
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
-                        {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
+                        {...{ href, context, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
                         ref={this.searchResultTableRef}
                         termTransformFxn={Schemas.Term.toName}
                         results={context['@graph']}
