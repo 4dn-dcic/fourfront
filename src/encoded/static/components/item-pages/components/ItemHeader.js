@@ -276,16 +276,34 @@ export class MiddleRow extends React.Component {
  * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.
  */
 export const BottomRow = React.memo(function BottomRow(props){
-    const { context: { date_modified, date_created }, children } = props;
+    const {
+        context: {
+            last_modified: {
+                date_modified = null,
+                modified_by: { display_title: modifiedByTitle = null } = {} // Likely to have { error : "no view permissions" }
+            } = {},
+            date_created,
+            submitted_by: { display_title: submittedByTitle = null  } = {} // Likely to have { error : "no view permissions" }
+        },
+        children = null
+    } = props;
     let dateToUse = null;
     let tooltip = null;
 
     if (typeof date_modified === 'string'){
         dateToUse = date_modified;
-        tooltip = 'Date last modified';
+        tooltip = 'Last modified';
+        if (modifiedByTitle) {
+            tooltip += " by " + modifiedByTitle;
+        }
     } else if (typeof date_created === 'string'){
         dateToUse = date_created;
-        tooltip = 'Date Created';
+        tooltip = 'Created';
+        if (submittedByTitle) {
+            tooltip += " by " + submittedByTitle;
+        } else {
+            tooltip = "Date " + tooltip;
+        }
     }
 
     return (
