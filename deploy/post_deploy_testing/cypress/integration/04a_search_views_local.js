@@ -66,7 +66,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('"All Items" option works, takes us to search page', function(){
             cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                .get('form.navbar-search-form-container div.dropdown-menu a:not(.active)').click().end()
+                .get('form.navbar-search-form-container div.dropdown-menu').click().end()
                 .get('form.navbar-search-form-container').submit().end()
                 .get('#page-title-container span.title').should('have.text', 'Search').end()
                 .location('search').should('not.include', 'award.project=4DN')
@@ -87,7 +87,7 @@ describe('Deployment/CI Search View Tests', function () {
                 cy.get('input[name="q"]').focus().clear().type('*').wait(10).end()
                     .get('form.navbar-search-form-container').submit().end()
                     .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                    .get('form.navbar-search-form-container div.dropdown-menu a:not(.active)').click().end()                    
+                    .get('form.navbar-search-form-container div.dropdown-menu').click().end()                  
                     .get('form.navbar-search-form-container').submit().end()
                     // handle url encoding
                     .location('search').should('include', '%2A').wait(300).end()
