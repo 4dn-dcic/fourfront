@@ -57,7 +57,7 @@ function onLoadSchema(complete) {
     window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
     window
         .fetch(
-            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json"
+            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaSVG.json"
         )
         .then(function(resp) {
             console.log(resp);
@@ -85,7 +85,7 @@ function onLoadMicroscopes(complete) {
 
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPath = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/";
+const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/svg/";
 
 let MicroscopyMetadataTool = null;
 
@@ -512,7 +512,7 @@ export class MicroMetaTabView extends React.PureComponent {
             onSaveMicroscope: this.onSaveMicroscope,
             //visualizeImmediately: true,
             //loadedMicroscopeConfiguration: { ... },
-            imagesPath
+            imagesPathSVG
         };
 
         return (
