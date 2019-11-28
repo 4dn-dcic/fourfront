@@ -7,7 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
-import { searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { searchFilters, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { columnsToColumnDefinitions, defaultHiddenColumnMapFromColumns } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
 import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
@@ -194,8 +194,11 @@ class ResultTableContainer extends React.PureComponent {
         this.getColumnDefinitions = this.getColumnDefinitions.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
         this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
+        this.updateDetailPaneFileSectionStateCache = this.updateDetailPaneFileSectionStateCache.bind(this);
 
         this.searchResultTableRef = React.createRef();
+
+        this.detailPaneFileSectionStateCache = {};
     }
 
     forceUpdateOnSelf(){
@@ -235,18 +238,28 @@ class ResultTableContainer extends React.PureComponent {
         this.props.navigate(navigate.getBrowseBaseHref(), { 'inPlace' : true, 'dontScrollToTop' : true });
     }
 
-    browseExpSetDetailPane(result, rowNumber, containerWidth, toggleExpandCallback){
+    updateDetailPaneFileSectionStateCache(resultID, resultPaneState){
+        // Purposely avoid changing reference to avoid re-renders/updates (except when new components initialize)
+        if (resultPaneState === null){
+            delete this.detailPaneFileSectionStateCache[resultID];
+        } else {
+            this.detailPaneFileSectionStateCache[resultID] = resultPaneState;
+        }
+    }
+
+    browseExpSetDetailPane(result, rowNumber, containerWidth, propsFromTable){
         return (
             <ExperimentSetDetailPane
                 {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth', 'href')}
-                {...{ result, containerWidth, toggleExpandCallback }} paddingWidth={47} />
+                {...{ ...propsFromTable, result, containerWidth }} paddingWidth={47}
+                initialStateCache={this.detailPaneFileSectionStateCache} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
         );
     }
 
     render() {
         const {
             context, href, countExternalSets, session, browseBaseState, schemas, windowHeight,
-            totalExpected, selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets
+            selectedFiles, sortBy, sortColumn, sortReverse, windowWidth, isFullscreen, facets
         } = this.props;
         const currExpSetFilters = searchFilters.contextFiltersToExpSetFilters(context && context.filters, navigate.getBrowseBaseParams());
         const showClearFiltersButton = _.keys(currExpSetFilters || {}).length > 0;
@@ -272,7 +285,7 @@ class ResultTableContainer extends React.PureComponent {
                             'selectedFilesUniqueCount', 'windowHeight', 'windowWidth', 'toggleFullScreen', 'isFullscreen'
                         )} showSelectedFileCount />
                     <SearchResultTable {..._.pick(this.props, 'hiddenColumns', 'registerWindowOnScrollHandler')}
-                        {...{ href, totalExpected, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
+                        {...{ href, context, sortBy, sortColumn, sortReverse, selectedFiles, windowWidth, columnDefinitions }}
                         ref={this.searchResultTableRef}
                         termTransformFxn={Schemas.Term.toName}
                         results={context['@graph']}

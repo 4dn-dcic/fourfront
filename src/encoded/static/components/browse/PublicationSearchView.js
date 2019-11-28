@@ -319,7 +319,7 @@ export default class PublicationSearchView extends React.PureComponent {
         return (
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }} renderDetailPane={this.renderDetailPane}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={175} columnExtensionMap={publicationColExtensionMap} />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
             </div>
         );
     }
