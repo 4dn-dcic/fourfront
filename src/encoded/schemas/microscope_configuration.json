@@ -39,7 +39,7 @@
         },
         "microscope" : {
             "type" : "object",
-            "title" : "Settings",
+            "title" : "Microscope",
             "required": [
                 "Tier",
                 "ValidationTier",

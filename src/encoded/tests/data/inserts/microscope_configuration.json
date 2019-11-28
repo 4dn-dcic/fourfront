@@ -5,6 +5,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
+        "title": "New 4DN Microscope",
         "microscope": {
             "ID": "f812d6e5-de31-43b6-8ee0-47236494253a",
             "Schema_ID": "Microscope.json",
