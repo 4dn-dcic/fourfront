@@ -4,7 +4,7 @@
     "id": "/profiles/microscope_configuration.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab", "microscope"],
+    "required": ["microscope"],
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -36,6 +36,19 @@
             "title": "Description",
             "description" : "Description of microscope configuration.",
             "type": "string"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "draft",
+            "enum" : [
+                "released",
+                "released to project",
+                "released to lab",
+                "draft",
+                "deleted"
+            ],
+            "lookup" : 20
         },
         "microscope" : {
             "type" : "object",
@@ -96,6 +109,20 @@
                     ]
                 }
             }
+        },
+        "lab": {
+            "title": "Lab",
+            "description": "Lab associated with the submission.",
+            "exclude_from": ["submit4dn"],
+            "type": "string",
+            "linkTo": "Lab"
+        },
+        "award": {
+            "title": "Grant",
+            "description": "Grant associated with the submission.",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "type": "string",
+            "linkTo": "Award"
         }
     },
     "facets" : {

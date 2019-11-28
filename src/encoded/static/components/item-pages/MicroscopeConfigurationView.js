@@ -70,20 +70,6 @@ function onLoadSchema(complete) {
     // */
 }
 
-/**
- * Main function to implement
- * @todo Nothing in this view
- * Later, if on -collection- static page, present searchview to select a single microscope
- * and then pass in under a single key/value, e.g. `{ "SelectedItem" : ...the thing... }`
- */
-function onLoadMicroscopes(complete) {
-    const microscopesDB = {
-        "Test" : { "hello" : "world" }
-    };
-    complete(microscopesDB);
-}
-
-
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
 const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/svg/";
 
@@ -117,6 +103,7 @@ export class MicroMetaTabView extends React.PureComponent {
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000);
+        this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
@@ -140,7 +127,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
         if (!MicroscopyMetadataTool) {
             setTimeout(()=>{
-                // Load in HiGlass libraries as separate JS file due to large size.
+                // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
                 // @see https://webpack.js.org/api/module-methods/#requireensure
                 require.ensure(['4dn-microscopy-metadata-tool'], (require) => {
                     MicroscopyMetadataTool = require('4dn-microscopy-metadata-tool').default;
@@ -181,7 +168,7 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     /**
-        * Create a new higlass viewconfig for the user, based on the current data.
+        * Create a new microscope configuration for the user, based on the current data.
         * @returns {void}
     */
     handleClone(evt) {
@@ -243,11 +230,11 @@ export class MicroMetaTabView extends React.PureComponent {
             this.setState({ 'cloneLoading': false });
         };
 
+        microscope.Name = microConfTitle;
+
         const payload = {
             'title': microConfTitle,
             'description': microConfDesc,
-            'award': context.award.uuid,//??
-            'lab': context.lab.uuid,//??
             'microscope': microscope,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
@@ -282,6 +269,14 @@ export class MicroMetaTabView extends React.PureComponent {
             }
         );
 
+    }
+
+    /**
+      * Cancel/hide modal popup
+      * @returns {void}
+    */
+    handleModalCancel() {
+        this.setState({ 'modal': null });
     }
 
     /**
@@ -357,7 +352,7 @@ export class MicroMetaTabView extends React.PureComponent {
             'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
             'disabled'      : releaseLoading,
             'key'           : 'statuschangebtn',
-            'data-tip'      : "Change the visibility/permissions of this HiGlass Display",
+            'data-tip'      : "Change the visibility/permissions of this Microscope Configuration",
             'title'         : (
                 <React.Fragment>
                     <i className={"icon icon-fw icon-" + (releaseLoading ? 'circle-notch fas icon-spin' : 'id-badge far')}/>&nbsp; Manage
@@ -373,10 +368,6 @@ export class MicroMetaTabView extends React.PureComponent {
                 <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
                 <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
                 <Dropdown.Divider />
-                {/* These statuses currently not available.
-                <StatusMenuItem active={context.status === "archived to project"} eventKey="archived to project">Archive to Project</StatusMenuItem>
-                <StatusMenuItem active={context.status === "archived"} eventKey="archived">Archive to Lab</StatusMenuItem>
-                */}
                 <StatusMenuItem eventKey="deleted" context={context}>Delete</StatusMenuItem>
             </DropdownButton>
         );
@@ -399,7 +390,7 @@ export class MicroMetaTabView extends React.PureComponent {
     cloneButton(){
         const { session } = this.props;
         const { cloneLoading } = this.state;
-        const tooltip = "Create your own new HiGlass Display based off of this one";
+        const tooltip = "Create your own new Microscope Configuration based off of this one";
 
         return (
             <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
@@ -491,7 +482,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
     render(){
         const { schemas, context, windowWidth, windowHeight } = this.props;
-        const { mounted } = this.state;
+        const { mounted, modal } = this.state;
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
         const width = layout.gridContainerWidth(windowWidth);
@@ -507,7 +498,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
         const passProps = {
             width, height,
-            onLoadMicroscopes,
+            //onLoadMicroscopes,
             onLoadSchema,
             onSaveMicroscope: this.onSaveMicroscope,
             //visualizeImmediately: true,
@@ -531,6 +522,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 <div className="container px-0">
                     <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                 </div>
+                { modal }
             </div>
         );
     }
