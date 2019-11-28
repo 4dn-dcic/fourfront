@@ -13,6 +13,15 @@ import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
 
 
+const microscopyColExtensionMap = _.extend({}, columnExtensionMap, {
+    "microscope.Tier": { "widthMap": { "sm": 50, "md": 70, "lg": 80 } },
+    "microscope.Manufacturer": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
+    "microscope.Serial": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
+    "microscope.Model": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
+    "microscope.Type": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
+    "submitted_by.display_title": { "widthMap": { "sm": 100, "md": 100, "lg": 120 } },
+});
+
 export default class MicroscopySearchView extends React.PureComponent {
 
     /**
@@ -97,11 +106,11 @@ export default class MicroscopySearchView extends React.PureComponent {
         const facets = this.transformedFacets();
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
-        console.log('xxx hello world');
+
         return (
             <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets />
+                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }}
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} />
             </div>
         );
     }

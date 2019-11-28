@@ -4,7 +4,7 @@
     "id": "/profiles/microscope_configuration.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab"],
+    "required": ["award", "lab", "microscope"],
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -40,6 +40,11 @@
         "microscope" : {
             "type" : "object",
             "title" : "Settings",
+            "required": [
+                "Tier",
+                "ValidationTier",
+                "Name"
+            ],
             "additionalProperties": true,
             "properties":{
                 "Name": {
@@ -79,7 +84,16 @@
                 "Type": {
                     "title": "Type",
                     "description": "Type of microscope",
-                    "type" : "string"
+                    "type" : "string",
+                    "enum": [
+                        "Upright",
+                        "Inverted",
+                        "Custom Made",
+                        "Dissection",
+                        "Electrophysiology",
+                        "Stereomicroscope",
+                        "Other"
+                    ]
                 }
             }
         }
