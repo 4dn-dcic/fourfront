@@ -275,13 +275,15 @@ export function PublicationDetailPane(props){
         <div className="mr-1">
             { !abstract ? null : (
                 <div className="flex-description-container">
-                    <h5><i className="icon icon-fw icon-align-left fas"/>&nbsp; Abstract</h5>
-                    <p className="text-normal ml-22 mt-1">{ abstract }</p>
+                    <h5><i className="icon icon-fw icon-align-left mr-08 fas"/>Abstract</h5>
+                    <p className="text-normal ml-27 mt-1">{ abstract }</p>
                     <hr className="desc-separator" />
                 </div>
             )}
-            <div className="item-page-detail">
-                <h5 className="text-500"><i className="icon icon-fw icon-list fas"/>&nbsp; Details</h5>
+            <h5 className="text-500 mb-0 mt-16">
+                <i className="icon icon-fw icon-list fas mr-08"/>Details
+            </h5>
+            <div className="item-page-detail ml-27">
                 <Detail context={result} open={false} schemas={schemas} excludedKeys={PublicationDetailPane.excludedKeys} />
             </div>
         </div>
@@ -290,7 +292,7 @@ export function PublicationDetailPane(props){
 PublicationDetailPane.excludedKeys = [
     ...Detail.defaultProps.excludedKeys,
     "title", "abstract", "authors", "short_attribution", "static_content",
-    "submitted_by", "published_by", "journal"
+    "submitted_by", "published_by", "exp_sets_prod_in_pub", "exp_sets_used_in_pub", "public_release"
 ];
 
 
