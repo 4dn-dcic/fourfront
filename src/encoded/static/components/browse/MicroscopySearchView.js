@@ -44,7 +44,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         const validationTierOptions=_.range(1,tier+1);
         return (
             <>
-                <DropdownButton id="search-item-type-selector" onSelect={(eventKey, evt) => { this.onChangeCreateTier(eventKey) }}
+                <DropdownButton id="search-item-type-selector" onSelect={(eventKey, evt) => { this.onChangeCreateTier(eventKey); }}
                     title={'Crete New Configuration'} >
                     <DropdownItem eventKey="1" data-key="1" type="number" >
                         Tier 1
