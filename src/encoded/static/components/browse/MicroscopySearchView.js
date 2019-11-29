@@ -3,49 +3,71 @@
 import React from 'react';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import url from 'url';
+
 import { DropdownItem, DropdownButton, Modal } from 'react-bootstrap';
-import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
-import { console, isSelectAction, ajax, navigate , object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax, navigate, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+
 import { columnExtensionMap } from './columnExtensionMap';
-import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
+
+import { transformedFacets } from './SearchView';
+
 
 
 const microscopyColExtensionMap = _.extend({}, columnExtensionMap, {
-    "microscope.Tier": { "widthMap": { "sm": 50, "md": 70, "lg": 80 } },
-    "microscope.Manufacturer": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
-    "microscope.Serial": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
-    "microscope.Model": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
-    "microscope.Type": { "widthMap": { "sm": 80, "md": 100, "lg": 120 } },
-    "submitted_by.display_title": { "widthMap": { "sm": 100, "md": 100, "lg": 120 } },
+    "microscope.Tier": {
+        "widthMap": { "sm": 50, "md": 70, "lg": 80 }
+    },
+    "microscope.Manufacturer": {
+        "widthMap": { "sm": 80, "md": 100, "lg": 120 }
+    },
+    "microscope.Serial": {
+        "widthMap": { "sm": 80, "md": 100, "lg": 120 }
+    },
+    "microscope.Model": {
+        "widthMap": { "sm": 80, "md": 100, "lg": 120 }
+    },
+    "microscope.Type": {
+        "widthMap": { "sm": 80, "md": 100, "lg": 120 }
+    },
+    "submitted_by.display_title": {
+        "widthMap": { "sm": 100, "md": 100, "lg": 120 }
+    },
 });
+
 export default class MicroscopySearchView extends React.PureComponent {
+
     constructor(props) {
         super(props);
+
         this.handleModalCancel = this.handleModalCancel.bind(this);
-        this.handleConfirm = _.throttle(this.handleConfirm.bind(this), 3000);
-        this.handleMicroscopeNameChange = this.handleMicroscopeNameChange.bind(this);
+        this.handleModalConfirm = _.throttle(this.handleModalConfirm.bind(this), 3000);
+        this.handleChangeMicroscopeName = this.handleChangeMicroscopeName.bind(this);
+        this.handleChangeMicroscopeTier = this.handleChangeMicroscopeTier.bind(this);
+        this.handleChangeMicroscopeValidationTier = this.handleChangeMicroscopeValidationTier.bind(this);
+
+        this.memoized = {
+            transformedFacets: memoize(transformedFacets)
+        };
 
         this.state = {
             show: false,
             tier: 1,
             validationTier: 1,
-            microscopeName: '',
-            cloneLoading: false
+            microscopeName: null,
+            confirmLoading: false
         };
-
-        this.searchResultTableRef = React.createRef();
     }
-    leftButtonDropDownButton() {
-        const { show, tier, validationTier, microscopeName,cloneLoading } = this.state;
-        const validationTierOptions=_.range(1,tier+1);
+
+    createNewMicroscopeConfiguration() {
+        const { show, tier, validationTier, microscopeName, confirmLoading } = this.state;
+        const validationTierOptions = _.range(1, tier + 1);
         return (
-            <>
-                <DropdownButton id="search-item-type-selector" onSelect={(eventKey, evt) => { this.onChangeCreateTier(eventKey); }}
-                    title={'Crete New Configuration'} >
+            <React.Fragment>
+                <DropdownButton id="tier-selector" onSelect={this.handleChangeMicroscopeTier}
+                    title="Crete New Configuration" >
                     <DropdownItem eventKey="1" data-key="1" type="number" >
                         Tier 1
                     </DropdownItem>
@@ -64,7 +86,7 @@ export default class MicroscopySearchView extends React.PureComponent {
                 </DropdownButton>
 
 
-                <Modal show={show} >
+                <Modal show={show}>
                     <Modal.Header>
                         <Modal.Title>New Microscope - Tier {tier} </Modal.Title>
                     </Modal.Header>
@@ -73,14 +95,14 @@ export default class MicroscopySearchView extends React.PureComponent {
                             <label>Microscope Name</label>
                         </div>
                         <div>
-                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={this.handleMicroscopeNameChange} ></input>
+                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={this.handleChangeMicroscopeName} ></input>
                         </div>
                         <div>
                             <label>Validation Tier</label>
                         </div>
                         <div>
-                            <DropdownButton id="search-item-type-selector" onSelect={this.onChangeValidationTier.bind(this)}
-                                title={validationTier} style={{ width: "100%" }} >
+                            <DropdownButton id="validation-tier-selector" onSelect={this.handleChangeMicroscopeValidationTier}
+                                title={'Tier ' + validationTier} style={{ width: "100%" }} >
                                 {validationTierOptions.map((opt, i) => (
                                     <DropdownItem key={opt} eventKey={opt} data-key={opt}>
                                         {'Tier ' + opt}
@@ -90,23 +112,25 @@ export default class MicroscopySearchView extends React.PureComponent {
                         </div>
                     </Modal.Body>
                     <Modal.Footer>
-                        <button type="button" onClick={this.handleConfirm} className="btn btn-success" disabled={!microscopeName}>
-                            <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Submit
-
+                        <button type="button" onClick={this.handleModalConfirm} className="btn btn-success" disabled={!microscopeName}>
+                            <i className={"icon icon-fw icon-" + (confirmLoading ? 'circle-notch icon-spin fas' : 'clone far')} />Submit
                         </button>
                         <button type="button" onClick={this.handleModalCancel} className="btn btn-outline-warning">
                             <i className="icon icon-fw icon-times mr-05 fas" />Cancel
                         </button>
                     </Modal.Footer>
                 </Modal>
-            </>
+            </React.Fragment>
         );
     }
+
     handleModalCancel(evt) {
         this.setState({ 'show': null });
     }
-    handleConfirm() {
+
+    handleModalConfirm() {
         const { microscopeName, tier, validationTier } = this.state;
+
         const fallbackCallback = (errResp, xhr) => {
             // Error callback
             Alerts.queue({
@@ -114,14 +138,14 @@ export default class MicroscopySearchView extends React.PureComponent {
                 'message': "Sorry, can you try to save again?",
                 'style': 'danger'
             });
-            this.setState({ 'cloneLoading': false });
+            this.setState({ 'confirmLoading': false });
         };
 
-        const microscope = { 'Name': microscopeName, 'Tier':tier  , 'ValidationTier':validationTier };
+        const microscope = { 'Name': microscopeName, 'Tier': tier, 'ValidationTier': validationTier };
 
         const payload = {
-            'title': 'New Microscope',
-            'description': 'New Microscope Description',
+            'title': microscopeName,
+            'description': '',
             'microscope': microscope,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
@@ -130,20 +154,19 @@ export default class MicroscopySearchView extends React.PureComponent {
 
         // Try to POST/PUT a new viewconf.
         this.setState(
-            { 'cloneLoading': true },
+            { 'confirmLoading': true },
             () => {
                 ajax.load(
                     '/microscope-configurations/',
                     (resp) => { // We're likely to get a status code of 201 - Created.
-                        this.setState({ 'cloneLoading': false }, () => {
+                        this.setState({ 'confirmLoading': false, 'show': false }, () => {
                             const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
-
                             // Redirect the user to the new Microscope display.
                             navigate(newItemHref, {}, (resp) => {
                                 // Show alert on new Item page
                                 Alerts.queue({
-                                    'title': "Saved " + microscope.Name,
-                                    'message': "Saved new display.",
+                                    'title': "Created " + microscope.Name,
+                                    'message': "Created new microscope configuration.",
                                     'style': 'success'
                                 });
                             });
@@ -156,107 +179,33 @@ export default class MicroscopySearchView extends React.PureComponent {
             }
         );
     }
-    handleMicroscopeNameChange(evt) {
+
+    handleChangeMicroscopeName(evt) {
         this.setState({ 'microscopeName': evt.target.value });
     }
-    onChangeCreateTier(eventKey) {
+
+    handleChangeMicroscopeTier(eventKey) {
         this.setState({
             show: true,
-            tier:parseInt(eventKey)
+            tier: parseInt(eventKey)
         });
     }
-    onChangeValidationTier(eventKey,event) {
+
+    handleChangeMicroscopeValidationTier(eventKey) {
         this.setState({
             validationTier: parseInt(eventKey)
         });
     }
-    /**
-     * Function which is passed into a `.filter()` call to
-     * filter context.facets down, usually in response to frontend-state.
-     *
-     * Currently is meant to filter out type facet if we're in selection mode,
-     * as well as some fields from embedded 'experiment_set' which might
-     * give unexpected results.
-     *
-     * @todo Potentially get rid of this and do on backend.
-     *
-     * @param {{ field: string }} facet - Object representing a facet.
-     * @returns {boolean} Whether to keep or discard facet.
-     */
-    static filterFacet(facet, currentAction, session){
-        // Set in backend or schema for facets which are under development or similar.
-        if (facet.hide_from_view) return false;
 
-        // Remove the @type facet while in selection mode.
-        if (facet.field === 'type' && isSelectAction(currentAction)) return false;
-
-        // Most of these would only appear if manually entered into browser URL.
-        if (facet.field.indexOf('experiments.experiment_sets.') > -1) return false;
-        if (facet.field === 'experiment_sets.@type') return false;
-        if (facet.field === 'experiment_sets.experimentset_type') return false;
-
-        return true;
-    }
-
-    static transformedFacets = memoize(function(href, context, currentAction, session, schemas){
-        var facets,
-            typeFacetIndex,
-            hrefQuery,
-            itemTypesInSearch;
-
-        // Clone/filter list of facets.
-        // We may filter out type facet completely at this step,
-        // in which case we can return out of func early.
-        facets = _.filter(
-            context.facets,
-            function(facet){ return MicroscopySearchView.filterFacet(facet, currentAction, session); }
-        );
-
-        // Find facet for '@type'
-        typeFacetIndex = _.findIndex(facets, { 'field' : 'type' });
-
-        if (typeFacetIndex === -1) {
-            return facets; // Facet not present, return.
-        }
-
-        hrefQuery = _.extend({}, memoizedUrlParse(href).query || {});
-        if (typeof hrefQuery.type === 'string') hrefQuery.type = [hrefQuery.type];
-        itemTypesInSearch = _.without(hrefQuery.type, 'Item');
-
-        if (itemTypesInSearch.length > 0){
-            // Keep all terms/leaf-types - backend should already filter down to only valid sub-types through
-            // nature of search itself.
-            return facets;
-        }
-
-        // Avoid modifying in place.
-        facets[typeFacetIndex] = _.clone(facets[typeFacetIndex]);
-
-        // Show only base types for when itemTypesInSearch.length === 0 (aka 'type=Item').
-        facets[typeFacetIndex].terms = _.filter(facets[typeFacetIndex].terms, function(itemType){
-            const parentType = getAbstractTypeForType(itemType.key, schemas);
-            return !parentType || parentType === itemType.key;
-        });
-
-        return facets;
-    });
-
-    /** Filter the `@type` facet options down to abstract types only (if none selected) for Search. */
-    transformedFacets(){
-        const { href, context, currentAction, session, schemas } = this.props;
-        return MicroscopySearchView.transformedFacets(href, context, currentAction, session, schemas);
-    }
-
-    render(){
-        const { isFullscreen } = this.props;
-        const facets = this.transformedFacets();
+    render() {
+        const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
+        const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
-        const topLeftChildren = this.leftButtonDropDownButton();
         return (
             <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets, topLeftChildren }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} />
+                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }}
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} topLeftChildren={this.createNewMicroscopeConfiguration()} />
             </div>
         );
     }
