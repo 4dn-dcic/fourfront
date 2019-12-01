@@ -72,6 +72,7 @@ function onLoadSchema(complete) {
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
 const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/svg/";
+const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/png/";
 
 let MicroscopyMetadataTool = null;
 
@@ -503,7 +504,8 @@ export class MicroMetaTabView extends React.PureComponent {
             onSaveMicroscope: this.onSaveMicroscope,
             //visualizeImmediately: true,
             //loadedMicroscopeConfiguration: { ... },
-            imagesPathSVG
+            imagesPathSVG,
+            imagesPathPNG
         };
 
         return (
