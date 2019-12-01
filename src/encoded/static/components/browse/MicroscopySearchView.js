@@ -63,63 +63,24 @@ export default class MicroscopySearchView extends React.PureComponent {
 
     createNewMicroscopeConfiguration() {
         const { show, tier, validationTier, microscopeName, confirmLoading } = this.state;
-        const validationTierOptions = _.range(1, tier + 1);
+        const buttonProps = {
+            'handleChangeMicroscopeTier': this.handleChangeMicroscopeTier,
+            'startTier': 1,
+            'endTier': 5
+        };
+        const modalProps = {
+            tier, validationTier, show, confirmLoading, microscopeName,
+            'handleChangeMicroscopeName': this.handleChangeMicroscopeName,
+            'handleChangeMicroscopeValidationTier': this.handleChangeMicroscopeValidationTier,
+            'handleModalConfirm': this.handleModalConfirm,
+            'handleModalCancel': this.handleModalCancel
+        };
         return (
             <React.Fragment>
-                <DropdownButton id="tier-selector" onSelect={this.handleChangeMicroscopeTier}
-                    title="Crete New Configuration" >
-                    <DropdownItem eventKey="1" data-key="1" type="number" >
-                        Tier 1
-                    </DropdownItem>
-                    <DropdownItem eventKey="2" data-key="2" type="number" >
-                        Tier 2
-                    </DropdownItem>
-                    <DropdownItem eventKey="3" data-key="3" type="number" >
-                        Tier 3
-                    </DropdownItem>
-                    <DropdownItem eventKey="4" data-key="4" type="number" >
-                        Tier 4
-                    </DropdownItem>
-                    <DropdownItem eventKey="5" data-key="5" type="number" >
-                        Tier 5
-                    </DropdownItem>
-                </DropdownButton>
-
-
-                <Modal show={show}>
-                    <Modal.Header>
-                        <Modal.Title>New Microscope - Tier {tier} </Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <div>
-                            <label>Microscope Name</label>
-                        </div>
-                        <div>
-                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={this.handleChangeMicroscopeName} ></input>
-                        </div>
-                        <div>
-                            <label>Validation Tier</label>
-                        </div>
-                        <div>
-                            <DropdownButton id="validation-tier-selector" onSelect={this.handleChangeMicroscopeValidationTier}
-                                title={'Tier ' + validationTier} style={{ width: "100%" }} >
-                                {validationTierOptions.map((opt, i) => (
-                                    <DropdownItem key={opt} eventKey={opt} data-key={opt}>
-                                        {'Tier ' + opt}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownButton>
-                        </div>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <button type="button" onClick={this.handleModalConfirm} className="btn btn-success" disabled={!microscopeName}>
-                            <i className={"icon icon-fw icon-" + (confirmLoading ? 'circle-notch icon-spin fas' : 'clone far')} />Submit
-                        </button>
-                        <button type="button" onClick={this.handleModalCancel} className="btn btn-outline-warning">
-                            <i className="icon icon-fw icon-times mr-05 fas" />Cancel
-                        </button>
-                    </Modal.Footer>
-                </Modal>
+                <div className="inline-block ml-1">
+                    <CreateNewConfigurationDropDownButton {...buttonProps} />
+                </div>
+                <CreateNewConfigurationModal {...modalProps} />
             </React.Fragment>
         );
     }
@@ -202,11 +163,79 @@ export default class MicroscopySearchView extends React.PureComponent {
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+        let createNewVisible = false;
+        // don't show during submission search "selecting existing"
+        if (context && Array.isArray(context.actions) && !currentAction) {
+            const addAction = _.findWhere(context.actions, { 'name': 'add' });
+            if (addAction && typeof addAction.href === 'string') {
+                createNewVisible = true;
+            }
+        }
         return (
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} topLeftChildren={this.createNewMicroscopeConfiguration()} />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} topLeftChildren={createNewVisible ? this.createNewMicroscopeConfiguration() : null} />
             </div>
         );
     }
 }
+
+const CreateNewConfigurationDropDownButton = React.memo(function (props) {
+    const { handleChangeMicroscopeTier, startTier, endTier } = props;
+    const tierOptions = _.range(startTier, endTier + 1);
+    return (
+        <DropdownButton id="tier-selector" onSelect={handleChangeMicroscopeTier}
+            title="Crete New Configuration" size="xs">
+            {tierOptions.map((opt, i) => (
+                <DropdownItem key={opt} eventKey={opt} data-key={opt}>
+                    {'Tier ' + opt}
+                </DropdownItem>
+            ))}
+        </DropdownButton>
+    );
+});
+
+const CreateNewConfigurationModal = React.memo(function (props) {
+    const { tier, validationTier, show, confirmLoading, microscopeName, handleChangeMicroscopeName, handleChangeMicroscopeValidationTier, handleModalConfirm, handleModalCancel } = props;
+    const validationTierOptions = _.range(1, tier + 1);
+    return (
+        <Modal className="microscopy-create-modal" show={show}>
+            <Modal.Header>
+                <Modal.Title>New Microscope - Tier {tier} </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <div className="row">
+                    <div className="col-sm-12 col-md-12">
+                        <div className="form-group">
+                            <label htmlFor="microscope_name">Microscope Name <span className="text-danger">*</span></label>
+                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} />
+                        </div>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-12 col-md-12">
+                        <div className="form-group">
+                            <label htmlFor="validation_tier">Validation Tier <span className="text-danger">*</span></label>
+                            <DropdownButton id="validation-tier-selector" onSelect={handleChangeMicroscopeValidationTier}
+                                title={'Tier ' + validationTier}>
+                                {validationTierOptions.map((opt, i) => (
+                                    <DropdownItem key={opt} eventKey={opt} data-key={opt}>
+                                        {'Tier ' + opt}
+                                    </DropdownItem>
+                                ))}
+                            </DropdownButton>
+                        </div>
+                    </div>
+                </div>
+            </Modal.Body>
+            <Modal.Footer>
+                <button type="button" onClick={handleModalConfirm} className="btn btn-success" disabled={!microscopeName}>
+                    <i className={"icon icon-fw icon-" + (confirmLoading ? 'circle-notch icon-spin fas' : 'clone far')} />Submit
+                </button>
+                <button type="button" onClick={handleModalCancel} className="btn btn-outline-warning">
+                    <i className="icon icon-fw icon-times mr-05 fas" />Cancel
+                </button>
+            </Modal.Footer>
+        </Modal>
+    );
+});
