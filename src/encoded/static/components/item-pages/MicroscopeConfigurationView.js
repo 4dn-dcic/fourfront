@@ -18,7 +18,8 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 
     getTabViewContents(){
         const initTabs = [];
-        initTabs.push(MicroMetaTabView.getTabObject(this.props));
+        const width = this.getTabViewWidth();
+        initTabs.push(MicroMetaTabView.getTabObject(this.props, width));
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
@@ -78,7 +79,7 @@ let MicroscopyMetadataTool = null;
 
 export class MicroMetaTabView extends React.PureComponent {
 
-    static getTabObject(props){
+    static getTabObject(props, width) {
         return {
             'tab' : <span><i className="icon icon-microscope fas icon-fw"/> MicroMeta</span>,
             'key' : 'micrometa',
@@ -89,7 +90,7 @@ export class MicroMetaTabView extends React.PureComponent {
                         <span>4DN MicroMeta</span>
                     </h3>
                     <hr className="tab-section-title-horiz-divider"/>
-                    <MicroMetaTabView {...props} />
+                    <MicroMetaTabView {...props} width={width} />
                 </div>
             )
         };
@@ -121,6 +122,11 @@ export class MicroMetaTabView extends React.PureComponent {
         this.microMetaToolRef = React.createRef();
     }
 
+    componentDidUpdate(pastProps, pastState){
+        if (this.props.isFullscreen !== pastProps.isFullscreen) {
+            // TODO: Trigger re-draw of HiGlassComponent somehow
+        }
+    }
     componentDidMount(){
         const onComplete = () => {
             this.setState({ mounted: true });
@@ -482,7 +488,7 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     render(){
-        const { schemas, context, windowWidth, windowHeight } = this.props;
+        const { schemas, isFullscreen, context, windowWidth, windowHeight } = this.props;
         const { mounted, modal } = this.state;
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
@@ -509,7 +515,7 @@ export class MicroMetaTabView extends React.PureComponent {
         };
 
         return (
-            <div className="overflow-hidden tabview-container-fullscreen-capable">
+            <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
                     {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
                         className="btn-success mt-17" style={{ 'paddingLeft': 30, 'paddingRight': 30 }} /> */}
@@ -521,10 +527,12 @@ export class MicroMetaTabView extends React.PureComponent {
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider" />
-                <div className="container px-0">
-                    <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
+                <div className="microscope-tab-view-contents">
+                    <div className="container px-0" style={isFullscreen ? { 'paddingLeft': 10, 'paddingRight': 10 } : null}>
+                        <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
+                    </div>
                 </div>
-                { modal }
+                {modal}
             </div>
         );
     }
