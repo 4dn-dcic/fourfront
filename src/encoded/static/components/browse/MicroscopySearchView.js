@@ -46,7 +46,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         this.handleModalConfirm = _.throttle(this.handleModalConfirm.bind(this), 3000);
         this.handleChangeMicroscopeName = this.handleChangeMicroscopeName.bind(this);
         this.handleChangeMicroscopeTier = this.handleChangeMicroscopeTier.bind(this);
-        this.handleChangeMicroscopeValidationTier = this.handleChangeMicroscopeValidationTier.bind(this);
+        // this.handleChangeMicroscopeValidationTier = this.handleChangeMicroscopeValidationTier.bind(this);
 
         this.memoized = {
             transformedFacets: memoize(transformedFacets)
@@ -55,23 +55,23 @@ export default class MicroscopySearchView extends React.PureComponent {
         this.state = {
             show: false,
             tier: 1,
-            validationTier: 1,
+            // validationTier: 1,
             microscopeName: null,
             confirmLoading: false
         };
     }
 
     createNewMicroscopeConfiguration() {
-        const { show, tier, validationTier, microscopeName, confirmLoading } = this.state;
+        const { show, tier/*, validationTier*/, microscopeName, confirmLoading } = this.state;
         const buttonProps = {
             'handleChangeMicroscopeTier': this.handleChangeMicroscopeTier,
             'startTier': 1,
             'endTier': 5
         };
         const modalProps = {
-            tier, validationTier, show, confirmLoading, microscopeName,
+            tier/*, validationTier*/, show, confirmLoading, microscopeName,
             'handleChangeMicroscopeName': this.handleChangeMicroscopeName,
-            'handleChangeMicroscopeValidationTier': this.handleChangeMicroscopeValidationTier,
+            // 'handleChangeMicroscopeValidationTier': this.handleChangeMicroscopeValidationTier,
             'handleModalConfirm': this.handleModalConfirm,
             'handleModalCancel': this.handleModalCancel
         };
@@ -90,7 +90,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     handleModalConfirm() {
-        const { microscopeName, tier, validationTier } = this.state;
+        const { microscopeName, tier/*, validationTier*/ } = this.state;
 
         const fallbackCallback = (errResp, xhr) => {
             // Error callback
@@ -102,7 +102,7 @@ export default class MicroscopySearchView extends React.PureComponent {
             this.setState({ 'confirmLoading': false });
         };
 
-        const microscope = { 'Name': microscopeName, 'Tier': tier, 'ValidationTier': validationTier };
+        const microscope = { 'Name': microscopeName, 'Tier': tier, 'ValidationTier': tier/*validationTier*/ };
 
         const payload = {
             'title': microscopeName,
@@ -196,8 +196,8 @@ const CreateNewConfigurationDropDownButton = React.memo(function (props) {
 });
 
 const CreateNewConfigurationModal = React.memo(function (props) {
-    const { tier, validationTier, show, confirmLoading, microscopeName, handleChangeMicroscopeName, handleChangeMicroscopeValidationTier, handleModalConfirm, handleModalCancel } = props;
-    const validationTierOptions = _.range(1, tier + 1);
+    const { tier/*, validationTier*/, show, confirmLoading, microscopeName, handleChangeMicroscopeName/*, handleChangeMicroscopeValidationTier*/, handleModalConfirm, handleModalCancel } = props;
+    // const validationTierOptions = _.range(1, tier + 1);
     return (
         <Modal className="microscopy-create-modal" show={show}>
             <Modal.Header>
@@ -208,11 +208,11 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                     <div className="col-sm-12 col-md-12">
                         <div className="form-group">
                             <label htmlFor="microscope_name">Microscope Name <span className="text-danger">*</span></label>
-                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} />
+                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
                         </div>
                     </div>
                 </div>
-                <div className="row">
+                {/* <div className="row">
                     <div className="col-sm-12 col-md-12">
                         <div className="form-group">
                             <label htmlFor="validation_tier">Validation Tier <span className="text-danger">*</span></label>
@@ -226,7 +226,7 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                             </DropdownButton>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </Modal.Body>
             <Modal.Footer>
                 <button type="button" onClick={handleModalConfirm} className="btn btn-success" disabled={!microscopeName}>
