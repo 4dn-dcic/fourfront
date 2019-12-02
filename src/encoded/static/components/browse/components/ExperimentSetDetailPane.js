@@ -30,108 +30,63 @@ export class ExperimentSetDetailPane extends React.PureComponent {
         'paddingWidth' : PropTypes.number,
         'windowWidth' : PropTypes.number.isRequired,
         'href' : PropTypes.string.isRequired,
-        'minimumWidth' : PropTypes.number
+        'minimumWidth' : PropTypes.number,
+        'initialStateCache' : PropTypes.object,
+        'updateFileSectionStateCache' : PropTypes.func
     };
 
     static defaultProps = {
         'selectAllFilesInitially' : false,
         'paddingWidth' : 0,
-        'minimumWidth' : 725
+        'minimumWidth' : 725,
+        'initialStateCache' : {}
     };
 
     constructor(props){
         super(props);
-        this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), 500, { 'trailing' : false });
-        this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), 500, { 'trailing' : false });
-        this.state = {
+        this.toggleProcessedFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'processedFilesOpen'), 600, { 'trailing' : false });
+        this.toggleRawFilesOpen = _.throttle(this.toggleStateProperty.bind(this, 'rawFilesOpen'), 600, { 'trailing' : false });
+        const id = object.itemUtil.atId(props.result);
+        const initialState = props.initialStateCache[id];
+        this.state = initialState || {
             'rawFilesOpen' : false,
             'processedFilesOpen' : false
         };
     }
 
-    /*
-    componentDidUpdate(pastProps, pastState){
-        if ((pastState.rawFilesOpen !== this.state.rawFilesOpen) || (pastState.processedFilesOpen !== this.state.processedFilesOpen)){
-            if (typeof this.props.toggleExpandCallback === 'function'){
-                setTimeout(this.props.toggleExpandCallback, 500); // Delay to allow <Collapse> height transition to finish.
-            }
-        }
+    componentWillUnmount(){
+        const { result, updateFileSectionStateCache } = this.props;
+        const { rawFilesOpen, processedFilesOpen } = this.state;
+        const id = object.itemUtil.atId(result);
+        updateFileSectionStateCache(id, (rawFilesOpen || processedFilesOpen) ? { rawFilesOpen, processedFilesOpen } : null);
     }
-    */
 
     toggleStateProperty(property){
         this.setState(function(currState){
-            var nextState = {};
+            const nextState = {};
             nextState[property] = !currState[property];
             return nextState;
+        }, ()=>{
+            setTimeout(()=>{
+                const { setDetailHeightFromPane } = this.props;
+                if (typeof setDetailHeightFromPane === "function") {
+                    setDetailHeightFromPane();
+                }
+            }, 500);
         });
     }
 
-    /** @todo Make into functional component */
-    renderRawFilesSection(paddingWidth){
-        const { containerWidth, result, href, minimumWidth } = this.props;
-
-        // For debugging stacked tables
-        //const useResult = require('./../../testdata/experiment_set/replicate_4DNESH4MYRID');
-
-        const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
-
-        if (rawFilesCount === 0) return null;
-
-        return (
-            <div className="raw-files-table-section">
-                <h4 className="pane-section-title" onClick={this.toggleRawFilesOpen}>
-                    <i className={"toggle-open-icon icon icon-fw fas icon-" + (this.state.rawFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-leaf fas"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
-                </h4>
-                <Collapse in={this.state.rawFilesOpen}>
-                    <div>
-                        <RawFilesStackedTable {...SelectedFilesController.pick(this.props)}
-                            columnHeaders={[
-                                { columnClass: 'file-detail', title: 'File Type', render: renderFileTypeSummaryColumn },
-                                { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
-                            ]}
-                            experimentSet={result} href={href}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null}
-                            fadeIn={false} collapseLongLists />
-                    </div>
-                </Collapse>
-            </div>
-        );
-    }
-
-    /** @todo Make into functional component */
-    renderProcessedFilesSection(paddingWidth){
-        const { containerWidth, result, href, minimumWidth } = this.props;
-        const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
-
-        if (!Array.isArray(processedFiles) || processedFiles.length === 0){
-            return null;
-        }
-        return (
-            <div className="processed-files-table-section">
-                <h4 className="pane-section-title" onClick={this.toggleProcessedFilesOpen}>
-                    <i className={"toggle-open-icon icon icon-fw fas icon-" + (this.state.processedFilesOpen ? 'minus' : 'plus')} />
-                    <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
-                </h4>
-                <Collapse in={this.state.processedFilesOpen}>
-                    <div>
-                        <ProcessedFilesStackedTable {...SelectedFilesController.pick(this.props)}
-                            files={processedFiles} fadeIn={false} collapseLongLists href={href}
-                            width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null} />
-                    </div>
-                </Collapse>
-            </div>
-        );
-    }
-
     render(){
-        const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result } = this.props;
+        const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result, minimumWidth, href } = this.props;
+        const { processedFilesOpen, rawFilesOpen } = this.state;
+        const commonFileSectionProps = {
+            ...SelectedFilesController.pick(this.props),
+            containerWidth, result, href, minimumWidth, paddingWidth
+        };
         let usePadWidth = paddingWidth || 0;
 
         if (paddingWidthMap){
-            var rgs = layout.responsiveGridState(windowWidth);
-            usePadWidth = paddingWidthMap[rgs] || paddingWidth;
+            usePadWidth = paddingWidthMap[layout.responsiveGridState(windowWidth)] || paddingWidth;
         }
 
         return (
@@ -170,12 +125,70 @@ export class ExperimentSetDetailPane extends React.PureComponent {
                     </div>
                 </div>
                 <div style={{ overflowX : 'auto', width: containerWidth ? (containerWidth - usePadWidth) : null }} className="files-tables-container">
-                    { this.renderRawFilesSection(usePadWidth) }
-                    { this.renderProcessedFilesSection(usePadWidth) }
+                    <RawFilesSection {...commonFileSectionProps} open={rawFilesOpen} onToggle={this.toggleRawFilesOpen} />
+                    <ProcessedFilesSection {...commonFileSectionProps} open={processedFilesOpen} onToggle={this.toggleProcessedFilesOpen} />
                 </div>
             </div>
         );
     }
 
 }
+
+const RawFilesSection = React.memo(function RawFilesSection(props){
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle } = props;
+
+    // For debugging stacked tables
+    //const useResult = require('./../../testdata/experiment_set/replicate_4DNESH4MYRID');
+
+    const rawFilesCount = expFxn.fileCountFromExperimentSet(result, false, false);
+
+    if (rawFilesCount === 0) return null;
+
+    return (
+        <div className="raw-files-table-section">
+            <h4 className="pane-section-title" onClick={onToggle}>
+                <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
+                <i className="icon icon-fw icon-leaf fas"/> <span className="text-400">{ rawFilesCount }</span> Raw Files
+            </h4>
+            <Collapse in={open}>
+                <div>
+                    <RawFilesStackedTable {...SelectedFilesController.pick(props)}
+                        columnHeaders={[
+                            { columnClass: 'file-detail', title: 'File Type', render: renderFileTypeSummaryColumn },
+                            { columnClass: 'file-detail', title: 'File Size', initialWidth: 80, field : "file_size" }
+                        ]}
+                        experimentSet={result} href={href}
+                        width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null}
+                        fadeIn={false} collapseLongLists />
+                </div>
+            </Collapse>
+        </div>
+    );
+
+});
+
+const ProcessedFilesSection = React.memo(function ProcessedFilesSection(props){
+    const { containerWidth, result, href, minimumWidth, paddingWidth, open = false, onToggle } = props;
+    const processedFiles = expFxn.allProcessedFilesFromExperimentSet(result);
+
+    if (!Array.isArray(processedFiles) || processedFiles.length === 0){
+        return null;
+    }
+
+    return (
+        <div className="processed-files-table-section">
+            <h4 className="pane-section-title" onClick={onToggle}>
+                <i className={"toggle-open-icon icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
+                <i className="icon icon-fw icon-microchip fas"/> <span className="text-400">{ processedFiles.length }</span> Processed Files
+            </h4>
+            <Collapse in={open}>
+                <div>
+                    <ProcessedFilesStackedTable {...SelectedFilesController.pick(props)}
+                        files={processedFiles} fadeIn={false} collapseLongLists href={href}
+                        width={containerWidth ? (Math.max(containerWidth - paddingWidth, minimumWidth) /* account for padding of pane */) : null} />
+                </div>
+            </Collapse>
+        </div>
+    );
+});
 

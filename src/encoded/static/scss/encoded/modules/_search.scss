@@ -22,8 +22,8 @@
 		.facets-body {
 			body.scrolled-past-80 & {
 				max-height: 90vh;
-				// 86 = 40 nav + 46 facet-list-header
-				max-height: calc(100vh - 86px);
+				// 160 ~= 40 nav + 46 facet-list-header + footer + parent container bottom margin
+				max-height: calc(100vh - 160px);
 				overflow-y: auto;
 				overflow-x: hidden;
 
