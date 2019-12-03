@@ -38,12 +38,9 @@ export class SearchBar extends React.PureComponent {
         return href && typeof href === 'string' && (href.indexOf('/browse/') > -1 || href.indexOf('/search/') > -1);
     }
 
-    static deriveSearchItemTypeFromHref(href, searchItemType = null){
-        if (searchItemType === "within" && SearchBar.isBrowseOrSearchPage(href)) {
+    static deriveSearchItemTypeFromHref(href, searchItemType = null) {
+        if (SearchBar.isBrowseOrSearchPage(href)) {
             return "within";
-        }
-        if (navigate.isSearchHref(href)) {
-            return "all";
         }
         return "sets";
     }

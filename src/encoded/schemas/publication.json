@@ -180,6 +180,9 @@
         "number_of_experiment_sets": {
             "title": "# Experiment Sets"
         },
+        "award.project" : {
+            "title" : "Project"
+        },
         "date_created": {
             "default_hidden" : true
         },

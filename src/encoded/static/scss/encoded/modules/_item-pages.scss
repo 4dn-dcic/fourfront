@@ -572,7 +572,8 @@ i.item-status-indicator-dot {
 
 	.list-item.row {
 
-		.item-label, .item-value {
+		.item-label,
+		.item-value {
 			> div {
 				min-height: 26px;
 				height: 100%;
@@ -582,6 +583,7 @@ i.item-status-indicator-dot {
 
 			}
 		}
+
 		.item-label {
 			font-weight: 500;
 			flex-grow: 1;
@@ -592,6 +594,7 @@ i.item-status-indicator-dot {
 				}
 			}
 		}
+
 		.item-value {
 			flex-grow: 2;
 			> div {
@@ -599,10 +602,19 @@ i.item-status-indicator-dot {
 				padding-bottom: 8px;
 			}
 		}
+
 		ol {
 			padding-left: 20px;
 			margin-bottom: 0;
 			//margin-top: 3px;
+		}
+
+		&[data-for-field="abstract"] {
+			> .item-value {
+				> div {
+					word-break: break-word;
+				}
+			}
 		}
 
 		/** For embedded sub-objects **/

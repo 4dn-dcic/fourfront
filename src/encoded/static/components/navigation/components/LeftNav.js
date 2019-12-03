@@ -78,10 +78,14 @@ function DataNavItem(props){
     const bodyProps = useMemo(function(){
         // Figure out if any items are active
         const { query = {}, pathname = "/a/b/c/d/e" } = memoizedUrlParse(href);
+
         const browseHref = navigate.getBrowseBaseHref(browseBaseState);
         const sequencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
         const microscopyDataHref = "/microscopy-data-overview";
+        const publicationsHref = "/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets";
+        const isSearchActive = pathname === "/search/";
         const isMicroscopyActive = pathname === microscopyDataHref;
+        const isPublicationsActive = isSearchActive && query.type === "Publication";
         let isBrowseActive = pathname === "/browse/";
         let isSequencingActive = false;
         if (isBrowseActive) {
@@ -98,10 +102,13 @@ function DataNavItem(props){
                 isBrowseActive = false;
             }
         }
-        return { browseHref, sequencingDataHref, microscopyDataHref, isMicroscopyActive, isBrowseActive, isSequencingActive };
+        const isAnyActive = (isSearchActive || isBrowseActive || isMicroscopyActive || isSequencingActive || isPublicationsActive);
+        return {
+            browseHref, sequencingDataHref, microscopyDataHref, publicationsHref,
+            isAnyActive, isMicroscopyActive, isSearchActive, isBrowseActive, isSequencingActive, isPublicationsActive
+        };
     }, [ href, browseBaseState ]);
 
-    const isAnyActive = (bodyProps.isBrowseActive || bodyProps.isMicroscopyActive || bodyProps.isSequencingActive);
     const navLink = (
         <React.Fragment>
             <i className="icon icon-fw icon-database fas mr-05 align-middle" />
@@ -111,7 +118,7 @@ function DataNavItem(props){
 
     return ( // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
         <BigDropdownNavItem {...navItemProps} id="data-menu-item" navItemHref={bodyProps.browseHref} navItemContent={navLink}
-            active={isAnyActive}>
+            active={bodyProps.isAnyActive}>
             <DataNavItemBody {...bodyProps} />
         </BigDropdownNavItem>
     );
@@ -119,10 +126,11 @@ function DataNavItem(props){
 
 const DataNavItemBody = React.memo(function DataNavItemBody(props) {
     const {
-        browseHref, sequencingDataHref, microscopyDataHref,
+        browseHref, sequencingDataHref, microscopyDataHref, publicationsHref,
         isBrowseActive = false,
         isSequencingActive = false,
         isMicroscopyActive = false,
+        isPublicationsActive = false,
         ...passProps
     } = props;
     return (
@@ -142,10 +150,17 @@ const DataNavItemBody = React.memo(function DataNavItemBody(props) {
                 </div>
             </BigDropdownBigLink>
 
-            <BigDropdownBigLink href={microscopyDataHref} isActive={isMicroscopyActive} titleIcon="microscope fas" className="bottom-edge-child">
+            <BigDropdownBigLink href={microscopyDataHref} isActive={isMicroscopyActive} titleIcon="microscope fas">
                 <h4>View Microscopy Data</h4>
                 <div className="description">
                     View Microscopy Datasets in the 4D Nucleome Database
+                </div>
+            </BigDropdownBigLink>
+
+            <BigDropdownBigLink href={publicationsHref} isActive={isPublicationsActive} titleIcon="book-open fas" className="bottom-edge-child">
+                <h4>Browse by Publication</h4>
+                <div className="description">
+                    View Publications in the 4D Nucleome Database
                 </div>
             </BigDropdownBigLink>
 

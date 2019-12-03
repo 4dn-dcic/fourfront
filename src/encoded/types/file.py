@@ -870,6 +870,19 @@ class FileProcessed(File):
     def experiments(self, request):
         return list(set(self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")))
 
+    @calculated_property(schema={
+        "title": "Pairsqc Quality Metric Table",
+        "description": "Link to a PairsQC quality metric table tsv file",
+        "type": "string"
+    })
+    def pairsqc_table(self, request, file_format, accession, quality_metric=None):
+       if file_format.endswith('pairs/') and quality_metric:
+           bucket = request.registry.settings.get('file_wfout_bucket')
+           s3_url = 'https://s3.amazonaws.com/{bucket}/{accession}/{accession}.plot_table.out'
+           return s3_url.format(bucket=bucket, accession=accession)
+       else:
+           return None
+
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
         keys = super(FileProcessed, self).unique_keys(properties)
