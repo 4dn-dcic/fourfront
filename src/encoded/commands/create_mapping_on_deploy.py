@@ -76,6 +76,7 @@ ITEM_INDEX_ORDER = [
     'MicroscopeSettingA2',
     'MicroscopeSettingD1',
     'MicroscopeSettingD2',
+    'MicroscopeConfiguration',
 
     'HiglassViewConfig',
     'QualityMetricAtacseq',
