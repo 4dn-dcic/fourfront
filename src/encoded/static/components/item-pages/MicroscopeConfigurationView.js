@@ -128,11 +128,11 @@ export class MicroMetaTabView extends React.PureComponent {
 
     componentDidUpdate(pastProps, pastState){
         const { isFullscreen, windowWidth, windowHeight } = this.props;
-        if (isFullscreen !== pastProps.isFullscreen) {
-            // TODO: Trigger re-draw of HiGlassComponent somehow
+        if (isFullscreen !== pastProps.isFullscreen || windowWidth !== pastProps.windowWidth || windowHeight !== pastProps.windowHeight) {
             setTimeout(this.updateContainerOffsets, 500); // Allow time for browser to repaint
         }
     }
+
     componentDidMount(){
 
         const onComplete = () => {
