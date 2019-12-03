@@ -84,15 +84,7 @@ export class MicroMetaTabView extends React.PureComponent {
             'tab' : <span><i className="icon icon-microscope fas icon-fw"/> MicroMeta</span>,
             'key' : 'micrometa',
             //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>4DN MicroMeta</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <MicroMetaTabView {...props} width={width} />
-                </div>
-            )
+            'content' : <MicroMetaTabView {...props} width={width} />
         };
     }
 
@@ -417,7 +409,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const editPermission  = this.havePermissionToEdit();
 
         return (
-            <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleSave} disabled={true || !editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-notch icon-spin fas' : 'save fas')}/>&nbsp; Save
             </button>
         );
@@ -430,7 +422,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const tooltip = "Create your own new Microscope Configuration based off of this one";
 
         return (
-            <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleClone} disabled={true || !session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Clone
             </button>
         );
@@ -524,7 +516,7 @@ export class MicroMetaTabView extends React.PureComponent {
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
         const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
-        const height = Math.max(windowHeight / 2, 600);
+        const height = Math.max(700, windowHeight /2);
 
         if (!mounted){
             return (
@@ -553,8 +545,7 @@ export class MicroMetaTabView extends React.PureComponent {
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
-                    {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}
-                        className="btn-success mt-17" style={{ 'paddingLeft': 30, 'paddingRight': 30 }} /> */}
+                    <span>4DN MicroMeta</span>
                     <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
                         {this.saveButton()}
@@ -564,7 +555,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 </h3>
                 <hr className="tab-section-title-horiz-divider" />
                 <div className="microscope-tab-view-contents">
-                    <div className="micrometa-container" ref={this.containerElemRef}>
+                    <div className="micrometa-container" ref={this.containerElemRef} style={{ height : height + 20 }}>
                         <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>
