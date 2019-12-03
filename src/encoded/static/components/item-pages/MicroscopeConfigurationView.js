@@ -543,7 +543,8 @@ export class MicroMetaTabView extends React.PureComponent {
             //visualizeImmediately: true,
             //loadedMicroscopeConfiguration: { ... },
             imagesPathSVG,
-            imagesPathPNG
+            imagesPathPNG,
+            scalingFactor: 0.65
         };
 
         return (
