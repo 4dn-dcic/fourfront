@@ -128,7 +128,8 @@ export class MicroMetaTabView extends React.PureComponent {
 
     componentDidUpdate(pastProps, pastState){
         const { isFullscreen, windowWidth, windowHeight } = this.props;
-        if (isFullscreen !== pastProps.isFullscreen || windowWidth !== pastProps.windowWidth || windowHeight !== pastProps.windowHeight) {
+        const { mounted } = this.state;
+        if (mounted && (isFullscreen !== pastProps.isFullscreen || windowWidth !== pastProps.windowWidth || windowHeight !== pastProps.windowHeight)) {
             setTimeout(this.updateContainerOffsets, 500); // Allow time for browser to repaint
         }
     }
@@ -532,6 +533,8 @@ export class MicroMetaTabView extends React.PureComponent {
                 </div>
             );
         }
+
+        //console.log("TTT", containerOffsetLeft, containerOffsetTop);
 
         const passProps = {
             width, height,
