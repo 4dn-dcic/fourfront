@@ -109,6 +109,7 @@ export class MicroMetaTabView extends React.PureComponent {
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
+        this.updateContainerOffsets = _.debounce(this.updateContainerOffsets.bind(this), 500);
 
         this.state = {
             'mounted'               : false,
@@ -116,19 +117,27 @@ export class MicroMetaTabView extends React.PureComponent {
             'cloneLoading'          : false,
             'releaseLoading'        : false,
             'addFileLoading'        : false,
-            'modal'                 : null
+            'modal'                 : null,
+            'containerOffsetLeft'   : 0,
+            'containerOffsetTop'    : 0
         };
 
         this.microMetaToolRef = React.createRef();
+        this.containerElemRef = React.createRef();
     }
 
     componentDidUpdate(pastProps, pastState){
-        if (this.props.isFullscreen !== pastProps.isFullscreen) {
+        const { isFullscreen, windowWidth, windowHeight } = this.props;
+        if (isFullscreen !== pastProps.isFullscreen) {
             // TODO: Trigger re-draw of HiGlassComponent somehow
+            setTimeout(this.updateContainerOffsets, 500); // Allow time for browser to repaint
         }
     }
     componentDidMount(){
+
         const onComplete = () => {
+            window.addEventListener("scroll", this.updateContainerOffsets);
+            this.updateContainerOffsets();
             this.setState({ mounted: true });
         };
 
@@ -144,6 +153,23 @@ export class MicroMetaTabView extends React.PureComponent {
         } else {
             onComplete();
         }
+    }
+
+    componentWillUnmount(){
+        window.removeEventListener("scroll", this.updateContainerOffsets);
+    }
+
+    updateContainerOffsets(){
+        const containerElem = this.containerElemRef.current;
+        if (!containerElem) {
+            throw new Error("Couldn't get container elem");
+        }
+        // Relative to window/viewport, not document.
+        const boundingRect = containerElem.getBoundingClientRect();
+        this.setState({
+            containerOffsetTop: boundingRect.top,
+            containerOffsetLeft: boundingRect.left
+        });
     }
 
     getMicroscopyMetadataToolComponent(){
@@ -346,6 +372,7 @@ export class MicroMetaTabView extends React.PureComponent {
         );
     }
 
+    /** @todo make into functional component */
     statusChangeButton(){
         const { session, context } = this.props;
         const { saveLoading, cloneLoading, releaseLoading } = this.state;
@@ -380,6 +407,7 @@ export class MicroMetaTabView extends React.PureComponent {
         );
     }
 
+    /** @todo make into functional component or move to this components render method */
     saveButton(){
         const { session, context } = this.props;
         const { saveLoading } = this.state;
@@ -394,6 +422,7 @@ export class MicroMetaTabView extends React.PureComponent {
         );
     }
 
+    /** @todo make into functional component or move to this components render method */
     cloneButton(){
         const { session } = this.props;
         const { cloneLoading } = this.state;
@@ -414,6 +443,7 @@ export class MicroMetaTabView extends React.PureComponent {
         setTimeout(toggleFullScreen, 0, !isFullscreen);
     }
 
+    /** @todo make into functional component or move to this components render method */
     fullscreenButton(){
         const { isFullscreen, toggleFullScreen } = this.props;
         if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
@@ -489,10 +519,10 @@ export class MicroMetaTabView extends React.PureComponent {
 
     render(){
         const { schemas, isFullscreen, context, windowWidth, windowHeight } = this.props;
-        const { mounted, modal } = this.state;
+        const { mounted, modal, containerOffsetLeft, containerOffsetTop } = this.state;
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
-        const width = isFullscreen ? (windowWidth - 20) : layout.gridContainerWidth(windowWidth);
+        const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
         const height = Math.max(windowHeight / 2, 600);
 
         if (!mounted){
@@ -505,6 +535,8 @@ export class MicroMetaTabView extends React.PureComponent {
 
         const passProps = {
             width, height,
+            containerOffsetLeft,
+            containerOffsetTop,
             //onLoadMicroscopes,
             onLoadSchema,
             onSaveMicroscope: this.onSaveMicroscope,
@@ -528,7 +560,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 </h3>
                 <hr className="tab-section-title-horiz-divider" />
                 <div className="microscope-tab-view-contents">
-                    <div className="container px-0" style={isFullscreen ? { 'paddingLeft': 10, 'paddingRight': 10 } : null}>
+                    <div className="micrometa-container" ref={this.containerElemRef}>
                         <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>
