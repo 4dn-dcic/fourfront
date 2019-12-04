@@ -104,8 +104,7 @@ describe('Testing home.js', function() {
 
     it('has welcome, announcements headers', function() {
         var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "homepage-section-title");
-        console.log('TTT', page);
-        expect(newsHeaders.length).toEqual(2);
+        expect(newsHeaders.length).toEqual(3);
     });
 
 });
