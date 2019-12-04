@@ -237,7 +237,7 @@ const ExternalLinksRow = React.memo(function LinksRow(props){
                 </div>
                 <div className="col-3">
                     <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer">
-                        <span>NIH Common Fund</span>
+                        <span>Centers and Labs</span>
                     </a>
                 </div>
             </div>
