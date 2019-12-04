@@ -168,6 +168,27 @@ class GenomicRegion(Item):
 
 
 @collection(
+    name='microscope-configurations',
+    properties={
+        'title': 'Microscope Configurations',
+        'description': 'Collection of Metadata for microscope configurations of various Tiers',
+    })
+class MicroscopeConfiguration(Item):
+    """The MicroscopeConfiguration class that holds configuration of a microscope."""
+
+    item_type = 'microscope_configuration'
+    schema = load_schema('encoded:schemas/microscope_configuration.json')
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, microscope, title = None):
+        return microscope.get("Name") or title
+
+
+@collection(
     name='organisms',
     unique_key='organism:taxon_id',
     lookup_key='name',

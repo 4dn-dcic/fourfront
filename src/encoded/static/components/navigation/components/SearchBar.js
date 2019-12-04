@@ -6,7 +6,7 @@ import url from 'url';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import { DropdownItem, DropdownButton } from 'react-bootstrap';
-import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
+import Fade from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
 import { console, searchFilters, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
 import { memoizedUrlParse } from './../../globals';
@@ -37,12 +37,9 @@ export class SearchBar extends React.PureComponent {
         return href && typeof href === 'string' && (href.indexOf('/browse/') > -1 || href.indexOf('/search/') > -1);
     }
 
-    static deriveSearchItemTypeFromHref(href, searchItemType = null){
-        if (searchItemType === "within" && SearchBar.isBrowseOrSearchPage(href)) {
+    static deriveSearchItemTypeFromHref(href, searchItemType = null) {
+        if (SearchBar.isBrowseOrSearchPage(href)) {
             return "within";
-        }
-        if (navigate.isSearchHref(href)) {
-            return "all";
         }
         return "sets";
     }

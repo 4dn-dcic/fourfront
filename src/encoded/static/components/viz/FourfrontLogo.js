@@ -1,7 +1,6 @@
 'use strict';
 
 import React from 'react';
-import { NavItem, Navbar } from 'react-bootstrap';
 import _ from 'underscore';
 import * as d3 from 'd3';
 

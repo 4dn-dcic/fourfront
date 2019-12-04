@@ -17,7 +17,7 @@
     "cypress:test-recorded-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:test-recorded-hotseat": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com"
   },
-  "author": "",
+  "author": "4DN DCIC",
   "license": "MIT",
   "files": [],
   "repository": "4dn-dcic/fourfront",
@@ -100,7 +100,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.11.2",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.0",
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.2.39",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.0.2.40",
+    "4dn-microscopy-metadata-tool": "github:WU-BIMAC/4DNMicroscopyMetadataToolReact#0.0.0.12",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.12.0",
     "detect-browser": "^3.0.1",

@@ -124,6 +124,79 @@ function watchSharedPortalComponents(done){
     });
 }
 
+function getMicroscopyMetadataToolLink(){
+    let metadataToolPath = path.resolve(__dirname, 'node_modules/4dn-microscopy-metadata-tool');
+    let isLinked = false;
+
+    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
+        for (var i = 0; i < 10; i++) { // Incase multiple links.
+            metadataToolPath = fs.readlinkSync(metadataToolPath);
+            isLinked = true;
+        }
+    } catch (e){
+        // ... not linked
+    }
+
+    console.log(
+        "`4dn-microscopy-metadata-tool` directory is",
+        isLinked ? "sym-linked to `" + metadataToolPath + "`." : "NOT sym-linked."
+    );
+
+    return { isLinked, metadataToolPath: isLinked ? metadataToolPath : null };
+}
+
+function buildMicroscopyMetadataTool(done){
+    const { isLinked, metadataToolPath } = getMicroscopyMetadataToolLink();
+
+    if (!isLinked){ // Exit
+        done();
+        return;
+    }
+
+    // Same as 4dn-microscopy-metadata-tool own build method, but with "--watch"
+    const subP = spawn(
+        path.join(metadataToolPath, 'node_modules/.bin/babel'),
+        [
+            path.join(metadataToolPath, 'src'),
+            "--out-dir",
+            path.join(metadataToolPath, 'es'),
+            "--env-name",
+            "esm"
+        ],
+        { stdio: "inherit" }
+    );
+
+    subP.on("close", (code)=>{
+        done();
+    });
+}
+
+function watchMicroscopyMetadataTool(done){
+    const { isLinked, metadataToolPath } = getMicroscopyMetadataToolLink();
+
+    if (!isLinked){ // Exit
+        done();
+        return;
+    }
+
+    // Same as 4dn-microscopy-metadata-tool own build method, but with "--watch"
+    const subP = spawn(
+        path.join(metadataToolPath, 'node_modules/.bin/babel'),
+        [
+            path.join(metadataToolPath, 'src'),
+            "--out-dir",
+            path.join(metadataToolPath, 'es'),
+            "--env-name",
+            "esm",
+            "--watch"
+        ],
+        { stdio: "inherit" }
+    );
+
+    subP.on("close", (code)=>{
+        done();
+    });
+}
 
 
 // TODO: Just use command-line `node-sass` ?
@@ -166,14 +239,16 @@ const doSassBuild = (done, options = {}) => {
 const devQuick = gulp.series(
     setQuick,
     doWebpack,
-    gulp.parallel(watch, watchSharedPortalComponents)
+    gulp.parallel(watch, watchSharedPortalComponents, watchMicroscopyMetadataTool)
     // `watchSharedPortalComponents` will update @hms-dbmi-bgm/shared-portal-components/es/,
+    // `watchMicroscopyMetadataTool` will update 4dn-microscopy-metadata-tool/es/,
     // which will be picked up by `watch` and recompiled into bundle.js
 );
 
 const devAnalyzed = gulp.series(
     setDevelopment,
     buildSharedPortalComponents,
+    buildMicroscopyMetadataTool,
     doWebpack
 );
 
