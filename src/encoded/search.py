@@ -153,16 +153,15 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Execute the query
     if size == 'all':
         es_results = execute_search_for_all_results(search)
-        meta_search = search[0]
-        meta = search.execute()
     else:
         size_search = search[from_:from_ + size]
         es_results = execute_search(size_search)
-        meta_search = search[0]
-        meta = search.execute()
+
+    # execute a 'meta' search to get meta data not obtainable from scan
+    meta_search = search[0]
+    meta = search.execute().to_dict()
 
     ### Record total number of hits
-    import pdb; pdb.set_trace()
     result['total'] = total = len(es_results)
     result['facets'] = format_facets(meta, facets, total, search_frame)
     result['aggregations'] = format_extra_aggregations(meta)
@@ -1300,22 +1299,18 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 if len(result_facet.get('terms', [])) < 1:
                     continue
 
-            # XXX: es_dsl sometimes gives an AttrDict ?
-            if type(aggregations) == AttrDict:
-                aggregations_dict = aggregations.to_dict()
-            else:
-                aggregations_dict = aggregations
-            if len(aggregations_dict[full_agg_name].keys()) > 2:
-                result_facet['extra_aggs'] = { k:v for k,v in aggregations_dict[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
+            if len(aggregations[full_agg_name].keys()) > 2:
+                result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
 
         result.append(result_facet)
 
     return result
 
+
 def format_extra_aggregations(es_results):
     if 'aggregations' not in es_results:
         return {}
-    return { k:v for k,v in es_results['aggregations'].to_dict().items() if k != 'all_items' }
+    return { k:v for k,v in es_results['aggregations'].items() if k != 'all_items' }
 
 
 def format_results(request, hits, search_frame):
