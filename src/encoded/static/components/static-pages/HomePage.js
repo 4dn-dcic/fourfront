@@ -93,7 +93,7 @@ export default class HomePage extends React.PureComponent {
                     </div>
                     */}
 
-                    <div className="mt-3">
+                    <div className="mt-4">
                         <h3 className="homepage-section-title text-400">External Links</h3>
                         <ExternalLinksRow />
                     </div>
