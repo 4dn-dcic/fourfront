@@ -3,7 +3,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-//import { TwitterTimelineEmbed, TwitterShareButton, TwitterFollowButton, TwitterHashtagButton, TwitterMentionButton, TwitterTweetEmbed, TwitterMomentShare, TwitterDMButton, TwitterVideoEmbed, TwitterOnAirButton } from 'react-twitter-embed';
 import TwitterTimelineEmbed from '../lib/react-twitter-embed/TwitterTimelineEmbed';
 
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -79,10 +78,26 @@ export default class HomePage extends React.PureComponent {
                             </div>
                         </div>
                     </div>
+
+                    {/*
                     <div className="mt-4">
                         <h2 className="homepage-section-title">Announcements</h2>
                         <Announcements {...{ session, announcements, windowWidth }} />
                     </div>
+                    */}
+
+                    {/*
+                    <div className="mt-4">
+                        <h3 className="homepage-section-title text-300">Getting Started</h3>
+                        <GettingStartedLinksRow {...{ session }} />
+                    </div>
+                    */}
+
+                    <div className="mt-3">
+                        <h3 className="homepage-section-title text-400">External Links</h3>
+                        <ExternalLinksRow />
+                    </div>
+
                 </div>
 
             </div>
@@ -144,116 +159,88 @@ class BigBrowseButton extends React.Component {
 }
 
 
-class LinksColumn extends React.PureComponent {
-
-    jointAnalysisPageLink(colSize){
-        var className = "link-block";
-        if (colSize){
-            className += (' col-sm-' + colSize);
-        }
-        return (
-            <div className={className}>
-                <a href="/joint-analysis">
+const GettingStartedLinksRow = React.memo(function GettingStartedLinksRow(props){
+    const { linkBoxVerticalPaddingOffset, session } = props;
+    let jointAnalysisPageLink = null;
+    let nofisAicsCollaborationPageLink = null;
+    if (session) {
+        jointAnalysisPageLink = (
+            <div className="col-3">
+                <a className="link-block" href="/joint-analysis">
                     <span>Joint Analysis Page</span>
                 </a>
             </div>
         );
-    }
-
-    /**
-     * Add a link for the NOFIC-AICS Collaboration page.
-     */
-    nofisAicsCollaborationPageLink(colSize){
-        var className = "link-block";
-        if (colSize){
-            className += (' col-sm-' + colSize);
-        }
-        return (
-            <div className={className}>
-                <a href="/4DN-AICS-Collaboration">
+        nofisAicsCollaborationPageLink = (
+            <div className="col-3">
+                <a className="link-block" href="/4DN-AICS-Collaboration">
                     <span>NOFIC-AICS Collaboration</span>
                 </a>
             </div>
         );
     }
+    return (
+        <div className="homepage-links-row getting-started-links">
+            <div className="links-wrapper row">
+                <div className="col-3">
+                    <BigBrowseButton className="browse-btn link-block">
+                        <span>{ BigBrowseButton.defaultProps.children }</span>
+                    </BigBrowseButton>
+                </div>
+                <div className="col-3">
+                    <a className="link-block" href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets">
+                        <span>Browse Publications</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block" href="/tools/jupyterhub">
+                        <span>Explore 4DN Data (JupyterHub)</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block" href="/tools/visualization">
+                        <span>Visualize 4DN Data (HiGlass)</span>
+                    </a>
+                </div>
+                {/*
+                <div className="link-block">
+                    <a href="/help/user-guide/data-organization">
+                        <span>Introduction to 4DN Metadata</span>
+                    </a>
+                </div>
+                */}
+                { jointAnalysisPageLink }
+                { nofisAicsCollaborationPageLink }
+            </div>
+        </div>
+    );
+});
 
-    internalLinks(){
-        var { linkBoxVerticalPaddingOffset, session } = this.props;
-
-        return (
-            <div className="homepage-links-column internal-links">
-                <h4 className="text-400 mb-15 mt-0">Getting Started</h4>
-                <div className="links-wrapper clearfix">
-                    <div className="link-block">
-                        <BigBrowseButton className="browse-btn">
-                            <span>{ BigBrowseButton.defaultProps.children }</span>
-                        </BigBrowseButton>
-                    </div>
-                    <div className="link-block">
-                        <a href="/search/?award.project=4DN&type=Publication">
-                            <span>Browse 4DN Publications</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="/jupyterhub">
-                            <span>Explore 4DN Data (JupyterHub)</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="/visualization/index">
-                            <span>Visualize 4DN Data (HiGlass)</span>
-                        </a>
-                    </div>
-                    {/*
-                    <div className="link-block">
-                        <a href="/help/user-guide/data-organization">
-                            <span>Introduction to 4DN Metadata</span>
-                        </a>
-                    </div>
-                    */}
-                    { (session && this.jointAnalysisPageLink()) || null }
-                    { (session && this.nofisAicsCollaborationPageLink()) || null }
+const ExternalLinksRow = React.memo(function LinksRow(props){
+    return (
+        <div className="homepage-links-row external-links">
+            <div className="links-wrapper row">
+                <div className="col-3">
+                    <a className="link-block external-link" href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                        <span>Main 4DN Portal</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block external-link" href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                        <span>4DN DCIC</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer">
+                        <span>NIH Common Fund</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer">
+                        <span>NIH Common Fund</span>
+                    </a>
                 </div>
             </div>
-        );
-    }
-
-    externalLinks(){
-        var linkBoxVerticalPaddingOffset = this.props.linkBoxVerticalPaddingOffset;
-        return (
-            <div className="homepage-links-column external-links">
-                {/* <h3 className="text-300 mb-2 mt-3">External Links</h3> */}
-                <h4 className="text-400 mb-15 mt-25">External Links</h4>
-                <div className="links-wrapper clearfix">
-                    <div className="link-block">
-                        <a href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>Main Portal</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>4DN DCIC</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>NIH Common Fund</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>Centers and Labs</span>
-                        </a>
-                    </div>
-                </div>
-                <br/>
-            </div>
-        );
-    }
-
-    render(){
-        return <div className="homepage-links">{ this.internalLinks() }{ this.externalLinks() }</div>;
-    }
-
-}
-
+        </div>
+    );
+});
