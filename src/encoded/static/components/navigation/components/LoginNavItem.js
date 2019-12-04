@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { NavItem, DropdownItem, Nav } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserRegistrationModal } from './UserRegistrationModal';
 
@@ -34,12 +34,3 @@ LoginNavItem.propTypes = {
     'windowWidth'   : PropTypes.number,
     ...UserRegistrationModal.propTypes
 };
-
-
-export const LogoutDropdownItem = React.memo(function LogoutDropdownItem({ performLogout }){
-    return (
-        <DropdownItem id="logoutbtn" onClick={performLogout} className="global-entry">
-            Log Out
-        </DropdownItem>
-    );
-});

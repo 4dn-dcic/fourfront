@@ -6,7 +6,7 @@ import url from 'url';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import { DropdownItem, DropdownButton } from 'react-bootstrap';
-import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
+import Fade from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
 import { console, searchFilters, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
 import { memoizedUrlParse } from './../../globals';

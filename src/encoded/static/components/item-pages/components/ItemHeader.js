@@ -96,7 +96,7 @@ export class TopRow extends React.Component {
             <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code far"/>{' '}
                 <a href={viewUrl}
-                    className="inline-block" target="_blank" rel="noreferrer noopener"
+                    className="inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
                         if (window && window.open){
                             e.preventDefault();

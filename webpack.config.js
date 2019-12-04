@@ -75,6 +75,7 @@ const resolve = {
 };
 
 const optimization = {
+    usedExports: true,
     minimize: mode === "production",
     minimizer: [
         //new UglifyJsPlugin({

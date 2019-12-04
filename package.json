@@ -17,7 +17,7 @@
     "cypress:test-recorded-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:test-recorded-hotseat": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com"
   },
-  "author": "",
+  "author": "4DN DCIC",
   "license": "MIT",
   "files": [],
   "repository": "4dn-dcic/fourfront",
