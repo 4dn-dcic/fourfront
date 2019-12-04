@@ -175,14 +175,17 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     /**
-      * Update the current microscope configuration for the user, based on the current data.
-      * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
-      * @returns {void}
-    */
+     * Update the current microscope configuration for the user, based on the current data.
+     * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
+     * @returns {void}
+     */
     handleSave(evt) {
         evt.preventDefault();
 
         const mtc = this.getMicroscopyMetadataToolComponent();
+        if (!mtc || !mtc.api){
+            throw new Error('Could not get API.');
+        }
         const microscopeStr = mtc.api.exportMicroscopeConfString();
         const microscope = microscopeStr && JSON.parse(microscopeStr);
 
@@ -194,14 +197,17 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     /**
-        * Create a new microscope configuration for the user, based on the current data.
-        * @returns {void}
-    */
+     * Create a new microscope configuration for the user, based on the current data.
+     * @returns {void}
+     */
     handleClone(evt) {
         const { context } = this.props;
         evt.preventDefault();
 
         const mtc = this.getMicroscopyMetadataToolComponent();
+        if (!mtc || !mtc.api){
+            throw new Error('Could not get API.');
+        }
         const microscopeStr = mtc.api.exportMicroscopeConfString();
         const microscope = microscopeStr && JSON.parse(microscopeStr);
 
@@ -403,13 +409,13 @@ export class MicroMetaTabView extends React.PureComponent {
     /** @todo make into functional component or move to this components render method */
     saveButton(){
         const { session, context } = this.props;
-        const { saveLoading } = this.state;
+        const { saveLoading, mounted } = this.state;
         const tooltip = "Save the current view shown below to this display";
 
         const editPermission  = this.havePermissionToEdit();
 
         return (
-            <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleSave} disabled={!mounted || !editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-notch icon-spin fas' : 'save fas')}/>&nbsp; Save
             </button>
         );
@@ -418,11 +424,11 @@ export class MicroMetaTabView extends React.PureComponent {
     /** @todo make into functional component or move to this components render method */
     cloneButton(){
         const { session } = this.props;
-        const { cloneLoading } = this.state;
+        const { cloneLoading, mounted } = this.state;
         const tooltip = "Create your own new Microscope Configuration based off of this one";
 
         return (
-            <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleClone} disabled={!mounted || !session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Clone
             </button>
         );
