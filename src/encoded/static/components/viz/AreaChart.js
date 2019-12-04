@@ -8,8 +8,7 @@ import url from 'url';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
 
-import DropdownButton from 'react-bootstrap/es/DropdownButton';
-import DropdownItem from 'react-bootstrap/es/DropdownItem';
+import { DropdownItem, DropdownButton } from 'react-bootstrap';
 
 import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';

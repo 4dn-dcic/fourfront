@@ -6,7 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import moment from 'moment';
-import Modal from 'react-bootstrap/es/Modal';
+import { Modal } from 'react-bootstrap';
 
 import { console, ajax, JWT, typedefs } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';

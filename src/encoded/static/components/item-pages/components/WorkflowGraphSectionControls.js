@@ -3,8 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import DropdownButton from 'react-bootstrap/es/DropdownButton';
-import DropdownItem from 'react-bootstrap/es/DropdownItem';
+import { DropdownButton, DropdownItem } from 'react-bootstrap';
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { CollapsibleItemViewButtonToolbar } from './CollapsibleItemViewButtonToolbar';
 

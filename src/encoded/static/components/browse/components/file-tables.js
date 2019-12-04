@@ -7,8 +7,7 @@ import memoize from 'memoize-one';
 import url from 'url';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
-import DropdownButton from 'react-bootstrap/es/DropdownButton';
-import DropdownItem from 'react-bootstrap/es/DropdownItem';
+import { DropdownButton, DropdownItem } from 'react-bootstrap';
 
 import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 

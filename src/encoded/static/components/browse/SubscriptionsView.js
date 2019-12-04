@@ -5,13 +5,10 @@ import _ from 'underscore';
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
-import DropdownButton from 'react-bootstrap/es/DropdownButton';
-import DropdownItem from 'react-bootstrap/es/DropdownItem';
+import { DropdownButton, DropdownItem, ButtonToolbar, ButtonGroup } from 'react-bootstrap';
+
 /** @deprecated - DropDownButton, Button */
 /** @todo use HTML elem(s) */
-import ButtonToolbar from 'react-bootstrap/es/ButtonToolbar';
-import ButtonGroup from 'react-bootstrap/es/ButtonGroup';
-
 
 
 /**
