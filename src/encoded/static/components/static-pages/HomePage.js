@@ -93,7 +93,7 @@ export default class HomePage extends React.PureComponent {
                     </div>
                     */}
 
-                    <div className="mt-3">
+                    <div className="mt-4">
                         <h3 className="homepage-section-title text-400">External Links</h3>
                         <ExternalLinksRow />
                     </div>
@@ -158,7 +158,7 @@ class BigBrowseButton extends React.Component {
     }
 }
 
-
+/** NOT USED FOR NOW - NEEDS UPDATES IF TO BE REINTRODUCED */
 const GettingStartedLinksRow = React.memo(function GettingStartedLinksRow(props){
     const { linkBoxVerticalPaddingOffset, session } = props;
     let jointAnalysisPageLink = null;
@@ -220,24 +220,24 @@ const ExternalLinksRow = React.memo(function LinksRow(props){
     return (
         <div className="homepage-links-row external-links">
             <div className="links-wrapper row">
-                <div className="col-3">
+                <div className="col-12 col-md-3">
                     <a className="link-block external-link" href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
                         <span>Main 4DN Portal</span>
                     </a>
                 </div>
-                <div className="col-3">
+                <div className="col-12 col-md-3">
                     <a className="link-block external-link" href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
                         <span>4DN DCIC</span>
                     </a>
                 </div>
-                <div className="col-3">
+                <div className="col-12 col-md-3">
                     <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer">
                         <span>NIH Common Fund</span>
                     </a>
                 </div>
-                <div className="col-3">
+                <div className="col-12 col-md-3">
                     <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer">
-                        <span>NIH Common Fund</span>
+                        <span>Centers and Labs</span>
                     </a>
                 </div>
             </div>
