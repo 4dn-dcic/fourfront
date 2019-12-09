@@ -17,7 +17,7 @@ export const Footer = React.memo(function Footer(props){
 
                         <div className="col-12 col-md-6">
                             <div className="footer-section copy-notice">
-                                <a href="http://dcic.4dnucleome.org" target="_blank" rel="noopener noreferrer" className="text-400">
+                                <a href="http://dcic.4dnucleome.org" target="_blank" rel="noopener noreferrer" className="text-400" tabIndex="5">
                                     4D Nucleome Data Coordination and Integration Center
                                 </a>
                             </div>
@@ -25,9 +25,9 @@ export const Footer = React.memo(function Footer(props){
 
                         <div className="col-12 col-md-6">
                             <div className="footer-section text-500">
-                                <a href="http://www.harvard.edu/" target="_blank" rel="noopener noreferrer">Harvard University</a>
+                                <a href="http://www.harvard.edu/" target="_blank" rel="noopener noreferrer" tabIndex="5">Harvard University</a>
                                 <span> &nbsp;|&nbsp; </span>
-                                <a href="http://www.mit.edu/" target="_blank" rel="noopener noreferrer">Massachusetts Institute of Technology</a>
+                                <a href="http://www.mit.edu/" target="_blank" rel="noopener noreferrer" tabIndex="5">Massachusetts Institute of Technology</a>
                             </div>
                         </div>
                     </div>

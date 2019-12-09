@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import TwitterTimelineEmbed from '../lib/react-twitter-embed/TwitterTimelineEmbed';
 
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
@@ -28,23 +29,28 @@ export default class HomePage extends React.PureComponent {
         "session": PropTypes.bool.isRequired
     };
 
-    introText(){
-        var introContent = _.findWhere(this.props.context.content, { 'name' : 'home.introduction' }); // Content
-
-        if (introContent){
-            return <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} />;
-        }
-
-        return <p className="text-center">Introduction content not yet indexed.</p>;
-    }
-
     /**
      * The render function. Renders homepage contents.
      * @returns {Element} A React <div> element.
      */
     render() {
         const { windowWidth, context, session } = this.props;
-        const { announcements = null } = context || {};
+        const { announcements = null, content = [] } = context || {};
+        const introContent = _.findWhere(content, { 'name' : 'home.introduction' }); // Content
+        const introToShow = introContent ?
+            <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} />
+            : <p className="text-center">Introduction content not yet indexed.</p>;
+
+        const twitterPlaceholder = (
+            <div className="twitter-loading-placeholder">
+                <i className="icon icon-twitter icon-2x fab"/>
+            </div>
+        );
+        const twitterTimelineEmbed = (
+            <TwitterTimelineEmbed sourceType="profile" screenName="4dn_dcic"
+                placeholder={twitterPlaceholder} autoHeight noFooter noHeader />
+        );
+
         return (
             <div className="homepage-wrapper">
 
@@ -54,16 +60,44 @@ export default class HomePage extends React.PureComponent {
                     <div className="row">
                         <div className="col-12 col-md-8">
                             <h2 className="homepage-section-title">Introduction</h2>
-                            { this.introText() }
+                            { introToShow }
                         </div>
-                        <div className="col-12 col-md-4 pull-right">
+                        <div className="col-12 col-md-4 social-connections-column">
+                            {/*
                             <LinksColumn {...{ session, windowWidth }} />
+                            */}
+                            <h2 className="homepage-section-title">
+                                <span>Tweets</span>
+                                <a href="https://help.twitter.com/en/twitter-for-websites-ads-info-and-privacy" target="_blank"
+                                    rel="noopener noreferrer" className="right privacy-ext">
+                                    <i className="icon icon-fw icon-info-circle fas" data-tip="Cookie & Privacy Information for Twitter"/>
+                                </a>
+                            </h2>
+                            <div className="twitter-timeline-container">
+                                { twitterTimelineEmbed }
+                            </div>
                         </div>
                     </div>
+
+                    {/*
                     <div className="mt-4">
                         <h2 className="homepage-section-title">Announcements</h2>
                         <Announcements {...{ session, announcements, windowWidth }} />
                     </div>
+                    */}
+
+                    {/*
+                    <div className="mt-4">
+                        <h3 className="homepage-section-title text-300">Getting Started</h3>
+                        <GettingStartedLinksRow {...{ session }} />
+                    </div>
+                    */}
+
+                    <div className="mt-4">
+                        <h3 className="homepage-section-title text-400">External Links</h3>
+                        <ExternalLinksRow />
+                    </div>
+
                 </div>
 
             </div>
@@ -124,117 +158,89 @@ class BigBrowseButton extends React.Component {
     }
 }
 
-
-class LinksColumn extends React.PureComponent {
-
-    jointAnalysisPageLink(colSize){
-        var className = "link-block";
-        if (colSize){
-            className += (' col-sm-' + colSize);
-        }
-        return (
-            <div className={className}>
-                <a href="/joint-analysis">
+/** NOT USED FOR NOW - NEEDS UPDATES IF TO BE REINTRODUCED */
+const GettingStartedLinksRow = React.memo(function GettingStartedLinksRow(props){
+    const { linkBoxVerticalPaddingOffset, session } = props;
+    let jointAnalysisPageLink = null;
+    let nofisAicsCollaborationPageLink = null;
+    if (session) {
+        jointAnalysisPageLink = (
+            <div className="col-3">
+                <a className="link-block" href="/joint-analysis">
                     <span>Joint Analysis Page</span>
                 </a>
             </div>
         );
-    }
-
-    /**
-     * Add a link for the NOFIC-AICS Collaboration page.
-     */
-    nofisAicsCollaborationPageLink(colSize){
-        var className = "link-block";
-        if (colSize){
-            className += (' col-sm-' + colSize);
-        }
-        return (
-            <div className={className}>
-                <a href="/4DN-AICS-Collaboration">
+        nofisAicsCollaborationPageLink = (
+            <div className="col-3">
+                <a className="link-block" href="/4DN-AICS-Collaboration">
                     <span>NOFIC-AICS Collaboration</span>
                 </a>
             </div>
         );
     }
+    return (
+        <div className="homepage-links-row getting-started-links">
+            <div className="links-wrapper row">
+                <div className="col-3">
+                    <BigBrowseButton className="browse-btn link-block">
+                        <span>{ BigBrowseButton.defaultProps.children }</span>
+                    </BigBrowseButton>
+                </div>
+                <div className="col-3">
+                    <a className="link-block" href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets">
+                        <span>Browse Publications</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block" href="/tools/jupyterhub">
+                        <span>Explore 4DN Data (JupyterHub)</span>
+                    </a>
+                </div>
+                <div className="col-3">
+                    <a className="link-block" href="/tools/visualization">
+                        <span>Visualize 4DN Data (HiGlass)</span>
+                    </a>
+                </div>
+                {/*
+                <div className="link-block">
+                    <a href="/help/user-guide/data-organization">
+                        <span>Introduction to 4DN Metadata</span>
+                    </a>
+                </div>
+                */}
+                { jointAnalysisPageLink }
+                { nofisAicsCollaborationPageLink }
+            </div>
+        </div>
+    );
+});
 
-    internalLinks(){
-        var { linkBoxVerticalPaddingOffset, session } = this.props;
-
-        return (
-            <div className="homepage-links-column internal-links">
-                <h4 className="text-400 mb-15 mt-0">Getting Started</h4>
-                <div className="links-wrapper clearfix">
-                    <div className="link-block">
-                        <BigBrowseButton className="browse-btn">
-                            <span>{ BigBrowseButton.defaultProps.children }</span>
-                        </BigBrowseButton>
-                    </div>
-                    <div className="link-block">
-                        <a href="/search/?award.project=4DN&type=Publication">
-                            <span>Browse 4DN Publications</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="/jupyterhub">
-                            <span>Explore 4DN Data (JupyterHub)</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="/visualization/index">
-                            <span>Visualize 4DN Data (HiGlass)</span>
-                        </a>
-                    </div>
-                    {/*
-                    <div className="link-block">
-                        <a href="/help/user-guide/data-organization">
-                            <span>Introduction to 4DN Metadata</span>
-                        </a>
-                    </div>
-                    */}
-                    { (session && this.jointAnalysisPageLink()) || null }
-                    { (session && this.nofisAicsCollaborationPageLink()) || null }
+const ExternalLinksRow = React.memo(function LinksRow(props){
+    return (
+        <div className="homepage-links-row external-links">
+            <div className="links-wrapper row">
+                <div className="col-12 col-md-3">
+                    <a className="link-block external-link" href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                        <span>Main 4DN Portal</span>
+                    </a>
+                </div>
+                <div className="col-12 col-md-3">
+                    <a className="link-block external-link" href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
+                        <span>4DN DCIC</span>
+                    </a>
+                </div>
+                <div className="col-12 col-md-3">
+                    <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer">
+                        <span>NIH Common Fund</span>
+                    </a>
+                </div>
+                <div className="col-12 col-md-3">
+                    <a className="link-block external-link" href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer">
+                        <span>Centers and Labs</span>
+                    </a>
                 </div>
             </div>
-        );
-    }
-
-    externalLinks(){
-        var linkBoxVerticalPaddingOffset = this.props.linkBoxVerticalPaddingOffset;
-        return (
-            <div className="homepage-links-column external-links">
-                {/* <h3 className="text-300 mb-2 mt-3">External Links</h3> */}
-                <h4 className="text-400 mb-15 mt-25">External Links</h4>
-                <div className="links-wrapper clearfix">
-                    <div className="link-block">
-                        <a href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>Main Portal</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="http://dcic.4dnucleome.org/" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>4DN DCIC</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>NIH Common Fund</span>
-                        </a>
-                    </div>
-                    <div className="link-block">
-                        <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank" rel="noopener noreferrer" className="external-link">
-                            <span>Centers and Labs</span>
-                        </a>
-                    </div>
-                </div>
-                <br/>
-            </div>
-        );
-    }
-
-    render(){
-        return <div className="homepage-links">{ this.internalLinks() }{ this.externalLinks() }</div>;
-    }
-
-}
-
+        </div>
+    );
+});

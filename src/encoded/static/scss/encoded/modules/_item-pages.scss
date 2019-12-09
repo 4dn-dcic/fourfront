@@ -38,7 +38,7 @@ h4.tab-section-title {
 	border-top-color: #ccc;
 }
 
-body .rc-tabs-top {
+body .item-page-container > .rc-tabs-top {
 
 	box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
 	border-bottom: none;
@@ -54,7 +54,7 @@ body .rc-tabs-top {
 	}
 }
 
-.rc-tabs-bar {
+.item-page-container > .rc-tabs-top > .rc-tabs-bar {
 
 	.rc-tabs-tab {
 		padding-left: 18px;
@@ -174,7 +174,7 @@ body .rc-tabs-top {
 }
 
 
-.rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
+.item-page-container > .rc-tabs-top .extra-style-2 .rc-tabs-ink-bar {
 	height: 48px;
 	background: none;
 	border: 2px solid $brand-primary-dark;
@@ -2078,7 +2078,18 @@ $badge-item-min-height: 90px;
 }
 */
 
-
+/** Microscopy Configuration **/
+#microscopy-app-container {
+	.droptarget{
+		img { 
+			height: 100%;
+		}
+	}
+	.rc-tabs-content {
+		margin-left: 0px !important;
+	}
+}
+.microscopy-create-modal .modal-body .btn {width: 100% !important;}
 
 /**********************************************************
 		User Profile Page

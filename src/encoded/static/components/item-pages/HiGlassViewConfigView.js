@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { DropdownButton, DropdownItem, Dropdown, Button, Modal } from 'react-bootstrap';
+import { Dropdown, DropdownButton, DropdownItem, Modal } from 'react-bootstrap';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
