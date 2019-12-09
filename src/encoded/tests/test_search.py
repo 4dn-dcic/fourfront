@@ -1,5 +1,5 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
-from .features.conftest import app_settings, app, workbook
+from .workbook_fixtures import app_settings, app, workbook
 import pytest
 from encoded.commands.run_upgrader_on_inserts import get_inserts
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
