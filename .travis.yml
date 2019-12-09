@@ -109,7 +109,7 @@ after_success:
 - ! "if [ \"$BUILD_LEADER\" = \"YES\" ]; then\n  if [ \"$BUILD_AGGREGATE_STATUS\"
   = \"others_succeeded\" ]; then\n    if [ \"$TRAVIS_PULL_REQUEST\" = \"false\" ];
   then\n      echo \"cleanup build artifacts\"\n      rm elasticsearch-5.4.1.deb\n
-  \     rm .to_export_back\n      rm versions.cfg\n      pip install awsebcli\n      bin/aws
+  \     rm .to_export_back\n      rm versions.cfg\n      pip install awsebcli==3.16.0\n      bin/aws
   s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws\n      git remote
   add origin-travis https://${GH_TOKEN}@github.com/4dn-dcic/fourfront.git\n      git
   config --global user.email \"travis@builder.com\"\n      git config --global user.name
