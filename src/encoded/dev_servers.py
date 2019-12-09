@@ -103,6 +103,9 @@ def main():
 
     app = get_app(args.config_uri, args.app_name)
 
+    if args.init:
+        create_mapping.run(app, check_first=False, purge_queue=True)
+
     if args.load:
         from pyramid.path import DottedNameResolver
         load_test_data = app.registry.settings.get('load_test_data')
@@ -110,9 +113,6 @@ def main():
         load_res = load_test_data(app)
         if load_res:  # None if successful
             raise(load_res)
-
-    if args.init:
-        create_mapping.run(app, check_first=False, purge_queue=True)
 
     print('Started. ^C to exit.')
 
