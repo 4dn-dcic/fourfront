@@ -20,16 +20,17 @@ describe('Home Page', function () {
     });
 
 
-    it('Has carousel', function () {
+    it('Has carousel', function() {
         cy.get('.homepage-carousel-wrapper .slider-frame ul.slider-list li').should('have.length.of.at.least', 2);
     });
 
-
-    it('Has 3+ announcements', function () {
-
-        cy.window().scrollTo('bottom').wait(100).end()
-            .get('.home-content-area div.announcement').should('have.length.greaterThan', 2).end();
-
+    it('Has Twitter feed w. 5+ tweets', function() {
+        cy.get('.home-content-area div.twitter-timeline-container iframe#twitter-widget-0').then(function($twitterIframe){
+            // SEE: https://github.com/cypress-io/cypress/issues/136#issuecomment-309090376
+            const $iframeBody = $twitterIframe.contents().find("body");
+            // Must use .find here, .get runs off of top level document.
+            cy.wrap($iframeBody).find(".timeline-Tweet").should('have.length.of.at.least', 5);
+        });
     });
 
     it('"Toggle External Data" affects Chart', function () {
