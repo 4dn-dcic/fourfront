@@ -1085,7 +1085,7 @@ def main():
         if obsoletes:
             problems = []
             for obsolete in obsoletes:
-                result = get_metadata(obsolete['uuid'] + '/@@links', ff_env=args.env)
+                result = get_metadata(obsolete['uuid'] + '/@@links', connection)
                 if result.get('uuids_linking_to'):
                     for item in result['uuids_linking_to']:
                         if 'parents' not in item.get('field', ''):
