@@ -797,10 +797,14 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
             term['uuid'] = uuid
 
     # all terms have uuid - now add uuids to linked terms
+    missing_from_idmap = []
     for term in terms.values():
-        puuids = _get_uuids_for_linked(term, tid2uuid)
+        puuids, missing = _get_uuids_for_linked(term, tid2uuid)
+        missing_from_idmap.extend(missing)
         for rt, uuids in puuids.items():
             term[rt] = list(set(uuids))  # to avoid redundant terms
+    for p in set(missing_from_idmap):
+        print('WARNING - ', p, ' MISSING FROM IDMAP')
 
     # now to determine what needs to be patched for patches
     ontids = [o['uuid'] for o in ontologies]
@@ -843,6 +847,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
 
 def _get_uuids_for_linked(term, idmap):
     puuids = {}
+    missing = []
     for rt in ['parents', 'slim_terms']:
         if term.get(rt):
             puuids[rt] = []
@@ -850,8 +855,8 @@ def _get_uuids_for_linked(term, idmap):
                 if p in idmap:
                     puuids[rt].append(idmap[p])
                 else:
-                    print('WARNING - ', p, ' MISSING FROM IDMAP')
-    return puuids
+                    missing.append(p)
+    return puuids, missing
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms, prefix='UNK'):
@@ -1075,6 +1080,22 @@ def main():
             'terms': updates
         }
         write_outfile(out_dict, postfile, pretty)
+
+        obsoletes = [term for term in updates if term.get('status') == 'obsolete']
+        if obsoletes:
+            problems = []
+            for obsolete in obsoletes:
+                result = get_metadata(obsolete['uuid'] + '/@@links', ff_env=args.env)
+                if result.get('uuids_linking_to'):
+                    for item in result['uuids_linking_to']:
+                        if 'parents' not in item.get('field', ''):
+                            problems.append([obsolete['uuid'], item['uuid'], item['display_title']])
+            if problems:
+                print('WARNING: the following items are connected to an ontology_term listed for obsolescence')
+                print('')
+                print('term uuid\t\t\t\titem uuid\t\t\t\titem display title')
+                for problem in problems:
+                    print('\t'.join(problem))
 
 
 if __name__ == '__main__':
