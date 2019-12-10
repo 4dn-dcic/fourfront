@@ -5,7 +5,7 @@ from encoded.commands.run_upgrader_on_inserts import get_inserts
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
 import json
 import time
-from snovault import TYPES
+from snovault import TYPES, COLLECTIONS
 
 def delay_rerun(*args):
     """ Rerun function for flaky """
@@ -467,8 +467,6 @@ def test_search_with_static_header(workbook, testapp):
 ## Tests for collections (search 301s) ##
 #########################################
 
-from .test_views import TYPE_LENGTH
-
 def test_collection_limit(workbook, testapp):
     res = testapp.get('/biosamples/?limit=2', status=301)
     assert len(res.follow().json['@graph']) == 2
@@ -487,50 +485,50 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     from snovault.elasticsearch import create_mapping
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
-    # TODO: NAMESPACE - here, passed in list to create_mapping
-    # turn of logging for a bit
     create_mapping.run(app, sync_index=True)
     # check counts and ensure they're equal
     testapp_counts = testapp.get('/counts')
-    total_counts = testapp_counts.json['db_es_total']
-    split_counts = total_counts.split()  # 2nd item is db counts, 4th is es
-    assert(int(split_counts[1]) == int(split_counts[3]))
-    for item_type in TYPE_LENGTH.keys():
-        tries = 0
-        item_len = None
+    split_counts = testapp_counts.json['db_es_total'].split()
+    assert(int(split_counts[1]) == int(split_counts[3]))  # 2nd is db, 4th is es
+    for item_name, item_counts in testapp_counts.json['db_es_compare'].items():
+        # make sure counts for each item match ES counts
+        split_item_counts = item_counts.split()
+        db_item_count = int(split_item_counts[1])
+        es_item_count = int(split_item_counts[3])
+        assert db_item_count == es_item_count
+
+        # check ES counts directly. Must skip abstract collections
+        # must change counts result ("ItemName") to item_type format
+        item_type = app.registry[COLLECTIONS][item_name].type_info.item_type
         namespaced_index = get_namespaced_index(app, item_type)
-        while item_len is None or (item_len != TYPE_LENGTH[item_type] and tries < 3):
-            if item_len != None:
-                create_mapping.run(app, collections=[item_type], strict=True, sync_index=True)
-                es.indices.refresh(index=namespaced_index)
-            item_len = es.count(index=namespaced_index, doc_type=item_type).get('count')
-            print('... ES COUNT: %s' % item_len)
-            print('... TYPE COUNT: %s' % TYPE_LENGTH[item_type])
-            tries += 1
-        assert item_len == TYPE_LENGTH[item_type]
-        if item_len > 0:
-            res = testapp.get('/%s?limit=all' % item_type, status=[200, 301, 404])
-            res = res.follow()
-            for item_res in res.json.get('@graph', []):
-                index_view_res = es.get(index=namespaced_index, doc_type=item_type,
-                                        id=item_res['uuid'])['_source']
-                # make sure that the linked_uuids match the embedded data
-                assert 'linked_uuids_embedded' in index_view_res
-                assert 'embedded' in index_view_res
-                found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
-                # all found uuids must be within the linked_uuids
-                assert found_uuids <= set([link['uuid'] for link in index_view_res['linked_uuids_embedded']])
-                # if uuids_rev_linking to me, make sure they show up in @@links
-                if len(index_view_res.get('uuids_rev_linked_to_me', [])) > 0:
-                    links_res = testapp.get('/' + item_res['uuid'] + '/@@links', status=200)
-                    link_uuids = [lnk['uuid'] for lnk in links_res.json.get('uuids_linking_to')]
-                    assert set(index_view_res['uuids_rev_linked_to_me']) <= set(link_uuids)
-                # previously test_html_pages
-                try:
-                    html_res = htmltestapp.get(item_res['@id'])
-                    assert html_res.body.startswith(b'<!DOCTYPE html>')
-                except Exception as e:
-                    pass
+
+        es_direct_count = es.count(index=namespaced_index, doc_type=item_type).get('count')
+        assert es_item_count == es_direct_count
+
+        if es_item_count == 0:
+            continue
+        # check items in search result individually
+        res = testapp.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+        for item_res in res.json.get('@graph', []):
+            index_view_res = es.get(index=namespaced_index, doc_type=item_type,
+                                    id=item_res['uuid'])['_source']
+            # make sure that the linked_uuids match the embedded data
+            assert 'linked_uuids_embedded' in index_view_res
+            assert 'embedded' in index_view_res
+            found_uuids = recursively_find_uuids(index_view_res['embedded'], set())
+            # all found uuids must be within the linked_uuids
+            assert found_uuids <= set([link['uuid'] for link in index_view_res['linked_uuids_embedded']])
+            # if uuids_rev_linking to me, make sure they show up in @@links
+            if len(index_view_res.get('uuids_rev_linked_to_me', [])) > 0:
+                links_res = testapp.get('/' + item_res['uuid'] + '/@@links', status=200)
+                link_uuids = [lnk['uuid'] for lnk in links_res.json.get('uuids_linking_to')]
+                assert set(index_view_res['uuids_rev_linked_to_me']) <= set(link_uuids)
+            # previously test_html_pages
+            try:
+                html_res = htmltestapp.get(item_res['@id'])
+                assert html_res.body.startswith(b'<!DOCTYPE html>')
+            except Exception as e:
+                pass
 
 
 ######################################
