@@ -11,22 +11,18 @@ import text from './md-table-test';
  */
 export class MdSortableTable extends React.PureComponent {
 
+    static propTypes = {
+        'mdFilePath' : PropTypes.string
+    };
+
     constructor(props) {
         super(props);
-        this.convertMarkdownToObject = this.convertMarkdownToObject.bind(this);
-        console.log('xxx text', text);
-        this.state = { data: this.convertMarkdownToObject(text) };
-        // this.state = {
-        //     data: [
-        //         { id: 3, name: 'Satoshi Yamamoto', class: 'B' },
-        //         { id: 1, name: 'Taro Tanak', class: 'A' },
-        //         { id: 2, name: 'Ken Asada', class: 'A' },
-        //         { id: 4, name: 'Masaru Tokunaga', class: 'C' }
-        //     ]
-        // };
+        this.state = {
+            data: MdSortableTable.convertMarkdownToObject(props.content ? props.content : null)
+        };
     }
 
-    convertMarkdownToObject(input) {
+    static convertMarkdownToObject(input) {
         let i = 1, columnBorder;
         const out = [];
 
@@ -48,86 +44,96 @@ export class MdSortableTable extends React.PureComponent {
                 return obj = {};
             }
 
-            obj[headers[i % (headers.length + 1)]] = Number.isNaN(
-                parseFloat(val)
-            ) ? val : parseFloat(val);
+            obj[headers[i % (headers.length + 1)]] = Number.isNaN(parseFloat(val)) ? val : parseFloat(val);
         });
 
-        console.log('xxxx out: ', out);
+        console.log('xxxx markDown object: ', out);
         return out;
     }
 
-    static getFamilyName(name) {
-        return name.split(' ').slice(-1)[0];
-    }
+    // static getName(name) {
+    //     return name.split(' ').slice(-1)[0];
+    // }
 
     render() {
-        if (!this.state.data) { return null; }
+        const { data } = this.state;
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            return null;
+        }
 
-        const FamilyNameSorter = {
-            desc: (data, key) => {
-                const result = data.sort(function (_a, _b) {
-                    const a = MdSortableTable.getFamilyName(_a[key]);
-                    const b = MdSortableTable.getFamilyName(_b[key]);
-                    return (a <= b) ? 1 : -1;
-                });
-                return result;
-            },
+        // const CustomSorter = {
+        //     desc: (data, key) => {
+        //         const result = data.sort(function (_a, _b) {
+        //             const a = MdSortableTable.getName(_a[key]);
+        //             const b = MdSortableTable.getName(_b[key]);
+        //             return (a <= b) ? 1 : -1;
+        //         });
+        //         return result;
+        //     },
 
-            asc: (data, key) => {
-                const result = data.sort(function (_a, _b) {
-                    const a = MdSortableTable.getFamilyName(_a[key]);
-                    const b = MdSortableTable.getFamilyName(_b[key]);
-                    return (a >= b) ? 1 : -1;
-                });
-                return result;
-            }
-        };
+        //     asc: (data, key) => {
+        //         const result = data.sort(function (_a, _b) {
+        //             const a = MdSortableTable.getName(_a[key]);
+        //             const b = MdSortableTable.getName(_b[key]);
+        //             return (a >= b) ? 1 : -1;
+        //         });
+        //         return result;
+        //     }
+        // };
 
-        const columns = [
-            {
-                header: 'wiringPi',
-                key: 'wiringPi',
+        const columns = _.map(Object.keys(data[0]), function (item) {
+            return {
+                header: item,
+                key: item,
                 headerStyle: { fontSize: '15px' },
                 sortable: true
-            },
-            {
-                header: 'GPIO',
-                key: 'GPIO',
-                headerStyle: { fontSize: '15px' },
-                sortable: true
-            },
-            {
-                header: 'Phys',
-                key: 'Phys',
-                defaultSorting: 'ASC',
-                headerStyle: { fontSize: '15px', width: '100px' },
-                dataStyle: { fontSize: '15px' },
-                dataProps: { className: 'align-right' },
-                //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
+            };
+        });
 
-            },
-            {
-                header: 'Name',
-                key: 'Name',
-                headerStyle: { fontSize: '15px' },
-                headerProps: { className: 'align-left' },
-                descSortFunction: FamilyNameSorter.desc,
-                ascSortFunction: FamilyNameSorter.asc
-            },
-            {
-                header: 'Mode',
-                key: 'Mode',
-                headerStyle: { fontSize: '15px' },
-                sortable: true
-            },
-            {
-                header: 'Value',
-                key: 'Value',
-                headerStyle: { fontSize: '15px' },
-                sortable: true
-            }
-        ];
+        // const columns = [
+        //     {
+        //         header: 'wiringPi',
+        //         key: 'wiringPi',
+        //         headerStyle: { fontSize: '15px' },
+        //         sortable: true
+        //     },
+        //     {
+        //         header: 'GPIO',
+        //         key: 'GPIO',
+        //         headerStyle: { fontSize: '15px' },
+        //         sortable: true
+        //     },
+        //     {
+        //         header: 'Phys',
+        //         key: 'Phys',
+        //         defaultSorting: 'ASC',
+        //         headerStyle: { fontSize: '15px', width: '100px' },
+        //         dataStyle: { fontSize: '15px' },
+        //         dataProps: { className: 'align-right' },
+        //         //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
+
+        //     },
+        //     {
+        //         header: 'Name',
+        //         key: 'Name',
+        //         headerStyle: { fontSize: '15px' },
+        //         headerProps: { className: 'align-left' },
+        //         // descSortFunction: CustomSorter.desc,
+        //         // ascSortFunction: CustomSorter.asc
+        //     },
+        //     {
+        //         header: 'Mode',
+        //         key: 'Mode',
+        //         headerStyle: { fontSize: '15px' },
+        //         sortable: true
+        //     },
+        //     {
+        //         header: 'Value',
+        //         key: 'Value',
+        //         headerStyle: { fontSize: '15px' },
+        //         sortable: true
+        //     }
+        // ];
 
         const style = {
             backgroundColor: '#fff'
@@ -141,7 +147,7 @@ export class MdSortableTable extends React.PureComponent {
 
         return (
             <SortableTable
-                data={this.state.data}
+                data={data}
                 columns={columns}
                 style={style}
                 iconStyle={iconStyle} />
@@ -249,7 +255,7 @@ class SortableTable extends React.PureComponent {
     }
 
     sortDataByKey(data, key, fn) {
-        const clone = Array.apply(null, data);
+        const clone = [...data];
 
         return clone.sort((a, b) =>
             fn(a[key], b[key])
@@ -286,24 +292,27 @@ class SortableTable extends React.PureComponent {
     }
 
     render() {
-        const sortedData = this.sortData(this.props.data, this.state.sortings);
+        const { data, columns, style, iconStyle, iconAsc, iconDesc, iconBoth } = this.props;
+        const { sortings } = this.state;
+
+        const sortedData = this.sortData(data, sortings);
 
         return (
             <table
                 className="table"
-                style={this.props.style} >
+                style={style} >
                 <SortableTableHeader
-                    columns={this.props.columns}
-                    sortings={this.state.sortings}
+                    columns={columns}
+                    sortings={sortings}
                     onStateChange={this.onStateChange.bind(this)}
-                    iconStyle={this.props.iconStyle}
-                    iconDesc={this.props.iconDesc}
-                    iconAsc={this.props.iconAsc}
-                    iconBoth={this.props.iconBoth} />
+                    iconStyle={iconStyle}
+                    iconDesc={iconDesc}
+                    iconAsc={iconAsc}
+                    iconBoth={iconBoth} />
                 <SortableTableBody
-                    columns={this.props.columns}
+                    columns={columns}
                     data={sortedData}
-                    sortings={this.state.sortings} />
+                    sortings={sortings} />
             </table>
         );
     }
@@ -311,13 +320,15 @@ class SortableTable extends React.PureComponent {
 
 class SortableTableHeaderItem extends React.PureComponent {
     static propTypes = {
+        header: PropTypes.string,
         headerProps: PropTypes.object,
         sortable: PropTypes.bool,
         sorting: PropTypes.oneOf(['desc', 'asc', 'both']),
         iconStyle: PropTypes.object,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
-        iconBoth: PropTypes.node
+        iconBoth: PropTypes.node,
+        style: PropTypes.string,
     }
 
     static defaultProps = {
@@ -331,34 +342,35 @@ class SortableTableHeaderItem extends React.PureComponent {
     }
 
     render() {
+        const { header, sorting, sortable, style, iconStyle, iconAsc, iconDesc, iconBoth, headerProps } = this.props;
         let sortIcon;
-        if (this.props.sortable) {
-            if (this.props.iconBoth) {
-                sortIcon = this.props.iconBoth;
+        if (sortable) {
+            if (iconBoth) {
+                sortIcon = iconBoth;
             } else {
-                sortIcon = <SortIconBoth style={this.props.iconStyle} />;
+                sortIcon = <SortIconBoth style={iconStyle} />;
             }
-            if (this.props.sorting == "desc") {
-                if (this.props.iconDesc) {
-                    sortIcon = this.props.iconDesc;
+            if (sorting == "desc") {
+                if (iconDesc) {
+                    sortIcon = iconDesc;
                 } else {
-                    sortIcon = <SortIconDesc style={this.props.iconStyle} />;
+                    sortIcon = <SortIconDesc style={iconStyle} />;
                 }
-            } else if (this.props.sorting == "asc") {
-                if (this.props.iconAsc) {
-                    sortIcon = this.props.iconAsc;
+            } else if (sorting == "asc") {
+                if (iconAsc) {
+                    sortIcon = iconAsc;
                 } else {
-                    sortIcon = <SortIconAsc style={this.props.iconStyle} />;
+                    sortIcon = <SortIconAsc style={iconStyle} />;
                 }
             }
         }
 
         return (
             <th
-                style={this.props.style}
+                style={style}
                 onClick={this.onClick.bind(this)}
-                {...this.props.headerProps} >
-                {this.props.header}
+                {...headerProps} >
+                {header}
                 {sortIcon}
             </th>
         );
@@ -381,8 +393,9 @@ class SortableTableHeader extends React.PureComponent {
     }
 
     render() {
-        const headers = this.props.columns.map(((column, index) => {
-            const sorting = this.props.sortings[index];
+        const { columns, sortings, iconStyle, iconAsc, iconDesc, iconBoth } = this.props;
+        const headers = columns.map(((column, index) => {
+            const sorting = sortings[index];
             return (
                 <SortableTableHeaderItem
                     sortable={column.sortable}
@@ -393,10 +406,10 @@ class SortableTableHeader extends React.PureComponent {
                     onClick={this.onClick.bind(this)}
                     style={column.headerStyle}
                     headerProps={column.headerProps}
-                    iconStyle={this.props.iconStyle}
-                    iconDesc={this.props.iconDesc}
-                    iconAsc={this.props.iconAsc}
-                    iconBoth={this.props.iconBoth} />
+                    iconStyle={iconStyle}
+                    iconDesc={iconDesc}
+                    iconAsc={iconAsc}
+                    iconBoth={iconBoth} />
             );
         }).bind(this));
 
@@ -412,8 +425,9 @@ class SortableTableHeader extends React.PureComponent {
 
 class SortableTableRow extends React.PureComponent {
     render() {
-        var tds = this.props.columns.map(function (item, index) {
-            var value = this.props.data[item.key];
+        const { data, columns } = this.props;
+        const tds = columns.map(function (item, index) {
+            let value = data[item.key];
             if (item.render) {
                 value = item.render(value);
             }
@@ -443,14 +457,13 @@ class SortableTableBody extends React.PureComponent {
     }
 
     render() {
-        var bodies = this.props.data.map(((item, index) => {
-            return (
-                <SortableTableRow
-                    key={index}
-                    data={item}
-                    columns={this.props.columns} />
-            );
-        }).bind(this));
+        const { data, columns } = this.props;
+        const bodies = data.map(((item, index) =>
+            <SortableTableRow
+                key={index}
+                data={item}
+                columns={columns} />
+        ).bind(this));
 
         return (
             <tbody>
@@ -466,11 +479,12 @@ class FaIcon extends React.PureComponent {
     }
 
     render() {
-        const className = `fas icon ${this.props.icon}`
+        const { icon, style } = this.props;
+        const className = `fas icon ${icon}`;
         return (
             <i
                 className={className}
-                style={this.props.style}
+                style={style}
                 align="right" />
         );
     }
@@ -478,24 +492,27 @@ class FaIcon extends React.PureComponent {
 
 class SortIconBoth extends React.PureComponent {
     render() {
+        const { style } = this.props;
         return (
-            <FaIcon icon="icon-sort" style={this.props.style} />
+            <FaIcon icon="icon-sort" style={style} />
         );
     }
 }
 
 class SortIconAsc extends React.PureComponent {
     render() {
+        const { style } = this.props;
         return (
-            <FaIcon icon="icon-sort-up" style={this.props.style} />
+            <FaIcon icon="icon-sort-up" style={style} />
         );
     }
 }
 
 class SortIconDesc extends React.PureComponent {
     render() {
+        const { style } = this.props;
         return (
-            <FaIcon icon="icon-sort-down" style={this.props.style} />
+            <FaIcon icon="icon-sort-down" style={style} />
         );
     }
 }
