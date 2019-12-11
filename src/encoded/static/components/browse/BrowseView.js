@@ -132,53 +132,6 @@ class ExperimentSetCheckBox extends React.PureComponent {
  */
 class ResultTableContainer extends React.PureComponent {
 
-    /**
-     * Extends or creates `columnExtensionMap.display_title` with a larger width as well as
-     * a render method which will render out a checkbox for selecting files of an ExperimentSet,
-     * if `selectedFiles` are passed in as well.
-     * If no selected files data structure is being fed through props, this function returns `columnExtensionMap`.
-     *
-     * @param {Object.<string, File>?} selectedFiles - Object of selectedFiles keyed by accession-triple strings.
-     * @param {ColumnDefinition} columnExtensionMap - Colummn overrides or extensions from props.
-     * @returns {Object.<Object>} Column definition override map with checkbox handling in display_title column.
-     */
-    static colDefOverrides = memoize(function(selectedFiles, propColumnExtensionMap, selectFile, unselectFile){
-        if (typeof selectedFiles === 'undefined'){
-            // We don't need to add checkbox(es) for file selection.
-            return propColumnExtensionMap || null;
-        }
-
-        // Add Checkboxes
-        return _.extend({}, propColumnExtensionMap, {
-            // We extend the display_title of global constant columnExtensionMap, not the propColumnExtensionMap,
-            // incase the prop version's render fxn is different than what we expect.
-            'display_title' : _.extend({}, colExtensionMap4DN.display_title, {
-                'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
-                'render' : (expSet, columnDefinition, paneProps, width) => {
-                    var origTitleBlock          = colExtensionMap4DN.display_title.render(expSet, columnDefinition, paneProps, width),
-                        newChildren             = origTitleBlock.props.children.slice(0);
-
-                    newChildren[2] = newChildren[1];
-                    newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
-                    newChildren[1] = <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />;
-                    return React.cloneElement(origTitleBlock, { 'children' : newChildren });
-                }
-            })
-        });
-    });
-
-    static propTypes = {
-        // Props' type validation based on contents of this.props during render.
-        'href'                      : PropTypes.string.isRequired,
-        'columnExtensionMap'        : PropTypes.object,
-        'context'                   : PropTypes.shape({
-            'columns' : PropTypes.objectOf(PropTypes.object).isRequired
-        }),
-        'selectFile'                : PropTypes.func,
-        'unselectFile'              : PropTypes.func,
-        'selectedFiles'             : PropTypes.objectOf(PropTypes.object)
-    };
-
     static defaultProps = {
         'href'      : '/browse/',
         'debug'     : false
@@ -592,9 +545,22 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
         </ColumnCombiner>
     );
 }
+BrowseTableWithSelectedFilesCheckboxes.propTypes = {
+    // Props' type validation based on contents of this.props during render.
+    'href'                      : PropTypes.string.isRequired,
+    'columnExtensionMap'        : PropTypes.object.isRequired,
+    'context'                   : PropTypes.shape({
+        'columns' : PropTypes.objectOf(PropTypes.object).isRequired
+    }).isRequired,
+    'selectFile'                : PropTypes.func,
+    'unselectFile'              : PropTypes.func,
+    'selectedFiles'             : PropTypes.objectOf(PropTypes.object)
+};
 BrowseTableWithSelectedFilesCheckboxes.defaultProps = {
     'navigate'  : navigate,
     'columnExtensionMap' : colExtensionMap4DN
 };
+
+
 
 
