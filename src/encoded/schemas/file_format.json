@@ -129,6 +129,16 @@
             }
         }
     },
+    "columns": {
+        "standard_file_extension": {
+            "title": "Standard file extension",
+            "description": "File extension that is standardly used for filenames for upload and that will be used on the portal."
+        },
+        "other_allowed_extensions": {
+            "title": "Allowed extensions",
+            "description": "Other common extensions that are allowed when uploading files of this format"
+        }
+    },
     "facets": {
         "valid_item_types" : {
             "title" : "Valid item types",
