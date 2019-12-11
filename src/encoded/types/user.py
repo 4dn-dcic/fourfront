@@ -62,7 +62,6 @@ USER_DELETED = [
         'title': '4D Nucleome Users',
         'description': 'Listing of current 4D Nucleome DCIC users',
     },
-    properties_datastore='elasticsearch',
     acl=[])
 class User(Item):
     """The user class."""
