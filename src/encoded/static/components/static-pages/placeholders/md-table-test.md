@@ -1,7 +1,12 @@
 | wiringPi | GPIO | Phys | Name   | Mode | Value |
 +----------+------+------+--------+------+-------+
-|      0   |  17  |  11  | GPIO 0 | IN   | Low   |
-|      1   |  18  |  12  | GPIO 1 | OUT  | Low   |
+|      0   |  17  |  11  | GPIO 0 | IN   | [Markdown](http://daringfireball.net/projects/markdown/)   |
+|      1   |  18  |  12  | GPIO 1 | OUT  |
+* You can have lists, like this one
+* Make things **bold** or *italic*
+* Embed snippets of `code`
+* Create [links](/)
+* ...   |
 |      2   |  27  |  13  | GPIO 2 | IN   | Low   |
 |      3   |  22  |  15  | GPIO 3 | IN   | Low   |
 |      4   |  23  |  16  | GPIO 4 | IN   | Low   |

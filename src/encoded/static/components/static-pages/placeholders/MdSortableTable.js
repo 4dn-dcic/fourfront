@@ -4,6 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
+import Markdown from 'markdown-to-jsx';
 import { ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 // import text from './md-table-test';
 
@@ -123,7 +124,9 @@ export class MdSortableTable extends React.PureComponent {
                 header: item,
                 key: item,
                 headerStyle: { fontSize: '15px' },
-                sortable: true
+                headerProps: { className: 'text-left' },
+                sortable: true,
+                dataProps: { className: 'text-left' },
             };
         });
 
@@ -468,12 +471,13 @@ class SortableTableRow extends React.PureComponent {
             if (item.render) {
                 value = item.render(value);
             }
+            console.log('xxx value: ', value.toString());
             return (
                 <td
                     key={index}
                     style={item.dataStyle}
                     {...(item.dataProps || {})} >
-                    {value}
+                    <Markdown>{value.toString()}</Markdown>
                 </td>
             );
         }.bind(this));
