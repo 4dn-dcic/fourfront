@@ -46,9 +46,8 @@
 
 	}
 	
-	.search-headers-row {
-		position: sticky;
-		top: 0px;
+	.search-results-outer-container.is-own-page .search-results-container .search-headers-row {
+		top: 0px; // Default val
 		@include navbar-fixed-position {
 			top: 40px;
 		}
@@ -67,7 +66,7 @@
 			}
 		}
 		
-		.search-headers-row {
+		.search-results-outer-container.is-own-page .search-results-container .search-headers-row {
 			@include navbar-fixed-position {
 				top: 78px;
 			}

@@ -481,11 +481,11 @@ export default class App extends React.PureComponent {
         if (this.historyEnabled) {
             event.preventDefault();
 
-            const tHrefParts   = url.parse(targetHref);
-            const pHrefParts   = memoizedUrlParse(href);
-            let tHrefHash    = tHrefParts.hash;
-            const samePath     = pHrefParts.path === tHrefParts.path;
-            const navOpts      = {
+            const tHrefParts = url.parse(targetHref);
+            const pHrefParts = memoizedUrlParse(href);
+            let tHrefHash = tHrefParts.hash;
+            const samePath = pHrefParts.path === tHrefParts.path;
+            const navOpts = {
                 // Same pathname & search but maybe different hash. Don't add history entry etc.
                 'replace'           : samePath,
                 'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
@@ -500,7 +500,7 @@ export default class App extends React.PureComponent {
             navigate(targetHref, navOpts, function(){
                 if (targetOffset) targetOffset = parseInt(targetOffset);
                 if (!targetOffset || isNaN(targetOffset)) targetOffset = 112;
-                if (tHrefHash && typeof hrefHash === 'string' && tHrefHash.length > 1 && tHrefHash[1] !== '!'){
+                if (tHrefHash && typeof tHrefHash === 'string' && tHrefHash.length > 1 && tHrefHash[1] !== '!'){
                     tHrefHash = tHrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(null, tHrefHash, 750, targetOffset), 100);
                 }
@@ -810,7 +810,7 @@ export default class App extends React.PureComponent {
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
 
         // Holds #hash, if any.
-        let fragment;
+        let hashAppendage = "";
 
         // What we end up putting into Redux upon request completion.
         // Will include at least `context`, `href`.
@@ -819,25 +819,26 @@ export default class App extends React.PureComponent {
 
         // Prepare the target href. Cancel out if some rule prevents navigation(s) at moment.
         targetHref = url.resolve(href, targetHref);
+
         if (!options.skipConfirmCheck && !this.confirmNavigation(targetHref, options)) {
             return false;
         }
+
         // Strip url hash.
-        fragment = '';
-        var href_hash_pos = targetHref.indexOf('#');
-        if (href_hash_pos > -1) {
-            fragment = targetHref.slice(href_hash_pos);
-            targetHref = targetHref.slice(0, href_hash_pos);
+        const hashIndex = targetHref.indexOf('#');
+        if (hashIndex > -1) {
+            hashAppendage = targetHref.slice(hashIndex);
+            targetHref = targetHref.slice(0, hashIndex);
         }
 
         const doRequest = () => {
 
             if (!this.historyEnabled) {
                 if (options.replace) {
-                    window.location.replace(targetHref + fragment);
+                    window.location.replace(targetHref + hashAppendage);
                 } else {
                     const [ old_path ] = ('' + window.location).split('#');
-                    window.location.assign(targetHref + fragment);
+                    window.location.assign(targetHref + hashAppendage);
                     if (old_path === targetHref) {
                         window.location.reload();
                     }
@@ -859,21 +860,21 @@ export default class App extends React.PureComponent {
             if (options.skipRequest) {
                 if (options.replace) {
                     try {
-                        window.history.replaceState(context, '', targetHref + fragment);
+                        window.history.replaceState(context, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.replaceState(null, '', targetHref + fragment);
+                        window.history.replaceState(null, '', targetHref + hashAppendage);
                     }
                 } else {
                     try {
-                        window.history.pushState(context, '', targetHref + fragment);
+                        window.history.pushState(context, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.pushState(null, '', targetHref + fragment);
+                        window.history.pushState(null, '', targetHref + hashAppendage);
                     }
                 }
                 if (!options.skipUpdateHref) {
-                    reduxDispatchDict.href = targetHref + fragment;
+                    reduxDispatchDict.href = targetHref + hashAppendage;
                 }
                 if (_.keys(reduxDispatchDict).length > 0){
                     store.dispatch({ 'type' : reduxDispatchDict });
@@ -908,9 +909,9 @@ export default class App extends React.PureComponent {
                         // navigate normally to URL of unexpected non-JSON response so back button works.
                         // this cancels out of promise chain & current app JS scope
                         if (options.replace) {
-                            window.location.replace(targetHref + fragment);
+                            window.location.replace(targetHref + hashAppendage);
                         } else {
-                            window.location.assign(targetHref + fragment);
+                            window.location.assign(targetHref + hashAppendage);
                         }
                     }
 
@@ -922,7 +923,7 @@ export default class App extends React.PureComponent {
                         currentRequestInThisScope && currentRequestInThisScope.xhr && currentRequestInThisScope.xhr.responseURL
                     ) || targetHref;
 
-                    reduxDispatchDict.href = responseHref + fragment;
+                    reduxDispatchDict.href = responseHref + hashAppendage;
 
                     if (currentRequestInThisScope === this.currentNavigationRequest){ // Ensure we're not de-referencing some new superceding request.
                         this.currentNavigationRequest = null;
@@ -1023,17 +1024,17 @@ export default class App extends React.PureComponent {
                 // title currently ignored by browsers
                 if (options.replace){
                     try {
-                        window.history.replaceState(err, '', targetHref + fragment);
+                        window.history.replaceState(err, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.replaceState(null, '', targetHref + fragment);
+                        window.history.replaceState(null, '', targetHref + hashAppendage);
                     }
                 } else {
                     try {
-                        window.history.pushState(err, '', targetHref + fragment);
+                        window.history.pushState(err, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.pushState(null, '', targetHref + fragment);
+                        window.history.pushState(null, '', targetHref + hashAppendage);
                     }
                 }
             });

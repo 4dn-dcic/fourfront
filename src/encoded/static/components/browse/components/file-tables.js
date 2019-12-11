@@ -571,13 +571,15 @@ export class RawFilesStackedTable extends React.PureComponent {
         const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
 
         return (
-            <StackedBlockTable {...SelectedFilesController.pick(this.props)} {..._.pick(this.props, 'collapseLongLists', 'width')}
-                columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn allFiles={allRawFiles}
-                handleFileCheckboxChange={this.handleFileCheckboxChange}>
-                <StackedBlockList className="biosamples" showMoreExtTitle={showMoreExtTitle} title="Biosamples">
-                    { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
-                </StackedBlockList>
-            </StackedBlockTable>
+            <div className="stacked-block-table-outer-container overflow-auto">
+                <StackedBlockTable {...SelectedFilesController.pick(this.props)} {..._.pick(this.props, 'collapseLongLists', 'width')}
+                    columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn allFiles={allRawFiles}
+                    handleFileCheckboxChange={this.handleFileCheckboxChange}>
+                    <StackedBlockList className="biosamples" showMoreExtTitle={showMoreExtTitle} title="Biosamples">
+                        { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
+                    </StackedBlockList>
+                </StackedBlockTable>
+            </div>
         );
     }
 
@@ -718,10 +720,12 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         const filesGroupedByExperimentOrGlobal = ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
         return (
-            <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn allFiles={files}
-                handleFileCheckboxChange={this.handleFileCheckboxChange}>
-                <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{ experimentBlocks }</StackedBlockList>
-            </StackedBlockTable>
+            <div className="stacked-block-table-outer-container overflow-auto">
+                <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn allFiles={files}
+                    handleFileCheckboxChange={this.handleFileCheckboxChange}>
+                    <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{ experimentBlocks }</StackedBlockList>
+                </StackedBlockTable>
+            </div>
         );
     }
 

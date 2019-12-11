@@ -540,7 +540,8 @@ i.item-status-indicator-dot {
 
 	.rc-tabs-content {
 		.rc-tabs-tabpane {
-			overflow-x: hidden;
+			/* overflow-x: hidden; */ // Let inner containers/div set this
+			overflow: unset; // Will overflow instead of showing scrollbar
 			.info-area {
 				overflow: hidden;
 				border-bottom: none;
