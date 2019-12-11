@@ -4,7 +4,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import text from './md-table-test';
+import { ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+// import text from './md-table-test';
 
 /**
  * inspired by https://github.com/jrf0110/convert-text-table/ and https://github.com/Rudolph-Miller/react-sortable-table
@@ -12,13 +13,16 @@ import text from './md-table-test';
 export class MdSortableTable extends React.PureComponent {
 
     static propTypes = {
-        'mdFilePath' : PropTypes.string
+        'mdFilePath' : PropTypes.string,
+        'content': PropTypes.string
     };
 
     constructor(props) {
         super(props);
+        const { content, mdFilePath } = props;
         this.state = {
-            data: MdSortableTable.convertMarkdownToObject(props.content ? props.content : null)
+            data: content ? MdSortableTable.convertMarkdownToObject(content) : null,
+            loading: !content && (mdFilePath && typeof mdFilePath === 'string')
         };
     }
 
@@ -46,9 +50,35 @@ export class MdSortableTable extends React.PureComponent {
 
             obj[headers[i % (headers.length + 1)]] = Number.isNaN(parseFloat(val)) ? val : parseFloat(val);
         });
+        //push the last item
+        if (!_.isEmpty(obj)) {
+            out.push(obj);
+        }
 
-        console.log('xxxx markDown object: ', out);
         return out;
+    }
+
+    componentDidMount(){
+        this.loadMdFile();
+    }
+
+    loadMdFile() {
+        const { mdFilePath } = this.props;
+        const onFinishLoad = (data) => {
+            this.setState({ 'loading': false, data: data });
+        };
+
+        if (mdFilePath) {
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+            window.fetch(mdFilePath)
+                .then(function (resp) {
+                    return resp.text();
+                })
+                .then(function (respText) {
+                    const data = MdSortableTable.convertMarkdownToObject(respText);
+                    onFinishLoad(data);
+                });
+        }
     }
 
     // static getName(name) {
@@ -56,8 +86,15 @@ export class MdSortableTable extends React.PureComponent {
     // }
 
     render() {
-        const { data } = this.state;
+        const { data, loading } = this.state;
         if (!data || !Array.isArray(data) || data.length === 0) {
+            if (loading) {
+                return (
+                    <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                        <i className="icon icon-fw icon-spin icon-circle-notch fas" />
+                    </div>
+                );
+            }
             return null;
         }
 

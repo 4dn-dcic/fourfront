@@ -1,5 +1,4 @@
-const text =
-`| wiringPi | GPIO | Phys | Name   | Mode | Value |
+| wiringPi | GPIO | Phys | Name   | Mode | Value |
 +----------+------+------+--------+------+-------+
 |      0   |  17  |  11  | GPIO 0 | IN   | Low   |
 |      1   |  18  |  12  | GPIO 1 | OUT  | Low   |
@@ -22,6 +21,4 @@ const text =
 |     18   |  29  |   4  | GPIO 9 | OUT  | Low   |
 |     19   |  30  |   5  | GPIO10 | IN   | Low   |
 |     20   |  31  |   6  | GPIO11 | IN   | Low   |
-+----------+------+------+--------+------+-------+`;
-
-export default text;
++----------+------+------+--------+------+-------+
