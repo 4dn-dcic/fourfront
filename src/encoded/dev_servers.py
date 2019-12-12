@@ -103,16 +103,21 @@ def main():
 
     app = get_app(args.config_uri, args.app_name)
 
+    # clear queues and initialize indices before loading data. No indexing yet.
+    # this is needed for items with properties stored in ES
     if args.init:
-        create_mapping.run(app, check_first=False, purge_queue=True)
+        create_mapping.run(app, skip_indexing=True, purge_queue=True)
 
-    if args.load:
+    if args.init and args.load:
         from pyramid.path import DottedNameResolver
         load_test_data = app.registry.settings.get('load_test_data')
         load_test_data = DottedNameResolver().resolve(load_test_data)
         load_res = load_test_data(app)
         if load_res:  # None if successful
             raise(load_res)
+
+        # now clear the queues and queue items for indexing
+        create_mapping.run(app, check_first=True, strict=True, purge_queue=True)
 
     print('Started. ^C to exit.')
 
