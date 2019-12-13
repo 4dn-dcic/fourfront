@@ -6,28 +6,121 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import Markdown from 'markdown-to-jsx';
 import { ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-// import text from './md-table-test';
 
-/**
- * inspired by https://github.com/jrf0110/convert-text-table/ and https://github.com/Rudolph-Miller/react-sortable-table
- */
 export class MdSortableTable extends React.PureComponent {
 
     static propTypes = {
         'mdFilePath' : PropTypes.string,
-        'content': PropTypes.string
+        'content': PropTypes.string,
     };
 
     constructor(props) {
         super(props);
         const { content, mdFilePath } = props;
         this.state = {
-            data: content ? MdSortableTable.convertMarkdownToObject(content) : null,
+            data: content ? Utils.convertMarkdownTableToObject(content) : null,
             loading: !content && (mdFilePath && typeof mdFilePath === 'string')
         };
     }
 
-    static convertMarkdownToObject(input) {
+    componentDidMount(){
+        this.loadMdFile();
+    }
+
+    loadMdFile() {
+        const { mdFilePath } = this.props;
+        const onFinishLoad = (data) => {
+            this.setState({ 'loading': false, data: data });
+        };
+
+        if (mdFilePath) {
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+            window.fetch(mdFilePath)
+                .then(function (resp) {
+                    return resp.text();
+                })
+                .then(function (respText) {
+                    const data = Utils.convertMarkdownTableToObject(respText);
+                    onFinishLoad(data);
+                });
+        }
+    }
+
+    render() {
+        const { data, loading } = this.state;
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            if (loading) {
+                return (
+                    <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                        <i className="icon icon-fw icon-spin icon-circle-notch fas" />
+                    </div>
+                );
+            }
+            return null;
+        }
+
+        const columns = _.map(Object.keys(data[0]), function (item) {
+            return {
+                header: item,
+                key: item,
+                headerStyle: { fontSize: '15px', backgroundColor: '#00616d', color: '#fff' },
+                headerProps: { className: 'text-center' },
+                sortable: true,
+                //defaultSorting: 'ASC',
+                //dataStyle: { fontSize: '15px' },
+                dataProps: { className: 'text-center' },
+                descSortFunction: CustomSorter.desc,
+                ascSortFunction: CustomSorter.asc,
+                //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
+            };
+        });
+
+        const style = {
+            backgroundColor: '#fff'
+        };
+
+        const iconStyle = {
+            color: '#fff',
+            paddingLeft: '5px',
+            paddingRight: '5px'
+        };
+
+        return (
+            <SortableTable
+                data={data}
+                columns={columns}
+                style={style}
+                iconStyle={iconStyle} />
+        );
+    }
+}
+
+const CustomSorter = {
+    desc: (data, key) => {
+        const clone = [...data];
+        const result = clone.sort(function (_a, _b) {
+            const r = Utils.compareData(_a[key], _b[key]);
+            return r !== 1 ? 1 : -1;
+        });
+        return result;
+    },
+
+    asc: (data, key) => {
+        const clone = [...data];
+        const result = clone.sort(function (_a, _b) {
+            const r = Utils.compareData(_a[key], _b[key]);
+            return r !== -1 ? 1 : -1;
+        });
+        return result;
+    }
+};
+
+const Utils = {
+    /**
+     * https://github.com/jrf0110/convert-text-table/
+     * @param {*} input - markdown table input string
+     */
+    convertMarkdownTableToObject: (input) => {
         let i = 1, columnBorder;
         const out = [];
 
@@ -57,144 +150,110 @@ export class MdSortableTable extends React.PureComponent {
         }
 
         return out;
-    }
+    },
+    /**
+     * https://github.com/stiang/remove-markdown/blob/master/index.js
+     * @param {*} md - markdown input
+     * @param {*} options - remove options
+     */
+    removeMarkdown: (md, options) => {
+        options = options || {};
+        options.listUnicodeChar = options.hasOwnProperty('listUnicodeChar') ? options.listUnicodeChar : false;
+        options.stripListLeaders = options.hasOwnProperty('stripListLeaders') ? options.stripListLeaders : true;
+        options.gfm = options.hasOwnProperty('gfm') ? options.gfm : true;
+        options.useImgAltText = options.hasOwnProperty('useImgAltText') ? options.useImgAltText : true;
 
-    componentDidMount(){
-        this.loadMdFile();
-    }
+        let output = md || '';
 
-    loadMdFile() {
-        const { mdFilePath } = this.props;
-        const onFinishLoad = (data) => {
-            this.setState({ 'loading': false, data: data });
-        };
+        // Remove horizontal rules (stripListHeaders conflict with this rule, which is why it has been moved to the top)
+        output = output.replace(/^(-\s*?|\*\s*?|_\s*?){3,}\s*$/gm, '');
 
-        if (mdFilePath) {
-            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
-            window.fetch(mdFilePath)
-                .then(function (resp) {
-                    return resp.text();
-                })
-                .then(function (respText) {
-                    const data = MdSortableTable.convertMarkdownToObject(respText);
-                    onFinishLoad(data);
-                });
-        }
-    }
-
-    // static getName(name) {
-    //     return name.split(' ').slice(-1)[0];
-    // }
-
-    render() {
-        const { data, loading } = this.state;
-        if (!data || !Array.isArray(data) || data.length === 0) {
-            if (loading) {
-                return (
-                    <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                        <i className="icon icon-fw icon-spin icon-circle-notch fas" />
-                    </div>
-                );
+        try {
+            if (options.stripListLeaders) {
+                if (options.listUnicodeChar)
+                    output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, options.listUnicodeChar + ' $1');
+                else
+                    output = output.replace(/^([\s\t]*)([\*\-\+]|\d+\.)\s+/gm, '$1');
             }
-            return null;
+            if (options.gfm) {
+                output = output
+                    // Header
+                    .replace(/\n={2,}/g, '\n')
+                    // Fenced codeblocks
+                    .replace(/~{3}.*\n/g, '')
+                    // Strikethrough
+                    .replace(/~~/g, '')
+                    // Fenced codeblocks
+                    .replace(/`{3}.*\n/g, '');
+            }
+            output = output
+                // Remove HTML tags
+                .replace(/<[^>]*>/g, '')
+                // Remove setext-style headers
+                .replace(/^[=\-]{2,}\s*$/g, '')
+                // Remove footnotes?
+                .replace(/\[\^.+?\](\: .*?$)?/g, '')
+                .replace(/\s{0,2}\[.*?\]: .*?$/g, '')
+                // Remove images
+                .replace(/\!\[(.*?)\][\[\(].*?[\]\)]/g, options.useImgAltText ? '$1' : '')
+                // Remove inline links
+                .replace(/\[(.*?)\][\[\(].*?[\]\)]/g, '$1')
+                // Remove blockquotes
+                .replace(/^\s{0,3}>\s?/g, '')
+                // Remove reference-style links?
+                .replace(/^\s{1,2}\[(.*?)\]: (\S+)( ".*?")?\s*$/g, '')
+                // Remove atx-style headers
+                .replace(/^(\n)?\s{0,}#{1,6}\s+| {0,}(\n)?\s{0,}#{0,} {0,}(\n)?\s{0,}$/gm, '$1$2$3')
+                // Remove emphasis (repeat the line to remove double emphasis)
+                .replace(/([\*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
+                .replace(/([\*_]{1,3})(\S.*?\S{0,1})\1/g, '$2')
+                // Remove code blocks
+                .replace(/(`{3,})(.*?)\1/gm, '$2')
+                // Remove inline code
+                .replace(/`(.+?)`/g, '$1')
+                // Replace two or more newlines with exactly two? Not entirely sure this belongs here...
+                .replace(/\n{2,}/g, '\n\n');
+        } catch (e) {
+            console.error(e);
+            return md;
         }
+        return output;
+    },
+    /**
+     * @param {*} _val1 - value 1 to compare
+     * @param {*} _val2 - value 2 to compare
+     */
+    compareData: (_val1, _val2) => {
+        let val1, val2;
+        if (Utils.isNumeric(_val1) && Utils.isNumeric(_val2)) {
+            val1 = _val1;
+            val2 = _val2;
+        } else if (Utils.parseFloatable(_val1) && Utils.parseFloatable(_val2)) {
+            val1 = Utils.parseIfFloat(_val1);
+            val2 = Utils.parseIfFloat(_val2);
+        } else {
+            val1 = Utils.removeMarkdown(_val1);
+            val2 = Utils.removeMarkdown(_val2);
+        }
+        return val1 === val2 ? 0 : (val1 > val2 ? 1 : -1);
+    },
+    /**
+     * @param {string} value - check whether the string value is convertible to float
+     */
+    parseFloatable: (value) => (typeof (value) === "string" && (/^\d+$/.test(value) || /^\d+$/.test(value.replace(/[,.%$]/g, "")))) ? true : false,
+    /**
+     * @param {string} value - convert to float
+     */
+    parseIfFloat: (value) => parseFloat(value.replace(/,/g, "")),
+    /**
+     * @param {*} value - check whether value is numeric
+     */
+    isNumeric: (value) => !isNaN(parseFloat(value)) && isFinite(value),
+};
 
-        // const CustomSorter = {
-        //     desc: (data, key) => {
-        //         const result = data.sort(function (_a, _b) {
-        //             const a = MdSortableTable.getName(_a[key]);
-        //             const b = MdSortableTable.getName(_b[key]);
-        //             return (a <= b) ? 1 : -1;
-        //         });
-        //         return result;
-        //     },
-
-        //     asc: (data, key) => {
-        //         const result = data.sort(function (_a, _b) {
-        //             const a = MdSortableTable.getName(_a[key]);
-        //             const b = MdSortableTable.getName(_b[key]);
-        //             return (a >= b) ? 1 : -1;
-        //         });
-        //         return result;
-        //     }
-        // };
-
-        const columns = _.map(Object.keys(data[0]), function (item) {
-            return {
-                header: item,
-                key: item,
-                headerStyle: { fontSize: '15px' },
-                headerProps: { className: 'text-left' },
-                sortable: true,
-                dataProps: { className: 'text-left' },
-            };
-        });
-
-        // const columns = [
-        //     {
-        //         header: 'wiringPi',
-        //         key: 'wiringPi',
-        //         headerStyle: { fontSize: '15px' },
-        //         sortable: true
-        //     },
-        //     {
-        //         header: 'GPIO',
-        //         key: 'GPIO',
-        //         headerStyle: { fontSize: '15px' },
-        //         sortable: true
-        //     },
-        //     {
-        //         header: 'Phys',
-        //         key: 'Phys',
-        //         defaultSorting: 'ASC',
-        //         headerStyle: { fontSize: '15px', width: '100px' },
-        //         dataStyle: { fontSize: '15px' },
-        //         dataProps: { className: 'align-right' },
-        //         //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
-
-        //     },
-        //     {
-        //         header: 'Name',
-        //         key: 'Name',
-        //         headerStyle: { fontSize: '15px' },
-        //         headerProps: { className: 'align-left' },
-        //         // descSortFunction: CustomSorter.desc,
-        //         // ascSortFunction: CustomSorter.asc
-        //     },
-        //     {
-        //         header: 'Mode',
-        //         key: 'Mode',
-        //         headerStyle: { fontSize: '15px' },
-        //         sortable: true
-        //     },
-        //     {
-        //         header: 'Value',
-        //         key: 'Value',
-        //         headerStyle: { fontSize: '15px' },
-        //         sortable: true
-        //     }
-        // ];
-
-        const style = {
-            backgroundColor: '#fff'
-        };
-
-        const iconStyle = {
-            color: '#aaa',
-            paddingLeft: '5px',
-            paddingRight: '5px'
-        };
-
-        return (
-            <SortableTable
-                data={data}
-                columns={columns}
-                style={style}
-                iconStyle={iconStyle} />
-        );
-    }
-}
-
+/**
+ * https://github.com/Rudolph-Miller/react-sortable-table
+ */
 class SortableTable extends React.PureComponent {
     static propTypes = {
         data: PropTypes.array.isRequired,
@@ -236,6 +295,7 @@ class SortableTable extends React.PureComponent {
             const sorting = sortings[i];
             const column = this.props.columns[i];
             const key = this.props.columns[i].key;
+            console.log('xxxx sorting: ', sorting);
             switch (sorting) {
                 case "desc":
                     if (column.descSortFunction &&
@@ -260,9 +320,9 @@ class SortableTable extends React.PureComponent {
 
     ascSortData(data, key) {
         return this.sortDataByKey(data, key, ((a, b) => {
-            if (this.parseFloatable(a) && this.parseFloatable(b)) {
-                a = this.parseIfFloat(a);
-                b = this.parseIfFloat(b);
+            if (Utils.parseFloatable(a) && Utils.parseFloatable(b)) {
+                a = Utils.parseIfFloat(a);
+                b = Utils.parseIfFloat(b);
             }
             if (a >= b) {
                 return 1;
@@ -274,9 +334,9 @@ class SortableTable extends React.PureComponent {
 
     descSortData(data, key) {
         return this.sortDataByKey(data, key, ((a, b) => {
-            if (this.parseFloatable(a) && this.parseFloatable(b)) {
-                a = this.parseIfFloat(a);
-                b = this.parseIfFloat(b);
+            if (Utils.parseFloatable(a) && Utils.parseFloatable(b)) {
+                a = Utils.parseIfFloat(a);
+                b = Utils.parseIfFloat(b);
             }
             if (a <= b) {
                 return 1;
@@ -284,14 +344,6 @@ class SortableTable extends React.PureComponent {
                 return -1;
             }
         }).bind(this));
-    }
-
-    parseFloatable(value) {
-        return (typeof (value) === "string" && (/^\d+$/.test(value) || /^\d+$/.test(value.replace(/[,.%$]/g, "")))) ? true : false;
-    }
-
-    parseIfFloat(value) {
-        return parseFloat(value.replace(/,/g, ""));
     }
 
     sortDataByKey(data, key, fn) {
@@ -463,97 +515,82 @@ class SortableTableHeader extends React.PureComponent {
     }
 }
 
-class SortableTableRow extends React.PureComponent {
-    render() {
-        const { data, columns } = this.props;
-        const tds = columns.map(function (item, index) {
-            let value = data[item.key];
-            if (item.render) {
-                value = item.render(value);
-            }
-            console.log('xxx value: ', value.toString());
-            return (
-                <td
-                    key={index}
-                    style={item.dataStyle}
-                    {...(item.dataProps || {})} >
-                    <Markdown>{value.toString()}</Markdown>
-                </td>
-            );
-        }.bind(this));
-
+function SortableTableRow(props) {
+    const { data, columns } = props;
+    const tds = columns.map(function (item, index) {
+        let value = data[item.key];
+        if (item.render) {
+            value = item.render(value);
+        }
         return (
-            <tr>
-                {tds}
-            </tr>
-        );
-    }
-}
-
-class SortableTableBody extends React.PureComponent {
-    static propTypes = {
-        data: PropTypes.array.isRequired,
-        columns: PropTypes.array.isRequired,
-        sortings: PropTypes.array.isRequired
-    }
-
-    render() {
-        const { data, columns } = this.props;
-        const bodies = data.map(((item, index) =>
-            <SortableTableRow
+            <td
                 key={index}
-                data={item}
-                columns={columns} />
-        ).bind(this));
-
-        return (
-            <tbody>
-                {bodies}
-            </tbody>
+                style={item.dataStyle}
+                {...(item.dataProps || {})} >
+                <Markdown>{value.toString()}</Markdown>
+            </td>
         );
-    }
+    }.bind(this));
+
+    return (
+        <tr>
+            {tds}
+        </tr>
+    );
 }
 
-class FaIcon extends React.PureComponent {
-    static propTypes = {
-        icon: PropTypes.string.isRequired
-    }
+function SortableTableBody(props) {
+    const { data, columns } = props;
+    const bodies = data.map(((item, index) =>
+        <SortableTableRow
+            key={index}
+            data={item}
+            columns={columns} />
+    ).bind(this));
 
-    render() {
-        const { icon, style } = this.props;
-        const className = `fas icon ${icon}`;
-        return (
-            <i
-                className={className}
-                style={style}
-                align="right" />
-        );
-    }
+    return (
+        <tbody>
+            {bodies}
+        </tbody>
+    );
+}
+SortableTableBody.propTypes = {
+    data: PropTypes.array.isRequired,
+    columns: PropTypes.array.isRequired,
+    sortings: PropTypes.array.isRequired
+};
+
+function FaIcon(props) {
+    const { icon, style } = props;
+    const className = `fas icon ${icon}`;
+    return (
+        <i
+            className={className}
+            style={style}
+            align="right" />
+    );
+}
+FaIcon.propTypes = {
+    icon: PropTypes.string.isRequired
+};
+
+function SortIconBoth(props) {
+    const { style } = props;
+    return (
+        <FaIcon icon="icon-sort" style={style} />
+    );
 }
 
-class SortIconBoth extends React.PureComponent {
-    render() {
-        const { style } = this.props;
-        return (
-            <FaIcon icon="icon-sort" style={style} />
-        );
-    }
+function SortIconAsc(props) {
+    const { style } = props;
+    return (
+        <FaIcon icon="icon-sort-up" style={style} />
+    );
 }
 
-class SortIconAsc extends React.PureComponent {
-    render() {
-        const { style } = this.props;
-        return (
-            <FaIcon icon="icon-sort-up" style={style} />
-        );
-    }
-}
-
-class SortIconDesc extends React.PureComponent {
-    render() {
-        const { style } = this.props;
-        return (
-            <FaIcon icon="icon-sort-down" style={style} />
-        );
-    }
+function SortIconDesc(props) {
+    const { style } = props;
+    return (
+        <FaIcon icon="icon-sort-down" style={style} />
+    );
 }
