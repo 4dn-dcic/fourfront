@@ -500,7 +500,7 @@ export default class App extends React.PureComponent {
             navigate(targetHref, navOpts, function(){
                 if (targetOffset) targetOffset = parseInt(targetOffset);
                 if (!targetOffset || isNaN(targetOffset)) targetOffset = 112;
-                if (tHrefHash && typeof hrefHash === 'string' && tHrefHash.length > 1 && tHrefHash[1] !== '!'){
+                if (tHrefHash && typeof tHrefHash === 'string' && tHrefHash.length > 1 && tHrefHash[1] !== '!'){
                     tHrefHash = tHrefHash.slice(1); // Strip out '#'
                     setTimeout(layout.animateScrollTo.bind(null, tHrefHash, 750, targetOffset), 100);
                 }
