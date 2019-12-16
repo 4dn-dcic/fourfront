@@ -111,6 +111,10 @@ const Utils = {
         let i = 1, columnBorder;
         const out = [];
 
+        //workaround to run https://github.com/jrf0110/convert-text-table/ solution for standard markdown tables, since
+        //standard tables not use "+" for column headers. first convert any "|---|" to "+---+"
+        input = input.replace(/\|\-{3}/g, "+---").replace(/\-{3}\|/g, "---+");
+
         columnBorder = input.substring(input.indexOf('+') + 1);
         columnBorder = '+' + columnBorder.substring(0, columnBorder.indexOf('+') + 1);
 
