@@ -2,7 +2,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import memoize from 'memoize-one';
 import _ from 'underscore';
 import Markdown from 'markdown-to-jsx';
 import Draggable from 'react-draggable';
@@ -71,7 +70,6 @@ export class MdSortableTable extends React.PureComponent {
                 //defaultSorting: 'ASC',
                 descSortFunction: CustomSorter.desc,
                 ascSortFunction: CustomSorter.asc,
-                width: undefined,
                 //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
             };
         });
@@ -113,7 +111,7 @@ const Utils = {
 
         //workaround to run https://github.com/jrf0110/convert-text-table/ solution for standard markdown tables, since
         //standard tables not use "+" for column headers. first convert any "|---|" to "+---+"
-        input = input.replace(/\|\-{3}/g, "+---").replace(/\-{3}\|/g, "---+");
+        input = input.replace(/\|-{3}/g, "+---").replace(/-{3}\|/g, "---+");
 
         columnBorder = input.substring(input.indexOf('+') + 1);
         columnBorder = '+' + columnBorder.substring(0, columnBorder.indexOf('+') + 1);
@@ -263,6 +261,7 @@ class SortableTable extends React.PureComponent {
         super(props);
         this.throttledSetHeaderWidths = _.debounce(_.throttle(this.setHeaderWidths.bind(this), 1000), 350);
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
+        this.onStateChange = this.onStateChange.bind(this);
         this.state = {
             sortings: this.getDefaultSortings(props),
             widths: this.getDefaultWidths(props)
@@ -295,11 +294,12 @@ class SortableTable extends React.PureComponent {
     }
 
     sortData(data, sortings) {
-        let sortedData = this.props.data;
+        let { data: sortedData } = this.props;
+        const { columns } = this.props;
         for (var i in sortings) {
             const sorting = sortings[i];
-            const column = this.props.columns[i];
-            const key = this.props.columns[i].key;
+            const column = columns[i];
+            const key = columns[i].key;
             switch (sorting) {
                 case "desc":
                     if (column.descSortFunction &&
@@ -359,12 +359,13 @@ class SortableTable extends React.PureComponent {
     }
 
     onStateChange(index) {
-        const sortings = this.state.sortings.map(((sorting, i) => {
+        const { sortings: sortingsOld } = this.state;
+        const sortings = sortingsOld.map((sorting, i) => {
             if (i == index)
                 sorting = this.nextSortingState(sorting);
 
             return sorting;
-        }).bind(this));
+        });
 
         this.setState({
             sortings
@@ -395,7 +396,6 @@ class SortableTable extends React.PureComponent {
     render() {
         const { data, columns, iconAsc, iconDesc, iconBoth } = this.props;
         const { sortings, widths } = this.state;
-        _.each(columns, function (it, idx) { it.width = widths[idx]; });
 
         const sortedData = this.sortData(data, sortings);
         const fullRowWidth = widths.reduce((a, b) => a + b, 0);
@@ -404,8 +404,10 @@ class SortableTable extends React.PureComponent {
             <div className="markdown-table-outer-container">
                 <div className="markdown-table-container">
                     <SortableTableHeader
-                        {...{ columns, sortings, iconDesc, iconAsc, iconBoth, setHeaderWidths: this.setHeaderWidths, headerColumnWidths: widths }}
-                        onStateChange={this.onStateChange.bind(this)} />
+                        {...{
+                            columns, sortings, iconDesc, iconAsc, iconBoth,
+                            setHeaderWidths: this.setHeaderWidths, headerColumnWidths: widths, onStateChange: this.onStateChange
+                        }} />
                     <SortableTableBody {...{ columns, data: sortedData, sortings, widths, fullRowWidth }} />
                 </div>
             </div>
@@ -508,6 +510,7 @@ class SortableTableHeader extends React.PureComponent {
 
         this.setHeaderWidths = this.setHeaderWidths.bind(this);
         this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
+        this.onClick = this.onClick.bind(this);
 
         this.state = {
             'widths': (props.headerColumnWidths && props.headerColumnWidths.slice(0)) || null
@@ -542,17 +545,17 @@ class SortableTableHeader extends React.PureComponent {
 
     render() {
         const { columns, sortings, iconAsc, iconDesc, iconBoth } = this.props;
-        const headers = columns.map(((column, index) => {
+        const headers = columns.map((column, index) => {
             const sorting = sortings[index];
             return (
                 <SortableTableHeaderItem {...{ sortable: column.sortable, index, header: column.header, sorting, iconAsc, iconDesc, iconBoth }}
                     key={index}
-                    onClick={this.onClick.bind(this)}
+                    onClick={this.onClick}
                     onAdjusterDrag={this.onAdjusterDrag}
                     setHeaderWidths={this.setHeaderWidths}
-                    width={this.getWidthFor(index)}  />
+                    width={this.getWidthFor(index)} />
             );
-        }).bind(this));
+        });
 
         return (
             <div className="markdown-table-headers-row">
@@ -565,14 +568,15 @@ class SortableTableHeader extends React.PureComponent {
 }
 
 function SortableTableRow(props) {
-    const { data, columns } = props;
+    const { data, columns, widths } = props;
     const tds = columns.map(function (item, index) {
         let value = data[item.key];
         if (item.render) {
             value = item.render(value);
         }
+        const width = widths[index];
         return (
-            <div className="markdown-table-column-block" style={{ width: item.width }} data-field={item.key} key={item.key}>
+            <div className="markdown-table-column-block" style={{ width }} data-field={item.key} key={item.key}>
                 <div className="inner"><span className="value"><Markdown>{value.toString()}</Markdown></span></div>
             </div>
         );
@@ -588,13 +592,10 @@ function SortableTableRow(props) {
 }
 
 function SortableTableBody(props) {
-    const { data, columns, fullRowWidth } = props;
-    const bodies = data.map(((item, index) =>
-        <SortableTableRow
-            key={index}
-            data={item}
-            columns={columns} />
-    ).bind(this));
+    const { data, columns, widths, fullRowWidth } = props;
+    const bodies = data.map((item, index) =>
+        <SortableTableRow key={index} {...{ data: item, columns, widths }} />
+    );
 
     return (
         <div className="inner-container">
@@ -609,7 +610,9 @@ function SortableTableBody(props) {
 SortableTableBody.propTypes = {
     data: PropTypes.array.isRequired,
     columns: PropTypes.array.isRequired,
-    sortings: PropTypes.array.isRequired
+    widths: PropTypes.array.isRequired,
+    sortings: PropTypes.array.isRequired,
+    fullRowWidth: PropTypes.number.isRequired,
 };
 
 function FaIcon(props) {
