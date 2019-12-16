@@ -971,6 +971,18 @@
 
 
     {
+        "name" : "md-sortable-table.test",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af4610099",
+        "body" : "<MdSortableTable\n key='md-sortable-table'\n mdFilePath='https://s3.amazonaws.com/4dn-dcic-public/static-pages/md-table-test.md'\n defaultColWidths={[]}\n content={null}\n />",
+        "status" : "released",
+        "title" : "Microscope Markdown Table",
+        "options": {
+            "filetype" : "jsx"
+        }
+    },
+
+
+    {
         "name" : "privacy-policy.policy-content",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b051",
         "file" : "/src/encoded/static/data/privacy-policy.md",

@@ -705,13 +705,6 @@ $markdown-table-result-row-height: 46px !default;
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);
 							}
-							&.no-value {
-								> .inner {
-
-									//background-color: #f9f9f9;
-								}
-							}
-
 						}
 
 					}
@@ -792,17 +785,7 @@ $markdown-table-result-row-height: 46px !default;
 		}
 	}
 
-	&.no-detail-pane {
-		> .columns {
-			> .markdown-table-column-block {
-				&[data-field="display_title"]{
-					padding-left: 10px;
-				}
-			}
-		}
-	}
-
-} // .search-headers-row
+} // .markdown-table-headers-row
 
 /**********************************************************
 		Misc Static Pages

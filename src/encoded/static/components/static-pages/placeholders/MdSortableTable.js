@@ -14,6 +14,7 @@ export class MdSortableTable extends React.PureComponent {
     static propTypes = {
         'mdFilePath' : PropTypes.string,
         'content': PropTypes.string,
+        'defaultColWidths': PropTypes.array
     };
 
     constructor(props) {
@@ -49,6 +50,7 @@ export class MdSortableTable extends React.PureComponent {
     }
 
     render() {
+        const { defaultColWidths } = this.props;
         const { data, loading } = this.state;
         if (!data || !Array.isArray(data) || data.length === 0) {
             if (loading) {
@@ -69,13 +71,13 @@ export class MdSortableTable extends React.PureComponent {
                 //defaultSorting: 'ASC',
                 descSortFunction: CustomSorter.desc,
                 ascSortFunction: CustomSorter.asc,
-                width: 0,
+                width: undefined,
                 //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
             };
         });
 
         return (
-            <SortableTable data={data} columns={columns} />
+            <SortableTable {...{ data, columns, defaultColWidths }} />
         );
     }
 }
@@ -234,6 +236,10 @@ const Utils = {
      * @param {*} value - check whether value is numeric
      */
     isNumeric: (value) => !isNaN(parseFloat(value)) && isFinite(value),
+    /**
+     * default column width
+     */
+    DEFAULT_COL_WIDTH : 150
 };
 
 /**
@@ -243,6 +249,7 @@ class SortableTable extends React.PureComponent {
     static propTypes = {
         data: PropTypes.array.isRequired,
         columns: PropTypes.array.isRequired,
+        defaultColWidths: PropTypes.array,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node
@@ -254,8 +261,17 @@ class SortableTable extends React.PureComponent {
         this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.state = {
             sortings: this.getDefaultSortings(props),
-            widths: [150, 150, 150, 150, 150, 150, 150]
+            widths: this.getDefaultWidths(props)
         };
+    }
+
+    getDefaultWidths(props) {
+        const { columns, defaultColWidths } = props;
+        if (defaultColWidths && Array.isArray(defaultColWidths) && (defaultColWidths.length === columns.length) &&
+            _.all(defaultColWidths, (dcw) => Utils.isNumeric(dcw))) {
+            return _.map(defaultColWidths, (dcw) => dcw > 0 ? dcw : Utils.DEFAULT_COL_WIDTH);
+        }
+        return Array(columns.length).fill(Utils.DEFAULT_COL_WIDTH);
     }
 
     getDefaultSortings(props) {
@@ -378,14 +394,15 @@ class SortableTable extends React.PureComponent {
         _.each(columns, function (it, idx) { it.width = widths[idx]; });
 
         const sortedData = this.sortData(data, sortings);
+        const fullRowWidth = widths.reduce((a, b) => a + b, 0);
 
         return (
             <div className="markdown-table-outer-container">
                 <div className="markdown-table-container">
                     <SortableTableHeader
-                        {...{ columns, sortings, iconDesc, iconAsc, iconBoth, setHeaderWidths: this.setHeaderWidths }}
+                        {...{ columns, sortings, iconDesc, iconAsc, iconBoth, setHeaderWidths: this.setHeaderWidths, headerColumnWidths: widths }}
                         onStateChange={this.onStateChange.bind(this)} />
-                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths }} />
+                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths, fullRowWidth }} />
                 </div>
             </div>
         );
@@ -400,6 +417,11 @@ class SortableTableHeaderItem extends React.PureComponent {
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node,
+        onClick: PropTypes.func.isRequired,
+        onAdjusterDrag: PropTypes.func.isRequired,
+        setHeaderWidths: PropTypes.func.isRequired,
+        index: PropTypes.number.isRequired,
+        width: PropTypes.number.isRequired,
     }
 
     static defaultProps = {
@@ -422,8 +444,9 @@ class SortableTableHeaderItem extends React.PureComponent {
     }
 
     onClick(e) {
-        if (this.props.sortable)
-            this.props.onClick(this.props.index);
+        const { sortable, onClick, index } = this.props;
+        if (sortable)
+            onClick(index);
     }
 
     render() {
@@ -471,7 +494,9 @@ class SortableTableHeader extends React.PureComponent {
         onStateChange: PropTypes.func,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
-        iconBoth: PropTypes.node
+        iconBoth: PropTypes.node,
+        setHeaderWidths: PropTypes.func.isRequired,
+        headerColumnWidths: PropTypes.array,
     }
 
     constructor(props) {
@@ -481,7 +506,7 @@ class SortableTableHeader extends React.PureComponent {
         this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
 
         this.state = {
-            'widths': [150, 150, 150, 150, 150, 150, 150]
+            'widths': (props.headerColumnWidths && props.headerColumnWidths.slice(0)) || null
         };
     }
 
@@ -507,7 +532,6 @@ class SortableTableHeader extends React.PureComponent {
     }
 
     getWidthFor(idx){
-        //const { headerColumnWidths, mounted, columnDefinitions, windowWidth } = this.props;
         const { widths } = this.state;
         return Array.isArray(widths) && widths[idx];
     }
@@ -544,7 +568,7 @@ function SortableTableRow(props) {
             value = item.render(value);
         }
         return (
-            <div className="markdown-table-column-block" style={{ width: item.width }} data-field={item.key}>
+            <div className="markdown-table-column-block" style={{ width: item.width }} data-field={item.key} key={item.key}>
                 <div className="inner"><span className="value"><Markdown>{value.toString()}</Markdown></span></div>
             </div>
         );
@@ -560,7 +584,7 @@ function SortableTableRow(props) {
 }
 
 function SortableTableBody(props) {
-    const { data, columns, widths } = props;
+    const { data, columns, fullRowWidth } = props;
     const bodies = data.map(((item, index) =>
         <SortableTableRow
             key={index}
@@ -570,7 +594,7 @@ function SortableTableBody(props) {
 
     return (
         <div className="inner-container">
-            <div className="scrollable-container">
+            <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
                 <div>
                     {bodies}
                 </div>
