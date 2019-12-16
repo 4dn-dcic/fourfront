@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import Markdown from 'markdown-to-jsx';
+import Draggable from 'react-draggable';
+
 import { ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 export class MdSortableTable extends React.PureComponent {
@@ -63,34 +65,17 @@ export class MdSortableTable extends React.PureComponent {
             return {
                 header: item,
                 key: item,
-                headerStyle: { fontSize: '15px', backgroundColor: '#00616d', color: '#fff' },
-                headerProps: { className: 'text-center' },
                 sortable: true,
                 //defaultSorting: 'ASC',
-                //dataStyle: { fontSize: '15px' },
-                dataProps: { className: 'text-center' },
                 descSortFunction: CustomSorter.desc,
                 ascSortFunction: CustomSorter.asc,
+                width: 0,
                 //render: (id) => { return (<a href={'user/' + id}>{id}</a>); }
             };
         });
 
-        const style = {
-            backgroundColor: '#fff'
-        };
-
-        const iconStyle = {
-            color: '#fff',
-            paddingLeft: '5px',
-            paddingRight: '5px'
-        };
-
         return (
-            <SortableTable
-                data={data}
-                columns={columns}
-                style={style}
-                iconStyle={iconStyle} />
+            <SortableTable data={data} columns={columns} />
         );
     }
 }
@@ -117,7 +102,7 @@ const CustomSorter = {
 
 const Utils = {
     /**
-     * https://github.com/jrf0110/convert-text-table/
+     * forked and modified from https://github.com/jrf0110/convert-text-table/
      * @param {*} input - markdown table input string
      */
     convertMarkdownTableToObject: (input) => {
@@ -252,14 +237,12 @@ const Utils = {
 };
 
 /**
- * https://github.com/Rudolph-Miller/react-sortable-table
+ * forked and modified from https://github.com/Rudolph-Miller/react-sortable-table
  */
 class SortableTable extends React.PureComponent {
     static propTypes = {
         data: PropTypes.array.isRequired,
         columns: PropTypes.array.isRequired,
-        style: PropTypes.object,
-        iconStyle: PropTypes.object,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node
@@ -267,9 +250,11 @@ class SortableTable extends React.PureComponent {
 
     constructor(props) {
         super(props);
-
+        this.throttledSetHeaderWidths = _.debounce(_.throttle(this.setHeaderWidths.bind(this), 1000), 350);
+        this.setHeaderWidths = _.throttle(this.setHeaderWidths.bind(this), 300);
         this.state = {
-            sortings: this.getDefaultSortings(props)
+            sortings: this.getDefaultSortings(props),
+            widths: [150, 150, 150, 150, 150, 150, 150]
         };
     }
 
@@ -295,7 +280,6 @@ class SortableTable extends React.PureComponent {
             const sorting = sortings[i];
             const column = this.props.columns[i];
             const key = this.props.columns[i].key;
-            console.log('xxxx sorting: ', sorting);
             switch (sorting) {
                 case "desc":
                     if (column.descSortFunction &&
@@ -383,29 +367,27 @@ class SortableTable extends React.PureComponent {
         return next;
     }
 
+    setHeaderWidths(widths){
+        if (!Array.isArray(widths)) throw new Error('widths is not an array');
+        this.setState({ 'widths' : widths });
+    }
+
     render() {
-        const { data, columns, style, iconStyle, iconAsc, iconDesc, iconBoth } = this.props;
-        const { sortings } = this.state;
+        const { data, columns, iconAsc, iconDesc, iconBoth } = this.props;
+        const { sortings, widths } = this.state;
+        _.each(columns, function (it, idx) { it.width = widths[idx]; });
 
         const sortedData = this.sortData(data, sortings);
 
         return (
-            <table
-                className="table"
-                style={style} >
-                <SortableTableHeader
-                    columns={columns}
-                    sortings={sortings}
-                    onStateChange={this.onStateChange.bind(this)}
-                    iconStyle={iconStyle}
-                    iconDesc={iconDesc}
-                    iconAsc={iconAsc}
-                    iconBoth={iconBoth} />
-                <SortableTableBody
-                    columns={columns}
-                    data={sortedData}
-                    sortings={sortings} />
-            </table>
+            <div className="markdown-table-outer-container">
+                <div className="markdown-table-container">
+                    <SortableTableHeader
+                        {...{ columns, sortings, iconDesc, iconAsc, iconBoth, setHeaderWidths: this.setHeaderWidths }}
+                        onStateChange={this.onStateChange.bind(this)} />
+                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths }} />
+                </div>
+            </div>
         );
     }
 }
@@ -413,19 +395,30 @@ class SortableTable extends React.PureComponent {
 class SortableTableHeaderItem extends React.PureComponent {
     static propTypes = {
         header: PropTypes.string,
-        headerProps: PropTypes.object,
         sortable: PropTypes.bool,
         sorting: PropTypes.oneOf(['desc', 'asc', 'both']),
-        iconStyle: PropTypes.object,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node,
-        style: PropTypes.string,
     }
 
     static defaultProps = {
-        headerProps: {},
         sortable: true
+    }
+
+    constructor(props){
+        super(props);
+        _.bindAll(this, 'onDrag', 'onStop');
+    }
+
+    onDrag(event, res){
+        const { index, onAdjusterDrag } = this.props;
+        onAdjusterDrag(index, event, res);
+    }
+
+    onStop(event, res){
+        const { index, setHeaderWidths } = this.props;
+        setHeaderWidths(index, event, res);
     }
 
     onClick(e) {
@@ -434,37 +427,39 @@ class SortableTableHeaderItem extends React.PureComponent {
     }
 
     render() {
-        const { header, sorting, sortable, style, iconStyle, iconAsc, iconDesc, iconBoth, headerProps } = this.props;
+        const { header, sorting, sortable, iconAsc, iconDesc, iconBoth, width } = this.props;
         let sortIcon;
         if (sortable) {
             if (iconBoth) {
                 sortIcon = iconBoth;
             } else {
-                sortIcon = <SortIconBoth style={iconStyle} />;
+                sortIcon = <SortIconBoth />;
             }
             if (sorting == "desc") {
                 if (iconDesc) {
                     sortIcon = iconDesc;
                 } else {
-                    sortIcon = <SortIconDesc style={iconStyle} />;
+                    sortIcon = <SortIconDesc />;
                 }
             } else if (sorting == "asc") {
                 if (iconAsc) {
                     sortIcon = iconAsc;
                 } else {
-                    sortIcon = <SortIconAsc style={iconStyle} />;
+                    sortIcon = <SortIconAsc />;
                 }
             }
         }
 
         return (
-            <th
-                style={style}
-                onClick={this.onClick.bind(this)}
-                {...headerProps} >
-                {header}
-                {sortIcon}
-            </th>
+            <div data-field="name" className="markdown-table-column-block" style={{ width }}>
+                <div className="inner" onClick={this.onClick.bind(this)}>
+                    <span className="column-title">{header}</span>
+                    <span className={"column-sort-icon" + (['asc', 'desc'].indexOf(sorting) > -1 ? ' active' : '')}>{sortIcon}</span>
+                </div>
+                <Draggable position={{ x: width, y: 0 }} axis="x" onDrag={this.onDrag} onStop={this.onStop}>
+                    <div className="width-adjuster" />
+                </Draggable>
+            </div>
         );
     }
 }
@@ -474,43 +469,69 @@ class SortableTableHeader extends React.PureComponent {
         columns: PropTypes.array.isRequired,
         sortings: PropTypes.array.isRequired,
         onStateChange: PropTypes.func,
-        iconStyle: PropTypes.object,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node
+    }
+
+    constructor(props) {
+        super(props);
+
+        this.setHeaderWidths = this.setHeaderWidths.bind(this);
+        this.onAdjusterDrag = this.onAdjusterDrag.bind(this);
+
+        this.state = {
+            'widths': [150, 150, 150, 150, 150, 150, 150]
+        };
     }
 
     onClick(index) {
         this.props.onStateChange.bind(this)(index);
     }
 
+    setHeaderWidths(idx, evt, r){
+        const { setHeaderWidths } = this.props;
+        const { widths } = this.state;
+        if (typeof setHeaderWidths !== 'function'){
+            throw new Error('props.setHeaderWidths not a function');
+        }
+        setTimeout(()=> setHeaderWidths(widths.slice(0)), 0);
+    }
+
+    onAdjusterDrag(idx, evt, r){
+        this.setState(({ widths }) => {
+            const nextWidths = widths.slice(0);
+            nextWidths[idx] = r.x;
+            return { 'widths': nextWidths };
+        });
+    }
+
+    getWidthFor(idx){
+        //const { headerColumnWidths, mounted, columnDefinitions, windowWidth } = this.props;
+        const { widths } = this.state;
+        return Array.isArray(widths) && widths[idx];
+    }
+
     render() {
-        const { columns, sortings, iconStyle, iconAsc, iconDesc, iconBoth } = this.props;
+        const { columns, sortings, iconAsc, iconDesc, iconBoth } = this.props;
         const headers = columns.map(((column, index) => {
             const sorting = sortings[index];
             return (
-                <SortableTableHeaderItem
-                    sortable={column.sortable}
+                <SortableTableHeaderItem {...{ sortable: column.sortable, index, header: column.header, sorting, iconAsc, iconDesc, iconBoth }}
                     key={index}
-                    index={index}
-                    header={column.header}
-                    sorting={sorting}
                     onClick={this.onClick.bind(this)}
-                    style={column.headerStyle}
-                    headerProps={column.headerProps}
-                    iconStyle={iconStyle}
-                    iconDesc={iconDesc}
-                    iconAsc={iconAsc}
-                    iconBoth={iconBoth} />
+                    onAdjusterDrag={this.onAdjusterDrag}
+                    setHeaderWidths={this.setHeaderWidths}
+                    width={this.getWidthFor(index)}  />
             );
         }).bind(this));
 
         return (
-            <thead>
-                <tr>
+            <div className="markdown-table-headers-row">
+                <div className="columns clearfix" style={{ left: 0 }}>
                     {headers}
-                </tr>
-            </thead>
+                </div>
+            </div>
         );
     }
 }
@@ -523,24 +544,23 @@ function SortableTableRow(props) {
             value = item.render(value);
         }
         return (
-            <td
-                key={index}
-                style={item.dataStyle}
-                {...(item.dataProps || {})} >
-                <Markdown>{value.toString()}</Markdown>
-            </td>
+            <div className="markdown-table-column-block" style={{ width: item.width }} data-field={item.key}>
+                <div className="inner"><span className="value"><Markdown>{value.toString()}</Markdown></span></div>
+            </div>
         );
     }.bind(this));
 
     return (
-        <tr>
-            {tds}
-        </tr>
+        <div className="markdown-table-row">
+            <div className="columns clearfix result-table-row" draggable="false" style={{ minHeight: '46px' }}>
+                {tds}
+            </div>
+        </div>
     );
 }
 
 function SortableTableBody(props) {
-    const { data, columns } = props;
+    const { data, columns, widths } = props;
     const bodies = data.map(((item, index) =>
         <SortableTableRow
             key={index}
@@ -549,9 +569,13 @@ function SortableTableBody(props) {
     ).bind(this));
 
     return (
-        <tbody>
-            {bodies}
-        </tbody>
+        <div className="inner-container">
+            <div className="scrollable-container">
+                <div>
+                    {bodies}
+                </div>
+            </div>
+        </div>
     );
 }
 SortableTableBody.propTypes = {
@@ -561,36 +585,31 @@ SortableTableBody.propTypes = {
 };
 
 function FaIcon(props) {
-    const { icon, style } = props;
-    const className = `fas icon ${icon}`;
+    const { icon, iconClass } = props;
+    const className = `fas icon ${icon} ${iconClass}`;
     return (
-        <i
-            className={className}
-            style={style}
-            align="right" />
+        <i className={className} align="right" />
     );
 }
 FaIcon.propTypes = {
-    icon: PropTypes.string.isRequired
+    icon: PropTypes.string.isRequired,
+    iconClass: PropTypes.string.isRequired,
 };
 
 function SortIconBoth(props) {
-    const { style } = props;
     return (
-        <FaIcon icon="icon-sort" style={style} />
+        <FaIcon icon="icon-sort-down" iconClass="align-text-top" />
     );
 }
 
 function SortIconAsc(props) {
-    const { style } = props;
     return (
-        <FaIcon icon="icon-sort-up" style={style} />
+        <FaIcon icon="icon-sort-up" iconClass="align-bottom" />
     );
 }
 
 function SortIconDesc(props) {
-    const { style } = props;
     return (
-        <FaIcon icon="icon-sort-down" style={style} />
+        <FaIcon icon="icon-sort-down" iconClass="align-text-top" />
     );
 }
