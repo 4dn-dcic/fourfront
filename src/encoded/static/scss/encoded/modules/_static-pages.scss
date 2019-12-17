@@ -795,6 +795,11 @@ $carousel-height : 240px;
 			iframe[id^="twitter-widget-"] {
 				display: block !important;
 			}
+
+			@include media-breakpoint-down(sm){
+				// Add top margin for spacing on mobile
+				margin-top: 20px;
+			}
 		}
 
 		a.link-block {
@@ -835,7 +840,7 @@ $carousel-height : 240px;
 			}
 
 			&.external-link {
-				padding-right: 20px;
+				padding-right: 36px !important;
 				font-size: 0.925em;
 				&:after {
 					font-family: $fa-font-family;
@@ -866,16 +871,16 @@ $carousel-height : 240px;
 				flex-wrap: wrap;
 				flex-direction: column;
 
-				.link-block {
+				> div { // Columns
 					margin-bottom: 10px;
 				}
 
 				@include media-breakpoint-up(md){
 					flex-direction: row;
 					.link-block {
-						padding: 0 10px;
 						flex: 1;
 						text-align: center;
+						height: 100%;
 					}
 				}
 
