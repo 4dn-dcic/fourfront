@@ -13,8 +13,12 @@ from locust import HttpLocust, TaskSet, task, between
 # locust.rst in docs
 
 
-def load_auth(loc):
-    """ loads access key from given location """
+def load_locust_auth(loc):
+    """ 
+    Loads access key from given location 
+    Not a static method on FFUserBehavior because it is implicitly
+    a static class
+    """
     with open(loc, 'r') as f:
         raw = json.load(f)
         return raw['username'], raw['password']
@@ -26,7 +30,7 @@ class FFUserBehavior(TaskSet):
     interacting with the portal for the purposes of performance testing
     task decorator tells locust that it is task to be run.
     """
-    USERNAME, PASSWORD = load_auth(os.environ['LOCUST_KEY'])
+    USERNAME, PASSWORD = load_locust_auth(os.environ['LOCUST_KEY'])
     CONFIG = json.load(open(os.environ['LOCUST_CONFIG'], 'r'))
     ROUTES = CONFIG['routes']
 
@@ -45,7 +49,7 @@ class FFUserBehavior(TaskSet):
         self._get(url)
 
 
-class Locust(HttpLocust):
+class FFLocust(HttpLocust):
     """ test_set defines what the tasks are to be executed by the locust
         host is where to test
         wait_time is how long to wait between requests (5-15 seconds)
