@@ -1,4 +1,4 @@
-Search Documentation:
+Search Documentation
 =====================
 
 **URIS**
