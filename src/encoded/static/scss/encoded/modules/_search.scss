@@ -6,6 +6,7 @@
 /**********************/
 /***** Facet List *****/
 /**********************/
+$facetlist-term-block-height: 22px;
 @import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 
 /** Make FacetList Sticky for newer browsers **/
@@ -73,6 +74,13 @@
 		}
 
     }
+}
+
+/** Align facet-selector icon better w. text re: our fontface lineheight and such */
+
+.facets-container .facets-body .facet a.term .facet-selector {
+	transform: translate(0, 1px);
+	transform: translate(0, 0.5px);
 }
 
 
@@ -202,7 +210,7 @@ $search-results-above-results-row-height: 40px;
 /**** Row Height & Similar Overrides for Publication View ****/
 /*************************************************************/
 
-.search-page-container[data-search-item-type="Publication"] {
+.search-view-controls-and-results[data-search-item-type="Publication"] {
 
 	.search-results-outer-container .search-results-container .inner-container .scrollable-container .search-result-row > .columns.result-table-row > .search-result-column-block {
 
