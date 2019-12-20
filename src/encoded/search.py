@@ -546,12 +546,13 @@ def build_query(search, prepared_terms, source_fields):
     """
     query_info = {}
     string_query = None
+    max_ngram = 12  # XXX: should be imported constant from snovault
     # set _source fields for the search
     search = search.source(list(source_fields))
     # prepare the query from prepared_terms
     for field, value in prepared_terms.items():
         if field == 'q':
-            query_info['query'] = value
+            query_info['query'] = value[:max_ngram]
             query_info['lenient'] = True
             query_info['default_operator'] = 'AND'
             query_info['fields'] = ['_all']
