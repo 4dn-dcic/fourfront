@@ -10,7 +10,7 @@ from snovault import (
 )
 from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
-from snovault.elasticsearch.create_mapping import determine_if_is_date_field
+from snovault.elasticsearch.create_mapping import MAX_NGRAM, determine_if_is_date_field
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from snovault.resource_views import collection_view_listing_db
 from snovault.util import (
@@ -546,13 +546,12 @@ def build_query(search, prepared_terms, source_fields):
     """
     query_info = {}
     string_query = None
-    max_ngram = 12  # XXX: should be imported constant from snovault
     # set _source fields for the search
     search = search.source(list(source_fields))
     # prepare the query from prepared_terms
     for field, value in prepared_terms.items():
         if field == 'q':
-            query_info['query'] = value[:max_ngram]
+            query_info['query'] = value[:MAX_NGRAM]  # truncate q= @ max_ngram
             query_info['lenient'] = True
             query_info['default_operator'] = 'AND'
             query_info['fields'] = ['_all']
