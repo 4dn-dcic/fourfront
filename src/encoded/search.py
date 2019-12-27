@@ -92,6 +92,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             result['search_header'] = {}
             result['search_header']['content'] = item['content']
             result['search_header']['title'] = item.get('title', item['display_title'])
+            result['search_header']['filetype'] = item['filetype']
 
     from_, size = get_pagination(request)
 
