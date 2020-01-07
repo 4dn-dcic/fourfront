@@ -10,5 +10,11 @@
         "scientific_name": "Mus musculus",
         "taxon_id": "10090",
         "uuid": "3413218c-3d86-498b-a0a2-9a406638e786"
+    },
+    {
+        "name": "mallard",
+        "scientific_name": "Anas platyrhynchos",
+        "taxon_id": "8839",
+        "uuid": "3413218c-3d86-498b-a0a2-9a406638e777"
     }
 ]
