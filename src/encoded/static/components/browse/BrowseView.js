@@ -327,13 +327,14 @@ export default class BrowseView extends React.PureComponent {
 
         // Exclude facets which are part of browse base state filters.
         if (browseBaseState){
-            var browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
+            const browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
             if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
         }
 
         return true;
     }
 
+    /** The static func is memoized since assumed to only be 1 BrowseView ever per page/view. */
     static transformedFacets = memoize(function(context, browseBaseState, session){
         return _.filter(
             context.facets || [],

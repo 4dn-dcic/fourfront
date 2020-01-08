@@ -56,6 +56,11 @@ export class ExperimentSetDetailPane extends React.PureComponent {
 
     componentWillUnmount(){
         const { result, updateFileSectionStateCache } = this.props;
+
+        if (typeof updateFileSectionStateCache !== "function") {
+            return;
+        }
+
         const { rawFilesOpen, processedFilesOpen } = this.state;
         const id = object.itemUtil.atId(result);
         updateFileSectionStateCache(id, (rawFilesOpen || processedFilesOpen) ? { rawFilesOpen, processedFilesOpen } : null);

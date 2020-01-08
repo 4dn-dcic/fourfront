@@ -7,7 +7,7 @@ import _ from 'underscore';
 import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { ItemPageTable } from './components/tables/ItemPageTable';
-import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
+import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 import { IndividualItemTitle } from './BiosourceView';
 
@@ -15,7 +15,7 @@ import { IndividualItemTitle } from './BiosourceView';
 export default class BiosampleView extends DefaultItemView {
 
     getTabViewContents(){
-        const { context, browseBaseState } = this.props;
+        const { context : { display_title } } = this.props;
         const initTabs = [];
         const width = this.getTabViewWidth();
 
@@ -23,17 +23,14 @@ export default class BiosampleView extends DefaultItemView {
 
         const expSetTableProps = {
             ...this.props,
-            'requestHref' : (
-                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
-                //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
-                "experiments_in_set.biosample.display_title=" + context.display_title
+            width,
+            'searchHref' : (
+                "/browse/?type=ExperimentSet&experiments_in_set.biosample.display_title=" + encodeURIComponent(display_title)
             ),
-            'title' : function(props, { totalCount }){
-                return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
-            }
+            'facets': null
         };
 
-        initTabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
+        initTabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps));
 
         return initTabs.concat(this.getCommonTabs());
     }

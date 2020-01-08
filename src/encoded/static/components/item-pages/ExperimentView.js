@@ -8,8 +8,9 @@ import memoize from 'memoize-one';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 
-import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
-import { SimpleFilesTable, SimpleFilesTableLoaded, FilesTableLoadedFromSearch } from './components/tables/SimpleFilesTable';
+import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
+import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
+import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import { Publications } from './components/Publications';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 
@@ -120,11 +121,20 @@ export default class ExperimentView extends WorkflowRunTracingView {
      */
     getTabViewContents(){
         const { context } = this.props;
+        const { accession } = context;
         const width = this.getTabViewWidth();
         const initTabs = [];
 
-        if (parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
-            initTabs.push(ExperimentSetsViewOverview.getTabObject(this.props, width));
+        if (accession && parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
+
+            initTabs.push(ExperimentSetsTableTabView.getTabObject({
+                ...this.props,
+                width,
+                'facets' : null,
+                'searchHref' : "/search/?type=ExperimentSet&experiments_in_set.accession=" + encodeURIComponent(accession),
+                'defaultOpenIndices': [0]
+            }));
+
         }
 
         if (this.shouldGraphExist()){
@@ -188,45 +198,6 @@ export class ExperimentMicView extends ExperimentView {
     }
 }
 
-
-/**
- * This is the first Tab of the Experiment Item view and shows what ExperimentSets the Experiment is part of.
- *
- * @see ExperimentView.getTabViewContents()
- * @todo Change to have ExpSets loaded from single search URL instead of spinning off multiple AJAX requests.
- */
-const ExperimentSetsViewOverview = React.memo(function ExperimentSetsViewOverview(props){
-    const { context, width, windowWidth, href } = props;
-    const experimentSetUrls = _.filter(_.map(context.experiment_sets || [], object.atIdFromObject));
-
-    if (experimentSetUrls.length > 0){
-        return <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth, href }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />;
-    }
-
-    return null;
-});
-ExperimentSetsViewOverview.propTypes = {
-    'context' : PropTypes.shape({
-        'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-            '@id' : PropTypes.string.isRequired
-        })).isRequired
-    }).isRequired,
-    'width' : PropTypes.number.isRequired,
-    'windowWidth' : PropTypes.number,
-    'href' : PropTypes.string
-};
-ExperimentSetsViewOverview.getTabObject = function({ schemas, context, windowWidth }, width){
-    return {
-        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Experiment Sets</span>,
-        'key' : 'experiments-info',
-        //'disabled' : !Array.isArray(context.experiments),
-        'content' : (
-            <div className="overflow-hidden">
-                <ExperimentSetsViewOverview {...{ context, schemas, windowWidth, width }} />
-            </div>
-        )
-    };
-};
 
 const parentExpSetsExistForExp = memoize(function(exp){
     return (exp && Array.isArray(exp.experiment_sets) && exp.experiment_sets.length > 0 && object.atIdFromObject(exp.experiment_sets[0]));
@@ -329,26 +300,29 @@ const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
     }
 
     // Get all files which have expUUID in experiments.uuid[] excluding reference and processed files.
-    const requestHref = `/search/?type=File&experiments.uuid=${encodeURIComponent(expUUID)}&type%21=FileProcessed&type%21=FileReference`;
+    const searchHref = `/search/?type=File&experiments.uuid=${encodeURIComponent(expUUID)}&type%21=FileProcessed&type%21=FileReference`;
 
     return (
         <div className="raw-files-table-section">
             <h3 className="tab-section-title">
                 <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
             </h3>
-            <FilesTableLoadedFromSearch {...{ width, schemas, columns, requestHref }} id={object.itemUtil.atId(context)} />
+            <EmbeddedItemSearchTable {...{ searchHref, schemas, columns, width }} facets={null} />
         </div>
     );
 });
 
 const ProcessedFilesTableSection = React.memo(function ProcessedFilesTableSection(props){
-    const { files, context } = props;
+    const { files, context, schemas } = props;
+    //const { uuid: expUUID } = context;
     const fileUrls = _.map(files, object.itemUtil.atId);
+    //const searchHref = `/search/?type=FileProcessed&experiments.uuid=${encodeURIComponent(expUUID)}`;
     return (
         <div className="processed-files-table-section">
             <h3 className="tab-section-title">
                 <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
             </h3>
+            {/* <EmbeddedItemSearchTable {...{ searchHref, schemas }} facets={null} /> */}
             <SimpleFilesTableLoaded {..._.pick(props, 'schemas', 'width')} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
         </div>
     );

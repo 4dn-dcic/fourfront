@@ -25,23 +25,7 @@ $facetlist-term-block-height: 22px;
 				max-height: 90vh;
 				// 160 ~= 40 nav + 46 facet-list-header + footer + parent container bottom margin
 				max-height: calc(100vh - 160px);
-				overflow-y: auto;
-				overflow-x: hidden;
-
-				&::-webkit-scrollbar {
-					width: 6px;
-					height: 6px;
-					background-color: transparent;
-				}
-
-				&::-webkit-scrollbar-thumb {
-					background-color: #aaa;
-					border-radius: 3px;
-				}
-
-				&::-webkit-scrollbar-track {
-					margin-right: -1px;
-				}
+				@include facets-body-contained-height-style;
 			}
 		}
 
@@ -75,6 +59,7 @@ $facetlist-term-block-height: 22px;
 
     }
 }
+
 
 /** Align facet-selector icon better w. text re: our fontface lineheight and such */
 

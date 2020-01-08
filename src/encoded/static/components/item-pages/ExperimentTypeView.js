@@ -9,7 +9,7 @@ import DefaultItemView, { OverViewBodyItem, StaticHeadersArea } from './DefaultI
 import { Publications } from './components/Publications';
 import { SOPBelowHeaderRow, LinkBelowHeaderRow } from './components/LinkBelowHeaderRow';
 import { WrappedCollapsibleList } from './components/FormattedInfoBlock';
-import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
+import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import { UserContentBodyList } from './../static-pages/components';
 
 
@@ -20,18 +20,16 @@ export default class ExperimentTypeView extends DefaultItemView {
         const tabs = [];
         const width = this.getTabViewWidth();
         const expSetTableProps = _.extend({}, this.props, {
-            'requestHref' : (
+            'searchHref' : (
                 "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 "experiments_in_set.experiment_type.display_title=" + encodeURIComponent(context.display_title)
             ),
-            'title' : function(props, { totalCount }){
-                return (totalCount ? totalCount + ' ' : '') + context.display_title + " Experiment Sets";
-            }
+            'facets' : null
         });
 
         tabs.push(ExperimentTypeViewOverview.getTabObject(this.props));
 
-        tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps, width));
+        tabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps, width));
 
         return tabs.concat(this.getCommonTabs());
     }

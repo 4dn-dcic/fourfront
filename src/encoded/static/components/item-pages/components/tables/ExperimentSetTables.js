@@ -5,12 +5,74 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, ViewMoreResultsBtn } from './ItemPageTable';
-import { columnExtensionMap } from './../../../browse/columnExtensionMap';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader, ViewMoreResultsBtn, EmbeddedItemSearchTable } from './ItemPageTable';
 import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
+import { columnExtensionMap as columnExtensionMap4DN } from './../../../browse/columnExtensionMap';
 
 
 
+export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
+
+    static defaultProps = {
+        ...EmbeddedItemSearchTable.defaultProps,
+        columns : {
+            "display_title" : { "title" : "Title" },
+            "number_of_experiments" : { "title" : "Exps" },
+            "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
+            "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
+            "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
+            "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap4DN["experiments_in_set.experiment_categorizer.combined"]
+        }
+    }
+
+    constructor(props){
+        super(props);
+        this.renderDetailPane = this.renderDetailPane.bind(this);
+    }
+
+    renderDetailPane(result, rowNum, width){
+        const { windowWidth, href } = this.props;
+        return (
+            <ExperimentSetDetailPane {...{ result, href, windowWidth }} containerWidth={width || null} paddingWidthMap={{
+                'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
+            }} />
+        );
+    }
+
+    render(){
+        return <EmbeddedItemSearchTable {...this.props} renderDetailPane={this.renderDetailPane} />;
+    }
+}
+
+export function ExperimentSetsTableTabView(props){
+    // Eventually can consider getting rid of current title and using abovetablecontrols
+    // or similar to allow for column selection panel and such.
+    return <EmbeddedExperimentSetSearchTable {...props} />;
+}
+ExperimentSetsTableTabView.defaultProps = {
+    "title" : <ExperimentSetsTableTabViewTitle/>
+};
+ExperimentSetsTableTabView.getTabObject = function(props){
+    return {
+        'tab' : <span><i className="icon icon-file-alt far icon-fw"/> Experiment Sets</span>,
+        'key' : 'expsets-table',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : <ExperimentSetsTableTabView {...props} />
+    };
+};
+
+export function ExperimentSetsTableTabViewTitle({ totalCount }){
+    return (
+        <h3 className="tab-section-title">
+            { typeof totalCount === "number" ? <span className="text-500">{ totalCount + " " }</span> : null }
+            { "Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "") }
+        </h3>
+    );
+}
+
+
+
+/** @deprecated - Waiting until can use EmbeddedExperimentSetSearchTable everywhere */
 export class ExperimentSetTables extends React.PureComponent {
 
     static propTypes = {
@@ -30,7 +92,19 @@ export class ExperimentSetTables extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.updateDetailPaneFileSectionStateCache = this.updateDetailPaneFileSectionStateCache.bind(this);
         this.renderDetailPane = this.renderDetailPane.bind(this);
+        this.detailPaneFileSectionStateCache = {};
+    }
+
+    /** Copied from BrowseView */
+    updateDetailPaneFileSectionStateCache(resultID, resultPaneState){
+        // Purposely avoid changing reference to avoid re-renders/updates (except when new components initialize)
+        if (resultPaneState === null){
+            delete this.detailPaneFileSectionStateCache[resultID];
+        } else {
+            this.detailPaneFileSectionStateCache[resultID] = resultPaneState;
+        }
     }
 
     renderDetailPane(es, rowNum, width){
@@ -38,7 +112,7 @@ export class ExperimentSetTables extends React.PureComponent {
         return (
             <ExperimentSetDetailPane result={es} href={href} containerWidth={width || null} windowWidth={windowWidth} paddingWidthMap={{
                 'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
-            }} />
+            }} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
         );
     }
 
@@ -66,14 +140,7 @@ export class ExperimentSetTables extends React.PureComponent {
                 <ItemPageTable
                     results={expSets}
                     renderDetailPane={this.renderDetailPane}
-                    columns={{
-                        "display_title" : { "title" : "Title" },
-                        "number_of_experiments" : { "title" : "Exps" },
-                        "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
-                        "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
-                        "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-                        "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap["experiments_in_set.experiment_categorizer.combined"]
-                    }}
+                    columns={EmbeddedExperimentSetSearchTable.defaultProps.columns}
                     {..._.pick(this.props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth')}
                 />
                 <ViewMoreResultsBtn {..._.pick(this.props, 'countTotalResults', 'hrefWithoutLimit')} results={expSets} itemTypeTitle="Experiment Set" />
@@ -94,78 +161,3 @@ ExperimentSetTablesLoaded.propTypes = {
     'experimentSetUrls' : PropTypes.arrayOf(PropTypes.string).isRequired,
     'id' : PropTypes.string
 };
-
-export const ExperimentSetTablesLoadedFromSearch = React.memo(function ExperimentSetTablesLoadedFromSearch(props){
-    return (
-        <ItemPageTableSearchLoader {..._.pick(props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
-            <ExperimentSetTables {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
-        </ItemPageTableSearchLoader>
-    );
-});
-
-
-export class ExperimentSetTableTabView extends React.PureComponent {
-
-    /**
-     * Get overview tab object for tabpane.
-     *
-     * @param {Object} props - Parent Component props, as passed down from app.js
-     * @param {number} width - Width of tab container.
-     */
-    static getTabObject(props, width){
-        return {
-            'tab' : <span><i className="icon icon-file-alt far icon-fw"/> Experiment Sets</span>,
-            'key' : 'expsets-table',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <ExperimentSetTableTabView {...props} width={width} />
-                </div>
-            )
-        };
-    }
-
-    static defaultProps = {
-        'requestHref' : function(props, state){
-            return "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&publications_of_set.display_title=" + props.context.display_title;
-        },
-        'title' : function(props, state){
-            var title = 'Experiment Sets Published';
-            if (state.totalCount){
-                title = state.totalCount + ' Experiment Sets Published';
-            }
-            return title;
-        }
-    };
-
-    constructor(props){
-        super(props);
-        this.getCountCallback = this.getCountCallback.bind(this);
-        this.state = {
-            'totalCount' : null
-        };
-    }
-
-    getCountCallback(resp){
-        if (resp && typeof resp.total === 'number'){
-            this.setState({ 'totalCount' : resp.total });
-        }
-    }
-
-    render(){
-        const { windowWidth, href : currentPageHref } = this.props;
-        let { requestHref, title } = this.props;
-
-        if (typeof requestHref === 'function')  requestHref = requestHref(this.props, this.state);
-        if (typeof title === 'function')        title = title(this.props, this.state);
-
-        return (
-            <div>
-                <ExperimentSetTablesLoadedFromSearch {...{ requestHref, windowWidth, title, 'href' : currentPageHref }} onLoad={this.getCountCallback} />
-            </div>
-        );
-    }
-
-}
-
-
