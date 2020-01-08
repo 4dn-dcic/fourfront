@@ -6,8 +6,9 @@ import _ from 'underscore';
 import * as plansData from '../testdata/stacked-block-matrix-list';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual, sumPropertyFromList, StackedBlockGroupedRow } from './components';
+import { PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews } from './../PageTitle';
 
-
+import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 /**************
  *
@@ -177,3 +178,27 @@ export default class PlannedSubmissionsPage extends React.Component {
     }
 
 }
+const PlannedSubmissionPageTitle = React.memo(function PlannedSubmissionPageTitle(props) {
+    const { alerts, context } = props;
+
+    if (context.status === 'error' && context.code && (context.code === 404 || context.code === 403)) {
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder className="container-wide">
+                    Forbidden
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+    const thisTypeTitle = object.itemUtil.getTitleStringFromContext(context, schemas);
+    const subtitle = thisTypeTitle ? (
+        <span>{thisTypeTitle}</span>
+    ) : null;
+    return (
+        <PageTitleContainer alerts={alerts} className="container-wide">
+            <TitleAndSubtitleUnder subtitle={subtitle}>
+            </TitleAndSubtitleUnder>
+        </PageTitleContainer>
+    );
+});
+pageTitleViews.register(PlannedSubmissionPageTitle, "planned-submissions");

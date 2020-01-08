@@ -17,6 +17,7 @@ import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/compon
 // We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
 // We could probably also create different 'browseState' module for it, however.
 import { navigate, typedefs, Schemas } from './../util';
+import { PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews } from './../PageTitle';
 
 import { store } from './../../store';
 import { memoizedUrlParse } from './../globals';
@@ -599,3 +600,17 @@ export default class BrowseView extends React.Component {
     }
 
 }
+const BrowseViewPageTitle = React.memo(function BrowseViewPageTitle(props) {
+    const { alerts } = props;
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <TitleAndSubtitleUnder subtitle="Filter & browse experiments" className="container-wide">
+                Data Browser
+            </TitleAndSubtitleUnder>
+        </PageTitleContainer>
+    );
+
+});
+
+pageTitleViews.register(BrowseViewPageTitle, "Browse");

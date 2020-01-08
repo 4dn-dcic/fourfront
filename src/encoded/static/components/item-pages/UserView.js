@@ -13,6 +13,7 @@ import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/compone
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 
+import { PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews } from './../PageTitle';
 import { store } from './../../store';
 import { FormattedInfoBlock } from './components/FormattedInfoBlock';
 
@@ -767,3 +768,30 @@ export class ImpersonateUserForm extends React.PureComponent {
     }
 
 }
+const UserPageTitle = React.memo(function UserPageTitle(props) {
+    const { alerts,context } = props;
+    var myDetails = JWT.getUserDetails(),
+        myEmail = myDetails && myDetails.email;
+    if (myEmail && context && context.email && myEmail === context.email){
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder className="container-wide">
+                My Profile
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+    const thisTypeTitle = object.itemUtil.getTitleStringFromContext(context, schemas);
+    const subtitle = thisTypeTitle ? (
+        <span>{thisTypeTitle}</span>
+    ) : null;
+    return (
+        <PageTitleContainer alerts={alerts} className="container-wide">
+            <TitleAndSubtitleUnder subtitle={subtitle}>
+
+            </TitleAndSubtitleUnder>
+        </PageTitleContainer>
+    );
+});
+
+pageTitleViews.register(UserPageTitle, "User");

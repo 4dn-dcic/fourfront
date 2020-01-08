@@ -7,10 +7,11 @@ import url from 'url';
 
 import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
-import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isSelectAction,schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { columnExtensionMap } from './columnExtensionMap';
 import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
+import { TitleAndSubtitleBeside, PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews, EditingItemPageTitle } from './../PageTitle';
 
 
 /**
@@ -111,3 +112,62 @@ export default class SearchView extends React.PureComponent {
         );
     }
 }
+
+const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
+    const { context, schemas, currentAction, alerts } = props;
+    if (schemaTransforms.getSchemaTypeFromSearchContext(context) === "Publication") {
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder className="container-wide">
+                    Publications
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+
+    if (currentAction === "add") {
+        // Fallback unless any custom PageTitles registered for @type=<ItemType>SearchResults & currentAction=add
+        return <EditingItemPageTitle {...{ context, schemas, currentAction, alerts }} />;
+    }
+
+    if (currentAction === "selection") {
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder subtitle="Select an Item and click the Apply button." className="container-wide">
+                    Selecting
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+    if (currentAction === "multiselect") {
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <TitleAndSubtitleUnder subtitle="Select one or more Items and click the Apply button." className="container-wide">
+                    Selecting
+                </TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+
+    const searchType = schemaTransforms.getSchemaTypeFromSearchContext(context);
+    const thisTypeTitle = schemaTransforms.getTitleForType(searchType, schemas);
+    if (searchType === "Publication" && !isSelectAction(currentAction)) {
+        return null;
+    }
+    const subtitle = thisTypeTitle ? (
+        <span><small className="text-300">for</small> {thisTypeTitle}</span>
+    ) : null;
+
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <TitleAndSubtitleBeside subtitle={subtitle} className="container-wide">
+                Search
+            </TitleAndSubtitleBeside>
+        </PageTitleContainer>
+    );
+});
+
+pageTitleViews.register(SearchViewPageTitle, "Search");
+pageTitleViews.register(SearchViewPageTitle, "Search", "selection");
+pageTitleViews.register(SearchViewPageTitle, "Search", "multiselect");
+pageTitleViews.register(SearchViewPageTitle, "Search", "add");
