@@ -38,8 +38,9 @@
             "type": "string",
             "lookup": 20,
             "enum": [
-              "pup",
+              "embryo",
               "fetus",
+              "pup",
               "adult"
             ]
         },

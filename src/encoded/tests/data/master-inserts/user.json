@@ -181,5 +181,16 @@
         "uuid": "b041dba8-e2b2-4e54-a621-97edb508a0c4",
         "submits_for": ["4dn-dcic-lab"],
         "job_title": "Other"
+    },
+    {
+        "email": "andrea_cosolo@hms.harvard.edu",
+        "first_name": "Andrea",
+        "job_title": "Data Wrangler",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Cosolo",
+        "uuid": "e4a22298-1da4-4e59-8a65-9e661f47fb48",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
     }
 ]
