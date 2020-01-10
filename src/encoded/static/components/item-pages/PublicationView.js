@@ -131,7 +131,7 @@ class PublicationSummary extends React.PureComponent {
     details(){
         const { context } = this.props;
         const { journal, categories, date_published, ID } = context;
-        const datePublished = formatPublicationDate(date_published);
+        const datePublished = (date_published && typeof date_published === "string") ? formatPublicationDate(date_published) : null;
 
         return (
             <React.Fragment>
