@@ -131,12 +131,15 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
         return <EditingItemPageTitle {...{ context, schemas, currentAction, alerts }} />;
     }
 
+    const searchType = schemaTransforms.getSchemaTypeFromSearchContext(context);
+    const thisTypeTitle = schemaTransforms.getTitleForType(searchType, schemas);
+
     if (currentAction === "selection") {
         return (
             <PageTitleContainer alerts={alerts}>
                 <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleUnder subtitle="Select an Item and click the Apply button." subTitleClassName="smaller">
-                    Selecting
+                    <span className="title">Selecting</span><span className="prominent subtitle">{thisTypeTitle}</span>
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
@@ -146,14 +149,12 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
             <PageTitleContainer alerts={alerts}>
                 <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleUnder subtitle="Select one or more Items and click the Apply button." subTitleClassName="smaller">
-                    Selecting
+                    <span className="title">Selecting</span><span className="prominent subtitle">{thisTypeTitle}</span>
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
     }
 
-    const searchType = schemaTransforms.getSchemaTypeFromSearchContext(context);
-    const thisTypeTitle = schemaTransforms.getTitleForType(searchType, schemas);
     if (searchType === "Publication" && !isSelectAction(currentAction)) {
         return null;
     }
