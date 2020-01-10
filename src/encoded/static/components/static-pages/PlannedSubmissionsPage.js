@@ -6,7 +6,7 @@ import _ from 'underscore';
 import * as plansData from '../testdata/stacked-block-matrix-list';
 import StaticPage from './StaticPage';
 import { StackedBlockVisual, sumPropertyFromList, StackedBlockGroupedRow } from './components';
-import { PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews } from './../PageTitle';
+import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
 
 import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
@@ -71,19 +71,19 @@ export default class PlannedSubmissionsPage extends React.Component {
                     columnGrouping={columnGrouping}
                     headerColumnsOrder={headerColumnsOrder}
                     columnSubGrouping={columnSubGrouping}
-                    groupValue={function(data){
+                    groupValue={function (data) {
                         return sumPropertyFromList(StackedBlockGroupedRow.flattenChildBlocks(data), 'experiments_expected_2017');
                     }}
-                    blockRenderedContents={function(data){
+                    blockRenderedContents={function (data) {
                         var defaultOutput = <span>&nbsp;</span>;
                         var experimentsCountExpected = 0;
 
-                        function getCount(num){
+                        function getCount(num) {
                             try {
                                 var n = parseInt(num);
                                 if (isNaN(n)) return 0;
                                 return n;
-                            } catch (e){
+                            } catch (e) {
                                 return 0;
                             }
                         }
@@ -94,19 +94,19 @@ export default class PlannedSubmissionsPage extends React.Component {
                             experimentsCountExpected = getCount(data.experiments_expected_2017);
                         }
 
-                        if (experimentsCountExpected && experimentsCountExpected >= 1000){
-                            return <span style={{ fontSize: '0.825rem', position: 'relative', top: -1 }}>{ experimentsCountExpected }</span>;
+                        if (experimentsCountExpected && experimentsCountExpected >= 1000) {
+                            return <span style={{ fontSize: '0.825rem', position: 'relative', top: -1 }}>{experimentsCountExpected}</span>;
                         }
 
                         return experimentsCountExpected || defaultOutput;
                     }}
-                    blockClassName={function(data){
+                    blockClassName={function (data) {
 
                         // Figure out if we are submitted, planned, or N/A.
-                        function checkDataObjForProduction(d){
-                            if (typeof d.in_production_stage_standardized_protocol === 'string'){
+                        function checkDataObjForProduction(d) {
+                            if (typeof d.in_production_stage_standardized_protocol === 'string') {
                                 var checkStr = d.in_production_stage_standardized_protocol.toLowerCase();
-                                if (checkStr === 'yes' || checkStr === 'true'){
+                                if (checkStr === 'yes' || checkStr === 'true') {
                                     return true;
                                 }
                             }
@@ -127,40 +127,40 @@ export default class PlannedSubmissionsPage extends React.Component {
                     }}
                     // The below is no longer used / deprecated. If we need to use this view again, we should migrate this to `blockPopover`.
                     // We could also add prop for how blockPopover is activated and allow onHover/onMouseOut
-                    blockTooltipContents={function(data, groupingTitle, groupingPropertyTitle, props){
+                    blockTooltipContents={function (data, groupingTitle, groupingPropertyTitle, props) {
 
                         var keysToShow = ['center_name', 'lab_name', 'experiments_expected_2017', 'experiments_expected_2020', 'in_production_stage_standardized_protocol', 'additional_comments'];
 
                         var filteredData = data;
-                        if (!Array.isArray(data)){
+                        if (!Array.isArray(data)) {
                             filteredData = _.pick(data, ...keysToShow);
                         } else {
-                            filteredData = _.map(data, function(o){ return _.pick(o, ...keysToShow); });
+                            filteredData = _.map(data, function (o) { return _.pick(o, ...keysToShow); });
                         }
 
                         var tips = {}; // StackedBlockVisual.defaultProps.blockTooltipContents(filteredData, groupingTitle, groupingPropertyTitle, props);
-                        
-                        if (Array.isArray(data) && data.length > 1){
 
-                            var moreData = _.reduce(filteredData, function(m, o){
-                                for (var i = 0; i < keysToShow.length; i++){
-                                    if (m[keysToShow[i]] === null){
+                        if (Array.isArray(data) && data.length > 1) {
+
+                            var moreData = _.reduce(filteredData, function (m, o) {
+                                for (var i = 0; i < keysToShow.length; i++) {
+                                    if (m[keysToShow[i]] === null) {
                                         m[keysToShow[i]] = new Set();
                                     }
                                     m[keysToShow[i]].add(o[keysToShow[i]]);
                                 }
                                 return m;
-                            }, _.object(_.zip(keysToShow, [].fill.call({ length : keysToShow.length }, null, 0, keysToShow.length))) );
+                            }, _.object(_.zip(keysToShow, [].fill.call({ length: keysToShow.length }, null, 0, keysToShow.length))));
 
-                            _.forEach(_.keys(moreData), function(k){
-                                if (k === 'additional_comments'){
+                            _.forEach(_.keys(moreData), function (k) {
+                                if (k === 'additional_comments') {
                                     delete moreData[k]; // Don't show when multiple, too long.
                                     return;
                                 }
                                 moreData[k] = Array.from(moreData[k]);
-                                if (moreData[k].length === 0){
+                                if (moreData[k].length === 0) {
                                     delete moreData[k];
-                                } else if (moreData[k].length > 1){
+                                } else if (moreData[k].length > 1) {
                                     moreData[k] = '<span class="text-300">(' + moreData[k].length + ')</span> ' + moreData[k].join(', ');
                                 } else {
                                     moreData[k] = moreData[k][0];
@@ -168,7 +168,7 @@ export default class PlannedSubmissionsPage extends React.Component {
                             });
 
                         }
-                        
+
                         return tips;
 
                     }}
@@ -179,26 +179,24 @@ export default class PlannedSubmissionsPage extends React.Component {
 
 }
 const PlannedSubmissionPageTitle = React.memo(function PlannedSubmissionPageTitle(props) {
-    const { alerts, context } = props;
+    const { alerts, context, schemas, session, href } = props;
 
     if (context.status === 'error' && context.code && (context.code === 404 || context.code === 403)) {
         return (
             <PageTitleContainer alerts={alerts}>
-                <TitleAndSubtitleUnder className="container-wide">
+                <TitleAndSubtitleUnder>
                     Forbidden
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
     }
     const thisTypeTitle = object.itemUtil.getTitleStringFromContext(context, schemas);
-    const subtitle = thisTypeTitle ? (
-        <span>{thisTypeTitle}</span>
-    ) : null;
     return (
-        <PageTitleContainer alerts={alerts} className="container-wide">
-            <TitleAndSubtitleUnder subtitle={subtitle}>
+        <PageTitleContainer alerts={alerts}>
+            <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+            <TitleAndSubtitleUnder title={thisTypeTitle}>
             </TitleAndSubtitleUnder>
         </PageTitleContainer>
     );
 });
-pageTitleViews.register(PlannedSubmissionPageTitle, "planned-submissions");
+pageTitleViews.register(PlannedSubmissionPageTitle, "Planned-submissionsPage");

@@ -250,7 +250,9 @@ const HomePageTitle = React.memo(function HomePageTitle(props) {
     const { alerts } = props;
     return (
         <PageTitleContainer alerts={alerts}>
-            <TitleAndSubtitleUnder subtitle="A platform to search, visualize, and download nucleomics data." className="container-wide">
+            <div className="breadcrumb-placeholder" key="breadcrumbs" />
+            <TitleAndSubtitleUnder subtitle="A platform to search, visualize, and download nucleomics data."
+                className="home-page-title" subTitleClassName="subtitle" style={{ marginTop: '38px' }}>
                 4D Nucleome Data Portal
             </TitleAndSubtitleUnder>
         </PageTitleContainer>

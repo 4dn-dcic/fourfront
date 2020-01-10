@@ -48,12 +48,13 @@ export const PageTitleSection = React.memo(function PageTitle(props){
     }
 
     if (isAnItem(context)){
-        return null; // Item Pages show titles themselves
-        //return <GenericItemPageTitle {...{ context, schemas, alerts }}/>;
+        //return null; // Item Pages show titles themselves
+        return <GenericItemPageTitle {...{ context, schemas, alerts }}/>;
     }
 
     return (
         <PageTitleContainer alerts={alerts}>
+            <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
             <OnlyTitle>{ object.itemUtil.getTitleStringFromContext(context) || <em>Unknown</em> }</OnlyTitle>
         </PageTitleContainer>
     );
@@ -62,13 +63,14 @@ export const PageTitleSection = React.memo(function PageTitle(props){
 
 
 export const EditingItemPageTitle = React.memo(function EditingItemPageTitle(props){
-    const { currentAction, context, schemas, alerts } = props;
+    const { currentAction, context, schemas, alerts, session, href } = props;
     const subtitle = currentAction === 'edit' ? object.itemUtil.getTitleStringFromContext(context) // on item view
         : currentAction === 'create' ? schemaTransforms.getItemTypeTitle(context, schemas) // on item view
             : currentAction === 'add' ? schemaTransforms.getSchemaTypeFromSearchContext(context, schemas) // on search view
                 : schemaTransforms.getItemTypeTitle(context, schemas);
     return (
         <PageTitleContainer alerts={alerts}>
+            <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
             <TitleAndSubtitleBeside subtitle={subtitle}>
                 { currentAction === 'edit' ? 'Editing' : 'Creating' }
             </TitleAndSubtitleBeside>
@@ -103,7 +105,7 @@ export const TitleAndSubtitleUnder = React.memo(function TitleAndSubtitleUnder(p
     return (
         <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
             { children || title }
-            <div className={"subtitle page-subtitle " + (subTitleClassName || '')}>
+            <div className={"page-subtitle " + (subTitleClassName || '')}>
                 { subtitle }
             </div>
         </h1>
@@ -141,7 +143,7 @@ const StaticPageTitle = React.memo(function StaticPageTitle(props){
         <PageTitleContainer alerts={alerts} className="container" alertsContainerClassName={commonCls + " mt-2"}>
             <div className="row">
                 { !breadCrumbsVisible ?
-                    <StaticPageBreadcrumbs {...{ context, session, href }}
+                    <StaticPageBreadcrumbs {...{ context, session, href, hasToc }}
                         key="breadcrumbs" className={commonCls}/>
                     : null }
                 <OnlyTitle className={commonCls}>{ children  }</OnlyTitle>
@@ -152,7 +154,7 @@ const StaticPageTitle = React.memo(function StaticPageTitle(props){
 
 /** Based on 4DN content views & metadata, to be updated re: CGAP */
 const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
-    const { context, schemas, alerts } = props;
+    const { context, schemas, alerts, href, session } = props;
     const itemTitle = object.itemUtil.getTitleStringFromContext(context);
     const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
     const isTitleAnAccession = itemTitle && object.itemUtil.isDisplayTitleAccession(context, itemTitle, true);
@@ -166,6 +168,7 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
             if (remainderTitle.length > 0){
                 return (
                     <PageTitleContainer alerts={alerts}>
+                        <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                         <TitleAndSubtitleBeside subtitle={remainderTitle}>
                             { itemTypeTitle }
                         </TitleAndSubtitleBeside>
@@ -174,7 +177,12 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
             }
         }
         // We currently render accession in ItemView so exclude it here if it is the title.
-        return <PageTitleContainer alerts={alerts}><OnlyTitle>{ itemTypeTitle }</OnlyTitle></PageTitleContainer>;
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+                <OnlyTitle>{itemTypeTitle}</OnlyTitle>
+            </PageTitleContainer>
+        );
     }
 
     if (itemTitle && itemTitle.indexOf(context['@type'][0] + ' from ') === 0){
@@ -186,6 +194,7 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
         );
         return (
             <PageTitleContainer alerts={alerts}>
+                <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleBeside subtitle={dateCreatedTitle}>{ itemTypeTitle }</TitleAndSubtitleBeside>
             </PageTitleContainer>
         );
@@ -199,12 +208,14 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
             // If itemTitle is < 20chars might as well show it beside itemTypeTitle, anyway.
             return (
                 <PageTitleContainer alerts={alerts}>
+                    <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                     <TitleAndSubtitleUnder subtitle={itemTitle}>{ itemTypeTitle }</TitleAndSubtitleUnder>
                 </PageTitleContainer>
             );
         } else {
             return (
                 <PageTitleContainer alerts={alerts}>
+                    <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                     <TitleAndSubtitleBeside subtitle={itemTitle}>{ itemTypeTitle }</TitleAndSubtitleBeside>
                 </PageTitleContainer>
             );

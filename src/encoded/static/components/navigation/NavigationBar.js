@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import { Navbar } from 'react-bootstrap';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { portalConfig } from './../globals';
 import { SearchBar, TestWarning, LeftNav, AccountNav, BigDropdownGroupController } from './components';
@@ -120,8 +120,8 @@ export class NavigationBar extends React.PureComponent {
 
     render() {
         const { testWarning, mobileDropdownOpen, mounted } = this.state;
-        const { href, context, schemas, browseBaseState, isFullscreen } = this.props;
-        const testWarningVisible = !!(testWarning & !isFullscreen); // Hidden on full screen mode.
+        const { href, context, schemas, browseBaseState, isFullscreen, currentAction } = this.props;
+        const testWarningVisible = !!(testWarning & !isFullscreen & !isSelectAction(currentAction) ); // Hidden on full screen mode.
         const navClassName = (
             "navbar-container" +
             (testWarningVisible ? ' test-warning-visible' : '')

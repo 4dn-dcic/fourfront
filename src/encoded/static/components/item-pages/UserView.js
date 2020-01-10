@@ -775,7 +775,7 @@ const UserPageTitle = React.memo(function UserPageTitle(props) {
     if (myEmail && context && context.email && myEmail === context.email){
         return (
             <PageTitleContainer alerts={alerts}>
-                <TitleAndSubtitleUnder className="container-wide">
+                <TitleAndSubtitleUnder>
                 My Profile
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
@@ -786,7 +786,7 @@ const UserPageTitle = React.memo(function UserPageTitle(props) {
         <span>{thisTypeTitle}</span>
     ) : null;
     return (
-        <PageTitleContainer alerts={alerts} className="container-wide">
+        <PageTitleContainer alerts={alerts}>
             <TitleAndSubtitleUnder subtitle={subtitle}>
 
             </TitleAndSubtitleUnder>

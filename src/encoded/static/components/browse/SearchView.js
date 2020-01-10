@@ -11,7 +11,7 @@ import { console, isSelectAction,schemaTransforms } from '@hms-dbmi-bgm/shared-p
 import { columnExtensionMap } from './columnExtensionMap';
 import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
-import { TitleAndSubtitleBeside, PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews, EditingItemPageTitle } from './../PageTitle';
+import { TitleAndSubtitleBeside, PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews, EditingItemPageTitle, StaticPageBreadcrumbs } from './../PageTitle';
 
 
 /**
@@ -114,11 +114,12 @@ export default class SearchView extends React.PureComponent {
 }
 
 const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
-    const { context, schemas, currentAction, alerts } = props;
+    const { context, schemas, currentAction, alerts, session, href } = props;
     if (schemaTransforms.getSchemaTypeFromSearchContext(context) === "Publication") {
         return (
             <PageTitleContainer alerts={alerts}>
-                <TitleAndSubtitleUnder className="container-wide">
+                <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+                <TitleAndSubtitleUnder>
                     Publications
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
@@ -133,7 +134,8 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
     if (currentAction === "selection") {
         return (
             <PageTitleContainer alerts={alerts}>
-                <TitleAndSubtitleUnder subtitle="Select an Item and click the Apply button." className="container-wide">
+                <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+                <TitleAndSubtitleUnder subtitle="Select an Item and click the Apply button." subTitleClassName="smaller">
                     Selecting
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
@@ -142,7 +144,8 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
     if (currentAction === "multiselect") {
         return (
             <PageTitleContainer alerts={alerts}>
-                <TitleAndSubtitleUnder subtitle="Select one or more Items and click the Apply button." className="container-wide">
+                <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+                <TitleAndSubtitleUnder subtitle="Select one or more Items and click the Apply button." subTitleClassName="smaller">
                     Selecting
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
@@ -160,7 +163,8 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
 
     return (
         <PageTitleContainer alerts={alerts}>
-            <TitleAndSubtitleBeside subtitle={subtitle} className="container-wide">
+            <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+            <TitleAndSubtitleBeside subtitle={subtitle}>
                 Search
             </TitleAndSubtitleBeside>
         </PageTitleContainer>
