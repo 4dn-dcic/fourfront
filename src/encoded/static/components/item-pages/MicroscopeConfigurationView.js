@@ -138,10 +138,15 @@ export class MicroMetaTabView extends React.PureComponent {
             setTimeout(()=>{
                 // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
                 // @see https://webpack.js.org/api/module-methods/#requireensure
-                require.ensure(['4dn-microscopy-metadata-tool'], (require) => {
-                    MicroscopyMetadataTool = require('4dn-microscopy-metadata-tool').default;
+
+                import(
+                    /* webpackChunkName: "microscopy-metadata-bundle" */
+                    '4dn-microscopy-metadata-tool'
+                ).then(({ default: MicroscopyMetadataToolImported }) =>{
+                    MicroscopyMetadataTool = MicroscopyMetadataToolImported;
                     onComplete();
-                }, "microscopy-metadata-bundle");
+                });
+
             });
         } else {
             onComplete();

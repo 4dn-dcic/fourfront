@@ -197,7 +197,7 @@ $search-results-above-results-row-height: 40px;
 
 .search-view-controls-and-results[data-search-item-type="Publication"] {
 
-	.search-results-outer-container .search-results-container .inner-container .scrollable-container .search-result-row > .columns.result-table-row > .search-result-column-block {
+	.search-results-outer-container .search-results-container .search-result-row > .columns.result-table-row > .search-result-column-block {
 
 		> .inner {
 			height: 149px; // MUST be aligned to value in PublicationSearchView.js, minus 1 (for border)

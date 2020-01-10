@@ -27,6 +27,16 @@ export default class ExperimentView extends WorkflowRunTracingView {
         });
     });
 
+    static rawFilesWithViewPermissions = memoize(function(context){
+        const { files = null } = context;
+        return Array.isArray(files) && _.filter(files, function(rf){
+            if (rf.error && !object.itemUtil.atId(rf)) return false;
+            return true;
+        });
+    })
+
+    static defaultOpenIndices = [0];
+
     constructor(props){
         super(props);
         this.shouldGraphExist = this.shouldGraphExist.bind(this);
@@ -50,10 +60,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const width = this.getTabViewWidth();
         const tabs = [];
 
-        const rawFilesWithViewPermissions = Array.isArray(context.files) && _.filter(context.files, function(rf){
-            if (rf.error && !object.itemUtil.atId(rf)) return false;
-            return true;
-        });
+        const rawFilesWithViewPermissions = ExperimentView.rawFilesWithViewPermissions(context);
         const rawFilesLen = (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length) || 0;
 
         if (rawFilesLen > 0) {
@@ -132,7 +139,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 width,
                 'facets' : null,
                 'searchHref' : "/search/?type=ExperimentSet&experiments_in_set.accession=" + encodeURIComponent(accession),
-                'defaultOpenIndices': [0]
+                'defaultOpenIndices': ExperimentView.defaultOpenIndices
             }));
 
         }

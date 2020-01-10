@@ -940,6 +940,19 @@
 
 
 
+    {
+        "name" : "resources.protocols.experiment-types.genomics-experiments",
+        "uuid" : "20b55246-ea91-4b95-92d8-1c9091b49aea",
+        "title" : "Genomics Experiments",
+        "body" : "<p>The largest category of genomics experiments are <b>Chromatin Conformation Capture (3C)</b> assays. In general these assays detect regions of the genome that are in close spatial proximity in the nucleus even though they may be separated by many kilobases in the linear chromosome DNA sequence or even reside on separate chromosomes. Many variations of this general approach have been developed:</p>\n\n<ul>\n    <li>many recent ligation-based approaches perform the fixation, digestion and ligation in intact permeabilized nuclei</li>\n    <li>different classes of enzymes have been used in the digestion step</li>\n    <li>several ligation-free methodologies have been developed</li>\n    <li>while many methods detect pairwise interactions, several assays have been developed that can detect multiplexes of interacting DNA regions</li>\n    <li>some methods are designed to detect RNA-DNA contacts</li>\n    <li>several methods use immunoprecipitation (IP) of specific chromatin associated proteins or pull downs with targeted specific labeled nucleotide probes to enrich specific contacts.</li>\n</ul>\n\n<p className=\"mb-3\">\n    The types of 3C experiments for which data is available on the portal is summarized in the table below and includes links to the Datasets as well as the Experiment Type page,\n    which in some cases includes additional description and information on uniform processing of that data type at the 4DN-DCIC.\n    3C datasets are usually visualized as 2-dimensional contact matrices - the majority of pages for 3C datasets contain HiGlass views of these matrices.\n</p>\n\n<h4 className=\"text-500\">Chromatin Conformation Capture (3C) Experiment Types</h4>\n\n<EmbeddedItemSearchTable\n    searchHref=\"/search/?type=FileProcessed\"\n    session={session} schemas={schemas}\n/>\n\n<p className=\"mb-1 mt-2\">\n    In addition to the 3C experiments, 4DN also hosts other types of genomics data that can help elucidate the chromatin structure throughout the genome.\n    Most of these data types can be visualized as one-dimensional tracks on a genome data browser.\n    These 1D tracks can also be integrated into HiGlass views. The assay types and links to the corresponding datasets on the 4DN data portal are summarized below.\n</p>\n\n<h4 className=\"text-500\">Other Genomics Experiment Types</h4>\n\n<EmbeddedItemSearchTable\n    searchHref=\"/search/?type=FileProcessed\"\n    session={session} schemas={schemas}\n/>",
+        "options": {
+            "filetype": "jsx"
+        },
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+    },
+
+
+
 
     {
         "name" : "planned-submissions-matrix.matrix-1",

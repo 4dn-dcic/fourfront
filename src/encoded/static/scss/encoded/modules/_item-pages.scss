@@ -245,25 +245,15 @@ h3.submission-subtitle {
 }
 
 .submission-page-heading {
-    /** Extends .flexible-description-box **/
-	border-radius: 2px;
-	border: 1px solid #ddd;
-	min-height: 42px;
-	padding: 10px 15px 8px;
-}
-
-.submission-btn {
-	background-color: #f4f4f4;
-	border-color: #f4f4f4;
-	margin-left: 5px;
-	padding-left: 5px;
-	padding-right: 5px;
-	box-shadow: none;
-}
-
-.submission-btn:hover, .submission-btn:focus{
-	background-color: #ddd;
-	border-color: #f4f4f4;
+	padding: 10px;
+	position: relative;
+	&[data-open="true"]{
+		border-radius: 4px 4px 0 0;
+	}
+	> .row {
+		height: 100%;
+		min-height: 34px;
+	}
 }
 
 

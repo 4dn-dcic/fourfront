@@ -22,7 +22,8 @@ const placeholders = { SlideCarousel, BasicCarousel, JointAnalysisMatrix, Embedd
 export const replaceString = memoize(function(placeholderString, props){
 
     const parsedJSXContent = (
-        <JsxParser bindings={props} jsx={placeholderString} components={placeholders} key="placeholder-replacement" renderInWrapper={false} />
+        <JsxParser bindings={props} jsx={placeholderString} components={placeholders} key="placeholder-replacement"
+            renderInWrapper={false} showWarnings onError={onError} disableKeyGeneration />
     );
 
     if (parsedJSXContent){
@@ -39,3 +40,7 @@ export const replaceString = memoize(function(placeholderString, props){
     }
     return true;
 });
+
+function onError(err){
+    console.error("Error in JSX Parser --", err);
+}

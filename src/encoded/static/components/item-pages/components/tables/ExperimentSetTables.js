@@ -16,7 +16,7 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
     static defaultProps = {
         ...EmbeddedItemSearchTable.defaultProps,
         columns : {
-            "display_title" : { "title" : "Title" },
+            "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
             "number_of_experiments" : { "title" : "Exps" },
             "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
             "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },

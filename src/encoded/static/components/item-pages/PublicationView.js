@@ -36,7 +36,7 @@ export default class PublicationView extends DefaultItemView {
                         "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
                         "publications_of_set.display_title=" + encodeURIComponent(display_title)
                     ),
-                    facets : null // hide FacetList
+                    //facets : null // hide FacetList
                 },
                 this.props
             );
