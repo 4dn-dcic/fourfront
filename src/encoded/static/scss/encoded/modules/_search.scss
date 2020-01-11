@@ -45,7 +45,7 @@ $facetlist-term-block-height: 22px;
 				.facets-body {
 					body.scrolled-past-80 & {
 						// 124 = 40 nav + 46 facet-list-header + 38 quickinfobar
-						max-height: calc(100vh - 124px);
+						max-height: calc(100vh - 126px);
 					}
 				}
 			}
