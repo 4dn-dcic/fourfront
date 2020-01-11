@@ -241,8 +241,6 @@ class SubscriptionEntry extends React.PureComponent {
                 facets={null} onLoad={this.setAvailableTypes} maxHeight={Math.floor(windowHeight * 0.6)} />
         );
 
-        console.log('RTR', windowHeight, Math.floor(windowHeight / 2));
-
         return(
             <div className="mb-1">
                 <div className="submission-page-heading" data-open={open}>
