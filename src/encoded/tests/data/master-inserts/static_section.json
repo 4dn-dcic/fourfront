@@ -385,7 +385,7 @@
     {
         "name" : "help.user-guide.data-organization.introduction",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b011",
-        "file" : "/docs/public/help/introduction.md",
+        "file" : "/docs/source/introduction.rst",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     }, {
         "name" : "help.user-guide.data-organization.carousel-place-holder",
@@ -398,7 +398,7 @@
     }, {
         "name" : "help.user-guide.data-organization.introduction2",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b013",
-        "file" : "/docs/public/help/introduction2.md",
+        "file" : "/docs/source/introduction2.rst",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
@@ -406,7 +406,7 @@
     {
         "name" : "help.user-guide.account-creation.account_creation",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b014",
-        "file" : "/docs/public/metadata-submission/account_creation.md",
+        "file" : "/docs/source/account_creation.rst",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
@@ -414,7 +414,7 @@
     {
         "name" : "help.user-guide.getting-started.getting_started",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b015",
-        "file" : "/docs/public/metadata-submission/getting_started.md",
+        "file" : "/docs/source/getting_started.md",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
@@ -422,7 +422,7 @@
     {
         "name" : "help.submitter-guide.biosample-metadata.metadata",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b016",
-        "file" : "/docs/public/metadata-submission/biosample_metadata.md",
+        "file" : "/docs/source/biosample_metadata.md",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
@@ -430,7 +430,7 @@
     {
         "name" : "help.submitter-guide.web-submission.web_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b017",
-        "file" : "/docs/public/metadata-submission/web_submission.md",
+        "file" : "/docs/source/web_submission.md",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
@@ -438,19 +438,19 @@
     {
         "name" : "help.submitter-guide.spreadsheet.excel_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b018",
-        "file" : "/docs/public/metadata-submission/excel_submission.md",
+        "file" : "/docs/source/excel_submission.md",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.submitter-guide.spreadsheet.schema_info",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b019",
-        "file" : "/docs/public/metadata-submission/schema_info.md",
+        "file" : "/docs/source/schema_info.md",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
         "name" : "help.submitter-guide.rest-api.rest_api_submission",
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020",
-        "file" : "/docs/public/metadata-submission/rest_api_submission.md",
+        "file" : "/docs/source/rest_api_submission.md",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
 
