@@ -6,19 +6,23 @@ import _ from 'underscore';
 import Markdown from 'markdown-to-jsx';
 import Draggable from 'react-draggable';
 
-import { ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 export class MdSortableTable extends React.PureComponent {
 
     static propTypes = {
         'mdFilePath' : PropTypes.string,
-        'content': PropTypes.string,
+        'children': PropTypes.string,
         'defaultColWidths': PropTypes.array
     };
 
     constructor(props) {
         super(props);
-        const { content, mdFilePath } = props;
+        const { mdFilePath, children } = props;
+        let content = null;
+        if (children && typeof children === 'string') {
+            content = children;
+        }
         this.state = {
             data: content ? Utils.convertMarkdownTableToObject(content) : null,
             loading: !content && (mdFilePath && typeof mdFilePath === 'string')

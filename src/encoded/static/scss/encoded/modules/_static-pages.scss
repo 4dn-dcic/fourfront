@@ -609,81 +609,6 @@ $markdown-table-result-row-height: 46px !default;
 	.markdown-table-container {
 		position: relative;
 
-		.shadow-border-layer {
-			pointer-events: none;
-			> .edge-scroll-button {
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				background: #f8f8f8;
-				width: 15px;
-				pointer-events: all;
-				opacity: 1;
-				transition: opacity .3s ease-out;
-				cursor: pointer;
-				text-align: center;
-				padding-top: 16px;
-				&.faded-out {
-					opacity: 0;
-					transition: opacity .6s ease-out;
-					pointer-events: none;
-				}
-				> i.icon {
-					position: absolute;
-					display: block;
-					width: 15px;
-					opacity : 0.5;
-				}
-				&:hover {
-					background-color: #f4f4f4;
-					box-shadow: none;
-					> i.icon {
-						opacity: 0.8;
-					}
-				}
-				&.right-edge {
-					right: -15px;
-					border-radius: 0 4px 4px 0;
-					box-shadow: inset -5px 0 10px #fff, -5px 0 10px -5px $search-results-edge-shadow-color;
-					&:hover {
-						box-shadow: -5px 0 10px -5px $search-results-edge-shadow-color;
-					}
-				}
-				&.left-edge {
-					left: -15px;
-					border-radius: 4px 0 0 4px;
-					box-shadow: inset 5px 0 10px #fff, 5px 0 10px -5px $search-results-edge-shadow-color;
-					&:hover {
-						box-shadow: 5px 0 10px -5px $search-results-edge-shadow-color;
-					}
-				}
-			}
-
-			&.short {
-				> .edge-scroll-button {
-					body.scrolled-past-top & {
-						> i.icon {
-							margin-top: -5px;
-							top: 50%;
-						}
-					}
-				}
-			}
-
-			&.tall.fixed-position-arrows {
-				> .edge-scroll-button {
-					body.scrolled-past-80 & {
-						> i.icon {
-							position: fixed;
-							margin-top: -5px;
-							top: 50%;
-						}
-					}
-				}
-			}
-
-		}
-
 		.inner-container {
 
 			overflow: auto;
@@ -712,7 +637,9 @@ $markdown-table-result-row-height: 46px !default;
 				} // .markdown-table-row
 
 			} // .scrollable-container
+
 		} // .inner-container
+		
 	} // .markdown-table-container
 
 } // .markdown-table-outer-container
