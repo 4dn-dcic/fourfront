@@ -1,0 +1,13 @@
+{
+    "routes": [
+        "/",
+        "/counts",
+        "/search/?type=user"
+    ],
+    "envs": {
+        "data": "https://data.4dnucleome.org",
+        "staging": "http://staging.4dnucleome.org",
+        "mastertest": "http://mastertest.4dnucleome.org",
+        "hotseat": "http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com"
+    }
+}
