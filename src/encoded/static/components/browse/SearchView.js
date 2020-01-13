@@ -11,6 +11,7 @@ import { console, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/
 import { columnExtensionMap } from './columnExtensionMap';
 import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
+import { replaceString as placeholderReplacementFxn } from './../static-pages/placeholders';
 
 
 /**
@@ -105,7 +106,7 @@ export default class SearchView extends React.PureComponent {
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
             <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets }}
+                <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets, placeholderReplacementFxn }}
                     termTransformFxn={Schemas.Term.toName} separateSingleTermFacets />
             </div>
         );
