@@ -27,7 +27,7 @@ describe('Testing about.js', function() {
     
     var About, testItem, page, data, banners, Wrapper, App, app, sinon, server;
 
-    beforeAll(function() {
+    beforeAll(()=>{
         // Get App from ../index instead of ../app to make sure prerequisite modules/components 
         // have loaded and initialized, e.g. AboutPage registered as handler for AboutPage @type in about.js.
         App = require('../index').default;
@@ -74,11 +74,15 @@ describe('Testing about.js', function() {
         //expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
         // Make sure 'in' is not in className, as it controls section visibility @ mobile sizes.
         expect(menuCollapsibleSection.className.search('show')).toBe(-1);
-        TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
+        //act(()=>{
+            TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
+        //});
         jest.runOnlyPendingTimers();
         //expect(menuToggleButton.className.search('collapsed')).toBe(-1);
         expect(menuCollapsibleSection.className.search('show')).toBeGreaterThan(-1);
-        TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
+        //act(()=>{
+            TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
+        //});
         jest.runOnlyPendingTimers();
 
         //expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
