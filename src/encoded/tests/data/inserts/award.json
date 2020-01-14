@@ -20,6 +20,16 @@
         "viewing_group": "Not 4DN"
     },
     {
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "description": "DCIC: The goals of the 4D Nucleome (4DN) Data Coordination and Integration Center (DCIC) are to collect, store, curate, display, and analyze data generated in the 4DN Network.",
+        "viewing_group": "4DN",
+        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "status": "current",
+        "title": "4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER",
+        "name": "1U01CA200059-01",
+        "project": "4DN"
+    },
+    {
         "description": "A test external award.",
         "end_date": "2020-08-31",
         "name": "1U01CA200059-02",
