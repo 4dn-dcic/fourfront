@@ -6,7 +6,10 @@
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b000",
         "section_type" : "Search Info Header",
         "title" : "Workflow Run Information",
-        "body" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>"
+        "body" : "<ul><li>Workflow Runs are runs of any particular <a href=\"/search/?type=Workflow\">Workflow</a>.</li><li>Workflow Runs have input/output files associated with them, whereas Workflows do not.</li></ul>",
+        "options" : {
+            "filetype" : "html"
+        }
     },
 
 
@@ -15,7 +18,10 @@
         "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b001",
         "section_type" : "Search Info Header",
         "title" : "Workflow Information",
-        "body" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>"
+        "body" : "<ul><li>Workflows define steps and their inputs & outputs. They are structurally similar to Common Workflow Language (CWL) definitions.</li><li><a href=\"/search/?type=WorkflowRun\">Workflow Runs</a> are unique runs of each Workflow and have specific files associated with them.</li></ul>",
+        "options" : {
+            "filetype" : "html"
+        }
     },
 
 
@@ -25,7 +31,10 @@
         "section_type" : "Search Info Header",
         "title" : "Basic Protocol",
         "body" : "<div><p>This page contains the Microscope Optical QC recordings from 4DN labs. 4DN Imaging Group strongly advices this QC to be performed once a month, and uploaded to this page. To produce this data,</p><ol><li>Please use the <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">TetraSpeckTM</a> Fluorescent Microspheres from Thermo Fisher Scientific (catalog number <a href=\"https://www.thermofisher.com/order/catalog/product/T14792\">T14792</a>)</li><li>Follow the simple step in this <a href=\"http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/protocols/fbc19c00-d377-461c-98a4-9c3c32544d40/\">Protocol</a> to produce a PSFj report.</li></ol></div>",
-        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "options" : {
+            "filetype" : "html"
+        }
     },
 
 
@@ -964,6 +973,18 @@
         "body" : "<BasicCarousel\n    slides={[\n\t\t\t{\n                'img': '/static/img/Metadata_structure_slides/Slide01.png',\n                'alt': 'Slide 1 alt text',\n                'width': 720,\n                'height': 540\n            },\n            {\n                'img': '/static/img/Metadata_structure_slides/Slide02.png',\n                'alt': 'Slide 2 alt text',\n                'width': 720,\n                'height': 540\n            },\n            {\n                'img': '/static/img/Metadata_structure_slides/Slide03.png',\n                'alt': 'Slide 3 alt text',\n                'width': 720,\n                'height': 540\n            }\n\t]}\n    slideWidth={720}\n    slideHeight={540}\n    showSlideCount={true}\n    autoPlay={true}\n    carouselOptions={{\n  \t\t'autoplay': false,\n    \t'autoplayInterval': 5000,\n    \t'cellSpacing': 20,\n    \t'cellAlign': 'center',\n    \t'slidesToShow': 1,\n    \t'slidesToScroll': 1,\n    \t'slideIndex': 0,\n    \t'speed': 700,\n    \t'dragging': true,\n    \t'easing': 'easeLinear',\n    \t'transitionMode': 'scroll'\n    }}\n    key='random-basic-carousel-key'\n/>",
         "status" : "released",
         "title" : "Basic Carousel Test",
+        "options": {
+            "filetype" : "jsx"
+        }
+    },
+
+
+    {
+        "name" : "md-sortable-table.test",
+        "uuid" : "442c8aa0-dc6c-43d7-814a-854af4610099",
+        "body" : "<MdSortableTable\n key='md-sortable-table'\n mdFilePath='https://s3.amazonaws.com/4dn-dcic-public/static-pages/md-table-test.md'\n defaultColWidths={[]}\n />",
+        "status" : "released",
+        "title" : "Microscope Markdown Table",
         "options": {
             "filetype" : "jsx"
         }

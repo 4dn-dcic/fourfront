@@ -77,5 +77,15 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
+    },
+    {
+        "uuid": "0f011b1e-b772-4f2a-8c24-cc55de28a994",
+        "description": "Homo sapiens GM12878 immortalized cell line",
+        "biosource_type": "immortalized cell line",
+        "individual":"4DNINOOOAAQ1",
+        "award": "1U01CA200059-01",
+        "lab": "dcic-testing-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     }
 ]

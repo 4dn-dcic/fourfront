@@ -154,6 +154,14 @@
             "exclude_from": ["submit4dn", "FFedit-create"],
             "permission": "import_items",
             "lookup": 1001
+        },
+        "file_first_line":{
+            "title": "First line of the fastq file",
+            "description": "First line of the fastq file",
+            "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "permission": "import_items",
+            "lookup": 1002
         }
     }
 }
