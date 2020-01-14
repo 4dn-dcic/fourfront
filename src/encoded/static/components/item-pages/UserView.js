@@ -13,7 +13,7 @@ import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/compone
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 
-import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
+import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews, OnlyTitle } from './../PageTitle';
 import { store } from './../../store';
 import { FormattedInfoBlock } from './components/FormattedInfoBlock';
 
@@ -769,7 +769,7 @@ export class ImpersonateUserForm extends React.PureComponent {
 
 }
 const UserPageTitle = React.memo(function UserPageTitle(props) {
-    const { alerts, context, session, href } = props;
+    const { alerts, context, session, href, schemas } = props;
     const myDetails = JWT.getUserDetails();
     const myEmail = myDetails && myDetails.email;
     if (myEmail && context && context.email && myEmail === context.email) {
@@ -782,15 +782,10 @@ const UserPageTitle = React.memo(function UserPageTitle(props) {
             </PageTitleContainer>
         );
     }
-    const thisTypeTitle = object.itemUtil.getTitleStringFromContext(context, schemas);
-    const subtitle = thisTypeTitle ? (
-        <span>{thisTypeTitle}</span>
-    ) : null;
     return (
         <PageTitleContainer alerts={alerts}>
-            <TitleAndSubtitleUnder subtitle={subtitle}>
-
-            </TitleAndSubtitleUnder>
+            <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+            <OnlyTitle>User</OnlyTitle>
         </PageTitleContainer>
     );
 });
