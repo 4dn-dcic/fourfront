@@ -131,14 +131,15 @@ export const TitleAndSubtitleBeside = React.memo(function TitleAndSubtitleNextTo
 /** Composed Titles **/
 
 const StaticPageTitle = React.memo(function StaticPageTitle(props){
-    const { children, alerts, breadCrumbsVisible, session, context, href } = props;
-    const hasToc = (
-        context && Array.isArray(context['@type'])
-        && context['@type'].indexOf('StaticPage') > -1
-        && context['table-of-contents']
-        && context['table-of-contents'].enabled
-    );
-    const commonCls = "col-12" + hasToc ? " col-lg-9" : '';
+    const { alerts, breadCrumbsVisible, session, context, href } = props;
+    const {
+        display_title: title,
+        'table-of-contents' : { enabled: tocEnabled = false } = {},
+        '@type' : itemTypes = [],
+        '@id' : contextID
+    } = context || {};
+    const hasToc = (contextID && itemTypes.indexOf('StaticPage') > -1 && tocEnabled) || false;
+    const commonCls = "col-12" + (hasToc ? " col-lg-9" : '');
     return (
         <PageTitleContainer alerts={alerts} className="container" alertsContainerClassName={commonCls + " mt-2"}>
             <div className="row">
@@ -146,7 +147,7 @@ const StaticPageTitle = React.memo(function StaticPageTitle(props){
                     <StaticPageBreadcrumbs {...{ context, session, href, hasToc }}
                         key="breadcrumbs" className={commonCls}/>
                     : null }
-                <OnlyTitle className={commonCls}>{ children  }</OnlyTitle>
+                <OnlyTitle className={commonCls}>{ title }</OnlyTitle>
             </div>
         </PageTitleContainer>
     );
@@ -264,7 +265,7 @@ const isEditingFormView = memoize(function(context, currentAction){
  * Is used as part of PageTitle.
  * @memberof PageTitle
  */
-export class StaticPageBreadcrumbs extends React.Component {
+export class StaticPageBreadcrumbs extends React.PureComponent {
 
     /**
      * Get ancestors of current Item JSON.
@@ -299,6 +300,9 @@ export class StaticPageBreadcrumbs extends React.Component {
         super(props);
         this.renderCrumb = this.renderCrumb.bind(this);
         this.seoMetadata = this.seoMetadata.bind(this);
+        this.memoized = {
+            getAncestors : memoize(StaticPageBreadcrumbs.getAncestors)
+        };
     }
 
     /**
@@ -311,14 +315,13 @@ export class StaticPageBreadcrumbs extends React.Component {
      * @returns {JSX.Element} A div element representing a breadcrumb.
      */
     renderCrumb(ancestor, index, all){
-        var inner;
-        if (ancestor['@id'] === this.props.context['@id']){
-            inner = null;//ancestor.display_title;
-        } else {
-            inner = <a href={ancestor['@id']}>{ ancestor.display_title }</a>;
-        }
+        const { '@id' : ancestorID, display_title, name: ancestorPathName } = ancestor;
+        const { context: { '@id' : contextID } } = this.props;
+        const inner = ancestorID === contextID ? null : (
+            <a href={ancestorID}>{ display_title }</a>
+        );
         return (
-            <div className="static-breadcrumb" data-name={ancestor.name} key={ancestor['@id']}>
+            <div className="static-breadcrumb" data-name={ancestorPathName} key={ancestorID}>
                 { index > 0 ? <i className="icon icon-fw icon-angle-right fas"/> : null }
                 { inner }
             </div>
@@ -380,14 +383,19 @@ export class StaticPageBreadcrumbs extends React.Component {
         return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonScriptEscape(JSON.stringify(structuredJSON)) }} />;
     }
 
-    /** @private */
     render(){
-        var { context, hasToc } = this.props,
-            ancestors = StaticPageBreadcrumbs.getAncestors(context),
-            crumbs = ancestors && _.map(ancestors, this.renderCrumb);
+        const { context = null, hasToc, className } = this.props;
+        const ancestors = context && this.memoized.getAncestors(context);
+        const crumbs = Array.isArray(ancestors) && ancestors.length > 0 && ancestors.map(this.renderCrumb);
+        const cls = (
+            "static-page-breadcrumbs clearfix" +
+            (!crumbs ? ' empty' : '') +
+            (hasToc ? ' page-has-toc' : '') +
+            (className ? " " + className : "")
+        );
 
         return  (
-            <div className={"static-page-breadcrumbs clearfix" + (!crumbs ? ' empty' : '') + (hasToc ? ' page-has-toc' : '')}>
+            <div className={cls}>
                 { crumbs }
                 { this.editButton() }
                 { this.seoMetadata(ancestors) }

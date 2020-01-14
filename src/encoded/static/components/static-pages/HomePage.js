@@ -11,7 +11,7 @@ import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es
 
 import { navigate } from'./../util';
 import { Announcements, HomePageCarousel } from './components';
-import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, OnlyTitle } from './../PageTitle';
+import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs } from './../PageTitle';
 
 
 /**
@@ -250,7 +250,7 @@ const HomePageTitle = React.memo(function HomePageTitle(props) {
     const { alerts } = props;
     return (
         <PageTitleContainer alerts={alerts}>
-            <div className="breadcrumb-placeholder" key="breadcrumbs" />
+            <StaticPageBreadcrumbs key="breadcrumbs" />
             <TitleAndSubtitleUnder subtitle="A platform to search, visualize, and download nucleomics data."
                 className="home-page-title" subTitleClassName="subtitle" style={{ marginTop: '38px' }}>
                 4D Nucleome Data Portal

@@ -600,6 +600,7 @@ export default class BrowseView extends React.Component {
     }
 
 }
+
 const BrowseViewPageTitle = React.memo(function BrowseViewPageTitle(props) {
     const { alerts, context, session, href } = props;
 
