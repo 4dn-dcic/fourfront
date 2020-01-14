@@ -30,7 +30,7 @@ describe('Biosample create page', function () {
             cy.get('.field-row [data-field-name=biosource] .linked-object-buttons-container .select-create-linked-item-button').first().should('contain', 'Select existing').click().end();
 
             //Add biosources data file
-            cy.get('.array-field-container  .field-row .field-column .linked-object-text-input-container  .form-control').focus().type('111116bc-8535-4448-903e-854af460b254').wait(100).end();
+            cy.get('.array-field-container  .field-row .field-column .linked-object-text-input-container  .form-control').focus().type('0f011b1e-b772-4f2a-8c24-cc55de28a994').wait(100).end();
 
             //Biosource data file check succes
             cy.get('.remove-button-container .btn-success').click().end().wait(10000)
