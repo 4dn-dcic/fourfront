@@ -47,21 +47,8 @@ export default class HealthView extends React.PureComponent {
 
     getCounts(){
         this.setState({
-            'db_es_total' : "loading...",
-        }, ()=>{
-            ajax.load('/counts?format=json', (resp)=>{
-                this.setState({
-                    'db_es_total' : resp.db_es_total,
-                    'db_es_compare': resp.db_es_compare,
-                });
-            }, 'GET', (resp)=>{
-                this.setState({
-                    'error' : resp.error || resp.message,
-                    'db_es_total' : null,
-                    'db_es_compare': null
-                });
-            });
-        });
+            'db_es_total' : "See /counts page",
+        }, ()=>{});
     }
 
     render() {
