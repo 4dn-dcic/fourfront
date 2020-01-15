@@ -198,3 +198,16 @@ class QualityMetricWorkflowrun(QualityMetric):
     item_type = 'quality_metric_workflowrun'
     schema = load_schema('encoded:schemas/quality_metric_workflowrun.json')
     embedded_list = QualityMetric.embedded_list
+
+
+@collection(
+    name='quality-metrics-qclist',
+    properties={
+        'title': 'QC Quality metrics for QC List',
+        'description': 'Listing of QC Quality Metrics for QC List.',
+    })
+class QualityMetricQclist(QualityMetric):
+    """Subclass of quality matrics for QCList"""
+    item_type = 'quality_metric_qclist'
+    schema = load_schema('encoded:schemas/quality_metric_qclist.json')
+    embedded_list = QualityMetric.embedded_list
