@@ -131,6 +131,7 @@ def main():
     )
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
+    parser.add_argument('--wipe-es', help="If specified on webprod will wipe ES", action='store_true', default=False)
 
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
@@ -144,8 +145,13 @@ def main():
         env = app.registry.settings.get('env.name')
         if 'webprod' in env:
             if data_env != env:
-                log.info("looks like we are on staging, run create mapping without check first")
-                run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
+                log.info("Looks like we are deploying staging, checking --wipe-es")
+                if args.wipe_es:
+                    log.info('--wipe-es specified - obliging')
+                    run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
+                else:
+                    log.info('--wipe-es not specified - will not wipe ES')
+                    run_create_mapping(app, check_first=True, item_order=ITEM_INDEX_ORDER)
                 return
         # handle mastertest ... by blowing away all data first
         if 'mastertest' in env:
