@@ -6,3 +6,6 @@ Disallow: /*@@download
 Disallow: /profiles/
 Disallow: /*@@download*
 Disallow: /cgi-bin/
+Disallow: /counts*
+Disallow: /health*
+Disallow: /indexing_status*
