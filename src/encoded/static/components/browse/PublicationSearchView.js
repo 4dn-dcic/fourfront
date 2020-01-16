@@ -84,7 +84,19 @@ function maxCharsToShowPerLine(colWidth){
 
 class PublicationSearchResultTitle extends React.PureComponent {
 
+    /** Static func is memoized since will get back same value for all instances within table/view */
     static maxCharsToShowPerLine = memoize(maxCharsToShowPerLine);
+
+    static shortenedTitle(colWidth, origTitle, fallbackTitle){
+        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 45); // -45 re: ToggleBtn width
+        const titleMaxLen = charsPerLine * 3; // 3 lines max for it
+        let title = origTitle || fallbackTitle || "No Title";
+        const titleLen = title.length;
+        if (titleLen > titleMaxLen) {
+            title = title.slice(0, titleMaxLen) + "...";
+        }
+        return { title, titleMaxLen, charsPerLine, titleLen };
+    }
 
     static defaultProps = {
         "showAbstractBlock" : false
@@ -93,6 +105,9 @@ class PublicationSearchResultTitle extends React.PureComponent {
     constructor(props){
         super(props);
         this.onClickTrack = this.onClickTrack.bind(this);
+        this.memoized = {
+            shortenedTitle: memoize(PublicationSearchResultTitle.shortenedTitle)
+        };
     }
 
     onClickTrack(evt){
@@ -117,14 +132,7 @@ class PublicationSearchResultTitle extends React.PureComponent {
             abstract = null,
             authors = null
         } = result;
-        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 45); // -45 re: ToggleBtn width
-        const titleMaxLen = charsPerLine * 3; // 3 lines max for it
-        let title = origTitle || fallbackTitle || "No Title";
-        const titleLen = title.length;
-        if (titleLen > titleMaxLen) {
-            title = title.slice(0, titleMaxLen) + "...";
-        }
-
+        const { title, titleMaxLen, charsPerLine, titleLen } = this.memoized.shortenedTitle(colWidth, origTitle, fallbackTitle);
         return (
             <React.Fragment>
                 <TableRowToggleOpenButton onClick={toggleDetailOpen} open={detailOpen} />

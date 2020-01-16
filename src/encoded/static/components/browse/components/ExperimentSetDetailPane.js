@@ -84,15 +84,15 @@ export class ExperimentSetDetailPane extends React.PureComponent {
     render(){
         const { paddingWidthMap, paddingWidth, containerWidth, windowWidth, result, minimumWidth, href } = this.props;
         const { processedFilesOpen, rawFilesOpen } = this.state;
-        const commonFileSectionProps = {
-            ...SelectedFilesController.pick(this.props),
-            containerWidth, result, href, minimumWidth, paddingWidth
-        };
-        let usePadWidth = paddingWidth || 0;
 
+        let usePadWidth = paddingWidth || 0;
         if (paddingWidthMap){
             usePadWidth = paddingWidthMap[layout.responsiveGridState(windowWidth)] || paddingWidth;
         }
+        const commonFileSectionProps = {
+            ...SelectedFilesController.pick(this.props),
+            containerWidth, result, href, minimumWidth, paddingWidth: usePadWidth
+        };
 
         return (
             <div className="experiment-set-info-wrapper">
