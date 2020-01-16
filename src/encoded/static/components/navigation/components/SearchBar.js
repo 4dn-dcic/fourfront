@@ -98,6 +98,7 @@ export class SearchBar extends React.PureComponent {
 
         if (pastHref !== href) {
             this.setState(({ isVisible, searchItemType })=>{
+                console.log('xxx buradayım');
                 const typedSearchQuery = searchFilters.searchQueryStringFromHref(href) || '';
                 return {
                     // We don't want to hide if was already open.
@@ -187,25 +188,21 @@ export class SearchBar extends React.PureComponent {
                 const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownOpen || false;
                 return { typedSearchQuery, isVisible, isSearchItemTypeDropDownOpen: isVisible ? isSearchItemTypeDropDownOpen : false };
             });
-        }.bind(this), 1000);
+        }.bind(this), 100);
     }
 
     onToggleSearchItemType(isOpen, event) {
-        const { currentAction } = this.props;
-        this.setState(function (state, props) { return { isSearchItemTypeDropDownOpen: isOpen }; });
-
-        setTimeout(function () {
-            const { isSearchItemTypeDropDownOpen } = this.state;
-            const isInputElemActive = this.inputElemRef.current && document.activeElement === this.inputElemRef.current;
-
-            if (!isSearchItemTypeDropDownOpen && !isInputElemActive) {
-                this.setState(function ({ typedSearchQuery }) {
-                    // Prevent closing onBlur if on selection view, or if have input.
-                    const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || false;
-                    return { isVisible };
-                });
+        this.setState(function (state, props) {
+            return { isSearchItemTypeDropDownOpen: isOpen };
+        }, function () {
+            const { typedSearchQuery, isSearchItemTypeDropDownOpen } = this.state;
+            if (!isSearchItemTypeDropDownOpen && this.inputElemRef && this.inputElemRef.current) {
+                const isInputElemActive = document.activeElement === this.inputElemRef.current;
+                if (!isInputElemActive && typedSearchQuery.length === 0) {
+                    this.inputElemRef.current.focus();
+                }
             }
-        }.bind(this), 2000);
+        }.bind(this));
     }
 
     onResetSearch(e){
