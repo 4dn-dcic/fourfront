@@ -3,70 +3,61 @@
         "uuid": "d0be03da-3700-4148-a225-3852422c121e",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
-        {
+        "MAD QC": {
           "one and two": {
             "MAD of log ratios": 0.398,
             "Pearson correlation": 0.949,
             "SD of log ratios": 0.573,
             "Spearman correlation": 0.929
-          }
-        }{
+          },
           "one and three": {
             "MAD of log ratios": 0.361,
             "Pearson correlation": 0.955,
             "SD of log ratios": 0.54,
             "Spearman correlation": 0.936
-          }
-        }{
+          },
           "one and four": {
             "MAD of log ratios": 2.013,
             "Pearson correlation": 0.427,
             "SD of log ratios": 2.358,
             "Spearman correlation": 0.401
-          }
-        }{
+          },
           "one and five": {
             "MAD of log ratios": 1.973,
             "Pearson correlation": 0.421,
             "SD of log ratios": 2.369,
             "Spearman correlation": 0.391
-          }
-        }{
+          },
           "two and three": {
             "MAD of log ratios": 0.211,
             "Pearson correlation": 0.971,
             "SD of log ratios": 0.424,
             "Spearman correlation": 0.957
-          }
-        }{
+          },
           "two and four": {
             "MAD of log ratios": 2.013,
             "Pearson correlation": 0.423,
             "SD of log ratios": 2.347,
             "Spearman correlation": 0.398
-          }
-        }{
+          },
           "two and five": {
             "MAD of log ratios": 2.001,
             "Pearson correlation": 0.417,
             "SD of log ratios": 2.356,
             "Spearman correlation": 0.386
-          }
-        }{
+          },
           "three and four": {
             "MAD of log ratios": 2.026,
             "Pearson correlation": 0.417,
             "SD of log ratios": 2.364,
             "Spearman correlation": 0.392
-          }
-        }{
+          },
           "three and five": {
             "MAD of log ratios": 2.006,
             "Pearson correlation": 0.413,
             "SD of log ratios": 2.371,
             "Spearman correlation": 0.384
-          }
-        }{
+          },
           "four and five": {
             "MAD of log ratios": 0.499,
             "Pearson correlation": 0.947,
