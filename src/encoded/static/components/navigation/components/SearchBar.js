@@ -98,7 +98,6 @@ export class SearchBar extends React.PureComponent {
 
         if (pastHref !== href) {
             this.setState(({ isVisible, searchItemType })=>{
-                console.log('xxx buradayım');
                 const typedSearchQuery = searchFilters.searchQueryStringFromHref(href) || '';
                 return {
                     // We don't want to hide if was already open.
@@ -177,8 +176,8 @@ export class SearchBar extends React.PureComponent {
         const { href, currentAction } = this.props;
         const lastQuery = searchFilters.searchQueryStringFromHref(href);
 
-        setTimeout(function () {
-            this.setState(function ({ typedSearchQuery: currQueryStr, isSearchItemTypeDropDownOpen }) {
+        setTimeout(() => {
+            this.setState(({ typedSearchQuery: currQueryStr, isSearchItemTypeDropDownOpen }) => {
                 let typedSearchQuery = currQueryStr; // No change - default
                 if (SearchBar.hasInput(lastQuery) && !SearchBar.hasInput(currQueryStr)) {
                     // Replace new value entered with current search query in URL if new value is empty string
@@ -188,13 +187,13 @@ export class SearchBar extends React.PureComponent {
                 const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownOpen || false;
                 return { typedSearchQuery, isVisible, isSearchItemTypeDropDownOpen: isVisible ? isSearchItemTypeDropDownOpen : false };
             });
-        }.bind(this), 100);
+        }, 100);
     }
 
     onToggleSearchItemType(isOpen, event) {
-        this.setState(function (state, props) {
+        this.setState((state, props) => {
             return { isSearchItemTypeDropDownOpen: isOpen };
-        }, function () {
+        }, () => {
             const { typedSearchQuery, isSearchItemTypeDropDownOpen } = this.state;
             if (!isSearchItemTypeDropDownOpen && this.inputElemRef && this.inputElemRef.current) {
                 const isInputElemActive = document.activeElement === this.inputElemRef.current;
@@ -202,7 +201,7 @@ export class SearchBar extends React.PureComponent {
                     this.inputElemRef.current.focus();
                 }
             }
-        }.bind(this));
+        });
     }
 
     onResetSearch(e){
