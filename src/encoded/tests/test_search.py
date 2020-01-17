@@ -36,7 +36,7 @@ def recursively_find_uuids(json, uuids):
 
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
-    assert res['@type'] == ['Search']
+    assert res['@type'] == ['ItemSearchResults','Search']
     assert res['@id'] == '/search/?type=Item'
     assert res['@context'] == '/terms/'
     assert res['notification'] == 'Success'
@@ -51,7 +51,7 @@ def test_search_with_no_query(workbook, testapp):
     # using /search/ (with no query) should default to /search/?type=Item
     # thus, should satisfy same assertions as test_search_view
     res = testapp.get('/search/').follow(status=200)
-    assert res.json['@type'] == ['Search']
+    assert res.json['@type'] == ['ItemSearchResults', 'Search']
     assert res.json['@id'] == '/search/?type=Item'
     assert res.json['@context'] == '/terms/'
     assert res.json['notification'] == 'Success'

@@ -22,7 +22,7 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 
 import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
-import PageTitle from './PageTitle';
+import { PageTitleSection } from './PageTitle';
 
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
@@ -1784,7 +1784,7 @@ class BodyElement extends React.PureComponent {
 
                             {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
 
-                            <PageTitle {...this.props} windowWidth={windowWidth} />
+                            <PageTitleSection {...this.props} windowWidth={windowWidth} />
 
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}

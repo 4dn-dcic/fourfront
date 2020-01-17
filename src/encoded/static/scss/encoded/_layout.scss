@@ -203,7 +203,7 @@ h1.page-title {
 	margin-bottom: 32px;
 
 	&.top-of-page {
-		margin-top: 36px;
+		margin-top: 0px;
 		margin-bottom: 0px;
 		margin-left: -2px;
 		
@@ -220,6 +220,7 @@ h1.page-title {
 
 			.subtitle {
 				font-size: 1.7rem;
+				font-weight: 200;
 			}
 		}
 		
