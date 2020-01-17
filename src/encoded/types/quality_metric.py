@@ -175,6 +175,20 @@ class QualityMetricRnaseq(QualityMetric):
 
 
 @collection(
+    name='quality-metrics-rnaseq_madqc',
+    properties={
+        'title': 'QC Quality Metrics for RNA-seq MAD QC (reproducibility QC)',
+        'description': 'Listing of QC Quality Metrics for RNA-seq MAD QC',
+    })
+class QualityMetricRnaseqMadqc(QualityMetric):
+    """Subclass of quality matrics for rna-seq MAD QC"""
+
+    item_type = 'quality_metric_rnaseq_madqc'
+    schema = load_schema('encoded:schemas/quality_metric_rnaseq_madqc.json')
+    embedded_list = QualityMetric.embedded_list
+
+
+@collection(
     name='quality-metrics-margi',
     properties={
         'title': 'QC Quality metrics for MARGI',
