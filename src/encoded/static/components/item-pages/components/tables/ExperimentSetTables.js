@@ -28,6 +28,18 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
     constructor(props){
         super(props);
         this.renderDetailPane = this.renderDetailPane.bind(this);
+        this.updateDetailPaneFileSectionStateCache = this.updateDetailPaneFileSectionStateCache.bind(this);
+        this.detailPaneFileSectionStateCache = {};
+    }
+
+    /** Copied from BrowseView */
+    updateDetailPaneFileSectionStateCache(resultID, resultPaneState){
+        // Purposely avoid changing reference to avoid re-renders/updates (except when new components initialize)
+        if (resultPaneState === null){
+            delete this.detailPaneFileSectionStateCache[resultID];
+        } else {
+            this.detailPaneFileSectionStateCache[resultID] = resultPaneState;
+        }
     }
 
     renderDetailPane(result, rowNum, width){
@@ -35,7 +47,7 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
         return (
             <ExperimentSetDetailPane {...{ result, href, windowWidth }} containerWidth={width || null} paddingWidthMap={{
                 'xs' : 0, 'sm' : 10, 'md' : 47, 'lg' : 47, 'xl' : 47
-            }} />
+            }} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
         );
     }
 

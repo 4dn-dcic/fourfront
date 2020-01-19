@@ -149,7 +149,7 @@ class SubscriptionEntry extends React.PureComponent {
     constructor(props){
         super(props);
         this.changePage = _.throttle(this.changePage, 250);
-        _.bindAll(this, 'toggleOpen', 'setAvailableTypes',
+        _.bindAll(this, 'toggleOpen', 'updateStateFromSearchResponse',
             'displayToggle', 'generateButtonToolbar', 'handleChangeType'
         );
         const open = props.title == 'My submissions' ? true : false;
@@ -164,30 +164,40 @@ class SubscriptionEntry extends React.PureComponent {
         };
     }
 
-    setAvailableTypes(resp){
-        const { facets = null } = resp;
+    updateStateFromSearchResponse(resp){
+        const { facets = null, '@type' : [ primaryResponseType ], total = 0 } = resp;
+        const searchViewTypeMatch = primaryResponseType.match(/^(\w+)(SearchResults)$/); // Returns null or [ "ItemTypeSearchResults", "ItemType", "SearchResults" ]
+        let currSearchType = null;
+        if (Array.isArray(searchViewTypeMatch) && searchViewTypeMatch.length === 3){
+            // We're on a search results page. Parse out the proper 'type'.
+            [ , currSearchType ] = searchViewTypeMatch; // e.g. [ "PublicationSearchResults", >> "Publication" <<, "SearchResults" ]
+        }
         this.setState(function({ availableTypes: currAvailTypes, itemType }){
-            if (currAvailTypes) {
-                return null;
+            const nextState = { total }; // Always update total re: filtering
+
+            if ((!currAvailTypes) && Array.isArray(facets)) { // If first time loaded.
+                const typesFacet = _.findWhere(facets, { field: "type" });
+                if (typesFacet) {
+                    const availableTypes = _.sortBy(typesFacet.terms.filter(function(itemTypeTerm){
+                        const { doc_count, key } = itemTypeTerm;
+                        if (doc_count === 0) return false;
+                        if (key === "Item") return false;
+                        return true;
+                    }), "doc_count").reverse().map(function(itemTypeTerm){
+                        const { key } = itemTypeTerm;
+                        return key;
+                    });
+                    availableTypes.unshift("Item");
+                    nextState.availableTypes = availableTypes;
+                }
             }
-            if (!Array.isArray(facets)) {
-                return { total: resp.total || 0 };
+
+            if (currSearchType !== itemType) {
+                // Item type has changed through interactions within EmbeddedSearchView, update our state as well.
+                nextState.itemType = currSearchType;
             }
-            const typesFacet = _.findWhere(facets, { field: "type" });
-            if (!typesFacet) {
-                return null;
-            }
-            const availableTypes = _.sortBy(typesFacet.terms.filter(function(itemTypeTerm){
-                const { doc_count, key } = itemTypeTerm;
-                if (doc_count === 0) return false;
-                if (key === "Item") return false;
-                return true;
-            }), "doc_count").reverse().map(function(itemTypeTerm){
-                const { key } = itemTypeTerm;
-                return key;
-            });
-            availableTypes.unshift("Item");
-            return { availableTypes, total: resp.total };
+
+            return nextState;
         });
     }
 
@@ -238,7 +248,7 @@ class SubscriptionEntry extends React.PureComponent {
         const searchHref = this.memoized.getSearchHref(url, selectedItemType);
         const body = !open ? null : (
             <EmbeddedItemSearchTable {...{ session, schemas, searchHref, columns }}
-                facets={null} onLoad={this.setAvailableTypes} maxHeight={Math.floor(windowHeight * 0.6)} />
+                facets={null} onLoad={this.updateStateFromSearchResponse} maxHeight={Math.floor(windowHeight * 0.6)} />
         );
 
         return(
