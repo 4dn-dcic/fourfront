@@ -383,7 +383,8 @@ export class RawFilesStackedTable extends React.PureComponent {
                 }).isRequired
             })).isRequired
         }),
-        'collapseLongLists'         : PropTypes.bool
+        'collapseLongLists'         : PropTypes.bool,
+        'preventExpand'             : PropTypes.bool
     };
 
     static defaultProps = {
@@ -395,7 +396,8 @@ export class RawFilesStackedTable extends React.PureComponent {
             { columnClass: 'file-detail',                               title: 'File Size',     initialWidth: 80,   field : "file_size" }
         ],
         'collapseLongLists' : true,
-        'showMetricColumns' : null
+        'showMetricColumns' : null,
+        'preventExpand'     : false
     };
 
     constructor(props){
@@ -418,7 +420,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        const { experimentSet, collapseLongLists, collapseShow, collapseLimit, columnHeaders, showMetricsColumns, href } = this.props;
+        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, href, preventExpand } = this.props;
 
         const allRawFiles = exp.files || [];
 
@@ -483,19 +485,24 @@ export class RawFilesStackedTable extends React.PureComponent {
             );
         }
 
-        var experimentVisibleName = (
-                exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
-                    (exp.experiment_type && exp.experiment_type.display_title) ? exp.experiment_type.display_title :
-                        exp.accession
-            ),
-            experimentAtId  = object.itemUtil.atId(exp),
-            linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName,
-            // Shown in show more button, e.g. "Show X more Files".
-            listTitle       = (
-                (haveUngroupedFiles? "Files" : '') +
-                (haveUngroupedFiles && haveGroups? " or " : '') +
-                (haveGroups? "Groups" : '')
-            );
+        const experimentVisibleName = (
+            exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
+                (exp.experiment_type && exp.experiment_type.display_title) ? exp.experiment_type.display_title :
+                    exp.accession
+        );
+        const experimentAtId  = object.itemUtil.atId(exp);
+        const linkTitle       = !experimentAtId && exp.error ? <em>{ exp.error }</em> : experimentVisibleName;
+        // Shown in show more button, e.g. "Show X more Files".
+        const listTitle       = (
+            (haveUngroupedFiles? "Files" : '') +
+            (haveUngroupedFiles && haveGroups? " or " : '') +
+            (haveGroups? "Groups" : '')
+        );
+
+
+        const showMoreExtTitle = preventExpand ? (
+            <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
+        ) : null;
 
         return (
             <StackedBlock key={ experimentAtId || exp.tec_rep_no || i } hideNameOnHover={false} columnClass="experiment" stripe={this.cache.oddExpRow}
@@ -503,8 +510,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList title={listTitle} className={contentsClassName}
-                    collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2} collapseLongLists={collapseLongLists}>
+                <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle }} title={listTitle} className={contentsClassName}>
                     { contents }
                 </StackedBlockList>
             </StackedBlock>
@@ -512,14 +518,22 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
-        const { collapseLimit, collapseShow } = this.props;
+        const { collapseLimit = 3, collapseShow = 2, experimentSet, preventExpand = false } = this.props;
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
         const [ { biosample } ] = expsWithBiosample; // From first exp, grab out biosample (all exps should have same 1).
         const bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
         const biosampleAtId = object.itemUtil.atId(biosample);
         const biosampleTitle = !biosampleAtId && biosample.error ? <em>{ biosample.error }</em> : bioRepTitle;
-        const showMoreExtraTitle = expsWithBiosample.length <= 5 ? null : (
-            'with ' + expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + ' Files'
+        const appendCountStr = expsWithBiosample.length <= 5 ? null : (
+            'with ' + expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + ' Files '
+        );
+        const showMoreExtTitle = (
+            <React.Fragment>
+                { appendCountStr }
+                { preventExpand ?
+                    <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
+                    : null }
+            </React.Fragment>
         );
 
         return (
@@ -531,8 +545,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                         <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
                         : <span className="name-title">{ biosampleTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList className="experiments" title="Experiments" collapseLimit={collapseLimit || 3} collapseShow={collapseShow || 2}
-                    showMoreExtTitle={showMoreExtraTitle}>
+                <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle }}>
                     { _.map(expsWithBiosample, this.renderExperimentBlock) }
                 </StackedBlockList>
             </StackedBlock>
@@ -556,24 +569,33 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Much of styling/layouting is defined in CSS.
      */
     render(){
-        const { experimentSet, columnHeaders, showMetricsColumns, collapseLongLists } = this.props;
+        const { experimentSet, columnHeaders: propColHeaders, showMetricsColumns, collapseLongLists, width, preventExpand } = this.props;
         const { experiments_in_set, replicate_exps } = experimentSet;
 
         const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
             expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
         );
 
-        const showMoreExtTitle = experimentsGroupedByBiosample.length > 5 ?
+        const appendCountStr = experimentsGroupedByBiosample.length > 5 ?
             'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments' : null;
 
-        const fullColumnHeaders = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet);
+        const showMoreExtTitle = (
+            <React.Fragment>
+                { appendCountStr }
+                { preventExpand ?
+                    <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
+                    : null }
+            </React.Fragment>
+        );
+
+        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, experimentSet);
 
         const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
-                <StackedBlockTable {...SelectedFilesController.pick(this.props)} {..._.pick(this.props, 'collapseLongLists', 'width')}
-                    columnHeaders={fullColumnHeaders} className="expset-raw-files" fadeIn allFiles={allRawFiles}
+                <StackedBlockTable {...SelectedFilesController.pick(this.props)} {...{ collapseLongLists, width, preventExpand, columnHeaders }}
+                    className="expset-raw-files" fadeIn allFiles={allRawFiles}
                     handleFileCheckboxChange={this.handleFileCheckboxChange}>
                     <StackedBlockList className="biosamples" showMoreExtTitle={showMoreExtTitle} title="Biosamples">
                         { _.map(experimentsGroupedByBiosample, this.renderBiosampleStackedBlockOfExperiments) }
