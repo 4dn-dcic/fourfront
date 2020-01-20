@@ -201,7 +201,7 @@ After first setting up `Package Control`_ (follow install and usage instructions
 .. _`Package Control`: https://sublime.wbond.net/
 
 *Contents*
-    
+
  .. toctree::
    :maxdepth: 4
 
@@ -210,7 +210,8 @@ After first setting up `Package Control`_ (follow install and usage instructions
    search_info
    security
    auth
-   beanstalk-deployment
+   beanstalk_deployment
+   apache_modwsgi
    database
    higlass-visualization
    inserts
