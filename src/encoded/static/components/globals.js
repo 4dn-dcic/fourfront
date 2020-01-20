@@ -26,9 +26,11 @@ export const portalConfig = {
 
     "gaTrackingIDHostMap" : {
         "data.4dnucleome" : "UA-86655305-1",
-        "testportal.4dnucleome" : "UA-86655305-2",
-        "localhost" : "UA-86655305-3",
-        "4dn-web-alex" : "UA-86655305-4",
+        "mastertest.4dnucleome" : "UA-86655305-2", // (primary domain for `UA-86655305-2`)
+        "staging.4dnucleome" : "UA-86655305-2",
+        "fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk" : "UA-86655305-2",
+        "hotseat.4dnucleome" : "UA-86655305-2",
+        "localhost" : "UA-86655305-3"
     }
 };
 
