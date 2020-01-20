@@ -86,7 +86,7 @@ export class SearchBar extends React.PureComponent {
             'searchItemType'    : this.memoized.deriveSearchItemTypeFromHref(props.href, null),
             'typedSearchQuery'  : initialQuery,
             'isVisible'         : isSelectAction(props.currentAction) || SearchBar.hasInput(initialQuery) || false,
-            'isSearchItemTypeDropDownOpen': false
+            'isSearchItemTypeDropDownToggleOn': false
         };
 
         this.inputElemRef = React.createRef();
@@ -177,25 +177,26 @@ export class SearchBar extends React.PureComponent {
         const lastQuery = searchFilters.searchQueryStringFromHref(href);
 
         setTimeout(() => {
-            this.setState(({ typedSearchQuery: currQueryStr, isSearchItemTypeDropDownOpen }) => {
+            this.setState(({ typedSearchQuery: currQueryStr, isSearchItemTypeDropDownToggleOn }) => {
                 let typedSearchQuery = currQueryStr; // No change - default
                 if (SearchBar.hasInput(lastQuery) && !SearchBar.hasInput(currQueryStr)) {
                     // Replace new value entered with current search query in URL if new value is empty string
                     typedSearchQuery = lastQuery;
                 }
                 // Prevent closing onBlur if on selection view, or if have input.
-                const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownOpen || false;
-                return { typedSearchQuery, isVisible, isSearchItemTypeDropDownOpen: isVisible ? isSearchItemTypeDropDownOpen : false };
+                const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownToggleOn || false;
+                console.log('xxx visible:', isVisible);
+                return { typedSearchQuery, isVisible, isSearchItemTypeDropDownToggleOn: isVisible ? isSearchItemTypeDropDownToggleOn : false };
             });
         }, 100);
     }
 
     onToggleSearchItemType(isOpen, event) {
         this.setState((state, props) => {
-            return { isSearchItemTypeDropDownOpen: isOpen };
+            return { isSearchItemTypeDropDownToggleOn: isOpen };
         }, () => {
-            const { typedSearchQuery, isSearchItemTypeDropDownOpen } = this.state;
-            if (!isSearchItemTypeDropDownOpen && this.inputElemRef && this.inputElemRef.current) {
+            const { typedSearchQuery, isSearchItemTypeDropDownToggleOn } = this.state;
+            if (!isSearchItemTypeDropDownToggleOn && this.inputElemRef && this.inputElemRef.current) {
                 const isInputElemActive = document.activeElement === this.inputElemRef.current;
                 if (!isInputElemActive && typedSearchQuery.length === 0) {
                     this.inputElemRef.current.focus();
