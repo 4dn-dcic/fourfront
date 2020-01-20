@@ -137,8 +137,7 @@ class ControlsAndResults extends React.PureComponent {
     }
 
     static defaultProps = {
-        'href'      : '/browse/',
-        'debug'     : false
+        'href' : '/browse/',
     };
 
     constructor(props){

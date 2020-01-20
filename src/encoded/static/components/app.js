@@ -227,7 +227,10 @@ export default class App extends React.PureComponent {
         // Load up analytics & perform initial pageview track
         const analyticsID = getGoogleAnalyticsTrackingID(href);
         if (analyticsID){
-            analytics.initializeGoogleAnalytics(analyticsID, context);
+            analytics.initializeGoogleAnalytics(
+                analyticsID,
+                { reduxStore: store, initialContext: context, initialHref: windowHref }
+            );
         }
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
@@ -328,16 +331,10 @@ export default class App extends React.PureComponent {
     }
 
     /** @ignore */
-    UNSAFE_componentWillUpdate(nextProps, nextState){
-        if (nextState.schemas !== this.state.schemas){
-            Schemas.set(nextState.schemas);
-        }
-    }
-
-    /** @ignore */
     componentDidUpdate(prevProps, prevState) {
         const { href, context } = this.props;
         const { session } = this.state;
+
         var key;
 
         if (href !== prevProps.href){ // We navigated somewhere else.
@@ -350,26 +347,31 @@ export default class App extends React.PureComponent {
             App.debouncedOnNavigationTooltipRebuild();
         }
 
-
-        for (key in this.props) {
-            // eslint-disable-next-line react/destructuring-assignment
-            if (this.props[key] !== prevProps[key]) {
-                console.log('changed props: %s', key);
-            }
-        }
-        for (key in this.state) {
-            // eslint-disable-next-line react/destructuring-assignment
-            if (this.state[key] !== prevState[key]) {
-                console.log('changed state: %s', key);
-            }
-        }
-
         // We could migrate this block of code to ChartDataController if it were stored in Redux.
         if (prevState.session !== session && ChartDataController.isInitialized()){
             setTimeout(function(){
                 console.log("SYNCING CHART DATA");
                 ChartDataController.sync();
             }, 0);
+        }
+
+        // We can skip doing this unless debugging on localhost-
+        if (console.isDebugging()){
+
+            for (key in this.props) {
+                // eslint-disable-next-line react/destructuring-assignment
+                if (this.props[key] !== prevProps[key]) {
+                    console.log('changed props: %s', key);
+                }
+            }
+
+            for (key in this.state) {
+                // eslint-disable-next-line react/destructuring-assignment
+                if (this.state[key] !== prevState[key]) {
+                    console.log('changed state: %s', key);
+                }
+            }
+
         }
 
     }
@@ -418,6 +420,7 @@ export default class App extends React.PureComponent {
         }
         ajax.promise('/profiles/?format=json').then((data) => {
             if (object.isValidJSON(data)){
+                Schemas.set(data);
                 this.setState({ 'schemas' : data }, () => {
                     // Rebuild tooltips because they likely use descriptions from schemas
                     ReactTooltip.rebuild();
@@ -1186,8 +1189,8 @@ export default class App extends React.PureComponent {
                     <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" type="text/css" />
                     <SEO.CurrentContext {...{ context, hrefParts, baseDomain }} />
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet" type="text/css"/>
-                    <script defer type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <script defer type="application/javascript" src="//www.google-analytics.com/analytics.js" />
+                    <script defer type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <link rel="canonical" href={canonical} />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>
