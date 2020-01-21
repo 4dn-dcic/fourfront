@@ -52,7 +52,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             title,
             children,
             facets,
-            session, schemas,
+            session, schemas: propSchemas,
             renderDetailPane, defaultOpenIndices, maxHeight,
             columns, columnExtensionMap,
             searchHref,
@@ -63,6 +63,8 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
         if (typeof searchHref !== "string") {
             throw new Error("Expected a string 'searchHref'");
         }
+
+        const schemas = propSchemas || getSchemas() || null; // We might not have this e.g. in placeholders in StaticSections
 
         const passProps = {
             facets, columns, columnExtensionMap, searchHref, session,
