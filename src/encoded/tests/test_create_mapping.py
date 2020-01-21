@@ -51,7 +51,7 @@ def test_create_mapping_item_order(registry):
         assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER
 
 
-@mock.patch('whodaman', new='fourfront-webprod')
+@mock.patch('dcicutils.beanstalk_utils.whodaman', new='fourfront-webprod')
 @mock.patch('get_my_env', new='fourfront-webprod2')
 def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the staging case """
