@@ -3,6 +3,7 @@ from .datafixtures import ORDER
 from snovault import COLLECTIONS
 from encoded.types.experiment import *
 from encoded.commands.create_mapping_on_deploy import ITEM_INDEX_ORDER
+from encoded.commands.create_mapping_on_deploy import get_deployment_config
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -47,3 +48,37 @@ def test_create_mapping_item_order(registry):
         if i_type.startswith('testing_'):
             continue
         assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER
+
+
+@mock.patch('whodaman', new='fourfront-webprod')
+@mock.patch('get_my_env', new='fourfront-webprod2')
+def test_get_deployment_config_staging():
+    """ Tests get_deployment_config in the staging case """
+    cfg = get_deployment_config(None)
+    assert cfg[0] == 'fourfront-webprod2'  # sanity
+    assert cfg[1] is False  # no wipe 
+
+@mock.patch('whodaman', new='fourfront-webprod2')
+@mock.patch('get_my_env', new='fourfront-webprod')
+def test_get_deployment_config_isomorphic_staging():
+    """ Tests get_deployment_config in the isomorphic staging case """
+    cfg = get_deployment_config(None)
+    assert cfg[0] == 'fourfront-webprod'  # sanity
+    assert cfg[1] is False  # no wipe 
+
+@mock.patch('whodaman', new='fourfront-webprod')
+@mock.patch('get_my_env', new='fourfront-mastertest')
+def test_get_deployment_config_mastertest():
+    """ Tests get_deployment_config in the mastertest case """
+    cfg = get_deployment_config(None)
+    assert cfg[0] == 'fourfront-mastertest'  # sanity
+    assert cfg[1] is True  # wipe 
+
+@mock.patch('whodaman', new='fourfront-webprod2')
+@mock.patch('get_my_env', new='fourfront-hotseat')
+def test_get_deployment_config_hotseat():
+    """ Tests get_deployment_config in the hotseat case """
+    cfg = get_deployment_config(None)
+    assert cfg[0] == 'fourfront-hotseat'  # sanity
+    assert cfg[1] is False  # no wipe 
+

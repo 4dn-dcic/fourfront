@@ -170,6 +170,12 @@ class DeploymentConfig(object):
         self.tuple[idx] = None
 
 
+def get_my_env(app):
+    """
+    Gets the env name of the currently running environments
+    """
+    return app.registry.settings.get('env.name')
+
 def get_deployment_config(app):
     """
         Gets the current data environment from 'whodaman()' and checks
@@ -179,7 +185,7 @@ def get_deployment_config(app):
     """
     deploy_cfg = DeploymentConfig(FF_DEPLOY_CONFIG_SIZE)
     current_data_env = whodaman()
-    my_env = app.registry.settings.get('env.name')
+    my_env = get_my_env(app)
     deploy_cfg[0] = my_env
     if (current_data_env == my_env):
         log.info('This looks like our production environment -- SKIPPING ALL')
