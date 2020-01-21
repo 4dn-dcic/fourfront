@@ -123,52 +123,23 @@ ITEM_INDEX_ORDER = [
     'Page',
 ]
 
-WEBPROD = 'fourfront-webprod'
-WEBPROD_TWO = 'fourfront-webprod2'
-MASTERTEST = 'fourfront-mastertest'
-HOTSEAT = 'fourfront-hotseat'
-WEBDEV = 'fourfront-webdev'
+ENV_WEBPROD = 'fourfront-webprod'
+ENV_WEBPROD2 = 'fourfront-webprod2'
+ENV_MASTERTEST = 'fourfront-mastertest'
+ENV_HOTSEAT = 'fourfront-hotseat'
+ENV_WEBDEV = 'fourfront-webdev'
 
 
-BEANSTALK_PROD = [
-    WEBPROD,
-    WEBPROD_TWO,
+BEANSTALK_PROD_ENVS = [
+    ENV_WEBPROD,
+    ENV_WEBPROD2,
 ]
 
-BEANSTALK_TEST = [
-    MASTERTEST,
-    HOTSEAT,
-    WEBDEV,
+BEANSTALK_TEST_ENVS = [
+    ENV_MASTERTEST,
+    ENV_HOTSEAT,
+    ENV_WEBDEV,
 ]
-
-FF_DEPLOY_CONFIG_SIZE = 2
-
-class DeploymentConfig(object):
-    """
-        Basic class wrapping an arbitrary number of configuration options
-        The caller must know the structure and how to interpret it
-        Values default to None and are set to None when del'd
-    """
-
-    def __init__(self, size):
-        self.tuple = [None] * size
-        self.size = size
-
-    def __getitem__(self, idx):
-        if (idx >= self.size):
-            raise IndexError('Index out of bounds on DeploymentConfig.get')
-        return self.tuple[idx]
-    
-    def __setitem__(self, idx, val):
-        if (idx >= self.size):
-            raise IndexError('Index out of bounds on DeploymentConfig.set')
-        self.tuple[idx] = val
-
-    def __delitem__(self, idx):
-        if (idx >= self.size):
-            raise IndexError('Index out of bounds on DeploymentConfig.del')
-        self.tuple[idx] = None
-
 
 def get_my_env(app):
     """
@@ -180,26 +151,26 @@ def get_deployment_config(app):
     """
         Gets the current data environment from 'whodaman()' and checks
         via environment variable if we are on production.
-        Returns a DeploymentConfig object with deployment options based on
-        the environment we are on
+        Returns a dictionary with deployment options based on
+        the environment we are on with keys: 'ENV_NAME' and 'WIPE_ES'
     """
-    deploy_cfg = DeploymentConfig(FF_DEPLOY_CONFIG_SIZE)
+    deploy_cfg = {}
     current_data_env = whodaman()
     my_env = get_my_env(app)
-    deploy_cfg[0] = my_env
+    deploy_cfg['ENV_NAME'] = my_env
     if (current_data_env == my_env):
         log.info('This looks like our production environment -- SKIPPING ALL')
         exit(1)
-    elif my_env in BEANSTALK_PROD:
+    elif my_env in BEANSTALK_PROD_ENVS:
         log.info('This looks like our staging environment -- do not wipe ES')
-        deploy_cfg[1] = False  # do not wipe ES
-    elif my_env in BEANSTALK_TEST:
-        if my_env == HOTSEAT:
+        deploy_cfg['WIPE_ES'] = False  # do not wipe ES
+    elif my_env in BEANSTALK_TEST_ENVS:
+        if my_env == ENV_HOTSEAT:
             log.info('Looks like we are on hotseat -- do not wipe ES')
-            deploy_cfg[1] = False
+            deploy_cfg['WIPE_ES'] = False
         else:
             log.info('Looks like we are on webdev or mastertest -- wipe ES')
-            deploy_cfg[1] = True
+            deploy_cfg['WIPE_ES'] = True
     return deploy_cfg
 
 
@@ -221,7 +192,8 @@ def main():
     # check_first. This is where you could do more things based on deployment options
     try:
         deploy_cfg = get_deployment_config(app)
-        if deploy_cfg[1]:  # if we want to wipe ES
+        log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
+        if deploy_cfg['WIPE_ES']:  # if we want to wipe ES
             run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
         else:
             run_create_mapping(app, check_first=True, item_order=ITEM_INDEX_ORDER)
