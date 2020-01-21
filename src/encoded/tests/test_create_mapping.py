@@ -51,18 +51,10 @@ def test_create_mapping_item_order(registry):
         assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER
 
 
-@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod2'))
-def test_get_deployment_config_staging():
-    """ Tests get_deployment_config in the staging case """
-    cfg = get_deployment_config(None)
-    assert cfg[0] == 'fourfront-webprod2'  # sanity
-    assert cfg[1] is False  # no wipe 
-
 @patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod'))
-def test_get_deployment_config_isomorphic_staging():
-    """ Tests get_deployment_config in the isomorphic staging case """
+def test_get_deployment_config_staging():
+    """ Tests get_deployment_config in the staging case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-webprod'  # sanity
     assert cfg[1] is False  # no wipe 
