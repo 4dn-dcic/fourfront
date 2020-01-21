@@ -52,31 +52,31 @@ def test_create_mapping_item_order(registry):
 
 
 @mock.patch('dcicutils.beanstalk_utils.whodaman', new='fourfront-webprod')
-@mock.patch('get_my_env', new='fourfront-webprod2')
+@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new='fourfront-webprod2')
 def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the staging case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-webprod2'  # sanity
     assert cfg[1] is False  # no wipe 
 
-@mock.patch('whodaman', new='fourfront-webprod2')
-@mock.patch('get_my_env', new='fourfront-webprod')
+@mock.patch('dcicutils.beanstalk_utils.whodaman', new='fourfront-webprod2')
+@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new='fourfront-webprod')
 def test_get_deployment_config_isomorphic_staging():
     """ Tests get_deployment_config in the isomorphic staging case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-webprod'  # sanity
     assert cfg[1] is False  # no wipe 
 
-@mock.patch('whodaman', new='fourfront-webprod')
-@mock.patch('get_my_env', new='fourfront-mastertest')
+@mock.patch('dcicutils.beanstalk_utils.whodaman', new='fourfront-webprod')
+@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new='fourfront-mastertest')
 def test_get_deployment_config_mastertest():
     """ Tests get_deployment_config in the mastertest case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-mastertest'  # sanity
     assert cfg[1] is True  # wipe 
 
-@mock.patch('whodaman', new='fourfront-webprod2')
-@mock.patch('get_my_env', new='fourfront-hotseat')
+@mock.patch('dcicutils.beanstalk_utils.whodaman', new='fourfront-webprod2')
+@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new='fourfront-hotseat')
 def test_get_deployment_config_hotseat():
     """ Tests get_deployment_config in the hotseat case """
     cfg = get_deployment_config(None)
