@@ -1,5 +1,5 @@
 import pytest
-import mock
+from mock import patch, MagicMock
 from .datafixtures import ORDER
 from snovault import COLLECTIONS
 from encoded.types.experiment import *
@@ -51,32 +51,32 @@ def test_create_mapping_item_order(registry):
         assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER
 
 
-@mock.patch('dcicutils.beanstalk_utils.whodaman', new=lambda x: 'fourfront-webprod')
-@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new=lambda x: 'fourfront-webprod2')
+@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod2'))
 def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the staging case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-webprod2'  # sanity
     assert cfg[1] is False  # no wipe 
 
-@mock.patch('dcicutils.beanstalk_utils.whodaman', new=lambda x: 'fourfront-webprod2')
-@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new=lambda x: 'fourfront-webprod')
+@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod'))
 def test_get_deployment_config_isomorphic_staging():
     """ Tests get_deployment_config in the isomorphic staging case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-webprod'  # sanity
     assert cfg[1] is False  # no wipe 
 
-@mock.patch('dcicutils.beanstalk_utils.whodaman', new=lambda x: 'fourfront-webprod')
-@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new=lambda x: 'fourfront-mastertest')
+@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
 def test_get_deployment_config_mastertest():
     """ Tests get_deployment_config in the mastertest case """
     cfg = get_deployment_config(None)
     assert cfg[0] == 'fourfront-mastertest'  # sanity
     assert cfg[1] is True  # wipe 
 
-@mock.patch('dcicutils.beanstalk_utils.whodaman', new=lambda x: 'fourfront-webprod2')
-@mock.patch('encoded.commands.create_mapping_on_deploy.get_my_env', new=lambda x: 'fourfront-hotseat')
+@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
 def test_get_deployment_config_hotseat():
     """ Tests get_deployment_config in the hotseat case """
     cfg = get_deployment_config(None)
