@@ -161,8 +161,8 @@ def get_deployment_config(app):
     my_env = get_my_env(app)
     deploy_cfg['ENV_NAME'] = my_env
     if current_data_env == my_env:
-        log.info('This looks like our production environment -- SKIPPING ALL')
-        exit(1)
+        log.info('This looks like our production environment -- do not wipe ES')
+        deploy_cfg['WIPE_ES'] = False
     elif my_env in BEANSTALK_PROD_ENVS:
         log.info('This looks like our staging environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False  # do not wipe ES
@@ -173,6 +173,10 @@ def get_deployment_config(app):
         else:
             log.info('Looks like we are on webdev or mastertest -- wipe ES')
             deploy_cfg['WIPE_ES'] = True
+    else:
+        log.warning('Looks like we are on an unrecognized env: %s' % my_env)
+        log.warning('Defaulting to not wipe ES')
+        deploy_cfg['WIPE_ES'] = False
     return deploy_cfg
 
 
