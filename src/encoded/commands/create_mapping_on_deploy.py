@@ -123,6 +123,86 @@ ITEM_INDEX_ORDER = [
     'Page',
 ]
 
+ENV_WEBPROD = 'fourfront-webprod'
+ENV_WEBPROD2 = 'fourfront-webprod2'
+ENV_MASTERTEST = 'fourfront-mastertest'
+ENV_HOTSEAT = 'fourfront-hotseat'
+ENV_WEBDEV = 'fourfront-webdev'
+
+
+BEANSTALK_PROD_ENVS = [
+    ENV_WEBPROD,
+    ENV_WEBPROD2,
+]
+
+BEANSTALK_TEST_ENVS = [
+    ENV_MASTERTEST,
+    ENV_HOTSEAT,
+    ENV_WEBDEV,
+]
+
+
+def get_my_env(app):
+    """
+    Gets the env name of the currently running environments
+    """
+    return app.registry.settings.get('env.name')
+
+
+def get_deployment_config(app):
+    """
+        Gets the current data environment from 'whodaman()' and checks
+        via environment variable if we are on production.
+        Returns a dictionary with deployment options based on
+        the environment we are on with keys: 'ENV_NAME' and 'WIPE_ES'
+    """
+    deploy_cfg = {}
+    current_data_env = whodaman()
+    my_env = get_my_env(app)
+    deploy_cfg['ENV_NAME'] = my_env
+    if current_data_env == my_env:
+        log.info('This looks like our production environment -- do not wipe ES')
+        deploy_cfg['WIPE_ES'] = False
+    elif my_env in BEANSTALK_PROD_ENVS:
+        log.info('This looks like our staging environment -- do not wipe ES')
+        deploy_cfg['WIPE_ES'] = False  # do not wipe ES
+    elif my_env in BEANSTALK_TEST_ENVS:
+        if my_env == ENV_HOTSEAT:
+            log.info('Looks like we are on hotseat -- do not wipe ES')
+            deploy_cfg['WIPE_ES'] = False
+        else:
+            log.info('Looks like we are on webdev or mastertest -- wipe ES')
+            deploy_cfg['WIPE_ES'] = True
+    else:
+        log.warning('Looks like we are on an unrecognized env: %s' % my_env)
+        log.warning('Defaulting to not wipe ES')
+        deploy_cfg['WIPE_ES'] = False
+    return deploy_cfg
+
+
+def _run_create_mapping(app, args):
+    """
+    Runs create_mapping with deploy options and report errors. Allows args passed from argparse in main to override
+    the default deployment configuration
+
+    :param app: pyramid application handle
+    :param args: args from argparse
+    :return: None
+    """
+    try:
+        deploy_cfg = get_deployment_config(app)
+        if args.wipe_es:  # override deploy_cfg WIPE_ES option
+            deploy_cfg['WIPE_ES'] = True
+        log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
+        if deploy_cfg['WIPE_ES']:  # if we want to wipe ES
+            run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
+        else:
+            run_create_mapping(app, check_first=True, item_order=ITEM_INDEX_ORDER)
+    except Exception as e:
+        log.error("Exception encountered while gathering deployment information or running create_mapping")
+        log.error(str(e))
+        exit(1)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -131,7 +211,7 @@ def main():
     )
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('--wipe-es', help="If specified on webprod will wipe ES", action='store_true', default=False)
+    parser.add_argument('--wipe-es', help="Specify to wipe ES", action='store_true', default=False)
 
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
@@ -139,29 +219,6 @@ def main():
     set_logging(in_prod=app.registry.settings.get('production'), log_name=__name__, level=logging.DEBUG)
     # set_logging(app.registry.settings.get('elasticsearch.server'), app.registry.settings.get('production'), level=logging.DEBUG)
 
-    # check if staging
-    try:
-        data_env = whodaman()
-        env = app.registry.settings.get('env.name')
-        if 'webprod' in env:
-            if data_env != env:
-                log.info("Looks like we are deploying staging, checking --wipe-es")
-                if args.wipe_es:
-                    log.info('--wipe-es specified - obliging')
-                    run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
-                else:
-                    log.info('--wipe-es not specified - will not wipe ES')
-                    run_create_mapping(app, check_first=True, item_order=ITEM_INDEX_ORDER)
-                return
-        # handle mastertest ... by blowing away all data first
-        if 'mastertest' in env:
-            log.info("looks like we are on mastertest, run create mapping without check first")
-            run_create_mapping(app, check_first=False, purge_queue=True, item_order=ITEM_INDEX_ORDER)
-            return
-        log.info("looks like we are NOT on staging or mastertest so run create mapping with check first")
-    except Exception:
-        import traceback
-        log.warning("error checking whodaman: %s " % traceback.format_exc())
-        log.warning("couldn't get wodaman, so assuming NOT staging")
-    log.info("... using default create mapping case")
-    run_create_mapping(app, check_first=True, purge_queue=True, item_order=ITEM_INDEX_ORDER)
+    _run_create_mapping(app, args)
+    exit(0)
+
