@@ -5,11 +5,10 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import url from 'url';
 
-import { getAbstractTypeForType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
+import { getAbstractTypeForType, getAllSchemaTypesFromSearchContext } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 import { console, isSelectAction,schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { columnExtensionMap } from './columnExtensionMap';
-import { memoizedUrlParse } from './../globals';
 import { Schemas } from './../util';
 import { TitleAndSubtitleBeside, PageTitleContainer, TitleAndSubtitleUnder, pageTitleViews, EditingItemPageTitle, StaticPageBreadcrumbs } from './../PageTitle';
 import { replaceString as placeholderReplacementFxn } from './../static-pages/placeholders';
@@ -48,40 +47,43 @@ export function filterFacet(facet, currentAction, session){
  * Also, whatever defined in `filterFacet`.
  */
 export function transformedFacets(href, context, currentAction, session, schemas){
-    var facets,
-        typeFacetIndex,
-        hrefQuery,
-        itemTypesInSearch;
 
     // Clone/filter list of facets.
     // We may filter out type facet completely at this step,
     // in which case we can return out of func early.
-    facets = _.filter(
+    const facets = _.filter(
         context.facets,
-        function(facet){ return filterFacet(facet, currentAction, session); }
+        function(facet){
+            return filterFacet(facet, currentAction, session);
+        }
     );
 
-    // Find facet for '@type'
-    typeFacetIndex = _.findIndex(facets, { 'field' : 'type' });
+    const searchItemTypes = getAllSchemaTypesFromSearchContext(context); // "Item" is excluded
 
-    if (typeFacetIndex === -1) {
-        return facets; // Facet not present, return.
-    }
-
-    hrefQuery = _.extend({}, memoizedUrlParse(href).query || {});
-    if (typeof hrefQuery.type === 'string') hrefQuery.type = [hrefQuery.type];
-    itemTypesInSearch = _.without(hrefQuery.type, 'Item');
-
-    if (itemTypesInSearch.length > 0){
+    if (searchItemTypes.length > 0) {
+        console.info("A (non-'Item') type filter is present. Will skip filtering Item types in Facet.");
         // Keep all terms/leaf-types - backend should already filter down to only valid sub-types through
         // nature of search itself.
+
+        if (searchItemTypes.length > 1) {
+            console.warn("More than one \"type\" filter is selected. This is intended to not occur, at least as a consequence of interacting with the UI. Perhaps have entered multiple types into URL.");
+        }
+
+        return facets;
+    }
+
+    // Find facet for '@type'
+    const typeFacetIndex = _.findIndex(facets, { 'field' : 'type' });
+
+    if (typeFacetIndex === -1) {
+        console.error("Could not get type facet, though some filter for it is present.");
         return facets;
     }
 
     // Avoid modifying in place.
     facets[typeFacetIndex] = _.clone(facets[typeFacetIndex]);
 
-    // Show only base types for when itemTypesInSearch.length === 0 (aka 'type=Item').
+    // Show only base types (exclude leaf types) for when no non-Item type filter is present.
     facets[typeFacetIndex].terms = _.filter(facets[typeFacetIndex].terms, function(itemType){
         const parentType = getAbstractTypeForType(itemType.key, schemas);
         return !parentType || parentType === itemType.key;

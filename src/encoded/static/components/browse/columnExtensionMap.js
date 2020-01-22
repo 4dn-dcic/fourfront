@@ -164,5 +164,11 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
                 </div>
             );
         }
-    }
+    },
+    'experiments_in_set.biosample.biosource.individual.organism.name' : {
+        'widthMap' : { 'lg' : 160, 'md' : 140, 'sm' : 120 }
+    },
+    'experiments_in_set.biosample.biosource_summary' : {
+        'widthMap' : { 'lg' : 260, 'md' : 230, 'sm' : 180 }
+    },
 });

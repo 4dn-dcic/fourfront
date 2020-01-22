@@ -38,137 +38,141 @@ h4.tab-section-title {
 	border-top-color: #ccc;
 }
 
-body .item-page-container > .rc-tabs-top {
+
+.item-page-container > .rc-tabs-top {
 
 	box-shadow: 0 -4px 5px -5px rgba(0,0,0,0.33);
 	border-bottom: none;
+	overflow: unset;
 
-	.rc-tabs-bar.extra-style-2 {
-		border-top: none;
-		border-bottom: none;
-		background: $brand-primary-dark;
+	
+	> .rc-tabs-bar {
 
-		.rc-tabs-nav {
-			padding: 4px 0px 4px;
-		}
-	}
-}
-
-.item-page-container > .rc-tabs-top > .rc-tabs-bar {
-
-	.rc-tabs-tab {
-		padding-left: 18px;
-		padding-right: 18px;
-		margin-right: 0px;
-		height: 38px;
-		line-height: 36px;
-		padding-top: 0px;
-		padding-bottom: 0px;
-		border-bottom: 1px solid transparent;
-		position: relative;
-		z-index: 10;
-		transition : border-color .1s ease-out;
-		color : #fff;
-
-		&:not(:nth-child(1)) {
-			border-left: 1px solid rgba(255,255,255,0.33);
+		&.extra-style-2 {
+			border-top: none;
+			border-bottom: none;
+			background: $brand-primary-dark;
+	
+			.rc-tabs-nav {
+				padding: 4px 0px 4px;
+			}
 		}
 
-		//&:last-child {
-		//  border-right: 1px solid rgba(255,255,255,0.2);
-		//}
+		.rc-tabs-tab {
+			padding-left: 18px;
+			padding-right: 18px;
+			margin-right: 0px;
+			height: 38px;
+			line-height: 36px;
+			padding-top: 0px;
+			padding-bottom: 0px;
+			border-bottom: 1px solid transparent;
+			position: relative;
+			z-index: 10;
+			transition : border-color .1s ease-out;
+			color : #fff;
 
-		&:hover:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled) {
-			color: #fff;
-			transition: none;
-			//background-color: #fafafa;
-			border-color: rgba(255, 255, 255, 0.33);
-			border-bottom-color: transparent;
-			border-top-color: transparent;
-			//border-bottom-color: rgba(255, 255, 255, 0.2);
-			background-color: rgba(255,255,255,0.1);
-		}
+			&:not(:nth-child(1)) {
+				border-left: 1px solid rgba(255,255,255,0.33);
+			}
 
-		&.rc-tabs-tab-disabled {
-			color: rgba(255,255,255,0.66) !important;
-			//pointer-events: none;
-			//cursor: none;
-		}
+			//&:last-child {
+			//  border-right: 1px solid rgba(255,255,255,0.2);
+			//}
 
-		&:hover.rc-tabs-tab-active {
-			transition:
-				border-color .6s ease-out,
-				color .3s .1s ease-out,
-				background-color .3s .2s ease-out;
-		}
+			&:hover:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled) {
+				color: #fff;
+				transition: none;
+				//background-color: #fafafa;
+				border-color: rgba(255, 255, 255, 0.33);
+				border-bottom-color: transparent;
+				border-top-color: transparent;
+				//border-bottom-color: rgba(255, 255, 255, 0.2);
+				background-color: rgba(255,255,255,0.1);
+			}
 
-		&.rc-tabs-tab-active {
-			border-color: transparent;
-			color: #000;
-		}
+			&.rc-tabs-tab-disabled {
+				color: rgba(255,255,255,0.66) !important;
+				//pointer-events: none;
+				//cursor: none;
+			}
 
-		&:hover:not(.rc-tabs-tab-disabled) + .rc-tabs-tab:not(.rc-tabs-tab-active) {
-			border-left-color: rgba(255,255,255,0.33);
-		}
+			&:hover.rc-tabs-tab-active {
+				transition:
+					border-color .6s ease-out,
+					color .3s .1s ease-out,
+					background-color .3s .2s ease-out;
+			}
 
-		&.rc-tabs-tab-active + .rc-tabs-tab:not(:hover) {
-			border-left-color: transparent;
-		}
+			&.rc-tabs-tab-active {
+				border-color: transparent;
+				color: #000;
+			}
 
-		.tab {
+			&:hover:not(.rc-tabs-tab-disabled) + .rc-tabs-tab:not(.rc-tabs-tab-active) {
+				border-left-color: rgba(255,255,255,0.33);
+			}
 
-			user-select: none;
-			font-weight: 500;
-			font-size: 1.05rem;
+			&.rc-tabs-tab-active + .rc-tabs-tab:not(:hover) {
+				border-left-color: transparent;
+			}
 
-			i.icon {
-				margin-right: 3px;
-				vertical-align: middle;
+			.tab {
 
-				&.icon-exclamation-triangle {
-					color: $badge-color-warning;
+				user-select: none;
+				font-weight: 500;
+				font-size: 1.05rem;
+
+				i.icon {
+					margin-right: 3px;
+					vertical-align: middle;
+
+					&.icon-exclamation-triangle {
+						color: $badge-color-warning;
+					}
+
+					&.icon-ban, &.icon-exclamation-circle {
+						color : $badge-color-warning;
+						//color: #ff5757;
+					}
+
 				}
 
-				&.icon-ban, &.icon-exclamation-circle {
-					color : $badge-color-warning;
-					//color: #ff5757;
+			}
+		}
+
+		.rc-tabs-tab-next,
+		.rc-tabs-tab-prev {
+
+			display: none;
+
+			&.rc-tabs-tab-arrow-show {
+				display: block;
+				color: #fff;
+
+				> span.rc-tabs-tab-prev-icon,
+				> span.rc-tabs-tab-next-icon {
+					top: 5px;
+				}
+
+				&.rc-tabs-tab-btn-disabled {
+					opacity: 0.25;
+				}
+
+				> .rc-tabs-tab-next-icon:before {
+					font-family: $fa-font-family;
+					font-weight: 900;
+					content: "\f105";
+				}
+				> .rc-tabs-tab-prev-icon:before {
+					font-family: $fa-font-family;
+					font-weight: 900;
+					content: "\f104";
 				}
 
 			}
-
 		}
-	}
 
-	.rc-tabs-tab-next,
-	.rc-tabs-tab-prev {
-
-		display: none;
-
-		&.rc-tabs-tab-arrow-show {
-			display: block;
-			color: #fff;
-
-			> span.rc-tabs-tab-prev-icon,
-			> span.rc-tabs-tab-next-icon {
-				top: 5px;
-			}
-
-			&.rc-tabs-tab-btn-disabled {
-				opacity: 0.25;
-			}
-
-			> .rc-tabs-tab-next-icon:before {
-				font-family: $fa-font-family;
-				font-weight: 900;
-				content: "\f105";
-			}
-			> .rc-tabs-tab-prev-icon:before {
-				font-family: $fa-font-family;
-				font-weight: 900;
-				content: "\f104";
-			}
-
-		}
 	}
 
 }
@@ -241,25 +245,15 @@ h3.submission-subtitle {
 }
 
 .submission-page-heading {
-    /** Extends .flexible-description-box **/
-	border-radius: 2px;
-	border: 1px solid #ddd;
-	min-height: 42px;
-	padding: 10px 15px 8px;
-}
-
-.submission-btn {
-	background-color: #f4f4f4;
-	border-color: #f4f4f4;
-	margin-left: 5px;
-	padding-left: 5px;
-	padding-right: 5px;
-	box-shadow: none;
-}
-
-.submission-btn:hover, .submission-btn:focus{
-	background-color: #ddd;
-	border-color: #f4f4f4;
+	padding: 10px;
+	position: relative;
+	&[data-open="true"]{
+		border-radius: 4px 4px 0 0;
+	}
+	> .row {
+		height: 100%;
+		min-height: 34px;
+	}
 }
 
 
@@ -540,7 +534,8 @@ i.item-status-indicator-dot {
 
 	.rc-tabs-content {
 		.rc-tabs-tabpane {
-			overflow-x: hidden;
+			/* overflow-x: hidden; */ // Let inner containers/div set this
+			overflow: unset; // Will overflow instead of showing scrollbar
 			.info-area {
 				overflow: hidden;
 				border-bottom: none;

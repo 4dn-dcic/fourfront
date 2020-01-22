@@ -24,7 +24,7 @@ export function getIconForCustomTab(tabName){
         case 'overview':
         case 'experiment-summaries':
         case 'experiment_summaries':
-            return 'file-alt';
+            return 'file-alt far';
         case 'data_processing':
             return 'area-chart fas';
         case 'processed_files':

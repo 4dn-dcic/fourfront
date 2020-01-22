@@ -19,7 +19,7 @@ import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTraci
 import { QCMetricFromSummary } from './FileView';
 
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components/file-tables';
-import { SelectedFilesController, uniqueFileCountNonMemoized } from './../browse/components/SelectedFilesController';
+import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 
@@ -222,7 +222,7 @@ const expCategorizerTitleRenderFxn = memoize(function(field, val, allowJX = true
 
 export class RawFilesStackedTableSection extends React.PureComponent {
 
-    static selectedFilesUniqueCount = memoize(uniqueFileCountNonMemoized);
+    static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
         const { context, files, selectedFiles } = this.props;
@@ -235,7 +235,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-raw-files-download-files-btn">
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0} id="expset-raw-files-download-files-btn">
                             <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
@@ -453,7 +453,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         );
     }
 
-    static selectedFilesUniqueCount = memoize(uniqueFileCountNonMemoized);
+    static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     constructor(props){
         super(props);
@@ -488,7 +488,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                 </span>
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix }} disabled={selectedFilesUniqueCount === 0} id="expset-processed-files-download-files-btn">
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0} id="expset-processed-files-download-files-btn">
                             <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>

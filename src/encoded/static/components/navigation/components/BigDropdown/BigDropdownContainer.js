@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
 import ReactTooltip from 'react-tooltip';
-import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { layout, console, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { elementIsChildOfLink } from './../../../globals';
 
 
@@ -44,6 +44,10 @@ export class BigDropdownContainer extends React.PureComponent {
                     firstFocusableElem.focus();
                 }
             }, 250);
+
+            analytics.event("BigDropdownContainer", "open", { eventLabel: id });
+        } else if (!open && pastOpen){
+            analytics.event("BigDropdownContainer", "close", { eventLabel: id });
         }
     }
 

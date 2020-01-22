@@ -227,7 +227,10 @@ export default class App extends React.PureComponent {
         // Load up analytics & perform initial pageview track
         const analyticsID = getGoogleAnalyticsTrackingID(href);
         if (analyticsID){
-            analytics.initializeGoogleAnalytics(analyticsID, context);
+            analytics.initializeGoogleAnalytics(
+                analyticsID,
+                { reduxStore: store, initialContext: context, initialHref: windowHref }
+            );
         }
 
         // Authenticate user if not yet handled server-side w/ cookie and rendering props.
@@ -328,16 +331,10 @@ export default class App extends React.PureComponent {
     }
 
     /** @ignore */
-    UNSAFE_componentWillUpdate(nextProps, nextState){
-        if (nextState.schemas !== this.state.schemas){
-            Schemas.set(nextState.schemas);
-        }
-    }
-
-    /** @ignore */
     componentDidUpdate(prevProps, prevState) {
         const { href, context } = this.props;
         const { session } = this.state;
+
         var key;
 
         if (href !== prevProps.href){ // We navigated somewhere else.
@@ -350,26 +347,31 @@ export default class App extends React.PureComponent {
             App.debouncedOnNavigationTooltipRebuild();
         }
 
-
-        for (key in this.props) {
-            // eslint-disable-next-line react/destructuring-assignment
-            if (this.props[key] !== prevProps[key]) {
-                console.log('changed props: %s', key);
-            }
-        }
-        for (key in this.state) {
-            // eslint-disable-next-line react/destructuring-assignment
-            if (this.state[key] !== prevState[key]) {
-                console.log('changed state: %s', key);
-            }
-        }
-
         // We could migrate this block of code to ChartDataController if it were stored in Redux.
         if (prevState.session !== session && ChartDataController.isInitialized()){
             setTimeout(function(){
                 console.log("SYNCING CHART DATA");
                 ChartDataController.sync();
             }, 0);
+        }
+
+        // We can skip doing this unless debugging on localhost-
+        if (console.isDebugging()){
+
+            for (key in this.props) {
+                // eslint-disable-next-line react/destructuring-assignment
+                if (this.props[key] !== prevProps[key]) {
+                    console.log('changed props: %s', key);
+                }
+            }
+
+            for (key in this.state) {
+                // eslint-disable-next-line react/destructuring-assignment
+                if (this.state[key] !== prevState[key]) {
+                    console.log('changed state: %s', key);
+                }
+            }
+
         }
 
     }
@@ -418,6 +420,7 @@ export default class App extends React.PureComponent {
         }
         ajax.promise('/profiles/?format=json').then((data) => {
             if (object.isValidJSON(data)){
+                Schemas.set(data);
                 this.setState({ 'schemas' : data }, () => {
                     // Rebuild tooltips because they likely use descriptions from schemas
                     ReactTooltip.rebuild();
@@ -481,11 +484,11 @@ export default class App extends React.PureComponent {
         if (this.historyEnabled) {
             event.preventDefault();
 
-            const tHrefParts   = url.parse(targetHref);
-            const pHrefParts   = memoizedUrlParse(href);
-            let tHrefHash    = tHrefParts.hash;
-            const samePath     = pHrefParts.path === tHrefParts.path;
-            const navOpts      = {
+            const tHrefParts = url.parse(targetHref);
+            const pHrefParts = memoizedUrlParse(href);
+            let tHrefHash = tHrefParts.hash;
+            const samePath = pHrefParts.path === tHrefParts.path;
+            const navOpts = {
                 // Same pathname & search but maybe different hash. Don't add history entry etc.
                 'replace'           : samePath,
                 'skipRequest'       : samePath || !!(target.getAttribute('data-skiprequest')),
@@ -810,7 +813,7 @@ export default class App extends React.PureComponent {
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
 
         // Holds #hash, if any.
-        let fragment;
+        let hashAppendage = "";
 
         // What we end up putting into Redux upon request completion.
         // Will include at least `context`, `href`.
@@ -819,25 +822,26 @@ export default class App extends React.PureComponent {
 
         // Prepare the target href. Cancel out if some rule prevents navigation(s) at moment.
         targetHref = url.resolve(href, targetHref);
+
         if (!options.skipConfirmCheck && !this.confirmNavigation(targetHref, options)) {
             return false;
         }
+
         // Strip url hash.
-        fragment = '';
-        var href_hash_pos = targetHref.indexOf('#');
-        if (href_hash_pos > -1) {
-            fragment = targetHref.slice(href_hash_pos);
-            targetHref = targetHref.slice(0, href_hash_pos);
+        const hashIndex = targetHref.indexOf('#');
+        if (hashIndex > -1) {
+            hashAppendage = targetHref.slice(hashIndex);
+            targetHref = targetHref.slice(0, hashIndex);
         }
 
         const doRequest = () => {
 
             if (!this.historyEnabled) {
                 if (options.replace) {
-                    window.location.replace(targetHref + fragment);
+                    window.location.replace(targetHref + hashAppendage);
                 } else {
                     const [ old_path ] = ('' + window.location).split('#');
-                    window.location.assign(targetHref + fragment);
+                    window.location.assign(targetHref + hashAppendage);
                     if (old_path === targetHref) {
                         window.location.reload();
                     }
@@ -859,21 +863,21 @@ export default class App extends React.PureComponent {
             if (options.skipRequest) {
                 if (options.replace) {
                     try {
-                        window.history.replaceState(context, '', targetHref + fragment);
+                        window.history.replaceState(context, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.replaceState(null, '', targetHref + fragment);
+                        window.history.replaceState(null, '', targetHref + hashAppendage);
                     }
                 } else {
                     try {
-                        window.history.pushState(context, '', targetHref + fragment);
+                        window.history.pushState(context, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.pushState(null, '', targetHref + fragment);
+                        window.history.pushState(null, '', targetHref + hashAppendage);
                     }
                 }
                 if (!options.skipUpdateHref) {
-                    reduxDispatchDict.href = targetHref + fragment;
+                    reduxDispatchDict.href = targetHref + hashAppendage;
                 }
                 if (_.keys(reduxDispatchDict).length > 0){
                     store.dispatch({ 'type' : reduxDispatchDict });
@@ -908,9 +912,9 @@ export default class App extends React.PureComponent {
                         // navigate normally to URL of unexpected non-JSON response so back button works.
                         // this cancels out of promise chain & current app JS scope
                         if (options.replace) {
-                            window.location.replace(targetHref + fragment);
+                            window.location.replace(targetHref + hashAppendage);
                         } else {
-                            window.location.assign(targetHref + fragment);
+                            window.location.assign(targetHref + hashAppendage);
                         }
                     }
 
@@ -922,7 +926,7 @@ export default class App extends React.PureComponent {
                         currentRequestInThisScope && currentRequestInThisScope.xhr && currentRequestInThisScope.xhr.responseURL
                     ) || targetHref;
 
-                    reduxDispatchDict.href = responseHref + fragment;
+                    reduxDispatchDict.href = responseHref + hashAppendage;
 
                     if (currentRequestInThisScope === this.currentNavigationRequest){ // Ensure we're not de-referencing some new superceding request.
                         this.currentNavigationRequest = null;
@@ -1023,17 +1027,17 @@ export default class App extends React.PureComponent {
                 // title currently ignored by browsers
                 if (options.replace){
                     try {
-                        window.history.replaceState(err, '', targetHref + fragment);
+                        window.history.replaceState(err, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.replaceState(null, '', targetHref + fragment);
+                        window.history.replaceState(null, '', targetHref + hashAppendage);
                     }
                 } else {
                     try {
-                        window.history.pushState(err, '', targetHref + fragment);
+                        window.history.pushState(err, '', targetHref + hashAppendage);
                     } catch (exc) {
                         console.warn('Data too big, saving null to browser history in place of props.context.');
-                        window.history.pushState(null, '', targetHref + fragment);
+                        window.history.pushState(null, '', targetHref + hashAppendage);
                     }
                 }
             });
@@ -1185,8 +1189,8 @@ export default class App extends React.PureComponent {
                     <link rel="stylesheet" href="https://unpkg.com/rc-tabs@9.6.0/dist/rc-tabs.min.css" type="text/css" />
                     <SEO.CurrentContext {...{ context, hrefParts, baseDomain }} />
                     <link href="https://fonts.googleapis.com/css?family=Mada:200,300,400,500,600,700,900|Yrsa|Source+Code+Pro:300,400,500,600" rel="stylesheet" type="text/css"/>
-                    <script defer type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <script defer type="application/javascript" src="//www.google-analytics.com/analytics.js" />
+                    <script defer type="application/javascript" src={"/static/build/bundle.js?build=" + (lastCSSBuildTime || 0)} charSet="utf-8" />
                     <link rel="canonical" href={canonical} />
                     {/* <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}/> <-- SAVED FOR REFERENCE */}
                 </head>

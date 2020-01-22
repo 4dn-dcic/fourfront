@@ -12,7 +12,7 @@ import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
 import { memoizedUrlParse } from './../globals';
 
-import { ExperimentSetTablesLoaded, ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
+import { ExperimentSetTablesLoaded, ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -53,25 +53,24 @@ export default class FileView extends WorkflowRunTracingView {
     }
 
     getTabViewContents(){
-        const { context, browseBaseState } = this.props;
+        const { context } = this.props;
         const width = this.getTabViewWidth();
         const tabs = [];
 
         tabs.push(FileViewOverview.getTabObject(this.props, width));
 
-        if(getItemType(context) === 'FileReference') {
+        if (getItemType(context) === 'FileReference') {
             const expSetTableProps = {
                 ...this.props,
-                'requestHref': (
-                    "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                width,
+                'searchHref': (
+                    "/browse/?type=ExperimentSet&" +
                     "experiments_in_set.reference_files.accession=" + context.accession
                 ),
-                'title': function (props, { totalCount }) {
-                    return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
-                }
+                'facets' : null
             };
 
-            tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps));
+            tabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps));
         }
 
         if (this.shouldGraphExist(context)){
