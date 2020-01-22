@@ -278,25 +278,16 @@ export class MiddleRow extends React.Component {
 export const BottomRow = React.memo(function BottomRow(props){
     const {
         context: {
-            last_modified: {
-                date_modified = null,
-                modified_by: { display_title: modifiedByTitle = null } = {} // Likely to have { error : "no view permissions" }
-            } = {},
-            date_created,
+            date_created = null,
             submitted_by: { display_title: submittedByTitle = null  } = {} // Likely to have { error : "no view permissions" }
         },
         children = null
     } = props;
+
     let dateToUse = null;
     let tooltip = null;
 
-    if (typeof date_modified === 'string'){
-        dateToUse = date_modified;
-        tooltip = 'Last modified';
-        if (modifiedByTitle) {
-            tooltip += " by " + modifiedByTitle;
-        }
-    } else if (typeof date_created === 'string'){
+    if (typeof date_created === 'string'){
         dateToUse = date_created;
         tooltip = 'Created';
         if (submittedByTitle) {
