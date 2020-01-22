@@ -57,7 +57,8 @@ def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the staging case """
     cfg = get_deployment_config(None)
     assert cfg['ENV_NAME'] == 'fourfront-webprod'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe 
+    assert cfg['WIPE_ES'] is False  # no wipe
+
 
 @patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
@@ -65,7 +66,8 @@ def test_get_deployment_config_mastertest():
     """ Tests get_deployment_config in the mastertest case """
     cfg = get_deployment_config(None)
     assert cfg['ENV_NAME'] == 'fourfront-mastertest'  # sanity
-    assert cfg['WIPE_ES'] is True  # wipe 
+    assert cfg['WIPE_ES'] is True  # wipe
+
 
 @patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
@@ -73,5 +75,5 @@ def test_get_deployment_config_hotseat():
     """ Tests get_deployment_config in the hotseat case """
     cfg = get_deployment_config(None)
     assert cfg['ENV_NAME'] == 'fourfront-hotseat'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe 
+    assert cfg['WIPE_ES'] is False  # no wipe
 

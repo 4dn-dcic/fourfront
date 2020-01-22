@@ -141,11 +141,13 @@ BEANSTALK_TEST_ENVS = [
     ENV_WEBDEV,
 ]
 
+
 def get_my_env(app):
     """
     Gets the env name of the currently running environments
     """
     return app.registry.settings.get('env.name')
+
 
 def get_deployment_config(app):
     """
@@ -158,7 +160,7 @@ def get_deployment_config(app):
     current_data_env = whodaman()
     my_env = get_my_env(app)
     deploy_cfg['ENV_NAME'] = my_env
-    if (current_data_env == my_env):
+    if current_data_env == my_env:
         log.info('This looks like our production environment -- SKIPPING ALL')
         exit(1)
     elif my_env in BEANSTALK_PROD_ENVS:
@@ -174,24 +176,19 @@ def get_deployment_config(app):
     return deploy_cfg
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Create Elasticsearch mapping on deployment", epilog=EPILOG,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    parser.add_argument('config_uri', help="path to configfile")
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
+def _run_create_mapping(app, args):
+    """
+    Runs create_mapping with deploy options and report errors. Allows args passed from argparse in main to override
+    the default deployment configuration
 
-    args = parser.parse_args()
-    app = get_app(args.config_uri, args.app_name)
-    # Loading app will have configured from config file. Reconfigure here:
-    set_logging(in_prod=app.registry.settings.get('production'), log_name=__name__, level=logging.DEBUG)
-    # set_logging(app.registry.settings.get('elasticsearch.server'), app.registry.settings.get('production'), level=logging.DEBUG)
-
-    # get deployment config, check whether to run create mapping with or without
-    # check_first. This is where you could do more things based on deployment options
+    :param app: pyramid application handle
+    :param args: args from argparse
+    :return: None
+    """
     try:
         deploy_cfg = get_deployment_config(app)
+        if args.wipe_es:  # override deploy_cfg WIPE_ES option
+            deploy_cfg['WIPE_ES'] = True
         log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
         if deploy_cfg['WIPE_ES']:  # if we want to wipe ES
             run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
@@ -200,3 +197,24 @@ def main():
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
         log.error(str(e))
+        exit(1)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Create Elasticsearch mapping on deployment", epilog=EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('--app-name', help="Pyramid app name in configfile")
+    parser.add_argument('--wipe-es', help="Specify to wipe ES", action='store_true', default=False)
+
+    args = parser.parse_args()
+    app = get_app(args.config_uri, args.app_name)
+    # Loading app will have configured from config file. Reconfigure here:
+    set_logging(in_prod=app.registry.settings.get('production'), log_name=__name__, level=logging.DEBUG)
+    # set_logging(app.registry.settings.get('elasticsearch.server'), app.registry.settings.get('production'), level=logging.DEBUG)
+
+    _run_create_mapping(app, args)
+    exit(0)
+
