@@ -65,8 +65,6 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     );
 });
 
-
-
 /**
  * Upon clicking the button, reveal a modal popup giving users more download instructions.
  */
@@ -151,22 +149,16 @@ class SelectedFilesDownloadModal extends React.PureComponent {
     }
 
     handleAcceptDisclaimer(){
-        const { context } = this.props;
-        const { filters = null, display_title, title } = context || {};
-        const eventObj = {
-            name: display_title || title
-        };
-
-        if (filters) {
-            eventObj.currentFilters = analytics.getStringifiedCurrentFilters(filters);
-        }
-
-        analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", eventObj);
+        const { context, fileCountUnique } = this.props;
+        analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", {
+            ...analytics.eventObjectFromCtx(context),
+            eventValue: fileCountUnique
+        });
         this.setState({ 'disclaimerAccepted' : true });
     }
 
     render(){
-        const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes } = this.props;
+        const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context } = this.props;
         const { disclaimerAccepted } = this.state;
 
         const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
@@ -218,7 +210,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             I have read and understand the notes.
                         </button>
                         :
-                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename }} />
+                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context }} />
                     }
 
                     <button type="reset" onClick={onHide} className="btn btn-outline-dark ml-05">Cancel</button>
@@ -248,17 +240,46 @@ const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
  * the POSTed form fields which identify the individual files to download.
  */
 const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownloadStartButton(props){
-    const { suggestedFilename, selectedFiles } = props;
-    const accessionTripleArrays = _.map(_.keys(selectedFiles), function(accessionTripleString){
-        const accessions = accessionTripleString.split('~');
-        return [accessions[0] || 'NONE', accessions[1] || 'NONE', accessions[2] || 'NONE'];
-    });
+    const { suggestedFilename, selectedFiles, context } = props;
+
+    const { accessionTripleArrays, onClick } = useMemo(function(){
+        const filenameAccessions = new Set();
+        const accessionTripleArrays = _.map(_.keys(selectedFiles), function(accessionTripleString){
+            const [ setAcc = "NONE", expAcc = "NONE", fileAcc ] = accessionTripleString.split('~');
+            if (fileAcc){
+                filenameAccessions.add(fileAcc);
+            }
+            return [setAcc, expAcc, fileAcc || "NONE"];
+        });
+
+        /**
+         * We're going to consider download of metadata.tsv file to be akin to adding something to shopping cart.
+         * Something they might download later...
+         */
+        function onClick(evt){
+            setTimeout(function(){
+                analytics.productsAddToCart(
+                    _.keys(selectedFiles).map(function(accessionTripleString){
+                        return selectedFiles[accessionTripleString];
+                    })
+                );
+                analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
+                    ...eventObjectFromCtx(context),
+                    eventLabel: JSON.stringify([...filenameAccessions].sort()),
+                    eventValue: filenameAccessions.size || 0
+                });
+            }, 0);
+        }
+
+        return { accessionTripleArrays, onClick };
+    }, [ selectedFiles, context ]);
 
     return (
         <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-            <button type="submit" name="Download" className="btn btn-primary" data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
+            <button type="submit" name="Download" className="btn btn-primary" onClick={onClick}
+                data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
                 <i className="icon icon-fw icon-file-alt fas"/>&nbsp; Download metadata for files
             </button>
         </form>
