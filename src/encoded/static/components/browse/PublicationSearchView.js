@@ -84,7 +84,19 @@ function maxCharsToShowPerLine(colWidth){
 
 class PublicationSearchResultTitle extends React.PureComponent {
 
+    /** Static func is memoized since will get back same value for all instances within table/view */
     static maxCharsToShowPerLine = memoize(maxCharsToShowPerLine);
+
+    static shortenedTitle(colWidth, origTitle, fallbackTitle){
+        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 45); // -45 re: ToggleBtn width
+        const titleMaxLen = charsPerLine * 3; // 3 lines max for it
+        let title = origTitle || fallbackTitle || "No Title";
+        const titleLen = title.length;
+        if (titleLen > titleMaxLen) {
+            title = title.slice(0, titleMaxLen) + "...";
+        }
+        return { title, titleMaxLen, charsPerLine, titleLen };
+    }
 
     static defaultProps = {
         "showAbstractBlock" : false
@@ -93,6 +105,9 @@ class PublicationSearchResultTitle extends React.PureComponent {
     constructor(props){
         super(props);
         this.onClickTrack = this.onClickTrack.bind(this);
+        this.memoized = {
+            shortenedTitle: memoize(PublicationSearchResultTitle.shortenedTitle)
+        };
     }
 
     onClickTrack(evt){
@@ -111,19 +126,13 @@ class PublicationSearchResultTitle extends React.PureComponent {
     render(){
         const { result, detailOpen, toggleDetailOpen, width: colWidth, showAbstractBlock } = this.props;
         const {
-            title: origTitle, // We use "title" here, not "display_title" (which contains year+author, also)
+            title: origTitle = null, // We use "title" here, not "display_title" (which contains year+author, also)
+            display_title: fallbackTitle, // If "title" is not present, we prly have some display_title backup.
             "@id" : id,
             abstract = null,
             authors = null
         } = result;
-        const charsPerLine = PublicationSearchResultTitle.maxCharsToShowPerLine(colWidth - 45); // -45 re: ToggleBtn width
-        const titleLen = origTitle.length;
-        const titleMaxLen = charsPerLine * 3; // 3 lines max for it
-        let title = origTitle;
-        if (titleLen > titleMaxLen) {
-            title = title.slice(0, titleMaxLen) + "...";
-        }
-
+        const { title, titleMaxLen, charsPerLine, titleLen } = this.memoized.shortenedTitle(colWidth, origTitle, fallbackTitle);
         return (
             <React.Fragment>
                 <TableRowToggleOpenButton onClick={toggleDetailOpen} open={detailOpen} />
@@ -144,7 +153,7 @@ const AbstractBlock = React.memo(function({ enabled, authors, titleLen, titleMax
     if (!enabled) return null;
 
     const authorsLen = useMemo(function(){
-        if (!Array.isArray(authors)) return 0;
+        if (!Array.isArray(authors) || authors.length === 0) return 0;
         const initAuthors = authors.slice(0);
         let charCount = 0;
         while (initAuthors.length){
@@ -187,7 +196,7 @@ const AbstractBlock = React.memo(function({ enabled, authors, titleLen, titleMax
 
 const AuthorsBlock = React.memo(function AuthorsBlock(props){
     const { maxCharacters: maxCharLen = 20, authors = [] } = props;
-    const initAuthorsLen = authors.length;
+    const initAuthorsLen = (Array.isArray(authors) && authors.length) || 0;
     if (initAuthorsLen === 0) {
         return (
             <div className="authors-list">
@@ -225,12 +234,16 @@ const AuthorsBlock = React.memo(function AuthorsBlock(props){
 });
 
 
-const JournalTitle = React.memo(function JournalTitle({ journal, width: colWidth }){
+const JournalTitle = React.memo(function JournalTitle({ journal = null, width: colWidth }){
 
     // Not memoized since this component itself is memoized with only real dynamic prop being colWidth.
     const maxCharsPerLine = maxCharsToShowPerLine(colWidth);
     const maxChars = maxCharsPerLine * 5;
-    const journalLen = journal.length;
+    const journalLen = (journal && journal.length) || 0;
+
+    if (journalLen === 0) {
+        return <span className="value text-500"> - </span>;
+    }
 
     if (journalLen > maxChars) {
         return <span className="value">{ journal.slice(0, maxChars).trim() + "..." }</span>;

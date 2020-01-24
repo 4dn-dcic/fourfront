@@ -12,7 +12,7 @@ import { expFxn } from './../../util';
 // These are used often by other components which consume/display selected file counts.
 
 /** Used and memoized in views which have multiple sets of selectedFiles */
-export function uniqueFileCountNonMemoized(selectedFiles){
+export function uniqueFileCount(selectedFiles){
     if (!selectedFiles || typeof selectedFiles !== 'object' || Array.isArray(selectedFiles)){
         console.error("selectedFiles not in proper form or is non-existent", selectedFiles);
         return 0;
@@ -20,12 +20,9 @@ export function uniqueFileCountNonMemoized(selectedFiles){
     return _.uniq(_.pluck(_.values(selectedFiles), 'accession')).length;
 }
 
-/** Pre-memoized and to be used in views that only have 1 selectedFiles collection, such as BrowseView */
-export const uniqueFileCount = memoize(uniqueFileCountNonMemoized);
-
-export const fileCountWithDuplicates = memoize(function(selectedFiles){
+export function fileCountWithDuplicates(selectedFiles){
     return _.keys(selectedFiles).length;
-});
+}
 
 
 /**

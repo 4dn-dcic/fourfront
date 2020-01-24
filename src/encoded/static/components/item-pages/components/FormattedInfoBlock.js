@@ -66,7 +66,7 @@ export class WrappedCollapsibleList extends React.Component {
         'publications'      : [],
         'singularTitle'     : 'Publication',
         'itemClassName'     : null,
-        'iconClass'         : 'book',
+        'iconClass'         : 'book fas',
         'itemRenderFxn'     : null,
         'wrapperElement'    : 'ul'
     };
