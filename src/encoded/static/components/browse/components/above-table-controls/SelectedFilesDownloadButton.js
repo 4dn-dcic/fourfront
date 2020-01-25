@@ -261,7 +261,11 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                 const fileList = _.keys(selectedFiles).map(function(accessionTripleString){
                     return selectedFiles[accessionTripleString];
                 });
-                const extData = { list: analytics.hrefToListName(window && window.location.href), step: 1 };
+                const extData = {
+                    list: analytics.hrefToListName(window && window.location.href),
+                    step: 1,
+                    option: "Metadata.tsv Download"
+                };
                 // analytics.productsAddToCart(fileList, extData);
                 analytics.productsCheckout(fileList, extData);
                 analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {

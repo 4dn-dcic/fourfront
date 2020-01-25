@@ -21,7 +21,7 @@ import { File } from './typedefs';
 export function downloadFileButtonClick(fileItem, context = null){
     setTimeout(function(){
         productsAddToCart(fileItem);
-        productsCheckout(fileItem);
+        productsCheckout(fileItem, { step: 1, option: "File Download Button" });
         const evtObj = eventObjectFromCtx(context);
         if (!isNaN(fileItem.file_size)){
             evtObj.filesize = fileItem.file_size;
