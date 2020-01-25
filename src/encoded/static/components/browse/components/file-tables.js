@@ -382,7 +382,8 @@ export class RawFilesStackedTable extends React.PureComponent {
             })).isRequired
         }),
         'collapseLongLists'         : PropTypes.bool,
-        'preventExpand'             : PropTypes.bool
+        'preventExpand'             : PropTypes.bool,
+        'analyticsImpressionOnMount': PropTypes.bool
     };
 
     static defaultProps = {
@@ -400,6 +401,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.analyticsImpression = _.once(this.analyticsImpression.bind(this));
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
@@ -423,7 +425,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         };
     }
 
-    componentDidMount(){
+    analyticsImpression(){
         const { experimentSet } = this.props;
         const { allRawFiles, experimentsGroupedByBiosample } = this.memoized.groupedData(experimentSet);
 
@@ -442,6 +444,13 @@ export class RawFilesStackedTable extends React.PureComponent {
             analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable");
             analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet.display_title });
         }, 250);
+    }
+
+    componentDidMount(){
+        const { analyticsImpressionOnMount = false } = this.props;
+        if (analyticsImpressionOnMount) {
+            this.analyticsImpression();
+        }
     }
 
     handleFileCheckboxChange(accessionTripleString, fileObj){
@@ -636,7 +645,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static propTypes = {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
-        'files' : PropTypes.array.isRequired
+        'files' : PropTypes.array.isRequired,
+        'analyticsImpressionOnMount' : PropTypes.bool
     };
 
     static defaultProps = {
@@ -683,6 +693,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.analyticsImpression = _.once(this.analyticsImpression.bind(this));
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.oddExpRow = false;
 
@@ -691,10 +702,9 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         };
     }
 
-    componentDidMount(){
+    analyticsImpression(){
         const { files: origFileList } = this.props;
         const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(origFileList);
-
         const exps = [];
         let resortedFileList = [];
 
@@ -715,6 +725,13 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             analytics.impressionListOfItems(resortedFileList, null, "ProcessedFilesStackedTable");
             analytics.event("ProcessedFilesStackedTable", "Mounted");
         }, 250);
+    }
+
+    componentDidMount(){
+        const { analyticsImpressionOnMount = false } = this.props;
+        if (analyticsImpressionOnMount) {
+            this.analyticsImpression();
+        }
     }
 
     componentDidUpdate(){

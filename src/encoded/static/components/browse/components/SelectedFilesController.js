@@ -90,7 +90,8 @@ export class SelectedFilesController extends React.PureComponent {
                 //}
             }
             return false;
-        }
+        },
+        'analyticsAddFilesToCart' : false
     };
 
     constructor(props){
@@ -105,6 +106,10 @@ export class SelectedFilesController extends React.PureComponent {
     }
 
     componentDidMount(){
+        const { analyticsAddFilesToCart = false } = this.props;
+        if (!analyticsAddFilesToCart) {
+            return;
+        }
         const { selectedFiles, context } = this.state;
         const existingFileList = _.keys(selectedFiles).map(function(accessionTripleString){
             return selectedFiles[accessionTripleString];
@@ -133,7 +138,7 @@ export class SelectedFilesController extends React.PureComponent {
     }
 
     selectFile(accessionTriple, fileItem = null){
-        const { context } = this.props;
+        const { context, analyticsAddFilesToCart = false } = this.props;
         function error(){
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
@@ -166,6 +171,9 @@ export class SelectedFilesController extends React.PureComponent {
 
             return { 'selectedFiles' : newSelectedFiles };
         }, ()=>{
+            if (!analyticsAddFilesToCart){
+                return;
+            }
             const extData = { list: analytics.hrefToListName(window && window.location.href) };
             analytics.productsAddToCart(newlyAddedFileItems, extData);
             analytics.event(
@@ -181,7 +189,7 @@ export class SelectedFilesController extends React.PureComponent {
     }
 
     unselectFile(accessionTriple){
-        const { context } = this.props;
+        const { context, analyticsAddFilesToCart = false } = this.props;
         function error(){
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
@@ -215,6 +223,9 @@ export class SelectedFilesController extends React.PureComponent {
 
             return { 'selectedFiles' : newSelectedFiles };
         }, ()=>{
+            if (!analyticsAddFilesToCart){
+                return;
+            }
             const extData = { list: analytics.hrefToListName(window && window.location.href) };
             analytics.productsRemoveFromCart(newlyRemovedFileItems, extData);
             analytics.event(
@@ -229,14 +240,18 @@ export class SelectedFilesController extends React.PureComponent {
         });
     }
 
+    /** @todo: Maybe change to remove all files (not reset to initial) */
     resetSelectedFiles(){
-        const { context, initiallySelectedFiles } = this.props;
+        const { context, initiallySelectedFiles, analyticsAddFilesToCart = false } = this.props;
         const { selectedFiles: existingSelectedFiles } = this.state;
         const existingFileList = _.keys(existingSelectedFiles).map(function(accessionTripleString){
             return selectedFiles[accessionTripleString];
         });
         const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(initiallySelectedFiles);
         this.setState({ selectedFiles },()=>{
+            if (!analyticsAddFilesToCart){
+                return;
+            }
             const extData = { list: analytics.hrefToListName(window && window.location.href) };
             analytics.productsRemoveFromCart(existingFileList, extData);
             analytics.event(

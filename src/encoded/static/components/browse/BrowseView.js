@@ -438,7 +438,7 @@ export default class BrowseView extends React.PureComponent {
 
         return (
             <div className="browse-page-container search-page-container container" id="content">
-                <SelectedFilesController {...{ href, context }}>
+                <SelectedFilesController {...{ href, context }} analyticsAddFilesToCart>
                     <BrowseTableWithSelectedFilesCheckboxes {...this.props} facets={facets} />
                 </SelectedFilesController>
             </div>
