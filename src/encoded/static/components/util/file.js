@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { productsAddToCart, event, eventObjectFromCtx } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
+import { productsAddToCart, productsCheckout, event, eventObjectFromCtx } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 import { FileDownloadButtonAuto as FileDownloadButtonAutoOriginal } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
 
@@ -21,6 +21,7 @@ import { File } from './typedefs';
 export function downloadFileButtonClick(fileItem, context = null){
     setTimeout(function(){
         productsAddToCart(fileItem);
+        productsCheckout(fileItem);
         const evtObj = eventObjectFromCtx(context);
         if (!isNaN(fileItem.file_size)){
             evtObj.filesize = fileItem.file_size;

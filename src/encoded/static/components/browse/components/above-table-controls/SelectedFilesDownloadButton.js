@@ -258,13 +258,14 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
          */
         function onClick(evt){
             setTimeout(function(){
-                analytics.productsAddToCart(
-                    _.keys(selectedFiles).map(function(accessionTripleString){
-                        return selectedFiles[accessionTripleString];
-                    })
-                );
+                const fileList = _.keys(selectedFiles).map(function(accessionTripleString){
+                    return selectedFiles[accessionTripleString];
+                });
+                const extData = { list: analytics.hrefToListName(window && window.location.href), step: 1 };
+                // analytics.productsAddToCart(fileList, extData);
+                analytics.productsCheckout(fileList, extData);
                 analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
-                    ...eventObjectFromCtx(context),
+                    ...analytics.eventObjectFromCtx(context),
                     eventLabel: JSON.stringify([...filenameAccessions].sort()),
                     eventValue: filenameAccessions.size || 0
                 });

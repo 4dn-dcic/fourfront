@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, console, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../../util';
 
 
@@ -104,26 +104,51 @@ export class SelectedFilesController extends React.PureComponent {
         this.state = { selectedFiles };
     }
 
-    componentDidUpdate(pastProps){
-        if (this.props.resetSelectedFilesCheck(this.props, pastProps)){
-            this.resetSelectedFiles(this.props);
+    componentDidMount(){
+        const { selectedFiles, context } = this.state;
+        const existingFileList = _.keys(selectedFiles).map(function(accessionTripleString){
+            return selectedFiles[accessionTripleString];
+        });
+        if (existingFileList.length > 0) {
+            setTimeout(function(){
+                const extData = { list: analytics.hrefToListName(window && window.location.href) };
+                analytics.productsAddToCart(existingFileList, extData);
+                analytics.event(
+                    "SelectedFilesController",
+                    "Select Files",
+                    {
+                        eventLabel: extData.list,
+                        eventValue: existingFileList.length,
+                        currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    }
+                );
+            }, 250);
         }
     }
 
-    selectFile(accessionTriple, memo = null){
+    componentDidUpdate(pastProps){
+        if (this.props.resetSelectedFilesCheck(this.props, pastProps)){
+            this.resetSelectedFiles();
+        }
+    }
 
+    selectFile(accessionTriple, fileItem = null){
+        const { context } = this.props;
         function error(){
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
-
+        const newlyAddedFileItems = [];
         this.setState(({ selectedFiles })=>{
             var newSelectedFiles = _.extend({}, selectedFiles);
 
-            function add(id, memo = null){
+            function add(id, fileItemCurr = null){
                 if (typeof newSelectedFiles[id] !== 'undefined'){
                     console.error("File already selected!", id);
                 } else {
-                    newSelectedFiles[id] = memo || true;
+                    newSelectedFiles[id] = fileItemCurr || true;
+                    if (fileItemCurr){
+                        newlyAddedFileItems.push(fileItemCurr);
+                    }
                 }
             }
 
@@ -136,19 +161,32 @@ export class SelectedFilesController extends React.PureComponent {
                     } else error();
                 });
             } else if (typeof accessionTriple === 'string') {
-                add(accessionTriple, memo);
+                add(accessionTriple, fileItem);
             } else error();
 
             return { 'selectedFiles' : newSelectedFiles };
+        }, ()=>{
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            analytics.productsAddToCart(newlyAddedFileItems, extData);
+            analytics.event(
+                "SelectedFilesController",
+                "Select Files",
+                {
+                    eventLabel: extData.list,
+                    eventValue: newlyAddedFileItems.length,
+                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                }
+            );
         });
     }
 
     unselectFile(accessionTriple){
-
+        const { context } = this.props;
         function error(){
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
 
+        const newlyRemovedFileItems = [];
         this.setState(({ selectedFiles })=>{
             var newSelectedFiles = _.extend({}, selectedFiles);
 
@@ -157,6 +195,10 @@ export class SelectedFilesController extends React.PureComponent {
                     console.log(id, newSelectedFiles);
                     console.error("File not in set!", id);
                 } else {
+                    const fileItemCurr = newSelectedFiles[id];
+                    if (fileItemCurr){
+                        newlyRemovedFileItems.push(fileItemCurr);
+                    }
                     delete newSelectedFiles[id];
                 }
             }
@@ -172,12 +214,41 @@ export class SelectedFilesController extends React.PureComponent {
             } else error();
 
             return { 'selectedFiles' : newSelectedFiles };
+        }, ()=>{
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            analytics.productsRemoveFromCart(newlyRemovedFileItems, extData);
+            analytics.event(
+                "SelectedFilesController",
+                "Unselect Files",
+                {
+                    eventLabel: extData.list,
+                    eventValue: newlyRemovedFileItems.length,
+                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                }
+            );
         });
     }
 
-    resetSelectedFiles(props = this.props){
-        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles);
-        this.setState({ selectedFiles });
+    resetSelectedFiles(){
+        const { context, initiallySelectedFiles } = this.props;
+        const { selectedFiles: existingSelectedFiles } = this.state;
+        const existingFileList = _.keys(existingSelectedFiles).map(function(accessionTripleString){
+            return selectedFiles[accessionTripleString];
+        });
+        const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(initiallySelectedFiles);
+        this.setState({ selectedFiles },()=>{
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            analytics.productsRemoveFromCart(existingFileList, extData);
+            analytics.event(
+                "SelectedFilesController",
+                "Unselect All Files",
+                {
+                    eventLabel: extData.list,
+                    eventValue: existingFileList.length,
+                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                }
+            );
+        });
     }
 
     render(){

@@ -28,8 +28,10 @@ export class SelectAllFilesButton extends React.PureComponent {
     static fieldsToRequest = [
         'accession',
         'produced_in_pub.display_title',
+        'lab.display_title',
 
         'processed_files.accession',
+        'processed_files.display_title',
         'processed_files.@id',
         'processed_files.@type',
         'processed_files.file_type_detailed',
@@ -37,11 +39,13 @@ export class SelectAllFilesButton extends React.PureComponent {
         'experiments_in_set.accession',
 
         'experiments_in_set.files.accession',
+        'experiments_in_set.files.display_title',
         'experiments_in_set.files.@id',
         'experiments_in_set.files.@type',
         'experiments_in_set.files.file_type_detailed',
 
         'experiments_in_set.processed_files.accession',
+        'experiments_in_set.processed_files.display_title',
         'experiments_in_set.processed_files.@id',
         'experiments_in_set.processed_files.@type',
         'experiments_in_set.processed_files.file_type_detailed',
@@ -80,7 +84,8 @@ export class SelectAllFilesButton extends React.PureComponent {
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
 
-        this.setState({ 'selecting' : true }, () => raf(()=>{
+        this.setState({ 'selecting' : true }, () => {
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
             if (!this.isAllSelected()){
                 const currentHrefParts = memoizedUrlParse(href);
                 const currentHrefQuery = _.extend({}, currentHrefParts.query);
@@ -90,6 +95,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                 ajax.load(reqHref, (resp)=>{
                     const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
                     const filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
+
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
 
@@ -97,26 +103,17 @@ export class SelectAllFilesButton extends React.PureComponent {
                         "SelectAllFilesButton",
                         "Select All",
                         {
-                            eventLabel: "BrowseView",
+                            eventLabel: extData.list,
                             eventValue: totalFilesCount,
                             currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
                         }
                     );
                 });
             } else {
-                analytics.event(
-                    "SelectAllFilesButton",
-                    "Unselect All",
-                    {
-                        eventLabel: "BrowseView",
-                        eventValue: totalFilesCount,
-                        currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
-                    }
-                );
                 resetSelectedFiles();
                 this.setState({ 'selecting' : false });
             }
-        }));
+        });
     }
 
     render(){
