@@ -51,7 +51,6 @@ beanstalk.cfg
 ~$*
 .~*#
 production.ini
-.python-version
 
 set_aws_env.sh
 
@@ -60,3 +59,12 @@ src/encoded/static/css/fontawesome/font-awesome.css
 # files on build server
 .to_export_back
 elasticsearch-*.deb
+
+# Emacs backup files
+*~
+
+# Virtual environments
+*env/
+
+# PyCharm
+.idea/
