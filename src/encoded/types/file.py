@@ -1294,7 +1294,7 @@ def download(context, request):
         # Product Category from @type, e.g. "File/FileProcessed"
         "pr1ca": "/".join([ ty for ty in reversed(context.jsonld_type()[:-1]) ]),
         # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-        "pr1va": properties.get("file_type", None)
+        "pr1va": properties.get("file_type", "other") # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
     }
 
     # Custom dimensions
