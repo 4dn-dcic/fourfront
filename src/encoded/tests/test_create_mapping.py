@@ -1,5 +1,5 @@
 import pytest
-from mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 from .datafixtures import ORDER
 from snovault import COLLECTIONS
 from encoded.types.experiment import *
