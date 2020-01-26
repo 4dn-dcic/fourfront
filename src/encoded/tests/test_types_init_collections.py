@@ -229,12 +229,10 @@ def test_tracking_item_display_title_google_analytic(google_analytics):
 
 
 def test_tracking_item_display_title_download(download_tracking):
-    from datetime import datetime
     assert download_tracking.get('display_title') == 'Download Tracking Item from ' + utc_today_str()
 
 
 def test_tracking_item_display_title_other(jupyterhub_session):
-    from datetime import datetime
     assert jupyterhub_session.get('display_title') == 'Tracking Item from ' + utc_today_str()
 
 
