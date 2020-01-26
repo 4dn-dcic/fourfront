@@ -20,15 +20,16 @@ import { File } from './typedefs';
  */
 export function downloadFileButtonClick(fileItem, context = null){
     setTimeout(function(){
-        productsAddToCart(fileItem);
-        productsCheckout(fileItem, { step: 1, option: "File Download Button" });
         const evtObj = eventObjectFromCtx(context);
         if (!isNaN(fileItem.file_size)){
-            evtObj.filesize = fileItem.file_size;
             evtObj.eventValue = fileItem.file_size;
         }
         evtObj.eventLabel = eventObjectFromCtx(fileItem).name;
-        event("FileDownloadButton", "Clicked", evtObj);
+        // Need 2 sep. events here else will be 2x checkouts.
+        productsAddToCart(fileItem);
+        event("FileDownloadButton", "Added Item to 'Cart'", evtObj, false);
+        productsCheckout(fileItem, { step: 1, option: "File Download Button" });
+        event("FileDownloadButton", "Clicked", evtObj, false);
     }, 0);
 }
 

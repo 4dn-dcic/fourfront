@@ -156,6 +156,23 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         };
     }
 
+    componentDidMount(){
+        const { analyticsAddFilesToCart = false, fileCountUnique, selectedFiles = {}, context } = this.props;
+        if (!analyticsAddFilesToCart){
+            return;
+        }
+
+        const fileList = _.keys(selectedFiles).map(function(accessionTripleString){
+            return selectedFiles[accessionTripleString];
+        });
+        const extData = { list: analytics.hrefToListName(window && window.location.href) };
+        analytics.productsAddToCart(fileList, extData);
+        analytics.event("SelectedFilesDownloadModal", "Mounted", {
+            ...analytics.eventObjectFromCtx(context),
+            eventValue: fileCountUnique || fileList.length || 0
+        });
+    }
+
     handleAcceptDisclaimer(){
         const { context, fileCountUnique } = this.props;
         analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", {
@@ -166,7 +183,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
     }
 
     render(){
-        const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context, analyticsAddFilesToCart } = this.props;
+        const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context } = this.props;
         const { disclaimerAccepted } = this.state;
 
         const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
@@ -218,7 +235,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             I have read and understand the notes.
                         </button>
                         :
-                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context, analyticsAddFilesToCart }} />
+                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context }} />
                     }
 
                     <button type="reset" onClick={onHide} className="btn btn-outline-dark ml-05">Cancel</button>
@@ -248,7 +265,7 @@ const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
  * the POSTed form fields which identify the individual files to download.
  */
 const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownloadStartButton(props){
-    const { suggestedFilename, selectedFiles, context, analyticsAddFilesToCart = false } = props;
+    const { suggestedFilename, selectedFiles, context } = props;
 
     const { accessionTripleArrays, onClick } = useMemo(function(){
         const filenameAccessions = new Set();
@@ -269,11 +286,11 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                 const fileList = _.keys(selectedFiles).map(function(accessionTripleString){
                     return selectedFiles[accessionTripleString];
                 });
-                let extData = { list: analytics.hrefToListName(window && window.location.href) };
-                if (analyticsAddFilesToCart){
-                    analytics.productsAddToCart(fileList, extData);
-                }
-                extData = { ...extData, step: 1, option: "Metadata.tsv Download" };
+                const extData = {
+                    list: analytics.hrefToListName(window && window.location.href),
+                    step: 1,
+                    option: "Metadata.tsv Download"
+                };
                 analytics.productsCheckout(fileList, extData);
                 analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
                     ...analytics.eventObjectFromCtx(context),
@@ -284,7 +301,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
         }
 
         return { accessionTripleArrays, onClick };
-    }, [ selectedFiles, context, analyticsAddFilesToCart ]);
+    }, [ selectedFiles, context ]);
 
     return (
         <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
