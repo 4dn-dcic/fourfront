@@ -1,6 +1,6 @@
-========================
+============================
  Fourfront Metadata Database
-========================
+============================
 
 
 |Build status|_
@@ -32,7 +32,6 @@ Step 1: Verify that homebrew is working properly::
 
     $ brew doctor
 
-
 Step 2: Install or update dependencies::
 
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
@@ -40,11 +39,10 @@ Step 2: Install or update dependencies::
     $ brew cask install adoptopenjdk8
     $ brew install elasticsearch@5.6 node@10
 
-
-You may need to link the brew-installed elasticsearch::
+If you try to invoke elasticsearch and it is not found,
+you may need to link the brew-installed elasticsearch::
 
     $ brew link --force elasticsearch@5.6
-
 
 If you need to update dependencies::
 
@@ -52,28 +50,39 @@ If you need to update dependencies::
     $ brew upgrade
     $ rm -rf encoded/eggs
 
-
 Step 3: Run buildout::
 
     $ pip install -U zc.buildout setuptools
     $ buildout bootstrap --buildout-version 2.9.5 --setuptools-version 36.6.0
     $ bin/buildout
 
-    NOTE:
-    If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql
-    via homebrew (as above)
-    If you have issues with Pillow you may need to install new xcode command line tools:
-    - First update Xcode from AppStore (reboot)
-    $ xcode-select --install
-    If you are running macOS Mojave, you may need to run the below command as well:
-    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+NOTES:
 
+ * If you have issues with postgres or the python interface to it (psycogpg2)
+   you probably need to install postgresql via homebrew (as above)
 
+ * If you have issues with Pillow you may need to install new xcode command line tools.
 
-If you wish to completely rebuild the application, or have updated dependencies:
-    $ make clean
+   - First update Xcode from AppStore (reboot)::
 
-    Then goto Step 3.
+       $ xcode-select --install
+
+   - If you are running macOS Mojave (though this is fixed in Catalina), you may need to run this command as well::
+
+       $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+
+   - If you have trouble with zlib, especially in Catalina, it is probably because brew installed it
+     in a different location. In that case, you'll want to do the following
+     in place of the regular call to buildout::
+
+       $ CFLAGS="-I$(brew --prefix zlib)/include" LDFLAGS="-L$(brew --prefix zlib)/lib" bin/buildout
+
+ * If you wish to completely rebuild the application, or have updated dependencies,
+   before you go ahead, you'll probably want to do::
+
+     $ make clean
+
+   Then goto Step 3.
 
 Step 4: Start the application locally
 
