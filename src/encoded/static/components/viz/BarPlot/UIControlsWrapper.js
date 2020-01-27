@@ -5,12 +5,11 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 
-import { console, layout, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, layout, searchFilters, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas } from './../../util';
 import { DropdownItem, DropdownButton } from 'react-bootstrap';
 import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { Legend } from './../components';
-import { memoizedUrlParse } from './../../globals';
 
 /**
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.

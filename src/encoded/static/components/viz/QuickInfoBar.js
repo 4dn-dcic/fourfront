@@ -6,11 +6,10 @@ import _ from 'underscore';
 import url from 'url';
 import memoize from 'memoize-one';
 import ReactTooltip from 'react-tooltip';
-import { console, searchFilters, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, searchFilters, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ActiveFiltersBar } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/ActiveFiltersBar';
 import { Filters, navigate, Schemas } from './../util';
 import { Toggle } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Toggle';
-import { memoizedUrlParse } from './../globals';
 
 
 

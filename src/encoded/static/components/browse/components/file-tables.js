@@ -9,11 +9,10 @@ import url from 'url';
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { DropdownButton, DropdownItem } from 'react-bootstrap';
 
-import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
-import { memoizedUrlParse } from './../../globals';
 import { expFxn, Schemas, typedefs, fileUtil } from './../../util';
 import { Item, ExperimentSet } from '../../util/typedefs';
 

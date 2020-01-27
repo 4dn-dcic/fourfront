@@ -7,7 +7,7 @@ import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { get as getSchemas, Term } from './../../../util/Schemas';
-import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
     HeadersRow, TableRowToggleOpenButton
@@ -17,7 +17,6 @@ import { columnExtensionMap as columnExtensionMap4DN } from './../../../browse/c
 
 import { EmbeddedSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/EmbeddedSearchView';
 //import { transformedFacets } from './../../../browse/SearchView';
-import { memoizedUrlParse } from './../../../globals';
 
 
 

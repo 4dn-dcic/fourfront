@@ -131,8 +131,9 @@ def app_version(config):
         config.registry.settings['snovault.app_version'] = version
 
     # GA Config
-    ga_conf_file = config.registry.settings.get('ga_config')
-    if ga_conf_file:
+    ga_conf_file = config.registry.settings.get('ga_config_location')
+    ga_conf_existing = config.registry.settings.get('ga_config')
+    if ga_conf_file and not ga_conf_existing:
         ga_conf_file = os.path.normpath(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)), # Absolute loc. of this file

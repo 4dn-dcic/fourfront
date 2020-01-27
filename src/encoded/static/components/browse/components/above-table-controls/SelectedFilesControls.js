@@ -8,11 +8,10 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { console, object, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, ajax, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';
-import { memoizedUrlParse } from './../../../globals';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';

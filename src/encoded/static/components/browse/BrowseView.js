@@ -7,7 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
-import { searchFilters, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { searchFilters, object, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ColumnCombiner } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
 import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
@@ -21,7 +21,6 @@ import { navigate, typedefs, Schemas } from './../util';
 import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
 
 import { store } from './../../store';
-import { memoizedUrlParse } from './../globals';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { ChartDataController } from './../viz/chart-data-controller';
 import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';

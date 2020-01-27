@@ -5,9 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Nav } from 'react-bootstrap';
 
-import { JWT, isServerSide, object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { JWT, isServerSide, object, console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
-import { memoizedUrlParse } from './../../globals';
 
 import { LoginNavItem } from './LoginNavItem';
 import { BigDropdownNavItem, BigDropdownIntroductionWrapper } from './BigDropdown';

@@ -10,10 +10,8 @@ import ReactTooltip from 'react-tooltip';
 
 import { DropdownItem, DropdownButton } from 'react-bootstrap';
 
-import { console, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, layout, ajax, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-
-import { memoizedUrlParse } from './../globals';
 
 /**
  * Various utilities for helping to draw area charts.
