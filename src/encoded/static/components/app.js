@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, memoizedUrlParse, elementIsChildOfLink } from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions, memoizedUrlParse, elementIsChildOfLink } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
@@ -229,7 +229,12 @@ export default class App extends React.PureComponent {
         if (analyticsID){
             analytics.initializeGoogleAnalytics(
                 analyticsID,
-                { reduxStore: store, initialContext: context, initialHref: windowHref }
+                {
+                    ...analyticsConfigurationOptions,
+                    reduxStore: store,
+                    initialContext: context,
+                    initialHref: windowHref
+                }
             );
         }
 
