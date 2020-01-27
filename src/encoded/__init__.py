@@ -110,6 +110,7 @@ def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
         proc.communicate()
 
 
+
 def app_version(config):
     import hashlib
     if not config.registry.settings.get('snovault.app_version'):
@@ -128,6 +129,23 @@ def app_version(config):
                 version = "test"
 
         config.registry.settings['snovault.app_version'] = version
+
+    # GA Config
+    ga_conf_file = config.registry.settings.get('ga_config')
+    if not ga_conf_file:
+        raise Exception("No ga_config (path to JSON file of config) define in config. Aborting.")
+    ga_conf_file = os.path.normpath(
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), # Absolute loc. of this file
+            "../../",                                   # Go back up to repo dir
+            ga_conf_file
+        )
+    )
+    if not os.path.exists(ga_conf_file):
+        raise Exception(ga_conf_file + " does not exist in filesystem. Aborting.")
+    with open(ga_conf_file) as json_file:
+        config.registry.settings["ga_config"] = json.load(json_file)
+
 
 '''
 def add_schemas_to_html_responses(config):

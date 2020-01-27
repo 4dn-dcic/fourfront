@@ -1231,140 +1231,98 @@ def download(context, request):
 
 
     # Analytics Stuff
+    ga_config = request.registry.settings.get('ga_config')
 
-    ga_host_map = {
-        # We should maybe move this to config file eventually..
-        # Might be cool if available as .json maybe and could import server-side as well
-        # as client-side (during JS build, somehow)
-        "data.4dnucleome.org" : "UA-86655305-1",
-        "fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com" : "UA-86655305-2",
-        "mastertest.4dnucleome.org" : "UA-86655305-2",
-        "localhost:8000" : "UA-86655305-3",
-        "localhost:6543" : "UA-86655305-3",
-        "default" : "UA-86655305-4"
-    }
+    if ga_config:
 
-    ga_dimension_map = {
-        # 'currentFilters'    : '1', # Used for search response/faceting analytics
-        'name'              : '2', # Used for ItemView/PageView + misc analytics
-        # 'field'             : '3', # Used for Faceting analytics
-        # 'term'              : '4', # Used for Faceting analytics
-        "experimentType"    : '5'  # Used for this / product analytics
-    }
+        ga_cid = request.cookies.get("clientIdentifier")
+        if not ga_cid: # Fallback, potentially can stop working as GA is updated
+            ga_cid = request.cookies.get("_ga")
+            if ga_cid:
+                ga_cid = ".".join(ga_cid.split(".")[2:])
 
-    ga_metric_map = {
-        'filesize'          : '1',
-        'downloads'         : '2'
-    }
+        ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host, ga_config["hostnameTrackerIDMapping"].get("default"))
+        if ga_tid is None:
+            raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
 
-    ga_cid = request.cookies.get("clientIdentifier")
-    if not ga_cid: # Fallback, potentially can stop working as GA is updated
-        ga_cid = request.cookies.get("_ga")
+        # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
+        # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
+        ga_payload = {
+            "v": 1,
+            "tid": ga_tid,
+            "t": "event",                           # Hit type. Could also be event, transaction, pageview, etc.
+            # Override IP address. Else will send detail about EC2 server which not too useful.
+            "uip": request.remote_addr,
+            "ua": request.user_agent,
+            "dl": request.url,
+            "dt" : filename,
+            # This is a ~ random ID/number. Used as fallback, since one is required
+            # if don't provided uid. While we still allow users to not be logged in,
+            # should at least be able to preserve/track their anon downloads..
+            "cid": "555",
+            "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
+            "ec": "Serverside File Download",       # Event Category
+            "ea": "Range Query" if request.range else "File Download", # Event Action
+            "el": filename,                         # Event Label
+            "ev": file_size_downloaded,             # Event Value
+            # Product fields
+            "pa": "purchase",
+            "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
+            "pr1id": file_at_id,                    # Product ID/SKU
+            "pr1nm": filename,                      # Product Name
+            "pr1br" : lab.get("display_title"),     # Product Branch
+            "pr1qt": 1,                             # Product Quantity
+            # Product Category from @type, e.g. "File/FileProcessed"
+            "pr1ca": "/".join([ ty for ty in reversed(context.jsonld_type()[:-1]) ]),
+            # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
+            "pr1va": properties.get("file_type", "other") # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
+        }
+
+        # Custom dimensions
+        # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
+        if "name" in ga_config["dimensionNameMap"]:
+            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
+            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
+
+        if "experimentType" in ga_config["dimensionNameMap"]:
+            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+
+        if "filesize" in ga_config["metricNameMap"]:
+            ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+
+        if "downloads" in ga_config["metricNameMap"]:
+            ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+
+
+        # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
+        # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
+        if user_uuid:
+            ga_payload['uid'] = user_uuid
         if ga_cid:
-            ga_cid = ".".join(ga_cid.split(".")[2:])
+            ga_payload['cid'] = ga_cid
 
-    ga_tid = ga_host_map.get(request.host, ga_host_map["default"])
-    # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
-    # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
-    ga_payload = {
-        "v": 1,
-        "tid": ga_tid,                          # see ga_host_map
-        "t": "event",                           # Hit type. Could also be event, transaction, pageview, etc.
-        # Override IP address. Else will send detail about EC2 server which not too useful.
-        "uip": request.remote_addr,
-        "ua": request.user_agent,
-        "dl": request.url,
-        "dt" : filename,
-        # This is a ~ random ID/number. Used as fallback, since one is required
-        # if don't provided uid. While we still allow users to not be logged in,
-        # should at least be able to preserve/track their anon downloads..
-        "cid": "555",
-        "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
-        "ec": "Serverside File Download",       # Event Category
-        "ea": "Range Query" if request.range else "File Download", # Event Action
-        "el": filename,                         # Event Label
-        "ev": file_size_downloaded,             # Event Value
-        # Product fields
-        "pa": "purchase",
-        "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
-        "pr1id": file_at_id,                    # Product ID/SKU
-        "pr1nm": filename,                      # Product Name
-        "pr1br" : lab.get("display_title"),     # Product Branch
-        "pr1qt": 1,                             # Product Quantity
-        # Product Category from @type, e.g. "File/FileProcessed"
-        "pr1ca": "/".join([ ty for ty in reversed(context.jsonld_type()[:-1]) ]),
-        # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-        "pr1va": properties.get("file_type", "other") # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
-    }
+        # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
 
-    # Custom dimensions
-    # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
-    if "name" in ga_dimension_map:
-        ga_payload["dimension" + ga_dimension_map["name"]] = filename
-        ga_payload["pr1cd" + ga_dimension_map["name"]] = filename
+        # print('\n\n', ga_payload)
 
-    if "experimentType" in ga_dimension_map:
-        ga_payload["dimension" + ga_dimension_map["experimentType"]] = file_experiment_type or None
-        ga_payload["pr1cd" + ga_dimension_map["experimentType"]] = file_experiment_type or None
+        resp = requests.post(
+            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
+            data=urllib.parse.urlencode(ga_payload),
+            timeout=5.0,
+            headers = {'user-agent': ga_payload['ua']}
+        )
 
-    if "filesize" in ga_metric_map:
-        ga_payload["metric" + ga_metric_map["filesize"]] = file_size_downloaded
-        ga_payload["pr1cm" + ga_metric_map["filesize"]] = file_size_downloaded
-
-    if "downloads" in ga_metric_map:
-        ga_payload["metric" + ga_metric_map["downloads"]] = 0 if request.range else 1
-        ga_payload["pr1cm" + ga_metric_map["downloads"]] = 0 if request.range else 1
-
-
-    # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
-    # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
-    if user_uuid:
-        ga_payload['uid'] = user_uuid
-    if ga_cid:
-        ga_payload['cid'] = ga_cid
-
-    # ga_payload_event = dict({
-    #     "t": "event",         # Hit type. Could also be event, transaction, pageview, etc.
-    #     "ec": "File Download",      # Event Category
-    #     "e1": filename,             # Event Label
-    #     "ev": properties.get('file_size', 0),             # Event Value
-    # }, **ga_payload)
-
-    # ga_transaction = dict({
-    #     "t": "transaction",         # Hit type. Could also be event, transaction, pageview, etc.
-    #     # Product fields
-    #     "pa": "purchase",
-    #     "pr1id": context.jsonld_id(request),
-    #     "pr1nm": filename,
-    #     # TODO: "pr1br" : lab name or display_title,
-    #     "pr1qt": 1,
-    #     "pr1ca": "/".join([ ty for ty in reversed(context.jsonld_type()[:-1]) ]), # File/FileProcessed
-    #     "pr1va": file_format_name, # "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-    #     "pr1cm1": properties.get('file_size', 0), # See ga_metric_map, see https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
-    #     "pr1cd2": filename,          # See ga_dimension_map
-    #     "pr1cd5": get_file_experiment_type(request, context, properties) # See ga_dimension_map
-    # } **ga_payload)
-
-
-    # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
-
-    # print('\n\n', ga_payload)
-
-    resp = requests.post(
-        "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
-        data=urllib.parse.urlencode(ga_payload),
-        timeout=5.0,
-        headers = {'user-agent': ga_payload['ua']}
-    )
-
-    # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    # # create a tracking_item to track this download
-    # tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
-    #                  'download_tracking': tracking_values}
-    # try:
-    #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
-    # except Exception as e:
-    #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
+        # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
+        # # create a tracking_item to track this download
+        # tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
+        #                  'download_tracking': tracking_values}
+        # try:
+        #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
+        # except Exception as e:
+        #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
 
 
     if asbool(request.params.get('soft')):
