@@ -195,7 +195,7 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 @debug_log
-def bar_plot_chart(request):
+def bar_plot_chart(context, request):
 
     MAX_BUCKET_COUNT = 30 # Max amount of bars or bar sections to return, excluding 'other'.
 
@@ -303,7 +303,7 @@ def bar_plot_chart(request):
 
 @view_config(route_name='date_histogram_aggregations', request_method=['GET', 'POST'])
 @debug_log
-def date_histogram_aggregations(request):
+def date_histogram_aggregations(context, request):
     '''PREDEFINED aggregations which run against type=ExperimentSet'''
 
     # Defaults - may be overriden in URI params
@@ -428,7 +428,7 @@ def date_histogram_aggregations(request):
 
 @view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
 @debug_log
-def add_files_to_higlass_viewconf(request):
+def add_files_to_higlass_viewconf(context, request):
     """ Add multiple files to the given Higlass view config.
 
     Args:
