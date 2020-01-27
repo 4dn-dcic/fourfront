@@ -57,7 +57,7 @@ const getGoogleAnalyticsTrackingID = memoize(function(href){
             return analyticsConfigurationOptions.hostnameTrackerIDMapping[hostnames[i]];
         }
     }
-    return null;
+    return analyticsConfigurationOptions.hostnameTrackerIDMapping.default || null;
 });
 
 
