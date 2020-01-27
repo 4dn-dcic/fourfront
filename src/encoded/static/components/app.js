@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions, elementIsChildOfLink } from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
@@ -449,7 +449,7 @@ export default class App extends React.PureComponent {
         if (event.isDefaultPrevented()) return;
         const { href } = this.props;
         const { nativeEvent } = event;
-        const target = elementIsChildOfLink(event.target);
+        const target = layout.elementIsChildOfLink(event.target);
 
         if (!target) return;
 

@@ -28,20 +28,6 @@ const portalConfig = {
 
 
 /**
- * Meant to be used in click handlers. See app.js.
- * Memoized in case multiple click handlers bound to
- * event bubble chain (same event bubbles up).
- */
-const elementIsChildOfLink = memoize(function(initDomElement){
-    let domElem = initDomElement;
-    // SVG anchor elements have tagName == 'a' while HTML anchor elements have tagName == 'A'
-    while (domElem && (domElem.tagName.toLowerCase() !== 'a' && !domElem.getAttribute('data-href'))) {
-        domElem = domElem.parentElement;
-    }
-    return domElem;
-});
-
-/**
  * Registry of views for Item pages, keyed by Item type.
  * To register a new view for a given `@type`, may do the following:
  *
@@ -80,6 +66,5 @@ export {
     portalConfig,
     getGoogleAnalyticsTrackingID,
     content_views,
-    panel_views,
-    elementIsChildOfLink
+    panel_views
 };
