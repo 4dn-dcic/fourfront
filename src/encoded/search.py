@@ -15,7 +15,8 @@ from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from snovault.resource_views import collection_view_listing_db
 from snovault.util import (
     find_collection_subtypes,
-    crawl_schema
+    crawl_schema,
+    debug_log
 )
 from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
@@ -54,6 +55,7 @@ COMMON_EXCLUDED_URI_PARAMS = [
 
 
 @view_config(route_name='search', request_method='GET', permission='search')
+@debug_log
 def search(context, request, search_type=None, return_generator=False, forced_type='Search', custom_aggregations=None):
     """
     Search view connects to ElasticSearch and returns the results
@@ -214,6 +216,7 @@ DEFAULT_BROWSE_PARAM_LISTS = {
 }
 
 @view_config(route_name='browse', request_method='GET', permission='search')
+@debug_log
 def browse(context, request, search_type='ExperimentSetReplicate', return_generator=False):
     """
     Simply use search results for browse view
@@ -243,6 +246,7 @@ def browse(context, request, search_type='ExperimentSetReplicate', return_genera
 
 
 @view_config(context=AbstractCollection, permission='list', request_method='GET')
+@debug_log
 def collection_view(context, request):
     """
     Simply use search results for collections views (e.g./biosamples/)

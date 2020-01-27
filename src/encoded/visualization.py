@@ -2,6 +2,7 @@ from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest
 from snovault import CONNECTION
+from snovault.util import debug_log
 from copy import (
     copy,
     deepcopy
@@ -34,8 +35,10 @@ def includeme(config):
     config.add_route('add_files_to_higlass_viewconf', '/add_files_to_higlass_viewconf/')
     config.scan(__name__)
 
+
 # TODO: figure out how to make one of those cool /file/ACCESSION/@@download/-like URLs for this.
 @view_config(route_name='trace_workflow_runs', request_method='GET', permission='view', context=Item)
+@debug_log
 def trace_workflow_runs(context, request):
     '''
     Traces workflow runs from context (an Item instance), which may be one of the following @types:
@@ -191,6 +194,7 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 
 
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
+@debug_log
 def bar_plot_chart(request):
 
     MAX_BUCKET_COUNT = 30 # Max amount of bars or bar sections to return, excluding 'other'.
@@ -298,6 +302,7 @@ def bar_plot_chart(request):
 
 
 @view_config(route_name='date_histogram_aggregations', request_method=['GET', 'POST'])
+@debug_log
 def date_histogram_aggregations(request):
     '''PREDEFINED aggregations which run against type=ExperimentSet'''
 
@@ -422,6 +427,7 @@ def date_histogram_aggregations(request):
     return search_result
 
 @view_config(route_name='add_files_to_higlass_viewconf', request_method='POST')
+@debug_log
 def add_files_to_higlass_viewconf(request):
     """ Add multiple files to the given Higlass view config.
 
