@@ -1,6 +1,6 @@
-========================
+============================
  Fourfront Metadata Database
-========================
+============================
 
 
 |Build status|_
@@ -18,64 +18,104 @@
 .. |Quality| image:: https://api.codacy.com/project/badge/Grade/f5fc54006b4740b5800e83eb2aeeeb43
 .. _Quality: https://www.codacy.com/app/4dn/fourfront?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=4dn-dcic/fourfront&amp;utm_campaign=Badge_Grade
 
+Overview
+========
 
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
+Installation
+============
 
 Fourfront is known to work with Python 3.6.x and will not work with Python 3.7 or greater. If part of the 4DN team, it is recommended to use Python 3.4.3, since that's what is running on our servers. It is best practice to create a fresh Python virtualenv using one of these versions before proceeding to the following steps.
 
+Step 0: Obtain Credentials
+--------------------------
 
-Step 0: Obtain AWS keys. These will need to added to your environment variables or through the AWS CLI (installed later in this process).
+Obtain AWS keys. These will need to added to your environment variables or through the AWS CLI (installed later in this process).
 
 
-Step 1: Verify that homebrew is working properly::
+Step 1: Verify Homebrew Itself
+------------------------------
+
+Verify that homebrew is working properly::
 
     $ brew doctor
 
+Step 2: Install Homebrewed Dependencies
+---------------------------------------
 
-Step 2: Install or update dependencies::
+Install or update dependencies::
 
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install adoptopenjdk8
     $ brew install elasticsearch@5.6 node@10
 
+NOTES:
 
-You may need to link the brew-installed elasticsearch::
+* If installation of adtopopenjdk8 fails due to an ambiguity, it should work to do this instead::
+
+    $ brew cask install homebrew/cask-versions/adoptopenjdk8
+
+* If you try to invoke elasticsearch and it is not found,
+  you may need to link the brew-installed elasticsearch::
 
     $ brew link --force elasticsearch@5.6
 
+* If you need to update dependencies::
 
-If you need to update dependencies::
+    $ brew update
+    $ rm -rf encoded/eggs
+
+* If you need to upgrade brew-installed packages that don't have pinned versions,
+  you can use the following. However, take care because there is no command to directly
+  undo this effect::
 
     $ brew update
     $ brew upgrade
     $ rm -rf encoded/eggs
 
+Step 3: Running Buildout
+------------------------
 
-Step 3: Run buildout::
+Run buildout::
 
     $ pip install -U zc.buildout setuptools
     $ buildout bootstrap --buildout-version 2.9.5 --setuptools-version 36.6.0
     $ bin/buildout
 
-    NOTE:
-    If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql
-    via homebrew (as above)
-    If you have issues with Pillow you may need to install new xcode command line tools:
-    - First update Xcode from AppStore (reboot)
-    $ xcode-select --install
-    If you are running macOS Mojave, you may need to run the below command as well:
-    sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+NOTES:
 
+* If you have issues with postgres or the python interface to it (psycogpg2)
+  you probably need to install postgresql via homebrew (as above)
 
+* If you have issues with Pillow you may need to install new xcode command line tools.
 
-If you wish to completely rebuild the application, or have updated dependencies:
+  - First update Xcode from AppStore (reboot)::
+
+      $ xcode-select --install
+
+  - If you are running macOS Mojave (though this is fixed in Catalina), you may need to run this command as well::
+
+      $ sudo installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+
+  - If you have trouble with zlib, especially in Catalina, it is probably because brew installed it
+    in a different location. In that case, you'll want to do the following
+    in place of the regular call to buildout::
+
+      $ CFLAGS="-I$(brew --prefix zlib)/include" LDFLAGS="-L$(brew --prefix zlib)/lib" bin/buildout
+
+* If you wish to completely rebuild the application, or have updated dependencies,
+  before you go ahead, you'll probably want to do::
+
     $ make clean
 
-    Then goto Step 3.
+  Then goto Step 3.
 
-Step 4: Start the application locally
+Step 4: Running the Application Locally
+---------------------------------------
+
+Start the application locally
 
 In one terminal startup the database servers and nginx proxy with::
 
