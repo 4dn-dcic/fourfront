@@ -1,5 +1,18 @@
 [
     {
+        "email": "loadxl@loadxl.us",
+        "first_name": "loadxl",
+        "groups": ["admin"],
+        "job_title": "Administrator",
+        "lab": "4dn-dcic-lab",
+        "last_name": "loadxl",
+        "status": "current",
+        "submits_for": ["4dn-dcic-lab"],
+        "timezone": "US/Pacific",
+        "uuid": "3202fd57-44d2-44fb-a131-afb1e43d8ae5",
+        "date_created": "2020-01-28T00:00:00.000000+00:00"
+    },
+    {
         "email": "wrangler@wrangler.com",
         "first_name": "Wrangler",
         "groups": ["submitter"],
