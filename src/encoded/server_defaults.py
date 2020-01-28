@@ -24,6 +24,10 @@ def includeme(config):
     config.registry[ACCESSION_FACTORY] = factory
 
 
+# XXX: This stuff is all added based on the serverDefault identifier in the schemas
+# removing it altogether will totally break our code
+
+
 @server_default
 def userid(instance, subschema):
     request = get_current_request()
@@ -58,6 +62,16 @@ def accession(instance, subschema):
             continue
         return new_accession
     raise AssertionError("Free accession not found in %d attempts" % ATTEMPTS)
+
+
+def get_userid():
+    """ Wrapper for the server_default 'userid' above so it is not called through SERVER_DEFAULTS in our code """
+    return userid(None, None)
+
+
+def get_now():
+    """ Wrapper for the server_default 'now' above so it is not called through SERVER_DEFAULTS in our code """
+    return now(None, None)
 
 
 #FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
