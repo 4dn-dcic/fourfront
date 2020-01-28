@@ -9,7 +9,7 @@ from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
 from pyramid.response import Response
-from datetime import datetime
+from encoded.server_defaults import add_last_modified
 from base64 import b64encode
 from PIL import Image
 
@@ -396,6 +396,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     yield str.encode('SKIP: %s\n' % an_item['uuid'])
                 else:
                     post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
+                    add_last_modified(post_first)
                     post_first = format_for_attachment(post_first, docsdir)
                     try:
                         res = testapp.post_json('/'+a_type, post_first)

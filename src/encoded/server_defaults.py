@@ -30,6 +30,10 @@ def includeme(config):
 
 @server_default
 def userid(instance, subschema):
+    return _userid(instance, subschema)
+
+
+def _userid(instance, subschema):
     request = get_current_request()
     for principal in request.effective_principals:
         if principal.startswith('userid.'):
@@ -39,6 +43,10 @@ def userid(instance, subschema):
 
 @server_default
 def now(instance, subschema):
+    return _now(instance, subschema)
+
+
+def _now(instance, subschema):
     # from jsonschema_serialize_fork date-time format requires a timezone
     return datetime.utcnow().isoformat() + '+00:00'
 
@@ -66,13 +74,30 @@ def accession(instance, subschema):
 
 def get_userid():
     """ Wrapper for the server_default 'userid' above so it is not called through SERVER_DEFAULTS in our code """
-    return userid(None, None)
+    return _userid(None, None)
 
 
 def get_now():
     """ Wrapper for the server_default 'now' above so it is not called through SERVER_DEFAULTS in our code """
-    return now(None, None)
+    return _now(None, None)
 
+
+def add_last_modified(properties):
+    """
+        Uses the above two functions to add the last_modified information to the item
+        May have no effect
+    """
+    try:
+        last_modified = {
+            'modified_by': get_userid(),
+            'date_modified': get_now(),
+        }
+    except AttributeError:
+        pass
+    else:
+        # get_userid returns NO_DEFAULT if no userid
+        if last_modified['modified_by'] != NO_DEFAULT:
+            properties['last_modified'] = last_modified
 
 #FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
 FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
