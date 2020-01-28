@@ -45,6 +45,7 @@ export function FileDownloadButtonAuto(props){
 FileDownloadButtonAuto.defaultProps = {
     'canDownloadStatuses' : [
         'uploaded',
+        'pre-release',
         'released',
         'replaced',
         'submission in progress',
