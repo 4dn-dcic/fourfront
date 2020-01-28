@@ -372,8 +372,13 @@ class QCMetricsTable extends React.PureComponent {
         super(props);
         this.memoized = {
             filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
-            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles)
+            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles),
+            filterQCSummaryItemsHavingTitleTooltips: memoize(this.filterQCSummaryItemsHavingTitleTooltips)
         };
+    }
+
+    filterQCSummaryItemsHavingTitleTooltips(fileGroup) {
+        return _.filter(_.flatten(_.pluck(fileGroup, 'quality_metric_summary')), function (qmsItem) { return qmsItem.title_tooltip && qmsItem.title_tooltip.length > 0; });
     }
 
     render() {
@@ -389,17 +394,26 @@ class QCMetricsTable extends React.PureComponent {
             <div className="row">
                 <div className="exp-table-container col-12">
                     {heading}
-                    {_.map(filesByTitles, function (fileGroup, i) {
+                    {_.map(filesByTitles, (fileGroup, i) => {
                         const columnHeaders = [ // Static / present-for-each-table headers
                             { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
                             { columnClass: 'file', title: 'For File', initialWidth: 100 }
-                        ].concat(_.map(fileGroup[0].quality_metric_summary, function (sampleQMSItem, qmsIndex) { // Dynamic Headers
+                        ].concat(_.map(fileGroup[0].quality_metric_summary, (sampleQMSItem, qmsIndex) => { // Dynamic Headers
                             function renderColValue(file, field, colIndex, fileEntryBlockProps) {
                                 const qmsItem = file.quality_metric_summary[qmsIndex];
                                 const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
                                 return <span className="inline-block" data-tip={tooltip}>{value}</span>;
                             }
-                            return { columnClass: 'file-detail', title: sampleQMSItem.title, initialWidth: 80, render: renderColValue };
+                            //title tooltip: if missing in the first item then try to get it from the first valid one in array
+                            let { title_tooltip } = sampleQMSItem;
+                            if (!title_tooltip) {
+                                //quality metric summary items having title tooltip
+                                const qmsItemsHavingTitleTooltip = this.memoized.filterQCSummaryItemsHavingTitleTooltips(fileGroup);
+                                const match = _.findWhere(qmsItemsHavingTitleTooltip, { title: sampleQMSItem.title });
+                                title_tooltip = match ? match.title_tooltip : null;
+                            }
+
+                            return { columnClass: 'file-detail', title: sampleQMSItem.title, title_tooltip: title_tooltip, initialWidth: 80, render: renderColValue };
                         }));
 
                         // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
