@@ -70,12 +70,9 @@ export default class CursorViewBounds extends React.PureComponent {
         this.updateDetailCursorFromNode = this.updateDetailCursorFromNode.bind(this);
         this.handleMouseMoveToUnsticky = this.handleMouseMoveToUnsticky.bind(this);
         this.handleClickAnywhere = this.handleClickAnywhere.bind(this);
-        this.sendHoverEvent = _.debounce(this.sendHoverEvent.bind(this), 3000);
-        this.registerHoverEvent = this.registerHoverEvent.bind(this);
         this.onNodeMouseEnter = this.onNodeMouseEnter.bind(this);
         this.onNodeMouseLeave = this.onNodeMouseLeave.bind(this);
         this.onNodeClick = this.onNodeClick.bind(this);
-        this.hovers = [];
         this.state = {
             'selectedParentTerm' : null,
             'selectedTerm' : null,
@@ -126,23 +123,24 @@ export default class CursorViewBounds extends React.PureComponent {
     }
 
     updateDetailCursorFromNode(node, overrideSticky = false){
-        var newCursorDetailState = {
+        const { actions = null, aggregateType } = this.props;
+        const newCursorDetailState = {
             'path' : [],
             'includeTitleDescendentPrefix' : false,
-            'actions' : this.props.actions || null,
+            actions
         };
 
         if (node.parent) newCursorDetailState.path.push(node.parent);
-        if (typeof this.props.aggregateType === 'string') {
-            newCursorDetailState.primaryCount = this.props.aggregateType;
+        if (typeof aggregateType === 'string') {
+            newCursorDetailState.primaryCount = aggregateType;
         }
         newCursorDetailState.path.push(node);
         this.cursorRef.current.update(newCursorDetailState, null, overrideSticky);
     }
 
     handleMouseMoveToUnsticky(evt){
-        var container = this.boundsContainerRef && this.boundsContainerRef.current,
-            cursorContainerMargin = this.props.cursorContainerMargin;
+        const container = this.boundsContainerRef && this.boundsContainerRef.current;
+        const { cursorContainerMargin } = this.props;
 
         if (container){
 
@@ -186,39 +184,17 @@ export default class CursorViewBounds extends React.PureComponent {
         });
     }
 
-    /**
-     * Is debounced by 3 seconds. Nodes hovered over get added to this.hovers and then every 3 seconds (+) any
-     * queued this.hovers nodes get an Analytics events sent, with multiple node hover instances delimited by '; '.
-     */
-    sendHoverEvent(){
-        const { context, eventCategory } = this.props;
-        setTimeout(()=>{
-            analytics.event(eventCategory || 'CursorViewBounds', 'Hover Node', {
-                'eventLabel' : analytics.eventLabelFromChartNodes(this.hovers),
-                'currentFilters' : analytics.getStringifiedCurrentFilters(
-                    searchFilters.contextFiltersToExpSetFilters(context && context.filters)
-                ),
-                'eventValue' : this.hovers.length
-            });
-            this.hovers = [];
-        }, 10);
-    }
-
-    registerHoverEvent(node){
-        this.hovers.push(node);
-        this.sendHoverEvent();
-    }
-
     onNodeMouseEnter(node, evt){
+        const { selectedTerm, selectedParentTerm } = this.state;
         // Cancel if same node as selected.
-        if (CursorViewBounds.isSelected(node, this.state.selectedTerm, this.state.selectedParentTerm)){
+        if (CursorViewBounds.isSelected(node, selectedTerm, selectedParentTerm)){
             return false;
         }
-        if (this.state.selectedTerm === null){
+        if (selectedTerm === null){
             this.updateDetailCursorFromNode(node, false);
         }
 
-        var newOwnState = {};
+        const newOwnState = {};
 
         // Update hover state
         _.extend(newOwnState, {
@@ -227,7 +203,7 @@ export default class CursorViewBounds extends React.PureComponent {
         });
 
         if (_.keys(newOwnState).length > 0){
-            this.setState(newOwnState, this.registerHoverEvent.bind(this, node));
+            this.setState(newOwnState);
         }
 
         if (this.props.highlightTerm && typeof vizUtil.highlightTerm === 'function') vizUtil.highlightTerm(node.field, node.term, node.color || barplot_color_cycler.colorForNode(node));
@@ -261,11 +237,9 @@ export default class CursorViewBounds extends React.PureComponent {
             // Manually adjust popover position if a different bar section is already selected.
             if (selectedTerm) {
 
-                var container       = this.boundsContainerRef && this.boundsContainerRef.current,
-                    containerPos    = layout.getElementOffset(container),
-                    bottomOffset    = (styleOptions && styleOptions.offset && styleOptions.offset.bottom) || 0,
-                    leftOffset      = (styleOptions && styleOptions.offset && styleOptions.offset.left) || 0,
-                    containerWidth;
+                const container = this.boundsContainerRef && this.boundsContainerRef.current;
+                const containerPos = layout.getElementOffset(container);
+                let containerWidth;
 
                 //var mouseXInContainer = (evt.pageX || evt.clientX) - containerPos.left;
 
@@ -276,8 +250,8 @@ export default class CursorViewBounds extends React.PureComponent {
                     containerWidth = container.clientWidth;
                 }
 
-                var isPopoverOnRightSide = (evt.pageX || evt.clientX) > (containerWidth / 2),
-                    coords  = clickCoordsFxn(node, containerPos, container.clientHeight, isPopoverOnRightSide);
+                const isPopoverOnRightSide = (evt.pageX || evt.clientX) > (containerWidth / 2);
+                const coords = clickCoordsFxn(node, containerPos, container.clientHeight, isPopoverOnRightSide);
 
                 // Manually update popover coords then update its contents
                 this.cursorRef.current.setCoords(
@@ -295,9 +269,7 @@ export default class CursorViewBounds extends React.PureComponent {
                 setTimeout(()=>{
                     analytics.event(eventCategory || 'CursorViewBounds', 'Select Node', {
                         eventLabel : analytics.eventLabelFromChartNode(node),
-                        currentFilters : analytics.getStringifiedCurrentFilters(
-                            searchFilters.contextFiltersToExpSetFilters(context && context.filters)
-                        )
+                        currentFilters : analytics.getStringifiedCurrentFilters(context && context.filters)
                     });
                 }, 10);
             });
@@ -307,12 +279,12 @@ export default class CursorViewBounds extends React.PureComponent {
     }
 
     render(){
-
+        const { children, ...passProps } = this.props;
         return (
             <div className="popover-bounds-container" ref={this.boundsContainerRef} style={_.pick(this.props, 'width', 'height')}>
                 {
-                    React.cloneElement(this.props.children, _.extend(
-                        _.omit(this.props, 'children'),
+                    React.cloneElement(children, _.extend(
+                        passProps,
                         _.pick(this.state, 'selectedTerm', 'selectedParentTerm', 'hoverTerm', 'hoverParentTerm'),
                         _.pick(this, 'onNodeMouseEnter', 'onNodeMouseLeave', 'onNodeClick')
                     ))

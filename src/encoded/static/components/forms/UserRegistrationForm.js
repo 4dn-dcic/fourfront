@@ -278,7 +278,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     </div>
 
                     <div className="row">
-                        <div className="col-sm-12 col-md-6">
+                        <div className="col-12 col-md-6">
                             <div className="form-group">
                                 <label htmlFor="firstName">First Name <span className="text-danger">*</span></label>
                                 <input name="first_name" type="text" onChange={this.onFirstNameChange}
@@ -286,7 +286,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                                 <div className="invalid-feedback">First name cannot be blank</div>
                             </div>
                         </div>
-                        <div className="col-sm-12 col-md-6">
+                        <div className="col-12 col-md-6">
                             <div className="form-group">
                                 <label htmlFor="lastName">Last Name <span className="text-danger">*</span></label>
                                 <input name="last_name" type="text" onChange={this.onLastNameChange}
@@ -319,10 +319,22 @@ export default class UserRegistrationForm extends React.PureComponent {
                         </small>
                     </div>
 
-                    <div className={"recaptcha-container" + (captchaError ? ' has-error' : '')}>
-                        <div className="g-recaptcha" ref={this.recaptchaContainerRef} />
-                        { captchaError ? <span className="help-block">{ captchaError }</span> : null }
+                    <div className="row">
+                        <div className="col-12 col-lg-5">
+                            <div className={"recaptcha-container" + (captchaError ? ' has-error' : '')}>
+                                <div className="g-recaptcha" ref={this.recaptchaContainerRef} />
+                                { captchaError ? <span className="help-block">{ captchaError }</span> : null }
+                            </div>
+                        </div>
+                        <div className="col-12 col-lg-7">
+                            <p>
+                                By signing up, you are agreeing to our <a href="/privacy-policy" target="_blank" rel="noreferrer noopener">Privacy Policy</a>.
+                                <br/>
+                                We may track your usage of the portal to help improve the quality of user experience and/or security assurance purposes.
+                            </p>
+                        </div>
                     </div>
+
 
                     <div className="clearfix">
                         <button type="submit" disabled={!(maySubmit)} className="btn btn-lg btn-primary text-300 btn-block mt-2">

@@ -235,7 +235,8 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0} id="expset-raw-files-download-files-btn">
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                            id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
@@ -255,7 +256,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 { this.renderHeader() }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
-                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} />
+                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} analyticsImpressionOnMount />
                 </div>
             </div>
         );
@@ -337,11 +338,17 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
     }
 
     render(){
-        const { mounted, width, renderRightPanel, minOpenHeight, leftPanelCollapseWidth, higlassItem, windowWidth } = this.props;
+        const { mounted, minOpenHeight, leftPanelCollapseWidth, windowWidth } = this.props;
 
         // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
-        if (!mounted || !higlassItem || !object.itemUtil.atId(higlassItem)) {
-            return (renderRightPanel && renderRightPanel(width, null));
+        if (!mounted) {
+            return (
+                <div className="adjustable-divider-row text-center py-5">
+                    <div className="text-center my-5">
+                        <i className="icon icon-spin icon-circle-notch fas text-secondary icon-2x"/>
+                    </div>
+                </div>
+            );
         }
 
         // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
@@ -414,7 +421,7 @@ class QCMetricsTable extends React.PureComponent {
                         }
 
                         return (
-                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i}
+                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i} analyticsImpressionOnMount={false}
                                 files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
                         );
                     })}
@@ -448,7 +455,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     static tableProps(sectionProps){
         return _.extend(
             _.pick(sectionProps, 'files', 'windowWidth', 'href'),
-            { 'collapseLimit' : 10, 'collapseShow' : 7 },
+            { 'collapseLimit' : 10, 'collapseShow' : 7, 'analyticsImpressionOnMount': true },
             SelectedFilesController.pick(sectionProps)
         );
     }
@@ -461,7 +468,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
-        return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} />;
+        return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} key="p-table" />;
     }
 
     renderTopRow(){
@@ -473,7 +480,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
             // selectedFiles passed in to re-render panel if changes.
             return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem, selectedFiles }} renderRightPanel={this.renderProcessedFilesTableAsRightPanel} />;
         } else {
-            return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={width}/>;
+            return <ProcessedFilesStackedTable {...ProcessedFilesStackedTableSection.tableProps(this.props)} width={width} key="p-table"/>;
         }
     }
 
@@ -488,7 +495,8 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
                 </span>
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0} id="expset-processed-files-download-files-btn">
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                            id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
                             <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
@@ -553,7 +561,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         const { collection, href } = this.props;
         const passProps = _.extend({ width, href }, SelectedFilesController.pick(this.props));
         return (
-            <ProcessedFilesStackedTable {...passProps} files={collection.files} collapseLongLists />
+            <ProcessedFilesStackedTable {...passProps} files={collection.files} collapseLongLists analyticsImpressionOnMount />
         );
     }
 

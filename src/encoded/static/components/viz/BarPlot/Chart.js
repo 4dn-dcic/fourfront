@@ -342,7 +342,7 @@ export class Chart extends React.PureComponent {
         barplot_color_cycler.resetCache();
 
         const {
-            width, height, showType, barplot_data_unfiltered, barplot_data_filtered,
+            width, height, showType, barplot_data_unfiltered, barplot_data_filtered, context,
             aggregateType, useOnlyPopulatedFields, cursorDetailActions, href, schemas
         } = this.props;
         const styleOptions = this.styleOptions();
@@ -359,7 +359,7 @@ export class Chart extends React.PureComponent {
         );
 
         return (
-            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href, schemas }}
+            <PopoverViewContainer {...{ width, height, styleOptions, showType, aggregateType, href, schemas, context }}
                 actions={cursorDetailActions}
                 leftAxis={this.renderParts.leftAxis(width, height, barData, styleOptions)}
                 bottomAxis={this.renderParts.bottomXAxis(width, height, barData.bars, styleOptions)}
