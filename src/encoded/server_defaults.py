@@ -29,11 +29,11 @@ def includeme(config):
 
 
 @server_default
-def userid(instance, subschema):
-    return _userid(instance, subschema)
+def userid(instance, subschema):  # args required by jsonschema-serialize-fork
+    return _userid()
 
 
-def _userid(instance, subschema):
+def _userid():
     request = get_current_request()
     for principal in request.effective_principals:
         if principal.startswith('userid.'):
@@ -42,11 +42,11 @@ def _userid(instance, subschema):
 
 
 @server_default
-def now(instance, subschema):
-    return _now(instance, subschema)
+def now(instance, subschema):  # args required by jsonschema-serialize-fork
+    return utc_now_str()
 
 
-def _now(instance, subschema):
+def utc_now_str():
     # from jsonschema_serialize_fork date-time format requires a timezone
     return datetime.utcnow().isoformat() + '+00:00'
 
@@ -74,12 +74,12 @@ def accession(instance, subschema):
 
 def get_userid():
     """ Wrapper for the server_default 'userid' above so it is not called through SERVER_DEFAULTS in our code """
-    return _userid(None, None)
+    return _userid()
 
 
 def get_now():
     """ Wrapper for the server_default 'now' above so it is not called through SERVER_DEFAULTS in our code """
-    return _now(None, None)
+    return utc_now_str()
 
 
 def add_last_modified(properties, userid=None):
