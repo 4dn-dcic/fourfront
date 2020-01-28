@@ -82,22 +82,29 @@ def get_now():
     return _now(None, None)
 
 
-def add_last_modified(properties):
+def add_last_modified(properties, userid=None):
     """
         Uses the above two functions to add the last_modified information to the item
         May have no effect
+        Allow someone to override the request userid (none in this case) by passing in a different uuid
     """
     try:
         last_modified = {
             'modified_by': get_userid(),
             'date_modified': get_now(),
         }
-    except AttributeError:
-        pass
+    except AttributeError:  # no request in scope ie: we are outside the core application.
+        if userid:
+            last_modified = {
+                'modified_by': userid,
+                'date_modified': get_now(),
+            }
+            properties['last_modified'] = last_modified
     else:
         # get_userid returns NO_DEFAULT if no userid
         if last_modified['modified_by'] != NO_DEFAULT:
             properties['last_modified'] = last_modified
+
 
 #FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
 FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7

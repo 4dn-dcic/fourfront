@@ -43,6 +43,9 @@ IS_ATTACHMENT = [
 ]
 
 
+LOADXL_USER_UUID = "3202fd57-44d2-44fb-a131-afb1e43d8ae5"
+
+
 class LoadGenWrapper(object):
     """
     Simple class that accepts a generator function and handles errors by
@@ -396,7 +399,6 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     yield str.encode('SKIP: %s\n' % an_item['uuid'])
                 else:
                     post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
-                    add_last_modified(post_first)
                     post_first = format_for_attachment(post_first, docsdir)
                     try:
                         res = testapp.post_json('/'+a_type, post_first)
@@ -431,6 +433,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         for an_item in second_round_items[a_type]:
             an_item = format_for_attachment(an_item, docsdir)
             try:
+                add_last_modified(an_item, userid=LOADXL_USER_UUID)
                 res = testapp.patch_json('/'+an_item['uuid'], an_item)
                 assert res.status_code == 200
                 patched += 1
