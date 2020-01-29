@@ -9,7 +9,7 @@ from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
 from pyramid.response import Response
-from datetime import datetime
+from encoded.server_defaults import add_last_modified
 from base64 import b64encode
 from PIL import Image
 
@@ -41,6 +41,9 @@ IS_ATTACHMENT = [
     'attachment',
     'file_format_specification',
 ]
+
+
+LOADXL_USER_UUID = "3202fd57-44d2-44fb-a131-afb1e43d8ae5"
 
 
 class LoadGenWrapper(object):
@@ -430,6 +433,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         for an_item in second_round_items[a_type]:
             an_item = format_for_attachment(an_item, docsdir)
             try:
+                add_last_modified(an_item, userid=LOADXL_USER_UUID)
                 res = testapp.patch_json('/'+an_item['uuid'], an_item)
                 assert res.status_code == 200
                 patched += 1
