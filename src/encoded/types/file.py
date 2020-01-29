@@ -32,6 +32,7 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPTemporaryRedirect,
     HTTPNotFound,
+    HTTPBadRequest
 )
 from pyramid.response import Response
 from pyramid.settings import asbool
@@ -46,6 +47,9 @@ import datetime
 import json
 import pytz
 import os
+import requests
+from uuid import uuid4
+import urllib.parse
 from pyramid.traversal import resource_path
 from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
@@ -1119,19 +1123,35 @@ def is_file_to_download(properties, file_format, expected_filename=None):
         return filename
 
 
-@view_config(name='download', context=File, request_method='GET',
-             permission='view', subpath_segments=[0, 1])
+@view_config(name='download', context=File, request_method='GET', permission='view', subpath_segments=[0, 1])
 def download(context, request):
+    '''
+    Endpoint for handling /@@download/ URLs
+    '''
+
     # first check for restricted status
     if context.properties.get('status') == 'restricted':
         raise HTTPForbidden('This is a restricted file not available for download')
     try:
         user_props = session_properties(request)
     except Exception as e:
-        user_props = {'error': str(e)}
-    tracking_values = {'user_agent': request.user_agent, 'remote_ip': request.remote_addr,
-                       'user_uuid': user_props.get('details', {}).get('uuid', 'anonymous'),
-                       'request_path': request.path_info, 'request_headers': str(dict(request.headers))}
+        user_props = { "error": str(e) }
+
+    user_uuid = user_props.get('details', {}).get('uuid', None)
+    # tracking_values = {
+    #     "user_agent"      : request.user_agent,
+    #     "remote_ip"       : request.remote_addr,
+    #     "user_uuid"       : user_uuid or 'anonymous',
+    #     "request_path"    : request.path_info,
+    #     "request_headers" : str(dict(request.headers))
+    # }
+
+
+    # TODO:
+    # if not user_uuid or file_size_downloaded < 25 * (1024**2): # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
+    #     raise HTTPForbidden("Must login or provide access keys to download files larger than 5mb")
+
+    file_format_name = "Unknown"
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
@@ -1145,6 +1165,7 @@ def download(context, request):
     # search to find the "right" file and redirect to a download link for that one
     properties = context.upgrade_properties()
     file_format = get_item_if_you_can(request, properties.get('file_format'), 'file-formats')
+    lab = properties.get('lab') and get_item_if_you_can(request, properties.get('lab'), 'labs')
     _filename = None
     if request.subpath:
         _filename, = request.subpath
@@ -1159,15 +1180,35 @@ def download(context, request):
                 properties = extra
                 external = context.propsheets.get('external' + eformat.get('uuid'))
                 if eformat is not None:
-                    tracking_values['file_format'] = eformat.get('file_format')
+                    file_format_name = eformat.get('file_format')
+                    #tracking_values['file_format'] = eformat.get('file_format')
                 break
         if not found:
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
         if file_format is not None:
-            tracking_values['file_format'] = file_format.get('file_format')
-    tracking_values['filename'] = filename
+            file_format_name = file_format.get('file_format')
+
+    file_experiment_type = get_file_experiment_type(request, context, properties)
+    file_at_id = context.jsonld_id(request)
+    file_size_downloaded = properties.get('file_size', 0)
+
+    # Calculate bytes downloaded from Range header
+    if request.range:
+        file_size_downloaded = 0
+        # Assume range unit is bytes. Because there's no spec for others really, atm, afaik..
+        if hasattr(request.range, "ranges"):
+            for (range_start, range_end) in request.range.ranges:
+                file_size_downloaded += (
+                    (range_end or properties.get('file_size', 0)) -
+                    (range_start or 0)
+                )
+        else:
+            file_size_downloaded = (
+                (request.range.end or properties.get('file_size', 0)) -
+                (request.range.start or 0)
+            )
 
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
@@ -1178,11 +1219,8 @@ def download(context, request):
             'Key': external['key'],
             'ResponseContentDisposition': "attachment; filename=" + filename
         }
-        if 'Range' in request.headers:
-            tracking_values['range_query'] = True
+        if request.range:
             param_get_object.update({'Range': request.headers.get('Range')})
-        else:
-            tracking_values['range_query'] = False
         location = conn.generate_presigned_url(
             ClientMethod='get_object',
             Params=param_get_object,
@@ -1191,14 +1229,101 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
-    tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-    # create a tracking_item to track this download
-    tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
-                     'download_tracking': tracking_values}
-    try:
-        TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
-    except Exception as e:
-        log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
+
+    # Analytics Stuff
+    ga_config = request.registry.settings.get('ga_config')
+
+    if ga_config:
+
+        ga_cid = request.cookies.get("clientIdentifier")
+        if not ga_cid: # Fallback, potentially can stop working as GA is updated
+            ga_cid = request.cookies.get("_ga")
+            if ga_cid:
+                ga_cid = ".".join(ga_cid.split(".")[2:])
+
+        ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host, ga_config["hostnameTrackerIDMapping"].get("default"))
+        if ga_tid is None:
+            raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
+
+        # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
+        # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
+        ga_payload = {
+            "v": 1,
+            "tid": ga_tid,
+            "t": "event",                           # Hit type. Could also be event, transaction, pageview, etc.
+            # Override IP address. Else will send detail about EC2 server which not too useful.
+            "uip": request.remote_addr,
+            "ua": request.user_agent,
+            "dl": request.url,
+            "dt" : filename,
+            # This is a ~ random ID/number. Used as fallback, since one is required
+            # if don't provided uid. While we still allow users to not be logged in,
+            # should at least be able to preserve/track their anon downloads..
+            "cid": "555",
+            "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
+            "ec": "Serverside File Download",       # Event Category
+            "ea": "Range Query" if request.range else "File Download", # Event Action
+            "el": filename,                         # Event Label
+            "ev": file_size_downloaded,             # Event Value
+            # Product fields
+            "pa": "purchase",
+            "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
+            "pr1id": file_at_id,                    # Product ID/SKU
+            "pr1nm": filename,                      # Product Name
+            "pr1br" : lab.get("display_title"),     # Product Branch
+            "pr1qt": 1,                             # Product Quantity
+            # Product Category from @type, e.g. "File/FileProcessed"
+            "pr1ca": "/".join([ ty for ty in reversed(context.jsonld_type()[:-1]) ]),
+            # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
+            "pr1va": properties.get("file_type", "other") # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
+        }
+
+        # Custom dimensions
+        # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
+        if "name" in ga_config["dimensionNameMap"]:
+            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
+            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
+
+        if "experimentType" in ga_config["dimensionNameMap"]:
+            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+
+        if "filesize" in ga_config["metricNameMap"]:
+            ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+
+        if "downloads" in ga_config["metricNameMap"]:
+            ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+
+
+        # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
+        # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
+        if user_uuid:
+            ga_payload['uid'] = user_uuid
+        if ga_cid:
+            ga_payload['cid'] = ga_cid
+
+        # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
+
+        # print('\n\n', ga_payload)
+
+        resp = requests.post(
+            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
+            data=urllib.parse.urlencode(ga_payload),
+            timeout=5.0,
+            headers = {'user-agent': ga_payload['ua']}
+        )
+
+        # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
+        # # create a tracking_item to track this download
+        # tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
+        #                  'download_tracking': tracking_values}
+        # try:
+        #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
+        # except Exception as e:
+        #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
+
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])

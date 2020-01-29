@@ -10,9 +10,8 @@ import moment from 'moment';
 import { DropdownItem, DropdownButton } from 'react-bootstrap';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { console, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../util';
-import { memoizedUrlParse } from './../globals';
 import {
     StatsViewController, GroupByController, GroupByDropdown, ColorScaleProvider,
     AreaChart, AreaChartContainer, LoadingIcon, ErrorIcon, HorizontalD3ScaleLegend, StatsChartViewAggregator

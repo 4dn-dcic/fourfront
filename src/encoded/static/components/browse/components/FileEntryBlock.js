@@ -7,7 +7,7 @@ import _ from 'underscore';
 
 import { StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
-import { object, typedefs } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, typedefs, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas } from './../../util';
 
 // eslint-disable-next-line no-unused-vars
@@ -110,6 +110,7 @@ export class FileEntryBlock extends React.PureComponent {
     constructor(props){
         super(props);
         this.filledFileRow = this.filledFileRow.bind(this);
+        this.onNameClick = this.onNameClick.bind(this);
         this.renderName = this.renderName.bind(this);
     }
 
@@ -156,6 +157,11 @@ export class FileEntryBlock extends React.PureComponent {
         return row;
     }
 
+    onNameClick(e){
+        const { file } = this.props;
+        analytics.productClick(file);
+    }
+
     renderNameInnerTitle(){
         const { file, columnHeaders } = this.props;
         const colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null;
@@ -173,7 +179,11 @@ export class FileEntryBlock extends React.PureComponent {
 
         if (typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, colForFile.field || null, 0, this.props);
-            if (renderedName) return <div key="name-title" className="name-title inline-block">{ renderedName }</div>;
+            if (renderedName) return (
+                <div key="name-title" className="name-title inline-block" onClick={this.onNameClick}>
+                    { renderedName }
+                </div>
+            );
         }
 
         if (!fileTitleString && file.accession) {
@@ -189,7 +199,11 @@ export class FileEntryBlock extends React.PureComponent {
             fileTitleString = file.uuid || fileAtId || 'N/A';
         }
 
-        return <a className="title-of-file mono-text name-title" href={fileAtId}>{ fileTitleString }</a>;
+        return (
+            <a className="title-of-file mono-text name-title" href={fileAtId} onClick={this.onNameClick}>
+                { fileTitleString }
+            </a>
+        );
     }
 
 

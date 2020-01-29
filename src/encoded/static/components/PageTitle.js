@@ -8,14 +8,13 @@ import memoize from 'memoize-one';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-import { console, object, JWT, layout, schemaTransforms, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, JWT, layout, schemaTransforms, isSelectAction, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import Registry from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/Registry';
 
 import { content_views } from './globals';
 import { typedefs } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
-import { memoizedUrlParse } from './globals';
 // eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
 

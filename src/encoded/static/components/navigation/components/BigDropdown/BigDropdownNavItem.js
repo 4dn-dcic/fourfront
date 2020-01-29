@@ -6,8 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { Nav } from 'react-bootstrap';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { memoizedUrlParse } from './../../../globals';
+import { console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BigDropdownContainer } from './BigDropdownContainer';
 
 

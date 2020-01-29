@@ -172,16 +172,14 @@ class Bar extends React.PureComponent {
     }
 
     render(){
-        var { canBeHighlighted, showBarCount } = this.props,
-            d = this.props.node;
-
-        var hasSubSections = Array.isArray(d.bars),
-            barSections = (hasSubSections ?
-                // If needed, remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
-                barplot_color_cycler.sortObjectsByColorPalette(d.bars).reverse() : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
-            ),
-            className = "chart-bar",
-            topLabel = showBarCount ? <span className="bar-top-label" key="text-label" children={d.count} /> : null;
+        const { canBeHighlighted, showBarCount, node: d } = this.props;
+        const hasSubSections = Array.isArray(d.bars);
+        const barSections = (hasSubSections ?
+            // If needed, remove sort + reverse to keep order of heaviest->lightest aggs regardless of color
+            barplot_color_cycler.sortObjectsByColorPalette(d.bars).reverse() : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })]
+        );
+        let className = "chart-bar";
+        const topLabel = showBarCount ? <span className="bar-top-label" key="text-label">{ d.count }</span> : null;
 
         if (!canBeHighlighted)  className += ' no-highlight';
         else                    className += ' no-highlight-color';
