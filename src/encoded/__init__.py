@@ -29,10 +29,10 @@ from snovault.app import (
     json_from_path,
     configure_dbsession,
     changelogs,
-    json_asset
+    json_asset,
 )
 from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import whodaman
+from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
 from encoded.commands.create_mapping_on_deploy import (
     ENV_WEBPROD,
     ENV_WEBPROD2,
@@ -46,8 +46,13 @@ BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
 def get_mirror_env(settings):
-    """ Gets the mirror_env from whodaman instead of env variable """
-    who_is_data, who_i_am = whodaman(), settings.get('env.name', '')
+    """ 
+        Gets the mirror_env from whodaman instead of env variable 
+        This is important in our production environment because in our 
+        blue-green deployment we maintain two elasticsearch intances that
+        must be up to date with each other.
+    """
+    who_is_data, who_i_am = _whodaman(), settings.get('env.name', '')
     if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
         return None
     if who_is_data == ENV_WEBPROD:
