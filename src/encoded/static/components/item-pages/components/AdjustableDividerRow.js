@@ -88,7 +88,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         if (typeof this.props.leftPanelCollapseHeight !== 'number'){
             setTimeout(()=>{
                 this.setState({ 'rightPanelHeight' : this.getRightPanelHeight() });
-            }, 0);
+            }, 200);
         }
     }
 
@@ -150,7 +150,7 @@ export class AdjustableDividerRow extends React.PureComponent {
         const { rightPanelHeight, xOffset } = this.state;
 
         const useLeftPanelCollapseWidth = Math.max(leftPanelCollapseWidth || 0, minLeftPanelWidth);
-        let useHeight = height;
+        let useHeight = height || null;
 
         const layoutSize = layout.responsiveGridState(windowWidth) || null;
         const isDraggableSize = layoutSize === 'lg' || layoutSize === 'xl';
@@ -176,7 +176,7 @@ export class AdjustableDividerRow extends React.PureComponent {
             useHeight = leftPanelCollapseHeight;
         } else if (leftPanelCollapsed && typeof rightPanelHeight === 'number'){
             useHeight = rightPanelHeight;
-        } else if (!leftPanelCollapsed && typeof rightPanelHeight === 'number'){
+        } else if (!leftPanelCollapsed && typeof rightPanelHeight === 'number' && typeof height === "number"){
             useHeight = Math.max(rightPanelHeight, height);
         }
 
