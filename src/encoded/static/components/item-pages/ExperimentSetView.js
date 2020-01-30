@@ -388,6 +388,30 @@ class QCMetricsTable extends React.PureComponent {
         return _.filter(_.flatten(_.pluck(fileGroup, 'quality_metric_summary')), function (qmsItem) { return qmsItem.title_tooltip && qmsItem.title_tooltip.length > 0; });
     }
 
+    renderForFileColValue(file) {
+        const fileAtId = file && object.atIdFromObject(file);
+        let fileTitleString;
+        if (file.accession) {
+            fileTitleString = file.accession;
+        }
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0, 5) === '4DNFI') {
+                fileTitleString = idParts[1];
+            }
+        }
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
+        }
+        return (
+            <React.Fragment>
+                <div>{file.file_type_detailed}</div>
+                <a className="text-500 name-title" href={fileAtId}>
+                    {fileTitleString}
+                </a>
+            </React.Fragment>);
+    }
+
     render() {
         const { width, files, windowWidth, href, heading } = this.props;
         const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
@@ -404,7 +428,7 @@ class QCMetricsTable extends React.PureComponent {
                     {_.map(filesByTitles, (fileGroup, i) => {
                         const columnHeaders = [ // Static / present-for-each-table headers
                             { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
-                            { columnClass: 'file', title: 'For File', initialWidth: 100 }
+                            { columnClass: 'file', title: 'For File', initialWidth: 100, render: this.renderForFileColValue }
                         ].concat(_.map(fileGroup[0].quality_metric_summary, (sampleQMSItem, qmsIndex) => { // Dynamic Headers
                             function renderColValue(file, field, colIndex, fileEntryBlockProps) {
                                 const qmsItem = file.quality_metric_summary[qmsIndex];

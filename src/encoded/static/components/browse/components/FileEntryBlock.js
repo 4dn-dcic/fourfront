@@ -208,9 +208,10 @@ export class FileEntryBlock extends React.PureComponent {
 
 
     renderName(){
-        const { file, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
+        const { file,  columnHeaders, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
         const classList = ['name', 'col-file'];
-        if (file && file.accession) classList.push('mono-text');
+        const colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null;
+        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('mono-text');
         if (!excludeCheckbox && selectedFiles && SingleFileCheckbox.hasCheckbox(file)){
             classList.push('has-checkbox');
         }
