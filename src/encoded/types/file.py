@@ -1138,6 +1138,9 @@ def download(context, request):
         user_props = { "error": str(e) }
 
     user_uuid = user_props.get('details', {}).get('uuid', None)
+    user_groups = user_props.get('details', {}).get('groups', None)
+    if user_groups:
+        user_groups.sort()
     # tracking_values = {
     #     "user_agent"      : request.user_agent,
     #     "remote_ip"       : request.remote_addr,
@@ -1256,9 +1259,14 @@ def download(context, request):
             "ua": request.user_agent,
             "dl": request.url,
             "dt" : filename,
-            # This is a ~ random ID/number. Used as fallback, since one is required
+
+            # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
             # if don't provided uid. While we still allow users to not be logged in,
             # should at least be able to preserve/track their anon downloads..
+
+            # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
+            # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
+            # Unsure if groups under 1 session or not.
             "cid": "555",
             "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
             "ec": "Serverside File Download",       # Event Category
@@ -1301,11 +1309,18 @@ def download(context, request):
         # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
         if user_uuid:
             ga_payload['uid'] = user_uuid
+
+        if user_groups:
+            groups_json = json.dumps(user_groups, separators=(',', ':')) # Compcact JSON; aligns w. what's passed from JS.
+            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+
         if ga_cid:
             ga_payload['cid'] = ga_cid
 
         # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
 
+        #
         # print('\n\n', ga_payload)
 
         resp = requests.post(

@@ -14,7 +14,8 @@
         "name"              : 2,
         "field"             : 3,
         "term"              : 4,
-        "experimentType"    : 5
+        "experimentType"    : 5,
+        "userGroups"        : 6
     },
     "metricNameMap" : {
         "filesize"          : 1,
@@ -22,5 +23,6 @@
     },
     "isAnalyticsScriptOnPage" : true,
     "enhancedEcommercePlugin": true,
-    "anonymizeTypes" : ["User"]
+    "anonymizeTypes" : ["User"],
+    "excludeAdminTrackingOnHostnames" : ["data.4dnucleome.org"]
 }

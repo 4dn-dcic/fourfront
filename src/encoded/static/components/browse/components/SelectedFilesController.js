@@ -249,7 +249,7 @@ export class SelectedFilesController extends React.PureComponent {
         });
         const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(initiallySelectedFiles);
         this.setState({ selectedFiles },()=>{
-            if (!analyticsAddFilesToCart){
+            if (!analyticsAddFilesToCart || existingFileList.length === 0){
                 return;
             }
             const extData = { list: analytics.hrefToListName(window && window.location.href) };
