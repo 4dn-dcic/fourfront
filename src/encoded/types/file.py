@@ -53,6 +53,7 @@ import urllib.parse
 from pyramid.traversal import resource_path
 from encoded.search import make_search_subreq
 from snovault.elasticsearch import ELASTIC_SEARCH
+from snovault.util import debug_log
 from copy import deepcopy
 from . import TrackingItem
 from ..authentication import session_properties
@@ -1031,6 +1032,7 @@ class FileMicroscopy(ItemWithAttachment, File):
 
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
+@debug_log
 def get_upload(context, request):
     external = context.propsheets.get('external', {})
     upload_credentials = external.get('upload_credentials')
@@ -1051,6 +1053,7 @@ def get_upload(context, request):
 
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
+@debug_log
 def post_upload(context, request):
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -1123,7 +1126,9 @@ def is_file_to_download(properties, file_format, expected_filename=None):
         return filename
 
 
-@view_config(name='download', context=File, request_method='GET', permission='view', subpath_segments=[0, 1])
+@view_config(name='download', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+@debug_log
 def download(context, request):
     '''
     Endpoint for handling /@@download/ URLs
@@ -1624,6 +1629,7 @@ def validate_extra_file_format(context, request):
 @view_config(context=File.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -1656,5 +1662,6 @@ def file_add(context, request, render=None):
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field],
             request_param=['check_only=true'])
+@debug_log
 def file_edit(context, request, render=None):
     return item_edit(context, request, render)
