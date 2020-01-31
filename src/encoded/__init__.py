@@ -38,6 +38,7 @@ from encoded.commands.create_mapping_on_deploy import (
     ENV_WEBPROD2,
     BEANSTALK_PROD_ENVS,
 )
+from .util import compute_set_difference_one
 import structlog
 import logging
 
@@ -46,18 +47,16 @@ BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
 def get_mirror_env(settings):
-    """ 
-        Gets the mirror_env from whodaman instead of env variable 
-        This is important in our production environment because in our 
+    """
+        Gets the mirror_env from whodaman instead of env variable
+        This is important in our production environment because in our
         blue-green deployment we maintain two elasticsearch intances that
         must be up to date with each other.
     """
-    who_is_data, who_i_am = _whodaman(), settings.get('env.name', '')
+    who_i_am = settings.get('env.name', '')
     if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
         return None
-    if who_is_data == ENV_WEBPROD:
-        return ENV_WEBPROD2
-    return ENV_WEBPROD
+    return compute_set_difference_one(set(BEANSTALK_PROD_ENVS), {who_i_am})
 
 
 def static_resources(config):
