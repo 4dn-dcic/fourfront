@@ -8,7 +8,7 @@ from base64 import b64decode
 from pyramid.view import view_config
 from pyramid.response import Response
 from snovault import TYPES
-from snovault.util import simple_path_ids
+from snovault.util import simple_path_ids, debug_log
 from itertools import chain
 
 from urllib.parse import (
@@ -161,6 +161,7 @@ class DummyFileInterfaceImplementation(object):
 
 
 @view_config(route_name='peak_metadata', request_method='GET')
+@debug_log
 def peak_metadata(context, request):
     param_list = parse_qs(request.matchdict['search_params'])
     param_list['field'] = []
@@ -217,6 +218,7 @@ endpoints_initialized = {
 }
 
 @view_config(route_name='metadata', request_method=['GET', 'POST'])
+@debug_log
 def metadata_tsv(context, request):
     '''
     Accepts a POST Form request (NOT JSON) with 'accession_triples' (list of 3-item arrays containing ExpSet Accession, Exp Accession, File Accession)
@@ -611,6 +613,7 @@ def metadata_tsv(context, request):
 
 
 @view_config(route_name="metadata_redirect", request_method='GET')
+@debug_log
 def redirect_new_metadata_route(context, request):
     return HTTPMovedPermanently(
         location='/metadata/?' + request.matchdict['search_params'],
@@ -618,6 +621,7 @@ def redirect_new_metadata_route(context, request):
     )
 
 @view_config(route_name='batch_download', request_method='GET')
+@debug_log
 def batch_download(context, request):
     # adding extra params to get required columns
     param_list = parse_qs(request.matchdict['search_params'])
@@ -682,6 +686,7 @@ def format_row(columns):
 
 
 @view_config(route_name='report_download', request_method='GET')
+@debug_log
 def report_download(context, request):
     types = request.params.getall('type')
     if len(types) != 1:

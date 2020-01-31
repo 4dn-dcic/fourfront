@@ -5,6 +5,7 @@ import structlog
 import magic
 import json
 import os
+from snovault.util import debug_log
 from past.builtins import basestring
 from pyramid.view import view_config
 from pyramid.paster import get_app
@@ -73,6 +74,7 @@ class LoadGenWrapper(object):
 
 
 @view_config(route_name='load_data', request_method='POST', permission='add')
+@debug_log
 def load_data_view(context, request):
     '''
     expected input data
