@@ -119,7 +119,15 @@
             "description": "Do not compute workflow_run_inputs field for files used as control",
             "type": "boolean",
             "exclude_from": ["submit4dn", "FFedit-create"]
-        }
+        },
+		"percent_clipped_sites_with_re_motif": {
+			"title": "Percent of clipped sites with RE motif",
+			"description": "Percent of clipped sites possessing the reported restriction enzyme motif (x.x = x.x%)",
+			"type": "float",
+			"exclude_from": ["submit4dn", "FFedit-create"],
+			"permission": "import_items",
+			"lookup": 100
+		}
      },
     "facets" : {
         "workflow_run_inputs.workflow.title" : {
