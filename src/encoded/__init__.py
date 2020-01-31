@@ -48,7 +48,7 @@ BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 def get_mirror_env(settings):
     """
-        Gets the mirror_env from whodaman instead of env variable
+        Figures out who the mirror beanstalk Env is if applicable
         This is important in our production environment because in our
         blue-green deployment we maintain two elasticsearch intances that
         must be up to date with each other.
