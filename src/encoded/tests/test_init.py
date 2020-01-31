@@ -3,7 +3,6 @@ from encoded.commands.create_mapping_on_deploy import (
     ENV_WEBPROD,
     ENV_WEBPROD2,
     ENV_MASTERTEST,
-    BEANSTALK_PROD_ENVS,
 )
 from encoded import get_mirror_env
 
@@ -21,4 +20,4 @@ def test_get_mirror_env_webprod():
     assert mirror == ENV_WEBPROD
     settings = {'env.name': ENV_MASTERTEST}
     mirror = get_mirror_env(settings)
-    assert mirror == None
+    assert mirror is None

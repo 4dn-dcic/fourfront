@@ -29,17 +29,14 @@ def test_compute_set_difference_one():
 
 def test_find_other_in_pair():
     """ Tests the wrapper for the above function """
-    lst = [1, 2]
-    val = 1
-    assert find_other_in_pair(val, lst) == 2
+    assert find_other_in_pair(1, [1, 2]) == 2
+    assert find_other_in_pair(2, [1, 2]) == 1
     lst = [1, 2, 3]
     val = [1, 2]
     with pytest.raises(TypeError):
-        find_other_in_pair(val, lst)  # val is not single valued
+        find_other_in_pair(val, lst)  # val is 'not single valued'
     val = 1
     with pytest.raises(TypeError):
         find_other_in_pair(val, None)  # no pair to compare to
     with pytest.raises(RuntimeError):  # too many results
         find_other_in_pair(None, lst)
-
-
