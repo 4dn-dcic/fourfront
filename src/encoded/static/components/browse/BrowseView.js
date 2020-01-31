@@ -565,6 +565,9 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
     // in each controller that's child of <WindowNavigationController {...{ context, href }}>.
     // As well as in ControlsAndResults.
 
+    // Props passed down from parent components usually overwrite child props' components.
+    // (Unless otherwise implemented)
+
     return (
         <WindowNavigationController {...{ href, context }} navigate={propNavigate}>
             <ColumnCombiner columnExtensionMap={columnExtensionMapWithSelectedFilesCheckboxes}>
@@ -586,7 +589,7 @@ BrowseTableWithSelectedFilesCheckboxes.propTypes = {
         'total'                     : PropTypes.number.isRequired,
         'notification'              : PropTypes.string
     }).isRequired,
-    'facets'                    : PropTypes.objectOf(PropTypes.shape({
+    'facets'                    : PropTypes.arrayOf(PropTypes.shape({
         'title'                     : PropTypes.string.isRequired
     })),
     'schemas'                   : PropTypes.object,

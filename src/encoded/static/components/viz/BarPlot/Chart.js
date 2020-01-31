@@ -27,15 +27,20 @@ import { PopoverViewContainer } from './ViewContainer';
  * @param {?number} [fullHeightCount=null] - 100% Y-Axis count value. Overrides height of bars.
  * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
  */
-export const genChartBarDims = memoize(function(
+export function genChartBarDims(
     rootField,
     availWidth              = 400,
     availHeight             = 400,
-    styleOpts               = Chart.getDefaultStyleOpts(),
+    styleOpts               = Chart.defaultStyleOpts,
     aggregateType           = 'experiment_sets',
     useOnlyPopulatedFields  = false,
     fullHeightCount         = null
 ){
+
+    // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
+    // Probably shouldn't be done this way since kinda a globally-imported object... eh.. todo for later
+    // barplot_color_cycler is also imported & re-used by Legend.js to grab colors.
+    barplot_color_cycler.resetCache();
 
     const numberOfTerms = _.keys(rootField.terms).length;
     const largestExpCountForATerm = typeof fullHeightCount === 'number' ? fullHeightCount : _.reduce(rootField.terms, function(m,t){
@@ -131,7 +136,7 @@ export const genChartBarDims = memoize(function(
     });
 
     return barData;
-});
+}
 
 
 /**
@@ -167,21 +172,37 @@ export class Chart extends React.PureComponent {
         );
     }
 
-    static getDefaultStyleOpts(){
-        return {
-            'gap' : 16,
-            'maxBarWidth' : 60,
-            'maxLabelWidth' : null,
-            'labelRotation' : 30,
-            'labelWidth' : 200,
-            'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
-            'offset' : {
-                'top' : 18,
-                'bottom' : 50,
-                'left' : 50,
-                'right' : 0
-            }
-        };
+    static defaultStyleOpts = {
+        'gap' : 24,
+        'maxBarWidth' : 120,
+        'maxLabelWidth' : null,
+        'labelRotation' : 30,
+        'labelWidth' : 200,
+        'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
+        'offset' : {
+            'top' : 18,
+            'bottom' : 50,
+            'left' : 50,
+            'right' : 0
+        }
+    };
+
+    static getDefaultStyleOpts(topLevelField, width){
+        const opts = { ...Chart.defaultStyleOpts };
+        const { terms = {} } = topLevelField || {};
+        const termsLen = _.keys(terms).length;
+        if (!isNaN(width)){
+            const barAndGapWidth = (width / termsLen);
+            opts.gap = Math.min(
+                Math.floor(barAndGapWidth / 3),
+                opts.gap
+            );
+            opts.maxBarWidth = Math.min(
+                Math.floor(barAndGapWidth - opts.gap),
+                opts.maxBarWidth
+            );
+        }
+        return opts;
     }
 
     static propTypes = {
@@ -225,6 +246,11 @@ export class Chart extends React.PureComponent {
         this.renderParts.bottomXAxis = this.renderParts.bottomXAxis.bind(this);
         this.renderParts.leftAxis = this.renderParts.leftAxis.bind(this);
         this.state = { 'mounted' : false };
+        this.memoized = {
+            getDefaultStyleOpts: memoize(Chart.getDefaultStyleOpts),
+            extendStyleOptions: memoize(vizUtil.extendStyleOptions),
+            genChartBarDims: memoize(genChartBarDims)
+        };
     }
 
     componentDidMount(){
@@ -240,9 +266,12 @@ export class Chart extends React.PureComponent {
      * Gets style options for BarPlotChart instance. Internally, extends BarPlotChart.getDefaultStyleOpts() with props.styleOptions.
      * @returns {Object} Style options object.
      */
-    styleOptions(){
-        const { styleOptions } = this.props;
-        return vizUtil.extendStyleOptions(styleOptions, Chart.getDefaultStyleOpts());
+    styleOptions(topLevelField){
+        const { styleOptions, width } = this.props;
+        return this.memoized.extendStyleOptions(
+            styleOptions,
+            this.memoized.getDefaultStyleOpts(topLevelField, width)
+        );
     }
 
     /* TODO: Own components */
@@ -338,18 +367,16 @@ export class Chart extends React.PureComponent {
         const { mounted } = this.state;
         if (!mounted) return <div/>;
 
-        // Resets color cache of field-terms, allowing us to re-assign colors upon higher, data-changing, state changes.
-        barplot_color_cycler.resetCache();
-
         const {
             width, height, showType, barplot_data_unfiltered, barplot_data_filtered, context,
             aggregateType, useOnlyPopulatedFields, cursorDetailActions, href, schemas
         } = this.props;
-        const styleOptions = this.styleOptions();
+
         const topLevelField = (showType === 'all' ? barplot_data_unfiltered : barplot_data_filtered) || barplot_data_unfiltered;
+        const styleOptions = this.styleOptions(topLevelField);
 
         // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
-        const barData = genChartBarDims(
+        const barData = this.memoized.genChartBarDims(
             topLevelField,
             width,
             height,
