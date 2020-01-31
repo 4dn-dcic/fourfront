@@ -20,7 +20,6 @@
                     ],
                     "layout": {
                         "static": false,
-                        "i": "view-4dn-mcool-0",
                         "w": 12,
                         "x": 0,
                         "moved": false,
@@ -34,7 +33,6 @@
                                 "uid": "top-annotation-track",
                                 "orientation": "1d-horizontal",
                                 "options": {
-                                    "valueScaling": "linear",
                                     "geneAnnotationHeight": 10,
                                     "showTooltip": false,
                                     "mousePositionColor": "#999999",
@@ -47,7 +45,6 @@
                                     "trackBorderWidth": 0,
                                     "geneStrandSpacing": 4,
                                     "labelColor": "black",
-                                    "coordSystem": "mm10",
                                     "showMousePosition": false,
                                     "trackBorderColor": "black"
                                 },
@@ -77,9 +74,7 @@
                                     "trackBorderWidth": 0,
                                     "minusStrandColor": "red",
                                     "stroke": "#FFFFFF",
-                                    "showTooltip": false,
-                                    "coordSystem": "mm10",
-                                    "showMousePosition": false,
+                                    "showTooltip": false,                                    "showMousePosition": false,
                                     "trackBorderColor": "black"
                                 },
                                 "width": 1130,
@@ -193,7 +188,7 @@
                         -166316769.39873636,
                         3257874853.005984
                     ],
-                    "layout": {
+                    "layout": { 
                         "static": false,
                         "h": 12,
                         "x": 0,
@@ -251,7 +246,6 @@
                                             "mousePositionColor": "#000000",
                                             "trackBorderWidth": 0,
                                             "heatmapValueScaling": "log",
-                                            "coordSystem": "GRCm38",
                                             "labelBottomMargin": 0,
                                             "maxZoom": null,
                                             "trackBorderColor": "black",

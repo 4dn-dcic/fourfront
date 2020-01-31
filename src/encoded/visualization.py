@@ -843,7 +843,6 @@ def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, m
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
             "labelPosition": "topLeft",
         },
         "type": "horizontal-divergent-bar",
@@ -902,9 +901,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
             "colorRange": [],
-            "valueScaling": "linear",
             "labelPosition": "topLeft",
             "heatmapValueScaling": "log",
         },
@@ -1119,7 +1116,6 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
         }
     }
 
@@ -1207,7 +1203,6 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
         }
     }
 
@@ -1230,7 +1225,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
 
     new_tracks_by_side["center"]["name"] = "Chromosome Grid"
     del new_tracks_by_side["center"]["options"]["name"]
-    del new_tracks_by_side["center"]["options"]["coordSystem"]
+   
 
     # For each view:
     for view in views:
@@ -1382,7 +1377,6 @@ def create_2d_content(file, viewtype):
 
     # Add specific information for this file.
     contents["options"] = {}
-    contents["options"]["coordSystem"] = file["genome_assembly"]
     contents["options"]["name"] = get_title(file)
 
     if file.get("higlass_defaults"):

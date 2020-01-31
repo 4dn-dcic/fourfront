@@ -163,11 +163,8 @@
                                     "static" : {
                                         "type" : "boolean",
                                         "default" : true
-                                    },
-                                    "i" : {
-                                        "type" : "string",
-                                        "description": "Should match view UID."
-                                    }
+                                    }                                   
+                                   
                                 }
                             },
                             "tracks" : {
@@ -191,10 +188,7 @@
                                                 },
                                                 "height" : {
                                                     "type" : "integer"
-                                                },
-                                                "minHeight" : {
-                                                    "type" : "integer"
-                                                },
+                                                },                                               
                                                 "orientation" : {
                                                     "type" : "string",
                                                     "comment" : "This might be an ENUM, need to figure out.",
@@ -260,28 +254,12 @@
                                                             "default" : "#999999",
                                                             "description": "Applicable for BigWig and other 1D track files."
                                                         },
-                                                        "showTooltip" : {
-                                                            "type" : "boolean",
-                                                            "default": false,
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "axisPositionHorizontal" : {
-                                                            "type" : "string",
-                                                            "enum" : [
-                                                                "left", "right"
-                                                            ],
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "valueScaling" : {
-                                                            "type" : "string",
-                                                            "default" : "linear",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "coordSystem" : {
-                                                            "type" : "string",
-                                                            "default" : "mm10",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        }
+                                                            "showTooltip" : {
+                                                                "type" : "boolean",
+                                                                "default": false,
+                                                                "description": "Applicable for BigWig and other 1D track files."
+                                                                                                       }
+                                                       
                                                     }
                                                 }
                                             }
@@ -378,24 +356,7 @@
                                                             "type" : "boolean",
                                                             "default": false,
                                                             "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "axisPositionVertical" : {
-                                                            "type" : "string",
-                                                            "enum" : [
-                                                                "top", "bottom"
-                                                            ],
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "valueScaling" : {
-                                                            "type" : "string",
-                                                            "default" : "linear",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "coordSystem" : {
-                                                            "type" : "string",
-                                                            "default" : "mm10",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        }
+                                                        }                                                    
                                                     }
                                                 }
                                             }
@@ -419,10 +380,7 @@
                                                 },
                                                 "height" : {
                                                     "type" : "integer"
-                                                },
-                                                "minHeight" : {
-                                                    "type" : "integer"
-                                                },
+                                                },                                                
                                                 "orientation" : {
                                                     "type" : "string",
                                                     "comment" : "This might be an ENUM, need to figure out.",
@@ -491,23 +449,6 @@
                                                         "showTooltip" : {
                                                             "type" : "boolean",
                                                             "default": false,
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "axisPositionHorizontal" : {
-                                                            "type" : "string",
-                                                            "enum" : [
-                                                                "left", "right"
-                                                            ],
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "valueScaling" : {
-                                                            "type" : "string",
-                                                            "default" : "linear",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "coordSystem" : {
-                                                            "type" : "string",
-                                                            "default" : "mm10",
                                                             "description": "Applicable for BigWig and other 1D track files."
                                                         }
                                                     }
@@ -605,23 +546,6 @@
                                                         "showTooltip" : {
                                                             "type" : "boolean",
                                                             "default": false,
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "axisPositionVertical" : {
-                                                            "type" : "string",
-                                                            "enum" : [
-                                                                "top", "bottom"
-                                                            ],
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "valueScaling" : {
-                                                            "type" : "string",
-                                                            "default" : "linear",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "coordSystem" : {
-                                                            "type" : "string",
-                                                            "default" : "mm10",
                                                             "description": "Applicable for BigWig and other 1D track files."
                                                         }
                                                     }

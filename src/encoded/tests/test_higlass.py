@@ -80,7 +80,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "plusStrandColor": "black",
                             "minusStrandColor": "black",
                             "trackBorderWidth": 0,
-                            "coordSystem": "GRCm38",
                             "trackBorderColor": "black",
                             "name": "Gene Annotations (GRCm38)",
                             "showMousePosition": False,
@@ -101,7 +100,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                         "minHeight": 30,
                         "thumbnail": None,
                         "options": {
-                            "coordSystem": "GRCm38",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
@@ -128,7 +126,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "minusStrandColor": "black",
                             "trackBorderWidth": 0,
                             "trackBorderColor": "black",
-                            "coordSystem": "GRCm38",
                             "name": "Gene Annotations (GRCm38)",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
@@ -190,8 +187,7 @@ def higlass_mcool_viewconf(testapp, award, lab):
                                 "#eeeeee",
                                 "labelPosition":
                                 "topLeft",
-                                "coordSystem":
-                                "GRCm38",
+                               
                                 "colorRange": [
                                     "white", "rgba(245,166,35,1.0)",
                                     "rgba(208,2,27,1.0)", "black"
