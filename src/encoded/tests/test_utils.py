@@ -1,5 +1,5 @@
 import pytest
-from encoded.util import compute_set_difference_one
+from encoded.util import compute_set_difference_one, find_other_in_pair
 
 
 pytestmark = pytest.mark.working
@@ -25,4 +25,21 @@ def test_compute_set_difference_one():
     s1 = {1, 2}
     s2 = {1}
     assert compute_set_difference_one(s1, s2) == 2
+
+
+def test_find_other_in_pair():
+    """ Tests the wrapper for the above function """
+    lst = [1, 2]
+    val = 1
+    assert find_other_in_pair(val, lst) == 2
+    lst = [1, 2, 3]
+    val = [1, 2]
+    with pytest.raises(TypeError):
+        find_other_in_pair(val, lst)  # val is not single valued
+    val = 1
+    with pytest.raises(TypeError):
+        find_other_in_pair(val, None)  # no pair to compare to
+    with pytest.raises(RuntimeError):  # too many results
+        find_other_in_pair(None, lst)
+
 
