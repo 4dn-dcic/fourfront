@@ -173,7 +173,7 @@ export class Chart extends React.PureComponent {
     }
 
     static defaultStyleOpts = {
-        'gap' : 24,
+        'gap' : 48,
         'maxBarWidth' : 120,
         'maxLabelWidth' : null,
         'labelRotation' : 30,
@@ -194,7 +194,7 @@ export class Chart extends React.PureComponent {
         if (!isNaN(width)){
             const barAndGapWidth = (width / termsLen);
             opts.gap = Math.min(
-                Math.floor(barAndGapWidth / 3),
+                Math.floor(barAndGapWidth / 4),
                 opts.gap
             );
             opts.maxBarWidth = Math.min(
