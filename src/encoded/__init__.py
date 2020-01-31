@@ -29,14 +29,35 @@ from snovault.app import (
     json_from_path,
     configure_dbsession,
     changelogs,
-    json_asset
+    json_asset,
 )
 from dcicutils.log_utils import set_logging
+from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
+from encoded.commands.create_mapping_on_deploy import (
+    ENV_WEBPROD,
+    ENV_WEBPROD2,
+    BEANSTALK_PROD_ENVS,
+)
 import structlog
 import logging
 
 # location of environment variables on elasticbeanstalk
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
+
+
+def get_mirror_env(settings):
+    """ 
+        Gets the mirror_env from whodaman instead of env variable 
+        This is important in our production environment because in our 
+        blue-green deployment we maintain two elasticsearch intances that
+        must be up to date with each other.
+    """
+    who_is_data, who_i_am = _whodaman(), settings.get('env.name', '')
+    if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
+        return None
+    if who_is_data == ENV_WEBPROD:
+        return ENV_WEBPROD2
+    return ENV_WEBPROD
 
 
 def static_resources(config):
@@ -110,6 +131,7 @@ def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
         proc.communicate()
 
 
+
 def app_version(config):
     import hashlib
     if not config.registry.settings.get('snovault.app_version'):
@@ -129,56 +151,21 @@ def app_version(config):
 
         config.registry.settings['snovault.app_version'] = version
 
-'''
-def add_schemas_to_html_responses(config):
-
-    from pyramid.events import BeforeRender
-    from snovault.schema_views import schemas
-    from .renderers import should_transform
-
-    # Exclude some keys, to make response smaller.
-    exclude_schema_keys = [
-        'AccessKey', 'Image', 'ImagingPath', 'OntologyTerm', 'PublicationTracking', 'Modification',
-        'QualityMetricBamqc', 'QualityMetricFastqc', 'QualityMetricFlag', 'QualityMetricPairsqc',
-        'TestingDependencies', 'TestingDownload', 'TestingKey', 'TestingLinkSource', 'TestingPostPutPatch',
-        'TestingServerDefault'
-    ]
-
-    def add_schemas(event):
-        request = event.get('request')
-        if request is not None:
-
-            if event.get('renderer_name') != 'null_renderer' and ('application/html' in request.accept or 'text/html' in request.accept):
-                #print('\n\n\n\n')
-                #print(event.keys())
-                #print(event.get('renderer_name'))
-                #print(should_transform(request, request.response))
-                #print(request.response.content_type)
-
-                if event.rendering_val.get('@type') is not None and event.rendering_val.get('@id') is not None and event.rendering_val.get('schemas') is None:
-                    schemasDict = {
-                        k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
-                    }
-                    for schema in schemasDict.values():
-                        if schema.get('@type') is not None:
-                            del schema['@type']
-                        if schema.get('mixinProperties') is not None:
-                            del schema['mixinProperties']
-                        if schema.get('properties') is not None:
-                            if schema['properties'].get('@id') is not None:
-                                del schema['properties']['@id']
-                            if schema['properties'].get('@type') is not None:
-                                del schema['properties']['@type']
-                            if schema['properties'].get('display_title') is not None:
-                                del schema['properties']['display_title']
-                            if schema['properties'].get('schema_version') is not None:
-                                del schema['properties']['schema_version']
-                            if schema['properties'].get('uuid') is not None:
-                                del schema['properties']['uuid']
-                    event.rendering_val['schemas'] = schemasDict
-
-    config.add_subscriber(add_schemas, BeforeRender)
-'''
+    # GA Config
+    ga_conf_file = config.registry.settings.get('ga_config_location')
+    ga_conf_existing = config.registry.settings.get('ga_config')
+    if ga_conf_file and not ga_conf_existing:
+        ga_conf_file = os.path.normpath(
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), # Absolute loc. of this file
+                "../../",                                   # Go back up to repo dir
+                ga_conf_file
+            )
+        )
+        if not os.path.exists(ga_conf_file):
+            raise Exception(ga_conf_file + " does not exist in filesystem. Aborting.")
+        with open(ga_conf_file) as json_file:
+            config.registry.settings["ga_config"] = json.load(json_file)
 
 
 def main(global_config, **local_config):
@@ -205,7 +192,7 @@ def main(global_config, **local_config):
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = os.environ.get('MIRROR_ENV_NAME')
+    settings['mirror.env.name'] = get_mirror_env(settings)
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY

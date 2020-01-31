@@ -3,7 +3,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { downloadFileButtonClick } from './../../util/file';
 
 
 
@@ -82,13 +83,21 @@ LabIcon.defaultProps = {
 export const FileItemRow = React.memo(function FileItemRow(props){
     const { file } = props;
     const atId = object.atIdFromObject(file);
-    const { display_title, accession, href: fileDownloadHref = null } = file || {};
+    const {
+        display_title,
+        accession,
+        href: fileDownloadHref = null,
+        file_format: { display_title: fileFormat } = {},
+        attachment: { type: attachmentType } = {}
+    } = file || {};
+
     const title = display_title || accession;
 
     const attachmentDownloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
+    const fileItemClass = FilesInSetTable.iconClassFromFileType(fileFormat);
+    const attachmentIconClass = FilesInSetTable.iconClassFromFileType(attachmentType);
 
-    const fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format && (file.file_format.file_format || file.file_format.display_title));
-    const attachmentIconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
+    function onClick(evt){ downloadFileButtonClick(file); }
 
     return (
         <div className="row" key={atId || title}>
@@ -98,8 +107,8 @@ export const FileItemRow = React.memo(function FileItemRow(props){
                 </h6>
             </div>
 
-            <div className="col col-6 col-lg-2 text-right download-button pull-right">
-                <a className="btn btn-primary btn-sm button-dl-file"
+            <div className="col col-6 col-lg-2 download-button d-flex align-items-center justify-content-between">
+                <a className="btn btn-primary btn-sm button-dl-file" onClick={onClick}
                     href={fileDownloadHref} download disabled={!fileDownloadHref}>
                     <i className={"icon icon-" + (fileItemClass) }/>
                     { '\u00A0  Download' }

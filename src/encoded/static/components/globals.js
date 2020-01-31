@@ -4,11 +4,12 @@ import memoize from 'memoize-one';
 import url from 'url';
 import Registry from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/Registry';
 import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { default as analyticsConfigurationOptions } from "./../ga_config.json";
 
 /**
  * Top bar navigation & link schema definition.
  */
-export const portalConfig = {
+const portalConfig = {
     "title": "4DN Data Portal",
 
     /**
@@ -22,47 +23,9 @@ export const portalConfig = {
         "www.data.4dnucleome.org",
         "data.4dnucleome.org",
         "fourfront-webdev.us-east-1.elasticbeanstalk.com"
-    ],
-
-    "gaTrackingIDHostMap" : {
-        "data.4dnucleome" : "UA-86655305-1",
-        "mastertest.4dnucleome" : "UA-86655305-2", // (primary domain for `UA-86655305-2`)
-        "staging.4dnucleome" : "UA-86655305-2",
-        "fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk" : "UA-86655305-2",
-        "hotseat.4dnucleome" : "UA-86655305-2",
-        "localhost" : "UA-86655305-3"
-    }
+    ]
 };
 
-/**
- * `url.parse`, but globally memoized for performance.
- * **ONLY** pass in the _current_ `props.href` here.
- * Use regular `url.parse` for e.g. `pastProps.href`.
- *
- * If are re-using or transforming the resulting url parts or any
- * of its properties, such as the `query` property, be sure to
- * **clone** it first (since result is cached/memoized for other calls).
- *
- * @param {string} href - Current href.
- */
-export const memoizedUrlParse = memoize(function urlParse(href){
-    console.warn("memoizedUrlParse called with", href);
-    return url.parse(href, true);
-});
-
-/**
- * Meant to be used in click handlers. See app.js.
- * Memoized in case multiple click handlers bound to
- * event bubble chain (same event bubbles up).
- */
-export const elementIsChildOfLink = memoize(function(initDomElement){
-    let domElem = initDomElement;
-    // SVG anchor elements have tagName == 'a' while HTML anchor elements have tagName == 'A'
-    while (domElem && (domElem.tagName.toLowerCase() !== 'a' && !domElem.getAttribute('data-href'))) {
-        domElem = domElem.parentElement;
-    }
-    return domElem;
-});
 
 /**
  * Registry of views for Item pages, keyed by Item type.
@@ -71,7 +34,7 @@ export const elementIsChildOfLink = memoize(function(initDomElement){
  * @type {Registry}
  * @example content_views.register(SomeReactViewComponent, 'ItemType');
  */
-export const content_views = new Registry();
+const content_views = new Registry();
 
 /**
  * Registry of views for panels. Works similarly to `content_views`.
@@ -79,20 +42,29 @@ export const content_views = new Registry();
  *
  * @type {Registry}
  */
-export const panel_views = new Registry();
+const panel_views = new Registry();
 
 
 
-export const getGoogleAnalyticsTrackingID = memoize(function(href){
+const getGoogleAnalyticsTrackingID = memoize(function(href){
     if (!href && !isServerSide()){
         href = window.location.href;
     }
     const { host } = url.parse(href);
-    const hostnames = Object.keys(portalConfig.gaTrackingIDHostMap);
+    const hostnames = Object.keys(analyticsConfigurationOptions.hostnameTrackerIDMapping);
     for (var i = 0; i < hostnames.length; i++){
         if (host.indexOf(hostnames[i]) > -1) {
-            return portalConfig.gaTrackingIDHostMap[hostnames[i]];
+            return analyticsConfigurationOptions.hostnameTrackerIDMapping[hostnames[i]];
         }
     }
-    return null;
+    return analyticsConfigurationOptions.hostnameTrackerIDMapping.default || null;
 });
+
+
+export {
+    analyticsConfigurationOptions,
+    portalConfig,
+    getGoogleAnalyticsTrackingID,
+    content_views,
+    panel_views
+};
