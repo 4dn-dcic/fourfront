@@ -34,7 +34,7 @@ describe('Static Page & Content Tests', function () {
                     return Cypress.$(liEl).attr('id');
                 });
 
-                cy.get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').then((title)=>{
+                cy.get('#page-title-container .page-title').should('have.text', '4D Nucleome Data Portal').then((title)=>{
 
                     let prevTitle = title.text();
                     let count = 0;
@@ -57,7 +57,7 @@ describe('Static Page & Content Tests', function () {
                             }
                         }
 
-                        cy.get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                        cy.get('#page-title-container .page-title').should('not.have.text', prevTitle).then((t)=>{
                             var titleText = t.text();
                             expect(titleText).to.have.length.above(0);
                             cy.title().should('equal', titleText + ' – 4DN Data Portal').end(); // Ensure <head>...<title>TITLE</title>...</head> matches.
@@ -128,7 +128,7 @@ describe('Static Page & Content Tests', function () {
                             });
                         }
                     }
-                    cy.get('#page-title-container span.title').should('not.have.text', prevTitle).then((t)=>{
+                    cy.get('#page-title-container .page-title').should('not.have.text', prevTitle).then((t)=>{
                         var titleText = t.text();
                         expect(titleText).to.have.length.above(0);
                         prevTitle = titleText;
