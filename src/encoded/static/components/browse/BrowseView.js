@@ -495,7 +495,6 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
 
 function BrowseTableWithSelectedFilesCheckboxes(props){
     const {
-
         // Common high-level props from Redux, or App.js, or App.js > BodyElement:
         context, href, browseBaseState, schemas, navigate: propNavigate,
         windowHeight, windowWidth, registerWindowOnScrollHandler,
@@ -509,7 +508,6 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
 
         // Default prop / hardcoded (may become customizable later)
         columnExtensionMap
-
     } = props;
     const { total = 0, notification = null } = context;
 
