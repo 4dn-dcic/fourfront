@@ -635,12 +635,21 @@ export default class App extends React.PureComponent {
     authenticateUser(callback = null){
         const { session } = this.state;
         const idToken = JWT.get();
-        const userInfo = JWT.getUserInfo();
-        const userActions = (userInfo && userInfo.user_actions) || null;
 
-        if (idToken && (!session || !userActions)){
+        // Currently we usually only have at most 1 group per User.
+        // If changes, we may need to register multiple events
+        // or figure out prioritization of group to register.
+        const {
+            user_actions: userActions = null,
+            details: {
+                uuid: userId = null,
+                groups = null
+            } = {}
+        } = JWT.getUserInfo() || {};
+
+        if (idToken && (!session || !userId || !userActions)){
             // if JWT present, and session not yet set (from back-end), try to authenticate
-            // This is very unlikely due to us rendering re: session server-side. Mostly a remnant.
+            // This is very unlikely due to us rendering re: session server-side. Mostly a remnant or if localStorage cleared.
             console.info('AUTHENTICATING USER; JWT PRESENT BUT NO STATE.SESSION OR USER_ACTIONS');
             ajax.promise('/login', 'POST', { 'Authorization' : 'Bearer ' + idToken }, JSON.stringify({ 'id_token' : idToken }))
                 .then((response) => {
@@ -651,8 +660,12 @@ export default class App extends React.PureComponent {
                     (response) => {
                         JWT.saveUserInfo(response);
                         this.updateUserInfo(callback);
+                        analytics.setUserID(userId);
                         analytics.event('Authentication', 'ExistingSessionLogin', {
-                            'eventLabel' : 'Authenticated ClientSide'
+                            userId,
+                            name: userId,
+                            userGroups: groups && JSON.stringify(groups.sort()),
+                            eventLabel: 'Authenticated ClientSide'
                         });
                     },
                     (error) => {
@@ -663,10 +676,14 @@ export default class App extends React.PureComponent {
                     }
                 );
             return idToken;
-        } else if (idToken && session && userActions){
+        } else {
             console.info('User is logged in already, continuing session.');
+            // analytics.setUserID(userId); is performed in SPC/analytics.js on init.
             analytics.event('Authentication', 'ExistingSessionLogin', {
-                'eventLabel' : 'Authenticated ServerSide'
+                userId,
+                name: userId,
+                userGroups: groups && JSON.stringify(groups.sort()),
+                eventLabel: 'Authenticated ServerSide'
             });
         }
         return null;

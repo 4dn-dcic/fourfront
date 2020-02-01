@@ -388,7 +388,7 @@ export class FilePairBlock extends React.PureComponent {
                     {..._.omit(this.props, 'files', 'file', 'isSingleItem', 'className', 'type', 'excludeChildrenCheckboxes', 'excludeOwnCheckbox', 'name', 'label')}
                     file={file} stackDepth={stackDepth + 1}
                     className={null}
-                    isSingleItem={isReallySingleItem} hideNameOnHover={!isReallySingleItem}
+                    isSingleItem={isReallySingleItem}
                     excludeCheckbox={excludeChildrenCheckboxes} // May be excluded as this block has own checkbox
                     type="paired-end" />
             );
