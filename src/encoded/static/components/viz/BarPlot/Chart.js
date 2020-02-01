@@ -174,7 +174,7 @@ export class Chart extends React.PureComponent {
 
     static defaultStyleOpts = {
         'gap' : 48,
-        'maxBarWidth' : 120,
+        'maxBarWidth' : null,
         'maxLabelWidth' : null,
         'labelRotation' : 30,
         'labelWidth' : 200,
@@ -187,21 +187,42 @@ export class Chart extends React.PureComponent {
         }
     };
 
-    static getDefaultStyleOpts(topLevelField, width){
+    /**
+     * @todo
+     * Should prly have ~ `Chart.defaultStyleOpts` as prop maybe? Idk. W.e.
+     * Not super clean but 0 plans to re-use this atm so low cleanup prioritization.
+     * And rename this func.
+     *
+     * @static
+     * @param {{ terms: Object<string, { term, field, total, terms? }>, field }} topLevelField
+     * @param {number} width
+     * @param {number} [height=null]
+     * @returns {{ gap: number, maxBarWidth: number, ... }} Final options for dimensionsing bars.
+     */
+    static getDefaultStyleOpts(topLevelField, width, height = null){
         const opts = { ...Chart.defaultStyleOpts };
         const { terms = {} } = topLevelField || {};
         const termsLen = _.keys(terms).length;
-        if (!isNaN(width)){
+
+        // Decrease `gap` to 1/4 width of ((# of bars) / width) if necessary
+        if (typeof width === "number" && !isNaN(width)){
             const barAndGapWidth = (width / termsLen);
             opts.gap = Math.min(
                 Math.floor(barAndGapWidth / 4),
-                opts.gap
-            );
-            opts.maxBarWidth = Math.min(
-                Math.floor(barAndGapWidth - opts.gap),
-                opts.maxBarWidth
+                (opts.gap || 120) // Arbitrary default/fallback
             );
         }
+
+        if (!opts.maxBarWidth) {
+            if (typeof height === "number" && !isNaN(height)) {
+                opts.maxBarWidth = height - ((opts.offset || {}).top || 0) - ((opts.offset || {}).bottom || 0);
+            } else if (typeof width === "number" && !isNaN(width)){
+                opts.maxBarWidth = Math.floor(width / 2);
+            } else {   // Arbitrary default/fallback. Final 'bar width' is less than this, depending on width.
+                opts.maxBarWidth = 320;
+            }
+        }
+
         return opts;
     }
 
@@ -267,10 +288,10 @@ export class Chart extends React.PureComponent {
      * @returns {Object} Style options object.
      */
     styleOptions(topLevelField){
-        const { styleOptions, width } = this.props;
+        const { styleOptions, width, height } = this.props;
         return this.memoized.extendStyleOptions(
             styleOptions,
-            this.memoized.getDefaultStyleOpts(topLevelField, width)
+            this.memoized.getDefaultStyleOpts(topLevelField, width, height)
         );
     }
 

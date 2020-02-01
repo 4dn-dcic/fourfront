@@ -245,7 +245,7 @@ export class SelectedFilesController extends React.PureComponent {
         const { context, initiallySelectedFiles, analyticsAddFilesToCart = false } = this.props;
         const { selectedFiles: existingSelectedFiles } = this.state;
         const existingFileList = _.keys(existingSelectedFiles).map(function(accessionTripleString){
-            return selectedFiles[accessionTripleString];
+            return existingSelectedFiles[accessionTripleString];
         });
         const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(initiallySelectedFiles);
         this.setState({ selectedFiles },()=>{
