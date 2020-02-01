@@ -22,6 +22,7 @@ import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, render
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
+import { combineExpsWithReplicateNumbersForExpSet } from './../util/experiments-transforms';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
@@ -744,12 +745,18 @@ class SupplementaryFilesTabView extends React.PureComponent {
      * @returns {{ files: File[], title: string, type: string, description: string }[]} List of uniqued-by-title viewable collections.
      */
     static combinedOtherProcessedFiles = memoize(function(context){
+        // Clone context
+        let experiment_set = _.extend({}, context);
+        // Add in Exp Bio & Tec Rep Nos, if available.
+        if (Array.isArray(context.replicate_exps) && Array.isArray(context.experiments_in_set)) {
+            experiment_set = combineExpsWithReplicateNumbersForExpSet(context);
+        }
 
         // Clone -- so we don't modify props.context in place
-        const collectionsFromExpSet = _.map(context.other_processed_files, function(collection){
+        const collectionsFromExpSet = _.map(experiment_set.other_processed_files, function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment_set' : context, 'from_experiment' : { 'from_experiment_set' : context, 'accession' : 'NONE' } }, file);
+                return _.extend({ 'from_experiment_set' : experiment_set, 'from_experiment' : { 'from_experiment_set' : experiment_set, 'accession' : 'NONE' } }, file);
             });
             return _.extend({}, collection, { files });
         });
@@ -762,11 +769,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         // Also required for SelectedFilesController
-        const allCollectionsFromExperiments = _.reduce(context.experiments_in_set || [], function(memo, exp){
+        const allCollectionsFromExperiments = _.reduce(experiment_set.experiments_in_set || [], function(memo, exp){
             _.forEach(exp.other_processed_files || [], function(collection){
                 const { files : origFiles } = collection;
                 const files = _.map(origFiles || [], function(file){
-                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : context }, exp), 'from_experiment_set' : context }, file);
+                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : experiment_set }, exp), 'from_experiment_set' : experiment_set }, file);
                 });
                 memo.push(_.extend({}, collection, { files }));
             });
