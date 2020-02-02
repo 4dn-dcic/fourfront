@@ -1,10 +1,14 @@
 import pytest
 from webtest import AppError
 from ..utils import use_fixtures
+from .features.conftest import app_settings, app, teardown
 from .conftest import testapp, anonhtmltestapp
 
 
 pytestmark = [pytest.mark.indexing, pytest.mark.working]
+
+
+
 
 
 @pytest.fixture(scope='module')
@@ -116,7 +120,7 @@ def test_get_help_page(testapp, help_page):
     assert res.json['toc'] == help_page['table-of-contents']
 
 
-@use_fixtures(testapp, help_page_deleted)
+@use_fixtures(anonhtmltestapp, help_page_deleted)
 def test_get_help_page_deleted(anonhtmltestapp, help_page_deleted):
     help_page_url = "/" + help_page_deleted['name']
     anonhtmltestapp.get(help_page_url, status=403)
