@@ -1,10 +1,8 @@
-import datetime
 import pytest
+
+from ..utils import utc_today_str
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
-
-
-def utc_today_str():
-    return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")
 
 
 @pytest.fixture

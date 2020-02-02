@@ -6,14 +6,15 @@ from snovault.elasticsearch.indexer_utils import get_namespaced_index
 import json
 import time
 from snovault import TYPES
-
-def delay_rerun(*args):
-    """ Rerun function for flaky """
-    time.sleep(1)
-    return True
+from ..utils import delay_rerun
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing] #pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [
+    pytest.mark.working,
+    pytest.mark.schema,
+    pytest.mark.indexing,
+    # pytest.mark.flaky(rerun_filter=delay_rerun),
+]
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts

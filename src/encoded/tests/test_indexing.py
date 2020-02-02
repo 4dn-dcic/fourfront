@@ -12,7 +12,7 @@ from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from elasticsearch.exceptions import NotFoundError
 from .features.conftest import app_settings, app as conf_app
-from .test_search import delay_rerun
+from ..utils import delay_rerun
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
 
