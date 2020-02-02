@@ -1,5 +1,5 @@
 import pytest
-from encoded.util import compute_set_difference_one, find_other_in_pair
+from ..utils import compute_set_difference_one, find_other_in_pair
 
 
 pytestmark = pytest.mark.working
