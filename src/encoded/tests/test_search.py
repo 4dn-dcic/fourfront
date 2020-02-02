@@ -1,4 +1,5 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
+from datetime import datetime, timedelta
 from .features.conftest import app_settings, app, workbook
 import pytest
 from encoded.commands.run_upgrader_on_inserts import get_inserts
@@ -7,6 +8,7 @@ import json
 import time
 from snovault import TYPES
 from ..utils import delay_rerun
+from .test_views import TYPE_LENGTH
 
 
 pytestmark = [
@@ -199,7 +201,6 @@ def test_search_embedded_file_by_accession(workbook, testapp):
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
     # relative to the creation date of the mboI one object in test inserts
-    from datetime import (datetime, timedelta)
     enz = testapp.get('/search/?type=Enzyme&name=MboI').json['@graph'][0]
 
     cdate = enz['date_created']
@@ -493,8 +494,6 @@ def test_search_with_static_header(workbook, testapp):
 #########################################
 ## Tests for collections (search 301s) ##
 #########################################
-
-from .test_views import TYPE_LENGTH
 
 def test_collection_limit(workbook, testapp):
     res = testapp.get('/biosamples/?limit=2', status=301)

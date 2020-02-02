@@ -39,3 +39,16 @@ def delay_rerun(*args):
 
 def utc_today_str():
     return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")
+
+
+def use_fixtures(*fixtures):
+    """
+    This declares that the fixtures are used. Mentioning them in the call is sufficient.
+    Without doing this, the PyCharm code analyzer can't tell that a Python fixtures is getting used
+    because it looks like a bound variable, not a use of a free variable, so the corresponding import
+    will be seem to be doing nothing, when in fact pytest is bypassing language semantics and supplying
+    an argument based on the fixture name in the argument list.
+    """
+    def fixture_consumer(func):
+        return func
+    return fixture_consumer

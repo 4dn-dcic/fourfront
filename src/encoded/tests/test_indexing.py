@@ -11,10 +11,14 @@ from encoded.verifier import verify_item
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from elasticsearch.exceptions import NotFoundError
+from ..utils import delay_rerun, use_fixtures
+from .conftest import app_settings, app as conf_app, testapp, indexer_testapp, registry, elasticsearch
+from .datafixtures import award, file_formats, lab
 from .features.conftest import app_settings, app as conf_app
-from ..utils import delay_rerun
+
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
+
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
@@ -36,7 +40,6 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
     from zope.sqlalchemy import mark_changed
     from snovault import DBSESSION
     from snovault.elasticsearch import create_mapping
-    from .conftest import indexer_testapp
     # index and then run create mapping to clear things out
     indexer_testapp(app).post_json('/index', {'record': True})
     create_mapping.run(app, collections=use_collections, skip_indexing=True)
@@ -54,6 +57,7 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
 
 
 @pytest.mark.slow
+@use_fixtures(app, testapp, indexer_testapp)
 def test_indexing_simple(app, testapp, indexer_testapp):
     es = app.registry['elasticsearch']
     namespaced_ppp = get_namespaced_index(app, 'testing_post_put_patch')
@@ -97,6 +101,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert testing_ppp_settings['settings']['index']['number_of_shards'] == '1'
 
 
+@use_fixtures(app, testapp, registry, elasticsearch)
 def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     """
     Test overall create_mapping functionality using app.
@@ -148,6 +153,7 @@ def test_fp_uuid(testapp, award, experiment, lab, file_formats):
     return res.json['@graph'][0]['uuid']
 
 
+@use_fixtures(app, testapp, indexer_testapp, test_fp_uuid, award, lab, file_formats)
 def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
                                  award, lab, file_formats):
     # Todo, input a list of accessions / uuids:
@@ -196,6 +202,7 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
+@use_fixtures(app, indexer_testapp, testapp, lab, award, file_formats)
 def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
     """
     Create an item (file-processed) with a validation error and index,
@@ -253,6 +260,7 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
 
 # @pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
+@use_fixtures(testapp, indexer_testapp)
 def test_load_and_index_perf_data(testapp, indexer_testapp):
     '''
     ~~ CURRENTLY NOT WORKING ~~

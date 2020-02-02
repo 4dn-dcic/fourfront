@@ -1,7 +1,6 @@
 import pytest
-import time
-from .features.conftest import app_settings, app, teardown
 from webtest import AppError
+
 
 pytestmark = [pytest.mark.indexing, pytest.mark.working]
 

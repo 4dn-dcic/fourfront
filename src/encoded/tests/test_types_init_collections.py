@@ -1,6 +1,8 @@
 import pytest
+from encoded.types.image import Image
 
 from ..utils import utc_today_str
+
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
@@ -287,7 +289,6 @@ def test_genomic_region_display_title(testapp, dt4genomic_regions):
 
 
 def test_image_unique_key(registry, image_data):
-    from encoded.types.image import Image
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
     image = Image.create(registry, uuid, image_data)
     keys = image.unique_keys(image.properties)
