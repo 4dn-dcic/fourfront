@@ -1,5 +1,7 @@
 import pytest
 from webtest import AppError
+from ..utils import use_fixtures
+from .conftest import testapp, anonhtmltestapp
 
 
 pytestmark = [pytest.mark.indexing, pytest.mark.working]
@@ -60,12 +62,14 @@ def help_page_json_deleted():
 
 
 @pytest.fixture(scope='module')
+@use_fixtures(testapp, help_page_section_json)
 def posted_help_page_section(testapp, help_page_section_json):
     res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
     return res.json['@graph'][0]
 
 
 @pytest.fixture(scope='module')
+@use_fixtures(testapp, help_page_section_json, help_page_json)
 def help_page(testapp, posted_help_page_section, help_page_json):
     try:
         res = testapp.post_json('/pages/', help_page_json, status=201)
@@ -77,6 +81,7 @@ def help_page(testapp, posted_help_page_section, help_page_json):
 
 
 @pytest.fixture(scope='module')
+@use_fixtures(testapp, posted_help_page_section, help_page_json_draft)
 def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
     try:
         res = testapp.post_json('/pages/', help_page_json_draft, status=201)
@@ -88,6 +93,7 @@ def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
 
 
 @pytest.fixture(scope='module')
+@use_fixtures(testapp, posted_help_page_section, help_page_json_deleted)
 def help_page_restricted(testapp, posted_help_page_section, help_page_json_deleted):
     try:
         res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
@@ -97,7 +103,7 @@ def help_page_restricted(testapp, posted_help_page_section, help_page_json_delet
         val = res.json
     return val
 
-
+@use_fixtures(testapp, help_page)
 def test_get_help_page(testapp, help_page):
     help_page_url = "/" + help_page['name']
     res = testapp.get(help_page_url, status=200)
@@ -110,17 +116,19 @@ def test_get_help_page(testapp, help_page):
     assert res.json['toc'] == help_page['table-of-contents']
 
 
+@use_fixtures(testapp, help_page_deleted)
 def test_get_help_page_deleted(anonhtmltestapp, help_page_deleted):
     help_page_url = "/" + help_page_deleted['name']
     anonhtmltestapp.get(help_page_url, status=403)
 
-
+@use_fixtures(anonhtmltestapp, testapp, help_page_restricted)
 def test_get_help_page_no_access(anonhtmltestapp, testapp, help_page_restricted):
     help_page_url = "/" + help_page_restricted['name']
     anonhtmltestapp.get(help_page_url, status=403)
     testapp.get(help_page_url, status=200)
 
 
+@use_fixtures(testapp, help_page, help_page_deleted)
 def test_page_unique_name(testapp, help_page, help_page_deleted):
     # POST again with same name and expect validation error
     new_page = {'name': help_page['name']}
