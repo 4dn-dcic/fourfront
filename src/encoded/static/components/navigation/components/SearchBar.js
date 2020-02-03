@@ -294,8 +294,7 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="sm" variant="outline-secondary" disabled={disabled}
-                onSelect={(eventKey, evt) => { onChangeSearchItemType(eventKey); }}
-                title={getDropdownTitleText()} onToggle={(isOpen, event) => { onToggleSearchItemType(isOpen, event); }}>
+                onSelect={onChangeSearchItemType} title={getDropdownTitleText()} onToggle={onToggleSearchItemType}>
                 <DropdownItem eventKey="sets" data-key="sets" active={searchItemType === "sets"}>
                     Experiment Sets
                 </DropdownItem>
