@@ -3,16 +3,38 @@
 The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
-import pytest
+import datetime
 import json
-import time
 import os
-from encoded.verifier import verify_item
-from snovault.elasticsearch.interfaces import INDEXER_QUEUE
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
+import pytest
+import time
+import transaction
+import uuid
+
 from elasticsearch.exceptions import NotFoundError
-from ..utils import delay_rerun, use_fixtures
-from .conftest import app_settings, app as conf_app, testapp, indexer_testapp, registry, elasticsearch
+from encoded.verifier import verify_item
+from snovault import DBSESSION, TYPES
+from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
+from snovault.elasticsearch.create_mapping import (
+    type_mapping,
+    create_mapping_by_type,
+    build_index_record,
+    compare_against_existing_mapping
+)
+from snovault.elasticsearch.interfaces import ELASTIC_SEARCH, INDEXER_QUEUE
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
+
+from sqlalchemy import MetaData
+
+from pkg_resources import resource_filename
+from timeit import default_timer as timer
+from unittest import mock
+
+from zope.sqlalchemy import mark_changed
+
+from ..utils import delay_rerun
+from .conftest_more_apps import testapp, indexer_testapp
+from .conftest_registry import registry, elasticsearch
 from .datafixtures import award, file_formats, lab
 from .features.conftest import app_settings, app as conf_app
 
@@ -35,11 +57,6 @@ def app(app_settings, use_collections=TEST_COLLECTIONS):
 
 @pytest.fixture(autouse=True)
 def teardown(app, use_collections=TEST_COLLECTIONS):
-    import transaction
-    from sqlalchemy import MetaData
-    from zope.sqlalchemy import mark_changed
-    from snovault import DBSESSION
-    from snovault.elasticsearch import create_mapping
     # index and then run create mapping to clear things out
     indexer_testapp(app).post_json('/index', {'record': True})
     create_mapping.run(app, collections=use_collections, skip_indexing=True)
@@ -57,7 +74,6 @@ def teardown(app, use_collections=TEST_COLLECTIONS):
 
 
 @pytest.mark.slow
-@use_fixtures(app, testapp, indexer_testapp)
 def test_indexing_simple(app, testapp, indexer_testapp):
     es = app.registry['elasticsearch']
     namespaced_ppp = get_namespaced_index(app, 'testing_post_put_patch')
@@ -101,21 +117,12 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert testing_ppp_settings['settings']['index']['number_of_shards'] == '1'
 
 
-@use_fixtures(app, testapp, registry, elasticsearch)
 def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     """
     Test overall create_mapping functionality using app.
     Do this by checking es directly before and after running mapping.
     Delete an index directly, run again to see if it recovers.
     """
-    from snovault.elasticsearch.create_mapping import (
-        type_mapping,
-        create_mapping_by_type,
-        build_index_record,
-        compare_against_existing_mapping
-    )
-    from snovault.elasticsearch import ELASTIC_SEARCH
-    from snovault import TYPES
     es = registry[ELASTIC_SEARCH]
     item_types = TEST_COLLECTIONS
     # check that mappings and settings are in index
@@ -153,7 +160,6 @@ def test_fp_uuid(testapp, award, experiment, lab, file_formats):
     return res.json['@graph'][0]['uuid']
 
 
-@use_fixtures(app, testapp, indexer_testapp, test_fp_uuid, award, lab, file_formats)
 def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
                                  award, lab, file_formats):
     # Todo, input a list of accessions / uuids:
@@ -202,15 +208,11 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
-@use_fixtures(app, indexer_testapp, testapp, lab, award, file_formats)
 def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
     """
     Create an item (file-processed) with a validation error and index,
     to ensure that validation errors work
     """
-    import uuid
-    import datetime
-    from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
     indexer_queue = app.registry[INDEXER_QUEUE]
     es = app.registry[ELASTIC_SEARCH]
     fp_body = {
@@ -260,7 +262,6 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
 
 # @pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
-@use_fixtures(testapp, indexer_testapp)
 def test_load_and_index_perf_data(testapp, indexer_testapp):
     '''
     ~~ CURRENTLY NOT WORKING ~~
@@ -275,13 +276,8 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     Note: run with bin/test -s -m performance to see the prints from the test
     '''
 
-    from os import listdir
-    from os.path import isfile, join
-    from unittest import mock
-    from timeit import default_timer as timer
-    from pkg_resources import resource_filename
     insert_dir = resource_filename('encoded', 'tests/data/perf-testing/')
-    inserts = [f for f in listdir(insert_dir) if isfile(join(insert_dir, f))]
+    inserts = [f for f in os.listdir(insert_dir) if os.path.isfile(os.path.join(insert_dir, f))]
     json_inserts = {}
 
     # pluck a few uuids for testing

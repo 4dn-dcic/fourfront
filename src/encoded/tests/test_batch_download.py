@@ -1,16 +1,13 @@
 import pytest
 
-from ..utils import delay_rerun, use_fixtures
+from ..utils import delay_rerun
 # Use workbook fixture from BDD tests (including elasticsearch)
-from .features.conftest import (
-    # app_settings, app,
-    workbook,
-)
+from .features.conftest import app_settings, app, workbook
+
 
 pytestmark = [pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 @pytest.mark.skip(reason="update data when we have a working experiment")
-@use_fixtures(workbook)
 def test_report_download(testapp, workbook):
     res = testapp.get('/report.tsv?type=Experiment&sort=accession')
     assert res.headers['content-type'] == 'text/tsv; charset=UTF-8'

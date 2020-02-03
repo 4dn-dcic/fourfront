@@ -4,7 +4,7 @@ import pytest
 import re
 import unittest.mock
 
-from ..utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str, use_fixtures
+from ..utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str
 
 
 pytestmark = pytest.mark.working
@@ -58,32 +58,3 @@ def test_utc_today_str():
     pattern = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
     actual = utc_today_str()
     assert re.match(pattern, actual), "utc_today_str() result %s did not match format: %s" % (actual, pattern)
-
-
-def test_use_fixtures():
-    mock_fixtures = {}
-
-    def declare_mock_fixture(name, mock_fixture):
-        mock_fixtures[name] = mock_fixture
-
-    def mock_fixtures_for_function(f):
-        return { name: mock_fixtures[name]
-                 for name in inspect.getfullargspec(f)[0]
-                 if name in mock_fixtures }
-
-    def mock_pytest_call(f, *args, **kwargs):
-        full_kwargs = dict(kwargs, **mock_fixtures_for_function(f))
-        return f(*args, **full_kwargs)
-
-    dummy = 'dummy-fixture'
-    declare_mock_fixture('dummy', dummy)
-
-    @use_fixtures(dummy)
-    def f(x, y, dummy):
-        return {'fixture': dummy, 'sum': x+y}
-
-    assert mock_fixtures_for_function(f) == {'dummy': 'dummy-fixture'}
-
-    actual = mock_pytest_call(f, 3, 4)
-    expected = {'fixture': 'dummy-fixture', 'sum': 7}
-    assert actual == expected, "Expected %r but got %r." % (expected, actual)

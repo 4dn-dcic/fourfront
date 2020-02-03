@@ -1,14 +1,19 @@
-# Use workbook fixture from BDD tests (including elasticsearch)
-from datetime import datetime, timedelta
-from .features.conftest import app_settings, app, workbook
-import pytest
-from encoded.commands.run_upgrader_on_inserts import get_inserts
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
 import json
 import time
+import pytest
+
+from datetime import datetime, timedelta
+
+from encoded.commands.run_upgrader_on_inserts import get_inserts
 from snovault import TYPES
+from snovault.elasticsearch import create_mapping
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
+from snovault.util import add_default_embeds
 from ..utils import delay_rerun
 from .test_views import TYPE_LENGTH
+
+# Use workbook fixture from BDD tests (including elasticsearch)
+from .features.conftest import app_settings, app, workbook
 
 
 pytestmark = [
@@ -387,8 +392,6 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
-    from snovault import TYPES
-    from snovault.util import add_default_embeds
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
@@ -510,7 +513,6 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 
 
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
-    from snovault.elasticsearch import create_mapping
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     # TODO: NAMESPACE - here, passed in list to create_mapping

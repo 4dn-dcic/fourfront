@@ -3,11 +3,13 @@ import pytest
 import webtest
 
 from encoded import main
+from pkg_resources import resource_filename
 
 from snovault import DBSESSION
 from snovault.elasticsearch import create_mapping
 
-from ..conftest import make_app_settings_dictionary
+from ..conftest_settings import make_app_settings_dictionary
+from ..conftest_more_apps import indexer_testapp
 
 
 # this file was previously used to setup the test fixtures for the BDD tests.
@@ -58,7 +60,6 @@ def teardown(app):
     Alternative to ..test_indexing.teardown
     Simply call /index to clear out the indexing queue after each test
     """
-    from ..conftest import indexer_testapp
     indexer_testapp(app).post_json('/index', {'record': True})
 
 
@@ -74,7 +75,6 @@ def workbook(app):
     testapp = webtest.TestApp(app, environ)
 
     from ...loadxl import load_all
-    from pkg_resources import resource_filename
     # just load the workbook inserts
     load_res = load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
     if load_res:
