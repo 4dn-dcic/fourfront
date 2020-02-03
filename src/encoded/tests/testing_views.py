@@ -162,7 +162,7 @@ class TestingLinkTarget(Item):
         },
     })
     def reverse(self, request):
-        return self.rev_link_atids(request, "reverse")
+        return self.rev_link_atids(request, rev_name="reverse")
 
 
 @collection(
