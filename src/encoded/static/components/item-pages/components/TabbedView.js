@@ -10,10 +10,9 @@ import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { navigate, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
-import { memoizedUrlParse } from './../../globals';
 
 
 /** This file/component is specific to 4DN portal */
@@ -24,7 +23,7 @@ export function getIconForCustomTab(tabName){
         case 'overview':
         case 'experiment-summaries':
         case 'experiment_summaries':
-            return 'file-alt';
+            return 'file-alt far';
         case 'data_processing':
             return 'area-chart fas';
         case 'processed_files':

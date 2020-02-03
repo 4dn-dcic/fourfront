@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { object, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, console, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../../util';
 
 
@@ -12,7 +12,7 @@ import { expFxn } from './../../util';
 // These are used often by other components which consume/display selected file counts.
 
 /** Used and memoized in views which have multiple sets of selectedFiles */
-export function uniqueFileCountNonMemoized(selectedFiles){
+export function uniqueFileCount(selectedFiles){
     if (!selectedFiles || typeof selectedFiles !== 'object' || Array.isArray(selectedFiles)){
         console.error("selectedFiles not in proper form or is non-existent", selectedFiles);
         return 0;
@@ -20,12 +20,9 @@ export function uniqueFileCountNonMemoized(selectedFiles){
     return _.uniq(_.pluck(_.values(selectedFiles), 'accession')).length;
 }
 
-/** Pre-memoized and to be used in views that only have 1 selectedFiles collection, such as BrowseView */
-export const uniqueFileCount = memoize(uniqueFileCountNonMemoized);
-
-export const fileCountWithDuplicates = memoize(function(selectedFiles){
+export function fileCountWithDuplicates(selectedFiles){
     return _.keys(selectedFiles).length;
-});
+}
 
 
 /**
@@ -93,7 +90,8 @@ export class SelectedFilesController extends React.PureComponent {
                 //}
             }
             return false;
-        }
+        },
+        'analyticsAddFilesToCart' : false
     };
 
     constructor(props){
@@ -107,26 +105,55 @@ export class SelectedFilesController extends React.PureComponent {
         this.state = { selectedFiles };
     }
 
-    componentDidUpdate(pastProps){
-        if (this.props.resetSelectedFilesCheck(this.props, pastProps)){
-            this.resetSelectedFiles(this.props);
+    componentDidMount(){
+        const { analyticsAddFilesToCart = false } = this.props;
+        if (!analyticsAddFilesToCart) {
+            return;
+        }
+        const { selectedFiles, context } = this.state;
+        const existingFileList = _.keys(selectedFiles).map(function(accessionTripleString){
+            return selectedFiles[accessionTripleString];
+        });
+        if (existingFileList.length > 0) {
+            setTimeout(function(){
+                const extData = { list: analytics.hrefToListName(window && window.location.href) };
+                analytics.productsAddToCart(existingFileList, extData);
+                analytics.event(
+                    "SelectedFilesController",
+                    "Select Files",
+                    {
+                        eventLabel: extData.list,
+                        eventValue: existingFileList.length,
+                        currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                    }
+                );
+            }, 250);
         }
     }
 
-    selectFile(accessionTriple, memo = null){
+    componentDidUpdate(pastProps){
+        if (this.props.resetSelectedFilesCheck(this.props, pastProps)){
+            this.resetSelectedFiles();
+        }
+    }
 
+    selectFile(accessionTriple, fileItem = null){
+        const { context, analyticsAddFilesToCart = false } = this.props;
         function error(){
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
-
+        const newlyAddedFileItems = [];
         this.setState(({ selectedFiles })=>{
             var newSelectedFiles = _.extend({}, selectedFiles);
 
-            function add(id, memo = null){
+            function add(id, fileItemCurr = null){
                 if (typeof newSelectedFiles[id] !== 'undefined'){
                     console.error("File already selected!", id);
                 } else {
-                    newSelectedFiles[id] = memo || true;
+                    newSelectedFiles[id] = fileItemCurr || true;
+                    if (fileItemCurr){
+                        newlyAddedFileItems.push(fileItemCurr);
+                    }
                 }
             }
 
@@ -139,19 +166,35 @@ export class SelectedFilesController extends React.PureComponent {
                     } else error();
                 });
             } else if (typeof accessionTriple === 'string') {
-                add(accessionTriple, memo);
+                add(accessionTriple, fileItem);
             } else error();
 
             return { 'selectedFiles' : newSelectedFiles };
+        }, ()=>{
+            if (!analyticsAddFilesToCart){
+                return;
+            }
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            analytics.productsAddToCart(newlyAddedFileItems, extData);
+            analytics.event(
+                "SelectedFilesController",
+                "Select Files",
+                {
+                    eventLabel: extData.list,
+                    eventValue: newlyAddedFileItems.length,
+                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                }
+            );
         });
     }
 
     unselectFile(accessionTriple){
-
+        const { context, analyticsAddFilesToCart = false } = this.props;
         function error(){
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
 
+        const newlyRemovedFileItems = [];
         this.setState(({ selectedFiles })=>{
             var newSelectedFiles = _.extend({}, selectedFiles);
 
@@ -160,6 +203,10 @@ export class SelectedFilesController extends React.PureComponent {
                     console.log(id, newSelectedFiles);
                     console.error("File not in set!", id);
                 } else {
+                    const fileItemCurr = newSelectedFiles[id];
+                    if (fileItemCurr){
+                        newlyRemovedFileItems.push(fileItemCurr);
+                    }
                     delete newSelectedFiles[id];
                 }
             }
@@ -175,12 +222,48 @@ export class SelectedFilesController extends React.PureComponent {
             } else error();
 
             return { 'selectedFiles' : newSelectedFiles };
+        }, ()=>{
+            if (!analyticsAddFilesToCart){
+                return;
+            }
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            analytics.productsRemoveFromCart(newlyRemovedFileItems, extData);
+            analytics.event(
+                "SelectedFilesController",
+                "Unselect Files",
+                {
+                    eventLabel: extData.list,
+                    eventValue: newlyRemovedFileItems.length,
+                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                }
+            );
         });
     }
 
-    resetSelectedFiles(props = this.props){
-        var selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(props.initiallySelectedFiles);
-        this.setState({ selectedFiles });
+    /** @todo: Maybe change to remove all files (not reset to initial) */
+    resetSelectedFiles(){
+        const { context, initiallySelectedFiles, analyticsAddFilesToCart = false } = this.props;
+        const { selectedFiles: existingSelectedFiles } = this.state;
+        const existingFileList = _.keys(existingSelectedFiles).map(function(accessionTripleString){
+            return existingSelectedFiles[accessionTripleString];
+        });
+        const selectedFiles = SelectedFilesController.parseInitiallySelectedFiles(initiallySelectedFiles);
+        this.setState({ selectedFiles },()=>{
+            if (!analyticsAddFilesToCart || existingFileList.length === 0){
+                return;
+            }
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
+            analytics.productsRemoveFromCart(existingFileList, extData);
+            analytics.event(
+                "SelectedFilesController",
+                "Unselect All Files",
+                {
+                    eventLabel: extData.list,
+                    eventValue: existingFileList.length,
+                    currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                }
+            );
+        });
     }
 
     render(){

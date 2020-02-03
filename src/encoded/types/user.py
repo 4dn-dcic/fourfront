@@ -23,6 +23,7 @@ from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
+from snovault.util import debug_log
 from dcicutils.s3_utils import s3Utils
 import requests
 import structlog
@@ -160,6 +161,7 @@ class User(Item):
 
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
+@debug_log
 def user_page_view(context, request):
     """smth."""
     properties = item_view_page(context, request)
@@ -176,6 +178,7 @@ def user_page_view(context, request):
 
 @view_config(context=User.Collection, permission='add', request_method='POST',
              physical_path="/users")
+@debug_log
 def user_add(context, request):
     '''
     if we have a password in our request, create and auth entry

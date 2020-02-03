@@ -8,11 +8,10 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, ajax, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';
-import { memoizedUrlParse } from './../../../globals';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
@@ -28,23 +27,37 @@ export class SelectAllFilesButton extends React.PureComponent {
     static fieldsToRequest = [
         'accession',
         'produced_in_pub.display_title',
+        'lab.display_title',
 
         'processed_files.accession',
+        'processed_files.display_title',
+        'processed_files.@id',
+        'processed_files.@type',
         'processed_files.file_type_detailed',
 
         'experiments_in_set.accession',
 
         'experiments_in_set.files.accession',
+        'experiments_in_set.files.display_title',
+        'experiments_in_set.files.@id',
+        'experiments_in_set.files.@type',
         'experiments_in_set.files.file_type_detailed',
 
         'experiments_in_set.processed_files.accession',
+        'experiments_in_set.processed_files.display_title',
+        'experiments_in_set.processed_files.@id',
+        'experiments_in_set.processed_files.@type',
         'experiments_in_set.processed_files.file_type_detailed',
     ];
 
     constructor(props){
         super(props);
+        this.isAllSelected = this.isAllSelected.bind(this);
         this.handleSelectAll = this.handleSelectAll.bind(this);
         this.state = { 'selecting' : false };
+        this.memoized = {
+            uniqueFileCount: memoize(uniqueFileCount)
+        };
     }
 
     isEnabled(){
@@ -58,19 +71,20 @@ export class SelectAllFilesButton extends React.PureComponent {
         const { totalFilesCount, selectedFiles } = this.props;
         if (!totalFilesCount) return false;
         // totalFilesCount as returned from bar plot aggs at moment is unique.
-        if (totalFilesCount === uniqueFileCount(selectedFiles)){
+        if (totalFilesCount === this.memoized.uniqueFileCount(selectedFiles)){
             return true;
         }
         return false;
     }
 
     handleSelectAll(evt){
-        const { selectFile, resetSelectedFiles, href } = this.props;
+        const { selectFile, selectedFiles, resetSelectedFiles, href, context, totalFilesCount } = this.props;
         if (typeof selectFile !== 'function' || typeof resetSelectedFiles !== 'function'){
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
 
-        this.setState({ 'selecting' : true }, () => raf(()=>{
+        this.setState({ 'selecting' : true }, () => {
+            const extData = { list: analytics.hrefToListName(window && window.location.href) };
             if (!this.isAllSelected()){
                 const currentHrefParts = memoizedUrlParse(href);
                 const currentHrefQuery = _.extend({}, currentHrefParts.query);
@@ -80,14 +94,25 @@ export class SelectAllFilesButton extends React.PureComponent {
                 ajax.load(reqHref, (resp)=>{
                     const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
                     const filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
+
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
+
+                    analytics.event(
+                        "SelectAllFilesButton",
+                        "Select All",
+                        {
+                            eventLabel: extData.list,
+                            eventValue: totalFilesCount,
+                            currentFilters: analytics.getStringifiedCurrentFilters((context && context.filters) || null)
+                        }
+                    );
                 });
             } else {
                 resetSelectedFiles();
                 this.setState({ 'selecting' : false });
             }
-        }));
+        });
     }
 
     render(){
@@ -234,8 +259,15 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
 
 
 export const SelectedFilesControls = React.memo(function SelectedFilesControls(props){
-
-    const { barplot_data_filtered, barplot_data_unfiltered, currentOpenPanel } = props;
+    const {
+        href, context,
+        selectedFiles, subSelectedFiles,
+        currentFileTypeFilters,
+        setFileTypeFilters,
+        barplot_data_filtered,
+        barplot_data_unfiltered,
+        currentOpenPanel
+    } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
     const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
     // This gets unique file count from ES aggs. In future we might be able to get total including
@@ -245,29 +277,15 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
 
     return (
         <div>
-            <SelectAllFilesButton {..._.extend(_.pick(props, 'href'), selectedFileProps)} totalFilesCount={totalUniqueFilesCount} />
+            <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
-                    <BrowseViewSelectedFilesDownloadButton {..._.pick(props, 'selectedFiles', 'subSelectedFiles')} totalFilesCount={totalUniqueFilesCount} />
+                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context }} totalFilesCount={totalUniqueFilesCount} />
                     <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
                         active={currentOpenPanel === "filterFilesBy"} // <- must be boolean
-                        {..._.extend(_.pick(props, 'setFileTypeFilters', 'currentFileTypeFilters', 'currentOpenPanel' ), selectedFileProps)} />
+                        {...selectedFileProps} {...{ currentFileTypeFilters, setFileTypeFilters, currentOpenPanel }} />
                 </div>
             </div>
         </div>
     );
-});
-
-SelectedFilesControls.filterSelectedFilesByFileTypeFilters = memoize(function(selectedFiles, fileTypeFilters){
-    if (Array.isArray(fileTypeFilters) && fileTypeFilters.length === 0){
-        return selectedFiles;
-    }
-    const fileTypeFiltersObject = _.object(_.map(fileTypeFilters, function(fltr){ return [fltr, true]; })); // Faster lookups
-    return _.object(_.filter(
-        _.pairs(selectedFiles),
-        function([fileAccessionTriple, filePartialItem], i){
-            if (fileTypeFiltersObject[filePartialItem.file_type_detailed]) return true;
-            return false;
-        }
-    ));
 });

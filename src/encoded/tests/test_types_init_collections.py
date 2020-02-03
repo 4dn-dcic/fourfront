@@ -1,5 +1,10 @@
+import datetime
 import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+
+
+def utc_today_str():
+    return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")
 
 
 @pytest.fixture
@@ -68,10 +73,9 @@ def test_document_display_title_w_attachment(testapp, protocol_data, attachment)
 
 
 def test_document_display_title_wo_attachment(testapp, protocol_data):
-    from datetime import datetime
     del(protocol_data['protocol_type'])
     res = testapp.post_json('/document', protocol_data).json['@graph'][0]
-    assert res.get('display_title') == 'Document from ' + str(datetime.utcnow())[:10]
+    assert res.get('display_title') == 'Document from ' + utc_today_str()
 
 
 def test_organism_display_title_standard_scientific_name(testapp, human_data):
@@ -113,16 +117,15 @@ def test_protocol_display_title_w_title(testapp, protocol_data, attachment):
 
 
 def test_protocol_display_title_wo_attachment(testapp, protocol_data):
-    from datetime import datetime
     protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    assert protocol['display_title'] == 'Experimental protocol from ' + str(datetime.utcnow())[:10]
+    assert protocol['display_title'] == 'Experimental protocol from ' + utc_today_str()
 
 
 def test_protocol_other_display_title_wo_attachment(testapp, protocol_data):
-    from datetime import datetime
     protocol_data['protocol_type'] = 'Other'
     protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    assert protocol['display_title'] == 'Protocol from ' + str(datetime.utcnow())[:10]
+    assert protocol['display_title'] == 'Protocol from ' + utc_today_str()
+
 
 
 @pytest.fixture
@@ -227,13 +230,12 @@ def test_tracking_item_display_title_google_analytic(google_analytics):
 
 
 def test_tracking_item_display_title_download(download_tracking):
-    from datetime import datetime
-    assert download_tracking.get('display_title') == 'Download Tracking Item from ' + str(datetime.utcnow())[:10]
+    assert download_tracking.get('display_title') == 'Download Tracking Item from ' + utc_today_str()
 
 
 def test_tracking_item_display_title_other(jupyterhub_session):
     from datetime import datetime
-    assert jupyterhub_session.get('display_title') == 'Tracking Item from ' + str(datetime.utcnow())[:10]
+    assert jupyterhub_session.get('display_title') == 'Tracking Item from ' + utc_today_str()
 
 
 @pytest.fixture

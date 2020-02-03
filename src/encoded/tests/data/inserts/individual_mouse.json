@@ -15,5 +15,17 @@
         "submitted_by": "wrangler@wrangler.com",
         "url": "",
         "uuid": "3cfe2618-368f-45a0-9aa9-a5277f1a56a9"
+    },
+    {
+        "award": "1U01CA200059-01",
+        "mouse_strain": "Test",
+        "mouse_vendor": "thermofisher-scientific",
+        "lab": "4dn-dcic-lab",
+        "mouse_life_stage": "embryo",
+        "sex": "male",
+        "status": "in review by lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "url": "",
+        "uuid": "d71711e9-d699-4586-91bd-8aff50cd1e77"
     }
 ]

@@ -7,10 +7,8 @@ import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
 
-import { ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
-
-import { memoizedUrlParse } from './../globals';
 
 
 /**
@@ -29,25 +27,86 @@ export default class HealthView extends React.PureComponent {
 
     static propTypes = {
         'href' : PropTypes.string
-    }
+    };
+
+    static defaultProps = {
+        "excludedKeys" : [ ...ItemDetailList.Detail.defaultProps.excludedKeys, 'content' ],
+        "keyTitleDescriptionMapConfig" : {
+            'blob_bucket' : {
+                title : "Blob Bucket",
+                description : "Name of blob storage bucket used for blob data."
+            },
+            'beanstalk_env' : {
+                title : "Beanstalk Environment",
+                description : "Which Elastic Beanstalk environment this instance running on."
+            },
+            'content' : {
+                title : "Extra Information"
+            },
+            'database' : {
+                title : "Database Location",
+                description : "URI used to connect to the back-end PgSQL DB."
+            },
+            'elasticsearch' : {
+                title : "ElasticSearch Location",
+                description : "URI used to connect to the back-end ES instance."
+            },
+            'file_upload_bucket' : {
+                title : "File Upload Bucket",
+                description : "Where uploaded files are stored."
+            },
+            'load_data' : {
+                title : "Data Loaded",
+                description : "Data which was loaded into database on initialization or boot."
+            },
+            'ontology_updated' : {
+                title : 'Last Ontology Update',
+                description : "Last time ontologies were updated."
+            },
+            'system_bucket' : {
+                title : 'System Bucket',
+                description : "Name of blob storage bucket used for system data."
+            },
+            'processed_file_bucket' : {
+                title: "Processed File Bucket",
+                description : "Blob storage bucket name of processed files."
+            },
+            'aggregations' : {
+                title : 'Aggregations',
+                description : "Aggregations of ES-indexed data."
+            }
+        },
+        "keyTitleDescriptionMapCounts" : {
+            'db_es_total' : {
+                title : "DB and ES Counts",
+                description : "Total counts of items in database and elasticsearch."
+            },
+            'db_es_compare' : {
+                title : "DB and ES Counts by Type",
+                description : "Counts of items in database and elasticsearch for each doc_type index."
+            }
+        }
+    };
 
     constructor(props){
         super(props);
         this.getCounts = _.throttle(this.getCounts.bind(this), 1000);
         this.state = {
-            'db_es_total' : "loading...",
-            'db_es_compare' : "loading...",
+            'db_es_total' : null,
+            'db_es_compare' : null,
             'mounted' : false
         };
     }
 
     componentDidMount(){
-        this.setState({ 'mounted' : true }, this.getCounts);
+        this.setState({ 'mounted' : true });
     }
 
+    /** We only allow this to be called manually, and if are admin, to minimize load on ES */
     getCounts(){
         this.setState({
             'db_es_total' : "loading...",
+            'db_es_compare' : "loading..."
         }, ()=>{
             ajax.load('/counts?format=json', (resp)=>{
                 this.setState({
@@ -65,81 +124,84 @@ export default class HealthView extends React.PureComponent {
     }
 
     render() {
-        var { context, schemas, session, windowWidth, href } = this.props,
-            { db_es_compare, db_es_total, mounted } = this.state,
-            title = typeof context.title === "string" ? context.title : memoizedUrlParse(href).path,
-            width = layout.gridContainerWidth(windowWidth);
+        const { context, schemas, session, windowWidth, href, keyTitleDescriptionMapConfig, keyTitleDescriptionMapCounts, excludedKeys } = this.props;
+        const {
+            db_es_compare = null,
+            db_es_total = null,
+            mounted = false
+        } = this.state;
+        const { title: ctxTitle, description } = context;
+        const notYetLoaded = (db_es_compare === null && db_es_total === null);
+        const title = typeof ctxTitle === "string" ? ctxTitle : memoizedUrlParse(href).path;
+        const width = layout.gridContainerWidth(windowWidth);
 
         return (
             <div className="view-item container" id="content">
                 <hr/>
                 <h3 className="text-400 mb-2 mt-3">Configuration</h3>
-                {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={context} schemas={schemas} keyTitleDescriptionMap={{
-                    'blob_bucket' : {
-                        title : "Blob Bucket",
-                        description : "Name of S3 bucket used for blob data."
-                    },
-                    'beanstalk_env' : {
-                        title : "Beanstalk Environment",
-                        description : "Which Elastic Beanstalk environment this instance running on."
-                    },
-                    'content' : {
-                        title : "Extra Information"
-                    },
-                    'database' : {
-                        title : "Database Location",
-                        description : "URI used to connect to the back-end PgSQL DB."
-                    },
-                    'elasticsearch' : {
-                        title : "ElasticSearch Location",
-                        description : "URI used to connect to the back-end ES instance."
-                    },
-                    'file_upload_bucket' : {
-                        title : "File Upload Bucket",
-                        description : "Where uploaded files are stored."
-                    },
-                    'load_data' : {
-                        title : "Data Loaded",
-                        description : "Data which was loaded into database on initialization or boot."
-                    },
-                    'ontology_updated' : {
-                        title : 'Last Ontology Update',
-                        description : "Last time ontologies were updated."
-                    },
-                    'system_bucket' : {
-                        title : 'System Bucket',
-                        description : "Name of S3 Bucket used for system data."
-                    },
-                    'aggregations' : {
-                        title : 'Aggregations',
-                        description : "Aggregations of ES-indexed data."
-                    }
-                }} />
 
-                <button type="button" className="btn btn-outline-dark refresh-counts-button pull-right mt-2"
-                    onClick={this.getCounts} disabled={db_es_total === 'loading...'}>
-                    <i className={"icon icon-fw fas icon-refresh" + (db_es_total === 'loading...' ? " icon-spin" : "")}/>&nbsp; Refresh Counts
-                </button>
-                <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
+                { typeof description == "string" ? <p className="description">{ description }</p> : null }
 
-                <ItemDetailList excludedKeys={ItemDetailList.Detail.defaultProps.excludedKeys.concat(['content'])} hideButtons context={_.pick(this.state, 'db_es_total', 'db_es_compare')} schemas={schemas} keyTitleDescriptionMap={{
-                    'db_es_total' : {
-                        title : "DB and ES Counts",
-                        description : "Total counts of items in database and elasticsearch."
-                    },
-                    'db_es_compare' : {
-                        title : "DB and ES Counts by Type",
-                        description : "Counts of items in database and elasticsearch for each doc_type index."
-                    }
-                }} />
+                <ItemDetailList {...{ excludedKeys, context }} hideButtons keyTitleDescriptionMap={keyTitleDescriptionMapConfig} />
 
-                <HealthChart {...{ db_es_compare, mounted, session, context, width }} height={600} />
+                <DatabaseCountsInfo {...{ notYetLoaded, excludedKeys, schemas, db_es_compare, db_es_total, session, mounted, context, width, keyTitleDescriptionMapCounts }}
+                    getCounts={this.getCounts} />
 
             </div>
         );
     }
 }
+
+const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
+    const { notYetLoaded, excludedKeys, schemas, db_es_compare, db_es_total, session, mounted, context, width, getCounts, keyTitleDescriptionMapCounts } = props;
+    const userGroups = (session && JWT.getUserGroups()) || null;
+
+    if (!userGroups || userGroups.indexOf("admin") === -1) {
+        return null;
+    }
+
+    if (notYetLoaded) {
+        return (
+            <button type="button" className="btn btn-block btn-lg btn-outline-dark refresh-counts-button btn-block mt-2"
+                onClick={getCounts}>
+                <i className="icon icon-fw fas icon-sync mr-08"/>Get Database Counts
+            </button>
+        );
+    }
+
+    let btnTitle = null;
+
+    if (db_es_total === 'loading...') {
+        btnTitle = (
+            <React.Fragment>
+                <i className="icon icon-fw fas icon-sync icon-spin mr-08"/>
+                Fetching Database Counts
+            </React.Fragment>
+        );
+    } else {
+        btnTitle = (
+            <React.Fragment>
+                <i className="icon icon-fw fas icon-sync mr-08"/>
+                Refresh Counts
+            </React.Fragment>
+        );
+    }
+
+    return (
+        <React.Fragment>
+            <h3 className="text-400 mb-2 mt-3">Database Counts</h3>
+
+            <button type="button" className="btn btn-outline-dark refresh-counts-button btn-block mt-2"
+                onClick={getCounts} disabled={db_es_total === 'loading...'}>
+                { btnTitle }
+            </button>
+
+            <ItemDetailList {...{ excludedKeys, schemas }} context={{ db_es_compare, db_es_total }} hideButtons keyTitleDescriptionMap={keyTitleDescriptionMapCounts} />
+
+            <HealthChart {...{ db_es_compare, mounted, session, context, width }} height={600} />
+        </React.Fragment>
+    );
+});
 
 /**
  * This is a React wrapper around a D3 visualization.

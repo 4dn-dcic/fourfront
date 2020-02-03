@@ -7,7 +7,7 @@ import _ from 'underscore';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
-import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
+import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
 
@@ -15,20 +15,34 @@ import { UserContentBodyList } from './../static-pages/components';
 export default class PublicationView extends DefaultItemView {
 
     getTabViewContents(){
-        const { context, browseBaseState } = this.props;
+        const {
+            context : {
+                display_title,
+                exp_sets_used_in_pub = [],
+                exp_sets_prod_in_pub = []
+            }
+        } = this.props;
         const tabs = [];
         const width = this.getTabViewWidth();
+        const anyPublications = exp_sets_used_in_pub.length > 0 || exp_sets_prod_in_pub.length > 0;
 
         tabs.push(PublicationSummary.getTabObject(this.props, width));
 
-        if ((context.exp_sets_used_in_pub || []).length > 0 || (context.exp_sets_prod_in_pub || []).length > 0){
-            const expSetTableProps = _.extend({}, this.props, {
-                'requestHref' : (
-                    "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
-                    "publications_of_set.display_title=" + encodeURIComponent(context.display_title)
-                )
-            });
-            tabs.push(ExperimentSetTableTabView.getTabObject(expSetTableProps, width));
+        if (anyPublications){
+            const expSetTableProps = _.extend(
+                {
+                    width,
+                    searchHref : (
+                        "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
+                        "publications_of_set.display_title=" + encodeURIComponent(display_title)
+                    ),
+                    // Keep facets as they are returned from backend search response except the following:
+                    hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"]
+                    //facets : null // hide FacetList
+                },
+                this.props
+            );
+            tabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps));
         }
 
         return tabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
@@ -119,7 +133,7 @@ class PublicationSummary extends React.PureComponent {
     details(){
         const { context } = this.props;
         const { journal, categories, date_published, ID } = context;
-        const datePublished = formatPublicationDate(date_published);
+        const datePublished = (date_published && typeof date_published === "string") ? formatPublicationDate(date_published) : null;
 
         return (
             <React.Fragment>
@@ -152,10 +166,10 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <button type="button" className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
+                                        <a className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
                                             href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
                                             { cat }
-                                        </button>
+                                        </a>
                                     )
                                 }
                             </React.Fragment>

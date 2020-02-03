@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ExperimentSetTableTabView } from './components/tables/ExperimentSetTables';
+import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';
 
 
@@ -18,15 +18,13 @@ export default class BiosourceView extends DefaultItemView {
 
         initTabs.push(BiosourceViewOverview.getTabObject(this.props));
 
-        initTabs.push(ExperimentSetTableTabView.getTabObject(_.extend({}, this.props, {
-            'requestHref' : (
+        initTabs.push(ExperimentSetsTableTabView.getTabObject(_.extend({}, this.props, {
+            'searchHref' : (
                 "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                 "experiments_in_set.biosample.biosource.display_title=" + encodeURIComponent(context.display_title)
             ),
-            'title' : function(props, { totalCount }){
-                return (totalCount ? totalCount + ' ' : '') + "Experiment Sets";
-            }
+            'facets' : null
         })));
 
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)

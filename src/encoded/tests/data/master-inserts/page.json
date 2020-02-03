@@ -473,6 +473,15 @@
         "schema_version": "3"
     },
     {
+        "name": "markdown-sortable-table",
+        "uuid": "db5ed2fd-b4fb-4f4d-9053-4187d90560b8",
+        "title": "Markdown Sortable Table",
+        "content": [
+            "md-sortable-table.test"
+        ],
+        "schema_version": "3"
+    },
+    {
         "name": "privacy-policy",
         "uuid": "db5ed2fd-b4fb-4f4d-9053-9991d90560b0",
         "title": "Privacy Policy",

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableSearchLoader, ViewMoreResultsBtn } from './ItemPageTable';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader, ViewMoreResultsBtn } from './ItemPageTable';
 import { expFxn } from './../../../util';
 
 /**
@@ -51,15 +51,6 @@ SimpleFilesTable.defaultProps = {
         "file_type"         : { "title" : "File Type" },
     }
 };
-
-
-export const FilesTableLoadedFromSearch = React.memo(function FilesTableLoadedFromSearch(props){
-    return (
-        <ItemPageTableSearchLoader {..._.pick(props, 'requestHref', 'windowWidth', 'title', 'onLoad')}>
-            <SimpleFilesTable {..._.pick(props, 'width', 'defaultOpenIndices', 'defaultOpenIds', 'windowWidth', 'title', 'onLoad', 'href')} />
-        </ItemPageTableSearchLoader>
-    );
-});
 
 
 

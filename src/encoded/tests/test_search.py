@@ -36,7 +36,7 @@ def recursively_find_uuids(json, uuids):
 
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
-    assert res['@type'] == ['Search']
+    assert res['@type'] == ['ItemSearchResults','Search']
     assert res['@id'] == '/search/?type=Item'
     assert res['@context'] == '/terms/'
     assert res['notification'] == 'Success'
@@ -51,7 +51,7 @@ def test_search_with_no_query(workbook, testapp):
     # using /search/ (with no query) should default to /search/?type=Item
     # thus, should satisfy same assertions as test_search_view
     res = testapp.get('/search/').follow(status=200)
-    assert res.json['@type'] == ['Search']
+    assert res.json['@type'] == ['ItemSearchResults', 'Search']
     assert res.json['@id'] == '/search/?type=Item'
     assert res.json['@context'] == '/terms/'
     assert res.json['notification'] == 'Success'
@@ -135,6 +135,32 @@ def test_search_with_simple_query(workbook, testapp):
     mauxz_uuids = [item['uuid'] for item in res['@graph'] if 'uuid' in item]
     # make sure all uuids found in the first search are present in the second
     assert not set(mouse_uuids).issubset(set(mauxz_uuids))
+
+
+def test_search_ngram(workbook, testapp):
+    """
+    Tests ngram behavior for various use cases
+    """
+    res = testapp.get('/search/?type=Organism&q=mo').json
+    assert len(res['@graph']) == 1
+    res = testapp.get('/search/?type=Organism&q=hu').json
+    assert len(res['@graph']) == 1
+    res = testapp.get('/search/?type=Organism&q=ma').json
+    assert len(res['@graph']) == 1
+    # or search
+    res = testapp.get('/search/?type=Organism&q=(mu|an)').follow().json
+    assert len(res['@graph']) == 2
+    # or not search
+    res = testapp.get('/search/?type=Organism&q=(ho|-an)').follow().json
+    assert len(res['@graph']) == 2
+    # by uuid subset
+    res = testapp.get('/search/?type=Organism&q=3413218c').json
+    assert len(res['@graph']) == 2
+    # uuid difference beyond max_ngram
+    res = testapp.get('/search/?type=Organism&q=3413218c-3f').json
+    assert len(res['@graph']) == 2
+    # uuid difference before max_ngram, no results
+    res = testapp.get('/search/?type=Organism&q=3413218d', status=404)
 
 
 def test_search_facets_and_columns_order(workbook, testapp, registry):

@@ -8,9 +8,16 @@
  * @module
  */
 
-export { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableBatchLoader, ItemPageTableSearchLoader } from './ItemPageTable';
+export { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableBatchLoader, EmbeddedItemSearchTable } from './ItemPageTable';
 
-export { ExperimentSetTables, ExperimentSetTablesLoaded, ExperimentSetTablesLoadedFromSearch, ExperimentSetTableTabView } from './ExperimentSetTables';
+export {
+    EmbeddedExperimentSetSearchTable,
+    ExperimentSetsTableTabView,
+    ExperimentSetsTableTabViewTitle,
+    /* Somewhat deprecated: */
+    ExperimentSetTables,
+    ExperimentSetTablesLoaded,
+} from './ExperimentSetTables';
 
 export { SimpleFilesTable, SimpleFilesTableLoaded } from './SimpleFilesTable';
 

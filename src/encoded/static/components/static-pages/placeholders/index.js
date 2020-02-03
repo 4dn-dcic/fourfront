@@ -8,20 +8,23 @@ import _ from 'underscore';
 import { SlideCarousel } from './SlideCarousel';
 import { BasicCarousel } from './BasicCarousel';
 import { JointAnalysisMatrix } from './JointAnalysisMatrix';
+import { EmbeddedItemSearchTable } from './../../item-pages/components/tables/ItemPageTable';
+import { MdSortableTable } from './MdSortableTable';
 
-export { SlideCarousel, BasicCarousel, JointAnalysisMatrix };
+export { SlideCarousel, BasicCarousel, JointAnalysisMatrix, MdSortableTable };
 
 
 /**
  * Any placeholder(s) used in a StaticSection _must_ get imported here
  * and be available here.
  */
-const placeholders = { SlideCarousel, BasicCarousel, JointAnalysisMatrix };
+const placeholders = { SlideCarousel, BasicCarousel, JointAnalysisMatrix, EmbeddedItemSearchTable, MdSortableTable };
 
 export const replaceString = memoize(function(placeholderString, props){
 
-    var parsedJSXContent = (
-        <JsxParser bindings={props} jsx={placeholderString} components={placeholders} key="placeholder-replacement" renderInWrapper={false} />
+    const parsedJSXContent = (
+        <JsxParser bindings={props} jsx={placeholderString} components={placeholders} key="placeholder-replacement"
+            renderInWrapper={false} showWarnings onError={onError} disableKeyGeneration />
     );
 
     if (parsedJSXContent){
@@ -38,3 +41,7 @@ export const replaceString = memoize(function(placeholderString, props){
     }
     return true;
 });
+
+function onError(err){
+    console.error("Error in JSX Parser --", err);
+}
