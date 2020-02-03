@@ -368,28 +368,11 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 class QCMetricsTable extends React.PureComponent {
 
-    static defaultProps = {
-        heading: (
-            <h3 className="tab-section-title mt-12">
-                <span>Quality Metrics</span>
-            </h3>
-        )
-    };
-
-    constructor(props){
-        super(props);
-        this.memoized = {
-            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
-            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles),
-            filterQCSummaryItemsHavingTitleTooltips: memoize(this.filterQCSummaryItemsHavingTitleTooltips)
-        };
-    }
-
-    filterQCSummaryItemsHavingTitleTooltips(fileGroup) {
+    static filterQCSummaryItemsHavingTitleTooltips(fileGroup) {
         return _.filter(_.flatten(_.pluck(fileGroup, 'quality_metric_summary')), function (qmsItem) { return qmsItem.title_tooltip && qmsItem.title_tooltip.length > 0; });
     }
 
-    renderForFileColValue(file) {
+    static renderForFileColValue(file) {
         const fileAtId = file && object.atIdFromObject(file);
         let fileTitleString;
         if (file.accession) {
@@ -413,6 +396,23 @@ class QCMetricsTable extends React.PureComponent {
             </React.Fragment>);
     }
 
+    static defaultProps = {
+        heading: (
+            <h3 className="tab-section-title mt-12">
+                <span>Quality Metrics</span>
+            </h3>
+        )
+    };
+
+    constructor(props){
+        super(props);
+        this.memoized = {
+            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
+            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles),
+            filterQCSummaryItemsHavingTitleTooltips: memoize(QCMetricsTable.filterQCSummaryItemsHavingTitleTooltips)
+        };
+    }
+
     render() {
         const { width, files, windowWidth, href, heading } = this.props;
         const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
@@ -429,7 +429,7 @@ class QCMetricsTable extends React.PureComponent {
                     {_.map(filesByTitles, (fileGroup, i) => {
                         const columnHeaders = [ // Static / present-for-each-table headers
                             { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
-                            { columnClass: 'file', title: 'For File', initialWidth: 100, render: this.renderForFileColValue }
+                            { columnClass: 'file', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
                         ].concat(_.map(fileGroup[0].quality_metric_summary, (sampleQMSItem, qmsIndex) => { // Dynamic Headers
                             function renderColValue(file, field, colIndex, fileEntryBlockProps) {
                                 const qmsItem = file.quality_metric_summary[qmsIndex];
