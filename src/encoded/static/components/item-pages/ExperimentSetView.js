@@ -389,7 +389,7 @@ class QCMetricsTable extends React.PureComponent {
         }
         return (
             <React.Fragment>
-                <div>{file.file_type_detailed}</div>
+                <div>{ Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true) }</div>
                 <a className="text-500 name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
