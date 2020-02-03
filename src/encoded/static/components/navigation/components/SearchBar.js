@@ -65,6 +65,7 @@ export class SearchBar extends React.PureComponent {
         this.onToggleVisibility     = this.onToggleVisibility.bind(this);
         this.onChangeSearchItemType = this.onChangeSearchItemType.bind(this);
         this.onSearchInputChange    = this.onSearchInputChange.bind(this);
+        this.onToggleSearchItemType = this.onToggleSearchItemType.bind(this);
         this.onResetSearch          = this.onResetSearch.bind(this);
         this.onSearchInputBlur      = this.onSearchInputBlur.bind(this);
         this.getDropdownTitleText   = this.getDropdownTitleText.bind(this);
@@ -83,7 +84,8 @@ export class SearchBar extends React.PureComponent {
         this.state = {
             'searchItemType'    : this.memoized.deriveSearchItemTypeFromHref(props.href, null),
             'typedSearchQuery'  : initialQuery,
-            'isVisible'         : isSelectAction(props.currentAction) || SearchBar.hasInput(initialQuery) || false
+            'isVisible'         : isSelectAction(props.currentAction) || SearchBar.hasInput(initialQuery) || false,
+            'isSearchItemTypeDropDownToggleOn': false
         };
 
         this.inputElemRef = React.createRef();
@@ -107,7 +109,6 @@ export class SearchBar extends React.PureComponent {
     }
 
     getDropdownTitleText() {
-        const { href } = this.props;
         const { searchItemType } = this.state;
 
         switch (searchItemType) {
@@ -174,15 +175,32 @@ export class SearchBar extends React.PureComponent {
         const { href, currentAction } = this.props;
         const lastQuery = searchFilters.searchQueryStringFromHref(href);
 
-        this.setState(function({ typedSearchQuery: currQueryStr }){
-            let typedSearchQuery = currQueryStr; // No change - default
-            if (SearchBar.hasInput(lastQuery) && !SearchBar.hasInput(currQueryStr)) {
-                // Replace new value entered with current search query in URL if new value is empty string
-                typedSearchQuery = lastQuery;
+        setTimeout(() => {
+            this.setState(({ typedSearchQuery: currQueryStr, isSearchItemTypeDropDownToggleOn }) => {
+                let typedSearchQuery = currQueryStr; // No change - default
+                if (SearchBar.hasInput(lastQuery) && !SearchBar.hasInput(currQueryStr)) {
+                    // Replace new value entered with current search query in URL if new value is empty string
+                    typedSearchQuery = lastQuery;
+                }
+                // Prevent closing onBlur if on selection view, or if have input.
+                const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownToggleOn || false;
+                console.log('xxx visible:', isVisible);
+                return { typedSearchQuery, isVisible, isSearchItemTypeDropDownToggleOn: isVisible ? isSearchItemTypeDropDownToggleOn : false };
+            });
+        }, 100);
+    }
+
+    onToggleSearchItemType(isOpen, event) {
+        this.setState((state, props) => {
+            return { isSearchItemTypeDropDownToggleOn: isOpen };
+        }, () => {
+            const { typedSearchQuery, isSearchItemTypeDropDownToggleOn } = this.state;
+            if (!isSearchItemTypeDropDownToggleOn && this.inputElemRef && this.inputElemRef.current) {
+                const isInputElemActive = document.activeElement === this.inputElemRef.current;
+                if (!isInputElemActive && typedSearchQuery.length === 0) {
+                    this.inputElemRef.current.focus();
+                }
             }
-            // Prevent closing onBlur if on selection view, or if have input.
-            const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || false;
-            return { typedSearchQuery, isVisible };
         });
     }
 
@@ -242,8 +260,9 @@ export class SearchBar extends React.PureComponent {
         return ( // Form submission gets serialized and AJAXed via onSubmit handlers in App.js
             <form className={_.filter(formClasses).join(' ')} action={this.getActionType()} method="GET">
                 <div className="form-inputs-container">
-                    <SelectItemTypeDropdownBtn {...{ currentAction, searchItemType, href }} disabled={!(searchBoxHasInput || searchQueryFromHref)}
-                        onChangeSearchItemType={this.onChangeSearchItemType} getDropdownTitleText={this.getDropdownTitleText} currentPageType={this.currentPageType} />
+                    <SelectItemTypeDropdownBtn {...{ currentAction, searchItemType, href }} disabled={false/*!(searchBoxHasInput || searchQueryFromHref)*/}
+                        onChangeSearchItemType={this.onChangeSearchItemType} onToggleSearchItemType={this.onToggleSearchItemType}
+                        getDropdownTitleText={this.getDropdownTitleText} currentPageType={this.currentPageType} />
                     <input className="form-control search-query" id="navbar-search" type="search" placeholder="Search" ref={this.inputElemRef}
                         name="q" value={typedSearchQuery} onChange={this.onSearchInputChange} key="search-input" onBlur={this.onSearchInputBlur} />
                     { showingCurrentQuery ? <i className="reset-button icon icon-times fas" onClick={this.onResetSearch} /> : null }
@@ -265,7 +284,7 @@ export class SearchBar extends React.PureComponent {
 }
 
 const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
-    const { currentAction, searchItemType, onChangeSearchItemType, href, getDropdownTitleText, disabled = true } = props;
+    const { currentAction, searchItemType, onChangeSearchItemType, onToggleSearchItemType, href, getDropdownTitleText, disabled = true } = props;
     if (isSelectAction(currentAction)) return null;
 
     const showWithinResultsOption = useMemo(function(){
@@ -275,10 +294,9 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="sm" variant="outline-secondary" disabled={disabled}
-                onSelect={(eventKey, evt) => { onChangeSearchItemType(eventKey); }}
-                title={getDropdownTitleText()}>
+                onSelect={onChangeSearchItemType} title={getDropdownTitleText()} onToggle={onToggleSearchItemType}>
                 <DropdownItem eventKey="sets" data-key="sets" active={searchItemType === "sets"}>
-                        Experiment Sets
+                    Experiment Sets
                 </DropdownItem>
                 <DropdownItem eventKey="all" data-key="all" active={searchItemType === "all"}>
                     All Items (advanced)
