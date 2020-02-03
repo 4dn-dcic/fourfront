@@ -29,14 +29,34 @@ from snovault.app import (
     json_from_path,
     configure_dbsession,
     changelogs,
-    json_asset
+    json_asset,
 )
 from dcicutils.log_utils import set_logging
+from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
+from encoded.commands.create_mapping_on_deploy import (
+    ENV_WEBPROD,
+    ENV_WEBPROD2,
+    BEANSTALK_PROD_ENVS,
+)
+from .util import find_other_in_pair
 import structlog
 import logging
 
 # location of environment variables on elasticbeanstalk
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
+
+
+def get_mirror_env(settings):
+    """
+        Figures out who the mirror beanstalk Env is if applicable
+        This is important in our production environment because in our
+        blue-green deployment we maintain two elasticsearch intances that
+        must be up to date with each other.
+    """
+    who_i_am = settings.get('env.name', '')
+    if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
+        return None
+    return find_other_in_pair(who_i_am, BEANSTALK_PROD_ENVS)
 
 
 def static_resources(config):
@@ -147,58 +167,6 @@ def app_version(config):
             config.registry.settings["ga_config"] = json.load(json_file)
 
 
-'''
-def add_schemas_to_html_responses(config):
-
-    from pyramid.events import BeforeRender
-    from snovault.schema_views import schemas
-    from .renderers import should_transform
-
-    # Exclude some keys, to make response smaller.
-    exclude_schema_keys = [
-        'AccessKey', 'Image', 'ImagingPath', 'OntologyTerm', 'PublicationTracking', 'Modification',
-        'QualityMetricBamqc', 'QualityMetricFastqc', 'QualityMetricFlag', 'QualityMetricPairsqc',
-        'TestingDependencies', 'TestingDownload', 'TestingKey', 'TestingLinkSource', 'TestingPostPutPatch',
-        'TestingServerDefault'
-    ]
-
-    def add_schemas(event):
-        request = event.get('request')
-        if request is not None:
-
-            if event.get('renderer_name') != 'null_renderer' and ('application/html' in request.accept or 'text/html' in request.accept):
-                #print('\n\n\n\n')
-                #print(event.keys())
-                #print(event.get('renderer_name'))
-                #print(should_transform(request, request.response))
-                #print(request.response.content_type)
-
-                if event.rendering_val.get('@type') is not None and event.rendering_val.get('@id') is not None and event.rendering_val.get('schemas') is None:
-                    schemasDict = {
-                        k:v for k,v in schemas(None, request).items() if k not in exclude_schema_keys
-                    }
-                    for schema in schemasDict.values():
-                        if schema.get('@type') is not None:
-                            del schema['@type']
-                        if schema.get('mixinProperties') is not None:
-                            del schema['mixinProperties']
-                        if schema.get('properties') is not None:
-                            if schema['properties'].get('@id') is not None:
-                                del schema['properties']['@id']
-                            if schema['properties'].get('@type') is not None:
-                                del schema['properties']['@type']
-                            if schema['properties'].get('display_title') is not None:
-                                del schema['properties']['display_title']
-                            if schema['properties'].get('schema_version') is not None:
-                                del schema['properties']['schema_version']
-                            if schema['properties'].get('uuid') is not None:
-                                del schema['properties']['uuid']
-                    event.rendering_val['schemas'] = schemasDict
-
-    config.add_subscriber(add_schemas, BeforeRender)
-'''
-
-
 def main(global_config, **local_config):
     """
     This function returns a Pyramid WSGI application.
@@ -223,7 +191,7 @@ def main(global_config, **local_config):
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = os.environ.get('MIRROR_ENV_NAME')
+    settings['mirror.env.name'] = get_mirror_env(settings)
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY

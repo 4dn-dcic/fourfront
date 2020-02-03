@@ -504,7 +504,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
                         label={<StackedBlockNameLabel title="File"/>}
                         isSingleItem={ungroupedFiles.length + contents.length < 2 ? true : false}
-                        columnClass="file-group" hideNameOnHover={true} href={href}
+                        columnClass="file-group" hideNameOnHover href={href}
                     />
                 );
 
@@ -650,11 +650,11 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static defaultProps = {
         'columnHeaders' : [
-            { columnClass: 'experiment',  className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
+            { columnClass: 'experiment',  title: 'Experiment',  className: 'text-left',     initialWidth: 180  },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
-            { columnClass: 'file',        className: 'has-checkbox',  title: 'File',      initialWidth: 135, render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox },
-            { columnClass: 'file-detail', title: 'File Type', initialWidth: 135, render: renderFileTypeSummaryColumn },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
+            { columnClass: 'file',        title: 'File',        className: 'has-checkbox',  initialWidth: 165,  render: renderFileTitleColumn,          visibleTitle: renderFileHeaderWithCheckbox },
+            { columnClass: 'file-detail', title: 'File Type',                               initialWidth: 135,  render: renderFileTypeSummaryColumn     },
+            { columnClass: 'file-detail', title: 'File Size',                               initialWidth: 70,   field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
