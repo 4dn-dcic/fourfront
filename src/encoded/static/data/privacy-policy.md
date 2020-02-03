@@ -1,5 +1,5 @@
 
-Last updated on January 25th, 2020.
+Last updated on February 1st, 2020.
 
 The 4DN DCIC ("us", "we", or "our") operates https://data.4dnucleome.org (the "Portal"). This page informs you of our policies regarding the collection, use and disclosure of
 Personal Information we receive from users of the Portal. We use your Personal Information only for providing and improving the Portal. By using the Portal, you
@@ -17,11 +17,14 @@ We may collect non-personal information about the computer, mobile device or oth
 
 ## Cookies
 
-Cookies are files with small amount of data, which may include an anonymous unique identifier. Cookies are sent to your browser from a web site and stored on your computer's hard drive. We use cookies to understand and save your preferences for future visits and compile aggregate data about site traffic and site interaction so that we can offer better site experiences and tools in the future. We may contract with third-party service providers to assist us in better understanding our site visitors. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our Portal or sign in.
+Cookies are files with small amount of data, which may include an anonymous unique identifier. Cookies are sent to your browser from a web site and stored on your computer's hard drive. We use cookies to understand and save your preferences for future visits and compile aggregate data about site traffic and site interaction so that we can offer better site experiences and tools in the future. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. This can be performed in your browser's settings or by installing an ad-blocker. However, if you do not accept cookies, you may not be able to use some portions of our Portal or sign in.
 
 ## Third-Party Cookies
 
-Cookies may be set by an organization other than the 4DN DCIC or Harvard. These “third-party cookies” may, for example, originate from websites such as YouTube, Twitter, Facebook, Google Plus or other social media services for which 4DN DCIC has implemented authentication or “plug-ins.” Since the cookie policies of these sites change over time, you should determine their policies by visiting the privacy policy pages of these sites directly.
+We may contract with third-party service providers to assist us in better understanding our site visitors. Cookies may be set by an organization other than the 4DN DCIC or Harvard. These “third-party cookies” may, for example, originate from websites such as Google, YouTube, Twitter, Auth0, Facebook or other social media, authentication, or analytics services for which 4DN DCIC has implemented “plug-ins” on the portal. Since the cookie policies of these sites change over time, you should determine their policies by visiting the privacy policy pages of these sites directly.
+
+We utilize services from Google Analytics to gather usage data for user experience improvement and security assurance purposes. This usage data is available to Google and may be gathered, used, and managed according to their [Privacy & Terms Policies](https://policies.google.com/technologies/partner-sites). You may also opt out of usage tracking by installing an ad-blocking browser extension such as [uBlock Origin](https://github.com/gorhill/uBlock/#installation).
+
 You may disable cookies through your individual browser options. If you would like to learn more about cookies please refer to the following website: [http://www.allaboutcookies.org/](http://www.allaboutcookies.org/).
 
 ## Links to Third-Party Websites
