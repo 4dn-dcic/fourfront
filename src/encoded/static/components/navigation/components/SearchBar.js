@@ -184,7 +184,6 @@ export class SearchBar extends React.PureComponent {
                 }
                 // Prevent closing onBlur if on selection view, or if have input.
                 const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownToggleOn || false;
-                console.log('xxx visible:', isVisible);
                 return { typedSearchQuery, isVisible, isSearchItemTypeDropDownToggleOn: isVisible ? isSearchItemTypeDropDownToggleOn : false };
             });
         }, 100);
