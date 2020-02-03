@@ -6,6 +6,7 @@ import pkg_resources
 import pytest
 from pytest import fixture
 from pyramid.testing import DummyRequest
+from snovault import DBSESSION, UPGRADER, ROOT
 
 pytest_plugins = [
     'encoded.tests.datafixtures',
@@ -52,11 +53,13 @@ _app_settings = {
     'file_upload_profile_name': 'test-profile',
 }
 
+def make_app_settings_dictionary():
+    return _app_settings.copy()
+
 
 @fixture(scope='session')
 def app_settings(request, wsgi_server_host_port, conn, DBSession):
-    from snovault import DBSESSION
-    settings = _app_settings.copy()
+    settings = make_app_settings_dictionary()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
     # add some here for file testing
     settings[DBSESSION] = DBSession
@@ -149,13 +152,11 @@ def elasticsearch(registry):
 
 @fixture
 def upgrader(registry):
-    from snovault import UPGRADER
     return registry[UPGRADER]
 
 
 @fixture
 def root(registry):
-    from snovault import ROOT
     return registry[ROOT]
 
 

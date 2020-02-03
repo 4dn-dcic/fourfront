@@ -1,4 +1,5 @@
 import pytest
+import webtest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 from datetime import date
@@ -149,12 +150,11 @@ def remc_submitter(testapp, remc_lab, remc_award):
 
 
 def remote_user_testapp(app, remote_user):
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': str(remote_user),
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
 @pytest.fixture

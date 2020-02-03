@@ -1,6 +1,9 @@
 import pytest
 import copy
 
+from uuid import uuid4
+
+
 ORDER = [
     'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
     'ontology', 'ontology_term', 'file_format', 'badge', 'organism', 'gene',
@@ -31,11 +34,13 @@ ORDER = [
 
 @pytest.fixture
 def wrangler_testapp(wrangler, app, external_tx, zsa_savepoints):
+    raise Exception("I think this doesn't get executed. -kmp 02-Feb-2020")
     return remote_user_testapp(app, wrangler['uuid'])
 
 
 @pytest.fixture
 def submitter_testapp(submitter, app, external_tx, zsa_savepoints):
+    raise Exception("I think this doesn't get executed. -kmp 02-Feb-2020")
     return remote_user_testapp(app, submitter['uuid'])
 
 
@@ -469,7 +474,6 @@ def experiment_data(lab, award, human_biosample, mboI, exp_types):
 
 @pytest.fixture
 def exp_types(testapp, lab, award):
-    from uuid import uuid4
     experiment_types = {}
     title_dict = {
         'hic': ('in situ Hi-C', ["ExperimentHiC"]),
@@ -556,7 +560,6 @@ def two_experiment_replicate_set(testapp, rep_set_data, experiments):
 
 @pytest.fixture
 def file_formats(testapp, lab, award):
-    from uuid import uuid4
     formats = {}
     ef_format_info = {
         'pairs_px2': {'standard_file_extension': 'pairs.gz.px2',
