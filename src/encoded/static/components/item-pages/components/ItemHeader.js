@@ -5,10 +5,9 @@ import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
 
-import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
-import { memoizedUrlParse } from './../../globals';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -278,25 +277,16 @@ export class MiddleRow extends React.Component {
 export const BottomRow = React.memo(function BottomRow(props){
     const {
         context: {
-            last_modified: {
-                date_modified = null,
-                modified_by: { display_title: modifiedByTitle = null } = {} // Likely to have { error : "no view permissions" }
-            } = {},
-            date_created,
+            date_created = null,
             submitted_by: { display_title: submittedByTitle = null  } = {} // Likely to have { error : "no view permissions" }
         },
         children = null
     } = props;
+
     let dateToUse = null;
     let tooltip = null;
 
-    if (typeof date_modified === 'string'){
-        dateToUse = date_modified;
-        tooltip = 'Last modified';
-        if (modifiedByTitle) {
-            tooltip += " by " + modifiedByTitle;
-        }
-    } else if (typeof date_created === 'string'){
+    if (typeof date_created === 'string'){
         dateToUse = date_created;
         tooltip = 'Created';
         if (submittedByTitle) {

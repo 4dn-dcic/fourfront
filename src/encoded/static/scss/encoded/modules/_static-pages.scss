@@ -533,7 +533,186 @@
 	}
 }
 
+/**********************************************************
+		Markdown Sortable Table
+***********************************************************/
+$markdown-table-edge-shadow-color : rgba(0,0,0,0.125) !default;
+$markdown-table-result-row-height: 46px !default;
 
+@mixin markdown-table-column-and-header-block {
+	//float: left;
+	//transform: translate3d(0,0,0);
+	> .inner {
+		height : 100%; //$markdown-table-result-row-height;
+		min-height: $markdown-table-result-row-height;
+		padding: 0 8px;
+		line-height: 16px;
+		text-align: center;
+		overflow: hidden;
+		text-overflow: ellipsis;
+        white-space: nowrap;
+        display: flex;
+		align-items: center;
+		line-height: $line-height-base;
+	}
+	> .width-adjuster {
+		position: absolute;
+		color: $search-results-header-text-color;
+		padding-left: 10px;
+		padding-right: 15px;
+		left: 0;
+		top : 0;
+		margin-left: -12px;
+		z-index: 10;
+		cursor: col-resize;
+		width: 28px;
+		height: 100%;
+
+		&:after {
+			content: ' ';
+			border-left-width: 1px;
+			border-right-width: 1px;
+			border-left-style: dotted;
+			border-right-style: dotted;
+			border-color: $search-results-header-text-color;
+			opacity: 0.6;
+			width: 3px;
+			left: 10px;
+
+			top: 9.5px;
+			bottom: 9.5px;
+			position: absolute;
+		}
+		&:hover:after {
+			opacity: 1;
+		}
+	}
+}
+
+@mixin markdown-table-column-block {
+    @include markdown-table-column-and-header-block;
+
+    > .inner > .value {
+        // Default style -- can be overriden
+        @include text-ellipsis-container;
+		flex-grow: 1;
+		font-size: 0.9rem;
+
+		img {
+			padding: 3px;
+		}
+    }
+}
+
+.markdown-table-outer-container {
+
+	.markdown-table-container {
+		position: relative;
+
+		.inner-container {
+
+			overflow: auto;
+
+			.scrollable-container {
+				overflow: hidden;
+				width: auto;
+
+				.markdown-table-row {
+					border-bottom: 1px solid rgb(220,220,220);
+					position: relative;
+					> .columns.result-table-row {
+
+						display: flex;
+						background-color: #fff;
+
+						> .markdown-table-column-block {
+							@include markdown-table-column-block;
+							&:not(:last-child) {
+								border-right: 1px dotted rgba(0,0,0,0.075);
+							}
+						}
+
+					}
+
+				} // .markdown-table-row
+
+			} // .scrollable-container
+
+		} // .inner-container
+		
+	} // .markdown-table-container
+
+} // .markdown-table-outer-container
+
+
+.markdown-table-headers-row {
+	background-color: $brand-primary-dark;
+	z-index: 50;
+	transform: translate3d(0,0,0) !important;
+	overflow-x: hidden;
+
+	> .columns {
+		display: -webkit-box;
+		display: flex;
+		position: relative;
+
+		> .markdown-table-column-block {
+			@include markdown-table-column-and-header-block;
+			flex-shrink: 0;
+			position: relative;
+
+			&.no-sort {
+				> .inner {
+					padding-right: 8px;
+				}
+			}
+
+			> .inner {
+				color: $search-results-header-text-color;
+				font-weight: 500;
+                padding-right: 32px;
+				display: flex;
+				font-size: 1rem;
+
+                > .column-title {
+                    flex-grow: 1;
+                    text-align: center;
+                    @include text-ellipsis-container;
+                }
+
+				> .column-sort-icon {
+					color: rgba(255,255,255,0.5);
+					text-decoration: none !important;
+					padding-left: 0;
+					padding-right: 5px;
+					display: inline-block;
+					/* float: right; */
+					position: absolute;
+					cursor: pointer;
+					right: 9px;
+					&:hover, &:active, &:focus {
+						color: $search-results-header-text-color;
+					}
+					&.active {
+						color: $search-results-header-text-color;
+						text-shadow: 0 0 0 $search-results-header-text-color;
+					}
+				}
+
+			}
+			&:hover{
+				z-index: 10;
+			}
+		}
+	}
+
+	&.non-adjustable {
+		> .columns > .markdown-table-column-block > .inner {
+			padding-right: 8px;
+		}
+	}
+
+} // .markdown-table-headers-row
 
 /**********************************************************
 		Misc Static Pages

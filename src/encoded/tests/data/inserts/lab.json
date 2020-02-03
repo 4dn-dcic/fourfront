@@ -15,6 +15,15 @@
         "uuid": "828cd4fe-ebb0-4b22-a94a-d2e3a36cc988"
     },
     {
+        "uuid": "a4dc7545-7836-4db4-bc6b-6f6b8cc745c8",
+        "awards": ["1U01CA200059-01"],
+        "date_created": "2017-04-08T13:01:50.900464+00:00",
+        "status": "current",
+        "institute_label": "HARVARD",
+        "name": "dcic-testing-lab",
+        "title": "DCIC Testing Lab"
+    },
+    {
         "awards": ["Test-NOT-4DN"],
         "name": "test-not-4dn-lab",
         "title": "NOT 4DN test lab",

@@ -1,5 +1,5 @@
 
-Last updated on October 25th, 2018.
+Last updated on January 25th, 2020.
 
 The 4DN DCIC ("us", "we", or "our") operates https://data.4dnucleome.org (the "Portal"). This page informs you of our policies regarding the collection, use and disclosure of
 Personal Information we receive from users of the Portal. We use your Personal Information only for providing and improving the Portal. By using the Portal, you
@@ -13,7 +13,7 @@ We may also provide your information to third parties in circumstances where we 
 
 ## Device Information Collected By Us
 
-We may collect non-personal information about the computer, mobile device or other device you use to access the Portal, such as IP address, geolocation information, unique device identifiers, browser type, browser language or other information of this nature. We use this information in an aggregate fashion to track access to the Portal. At no time do we disclose site usage by individual IP addresses. Web server logs are retained on a temporary basis and then deleted from our systems.
+We may collect non-personal information about the computer, mobile device or other device you use to access the Portal, such as IP address, geolocation information, unique device identifiers, browser type, browser language or other information of this nature. We use this information in an aggregate fashion to track access to the Portal. At no time do we disclose site usage by individual IP addresses. Web server logs are retained on a temporary basis and then deleted from our systems. Third-party partners such as Google Analytics may collect additional information about cross-device browsing habits of users who have turned on [Ads Personalization](https://support.google.com/ads/answer/2662856); some of this information may be shared with us and used to understand which devices are used to browse our portal and to improve user experience to cater to usage.
 
 ## Cookies
 

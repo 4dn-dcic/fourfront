@@ -50,13 +50,13 @@ StaticSectionViewPreview.getTabObject = function({ context, windowWidth }){
         'key' : 'preview',
         //'disabled' : !Array.isArray(context.experiments),
         'content' : (
-            <div className="overflow-hidden">
+            <React.Fragment>
                 <h3 className="tab-section-title">
                     { context.title || 'Preview' }
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 <StaticSectionViewPreview context={context} windowWidth={windowWidth} />
-            </div>
+            </React.Fragment>
         )
     };
 };
