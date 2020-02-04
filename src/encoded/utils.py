@@ -1,5 +1,8 @@
 # utility functions
 
+import datetime
+import time
+
 
 def compute_set_difference_one(s1, s2):
     """ Computes the set difference between s1 and s2 (ie: in s1 but not in s2)
@@ -26,3 +29,13 @@ def find_other_in_pair(element, pair):
         :raises: exception if types do not match or in compute_set_diferrence_one
     """
     return compute_set_difference_one(set(pair), {element})
+
+
+def delay_rerun(*args):
+    """ Rerun function for flaky """
+    time.sleep(1)
+    return True
+
+
+def utc_today_str():
+    return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")

@@ -1,5 +1,8 @@
+import datetime
 import pytest
-from encoded.util import compute_set_difference_one, find_other_in_pair
+import re
+
+from encoded.utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str
 
 
 pytestmark = pytest.mark.working
@@ -40,3 +43,16 @@ def test_find_other_in_pair():
         find_other_in_pair(val, None)  # no pair to compare to
     with pytest.raises(RuntimeError):  # too many results
         find_other_in_pair(None, lst)
+
+
+def test_delay_rerun():
+    t0 = datetime.datetime.now()
+    delay_rerun()
+    t1 = datetime.datetime.now()
+    assert (t1 - t0).total_seconds() > 1
+
+
+def test_utc_today_str():
+    pattern = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
+    actual = utc_today_str()
+    assert re.match(pattern, actual), "utc_today_str() result %s did not match format: %s" % (actual, pattern)
