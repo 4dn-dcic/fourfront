@@ -34,7 +34,7 @@ describe('Static Page & Content Tests', function () {
                     return Cypress.$(liEl).attr('id');
                 });
 
-                cy.get('#page-title-container .page-title').should('have.text', '4D Nucleome Data Portal').then((title)=>{
+                cy.get('#page-title-container .page-title').should('contain', '4D Nucleome Data Portal').then((title)=>{
 
                     let prevTitle = title.text();
                     let count = 0;

@@ -8,7 +8,7 @@ describe('Browse Views - Basic Tests', function () {
             cy.visit('/');
             cy.get('#top-nav div.navbar-collapse .navbar-nav a.id-data-menu-item').click().wait(500).then(()=>{
             }).get(navBrowseBtnSelector).click().then(()=>{
-                cy.get('#page-title-container .page-title').should('have.text', 'Data Browser');
+                cy.get('#page-title-container .page-title').should('contain', 'Data Browser');
             });
 
         });

@@ -2,7 +2,7 @@ import pytest
 
 # this file was previously used to setup the test fixtures for the BDD tests.
 # now, it holds the app_settings / app / workbook needed to test a full
-# app, including elasticsearch and loaded workbook inserts
+# app with indexing, including elasticsearch and loaded workbook inserts
 
 @pytest.fixture
 def external_tx():
@@ -11,7 +11,7 @@ def external_tx():
 
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
-    from ..conftest import _app_settings
+    from .conftest import _app_settings
     import os
     settings = _app_settings.copy()
     settings['create_tables'] = True
@@ -47,29 +47,17 @@ def app(app_settings, **kwargs):
     DBSession.bind.pool.dispose()
 
 
-@pytest.fixture(autouse=True)
-def teardown(app):
-    """
-    Alternative to ..test_indexing.teardown
-    Simply call /index to clear out the indexing queue after each test
-    """
-    from ..conftest import indexer_testapp
-    indexer_testapp(app).post_json('/index', {'record': True})
-
-
 @pytest.mark.fixture_cost(500)
 @pytest.yield_fixture(scope='session')
 def workbook(app):
     from webtest import TestApp
-    from ..test_indexing import teardown
-    teardown(app, use_collections=None)  # recreate all indices
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
 
-    from ...loadxl import load_all
+    from ..loadxl import load_all
     from pkg_resources import resource_filename
     # just load the workbook inserts
     load_res = load_all(testapp, resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
