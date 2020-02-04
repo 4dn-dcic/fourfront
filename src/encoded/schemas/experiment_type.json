@@ -192,6 +192,17 @@
                 "linkTo": "Publication"
             }
         },
+        "other_protocols": {
+            "title": "Other Protocols",
+            "description": "Other protocols associated with this assay that aren't the SOP",
+            "type": "array",
+            "lookup": 600,
+            "items": {
+                "title": "Protocol",
+                "type": "string",
+                "linkTo": "Protocol"
+            }
+        },
         "valid_item_types": {
             "title": "Valid Item Types",
             "description": "Types of items that can utilize this experiment type",
