@@ -627,7 +627,14 @@
                         }
                     }
                 }
-            }
+            },
+            "default":{
+                "editable": true,
+                "trackSourceServers": [
+                    "https://higlass.4dnucleome.org/api/v1"
+                ],
+                "views": []
+            }     
         },
         "instance_height": {
             "title": "Instance Height",
