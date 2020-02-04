@@ -68,6 +68,7 @@
                 "Ligation-free 3C",
                 "RNA Quantification",
                 "RNA-DNA Proximity Capture",
+                "Promoter Activity",
                 "Fluorescence Localization",
                 "Electron Microscopy"
             ]
@@ -90,6 +91,8 @@
                 "DNA-DNA Pairwise Interactions of Selected Loci",
                 "RNA-DNA Multi-way Interactions",
                 "RNA-DNA Pairwise Interactions",
+                "Transcription",
+                "Immunofluorescence",
                 "Fixed Sample DNA Localization",
                 "Fixed Sample RNA Localization",
                 "Single Particle Tracking",
@@ -113,6 +116,7 @@
                 "Hi-C (multi-contact)",
                 "3/4/5-C (multi-contact)",
                 "IP-based 3C",
+                "Enrichment Hi-C",
                 "3/4/5-C",
                 "Ligation-free 3C",
                 "Transcription",
@@ -120,6 +124,7 @@
                 "DNA FISH",
                 "RNA FISH",
                 "SPT",
+                "Immunofluorescence",
                 "Reporter Expression",
                 "SEM",
                 "TEM"
