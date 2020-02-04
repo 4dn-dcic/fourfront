@@ -443,21 +443,18 @@ def add_files_to_higlass_viewconf(request):
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
     higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
-    # if not higlass_viewconfig:
-    #     default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
-    #     higlass_viewconfig = default_higlass_viewconf["viewconfig"]
-    #     # Add a view section if the default higlass_viewconfig lacks one
-    #     if "views" not in higlass_viewconfig:
-    #         higlass_viewconfig["views"] = []
+   
+    if "views" not in higlass_viewconfig:
+        higlass_viewconfig["views"] = []
 
-    # # If no view config could be found, fail
-    # if not higlass_viewconfig:
-    #     return {
-    #         "success" : False,
-    #         "errors": "No view config found.",
-    #         "new_viewconfig": None,
-    #         "new_genome_assembly" : None
-    #     }
+     # If no view config could be found, fail
+    if not higlass_viewconfig:
+        return {
+            "success" : False,
+            "errors": "No view config found.",
+            "new_viewconfig": None,
+            "new_genome_assembly" : None
+        }
 
     # Get the list of files.
     file_uuids = request.json_body.get('files')
