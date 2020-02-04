@@ -11,6 +11,8 @@ import {
     capitalize, capitalizeSentence, bytesToLargerUnit, roundLargeNumber, roundDecimal, hrefToFilename
 } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/value-transforms';
 
+// import { downloadFileButtonClick } from './file';
+
 let cachedSchemas = null;
 
 /**
@@ -101,6 +103,17 @@ export const Term = {
         }
 
         // Custom stuff
+
+        // TODO: We really should disallow ppl from seeing download URL unless are on the Item page?
+        // if (field === "href" && typeof name === "string" && name.indexOf("/@@download/") > -1){
+        //     // Analytics track
+        //     return (
+        //         <a href={term} target="_blank" rel="noopener noreferrer">
+        //             { linkTitle }
+        //         </a>
+        //     );
+        // }
+
         if (field.indexOf('quality_metric.') > -1){
             if (field.slice(-11) === 'Total reads')     return roundLargeNumber(term);
             if (field.slice(-15) === 'Total Sequences') return roundLargeNumber(term);

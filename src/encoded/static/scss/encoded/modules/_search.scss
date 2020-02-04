@@ -6,6 +6,7 @@
 /**********************/
 /***** Facet List *****/
 /**********************/
+$facetlist-term-block-height: 22px;
 @import "../../../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/facet-list.scss";
 
 /** Make FacetList Sticky for newer browsers **/
@@ -24,31 +25,14 @@
 				max-height: 90vh;
 				// 160 ~= 40 nav + 46 facet-list-header + footer + parent container bottom margin
 				max-height: calc(100vh - 160px);
-				overflow-y: auto;
-				overflow-x: hidden;
-
-				&::-webkit-scrollbar {
-					width: 6px;
-					height: 6px;
-					background-color: transparent;
-				}
-
-				&::-webkit-scrollbar-thumb {
-					background-color: #aaa;
-					border-radius: 3px;
-				}
-
-				&::-webkit-scrollbar-track {
-					margin-right: -1px;
-				}
+				@include facets-body-contained-height-style;
 			}
 		}
 
 	}
 	
-	.search-headers-row {
-		position: sticky;
-		top: 0px;
+	.search-results-outer-container.is-own-page .search-results-container .search-headers-row {
+		top: 0px; // Default val
 		@include navbar-fixed-position {
 			top: 40px;
 		}
@@ -61,19 +45,27 @@
 				.facets-body {
 					body.scrolled-past-80 & {
 						// 124 = 40 nav + 46 facet-list-header + 38 quickinfobar
-						max-height: calc(100vh - 124px);
+						max-height: calc(100vh - 126px);
 					}
 				}
 			}
 		}
 		
-		.search-headers-row {
+		.search-results-outer-container.is-own-page .search-results-container .search-headers-row {
 			@include navbar-fixed-position {
 				top: 78px;
 			}
 		}
 
     }
+}
+
+
+/** Align facet-selector icon better w. text re: our fontface lineheight and such */
+
+.facets-container .facets-body .facet a.term .facet-selector {
+	transform: translate(0, 1px);
+	transform: translate(0, 0.5px);
 }
 
 
@@ -203,9 +195,9 @@ $search-results-above-results-row-height: 40px;
 /**** Row Height & Similar Overrides for Publication View ****/
 /*************************************************************/
 
-.search-page-container[data-search-item-type="Publication"] {
+.search-view-controls-and-results[data-search-item-type="Publication"] {
 
-	.search-results-outer-container .search-results-container .inner-container .scrollable-container .search-result-row > .columns.result-table-row > .search-result-column-block {
+	.search-results-outer-container .search-results-container .search-result-row > .columns.result-table-row > .search-result-column-block {
 
 		> .inner {
 			height: 149px; // MUST be aligned to value in PublicationSearchView.js, minus 1 (for border)

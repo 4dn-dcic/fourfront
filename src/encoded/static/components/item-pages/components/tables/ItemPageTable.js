@@ -7,14 +7,99 @@ import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { get as getSchemas, Term } from './../../../util/Schemas';
-import { object, ajax, layout, isServerSide, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
     HeadersRow, TableRowToggleOpenButton
 } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
-import { memoizedUrlParse } from './../../../globals';
+import { columnExtensionMap as columnExtensionMap4DN } from './../../../browse/columnExtensionMap';
 
+import { EmbeddedSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/EmbeddedSearchView';
+//import { transformedFacets } from './../../../browse/SearchView';
+
+
+
+
+
+
+export class EmbeddedItemSearchTable extends React.PureComponent {
+
+    static defaultProps = {
+        "columnExtensionMap": columnExtensionMap4DN,
+        "facets" : undefined // Default to those from search response.
+    };
+
+    constructor(props){
+        super(props);
+        this.getCountCallback = this.getCountCallback.bind(this);
+        this.state = { totalCount: null };
+    }
+
+    getCountCallback(resp){
+        const { onLoad } = this.props;
+        if (resp && typeof resp.total === 'number'){
+            this.setState({ 'totalCount' : resp.total });
+        }
+        if (typeof onLoad === "function") {
+            onLoad(resp);
+        }
+    }
+
+    render(){
+        const {
+            title,
+            children,
+            facets,
+            session, schemas: propSchemas,
+            renderDetailPane, defaultOpenIndices, maxHeight,
+            columns, columnExtensionMap,
+            searchHref,
+            filterFacetFxn, hideFacets
+        } = this.props;
+        const { totalCount } = this.state;
+
+        if (typeof searchHref !== "string") {
+            throw new Error("Expected a string 'searchHref'");
+        }
+
+        const schemas = propSchemas || getSchemas() || null; // We might not have this e.g. in placeholders in StaticSections
+
+        const passProps = {
+            facets, columns, columnExtensionMap, searchHref, session,
+            schemas, renderDetailPane, defaultOpenIndices, maxHeight,
+            filterFacetFxn, hideFacets,
+            onLoad: this.getCountCallback,
+            termTransformFxn: Term.toName
+        };
+
+        const showTitle = !title ? null
+            : React.isValidElement(title) ? (
+                typeof title.type === "string" ? title
+                    : React.cloneElement(title, { totalCount })
+            ) : title;
+
+        const showChildren = React.isValidElement(children) && typeof children.type !== "string" ?
+            React.cloneElement(children, { totalCount }) : children;
+
+        return (
+            <div className="embedded-search-view-outer-container">
+                { showTitle }
+                <EmbeddedSearchView {...passProps}/>
+                { showChildren }
+            </div>
+        );
+    }
+}
+
+
+
+
+
+
+
+
+/** @deprecated */
 
 /** @todo Move to shared components repo? */
 
@@ -283,108 +368,6 @@ export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
         return React.cloneElement(
             children,
             _.extend({ 'countTotalResults' : itemUrls.length }, this.props, { 'loading' : loading, 'results' : items })
-        );
-    }
-
-}
-
-
-export class ItemPageTableSearchLoader extends React.PureComponent {
-
-    /** We set the default number of results to get here to be 7, unless is overriden in href */
-    static getLimit(href){
-        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
-        const { query : { limit = 0 } = { limit : 0 } } = memoizedUrlParse(href);
-        return (limit && parseInt(limit)) || 7;
-    }
-
-    static hrefWithoutLimit(href){
-        // Fun with destructuring - https://medium.com/@MentallyFriendly/es6-constructive-destructuring-793ac098d138
-        const hrefParts = _.clone(memoizedUrlParse(href));
-        const query = (hrefParts.query && _.clone(hrefParts.query) || {});
-        delete query.limit;
-        hrefParts.search = '?' + queryString.stringify(query);
-        return url.format(hrefParts);
-    }
-
-    static hrefWithLimit(href, limit=null){
-        // TODO: maybe migrate logic for "View More results" to it from here or into re-usable-for-any-type-of-item component ... lower priority
-        // more relevant for CGAP but will have infinite-scroll-within-pane table to replace view more button at some point in future anyway so moot.
-
-        const hrefParts = _.clone(memoizedUrlParse(href));
-        const query = (hrefParts.query && _.clone(hrefParts.query) || {});
-        query.limit = query.limit || limit || ItemPageTableSearchLoader.getLimit(href);
-        hrefParts.search = '?' + queryString.stringify(query);
-        return url.format(hrefParts);
-    }
-
-    static propTypes = {
-        "requestHref" : PropTypes.string.isRequired,
-        "children" : PropTypes.node.isRequired,
-        "onLoad" : PropTypes.func
-    };
-
-    constructor(props){
-        super(props);
-        this.doRequest = this.doRequest.bind(this);
-        this.handleResponse = this.handleResponse.bind(this);
-        this.state = {
-            'loading' : false,
-            'results' : null,
-            'countTotalResults' : null
-        };
-        this.memoized = {
-            getLimit: memoize(ItemPageTableSearchLoader.getLimit),
-            hrefWithoutLimit: memoize(ItemPageTableSearchLoader.hrefWithoutLimit),
-            hrefWithLimit: memoize(ItemPageTableSearchLoader.hrefWithLimit)
-        };
-    }
-
-    componentDidMount(){
-        this.doRequest();
-    }
-
-    componentDidUpdate(pastProps){
-        // eslint-disable-next-line react/destructuring-assignment
-        if (pastProps.requestHref !== this.props.requestHref){
-            this.doRequest();
-        }
-    }
-
-    doRequest(){
-        const { requestHref } = this.props;
-        const limit = this.memoized.getLimit(requestHref);
-        const hrefWithLimit = this.memoized.hrefWithLimit(requestHref, limit);
-        this.setState({ 'loading' : true }, ()=>{
-            ajax.load(hrefWithLimit, this.handleResponse, 'GET', this.handleResponse);
-        });
-    }
-
-    handleResponse(resp){
-        const { onLoad } = this.props;
-        const results = (resp && resp['@graph']) || [];
-        const totalResults = (resp && typeof resp.total === 'number' && (resp.total || 0)) || null;
-        this.setState({
-            'loading' : false,
-            'results' : results,
-            'countTotalResults' : totalResults
-        });
-        if (typeof onLoad === 'function'){
-            onLoad(resp);
-        }
-    }
-
-    render(){
-        const { requestHref, children } = this.props;
-        if (!requestHref) return null;
-
-        const limit = this.memoized.getLimit(requestHref);
-        const hrefWithLimit = this.memoized.hrefWithLimit(requestHref, limit);
-        const hrefWithoutLimit = this.memoized.hrefWithoutLimit(requestHref, limit);
-
-        return React.cloneElement(
-            children,
-            _.extend({ hrefWithoutLimit, hrefWithLimit }, this.props, this.state)
         );
     }
 

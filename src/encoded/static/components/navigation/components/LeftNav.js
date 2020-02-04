@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { Nav } from 'react-bootstrap';
 import url from 'url';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util'; // Extended w. browseBaseHref & related fxns.
 import {
     BigDropdownNavItem,
@@ -12,7 +12,6 @@ import {
     BigDropdownPageTreeMenuIntroduction,
     BigDropdownBigLink
 } from './BigDropdown';
-import { memoizedUrlParse } from '../../globals';
 
 
 export const LeftNav = React.memo(function LeftNav(props){

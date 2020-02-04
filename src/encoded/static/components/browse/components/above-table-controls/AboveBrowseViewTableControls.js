@@ -34,6 +34,20 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
         return _.keys(existingFileTypeFiltersObject);
     });
 
+    static filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters){
+        if (Array.isArray(fileTypeFilters) && fileTypeFilters.length === 0){
+            return selectedFiles;
+        }
+        const fileTypeFiltersObject = _.object(_.map(fileTypeFilters, function(fltr){ return [fltr, true]; })); // Faster lookups
+        return _.object(_.filter(
+            _.pairs(selectedFiles),
+            function([fileAccessionTriple, filePartialItem], i){
+                if (fileTypeFiltersObject[filePartialItem.file_type_detailed]) return true;
+                return false;
+            }
+        ));
+    }
+
     static getDerivedStateFromProps(props, state){
         // Keep up to date if unselect files w/ such active filters.
         return {
@@ -56,6 +70,11 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
             // This would allow us to hoist this above BrowseView's entire results table and maybe hide or filter down expsets.
             'fileTypeFilters' : []
         };
+
+        this.memoized = {
+            fileCountWithDuplicates: memoize(fileCountWithDuplicates),
+            filterSelectedFilesByFileTypeFilters: memoize(AboveBrowseViewTableControls.filterSelectedFilesByFileTypeFilters)
+        };
     }
 
     setFileTypeFilters(fileTypeFilters){
@@ -65,14 +84,14 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
     render(){
         const { selectedFiles } = this.props;
         const { fileTypeFilters } = this.state;
-        const filteredSelectedFiles = SelectedFilesControls.filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters);
-        const selectedFileCount = fileCountWithDuplicates(selectedFiles);
+        const filteredSelectedFiles = this.memoized.filterSelectedFilesByFileTypeFilters(selectedFiles, fileTypeFilters);
+        const selectedFileCount = this.memoized.fileCountWithDuplicates(selectedFiles);
 
         let wrappedLeftSectionControls;
         if (selectedFiles){
             wrappedLeftSectionControls = (
                 <ChartDataController.Provider id="selected_files_section">
-                    <SelectedFilesControls {..._.extend(_.pick(this.props, 'href', 'includeFileSets'), SelectedFilesController.pick(this.props))}
+                    <SelectedFilesControls {..._.extend(_.pick(this.props, 'href', 'includeFileSets', 'context'), SelectedFilesController.pick(this.props))}
                         subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenFileTypeFiltersPanel}
                         currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
                 </ChartDataController.Provider>

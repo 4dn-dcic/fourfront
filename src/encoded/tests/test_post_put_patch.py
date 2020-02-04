@@ -174,29 +174,40 @@ def test_put_object_not_touching_children(content_with_child, testapp):
 
 
 def test_put_object_editing_child_does_not_work(content_with_child, testapp):
+    """
+    This will not post a rev link, since editing children through reverse links
+    is no longer done and linkFrom is removed.
+    """
     edit = {
         'reverse': [{
             '@id': content_with_child['child'],
             'status': 'released',
         }]
     }
-    testapp.put_json(content_with_child['@id'], edit, status=200)
-    res = testapp.get(content_with_child['child'] + '?frame=embedded')
-    assert 'status' not in res.json
+    # cannot submit 'reverse' calc property
+    res = testapp.put_json(content_with_child['@id'], edit, status=422).json
+    assert len(res['errors']) ==1
+    assert res['errors'][0]['description'] == 'submission of calculatedProperty disallowed'
+    assert res['errors'][0]['name'] == 'Schema: reverse'
+
+    get_res = testapp.get(content_with_child['child'] + '?frame=embedded').json
+    assert 'status' not in get_res
 
 
 def test_post_object_with_child(content_with_child, testapp):
     """
     This will not post a rev link, since editing children through reverse links
-    is no longer done
+    is no longer done  and linkFrom is removed.
     """
     edit = {
         'reverse': [
             {'status': 'released'}
         ]
     }
-    res = testapp.post_json('/testing-link-targets', edit, status=201)
-    assert len(res.json['@graph'][0]['reverse']) == 0
+    res = testapp.post_json('/testing-link-targets', edit, status=422).json
+    assert len(res['errors']) == 1
+    assert res['errors'][0]['description'] == 'submission of calculatedProperty disallowed'
+    assert res['errors'][0]['name'] == 'Schema: reverse'
 
 
 def test_retry(testapp):

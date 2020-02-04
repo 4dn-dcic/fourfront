@@ -21,7 +21,7 @@ from snovault.validators import (
     validate_item_content_patch
 )
 from snovault.interfaces import CONNECTION
-from snovault.schema_utils import SERVER_DEFAULTS
+from encoded.server_defaults import get_userid, add_last_modified
 from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date
@@ -398,7 +398,7 @@ class Item(snovault.Item):
 
     def is_update_by_admin_user(self):
         # determine if the submitter in the properties is an admin user
-        userid = SERVER_DEFAULTS['userid']('blah', 'blah')
+        userid = get_userid()
         users = self.registry['collections']['User']
         user = users.get(userid)
         if 'groups' in user.properties:
@@ -418,18 +418,7 @@ class Item(snovault.Item):
             if not self.is_update_by_admin_user():
                 properties['status'] = 'submission in progress'
 
-        try:  # update last_modified. this depends on an available request
-            last_modified = {
-                'modified_by': SERVER_DEFAULTS['userid']('blah', 'blah'),
-                'date_modified': SERVER_DEFAULTS['now']('blah', 'blah')
-            }
-        except AttributeError:
-            pass
-        else:
-            # SERVER_DEFAULTS['userid'] returns NO_DEFAULT if no userid
-            if last_modified['modified_by'] != NO_DEFAULT:
-                properties['last_modified'] = last_modified
-
+        add_last_modified(properties)
         date2status = [{'public_release': ['released', 'current']}, {'project_release': ['released to project']}]
         # if an item is directly released without first being released to project
         # then project_release date is added for same date as public_release

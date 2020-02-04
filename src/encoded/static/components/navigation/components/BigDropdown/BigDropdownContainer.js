@@ -5,8 +5,7 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
 import ReactTooltip from 'react-tooltip';
-import { layout, console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { elementIsChildOfLink } from './../../../globals';
+import { layout, console, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
 export class BigDropdownContainer extends React.PureComponent {
@@ -44,6 +43,10 @@ export class BigDropdownContainer extends React.PureComponent {
                     firstFocusableElem.focus();
                 }
             }, 250);
+
+            analytics.event("BigDropdownContainer", "open", { eventLabel: id });
+        } else if (!open && pastOpen){
+            analytics.event("BigDropdownContainer", "close", { eventLabel: id });
         }
     }
 
@@ -56,7 +59,7 @@ export class BigDropdownContainer extends React.PureComponent {
     onBackgroundClick(evt){
         const targetElem = (evt && evt.target) || null;
 
-        if (elementIsChildOfLink(targetElem)){
+        if (layout.elementIsChildOfLink(targetElem)){
             // Let bubble up - app.js will catch and navigate via handleClick and BigDropdownGroupController will catch and hide menu.
             return false;
         }

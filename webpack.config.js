@@ -199,6 +199,8 @@ module.exports = [
             '@babel/register', // avoid bundling babel transpiler, which is not used at runtime
             { 'higlass/dist/hglib' : '{HiGlassComponent:{}}' },
             'higlass',
+            'higlass-register',
+            'higlass-multivec',
             'auth0-lock',
             'aws-sdk',
             'src/encoded/static/components/utils/aws'

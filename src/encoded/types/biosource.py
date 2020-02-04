@@ -17,6 +17,7 @@ from snovault.crud_views import (
     collection_add,
     item_edit,
 )
+from snovault.util import debug_log
 from pyramid.view import view_config
 from .base import (
     Item,
@@ -286,6 +287,7 @@ def validate_biosource_cell_line(context, request):
 @view_config(context=Biosource.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def biosource_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -303,5 +305,6 @@ def biosource_add(context, request, render=None):
 @view_config(context=Biosource, permission='index', request_method='GET',
              validators=[validate_item_content_in_place, validate_biosource_cell_line, validate_biosource_tissue],  # , validate_biosource_cell_line],
              request_param=['check_only=true'])
+@debug_log
 def biosource_edit(context, request, render=None):
     return item_edit(context, request, render)

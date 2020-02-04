@@ -5,9 +5,8 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
-import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BigDropdownIntroductionWrapper } from './BigDropdownIntroductionWrapper';
-import { memoizedUrlParse } from './../../../globals';
 
 export function BigDropdownPageTreeMenuIntroduction(props) {
     const { menuTree, windowHeight, windowWidth, titleIcon = null, isActive = false } = props;

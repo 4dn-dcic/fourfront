@@ -104,6 +104,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
 
                 // Load in HiGlass libraries as separate JS file due to large size.
                 // @see https://webpack.js.org/api/module-methods/#requireensure
+                // TODO figure out how to use import() syntax to load multiple dependencies, to keep HiGlass working.
                 require.ensure(['higlass/dist/hglib', 'higlass-register', 'higlass-multivec/es/StackedBarTrack'], (require) => {
                     HiGlassComponent = require('higlass/dist/hglib').HiGlassComponent;
                     higlassRegister = require('higlass-register').default;
@@ -117,16 +118,6 @@ export class HiGlassPlainContainer extends React.PureComponent {
                     });
                     finish();
                 }, "higlass-utils-bundle");
-
-                // Alternative, newer version of above -- currently the 'magic comments' are
-                // not being picked up (?) though so the above is used to set name of JS file.
-                //import(
-                //    /* webpackChunkName: "higlass-bundle" */
-                //    'higlass/dist/hglib'
-                //).then((hglib) =>{
-                //    HiGlassComponent = hglib.HiGlassComponent;
-                //    finish();
-                //});
 
             } else {
                 finish();
