@@ -77,7 +77,7 @@ CellCultureDetailsTable.defaultProps = {
         //"description" : { "title" : "Description" },
         "synchronization_stage" : { "title" : "Synchronization Stage" },
         "culture_duration" : { "title" : "Total Days in Culture" },
-        "culture_start_date" : { "title" : "Culture Start Date", "render" : OverViewBodyItem.titleRenderPresets.local_date_time }
+        "culture_start_date" : { "title" : "Culture Start Date", "render" : OverViewBodyItem.titleRenderPresets.local_date }
     }
 };
 
@@ -240,4 +240,3 @@ const BiosourceInfoBody = React.memo(function BiosourceInfoBody(props){
     );
 
 });
-
