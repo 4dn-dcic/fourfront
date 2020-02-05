@@ -127,6 +127,34 @@ def test_protocol_other_display_title_wo_attachment(testapp, protocol_data):
     assert protocol['display_title'] == 'Protocol from ' + utc_today_str()
 
 
+def test_protocol_experiment_type(testapp, protocol_data, exp_types):
+    hic_exptype = exp_types.get('hic')
+    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert 'experiment_type' not in protocol
+    testapp.patch_json(hic_exptype['@id'], {'other_protocols': [protocol['@id']]})
+    res = testapp.get(protocol['@id'])
+    assert res.json.get('experiment_type', {}).get('@id') == hic_exptype['@id']
+
+
+def test_protocol_experiment_type_sop(testapp, protocol_data, exp_types):
+    hic_exptype = exp_types.get('hic')
+    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert 'experiment_type' not in protocol
+    testapp.patch_json(hic_exptype['@id'], {'sop': protocol['@id']})
+    res = testapp.get(protocol['@id'])
+    assert res.json.get('experiment_type', {}).get('@id') == hic_exptype['@id']
+
+
+def test_protocol_experiment_type_multiple(testapp, protocol_data, exp_types):
+    hic_exptype = exp_types.get('hic')
+    dam_exptype = exp_types.get('dam')
+    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+    assert 'experiment_type' not in protocol
+    testapp.patch_json(hic_exptype['@id'], {'sop': protocol['@id']})
+    testapp.patch_json(dam_exptype['@id'], {'other_protocols': [protocol['@id']]})
+    res = testapp.get(protocol['@id'])
+    assert res.json.get('experiment_type', {}).get('@id') == hic_exptype['@id']
+
 
 @pytest.fixture
 def google_analytics_tracking_data():

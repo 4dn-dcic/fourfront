@@ -25,26 +25,26 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 #     assert res.get('assay_subclass_short') == 'Sequencing (unclassified)'
 
 
-def test_other_protocols_no_protocol(exp_types):
-    hic_exptype = exp_types.get('hic')
-    assert 'other_protocols' not in hic_exptype
-
-
-def test_other_protocols_no_sop(testapp, protocol, exp_types):
-    hic_exptype = exp_types.get('hic')
-    testapp.patch_json(protocol['@id'], {'experiment_type': hic_exptype['@id']})
-    res = testapp.get(hic_exptype['@id'])
-    assert res.json.get('other_protocols')[0].get('@id') == protocol['@id']
-
-
-def test_other_protocols_w_sop(testapp, protocol, protocol_data, exp_types):
-    hic_exptype = exp_types.get('hic')
-    testapp.patch_json(hic_exptype['@id'], {'sop': protocol['@id']})
-    protocol_data['description'] = 'Another protocol'
-    protocol_data['experiment_type'] = hic_exptype['@id']
-    testapp.patch_json(protocol['@id'], {'experiment_type': hic_exptype['@id']})
-    protocol2 = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    res = testapp.get(hic_exptype['@id'])
-    other_protocols = [p.get('@id') for p in res.json.get('other_protocols')]
-    assert protocol['@id'] not in other_protocols
-    assert protocol2['@id'] in other_protocols
+# def test_other_protocols_no_protocol(exp_types):
+#     hic_exptype = exp_types.get('hic')
+#     assert 'other_protocols' not in hic_exptype
+#
+#
+# def test_other_protocols_no_sop(testapp, protocol, exp_types):
+#     hic_exptype = exp_types.get('hic')
+#     testapp.patch_json(protocol['@id'], {'experiment_type': hic_exptype['@id']})
+#     res = testapp.get(hic_exptype['@id'])
+#     assert res.json.get('other_protocols')[0].get('@id') == protocol['@id']
+#
+#
+# def test_other_protocols_w_sop(testapp, protocol, protocol_data, exp_types):
+#     hic_exptype = exp_types.get('hic')
+#     testapp.patch_json(hic_exptype['@id'], {'sop': protocol['@id']})
+#     protocol_data['description'] = 'Another protocol'
+#     protocol_data['experiment_type'] = hic_exptype['@id']
+#     testapp.patch_json(protocol['@id'], {'experiment_type': hic_exptype['@id']})
+#     protocol2 = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
+#     res = testapp.get(hic_exptype['@id'])
+#     other_protocols = [p.get('@id') for p in res.json.get('other_protocols')]
+#     assert protocol['@id'] not in other_protocols
+#     assert protocol2['@id'] in other_protocols
