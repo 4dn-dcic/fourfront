@@ -24,9 +24,6 @@ class ExperimentType(Item):
     item_type = 'experiment_type'
     schema = load_schema('encoded:schemas/experiment_type.json')
     name_key = 'experiment_name'
-    rev = {
-        'additional_protocols': ('Protocol', 'experiment_type')
-    }
 
     embedded_list = Item.embedded_list + [
         "sop.description",
@@ -71,18 +68,18 @@ class ExperimentType(Item):
     #         return experiment_category + ' (unclassified)'
     #     else:
     #         return title
-
-    @calculated_property(schema={
-        "title": "Other Protocols",
-        "description": "Other protocols associated with this experiment type besides the SOP",
-        "type": "string",
-        "linkTo": "Protocol"
-    })
-    def other_protocols(self, request, sop=None):
-        protocol_paths = self.rev_link_atids(request, 'additional_protocols')
-        protocols = [path for path in protocol_paths if path != sop]
-        if protocols:
-            return protocols
+    # 
+    # @calculated_property(schema={
+    #     "title": "Other Protocols",
+    #     "description": "Other protocols associated with this experiment type besides the SOP",
+    #     "type": "string",
+    #     "linkTo": "Protocol"
+    # })
+    # def other_protocols(self, request, sop=None):
+    #     protocol_paths = self.rev_link_atids(request, 'additional_protocols')
+    #     protocols = [path for path in protocol_paths if path != sop]
+    #     if protocols:
+    #         return protocols
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
