@@ -168,7 +168,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.messages",
-        "experiments_in_set.files.notes",
+        "experiments_in_set.files.notes_to_tsv_to_tsv",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -202,7 +202,7 @@ class ExperimentSet(Item):
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric_summary.*",
-        "processed_files.notes",
+        "processed_files.notes_to_tsv",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
@@ -227,7 +227,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.static_content.description",
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
         "experiments_in_set.processed_files.last_modified.date_modified",
-        "experiments_in_set.processed_files.notes",
+        "experiments_in_set.processed_files.notes_to_tsv",
         # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
@@ -242,7 +242,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric_summary.*",
-        "other_processed_files.files.notes",
+        "other_processed_files.files.notes_to_tsv",
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -261,7 +261,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
         "experiments_in_set.other_processed_files.files.quality_metric_summary.*",
-        "experiments_in_set.other_processed_files.files.notes",
+        "experiments_in_set.other_processed_files.files.notes_to_tsv",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
