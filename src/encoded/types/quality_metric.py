@@ -175,7 +175,7 @@ class QualityMetricRnaseq(QualityMetric):
 
 
 @collection(
-    name='quality-metrics-rnaseq_madqc',
+    name='quality-metrics-rnaseq-madqc',
     properties={
         'title': 'QC Quality Metrics for RNA-seq MAD QC (reproducibility QC)',
         'description': 'Listing of QC Quality Metrics for RNA-seq MAD QC',
