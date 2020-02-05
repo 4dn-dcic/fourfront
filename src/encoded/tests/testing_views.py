@@ -148,19 +148,21 @@ class TestingLinkTarget(Item):
         'reverse.*',
     ]
 
+    def rev_link_atids(self, request, rev_name):
+        conn = request.registry[CONNECTION]
+        return [request.resource_path(conn[uuid]) for uuid in
+                self.get_filtered_rev_links(request, rev_name)]
+
     @calculated_property(schema={
         "title": "Sources",
         "type": "array",
         "items": {
             "type": ['string', 'object'],
-            "linkFrom": "TestingLinkSource.target",
+            "linkTo": "TestingLinkSourceSno",
         },
     })
     def reverse(self, request):
-        # was def reverse(self, request, reverse): ... last param needed?
-        conn = request.registry[CONNECTION]
-        return [request.resource_path(conn[uuid]) for uuid in
-                self.get_filtered_rev_links(request, 'reverse')]
+        return self.rev_link_atids(request, rev_name="reverse")
 
 
 @collection(

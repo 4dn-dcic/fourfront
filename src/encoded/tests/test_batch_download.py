@@ -1,5 +1,5 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
-from .features.conftest import app_settings, app, workbook
+from .workbook_fixtures import app_settings, app, workbook
 from .test_search import delay_rerun
 import pytest
 pytestmark = [pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]

@@ -495,7 +495,6 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
 
 function BrowseTableWithSelectedFilesCheckboxes(props){
     const {
-
         // Common high-level props from Redux, or App.js, or App.js > BodyElement:
         context, href, browseBaseState, schemas, navigate: propNavigate,
         windowHeight, windowWidth, registerWindowOnScrollHandler,
@@ -509,7 +508,6 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
 
         // Default prop / hardcoded (may become customizable later)
         columnExtensionMap
-
     } = props;
     const { total = 0, notification = null } = context;
 
@@ -565,6 +563,9 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
     // in each controller that's child of <WindowNavigationController {...{ context, href }}>.
     // As well as in ControlsAndResults.
 
+    // Props passed down from parent components usually overwrite child props' components.
+    // (Unless otherwise implemented)
+
     return (
         <WindowNavigationController {...{ href, context }} navigate={propNavigate}>
             <ColumnCombiner columnExtensionMap={columnExtensionMapWithSelectedFilesCheckboxes}>
@@ -586,7 +587,7 @@ BrowseTableWithSelectedFilesCheckboxes.propTypes = {
         'total'                     : PropTypes.number.isRequired,
         'notification'              : PropTypes.string
     }).isRequired,
-    'facets'                    : PropTypes.objectOf(PropTypes.shape({
+    'facets'                    : PropTypes.arrayOf(PropTypes.shape({
         'title'                     : PropTypes.string.isRequired
     })),
     'schemas'                   : PropTypes.object,

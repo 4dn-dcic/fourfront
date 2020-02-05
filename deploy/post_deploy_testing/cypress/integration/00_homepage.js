@@ -6,7 +6,7 @@ describe('Home Page', function () {
 
         cy.visit('/').end()
             .title().should('include', '4DN Data Portal').end()
-            .get('#page-title-container span.title').should('have.text', '4D Nucleome Data Portal').end()
+            .get('#page-title-container .page-title').should('contain', '4D Nucleome Data Portal').end()
             .get('#page-title-container div.subtitle').should('have.text', 'A platform to search, visualize, and download nucleomics data.');
 
     });
