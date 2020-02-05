@@ -23,6 +23,7 @@ from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
+from snovault.util import debug_log
 from dcicutils.s3_utils import s3Utils
 import requests
 import structlog
@@ -119,36 +120,20 @@ class User(Item):
         return {owner: 'role.owner'}
 
     def _update(self, properties, sheets=None):
-        # update user subscriptions to ensure that they include the labs
-        # that the user is associated with, as well as their own submissions
-        # if they are a sumbitter
-        curr_subs = properties.get('subscriptions', [])
-        # subscriptions is a list but change to dict here for processing
-        curr_subs_dict = {sub['title']: sub for sub in curr_subs}
-        labs = {}  # cache lab info. keyed by @id
-        # remove old subscriptions
-        if 'My submissions' in curr_subs_dict: del curr_subs_dict['My submissions']
-        if 'My lab' in curr_subs_dict: del curr_subs_dict['My lab']
-        # if user has a lab, include all submissions to that lab
+        # subscriptions are search queries used on /submissions page
+        # always overwrite subscriptions on an update
+        new_subscriptions = []
+        if properties.get('submits_for'):
+            new_subscriptions.append({
+                'title': 'My submissions',
+                'url': '?submitted_by.uuid=%s&sort=-date_created' % str(self.uuid)
+            })
         if properties.get('lab'):
-            my_lab = self.collection.get(properties['lab'])
-            my_lab_title = my_lab.properties.get('title', 'NO TITLE FOUND')
-            curr_subs_dict['All submissions for ' + my_lab_title] = {
-                'title': 'All submissions for ' + my_lab_title,
-                'url': '?lab.uuid=' + str(my_lab.uuid) + '&sort=-date_created'
-            }
-            labs[properties['lab']] = my_lab
-        # if submitter, add subscriptions to this user submissions for each lab
-        for submits_lab in properties.get('submits_for', []):
-            submit_lab = labs.get(submits_lab, self.collection.get(submits_lab))
-            lab_title = submit_lab.properties.get('title', 'NO TITLE FOUND')
-            curr_subs_dict['My submissions for ' + lab_title] = {
-                'title': 'My submissions for ' + lab_title,
-                'url': '?submitted_by.uuid=' + str(self.uuid) + '&lab.uuid=' +
-                       str(submit_lab.uuid) + '&sort=-date_created'
-            }
-        # sort alphabetically by title
-        properties['subscriptions'] = sorted(list(curr_subs_dict.values()), key= lambda v:v['title'])
+            new_subscriptions.append({
+                'title': 'Submissions for my lab',
+                'url': '?lab.uuid=%s&sort=-date_created' % properties['lab']
+            })
+        properties['subscriptions'] = new_subscriptions
 
         # if we are on webprod/webprod2, make sure there is an account for the
         # user that reflects any email changes
@@ -176,6 +161,7 @@ class User(Item):
 
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
+@debug_log
 def user_page_view(context, request):
     """smth."""
     properties = item_view_page(context, request)
@@ -192,6 +178,7 @@ def user_page_view(context, request):
 
 @view_config(context=User.Collection, permission='add', request_method='POST',
              physical_path="/users")
+@debug_log
 def user_add(context, request):
     '''
     if we have a password in our request, create and auth entry

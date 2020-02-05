@@ -7,10 +7,8 @@ import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
 
-import { ajax, layout, navigate, JWT } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
-
-import { memoizedUrlParse } from './../globals';
 
 
 /**

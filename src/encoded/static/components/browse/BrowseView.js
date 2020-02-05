@@ -7,7 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
-import { searchFilters, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { searchFilters, object, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ColumnCombiner } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
 import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
@@ -21,7 +21,6 @@ import { navigate, typedefs, Schemas } from './../util';
 import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
 
 import { store } from './../../store';
-import { memoizedUrlParse } from './../globals';
 import { allFilesFromExperimentSet, filesToAccessionTriples } from './../util/experiments-transforms';
 import { ChartDataController } from './../viz/chart-data-controller';
 import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';
@@ -438,7 +437,7 @@ export default class BrowseView extends React.PureComponent {
 
         return (
             <div className="browse-page-container search-page-container container" id="content">
-                <SelectedFilesController href={href}>
+                <SelectedFilesController {...{ href, context }} analyticsAddFilesToCart>
                     <BrowseTableWithSelectedFilesCheckboxes {...this.props} facets={facets} />
                 </SelectedFilesController>
             </div>
@@ -496,7 +495,6 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
 
 function BrowseTableWithSelectedFilesCheckboxes(props){
     const {
-
         // Common high-level props from Redux, or App.js, or App.js > BodyElement:
         context, href, browseBaseState, schemas, navigate: propNavigate,
         windowHeight, windowWidth, registerWindowOnScrollHandler,
@@ -510,7 +508,6 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
 
         // Default prop / hardcoded (may become customizable later)
         columnExtensionMap
-
     } = props;
     const { total = 0, notification = null } = context;
 
@@ -566,6 +563,9 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
     // in each controller that's child of <WindowNavigationController {...{ context, href }}>.
     // As well as in ControlsAndResults.
 
+    // Props passed down from parent components usually overwrite child props' components.
+    // (Unless otherwise implemented)
+
     return (
         <WindowNavigationController {...{ href, context }} navigate={propNavigate}>
             <ColumnCombiner columnExtensionMap={columnExtensionMapWithSelectedFilesCheckboxes}>
@@ -587,7 +587,7 @@ BrowseTableWithSelectedFilesCheckboxes.propTypes = {
         'total'                     : PropTypes.number.isRequired,
         'notification'              : PropTypes.string
     }).isRequired,
-    'facets'                    : PropTypes.objectOf(PropTypes.shape({
+    'facets'                    : PropTypes.arrayOf(PropTypes.shape({
         'title'                     : PropTypes.string.isRequired
     })),
     'schemas'                   : PropTypes.object,

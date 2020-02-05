@@ -21,6 +21,7 @@ from snovault.crud_views import (
 )
 from pyramid.view import view_config
 from snovault.attachment import ItemWithAttachment
+from snovault.util import debug_log
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
@@ -826,6 +827,7 @@ def validate_exp_type_validity_for_experiment(context, request):
 @view_config(context=Experiment.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def experiment_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -843,5 +845,6 @@ def experiment_add(context, request, render=None):
 @view_config(context=Experiment, permission='index', request_method='GET',
              validators=[validate_item_content_in_place, validate_exp_type_validity_for_experiment],
              request_param=['check_only=true'])
+@debug_log
 def experiment_edit(context, request, render=None):
     return item_edit(context, request, render)

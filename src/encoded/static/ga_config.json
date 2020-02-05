@@ -1,0 +1,28 @@
+{
+    "hostnameTrackerIDMapping" : {
+        "data.4dnucleome.org" : "UA-86655305-1",
+        "mastertest.4dnucleome.org" : "UA-86655305-2",
+        "staging.4dnucleome.org" : "UA-86655305-2",
+        "fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com" : "UA-86655305-2",
+        "hotseat.4dnucleome.org" : "UA-86655305-2",
+        "localhost:8000" : "UA-86655305-3",
+        "localhost:6543" : "UA-86655305-3",
+        "default" : "UA-86655305-4"
+    },
+    "dimensionNameMap" : {
+        "currentFilters"    : 1,
+        "name"              : 2,
+        "field"             : 3,
+        "term"              : 4,
+        "experimentType"    : 5,
+        "userGroups"        : 6
+    },
+    "metricNameMap" : {
+        "filesize"          : 1,
+        "downloads"         : 2
+    },
+    "isAnalyticsScriptOnPage" : true,
+    "enhancedEcommercePlugin": true,
+    "anonymizeTypes" : ["User"],
+    "excludeAdminTrackingOnHostnames" : ["data.4dnucleome.org"]
+}
