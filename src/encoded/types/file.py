@@ -738,8 +738,6 @@ class File(Item):
     def tsv_notes(self, request, notes_to_tsv=None):
         if notes_to_tsv is None:
             return ''
-        elif len(notes_to_tsv) == 1:
-            notes_to_tsv_string = notes_to_tsv[0]
         else:
             notes_to_tsv_string = ','.join(notes_to_tsv)
         return notes_to_tsv_string
