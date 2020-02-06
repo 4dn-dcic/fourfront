@@ -127,6 +127,7 @@ def test_protocol_other_display_title_wo_attachment(testapp, protocol_data):
     assert protocol['display_title'] == 'Protocol from ' + utc_today_str()
 
 
+
 @pytest.fixture
 def google_analytics_tracking_data():
     return {
@@ -233,6 +234,7 @@ def test_tracking_item_display_title_download(download_tracking):
 
 
 def test_tracking_item_display_title_other(jupyterhub_session):
+    from datetime import datetime
     assert jupyterhub_session.get('display_title') == 'Tracking Item from ' + utc_today_str()
 
 
