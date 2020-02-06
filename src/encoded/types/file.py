@@ -730,6 +730,17 @@ class File(Item):
     class Collection(Item.Collection):
         pass
 
+    @calculated_property(schema={
+        "title": "Notes to tsv file",
+        "description": "Notes that go into the metadata.tsv file",
+        "type": "string"
+    })
+    def tsv_notes(self, request, notes_to_tsv=None):
+        if notes_to_tsv is None:
+            return ''
+        else:
+            notes_to_tsv_string = ','.join(notes_to_tsv)
+        return notes_to_tsv_string
 
 @collection(
     name='files-fastq',
