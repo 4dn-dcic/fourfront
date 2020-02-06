@@ -1,5 +1,5 @@
-import pytest
-pytestmark = [pytest.mark.working, pytest.mark.schema]
+# import pytest
+# pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 # def test_assay_subclass_short_wo_assay_classification(exp_types):
