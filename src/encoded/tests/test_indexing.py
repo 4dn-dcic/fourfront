@@ -3,18 +3,43 @@
 The fixtures in this module setup a full system with postgresql and
 elasticsearch running as subprocesses.
 """
-import pytest
+
+import datetime
 import json
-import time
 import os
+import pkg_resources
+import pytest
+import time
+import transaction
+import uuid
+
+from elasticsearch.exceptions import NotFoundError
+
+from encoded import main
 from encoded.verifier import verify_item
+
 from snovault import DBSESSION, TYPES
 from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
+from snovault.elasticsearch.create_mapping import (
+    type_mapping,
+    create_mapping_by_type,
+    build_index_record,
+    compare_against_existing_mapping
+)
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
-from elasticsearch.exceptions import NotFoundError
+
+from sqlalchemy import MetaData
+
+from timeit import default_timer as timer
+
+from unittest import mock
+
+from zope.sqlalchemy import mark_changed
+
+from ..utils import delay_rerun
 from .workbook_fixtures import app_settings
-from .test_search import delay_rerun
+
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
 
@@ -24,7 +49,6 @@ TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 @pytest.yield_fixture(scope='session', params=[False])
 def app(app_settings, request):
-    from encoded import main
     # for now, don't run with mpindexer. Add `True` to params above to do so
     if request.param:
         app_settings['mpindexer'] = True
@@ -43,9 +67,6 @@ def setup_and_teardown(app):
     Run create mapping and purge queue before tests and clear out the
     DB tables after the test
     """
-    import transaction
-    from sqlalchemy import MetaData
-    from zope.sqlalchemy import mark_changed
 
     # BEFORE THE TEST - run create mapping for tests types and clear queues
     create_mapping.run(app, collections=TEST_COLLECTIONS, skip_indexing=True)
@@ -117,12 +138,6 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
     Do this by checking es directly before and after running mapping.
     Delete an index directly, run again to see if it recovers.
     """
-    from snovault.elasticsearch.create_mapping import (
-        type_mapping,
-        create_mapping_by_type,
-        build_index_record,
-        compare_against_existing_mapping
-    )
     es = registry[ELASTIC_SEARCH]
     item_types = TEST_COLLECTIONS
     # check that mappings and settings are in index
@@ -209,8 +224,6 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     Create an item (file-processed) with a validation error and index,
     to ensure that validation errors work
     """
-    import uuid
-    import datetime
     indexer_queue = app.registry[INDEXER_QUEUE]
     es = app.registry[ELASTIC_SEARCH]
     fp_body = {
@@ -229,9 +242,9 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     assert val_err_view['@id'] == fp_id
     assert val_err_view['validation_errors'] == []
 
-    # call to /index will throw MissingIndexItemException multiple times, since
-    # associated file_format, lab, and award are not indexed. That's okay
-    # if we don't detect that it succeeded, keep trying until it does
+    # call to /index will throw MissingIndexItemException multiple times,
+    # since associated file_format, lab, and award are not indexed.
+    # That's okay if we don't detect that it succeeded, keep trying until it does
     indexer_testapp.post_json('/index', {'record': True})
     to_queue = {
         'uuid': fp_id,
@@ -274,13 +287,8 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     Note: run with bin/test -s -m performance to see the prints from the test
     '''
 
-    from os import listdir
-    from os.path import isfile, join
-    from unittest import mock
-    from timeit import default_timer as timer
-    from pkg_resources import resource_filename
-    insert_dir = resource_filename('encoded', 'tests/data/perf-testing/')
-    inserts = [f for f in listdir(insert_dir) if isfile(join(insert_dir, f))]
+    insert_dir = pkg_resources.resource_filename('encoded', 'tests/data/perf-testing/')
+    inserts = [f for f in os.listdir(insert_dir) if os.path.isfile(os.path.join(insert_dir, f))]
     json_inserts = {}
 
     # pluck a few uuids for testing

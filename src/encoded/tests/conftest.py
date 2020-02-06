@@ -2,10 +2,21 @@
 
 http://pyramid.readthedocs.org/en/latest/narr/testing.html
 '''
-import pkg_resources
+import logging
 import pytest
-from pytest import fixture
-from pyramid.testing import DummyRequest
+import webtest
+
+from encoded import main
+
+from pyramid.request import apply_request_extensions
+from pyramid.testing import DummyRequest, setUp, tearDown
+from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
+
+from snovault import DBSESSION, ROOT, UPGRADER
+from snovault.elasticsearch import ELASTIC_SEARCH
+
+from .conftest_settings import make_app_settings_dictionary
+
 
 pytest_plugins = [
     'encoded.tests.datafixtures',
@@ -18,45 +29,9 @@ def autouse_external_tx(external_tx):
     pass
 
 
-_app_settings = {
-    'collection_datastore': 'database',
-    'item_datastore': 'database',
-    'multiauth.policies': 'session remoteuser accesskey auth0',
-    'multiauth.groupfinder': 'encoded.authorization.groupfinder',
-    'multiauth.policy.session.use': 'encoded.authentication.NamespacedAuthenticationPolicy',
-    'multiauth.policy.session.base': 'pyramid.authentication.SessionAuthenticationPolicy',
-    'multiauth.policy.session.namespace': 'mailto',
-    'multiauth.policy.remoteuser.use': 'encoded.authentication.NamespacedAuthenticationPolicy',
-    'multiauth.policy.remoteuser.namespace': 'remoteuser',
-    'multiauth.policy.remoteuser.base': 'pyramid.authentication.RemoteUserAuthenticationPolicy',
-    'multiauth.policy.accesskey.use': 'encoded.authentication.NamespacedAuthenticationPolicy',
-    'multiauth.policy.accesskey.namespace': 'accesskey',
-    'multiauth.policy.accesskey.base': 'encoded.authentication.BasicAuthAuthenticationPolicy',
-    'multiauth.policy.accesskey.check': 'encoded.authentication.basic_auth_check',
-    'multiauth.policy.auth0.use': 'encoded.authentication.NamespacedAuthenticationPolicy',
-    'multiauth.policy.auth0.namespace': 'auth0',
-    'multiauth.policy.auth0.base': 'encoded.authentication.Auth0AuthenticationPolicy',
-    'load_test_only': True,
-    'testing': True,
-    'indexer': True,
-    'mpindexer': False,
-    'production': True,
-    'pyramid.debug_authorization': True,
-    'postgresql.statement_timeout': 20,
-    'sqlalchemy.url': 'dummy@dummy',
-    'retry.attempts': 3,
-    'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
-    # some file specific stuff for testing
-    'file_upload_bucket': 'test-wfout-bucket',
-    'file_wfout_bucket': 'test-wfout-bucket',
-    'file_upload_profile_name': 'test-profile',
-}
-
-
-@fixture(scope='session')
+@pytest.fixture(scope='session')
 def app_settings(request, wsgi_server_host_port, conn, DBSession):
-    from snovault import DBSESSION
-    settings = _app_settings.copy()
+    settings = make_app_settings_dictionary()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
     # add some here for file testing
     settings[DBSESSION] = DBSession
@@ -64,7 +39,6 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):
 
 
 def pytest_configure():
-    import logging
     logging.basicConfig(format='%(message)s')
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
 
@@ -84,17 +58,15 @@ def pytest_configure():
 
 @pytest.yield_fixture
 def config():
-    from pyramid.testing import setUp, tearDown
     yield setUp()
     tearDown()
 
 
 @pytest.yield_fixture
 def threadlocals(request, dummy_request, registry):
-    from pyramid.threadlocal import manager
-    manager.push({'request': dummy_request, 'registry': registry})
+    threadlocal_manager.push({'request': dummy_request, 'registry': registry})
     yield dummy_request
-    manager.pop()
+    threadlocal_manager.pop()
 
 
 class MyDummyRequest(DummyRequest):
@@ -102,7 +74,6 @@ class MyDummyRequest(DummyRequest):
         pass
 
     def _get_registry(self):
-        from pyramid.threadlocal import get_current_registry
         if self._registry is None:
             return get_current_registry()
         return self._registry
@@ -116,9 +87,8 @@ class MyDummyRequest(DummyRequest):
     registry = property(_get_registry, _set_registry, _del_registry)
 
 
-@fixture
+@pytest.fixture
 def dummy_request(root, registry, app):
-    from pyramid.request import apply_request_extensions
     request = app.request_factory.blank('/dummy')
     request.root = root
     request.registry = registry
@@ -128,120 +98,107 @@ def dummy_request(root, registry, app):
     return request
 
 
-@fixture(scope='session')
+@pytest.fixture(scope='session')
 def app(app_settings):
     '''WSGI application level functional testing.
     '''
-    from encoded import main
     return main({}, **app_settings)
 
 
-@fixture
+@pytest.fixture
 def registry(app):
     return app.registry
 
 
-@fixture
+@pytest.fixture
 def elasticsearch(registry):
-    from snovault.elasticsearch import ELASTIC_SEARCH
     return registry[ELASTIC_SEARCH]
 
 
-@fixture
+@pytest.fixture
 def upgrader(registry):
-    from snovault import UPGRADER
     return registry[UPGRADER]
 
 
-@fixture
+@pytest.fixture
 def root(registry):
-    from snovault import ROOT
     return registry[ROOT]
 
 
-@fixture
+@pytest.fixture
 def anonhtmltestapp(app):
-    from webtest import TestApp
-    return TestApp(app)
+    return webtest.TestApp(app)
 
 
-@fixture
+@pytest.fixture
 def htmltestapp(app):
-    from webtest import TestApp
     environ = {
         'REMOTE_USER': 'TEST',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
-@fixture(scope="module")
+@pytest.fixture(scope="module")
 def testapp(app):
     '''TestApp with JSON accept header.
     '''
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
-@fixture
+@pytest.fixture
 def anontestapp(app):
     '''TestApp with JSON accept header.
     '''
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
-@fixture
+@pytest.fixture
 def authenticated_testapp(app):
     '''TestApp with JSON accept header for non-admin user.
     '''
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST_AUTHENTICATED',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
-@fixture
+@pytest.fixture
 def submitter_testapp(app):
     '''TestApp with JSON accept header for non-admin user.
     '''
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST_SUBMITTER',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
 @pytest.fixture
 def indexer_testapp(app):
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'INDEXER',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
 @pytest.fixture
 def embed_testapp(app):
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'EMBED',
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
 @pytest.fixture
 def wsgi_app(wsgi_server):
-    from webtest import TestApp
-    return TestApp(wsgi_server)
+    return webtest.TestApp(wsgi_server)
