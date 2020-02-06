@@ -168,7 +168,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.messages",
-        "experiments_in_set.files.notes_to_tsv_to_tsv",
+        "experiments_in_set.files.notes_to_tsv",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
