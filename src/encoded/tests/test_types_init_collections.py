@@ -1,10 +1,11 @@
-import datetime
 import pytest
+
+from encoded.types.image import Image
+
+from ..utils import utc_today_str
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
-
-
-def utc_today_str():
-    return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")
 
 
 @pytest.fixture
@@ -234,7 +235,6 @@ def test_tracking_item_display_title_download(download_tracking):
 
 
 def test_tracking_item_display_title_other(jupyterhub_session):
-    from datetime import datetime
     assert jupyterhub_session.get('display_title') == 'Tracking Item from ' + utc_today_str()
 
 
@@ -291,7 +291,6 @@ def test_genomic_region_display_title(testapp, dt4genomic_regions):
 
 
 def test_image_unique_key(registry, image_data):
-    from encoded.types.image import Image
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
     image = Image.create(registry, uuid, image_data)
     keys = image.unique_keys(image.properties)
