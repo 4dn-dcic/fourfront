@@ -68,7 +68,7 @@ class ExperimentType(Item):
     #         return experiment_category + ' (unclassified)'
     #     else:
     #         return title
-    # 
+    #
     # @calculated_property(schema={
     #     "title": "Other Protocols",
     #     "description": "Other protocols associated with this experiment type besides the SOP",
