@@ -8,10 +8,12 @@ import json
 import time
 import os
 from encoded.verifier import verify_item
+from snovault import DBSESSION, TYPES
+from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from elasticsearch.exceptions import NotFoundError
-from .features.conftest import app_settings, app as conf_app
+from .workbook_fixtures import app_settings
 from .test_search import delay_rerun
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
@@ -20,26 +22,38 @@ pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.yield_fixture(scope='session')
-def app(app_settings, use_collections=TEST_COLLECTIONS):
-    """
-    Use to pass kwargs for create_mapping to conftest app
-    """
-    for app in conf_app(app_settings, collections=use_collections, skip_indexing=True):
-        yield app
+@pytest.yield_fixture(scope='session', params=[False])
+def app(app_settings, request):
+    from encoded import main
+    # for now, don't run with mpindexer. Add `True` to params above to do so
+    if request.param:
+        app_settings['mpindexer'] = True
+    app = main({}, **app_settings)
+
+    yield app
+
+    DBSession = app.registry[DBSESSION]
+    # Dispose connections so postgres can tear down.
+    DBSession.bind.pool.dispose()
 
 
-@pytest.fixture(autouse=True)
-def teardown(app, use_collections=TEST_COLLECTIONS):
+@pytest.yield_fixture(autouse=True)
+def setup_and_teardown(app):
+    """
+    Run create mapping and purge queue before tests and clear out the
+    DB tables after the test
+    """
     import transaction
     from sqlalchemy import MetaData
     from zope.sqlalchemy import mark_changed
-    from snovault import DBSESSION
-    from snovault.elasticsearch import create_mapping
-    from .conftest import indexer_testapp
-    # index and then run create mapping to clear things out
-    indexer_testapp(app).post_json('/index', {'record': True})
-    create_mapping.run(app, collections=use_collections, skip_indexing=True)
+
+    # BEFORE THE TEST - run create mapping for tests types and clear queues
+    create_mapping.run(app, collections=TEST_COLLECTIONS, skip_indexing=True)
+    app.registry[INDEXER_QUEUE].clear_queue()
+
+    yield  # run the test
+
+    # AFTER THE TEST
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
     meta = MetaData(bind=session.connection(), reflect=True)
@@ -109,8 +123,6 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         build_index_record,
         compare_against_existing_mapping
     )
-    from snovault.elasticsearch import ELASTIC_SEARCH
-    from snovault import TYPES
     es = registry[ELASTIC_SEARCH]
     item_types = TEST_COLLECTIONS
     # check that mappings and settings are in index
@@ -132,24 +144,20 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         assert compare_against_existing_mapping(es, namespaced_index, item_type, item_record, True)
 
 
-@pytest.fixture
-def test_fp_uuid(testapp, award, experiment, lab, file_formats):
-    # this is a processed file
+def test_file_processed_detailed(app, testapp, indexer_testapp, award, lab, file_formats):
+    # post file_processed
     item = {
-        'accession': '4DNFIO67APU2',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': file_formats.get('pairs').get('@id'),
         'filename': 'test.pairs.gz',
-        'md5sum': '0123456789abcdef0123456789abcdef',
-        'status': 'uploading',
+        'status': 'uploading'
     }
+    fp_res = testapp.post_json('/file_processed', item)
+    test_fp_uuid = fp_res.json['@graph'][0]['uuid']
     res = testapp.post_json('/file_processed', item)
-    return res.json['@graph'][0]['uuid']
+    indexer_testapp.post_json('/index', {'record': True})
 
-
-def test_file_processed_detailed(app, testapp, indexer_testapp, test_fp_uuid,
-                                 award, lab, file_formats):
     # Todo, input a list of accessions / uuids:
     verify_item(test_fp_uuid, indexer_testapp, testapp, app.registry)
     # While we're here, test that _update of the file properly
@@ -203,7 +211,6 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     """
     import uuid
     import datetime
-    from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
     indexer_queue = app.registry[INDEXER_QUEUE]
     es = app.registry[ELASTIC_SEARCH]
     fp_body = {

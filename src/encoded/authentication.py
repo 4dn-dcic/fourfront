@@ -42,6 +42,7 @@ from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
+from snovault.util import debug_log
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -250,7 +251,8 @@ def get_jwt(request):
 
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
-def login(request):
+@debug_log
+def login(context, request):
     '''
     Check the auth0 assertion and return User Information to be stored client-side
     user_info comes from /session-properties and other places and would contain ultimately:
@@ -265,7 +267,8 @@ def login(request):
 
 @view_config(route_name='logout',
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
-def logout(request):
+@debug_log
+def logout(context, request):
     """
     This endpoint proxies a request to Auth0 for it to remove its session cookies.
     See https://auth0.com/docs/api/authentication#enterprise-saml-and-others-
@@ -292,7 +295,8 @@ def logout(request):
 
 
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
-def me(request):
+@debug_log
+def me(context, request):
     '''Alias /users/<uuid-of-current-user>'''
     for principal in request.effective_principals:
         if principal.startswith('userid.'):
@@ -331,7 +335,8 @@ def get_basic_properties_for_user(request, userid):
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)
-def session_properties(request):
+@debug_log
+def session_properties(context, request):
     for principal in request.effective_principals:
         if principal.startswith('userid.'):
             break
@@ -374,7 +379,8 @@ def basic_auth_check(username, password, request):
 @view_config(route_name='impersonate-user', request_method='POST',
              validators=[no_validate_item_content_post],
              permission='impersonate')
-def impersonate_user(request):
+@debug_log
+def impersonate_user(context, request):
     """As an admin, impersonate a different user."""
 
     userid = request.validated['userid']
@@ -433,7 +439,8 @@ def generate_password():
 
 @view_config(route_name='create-unauthorized-user', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
-def create_unauthorized_user(request):
+@debug_log
+def create_unauthorized_user(context, request):
     """
     Endpoint to create an unauthorized user, which will have no lab or award.
     Requires a reCAPTCHA response, which is propogated from the front end

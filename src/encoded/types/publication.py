@@ -12,6 +12,7 @@ from snovault.crud_views import (
     item_edit,
 )
 from snovault.attachment import ItemWithAttachment
+from snovault.util import debug_log
 from .base import (
     Item,
     lab_award_attribution_embed_list
@@ -320,6 +321,7 @@ def validate_unique_pub_id(context, request):
 @view_config(context=Publication.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def publication_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -337,5 +339,6 @@ def publication_add(context, request, render=None):
 @view_config(context=Publication, permission='index', request_method='GET',
              validators=[validate_item_content_in_place, validate_unique_pub_id],
              request_param=['check_only=true'])
+@debug_log
 def publication_edit(context, request, render=None):
     return item_edit(context, request, render)

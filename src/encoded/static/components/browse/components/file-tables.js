@@ -9,16 +9,13 @@ import url from 'url';
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { DropdownButton, DropdownItem } from 'react-bootstrap';
 
-import { console, isServerSide, analytics, object, commonFileUtil, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
-import { memoizedUrlParse } from './../../globals';
 import { expFxn, Schemas, typedefs, fileUtil } from './../../util';
+import { Item, ExperimentSet } from '../../util/typedefs';
 
-
-// eslint-disable-next-line no-unused-vars
-const { Item, ExperimentSet } = typedefs;
 
 
 
@@ -384,7 +381,8 @@ export class RawFilesStackedTable extends React.PureComponent {
             })).isRequired
         }),
         'collapseLongLists'         : PropTypes.bool,
-        'preventExpand'             : PropTypes.bool
+        'preventExpand'             : PropTypes.bool,
+        'analyticsImpressionOnMount': PropTypes.bool
     };
 
     static defaultProps = {
@@ -402,6 +400,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     constructor(props){
         super(props);
+        this.analyticsImpression = _.once(this.analyticsImpression.bind(this));
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.renderExperimentBlock = this.renderExperimentBlock.bind(this);
         this.renderBiosampleStackedBlockOfExperiments = this.renderBiosampleStackedBlockOfExperiments.bind(this);
@@ -412,6 +411,45 @@ export class RawFilesStackedTable extends React.PureComponent {
         this.state = {
             'mounted' : false
         };
+
+        this.memoized = {
+            groupedData: memoize(function(experimentSet){
+                const { experiments_in_set, replicate_exps } = experimentSet;
+                const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
+                    expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
+                );
+                const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
+                return { experimentsGroupedByBiosample, allRawFiles };
+            })
+        };
+    }
+
+    analyticsImpression(){
+        const { experimentSet } = this.props;
+        const { allRawFiles, experimentsGroupedByBiosample } = this.memoized.groupedData(experimentSet);
+
+        const biosamples = [];
+        let exps = [];
+
+        experimentsGroupedByBiosample.forEach(function(expsWithBiosample){
+            const [ { biosample } ] = expsWithBiosample; // From first exp, grab out biosample (all exps should have same 1).
+            biosamples.push(biosample);
+            exps = exps.concat(expsWithBiosample);
+        });
+
+        setTimeout(function(){ // Wait for analytics initialization to complete.
+            analytics.impressionListOfItems(biosamples, null, "RawFilesStackedTable");
+            analytics.impressionListOfItems(exps, null, "RawFilesStackedTable");
+            analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable");
+            analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet.display_title });
+        }, 250);
+    }
+
+    componentDidMount(){
+        const { analyticsImpressionOnMount = false } = this.props;
+        if (analyticsImpressionOnMount) {
+            this.analyticsImpression();
+        }
     }
 
     handleFileCheckboxChange(accessionTripleString, fileObj){
@@ -466,7 +504,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
                         label={<StackedBlockNameLabel title="File"/>}
                         isSingleItem={ungroupedFiles.length + contents.length < 2 ? true : false}
-                        columnClass="file-group" hideNameOnHover={true} href={href}
+                        columnClass="file-group" hideNameOnHover href={href}
                     />
                 );
 
@@ -570,11 +608,7 @@ export class RawFilesStackedTable extends React.PureComponent {
      */
     render(){
         const { experimentSet, columnHeaders: propColHeaders, showMetricsColumns, collapseLongLists, width, preventExpand } = this.props;
-        const { experiments_in_set, replicate_exps } = experimentSet;
-
-        const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
-            expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
-        );
+        const { experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet);
 
         const appendCountStr = experimentsGroupedByBiosample.length > 5 ?
             'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments' : null;
@@ -589,8 +623,6 @@ export class RawFilesStackedTable extends React.PureComponent {
         );
 
         const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, experimentSet);
-
-        const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
@@ -612,23 +644,30 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     static propTypes = {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
-        'files' : PropTypes.array.isRequired
+        'files' : PropTypes.array.isRequired,
+        'analyticsImpressionOnMount' : PropTypes.bool
     };
 
     static defaultProps = {
         'columnHeaders' : [
-            { columnClass: 'experiment',  className: 'text-left',     title: 'Experiment',    initialWidth: 165   },
+            { columnClass: 'experiment',  title: 'Experiment',  className: 'text-left',     initialWidth: 180  },
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
-            { columnClass: 'file',        className: 'has-checkbox',  title: 'File',      initialWidth: 135, render: renderFileTitleColumn, visibleTitle : renderFileHeaderWithCheckbox },
-            { columnClass: 'file-detail', title: 'File Type', initialWidth: 135, render: renderFileTypeSummaryColumn },
-            { columnClass: 'file-detail', title: 'File Size', initialWidth: 70, field : "file_size" }
+            { columnClass: 'file',        title: 'File',        className: 'has-checkbox',  initialWidth: 165,  render: renderFileTitleColumn,          visibleTitle: renderFileHeaderWithCheckbox },
+            { columnClass: 'file-detail', title: 'File Type',                               initialWidth: 135,  render: renderFileTypeSummaryColumn     },
+            { columnClass: 'file-detail', title: 'File Size',                               initialWidth: 70,   field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
         'titleForFiles'     : 'Processed Files'
     };
 
-    static filesGroupedByExperimentOrGlobal = memoize(function(files){
+    /**
+     * @static
+     * @param {Item[]} files
+     * @returns {[ expAAccesion: string, files: Item[] ][]}
+     * @memberof ProcessedFilesStackedTable
+     */
+    static filesGroupedByExperimentOrGlobal(files){
         // Contains: { 'experiments' : { 'ACCESSSION1' : [..file_objects..], 'ACCESSION2' : [..file_objects..] }, 'experiment_sets' : { 'ACCESSION1' : [..file_objects..] } }
         const groupedFiles = expFxn.divideFilesFromExpSetToExpSetsAndExps(files);
         const filesGroupedByExperimentOrGlobal = _.clone(groupedFiles.experiments);
@@ -642,13 +681,56 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
 
-        return filesGroupedByExperimentOrGlobal;
-    });
+        return _.pairs(filesGroupedByExperimentOrGlobal).sort(function ([ expAAccesion, filesForExpA ], [ expBAccesion, filesForExpB ]){
+            // Bubble 'global' exps (aka grouping of files that belong to multiple exps or expset itself)
+            // to top.
+            if (expAAccesion === 'global') return -1;
+            if (expBAccesion === 'global') return 1;
+            return 0;
+        });
+    }
 
     constructor(props){
         super(props);
+        this.analyticsImpression = _.once(this.analyticsImpression.bind(this));
         this.handleFileCheckboxChange = this.handleFileCheckboxChange.bind(this);
         this.oddExpRow = false;
+
+        this.memoized = {
+            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal)
+        };
+    }
+
+    analyticsImpression(){
+        const { files: origFileList } = this.props;
+        const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(origFileList);
+        const exps = [];
+        let resortedFileList = [];
+
+        filesGroupedByExperimentOrGlobal.forEach(function([ expAccession, filesForExp ]){
+            if (expAccession !== "global") {
+                for (var i = 0; i < filesForExp.length; i++){
+                    if (filesForExp[i].from_experiment && filesForExp[i].from_experiment.accession === expAccession) {
+                        exps.push(filesForExp[i].from_experiment);
+                        break;
+                    }
+                }
+            }
+            resortedFileList = resortedFileList.concat(filesForExp);
+        });
+
+        setTimeout(function(){ // Wait for analytics initialization to complete.
+            analytics.impressionListOfItems(exps, null, "ProcessedFilesStackedTable");
+            analytics.impressionListOfItems(resortedFileList, null, "ProcessedFilesStackedTable");
+            analytics.event("ProcessedFilesStackedTable", "Mounted");
+        }, 250);
+    }
+
+    componentDidMount(){
+        const { analyticsImpressionOnMount = false } = this.props;
+        if (analyticsImpressionOnMount) {
+            this.analyticsImpression();
+        }
     }
 
     componentDidUpdate(){
@@ -661,8 +743,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     renderFileBlocksForExperiment(filesForExperiment){
         const { href } = this.props;
-        var fileBlocks = [],
-            filesWithPermissions = _.filter(filesForExperiment, object.itemUtil.atId);
+        const fileBlocks = [];
+        const filesWithPermissions = _.filter(filesForExperiment, object.itemUtil.atId);
 
         _.forEach(filesWithPermissions, (file, idx) => {
             this.oddExpRow = !this.oddExpRow;
@@ -684,17 +766,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-
         const { collapseLongLists, titleForFiles } = this.props;
-        const expSortFxn = function([ expAAccesion, filesForExpA ], [ expBAccesion, filesForExpB ]){
-            // Bubble 'global' exps (aka grouping of files that belong to multiple exps or expset itself)
-            // to top.
-            if (expAAccesion === 'global') return -1;
-            if (expBAccesion === 'global') return 1;
-            return 0;
-        };
-
-        return _.map(_.pairs(filesGroupedByExperimentOrGlobal).sort(expSortFxn), ([ experimentAccession, filesForExperiment ])=>{
+        return filesGroupedByExperimentOrGlobal.map(([ experimentAccession, filesForExperiment ])=>{
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
 
@@ -739,7 +812,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
     render(){
         const { files, collapseLongLists } = this.props;
-        const filesGroupedByExperimentOrGlobal = ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal(files);
+        const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
         return (
             <div className="stacked-block-table-outer-container overflow-auto">

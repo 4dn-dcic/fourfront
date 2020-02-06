@@ -66,7 +66,7 @@ Minimal set of inserts used with performance tests that are run with `pytest -m 
 Pared-down set of inserts used with a number of tests, namely those that leverage Elasticsearch to test indexing and searching. They are loaded by tests that use the workbook feature:
 
 ```
-from .features.conftest import workbook
+from .workbook_fixtures import workbook
 ```
 
 Never loaded into fourfront environments.

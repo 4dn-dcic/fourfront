@@ -166,10 +166,10 @@ class PublicationSummary extends React.PureComponent {
                                 </h4>
                                 {
                                     _.map(categories, (cat)=>
-                                        <button type="button" className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
+                                        <a className="btn btn-xs btn-info mr-02 mb-02 text-capitalize"
                                             href={"/search/?type=Publication&categories=" + encodeURIComponent(cat) }>
                                             { cat }
-                                        </button>
+                                        </a>
                                     )
                                 }
                             </React.Fragment>

@@ -9,14 +9,14 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, memoizedUrlParse, elementIsChildOfLink } from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -229,7 +229,12 @@ export default class App extends React.PureComponent {
         if (analyticsID){
             analytics.initializeGoogleAnalytics(
                 analyticsID,
-                { reduxStore: store, initialContext: context, initialHref: windowHref }
+                {
+                    ...analyticsConfigurationOptions,
+                    reduxStore: store,
+                    initialContext: context,
+                    initialHref: windowHref
+                }
             );
         }
 
@@ -444,7 +449,7 @@ export default class App extends React.PureComponent {
         if (event.isDefaultPrevented()) return;
         const { href } = this.props;
         const { nativeEvent } = event;
-        const target = elementIsChildOfLink(event.target);
+        const target = layout.elementIsChildOfLink(event.target);
 
         if (!target) return;
 
@@ -630,12 +635,21 @@ export default class App extends React.PureComponent {
     authenticateUser(callback = null){
         const { session } = this.state;
         const idToken = JWT.get();
-        const userInfo = JWT.getUserInfo();
-        const userActions = (userInfo && userInfo.user_actions) || null;
 
-        if (idToken && (!session || !userActions)){
+        // Currently we usually only have at most 1 group per User.
+        // If changes, we may need to register multiple events
+        // or figure out prioritization of group to register.
+        const {
+            user_actions: userActions = null,
+            details: {
+                uuid: userId = null,
+                groups = null
+            } = {}
+        } = JWT.getUserInfo() || {};
+
+        if (idToken && (!session || !userId || !userActions)){
             // if JWT present, and session not yet set (from back-end), try to authenticate
-            // This is very unlikely due to us rendering re: session server-side. Mostly a remnant.
+            // This is very unlikely due to us rendering re: session server-side. Mostly a remnant or if localStorage cleared.
             console.info('AUTHENTICATING USER; JWT PRESENT BUT NO STATE.SESSION OR USER_ACTIONS');
             ajax.promise('/login', 'POST', { 'Authorization' : 'Bearer ' + idToken }, JSON.stringify({ 'id_token' : idToken }))
                 .then((response) => {
@@ -646,8 +660,12 @@ export default class App extends React.PureComponent {
                     (response) => {
                         JWT.saveUserInfo(response);
                         this.updateUserInfo(callback);
+                        analytics.setUserID(userId);
                         analytics.event('Authentication', 'ExistingSessionLogin', {
-                            'eventLabel' : 'Authenticated ClientSide'
+                            userId,
+                            name: userId,
+                            userGroups: groups && JSON.stringify(groups.sort()),
+                            eventLabel: 'Authenticated ClientSide'
                         });
                     },
                     (error) => {
@@ -658,10 +676,14 @@ export default class App extends React.PureComponent {
                     }
                 );
             return idToken;
-        } else if (idToken && session && userActions){
+        } else {
             console.info('User is logged in already, continuing session.');
+            // analytics.setUserID(userId); is performed in SPC/analytics.js on init.
             analytics.event('Authentication', 'ExistingSessionLogin', {
-                'eventLabel' : 'Authenticated ServerSide'
+                userId,
+                name: userId,
+                userGroups: groups && JSON.stringify(groups.sort()),
+                eventLabel: 'Authenticated ServerSide'
             });
         }
         return null;
