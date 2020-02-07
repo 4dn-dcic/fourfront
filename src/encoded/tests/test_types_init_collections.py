@@ -1,10 +1,7 @@
-import datetime
 import pytest
+from encoded.types.image import Image
+from ..utils import utc_today_str
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
-
-
-def utc_today_str():
-    return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")
 
 
 @pytest.fixture
@@ -49,22 +46,6 @@ def test_calculated_target_summaries(testapp, targets):
             assert summary == 'no target'
 
 
-@pytest.fixture
-def protocol_data(lab, award):
-    return {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'protocol_type': 'Experimental protocol',
-        'description': 'Test Protocol'
-    }
-
-
-@pytest.fixture
-def protocol_w_attach(testapp, protocol_data, attachment):
-    protocol_data['attachment'] = attachment
-    return testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-
-
 def test_document_display_title_w_attachment(testapp, protocol_data, attachment):
     protocol_data['attachment'] = attachment
     del(protocol_data['protocol_type'])
@@ -99,33 +80,6 @@ def test_organism_display_title_no_scientific_name(testapp, human_data):
     del(human_data['scientific_name'])
     res = testapp.post_json('/organism', human_data).json['@graph'][0]
     assert res.get('display_title') == 'human'
-
-
-def test_protocol_display_title_w_attachment(testapp, protocol_data, attachment):
-    res = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    assert res.get('display_title').startswith('Experimental protocol')
-    patched = testapp.patch_json(res['@id'], {'attachment': attachment}).json['@graph'][0]
-    assert patched.get('display_title') == 'red-dot.png'
-
-
-def test_protocol_display_title_w_title(testapp, protocol_data, attachment):
-    protocol_data['attachment'] = attachment
-    res = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    assert res.get('display_title') == 'red-dot.png'
-    patched = testapp.patch_json(res['@id'], {'title': 'The best method'}).json['@graph'][0]
-    assert patched.get('display_title') == 'The best method'
-
-
-def test_protocol_display_title_wo_attachment(testapp, protocol_data):
-    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    assert protocol['display_title'] == 'Experimental protocol from ' + utc_today_str()
-
-
-def test_protocol_other_display_title_wo_attachment(testapp, protocol_data):
-    protocol_data['protocol_type'] = 'Other'
-    protocol = testapp.post_json('/protocol', protocol_data).json['@graph'][0]
-    assert protocol['display_title'] == 'Protocol from ' + utc_today_str()
-
 
 
 @pytest.fixture
@@ -234,7 +188,6 @@ def test_tracking_item_display_title_download(download_tracking):
 
 
 def test_tracking_item_display_title_other(jupyterhub_session):
-    from datetime import datetime
     assert jupyterhub_session.get('display_title') == 'Tracking Item from ' + utc_today_str()
 
 
@@ -291,7 +244,6 @@ def test_genomic_region_display_title(testapp, dt4genomic_regions):
 
 
 def test_image_unique_key(registry, image_data):
-    from encoded.types.image import Image
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
     image = Image.create(registry, uuid, image_data)
     keys = image.unique_keys(image.properties)

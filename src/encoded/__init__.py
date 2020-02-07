@@ -38,7 +38,7 @@ from encoded.commands.create_mapping_on_deploy import (
     ENV_WEBPROD2,
     BEANSTALK_PROD_ENVS,
 )
-from .util import find_other_in_pair
+from .utils import find_other_in_pair
 import structlog
 import logging
 

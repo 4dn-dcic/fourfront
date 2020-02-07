@@ -290,7 +290,17 @@
             "type": "string",
             "permission": "import_items",
             "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
-        }
+        },
+        "notes_to_tsv": {
+                "desciption":"Additional information intended to be shown in the metadata.tsv file",
+                "type": "array",
+                "permission":"import_items",
+                "comment": "value will be used to include notes in the metadata.tsv file",
+                "items": {
+                    "title": "Notes to tsv file",
+                    "type": "string"
+                }
+            }
     },
     "facets": {
         "lab.display_title": {
