@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import url from 'url';
-import { console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 
 let hasScriptBeenLoaded = false;
@@ -99,6 +99,12 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
             this.embedContainerRef.current,
             options
             ).then((element) => {
+
+                if (!element) {
+                    analytics.exception("TwitterTimelineEmbed - Couldn't load/get element");
+                    return false;
+                }
+
                 // `element` here is the iframe that TwitterJS created.
                 this.setState({
                     isLoading: false

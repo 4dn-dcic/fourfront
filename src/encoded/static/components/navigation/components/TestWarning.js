@@ -15,18 +15,14 @@ export class TestWarning extends React.PureComponent {
     }
 
     handleClose(evt){
-        const { setHidden } = this.props;
+        const { onAccept } = this.props;
         evt.preventDefault();
         evt.stopPropagation();
 
         analytics.event("TestWarningBanner", "Accept");
 
-        if (window && window.localStorage && window.localStorage.setItem) {
-            window.localStorage.setItem("accepted_privacy_policy_disclaimer", "true");
-        }
-
-        if (typeof setHidden === 'function'){
-            setHidden(evt);
+        if (typeof onAccept === 'function'){
+            onAccept(evt);
         }
     }
 
@@ -39,7 +35,7 @@ export class TestWarning extends React.PureComponent {
                     <div className="row align-items-center">
                         <div className="col text-container row align-items-center">
                             <div className="col-auto px-0">
-                                <i className="icon icon-fw icon-eye far circle-icon d-none d-md-inline-block"/>
+                                <i className="icon icon-fw icon-cookie-bite fas circle-icon d-none d-md-inline-block"/>
                             </div>
                             <div className="col">
                                 We use cookies to track your portal usage.
