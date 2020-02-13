@@ -74,6 +74,7 @@ TSV_MAPPING = OrderedDict([
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
+    ('Notes',                       (FILE,      ['notes_to_tsv'])),
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),

@@ -527,7 +527,7 @@ export class MicroMetaTabView extends React.PureComponent {
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
         const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
-        const height = Math.max(700, windowHeight /2);
+        const height = Math.max(750, windowHeight /2);
 
         if (!mounted){
             return (
@@ -567,6 +567,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 <hr className="tab-section-title-horiz-divider" />
                 <div className="microscope-tab-view-contents">
                     <div className="micrometa-container" ref={this.containerElemRef} style={{ height : height + 20 }}>
+                        <link type="text/css" rel="stylesheet react-resizable" href="https://unpkg.com/react-resizable/css/styles.css" crossOrigin="true" />
                         <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>

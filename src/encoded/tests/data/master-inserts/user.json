@@ -145,6 +145,17 @@
         "groups": ["read-only-admin"]
     },
     {
+        "email": "clara_bakker@hms.harvard.edu",
+        "first_name": "Clara",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Bakker",
+        "uuid": "545f1931-792c-4a7e-83b3-3e91baea4e30",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "timezone": "US/Eastern",
         "email": "ud4dntest@gmail.com",
         "status": "current",
