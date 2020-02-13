@@ -96,6 +96,15 @@ def fastq_uploading(fastq_json):
     return fastq_json
 
 
+@pytest.fixture
+def test_file_tsv_notes_field(award, lab, file_formats):
+    return {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('fastq').get('uuid')
+    }
+
+
 def test_restricted_no_download(testapp, fastq_json):
     # check that initial download works
     res = testapp.post_json('/file_fastq', fastq_json, status=201)
@@ -1231,3 +1240,10 @@ def test_track_and_file_facet_info_file_patch_override_fields(
 def test_pairs_file_qc_tsv_link(testapp, pairs_file_json):
     res = testapp.post_json('/file_processed', pairs_file_json).json['@graph'][0]
     assert res['pairsqc_table'].endswith('%s.plot_table.out' % res['accession'])
+
+def test_notes_to_tsv_field(testapp, test_file_tsv_notes_field):
+    tv = {'integer_read_ids': ['integer_read_ids'], 'integer_read_ids,low_quality': ['integer_read_ids', 'low_quality'], '': []}
+    for result, test_value in tv.items():
+        test_file_tsv_notes_field['notes_to_tsv'] = test_value
+        pfile = testapp.post_json('/file_fastq', test_file_tsv_notes_field).json
+        assert pfile['@graph'][0]['tsv_notes'] == result
