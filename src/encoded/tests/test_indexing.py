@@ -328,9 +328,6 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     # assert False
 
 
-pytestmark = [pytest.mark.xfail]  # redefine for below test, flaky will run xfail's twice
-
-
 def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
     """ Tests that anontestapp gets view denied when using datastore=database """
     from time import sleep
