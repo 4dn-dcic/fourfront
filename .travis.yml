@@ -54,8 +54,7 @@ before_install:
 - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 - SNO_PATH="snovault = git https://github.com/$USER/$SNO_REPO.git rev="
 - SNO_BRANCH=$(grep "${SNO_PATH}" buildout.cfg | sed "s@$SNO_PATH@@")
-- SNO_STATUS=$(curl -s "https://api.travis-ci.org/$USER/$SNO_REPO.svg?branch=$SNO_BRANCH"
-  | grep pass)
+- SNO_STATUS=0
 - ! "if [ -z \"$SNO_STATUS\" ]; then\n    echo \"Snovault branch build for $SNO_BRANCH
   is failing; exiting build\"\n    travis_terminate\nelse\n    echo \"Snovault branch
   $SNO_BRANCH is okay with build status: $SNO_STATUS\"\nfi\n"
