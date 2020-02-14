@@ -1,7 +1,11 @@
 import pytest
+
+from rdflib import RDFS, BNode, URIRef, Literal
+from ..commands import owltools as ot
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
-from rdflib import RDFS, BNode, URIRef
-from encoded.commands import owltools as ot
+
 
 
 @pytest.fixture
@@ -21,21 +25,18 @@ def owler(mocker):
 
 @pytest.fixture
 def rdf_objects():
-    from rdflib import Literal
     rdfobjs = ['testrdfobj1', 'testrdfobj2']
     return [Literal(rdfobj) for rdfobj in rdfobjs]
 
 
 @pytest.fixture
 def rdf_objects_2_1():
-    from rdflib import Literal
     rdfobjs = ['testrdfobj1']
     return [Literal(rdfobj) for rdfobj in rdfobjs]
 
 
 @pytest.fixture
 def rdf_objects_2_3():
-    from rdflib import Literal
     rdfobjs = ['testrdfobj1', 'testrdfobj2', 'testrdfobj3']
     return [Literal(rdfobj) for rdfobj in rdfobjs]
 

@@ -1,5 +1,8 @@
 import pytest
-from encoded.types.publication import find_best_date
+
+from ..types.publication import find_best_date
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 

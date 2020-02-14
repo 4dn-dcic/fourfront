@@ -1,9 +1,12 @@
 import pytest
-from encoded.types.gene import (
+
+from ..types.gene import (
     fetch_gene_info_from_ncbi,
     get_gene_info_from_response_text,
     map_ncbi2schema,
 )
+
+
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 

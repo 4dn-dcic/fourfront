@@ -1,9 +1,18 @@
-import pytest
+"""
+
+Tests for both experiment.py and experiment_set.py
+
+"""
+
 import datetime
-from encoded.types.experiment import ExperimentHiC
+import pytest
+from snovault import TYPES
 # from snovault.storage import UUID
+from uuid import uuid4
+from ..types.experiment import ExperimentHiC
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
-'''Has tests for both experiment.py and experiment_set.py'''
 
 
 @pytest.fixture
@@ -161,7 +170,6 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
 # test for default_embedding practice with embedded list
 # this test should change should any of the reference embeds below be altered
 def test_experiment_set_default_embedded_list(registry, exp_types):
-    from snovault import TYPES
     exp_data = {
         'experiment_type': exp_types['microc']['uuid'],
         'status': 'in review by lab'
@@ -836,7 +844,6 @@ def test_experiment_categorizer_cap_c_w_2regions(
 
 @pytest.fixture
 def new_exp_type(lab, award):
-    from uuid import uuid4
     data = {
         'uuid': str(uuid4()),
         'title': 'Title',
