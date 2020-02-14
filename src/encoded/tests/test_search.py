@@ -1,19 +1,17 @@
+import json
+import pytest
+import time
+
+from snovault import TYPES, COLLECTIONS
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
+from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-import pytest
-from encoded.commands.run_upgrader_on_inserts import get_inserts
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
-import json
-import time
-from snovault import TYPES, COLLECTIONS
-
-def delay_rerun(*args):
-    """ Rerun function for flaky """
-    time.sleep(1)
-    return True
+from ..utils import delay_rerun
 
 
 pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing] #pytest.mark.flaky(rerun_filter=delay_rerun)]
+
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts

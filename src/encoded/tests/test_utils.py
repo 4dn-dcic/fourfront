@@ -2,7 +2,7 @@ import datetime
 import pytest
 import re
 
-from encoded.utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str
+from ..utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str
 
 
 pytestmark = pytest.mark.working
