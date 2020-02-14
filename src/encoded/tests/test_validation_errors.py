@@ -1,7 +1,7 @@
 import pytest
 
 from .workbook_fixtures import app_settings, workbook
-from .test_search import delay_rerun
+from ..utils import delay_rerun
 
 
 pytestmark = [

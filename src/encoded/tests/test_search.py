@@ -7,10 +7,15 @@ from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-from ..utils import delay_rerun
+from ..utils import customized_delay_rerun
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing] #pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [
+    pytest.mark.working,
+    pytest.mark.schema,
+    pytest.mark.indexing,
+    pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+]
 
 
 ### IMPORTANT
