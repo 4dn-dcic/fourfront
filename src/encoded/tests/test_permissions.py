@@ -1,8 +1,13 @@
 import pytest
-pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+import webtest
 
 from datetime import date
 from urllib.parse import urlencode
+from ..types.lab import Lab
+
+
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+
 
 
 @pytest.fixture
@@ -149,12 +154,11 @@ def remc_submitter(testapp, remc_lab, remc_award):
 
 
 def remote_user_testapp(app, remote_user):
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': str(remote_user),
     }
-    return TestApp(app, environ)
+    return webtest.TestApp(app, environ)
 
 
 @pytest.fixture
@@ -879,7 +883,6 @@ def test_wrangler_can_edit_lab_name_or_title(lab, submitter_testapp, wrangler_te
 
 
 def test_ac_local_roles_for_lab(registry):
-    from encoded.types.lab import Lab
     lab_data = {
         'status': 'in review by lab',
         'award': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b',

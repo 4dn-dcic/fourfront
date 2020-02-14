@@ -1,7 +1,5 @@
-from snovault import (
-    upgrade_step,
-)
-from encoded.schema_formats import is_uuid
+from snovault import upgrade_step
+from ..schema_formats import is_uuid
 
 
 @upgrade_step('workflow', '1', '2')

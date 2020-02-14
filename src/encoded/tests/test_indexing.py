@@ -14,10 +14,6 @@ import transaction
 import uuid
 
 from elasticsearch.exceptions import NotFoundError
-
-from encoded import main
-from encoded.verifier import verify_item
-
 from snovault import DBSESSION, TYPES
 from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import (
@@ -28,16 +24,13 @@ from snovault.elasticsearch.create_mapping import (
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
-
 from sqlalchemy import MetaData
-
 from timeit import default_timer as timer
-
 from unittest import mock
-
 from zope.sqlalchemy import mark_changed
-
+from .. import main
 from ..utils import delay_rerun
+from ..verifier import verify_item
 from .workbook_fixtures import app_settings
 from .test_permissions import wrangler, wrangler_testapp
 

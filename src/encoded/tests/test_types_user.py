@@ -1,5 +1,8 @@
 import pytest
-from encoded.types.user import User
+
+from ..types.user import User
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 @pytest.fixture

@@ -33,7 +33,7 @@ from snovault.app import (
 )
 from dcicutils.log_utils import set_logging
 from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from encoded.commands.create_mapping_on_deploy import (
+from .commands.create_mapping_on_deploy import (
     ENV_WEBPROD,
     ENV_WEBPROD2,
     BEANSTALK_PROD_ENVS,

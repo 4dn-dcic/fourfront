@@ -6,15 +6,12 @@ import logging
 import pytest
 import webtest
 
-from encoded import main
-
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest, setUp, tearDown
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
-
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH
-
+from .. import main
 from .conftest_settings import make_app_settings_dictionary
 
 

@@ -31,10 +31,15 @@ def find_other_in_pair(element, pair):
     return compute_set_difference_one(set(pair), {element})
 
 
-def delay_rerun(*args):
-    """ Rerun function for flaky """
-    time.sleep(1)
-    return True
+def customized_delay_rerun(sleep_seconds=1):
+    def parameterized_delay_rerun(*args):
+        """ Rerun function for flaky """
+        time.sleep(sleep_seconds)
+        return True
+    return parameterized_delay_rerun
+
+
+delay_rerun = customized_delay_rerun(sleep_seconds=1)
 
 
 def utc_today_str():

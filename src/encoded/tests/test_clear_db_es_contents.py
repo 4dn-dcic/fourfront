@@ -1,8 +1,10 @@
 import pytest
-from encoded.commands.clear_db_es_contents import (
+
+from ..commands.clear_db_es_contents import (
     clear_db_tables,
     run_clear_db_es
 )
+
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 

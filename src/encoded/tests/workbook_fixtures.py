@@ -3,13 +3,10 @@ import pkg_resources
 import pytest
 import webtest
 
-from encoded import main
-
 from snovault import DBSESSION
 from snovault.elasticsearch import create_mapping
-
+from .. import main
 from ..loadxl import load_all
-
 from .conftest_settings import make_app_settings_dictionary
 
 

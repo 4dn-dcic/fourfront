@@ -1,7 +1,13 @@
 import pytest
+
+from snovault import TYPES
+from snovault.util import add_default_embeds, crawl_schemas_by_embeds
+from ..types.base import get_item_if_you_can
 from .datafixtures import ORDER
 
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
+
 
 targets = [
     {'name': 'one', 'uuid': '775795d3-4410-4114-836b-8eeecf1d0c2f'},
@@ -86,8 +92,6 @@ def test_add_default_embeds(registry, item_type):
     """
     Ensure default embedding matches the schema for each object
     """
-    from snovault.util import add_default_embeds, crawl_schemas_by_embeds
-    from snovault import TYPES
     type_info = registry[TYPES].by_item_type[item_type]
     schema = type_info.schema
     embeds = add_default_embeds(item_type, registry[TYPES], type_info.embedded_list, schema)
@@ -107,8 +111,6 @@ def test_manual_embeds(registry, item_type):
     """
     Ensure manual embedding in the types files are valid
     """
-    from snovault.util import crawl_schemas_by_embeds
-    from snovault import TYPES
     type_info = registry[TYPES].by_item_type[item_type]
     schema = type_info.schema
     embeds = type_info.embedded_list
@@ -126,8 +128,6 @@ def test_fictitous_embed(registry):
     the organism subpath should be in the added_embeds even though it is
     not a terminal object
     """
-    from snovault.util import crawl_schemas_by_embeds
-    from snovault import TYPES
     type_info = registry[TYPES].by_item_type['biosample']
     schema = type_info.schema
     embed = 'biosource.individual.organism.name'
@@ -144,7 +144,6 @@ def test_get_item_if_you_can(content, dummy_request, threadlocals):
     Not necessarily the best place for this test, but test that the
     `get_item_if_you_can` function works with multiple inputs
     """
-    from encoded.types.base import get_item_if_you_can
     used_item = sources[0]
     # all of these should get the full item
     res1 = get_item_if_you_can(dummy_request, used_item)

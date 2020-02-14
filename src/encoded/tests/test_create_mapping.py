@@ -1,10 +1,14 @@
 import pytest
-from unittest.mock import patch, MagicMock
-from .datafixtures import ORDER
+
 from snovault import COLLECTIONS
-from encoded.types.experiment import *
-from encoded.commands.create_mapping_on_deploy import ITEM_INDEX_ORDER
-from encoded.commands.create_mapping_on_deploy import get_deployment_config
+from unittest.mock import patch, MagicMock
+from ..commands.create_mapping_on_deploy import ITEM_INDEX_ORDER
+from ..commands.create_mapping_on_deploy import get_deployment_config
+# TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
+from ..types.experiment import *
+from .datafixtures import ORDER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 

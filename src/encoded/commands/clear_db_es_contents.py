@@ -1,12 +1,16 @@
 import argparse
 import logging
 import structlog
+
 from pyramid.paster import get_app
-from encoded import configure_dbsession
-from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from snovault import DBSESSION
+from snovault.elasticsearch.create_mapping import run as run_create_mapping
+from .. import configure_dbsession
+
 
 log = structlog.getLogger(__name__)
+
+
 EPILOG = __doc__
 
 

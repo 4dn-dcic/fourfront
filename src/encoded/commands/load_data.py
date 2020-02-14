@@ -1,11 +1,15 @@
 import argparse
 import logging
 import structlog
-from pyramid.path import DottedNameResolver
+
 from pyramid.paster import get_app
-from encoded import configure_dbsession
+from pyramid.path import DottedNameResolver
+from .. import configure_dbsession
+
 
 log = structlog.getLogger(__name__)
+
+
 EPILOG = __doc__
 
 
