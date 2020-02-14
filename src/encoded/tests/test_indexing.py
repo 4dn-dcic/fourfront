@@ -39,6 +39,7 @@ from zope.sqlalchemy import mark_changed
 
 from ..utils import delay_rerun
 from .workbook_fixtures import app_settings
+from .test_permissions import wrangler, wrangler_testapp
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
@@ -332,3 +333,26 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
                                                                             frame_time, embed_time))
     # userful for seeing debug messages
     # assert False
+
+
+pytestmark = [pytest.mark.xfail]  # redefine for below test, flaky will run xfail's twice
+
+
+def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
+    """ Tests that anontestapp gets view denied when using datastore=database """
+    from time import sleep
+    file_item_body = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'paired_end': '1',
+        'status': 'released'
+    }
+    res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
+    item_id = res['@graph'][0]['@id']
+    indexer_testapp.post_json('/index', {'record': True})
+    sleep(1)  # let es catch up
+    res = anontestapp.get('/' + item_id).json
+    assert res['file_format'] == {'error': 'no view permissions'}
+    res = anontestapp.get('/' + item_id + '?datastore=database').json
+    assert res['file_format'] == {'error': 'no view permissions'}
