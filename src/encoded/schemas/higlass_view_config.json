@@ -3,6 +3,7 @@
     "id": "/profiles/higlass_view_config.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["genome_assembly"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "name"],
     "mixinProperties": [
@@ -28,7 +29,15 @@
         "genome_assembly" : {
             "title": "Genome Assembly",
             "description": "All data files will use this genome assembly.",
-            "type" : "string"
+            "type" : "string",
+            "enum": [
+                "GRCh38",
+                "GRCm38",
+                "dm6",
+                "galGal5",
+                "chlSab2",
+                "GRCz10"
+            ]
         },
         "viewconfig": {
             "title": "View Configuration",
