@@ -7,21 +7,16 @@ describe('Browse Views - BarPlotChart II', function () {
     context('Counts stay same or change expectedly upon re-requests of BarPlot data', function(){
 
         before(()=>{
-            cy.visit('/browse/?award.project=4DN&experimentset_type=replicate&type=ExperimentSetReplicate')
-                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
+            cy.visit('/browse/').wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(300).end();
         });
 
-        it('In default view; BarPlot counts == QuickInfoBar counts', function(){
-
+        it('In default view BarPlot, QuickInfoBar counts >= 1100', function(){
             cy.location('pathname').should('include', '/browse/').end()
-                .location('search').should('include', 'award.project=4DN').end()
+                .location('search').should('include', 'type=ExperimentSetReplicate').end()
                 .get('.bar-plot-chart .chart-bar').should('have.length.above', 0)
                 .end().window().scrollTo(0, 200)
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').wait(1000).end()
-                .then(()=>{
-                    compareQuickInfoCountsVsBarPlotCounts({ 'countChildTypes' : true });
-                });
-
+                .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', 1460);
         });
 
         it('Toggling "Show External Data Off" ==> lower matching counts', function(){
@@ -34,10 +29,7 @@ describe('Browse Views - BarPlotChart II', function () {
                         .wait(250) // Wait for JS to init re-load of barplot data, then for it to have loaded.
                         .get('#select-barplot-field-1').should('not.have.attr', 'disabled').end()
                         .get('#stats-stat-expsets.stat-value:not(.loading)').should('have.length.greaterThan', 0).end()
-                        .getQuickInfoBarCounts().its('experiment_sets').should('be.eq', initialCounts.experiment_sets).wait(1000).end()
-                        .then(()=>{
-                            compareQuickInfoCountsVsBarPlotCounts({ 'countChildTypes' : true });
-                        });
+                        .getQuickInfoBarCounts().its('experiment_sets').should('be.lessThan', initialCounts.experiment_sets).wait(1000).end();
                 });
 
             });
@@ -60,7 +52,7 @@ describe('Browse Views - BarPlotChart II', function () {
         });
 
         // Skipped because biosource might return more terms than allowed (30) and likely fail to have matching counts.
-        it('Counts persist on setting groupBy --> "Biosource"', function(){
+        it.skip('Counts persist on setting groupBy --> "Biosource"', function(){
             cy.getQuickInfoBarCounts().then((initialCounts)=>{
                 cy.get('#select-barplot-field-1').click().wait(100).end()
                     .get('#select-barplot-field-1 + div.dropdown-menu').within(function($ul){
