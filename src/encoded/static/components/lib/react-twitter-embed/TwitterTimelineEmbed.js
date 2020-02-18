@@ -101,6 +101,7 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
             ).then((element) => {
 
                 if (!element) {
+                    // Happens occasionally, maybe due to network or adblocker.
                     analytics.exception("TwitterTimelineEmbed - Couldn't load/get element");
                     return false;
                 }

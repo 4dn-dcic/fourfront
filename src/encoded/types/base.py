@@ -21,7 +21,7 @@ from snovault.validators import (
     validate_item_content_patch
 )
 from snovault.interfaces import CONNECTION
-from encoded.server_defaults import get_userid, add_last_modified
+from ..server_defaults import get_userid, add_last_modified
 from jsonschema_serialize_fork import NO_DEFAULT
 
 from datetime import date

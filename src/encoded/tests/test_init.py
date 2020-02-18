@@ -1,10 +1,11 @@
 import pytest
-from encoded.commands.create_mapping_on_deploy import (
+
+from .. import get_mirror_env
+from ..commands.create_mapping_on_deploy import (
     ENV_WEBPROD,
     ENV_WEBPROD2,
     ENV_MASTERTEST,
 )
-from encoded import get_mirror_env
 
 
 pytestmark = pytest.mark.working

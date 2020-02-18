@@ -1,9 +1,8 @@
-from snovault import (
-    upgrade_step,
-)
 import json
-from encoded.schema_formats import is_uuid
+
+from snovault import upgrade_step
 from pkg_resources import resource_filename
+from ..schema_formats import is_uuid
 
 
 def generate_content_map_for_page_1_2_upgrader():

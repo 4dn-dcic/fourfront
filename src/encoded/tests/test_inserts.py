@@ -1,6 +1,9 @@
 import pytest
+
+from ..commands.run_upgrader_on_inserts import get_inserts
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
-from encoded.commands.run_upgrader_on_inserts import get_inserts
 
 
 def test_check_wf_links():

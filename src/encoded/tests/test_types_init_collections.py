@@ -1,6 +1,9 @@
 import pytest
-from encoded.types.image import Image
+
+from ..types.image import Image
 from ..utils import utc_today_str
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
