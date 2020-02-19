@@ -13,6 +13,8 @@ import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/compon
 import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
+import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
+import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import DefaultItemView from './DefaultItemView';
 
 
@@ -42,6 +44,23 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 }
 
+function getTilesetUids(obj) {
+    if (!obj) {
+        return [];
+    }
+    else {
+        return Object.keys(obj).reduce(function (acc, key) {
+            const value = obj[key];
+            if (typeof value === 'object') {
+                acc.push.apply(acc, getTilesetUids(value));
+            }
+            else if (key === 'tilesetUid') {
+                acc.push(value);
+            }
+            return acc;
+        }, []);
+    }
+}
 
 
 export class HiGlassViewConfigTabView extends React.PureComponent {
@@ -76,7 +95,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
+        this.onViewConfigUpdated = this.onViewConfigUpdated.bind(this);
 
+        //let tilesetUids = [];
+        // if(props.context && props.context.viewconfig){
+        //     tilesetUids = _.uniq(getTilesetUids(props.context.viewconfig));
+        //     console.log('xxx tilesetUids:', tilesetUids);
+        // }
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
          * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
@@ -94,51 +119,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'cloneLoading'          : false,
             'releaseLoading'        : false,
             'addFileLoading'        : false,
-            'modal'                 : null
+            'modal'                 : null,
+            'tilesetUids'           : []//tilesetUids,
         };
         this.higlassRef = React.createRef();
     }
-
-
-    /**
-     * @todo
-     * Think about different (non-componentWillReceiveProps) approaches to this - perhaps simply
-     * componentDidUpdate (?) now that we don't swap out state.viewConfig with nextProps.viewConfig.
-     * -- After cleanup.
-     */
-    // UNSAFE_componentWillReceiveProps(nextProps){
-    //     const nextState = {};
-
-    //     /*  Below code:
-    //         We will likely adjust/remove to no longer change viewConfig if receive new one from back-end because
-    //         backend will always deliver new object reference. Even if same context['@id'] and context.date_modified.
-    //     */
-
-    //     if (nextProps.viewConfig !== this.props.viewConfig){
-    //         _.extend(nextState, {
-    //             'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
-    //             'viewConfig'         : nextProps.viewConfig,
-    //             'genome_assembly'    : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
-    //         });
-    //     }
-    //     const hiGlassTabIndex = (this.props.hiGlassTabIndex !== 'undefined') ? this.props.hiGlassTabIndex : -1;
-    //     const recentTabIsHiglass = (hiGlassTabIndex === 0 ? this.props.href.indexOf('#') < 0 : false) || (this.props.href.indexOf('#higlass') >= 0);
-    //     if (recentTabIsHiglass && (nextProps.href !== this.props.href) && (object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context))) {
-    //         // If component is still same instance, then is likely that we're changing
-    //         // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
-    //         // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
-    //         const hgc = this.getHiGlassComponent();
-    //         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-    //         const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-    //         //  currentViewConf && _.extend(nextState, {
-    //         //      'viewConfig' : currentViewConf
-    //         //  });
-    //     }
-
-    //     if (_.keys(nextState).length > 0) {
-    //         this.setState(nextState);
-    //     }
-    // }
 
     componentDidUpdate(pastProps, pastState){
         if (this.props.isFullscreen !== pastProps.isFullscreen){
@@ -156,25 +141,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         //    }
         // }
     }
-
-    // This is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
-    // componentDidMount(){
-    //     // Hacky... we need to wait for HGC to load up and resize itself and such...
-    //     var initOriginalViewConfState = () => {
-    //         var hgc = this.getHiGlassComponent();
-    //         if (hgc){
-    //             setTimeout(()=>{
-    //                 this.setState({
-    //                     'originalViewConfigString' : hgc.api.exportAsViewConfString()
-    //                 });
-    //             }, 2000);
-    //         } else {
-    //             setTimeout(initOriginalViewConfState, 200);
-    //         }
-    //     };
-    //
-    //     initOriginalViewConfState();
-    // }
 
     havePermissionToEdit(){
         const { session, context : { actions = [] } } = this.props;
@@ -447,6 +413,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 stateChange["genome_assembly"] = resp.new_genome_assembly;
                             }
                             stateChange["viewConfig"] = resp.new_viewconfig;
+                            // stateChange["tilesetUids"] = getTilesetUids(resp.new_viewconfig);
                         }
 
                         this.setState(stateChange, ()=>{
@@ -647,9 +614,20 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
+    onViewConfigUpdated(viewConf){
+        const { tilesetUids: oldTilesetUids } = this.state;
+        const newTilesetUids = _.uniq(getTilesetUids(JSON.parse(viewConf)));
+
+        if(_.difference(oldTilesetUids, newTilesetUids).length > 0 || _.difference(newTilesetUids, oldTilesetUids).length > 0){
+            this.setState({ 'tilesetUids': newTilesetUids });
+            // console.log('xxx onViewConfigUpdated', viewConf);
+            //console.log('xxx newTilesetUids', newTilesetUids);
+        }
+    }
+
     render(){
-        const { context, isFullscreen, windowWidth, windowHeight, width, session } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal } = this.state;
+        const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas } = this.props;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
         // Setting the height of the HiGlass Component follows one of these rules:
@@ -673,6 +651,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
 
+        const searchHref = tilesetUids.length > 0 ? "/search/?type=File&higlass_uid=" + tilesetUids.join('&higlass_uid=') : null;
+        console.log('xxxx searchHref:', searchHref);
+        const columns = SimpleFilesTable.defaultProps.columns;
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -691,9 +673,22 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
                             width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={viewConfig}
-                            ref={this.higlassRef} />
+                            ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
                     </div>
                 </div>
+                {searchHref ?
+                    (
+                        <React.Fragment>
+                            <hr className="tab-section-title-horiz-divider" />
+                            <div className="raw-files-table-section">
+                                <h3 className="tab-section-title">
+                                    <span><span className="text-400">{tilesetUids.length}</span> HiGlass File(s)</span>
+                                </h3>
+                                <EmbeddedItemSearchTable {...{ searchHref, schemas, columns, width }} facets={null} />
+                            </div>
+                        </React.Fragment>
+                    ) : null
+                }
                 { modal }
             </div>
         );
