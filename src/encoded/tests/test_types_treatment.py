@@ -64,6 +64,15 @@ def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
     assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5 M, 3.5h at 3.5°C)'
 
 
+def test_calculated_chemical_treatment_washout_display_title(testapp, drug_treatment):
+    assert drug_treatment['display_title'] == 'Drug treatment'
+    res = testapp.patch_json(
+        drug_treatment['@id'],
+        {'duration': 3.5, 'duration_units': 'hour', 'concentration': 0, 'concentration_units': 'M'}
+    )
+    assert res.json['@graph'][0]['display_title'] == 'Drug washout (3.5h)'
+
+
 def test_calculated_biological_treatment_display_title(testapp, viral_treatment):
     assert viral_treatment['display_title'] == 'Virus treatment'
     res = testapp.patch_json(viral_treatment['@id'], {
