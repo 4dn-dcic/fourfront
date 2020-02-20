@@ -26,8 +26,6 @@ requires = [
     'jsonschema_serialize_fork',
     'loremipsum',
     'netaddr',
-    'bcrypt',
-    'cryptacular',
     'passlib',
     'psutil',
     'pyramid',
