@@ -63,7 +63,12 @@ def test_calculated_chemical_treatment_display_title(testapp, drug_treatment):
     res = testapp.patch_json(drug_treatment['@id'], {'temperature': 3.5})
     assert res.json['@graph'][0]['display_title'] == 'Drug treatment (3.5 M, 3.5h at 3.5°C)'
 
+def test_calculated_chemical_treatment_display_title_temp_only(testapp, drug_treatment):
+    assert drug_treatment['display_title'] == 'Drug treatment'
+    res = testapp.patch_json(drug_treatment['@id'], {'temperature': 37})
+    assert res.json['@graph'][0]['display_title'] == 'Drug treatment (at 37°C)'
 
+    
 def test_calculated_chemical_treatment_washout_display_title(testapp, drug_treatment):
     assert drug_treatment['display_title'] == 'Drug treatment'
     res = testapp.patch_json(
