@@ -1,5 +1,8 @@
 import pytest
+
 from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json, beddb_file_json, chromsizes_file_json
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 # Test Higlass display endpoints.

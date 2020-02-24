@@ -4,6 +4,7 @@ import requests
 
 from ..authentication import get_jwt
 
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 

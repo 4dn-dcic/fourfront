@@ -1,28 +1,44 @@
 from future.standard_library import install_aliases
+# TODO: Once things are working, remove this as probably 2.7 compatibility. --kent&will 4-Feb-2020
 install_aliases()  # NOQA
+
 import base64
 import codecs
+import hashlib
 import json
+import logging
+import mimetypes
 import netaddr
 import os
-try:
-    import subprocess32 as subprocess  # Closes pipes on failure
-except ImportError:
-    import subprocess
+import structlog
+# try:
+#     # TODO: Once things are working, remove this 2.7 compatibility. --kent&will 4-Feb-2020
+#     import subprocess32 as subprocess  # Closes pipes on failure
+# except ImportError:
+#     import subprocess
+import subprocess
+import webtest
+
+from dcicutils.log_utils import set_logging
+from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
+from .commands.create_mapping_on_deploy import (
+    ENV_WEBPROD,
+    ENV_WEBPROD2,
+    BEANSTALK_PROD_ENVS,
+)
+from pkg_resources import resource_filename
+from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
+from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.path import (
     AssetResolver,
     caller_package,
 )
-from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import (
     aslist,
     asbool,
 )
-from sqlalchemy import engine_from_config
-from webob.cookies import JSONSerializer
-from snovault.json_renderer import json_renderer
 from snovault.app import (
     STATIC_MAX_AGE,
     session,
@@ -31,16 +47,19 @@ from snovault.app import (
     changelogs,
     json_asset,
 )
-from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
+from snovault.elasticsearch import APP_FACTORY
+from snovault.json_renderer import json_renderer
+from sqlalchemy import engine_from_config
+from webob.cookies import JSONSerializer
 from .commands.create_mapping_on_deploy import (
     ENV_WEBPROD,
     ENV_WEBPROD2,
     BEANSTALK_PROD_ENVS,
 )
+
+from .loadxl import load_all
 from .utils import find_other_in_pair
-import structlog
-import logging
+
 
 # location of environment variables on elasticbeanstalk
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
@@ -60,8 +79,6 @@ def get_mirror_env(settings):
 
 
 def static_resources(config):
-    from pkg_resources import resource_filename
-    import mimetypes
     mimetypes.init()
     mimetypes.init([resource_filename('encoded', 'static/mime.types')])
     config.add_static_view('static', 'static', cache_max_age=STATIC_MAX_AGE)
@@ -103,13 +120,11 @@ def static_resources(config):
 
 
 def load_workbook(app, workbook_filename, docsdir):
-    from .loadxl import load_all
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'IMPORT',
     }
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
     load_all(testapp, workbook_filename, docsdir)
 
 
@@ -132,7 +147,6 @@ def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
 
 
 def app_version(config):
-    import hashlib
     if not config.registry.settings.get('snovault.app_version'):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
@@ -194,12 +208,10 @@ def main(global_config, **local_config):
     settings['mirror.env.name'] = get_mirror_env(settings)
     config = Configurator(settings=settings)
 
-    from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
     config.include(app_version)
 
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
-    from pyramid_localroles import LocalRolesAuthorizationPolicy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)

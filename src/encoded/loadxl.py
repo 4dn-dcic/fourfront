@@ -6,10 +6,12 @@ import magic
 import mimetypes
 import os
 import structlog
+import webtest
 
 from base64 import b64encode
 from past.builtins import basestring
 from PIL import Image
+from pkg_resources import resource_filename
 from pyramid.paster import get_app
 from pyramid.response import Response
 from pyramid.view import view_config
@@ -100,16 +102,14 @@ def load_data_view(context, request):
     config_uri = request.json.get('config_uri', 'production.ini')
     patch_only = request.json.get('patch_only', False)
     app = get_app(config_uri, 'app')
-    from webtest import TestApp
     environ = {'HTTP_ACCEPT': 'application/json', 'REMOTE_USER': 'TEST'}
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
     # expected response
     request.response.status = 200
     result = {
         'status': 'success',
         '@type': ['result'],
     }
-    from pkg_resources import resource_filename
     store = request.json.get('store', {})
     local_path = request.json.get('local_path')
     fdn_dir = request.json.get('fdn_dir')
@@ -465,13 +465,11 @@ def load_data(app, indir='inserts', docsdir=None, overwrite=False,
         indir (inserts): inserts folder, should be relative to tests/data/
         docsdir (None): folder with attachment documents, relative to tests/data
     '''
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
-    testapp = TestApp(app, environ)
-    from pkg_resources import resource_filename
+    testapp = webtest.TestApp(app, environ)
     # load master-inserts by default
     if indir != 'master-inserts' and use_master_inserts:
         master_inserts = resource_filename('encoded', 'tests/data/master-inserts/')
@@ -516,7 +514,6 @@ def load_local_data(app, overwrite=False):
     Returns:
         None if successful, otherwise Exception encountered
     """
-    from pkg_resources import resource_filename
     # if we have any json files in temp-local-inserts, use those
     chk_dir = resource_filename('encoded', 'tests/data/temp-local-inserts')
     use_temp_local = False

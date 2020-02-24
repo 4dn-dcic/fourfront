@@ -1,5 +1,8 @@
-import pytest
 import copy
+import pytest
+
+from uuid import uuid4
+
 
 ORDER = [
     'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
@@ -470,7 +473,6 @@ def experiment_data(lab, award, human_biosample, mboI, exp_types):
 
 @pytest.fixture
 def exp_types(testapp, lab, award):
-    from uuid import uuid4
     experiment_types = {}
     title_dict = {
         'hic': ('in situ Hi-C', ["ExperimentHiC"]),
@@ -557,7 +559,6 @@ def two_experiment_replicate_set(testapp, rep_set_data, experiments):
 
 @pytest.fixture
 def file_formats(testapp, lab, award):
-    from uuid import uuid4
     formats = {}
     ef_format_info = {
         'pairs_px2': {'standard_file_extension': 'pairs.gz.px2',

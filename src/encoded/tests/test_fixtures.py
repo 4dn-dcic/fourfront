@@ -1,4 +1,12 @@
+import copy
 import pytest
+import webtest
+
+from unittest import mock
+
+from ..tests import datafixtures
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
@@ -6,12 +14,11 @@ pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 def minitestdata(app, conn):
     tx = conn.begin_nested()
 
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
 
     item = {
         'name': 'human',
@@ -29,12 +36,11 @@ def minitestdata(app, conn):
 def minitestdata2(app, conn):
     tx = conn.begin_nested()
 
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
     }
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
 
     item = {
         'name': 'human',
@@ -95,29 +101,38 @@ def test_fixtures2(minitestdata2, testapp):
 
 
 def test_order_complete(app, conn):
-    from .datafixtures import ORDER
-    from webtest import TestApp
-    ORDER = ORDER + ['access_key']
-    environ = {
-        'HTTP_ACCEPT': 'application/json',
-        'REMOTE_USER': 'TEST',
-    }
-    testapp = TestApp(app, environ)
-    master_types = []
-    profiles = testapp.get('/profiles/?frame=raw').json
-    for a_type in profiles:
-        if profiles[a_type].get('id') and profiles[a_type]['isAbstract'] is False:
-            schema_name = profiles[a_type]['id'].split('/')[-1][:-5]
-            master_types.append(schema_name)
-    print(ORDER)
-    print(master_types)
-    print(len(ORDER))
-    print(len(master_types))
+    print("original datafixtures.ORDER =", datafixtures.ORDER)
+    print("original len(datafixtures.ORDER) =", len(datafixtures.ORDER))
+    assert "access_key" not in datafixtures.ORDER
+    order_for_testing = datafixtures.ORDER + ["access_key"]
+    with mock.patch.object(datafixtures, "ORDER", order_for_testing):
+        print("mocked datafixtures.ORDER =", datafixtures.ORDER)
+        print("len(mocked datafixtures.ORDER) =", len(datafixtures.ORDER))
+        assert "access_key" in datafixtures.ORDER
+        ORDER = datafixtures.ORDER
+        environ = {
+            'HTTP_ACCEPT': 'application/json',
+            'REMOTE_USER': 'TEST',
+        }
+        testapp = webtest.TestApp(app, environ)
+        master_types = []
+        profiles = testapp.get('/profiles/?frame=raw').json
+        for a_type in profiles:
+            if profiles[a_type].get('id') and profiles[a_type]['isAbstract'] is False:
+                schema_name = profiles[a_type]['id'].split('/')[-1][:-5]
+                master_types.append(schema_name)
+        print(ORDER)
+        print(master_types)
+        print(len(ORDER))
+        print(len(master_types))
 
-    missing_types = [i for i in master_types if i not in ORDER]
-    extra_types = [i for i in ORDER if i not in master_types]
-    print(missing_types)
-    print(extra_types)
+        missing_types = [i for i in master_types if i not in ORDER]
+        extra_types = [i for i in ORDER if i not in master_types]
+        print(missing_types)
+        print(extra_types)
 
-    assert missing_types == []
-    assert extra_types == []
+        assert missing_types == []
+        assert extra_types == []
+    print("restored datafixtures.ORDER =", datafixtures.ORDER)
+    print("restored len(datafixtures.ORDER) =", len(datafixtures.ORDER))
+    assert "access_key" not in datafixtures.ORDER

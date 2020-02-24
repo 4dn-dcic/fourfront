@@ -1,20 +1,32 @@
+import codecs
+import json
+import pkg_resources
 import pytest
-pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
-from time import sleep
+
+from base64 import b64encode
+
+from jsonschema_serialize_fork import Draft4Validator
+
+from pyramid.compat import ascii_native_
+
 from snovault import TYPES
+
+from urllib.parse import urlparse
+
+from .datafixtures import ORDER
+
+
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 def _type_length():
     # Not a fixture as we need to parameterize tests on this
-    from .datafixtures import ORDER
-    from pkg_resources import resource_stream
-    import codecs
-    import json
     utf8 = codecs.getreader("utf-8")
     type_length_dict = {}
     for name in ORDER:
         try:
-            type_length_dict[name] = len(json.load(utf8(resource_stream('encoded', 'tests/data/workbook-inserts/%s.json' % name))))
+            utf8_stream = utf8(pkg_resources.resource_stream('encoded', 'tests/data/workbook-inserts/%s.json' % name))
+            type_length_dict[name] = len(json.load(utf8_stream))
         except Exception:
             type_length_dict[name] = 0
 
@@ -114,8 +126,6 @@ def test_json(testapp, item_type):
 
 
 def test_json_basic_auth(anonhtmltestapp):
-    from base64 import b64encode
-    from pyramid.compat import ascii_native_
     url = '/'
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
     res = anonhtmltestapp.get(url, headers={'Authorization': value}, status=401)
@@ -123,7 +133,6 @@ def test_json_basic_auth(anonhtmltestapp):
 
 
 def _test_antibody_approval_creation(testapp):
-    from urllib.parse import urlparse
     new_antibody = {'foo': 'bar'}
     res = testapp.post_json('/antibodies/', new_antibody, status=201)
     assert res.location
@@ -195,8 +204,6 @@ def test_collection_post_missing_content_type(testapp):
 
 
 def test_collection_post_bad_(anontestapp):
-    from base64 import b64encode
-    from pyramid.compat import ascii_native_
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
     anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=401)
 
@@ -276,7 +283,6 @@ def test_jsonld_term(testapp):
 
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
 def test_profiles(testapp, item_type):
-    from jsonschema_serialize_fork import Draft4Validator
     # this will only be non-abstract types
     res = testapp.get('/profiles/%s.json' % item_type).maybe_follow(status=200)
     errors = Draft4Validator.check_schema(res.json)

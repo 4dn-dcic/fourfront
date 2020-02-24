@@ -55,7 +55,29 @@ def pytest_configure():
 
 @pytest.yield_fixture
 def config():
-    yield setUp()
+    # From https://docs.pylonsproject.org/projects/pyramid/en/latest/api/testing.html#pyramid.testing.setUp
+    # setUp:
+    #   Set Pyramid registry and request thread locals for the duration of a single unit test.
+    #   Use this function in the setUp method of a unittest test case which directly or indirectly uses:
+    #     * any method of the pyramid.config.Configurator object returned by this function.
+    #     * the pyramid.threadlocal.get_current_registry() or pyramid.threadlocal.get_current_request() functions.
+    # tearDown:
+    #   Undo the effects of pyramid.testing.setUp(). Use this function in the tearDown method of a unit test
+    #   that uses pyramid.testing.setUp() in its setUp method.
+    #
+    # The recommended use with unittest can be found here:
+    # https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/testing.html#test-set-up-and-tear-down
+    #   class MyTest(unittest.TestCase):
+    #     def setUp(self):
+    #       self.config = testing.setUp()
+    #     def tearDown(self):
+    #       testing.tearDown()
+    # This is the approximate equivalent in pyTest:
+
+    # TODO: Reonsider whether this setup/teardown is being done correctly
+    raise Exception("fixture config used")
+    the_config = setUp()
+    yield the_config
     tearDown()
 
 
@@ -122,6 +144,10 @@ def root(registry):
     return registry[ROOT]
 
 
+# TODO: Reconsider naming to have some underscores interspersed for better readability.
+#       e.g., html_testapp rather than htmltestapp, and especially anon_html_test_app rather than anonhtmltestapp.
+#       -kmp 03-Feb-2020
+
 @pytest.fixture
 def anonhtmltestapp(app):
     return webtest.TestApp(app)
@@ -129,6 +155,9 @@ def anonhtmltestapp(app):
 
 @pytest.fixture
 def htmltestapp(app):
+    """TestApp for TEST user and no HTTP_ACCEPT limitation, so HTML content can be tested."""
+    # TODO: Name may be misleading. If only for HTML testing, seems like it should be text/html.
+    #       Or if it spans CSS and other things, maybe call it page_content_testapp? -kmp 03-Feb-2020
     environ = {
         'REMOTE_USER': 'TEST',
     }
@@ -137,8 +166,7 @@ def htmltestapp(app):
 
 @pytest.fixture(scope="module")
 def testapp(app):
-    '''TestApp with JSON accept header.
-    '''
+    """TestApp for username TEST, accepting JSON data."""
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST',
@@ -148,8 +176,7 @@ def testapp(app):
 
 @pytest.fixture
 def anontestapp(app):
-    '''TestApp with JSON accept header.
-    '''
+    """TestApp for anonymous user (i.e., no user specified), accepting JSON data."""
     environ = {
         'HTTP_ACCEPT': 'application/json',
     }
@@ -158,8 +185,7 @@ def anontestapp(app):
 
 @pytest.fixture
 def authenticated_testapp(app):
-    '''TestApp with JSON accept header for non-admin user.
-    '''
+    """TestApp for an authenticated, non-admin user (TEST_AUTHENTICATED), accepting JSON data."""
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST_AUTHENTICATED',
@@ -169,8 +195,7 @@ def authenticated_testapp(app):
 
 @pytest.fixture
 def submitter_testapp(app):
-    '''TestApp with JSON accept header for non-admin user.
-    '''
+    """TestApp for a non-admin user (TEST_SUBMITTER), accepting JSON data."""
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'TEST_SUBMITTER',
@@ -180,6 +205,7 @@ def submitter_testapp(app):
 
 @pytest.fixture
 def indexer_testapp(app):
+    """TestApp for indexing (user INDEXER), accepting JSON data."""
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'INDEXER',
@@ -189,6 +215,7 @@ def indexer_testapp(app):
 
 @pytest.fixture
 def embed_testapp(app):
+    """TestApp for user EMBED, accepting JSON data."""
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'EMBED',
@@ -198,4 +225,5 @@ def embed_testapp(app):
 
 @pytest.fixture
 def wsgi_app(wsgi_server):
+    """TestApp for WSGI server."""
     return webtest.TestApp(wsgi_server)

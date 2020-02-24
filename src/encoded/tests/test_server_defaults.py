@@ -2,6 +2,7 @@ import pytest
 import webtest
 
 from .. import main
+from pytest import fixture
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
