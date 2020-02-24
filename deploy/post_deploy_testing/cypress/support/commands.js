@@ -36,6 +36,8 @@ Cypress.Commands.add('searchPageTotalResultCount', function(options){
     function getValue(){
         const $elem = Cypress.$('div.above-results-table-row .box.results-count > div.inline-block > span.text-500');
         const count = parseInt($elem.text());
+        expect(typeof count).to.equal("number");
+        expect(isNaN(count)).to.be.false;
         return count;
     }
 
