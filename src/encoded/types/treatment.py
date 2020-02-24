@@ -51,19 +51,6 @@ class TreatmentAgent(Treatment):
                       biological_agent=None, constructs=None, duration=None,
                       duration_units=None, concentration=None,
                       concentration_units=None, temperature=None):
-        # d_t = []
-        # conditions = ""
-        # if concentration and concentration_units:
-        #     d_t.extend([str(concentration), ' ' + concentration_units])
-        # if duration and duration_units:
-        #     if d_t:
-        #         d_t[-1] += ', '
-        #     d_t.extend([str(duration) + duration_units[0]])
-        # if temperature:
-        #     d_t.append(" at " + str(temperature) + "°C")
-        # if d_t:
-        #     conditions = " (" + "".join(d_t) + ")"
-        #
         conditions = ""
         if concentration and concentration_units:
             conditions += str(concentration) + " " + concentration_units
