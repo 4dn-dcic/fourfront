@@ -1254,7 +1254,7 @@ def execute_search(search):
         # try to get a specific error message. May fail in some cases
         try:
             err_detail = str(exc.info['error']['root_cause'][0]['reason'])
-        except:
+        except Exception:
             err_detail = str(exc)
         err_exp = 'The search failed due to a request error: ' + err_detail
     except TransportError as exc:

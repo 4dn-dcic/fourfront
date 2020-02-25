@@ -63,7 +63,7 @@ def main():
     raised = False
     try:
         run(app, good_files)
-    except:
+    except Exception:
         raised = True
         raise
     finally:

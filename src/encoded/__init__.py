@@ -145,7 +145,7 @@ def app_version(config):
                     ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
                 if diff:
                     version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-            except:
+            except Exception:
                 version = "test"
 
         config.registry.settings['snovault.app_version'] = version

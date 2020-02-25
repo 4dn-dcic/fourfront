@@ -393,7 +393,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     # 301 because @id is the existing item path, not uuid
                     testapp.get('/'+an_item['uuid'], status=[200, 301])
                     exists = True
-                except:
+                except Exception:
                     exists = False
                 # skip the items that exists
                 # if overwrite=True, still include them in PATCH round

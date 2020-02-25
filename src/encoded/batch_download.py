@@ -239,7 +239,7 @@ def metadata_tsv(context, request):
         try:
             post_body['accession_triples'] = json.loads(request.POST.get('accession_triples'))
             post_body['download_file_name'] = json.loads(request.POST.get('download_file_name')) # Note: Even though text string is requested, POST req should wrap it in JSON.stringify() else this fails.
-        except:
+        except Exception:
             pass
     if isinstance(post_body['accession_triples'], list) and len(post_body['accession_triples']) > 0:
         if isinstance(post_body['accession_triples'][0], list): # List of arrays
@@ -380,11 +380,11 @@ def metadata_tsv(context, request):
         def sort_files_from_expset_by_replicate_numbers(file_dict):
             try:
                 bio_rep_no = int(f['Bio Rep No'])
-            except:
+            except Exception:
                 bio_rep_no = 999
             try:
                 tec_rep_no = int(f['Tech Rep No'])
-            except:
+            except Exception:
                 tec_rep_no = 999
             return bio_rep_no * 100000 + tec_rep_no
 

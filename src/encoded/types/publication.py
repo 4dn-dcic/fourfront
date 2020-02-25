@@ -168,7 +168,7 @@ def map_doi_pmid(doi):
     res = json.loads(r)
     try:
         return res['records'][0]['pmid']
-    except:
+    except Exception:
         return
 
 
@@ -241,7 +241,7 @@ class Publication(Item, ItemWithAttachment):
                         pub_data = fetch_biorxiv(biox_url)
                     else:
                         pass
-        except:
+        except Exception:
             pass
         if pub_data:
             for k, v in pub_data.items():

@@ -139,7 +139,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         try:
             namespaced_index = get_namespaced_index(app, item_type)
             item_index = es.indices.get(index=namespaced_index)
-        except:
+        except Exception:
             assert False
         found_index_mapping_emb = item_index[namespaced_index]['mappings'][item_type]['properties']['embedded']
         found_index_settings = item_index[namespaced_index]['settings']

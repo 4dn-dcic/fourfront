@@ -159,7 +159,7 @@ r = requests.post(
 )
 try:
     r.raise_for_status()
-except:
+except Exception:
     print('Submission failed: %s %s' % (r.status_code, r.reason))
     print(r.text)
     raise

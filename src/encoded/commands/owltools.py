@@ -24,7 +24,7 @@ def convert2URIRef(astring):
     '''converts a string to a URIRef type'''
     try:
         astring = URIRef(astring)
-    except:
+    except Exception:
         pass
     return astring
 
@@ -37,7 +37,7 @@ def inferNamespacePrefix(aUri):
     stringa = aUri.__str__()
     try:
         prefix = stringa.replace("#", "").split("/")[-1]
-    except:
+    except Exception:
         prefix = ""
     return prefix
 
@@ -48,7 +48,7 @@ def splitNameFromNamespace(aUri):
     try:
         ns = stringa.split("#")[0]
         name = stringa.split("#")[1]
-    except:
+    except Exception:
         ns = stringa.rsplit("/", 1)[0]
         if '/' in stringa:
             name = stringa.rsplit("/", 1)[1]
@@ -60,13 +60,13 @@ def sortUriListByName(uri_list):
     def get_last_bit(uri_string):
         try:
             x = uri_string.split("#")[1]
-        except:
+        except Exception:
             x = uri_string.split("/")[-1]
         return x
 
     try:
         return sorted(uri_list, key=lambda x: get_last_bit(x.__str__()))
-    except:
+    except Exception:
         # TODO: do more testing.. maybe use a unicode-safe method instead of __str__
         print("Error in <sortUriListByName>: possibly a UnicodeEncodeError")
         return uri_list
@@ -126,10 +126,10 @@ class Owler(object):
         self.rdfGraph = ConjunctiveGraph()
         try:
             self.rdfGraph.parse(uri, format="application/rdf+xml")
-        except:
+        except Exception:
             try:
                 self.rdfGraph.parse(uri, format="n3")
-            except:
+            except Exception:
                 raise exceptions.Error("Could not parse the file! Is it a valid RDF/OWL ontology?")
         finally:
             self.baseURI = self.__get_OntologyURI() or uri

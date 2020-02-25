@@ -27,7 +27,7 @@ class ExecuteOnCompletion2:
     def __call__(self, environ, start_response):
         try:
             result = self.__application(environ, start_response)
-        except:
+        except BaseException:
             self.__callback(environ)
             raise
         return Generator2(result, self.__callback, environ)

@@ -54,7 +54,7 @@ def main():
     raised = False
     try:
         run(app)
-    except:
+    except Exception:
         raised = True
         raise
     finally:

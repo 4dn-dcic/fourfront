@@ -140,7 +140,7 @@ def get_item_if_you_can(request, value, itype=None, frame='object'):
     # these paths are cached in indexing
     try:
         item = request.embed(svalue, '@@' + frame)
-    except:
+    except Exception:
         pass
 
     # could lead to unexpected errors if == None
@@ -501,7 +501,7 @@ class Item(snovault.Item):
             type_date = self.__class__.__name__ + " from " + properties.get("date_created", None)[:10]
             return type_date
         # last resort, use uuid
-        except:
+        except Exception:
             return properties.get('uuid', None)
 
     def rev_link_atids(self, request, rev_name):

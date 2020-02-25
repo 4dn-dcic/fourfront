@@ -502,7 +502,7 @@ class File(Item):
             # get @id for parent file
             try:
                 at_id = resource_path(self)
-            except:
+            except Exception:
                 at_id = "/" + str(uuid) + "/"
             # ensure at_id ends with a slash
             if not at_id.endswith('/'):
@@ -579,7 +579,7 @@ class File(Item):
                     rev_switch = DicRefRelation[switch]
                     related_fl = relation["file"]
                     relationship_entry = {"relationship_type": rev_switch, "file": my_uuid}
-                except:
+                except Exception:
                     log.error('Error updating related_files on %s _update. %s'
                               % (my_uuid, relation))
                     continue

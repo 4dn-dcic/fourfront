@@ -323,7 +323,7 @@ def date_histogram_aggregations(context, request):
     try:
         json_body = request.json_body
         search_param_lists = json_body.get('search_query_params', deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
-    except:
+    except Exception:
         search_param_lists = request.GET.dict_of_lists()
         if 'group_by' in search_param_lists:
             group_by_fields = search_param_lists['group_by']

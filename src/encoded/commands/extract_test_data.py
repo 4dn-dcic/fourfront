@@ -143,7 +143,7 @@ def main():
     import traceback
     try:
         run(pipeline, args.inpath, args.outpath)
-    except:
+    except Exception:
         type, value, tb = sys.exc_info()
         traceback.print_exc()
         pdb.post_mortem(tb)
