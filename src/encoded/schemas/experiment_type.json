@@ -159,7 +159,9 @@
             "type": "string",
             "lookup": 160,
             "suggested_enum": [
-                "Reads (fastq) provided by lab",
+                "Reads (fastq) provided by lab"
+            ],
+            "ignored_enum": [
                 "Reads (fastq) provided by lab - 3 types: gDNA, iPCR and cDNA"
             ]
         },
