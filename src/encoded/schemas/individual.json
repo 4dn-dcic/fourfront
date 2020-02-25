@@ -61,10 +61,7 @@
             "ff_flag": "second round",
             "items": {
                 "title": "Individual relation",
-                "required": [
-                    "relationship_type",
-                    "individual"
-                ],
+                "required": ["relationship_type", "individual"],
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
