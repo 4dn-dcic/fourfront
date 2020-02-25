@@ -11,5 +11,5 @@ if [ "${TRAVIS_JOB_ID}" = "" -o "${TRAVIS_JOB_ID:0:4}" = "4dn-" ]; then
     export TRAVIS_JOB_ID=4dn-`date "+%m%d%H%M%Y%S"`
     echo "Simulating TRAVIS_JOB_ID=$TRAVIS_JOB_ID"
 fi
-python $(dirname $0)/test.py $@
+python $(dirname $0)/test.py "$@"
 
