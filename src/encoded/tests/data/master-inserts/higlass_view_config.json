@@ -1212,7 +1212,7 @@
         "name": "empty-higlass-viewconf",
         "schema_version": "1",
         "title": "Empty Higlass Viewconfig",
-        "genome_assembly": "",
+        "genome_assembly": "GRCh38",
         "uuid": "00000000-1111-0000-1111-000000000000"
     }
 ]

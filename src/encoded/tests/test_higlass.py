@@ -1561,9 +1561,7 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
             assert_true("options" in track)
             options = track["options"]
-            assert_true("valueScaling" in options)
-            assert_true(options["valueScaling"] == "linear")
-
+            
             assert_true("colorRange" in options)
             assert_true(len(options["colorRange"]) == 256)
 
