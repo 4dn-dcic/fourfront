@@ -14,7 +14,6 @@ import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContaine
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
-import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import DefaultItemView from './DefaultItemView';
 
 
@@ -97,11 +96,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
         this.onViewConfigUpdated = this.onViewConfigUpdated.bind(this);
 
-        //let tilesetUids = [];
-        // if(props.context && props.context.viewconfig){
-        //     tilesetUids = _.uniq(getTilesetUids(props.context.viewconfig));
-        //     console.log('xxx tilesetUids:', tilesetUids);
-        // }
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
          * @property {string} genome_assembly       Common genome assembly for all files/tracks of this viewconf.
@@ -620,8 +614,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if(_.difference(oldTilesetUids, newTilesetUids).length > 0 || _.difference(newTilesetUids, oldTilesetUids).length > 0){
             this.setState({ 'tilesetUids': newTilesetUids });
-            // console.log('xxx onViewConfigUpdated', viewConf);
-            //console.log('xxx newTilesetUids', newTilesetUids);
         }
     }
 
@@ -652,8 +644,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         const searchHref = tilesetUids.length > 0 ? "/search/?type=File&higlass_uid=" + tilesetUids.join('&higlass_uid=') : null;
-        console.log('xxxx searchHref:', searchHref);
-        const columns = SimpleFilesTable.defaultProps.columns;
+        const hideColumns = ['@type'];
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
@@ -684,7 +675,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 <h3 className="tab-section-title">
                                     <span><span className="text-400">{tilesetUids.length}</span> HiGlass File(s)</span>
                                 </h3>
-                                <EmbeddedItemSearchTable {...{ searchHref, schemas, columns, width }} facets={null} />
+                                <EmbeddedItemSearchTable {...{ searchHref, schemas, width, hideColumns }} facets={null} />
                             </div>
                         </React.Fragment>
                     ) : null
