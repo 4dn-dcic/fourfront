@@ -12,7 +12,6 @@ beanstalk.cfg
 /docs/javascript-reference/
 /annotations.json
 /aws-ip-ranges.json
-/bin/
 /develop/
 /develop-eggs/
 /downloads/

@@ -1,0 +1,15 @@
+if [ "$1" = "--setup-npm" ]; then
+    make npm-setup
+    shift 1
+else
+    echo "---------------------------------------------------------------"
+    echo "NOTE: For efficiency, we're skipping the 'make npm-setup' step."
+    echo "      You may need '--setup-npm' if you get a lot of 500's."
+    echo "---------------------------------------------------------------"
+fi
+if [ "${TRAVIS_JOB_ID}" = "" -o "${TRAVIS_JOB_ID:0:4}" = "4dn-" ]; then
+    export TRAVIS_JOB_ID=4dn-`date "+%m%d%H%M%Y%S"`
+    echo "Simulating TRAVIS_JOB_ID=$TRAVIS_JOB_ID"
+fi
+python $(dirname $0)/test.py $@
+
