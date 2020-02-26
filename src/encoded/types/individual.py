@@ -146,6 +146,12 @@ def validate_individual_relations(context, request):
     organism = data.get('organism')
     if organism is None:
         return
+    get_organism = get_item_if_you_can(request, organism, 'organisms')
+    if get_organism:
+        organism_uuid = get_organism.get('uuid')
+    else:
+        return
+
     related_individuals = data.get('individual_relation')  # a list of dicts
     if related_individuals is None:
         return
@@ -169,7 +175,7 @@ def validate_individual_relations(context, request):
             parent_uuid = parent_props.get('uuid')
 
         # Same species
-        if parent_organism != organism:
+        if parent_organism != organism_uuid:
             request.errors.add(
                 'body', 'Individual relation: different species',
                 'Parent individual is ' + parent_organism + ', not ' + organism
