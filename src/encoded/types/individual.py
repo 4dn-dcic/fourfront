@@ -142,8 +142,10 @@ def validate_individual_relations(context, request):
     limited to two relations per individual (max 1 paternal and 1 maternal),
     not self relations, and unique (no duplicate relations).
     '''
+    #import pdb; pdb.set_trace()
     data = request.json
     organism = data.get('organism')
+    print(organism)
     if organism is None:
         return
     get_organism = get_item_if_you_can(request, organism, 'organisms')
@@ -153,6 +155,7 @@ def validate_individual_relations(context, request):
         return
 
     related_individuals = data.get('individual_relation')  # a list of dicts
+    print(related_individuals)
     if related_individuals is None:
         return
     any_failures = False
@@ -169,7 +172,9 @@ def validate_individual_relations(context, request):
     relations_unique = {}
     for a_related_individual in related_individuals:
         parent = a_related_individual.get('individual')
+        print(parent)
         parent_props = get_item_if_you_can(request, parent, 'individuals', frame='raw')
+        print(parent_props)
         if parent_props:
             parent_organism = parent_props.get('organism')
             parent_uuid = parent_props.get('uuid')
@@ -183,6 +188,7 @@ def validate_individual_relations(context, request):
             any_failures = True
 
         # Self relation
+        print(data.keys())
         if parent_uuid == data['uuid']:
             request.errors.add(
                 'body', 'Individual relation: self-relation',
