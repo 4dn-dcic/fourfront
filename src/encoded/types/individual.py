@@ -151,13 +151,16 @@ def validate_individual_relations(context, request):
         return
     any_failures = False
     # check if the individual info is in request (POST) or in context (PATCH)
-    try:
+    if 'uuid' in data:  # it's a POST
         individual_uuid = data['uuid']
-        organism_id = data.get('organism')
-    except KeyError:
-        individual_uuid = str(context.uuid)
-        individual = get_item_if_you_can(request, individual_uuid, 'individuals')
-        organism_id = individual.get('organism')
+    else:  # get it from the context it's a PATCH
+        try:
+            individual_uuid = str(context.uuid)
+        except Exception:  # would be very wonky if this happened
+            pass
+        finally:
+            data = context.properties  # organism will be here now
+    organism_id = data.get('organism')
     organism = get_item_if_you_can(request, organism_id, 'organisms')
 
     # Max 2 parents per individual

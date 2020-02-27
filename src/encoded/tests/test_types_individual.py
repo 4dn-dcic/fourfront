@@ -14,22 +14,6 @@ def mouse_child(testapp, mouse, lab, award):
 
 
 @pytest.fixture
-def mouse_individual_father(testapp, mouse, lab, award):
-    item = {
-        'uuid': '3eff35a3-a0e9-421c-9cd6-bc79c8f2e56a',
-        "age": 53,
-        "age_units": "day",
-        'award': award['@id'],
-        'lab': lab['@id'],
-        'organism': mouse['@id'],
-        "mouse_strain": "Balb-c",
-        "mouse_life_stage": "adult",
-        "sex": "male",
-    }
-    return testapp.post_json('/individual_mouse', item).json['@graph'][0]
-
-
-@pytest.fixture
 def mouse_individual_2(testapp, mouse, lab, award):
     item = {
         'uuid': 'd89c5c5b-a427-4efa-b6da-44239d92f2e7',
@@ -52,16 +36,6 @@ def test_validate_individual_relation_valid_post(testapp, award, lab, mouse_indi
     assert not res.json.get('errors')
 
 
-def test_validate_individual_relation_multiple(testapp, award, lab, mouse_individual, mouse_individual_father, mouse_individual_2, mouse_child):
-    mouse_child['individual_relation'] = [
-        {'relationship_type': 'derived from', 'individual': mouse_individual['@id']},
-        {'relationship_type': 'derived from', 'individual': mouse_individual_father['@id']},
-        {'relationship_type': 'derived from', 'individual': mouse_individual_2['@id']}]
-    res = testapp.post_json('/individual_mouse', mouse_child, status=422)
-    errors = res.json['errors']
-    assert errors[0]['name'] == 'Individual relation: too many parents'
-
-
 def test_validate_individual_relation_species(testapp, award, lab, mouse_child, human_individual):
     mouse_child['individual_relation'] = [{'relationship_type': 'derived from', 'individual': human_individual['@id']}]
     res = testapp.post_json('/individual_mouse', mouse_child, status=422)
@@ -69,10 +43,13 @@ def test_validate_individual_relation_species(testapp, award, lab, mouse_child, 
     assert errors[0]['name'] == 'Individual relation: different species'
 
 
-def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_child, mouse_individual):
+def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_child, mouse_individual, mouse_individual_2):
     res = testapp.post_json('/individual_mouse', mouse_child, status=201)
     assert not res.json.get('errors')
-    patch_body = [{'relationship_type': 'derived from', 'individual': mouse_individual['@id']}]
+    patch_body = [
+        {'relationship_type': 'derived from', 'individual': mouse_individual['@id']},
+        {'relationship_type': 'derived from', 'individual': mouse_individual_2['@id']}
+    ]
     res2 = testapp.patch_json(res.json['@graph'][0]['@id'], {'individual_relation': patch_body})
     assert not res2.json.get('errors')
 
@@ -98,7 +75,7 @@ def test_validate_individual_relation_same(testapp, award, lab, mouse_individual
 def test_validate_individual_relation_duplicate(testapp, award, lab, mouse_individual, mouse_child):
     mouse_child['individual_relation'] = [
         {'relationship_type': 'derived from', 'individual': mouse_individual['@id']},
-        {'relationship_type': 'derived from', 'individual': mouse_individual['@id']}]
+        {'relationship_type': 'derived from (maternal strain)', 'individual': mouse_individual['@id']}]
     res = testapp.post_json('/individual_mouse', mouse_child, status=422)
     errors = res.json['errors']
     assert errors[0]['name'] == 'Individual relation: multiple relations with same parent'

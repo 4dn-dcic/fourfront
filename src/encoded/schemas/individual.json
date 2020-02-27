@@ -58,6 +58,8 @@
             "title": "Individual Relations",
             "description": "Related individuals",
             "type": "array",
+            "uniqueItems": true,
+            "maxItems": 2,
             "ff_flag": "second round",
             "items": {
                 "title": "Individual relation",
