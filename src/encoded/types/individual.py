@@ -45,6 +45,9 @@ class Individual(Item):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + ['organism.name']
     name_key = 'accession'
 
+    class Collection(Item.Collection):
+        pass
+
 
 @collection(
     name='individuals-human',
@@ -142,23 +145,20 @@ def validate_individual_relations(context, request):
     limited to two relations per individual (max 1 paternal and 1 maternal),
     not self relations, and unique (no duplicate relations).
     '''
-    #import pdb; pdb.set_trace()
     data = request.json
-    organism = data.get('organism')
-    print(organism)
-    if organism is None:
-        return
-    get_organism = get_item_if_you_can(request, organism, 'organisms')
-    if get_organism:
-        organism_uuid = get_organism.get('uuid')
-    else:
-        return
-
     related_individuals = data.get('individual_relation')  # a list of dicts
-    print(related_individuals)
     if related_individuals is None:
         return
     any_failures = False
+    # check if the individual info is in request (POST) or in context (PATCH)
+    try:
+        individual_uuid = data['uuid']
+        organism_id = data.get('organism')
+    except KeyError:
+        individual_uuid = str(context.uuid)
+        individual = get_item_if_you_can(request, individual_uuid, 'individuals')
+        organism_id = individual.get('organism')
+    organism = get_item_if_you_can(request, organism_id, 'organisms')
 
     # Max 2 parents per individual
     if len(related_individuals) > 2:
@@ -172,24 +172,20 @@ def validate_individual_relations(context, request):
     relations_unique = {}
     for a_related_individual in related_individuals:
         parent = a_related_individual.get('individual')
-        print(parent)
-        parent_props = get_item_if_you_can(request, parent, 'individuals', frame='raw')
-        print(parent_props)
-        if parent_props:
-            parent_organism = parent_props.get('organism')
-            parent_uuid = parent_props.get('uuid')
+        parent_props = get_item_if_you_can(request, parent, 'individuals')
+        parent_organism = get_item_if_you_can(request, parent_props.get('organism'), 'organisms')
+        parent_uuid = parent_props.get('uuid')
 
         # Same species
-        if parent_organism != organism_uuid:
+        if parent_organism.get('uuid') != organism.get('uuid'):
             request.errors.add(
                 'body', 'Individual relation: different species',
-                'Parent individual is ' + parent_organism + ', not ' + organism
+                'Parent individual is ' + parent_organism['name'] + ', not ' + organism['name']
             )
             any_failures = True
 
         # Self relation
-        print(data.keys())
-        if parent_uuid == data['uuid']:
+        if parent_uuid == individual_uuid:
             request.errors.add(
                 'body', 'Individual relation: self-relation',
                 'An individual cannot be related to itself'
