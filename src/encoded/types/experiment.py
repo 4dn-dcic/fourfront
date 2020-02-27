@@ -142,6 +142,9 @@ class Experiment(Item):
         "files.badges.badge.description",
         "files.badges.badge.badge_icon",
         "files.badges.messages",
+        "files.quality_metric.url",
+        "files.quality_metric.overall_quality_status",
+        "files.quality_metric_summary.*",
 
         "processed_files.href",
         "processed_files.accession",
@@ -150,6 +153,13 @@ class Experiment(Item):
         "processed_files.upload_key",
         "processed_files.file_format",
         "processed_files.file_classification",
+        "processed_files.files.quality_metric.url",
+        "processed_files.files.quality_metric.overall_quality_status",
+        "processed_files.files.quality_metric_summary.*",
+
+        "other_processed_files.files.quality_metric.url",
+        "other_processed_files.files.quality_metric.overall_quality_status",
+        "other_processed_files.files.quality_metric_summary.*",
 
         "reference_files.accession",
         "reference_files.file_type_detailed",
