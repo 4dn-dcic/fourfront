@@ -1,10 +1,15 @@
 import pytest
+
+from base64 import b64encode
+from pyramid.compat import ascii_native_
+from snovault import COLLECTIONS
+from ..edw_hash import EDWHash
+
+
 pytestmark = [pytest.mark.working, pytest.mark.setone]
 
 
 def basic_auth(username, password):
-    from base64 import b64encode
-    from pyramid.compat import ascii_native_
     return 'Basic ' + ascii_native_(b64encode(('%s:%s' % (username, password)).encode('utf-8')))
 
 
@@ -164,8 +169,6 @@ def test_access_key_view_hides_secret_access_key_hash(testapp, access_key, frame
 
 
 def test_access_key_uses_edw_hash(app, access_key):
-    from encoded.edw_hash import EDWHash
-    from snovault import COLLECTIONS
     root = app.registry[COLLECTIONS]
     obj = root.by_item_type['access_key'][access_key['access_key_id']]
     pwhash = obj.properties['secret_access_key_hash']

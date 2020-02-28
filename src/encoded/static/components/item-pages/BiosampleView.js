@@ -240,4 +240,3 @@ const BiosourceInfoBody = React.memo(function BiosourceInfoBody(props){
     );
 
 });
-

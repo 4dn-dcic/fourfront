@@ -20,7 +20,7 @@ from snovault import (
     COLLECTIONS,
     CONNECTION
 )
-from encoded.search import get_iterable_search_results
+from ..search import get_iterable_search_results
 from .base import (
     Item,
     ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
@@ -42,6 +42,7 @@ from snovault.crud_views import (
     collection_add,
     item_edit,
 )
+from snovault.util import debug_log
 
 
 def get_pyramid_http_exception_for_redirect_code(code):
@@ -226,6 +227,7 @@ def validate_unique_page_name(context, request):
 @view_config(context=Page.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def page_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -243,6 +245,7 @@ def page_add(context, request, render=None):
 @view_config(context=Page, permission='index', request_method='GET',
              validators=[validate_item_content_in_place, validate_unique_page_name],
              request_param=['check_only=true'])
+@debug_log
 def page_edit(context, request, render=None):
     return item_edit(context, request, render)
 

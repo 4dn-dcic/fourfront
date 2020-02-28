@@ -58,7 +58,7 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
                 .get('form.navbar-search-form-container').submit().end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
-                .get('#page-title-container span.title').should('have.text', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
+                .get('#page-title-container .page-title').should('contain', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
                 .location('search')
                 .should('include', 'ExperimentSetReplicate')
                 .should('include', 'q=mouse');
@@ -68,7 +68,7 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="all"]').click().end()
                 .get('form.navbar-search-form-container').submit().end()
-                .get('#page-title-container span.title').should('have.text', 'Search').end()
+                .get('#page-title-container .page-title').should('contain', 'Search').end()
                 .location('search').should('not.include', 'award.project=4DN')
                 .should('include', 'q=mouse').end()
                 .searchPageTotalResultCount().should('be.greaterThan', 0);

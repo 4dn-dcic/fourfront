@@ -29,6 +29,7 @@ from snovault.crud_views import (
 from snovault.validators import (
     validate_item_content_post,
 )
+from snovault.util import debug_log
 
 
 @collection(
@@ -88,6 +89,7 @@ class AccessKey(Item):
 @view_config(context=AccessKey.Collection, request_method='POST',
              permission='add',
              validators=[validate_item_content_post])
+@debug_log
 def access_key_add(context, request):
     """smth."""
     crypt_context = request.registry[CRYPT_CONTEXT]
@@ -122,6 +124,7 @@ def access_key_add(context, request):
 @view_config(name='reset-secret', context=AccessKey,
              permission='add',
              request_method='POST', subpath_segments=0)
+@debug_log
 def access_key_reset_secret(context, request):
     """smth."""
     request.validated = context.properties.copy()
@@ -137,6 +140,7 @@ def access_key_reset_secret(context, request):
 
 @view_config(context=AccessKey, permission='view_raw', request_method='GET',
              name='raw')
+@debug_log
 def access_key_view_raw(context, request):
     """smth."""
     if asbool(request.params.get('upgrade', True)):

@@ -23,6 +23,7 @@ from snovault.crud_views import (
     collection_add,
     item_edit,
 )
+from snovault.util import debug_log
 from .base import (
     Item,
     lab_award_attribution_embed_list,
@@ -167,6 +168,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.messages",
+        "experiments_in_set.files.notes_to_tsv",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -200,6 +202,7 @@ class ExperimentSet(Item):
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric_summary.*",
+        "processed_files.notes_to_tsv",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
@@ -224,6 +227,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.static_content.description",
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
         "experiments_in_set.processed_files.last_modified.date_modified",
+        "experiments_in_set.processed_files.notes_to_tsv",
         # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
@@ -238,6 +242,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric_summary.*",
+        "other_processed_files.files.notes_to_tsv",
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -256,6 +261,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
         "experiments_in_set.other_processed_files.files.quality_metric_summary.*",
+        "experiments_in_set.other_processed_files.files.notes_to_tsv",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
@@ -407,6 +413,7 @@ def validate_experiment_set_replicate_experiments(context, request):
 @view_config(context=ExperimentSetReplicate.Collection, permission='add_unvalidated',
              request_method='POST', validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def experiment_set_replicate_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -424,5 +431,6 @@ def experiment_set_replicate_add(context, request, render=None):
 @view_config(context=ExperimentSetReplicate, permission='index', request_method='GET',
              validators=[validate_item_content_in_place, validate_experiment_set_replicate_experiments],
              request_param=['check_only=true'])
+@debug_log
 def experiment_set_replicate_edit(context, request, render=None):
     return item_edit(context, request, render)

@@ -1,17 +1,21 @@
 # -*- coding: utf-8 -*-
 """Load collections and determine the order."""
-import mimetypes
-import structlog
-import magic
+
 import json
+import magic
+import mimetypes
 import os
+import structlog
+
+from base64 import b64encode
 from past.builtins import basestring
-from pyramid.view import view_config
+from PIL import Image
 from pyramid.paster import get_app
 from pyramid.response import Response
-from encoded.server_defaults import add_last_modified
-from base64 import b64encode
-from PIL import Image
+from pyramid.view import view_config
+from snovault.util import debug_log
+from .server_defaults import add_last_modified
+
 
 text = type(u'')
 logger = structlog.getLogger(__name__)
@@ -73,6 +77,7 @@ class LoadGenWrapper(object):
 
 
 @view_config(route_name='load_data', request_method='POST', permission='add')
+@debug_log
 def load_data_view(context, request):
     '''
     expected input data

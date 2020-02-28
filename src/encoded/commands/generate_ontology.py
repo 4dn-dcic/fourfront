@@ -1,15 +1,25 @@
+import boto3
+import datetime
 import os
 import json
 import sys
 import argparse
 import re
-from dateutil.relativedelta import relativedelta
-import datetime
-import boto3
-from uuid import uuid4
+import requests
+
 from collections import Counter
+from dateutil.relativedelta import relativedelta
+from dcicutils.ff_utils import (
+    get_authentication_with_server,
+    get_metadata,
+    search_metadata,
+    unified_authentication
+)
+from dcicutils.s3_utils import s3Utils
+from pyramid.paster import get_app
 from rdflib.collection import Collection
-from encoded.commands.owltools import (
+from uuid import uuid4
+from ..commands.owltools import (
     Namespace,
     Owler,
     OBO,
@@ -24,15 +34,7 @@ from encoded.commands.owltools import (
     OnProperty,
     Deprecated
 )
-from dcicutils.ff_utils import (
-    get_authentication_with_server,
-    get_metadata,
-    search_metadata,
-    unified_authentication
-)
-from dcicutils.s3_utils import s3Utils
-import requests
-from pyramid.paster import get_app
+
 
 EPILOG = __doc__
 

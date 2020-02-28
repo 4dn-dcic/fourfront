@@ -1,3 +1,25 @@
+import boto3
+import datetime
+import json
+import logging
+import os
+import pytz
+import requests
+import structlog
+import urllib.parse
+
+from botocore.exceptions import ClientError
+from copy import deepcopy
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPTemporaryRedirect,
+    HTTPNotFound,
+    HTTPBadRequest
+)
+from pyramid.response import Response
+from pyramid.settings import asbool
+from pyramid.traversal import resource_path
+from pyramid.view import view_config
 from snovault import (
     AfterModified,
     BeforeModified,
@@ -7,7 +29,14 @@ from snovault import (
     load_schema,
     abstract_collection,
 )
+from snovault.attachment import ItemWithAttachment
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
+)
+from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.schema_utils import schema_validator
+from snovault.util import debug_log
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -17,48 +46,24 @@ from snovault.validators import (
     no_validate_item_content_put,
     no_validate_item_content_patch
 )
-from snovault.crud_views import (
-    collection_add,
-    item_edit,
+from urllib.parse import (
+    parse_qs,
+    urlparse,
 )
-from snovault.attachment import ItemWithAttachment
+from uuid import uuid4
+from ..authentication import session_properties
+from ..search import make_search_subreq
+from . import TrackingItem
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
     get_item_if_you_can,
     lab_award_attribution_embed_list
 )
-from pyramid.httpexceptions import (
-    HTTPForbidden,
-    HTTPTemporaryRedirect,
-    HTTPNotFound,
-    HTTPBadRequest
-)
-from pyramid.response import Response
-from pyramid.settings import asbool
-from pyramid.view import view_config
-from urllib.parse import (
-    parse_qs,
-    urlparse,
-)
-import boto3
-from botocore.exceptions import ClientError
-import datetime
-import json
-import pytz
-import os
-import requests
-from uuid import uuid4
-import urllib.parse
-from pyramid.traversal import resource_path
-from encoded.search import make_search_subreq
-from snovault.elasticsearch import ELASTIC_SEARCH
-from copy import deepcopy
-from . import TrackingItem
-from ..authentication import session_properties
-import structlog
-import logging
+
+
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
+
 log = structlog.getLogger(__name__)
 
 file_workflow_run_embeds = [
@@ -729,6 +734,17 @@ class File(Item):
     class Collection(Item.Collection):
         pass
 
+    @calculated_property(schema={
+        "title": "Notes to tsv file",
+        "description": "Notes that go into the metadata.tsv file",
+        "type": "string"
+    })
+    def tsv_notes(self, request, notes_to_tsv=None):
+        if notes_to_tsv is None:
+            return ''
+        else:
+            notes_to_tsv_string = ','.join(notes_to_tsv)
+        return notes_to_tsv_string
 
 @collection(
     name='files-fastq',
@@ -1031,6 +1047,7 @@ class FileMicroscopy(ItemWithAttachment, File):
 
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
+@debug_log
 def get_upload(context, request):
     external = context.propsheets.get('external', {})
     upload_credentials = external.get('upload_credentials')
@@ -1051,6 +1068,7 @@ def get_upload(context, request):
 
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
+@debug_log
 def post_upload(context, request):
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
@@ -1123,7 +1141,9 @@ def is_file_to_download(properties, file_format, expected_filename=None):
         return filename
 
 
-@view_config(name='download', context=File, request_method='GET', permission='view', subpath_segments=[0, 1])
+@view_config(name='download', context=File, request_method='GET',
+             permission='view', subpath_segments=[0, 1])
+@debug_log
 def download(context, request):
     '''
     Endpoint for handling /@@download/ URLs
@@ -1138,6 +1158,9 @@ def download(context, request):
         user_props = { "error": str(e) }
 
     user_uuid = user_props.get('details', {}).get('uuid', None)
+    user_groups = user_props.get('details', {}).get('groups', None)
+    if user_groups:
+        user_groups.sort()
     # tracking_values = {
     #     "user_agent"      : request.user_agent,
     #     "remote_ip"       : request.remote_addr,
@@ -1256,9 +1279,14 @@ def download(context, request):
             "ua": request.user_agent,
             "dl": request.url,
             "dt" : filename,
-            # This is a ~ random ID/number. Used as fallback, since one is required
+
+            # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
             # if don't provided uid. While we still allow users to not be logged in,
             # should at least be able to preserve/track their anon downloads..
+
+            # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
+            # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
+            # Unsure if groups under 1 session or not.
             "cid": "555",
             "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
             "ec": "Serverside File Download",       # Event Category
@@ -1301,11 +1329,18 @@ def download(context, request):
         # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
         if user_uuid:
             ga_payload['uid'] = user_uuid
+
+        if user_groups:
+            groups_json = json.dumps(user_groups, separators=(',', ':')) # Compcact JSON; aligns w. what's passed from JS.
+            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+
         if ga_cid:
             ga_payload['cid'] = ga_cid
 
         # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
 
+        #
         # print('\n\n', ga_payload)
 
         resp = requests.post(
@@ -1609,6 +1644,7 @@ def validate_extra_file_format(context, request):
 @view_config(context=File.Collection, permission='add_unvalidated', request_method='POST',
              validators=[no_validate_item_content_post],
              request_param=['validate=false'])
+@debug_log
 def file_add(context, request, render=None):
     return collection_add(context, request, render)
 
@@ -1641,5 +1677,6 @@ def file_add(context, request, render=None):
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field],
             request_param=['check_only=true'])
+@debug_log
 def file_edit(context, request, render=None):
     return item_edit(context, request, render)
