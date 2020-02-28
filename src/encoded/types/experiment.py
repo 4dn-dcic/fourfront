@@ -126,6 +126,7 @@ class Experiment(Item):
         "biosample.badges.messages",
 
         "experiment_type.experiment_category",
+        "experiment_type.assay_subclass_short",
 
         "files.href",
         "files.accession",
