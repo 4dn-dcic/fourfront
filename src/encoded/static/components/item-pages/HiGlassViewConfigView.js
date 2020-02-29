@@ -1,14 +1,17 @@
 'use strict';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
+import memoize from 'memoize-one';
 import { Dropdown, DropdownButton, DropdownItem, Modal } from 'react-bootstrap';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/LinkToSelector';
+import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
@@ -43,24 +46,24 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 }
 
-function getTilesetUids(obj) {
-    if (!obj) {
-        return [];
-    }
-    else {
-        return Object.keys(obj).reduce(function (acc, key) {
-            const value = obj[key];
-            if (typeof value === 'object') {
-                acc.push.apply(acc, getTilesetUids(value));
-            }
-            else if (key === 'tilesetUid') {
-                acc.push(value);
-            }
-            return acc;
-        }, []);
-    }
-}
-
+// recursive and basic version of getTilesetUids func
+// function getTilesetUids(obj) {
+//     if (!obj) {
+//         return [];
+//     }
+//     else {
+//         return Object.keys(obj).reduce(function (acc, key) {
+//             const value = obj[key];
+//             if (typeof value === 'object') {
+//                 acc.push.apply(acc, getTilesetUids(value));
+//             }
+//             else if (key === 'tilesetUid') {
+//                 acc.push(value);
+//             }
+//             return acc;
+//         }, []);
+//     }
+// }
 
 export class HiGlassViewConfigTabView extends React.PureComponent {
 
@@ -71,6 +74,42 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'disabled' : false,
             'content' : <HiGlassViewConfigTabView {...props} width={width} />
         };
+    }
+
+    static getTilesetUids(obj) {
+        if (obj && obj.views && Array.isArray(obj.views) && obj.views.length > 0) {
+            const tilesetUids = {};
+            const trackNames = ['top', 'right', 'bottom', 'left', 'center', 'whole', 'gallery'];
+            _.each(obj.views, function (view) {
+                if (view.tracks && typeof view.tracks === 'object') {
+                    _.each(trackNames, function (trackName) {
+                        const track = view.tracks[trackName];
+                        if (track && Array.isArray(track) && track.length > 0) {
+                            _.each(track, function (trackItem) {
+                                if (trackItem.tilesetUid) {
+                                    if (!tilesetUids[trackItem.tilesetUid]) {
+                                        tilesetUids[trackItem.tilesetUid] = [];
+                                    }
+                                    tilesetUids[trackItem.tilesetUid].push({ track: trackName, width: trackItem.width, height: trackItem.height });
+                                }
+                                else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
+                                    _.each(trackItem.contents, function (subTrackItem) {
+                                        if (!tilesetUids[subTrackItem.tilesetUid]) {
+                                            tilesetUids[subTrackItem.tilesetUid] = [];
+                                        }
+                                        tilesetUids[subTrackItem.tilesetUid].push({ track: trackName, width: subTrackItem.width, height: subTrackItem.height });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+
+            return tilesetUids;
+        }
+
+        return [];
     }
 
     static defaultProps = {
@@ -95,6 +134,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
         this.onViewConfigUpdated = this.onViewConfigUpdated.bind(this);
+        this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
 
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
@@ -114,9 +154,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false,
             'modal'                 : null,
-            'tilesetUids'           : []//tilesetUids,
+            'filesTableSearchHref'  : null,
+            'tilesetUids'  : []
         };
         this.higlassRef = React.createRef();
+
+        this.memoized = {
+            getTilesetUids: memoize(HiGlassViewConfigTabView.getTilesetUids)
+        };
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -407,7 +452,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 stateChange["genome_assembly"] = resp.new_genome_assembly;
                             }
                             stateChange["viewConfig"] = resp.new_viewconfig;
-                            // stateChange["tilesetUids"] = getTilesetUids(resp.new_viewconfig);
                         }
 
                         this.setState(stateChange, ()=>{
@@ -609,17 +653,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     onViewConfigUpdated(viewConf){
-        const { tilesetUids: oldTilesetUids } = this.state;
-        const newTilesetUids = _.uniq(getTilesetUids(JSON.parse(viewConf)));
+        const { tilesetUids: oldData } = this.state;
+        const newData = this.memoized.getTilesetUids(JSON.parse(viewConf));
 
-        if(_.difference(oldTilesetUids, newTilesetUids).length > 0 || _.difference(newTilesetUids, oldTilesetUids).length > 0){
-            this.setState({ 'tilesetUids': newTilesetUids });
+        if (!_.isEqual(oldData, newData)) {
+            const newDataKeys = _.keys(newData);
+            const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.join('&higlass_uid=') : null;
+            //const timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
+            this.setState({ 'tilesetUids': newData, 'filesTableSearchHref': searchHref });
         }
+    }
+
+    renderFilesDetailPane(result, rowNumber, containerWidth){
+        const { schemas } = this.props;
+        const { tilesetUids } = this.state;
+        const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
+
+        return <HiGlassFileDetailPane {...{ result, schemas, viewConfigTracks: tracks }} key={"tilesetUid-" + result.higlass_uid}/>;
     }
 
     render(){
         const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids } = this.state;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
         // Setting the height of the HiGlass Component follows one of these rules:
@@ -643,7 +698,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
 
-        const searchHref = tilesetUids.length > 0 ? "/search/?type=File&higlass_uid=" + tilesetUids.join('&higlass_uid=') : null;
         const hideColumns = ['@type'];
 
         return (
@@ -667,15 +721,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
                     </div>
                 </div>
-                {searchHref ?
+                {filesTableSearchHref ?
                     (
                         <React.Fragment>
                             <hr className="tab-section-title-horiz-divider" />
                             <div className="raw-files-table-section">
                                 <h3 className="tab-section-title">
-                                    <span><span className="text-400">{tilesetUids.length}</span> HiGlass File(s)</span>
+                                    <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
                                 </h3>
-                                <EmbeddedItemSearchTable {...{ searchHref, schemas, width, hideColumns }} facets={null} />
+                                <EmbeddedItemSearchTable {...{ searchHref: filesTableSearchHref, schemas, width, hideColumns, renderDetailPane: this.renderFilesDetailPane, maxHeight: 800 }} facets={null} />
                             </div>
                         </React.Fragment>
                     ) : null
@@ -685,6 +739,60 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 }
+
+function HiGlassFileDetailPane(props){
+    const { result, viewConfigTracks = null, schemas } = props;
+
+    // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
+    // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
+    useEffect(function(){
+        ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
+    }, []);
+
+    const tracksBody = _.map(viewConfigTracks, (item, idx) =>
+        <tr><td>{idx + 1}</td><td>{item.track}</td><td>{item.width || '-'}</td><td>{item.height || '-'}</td></tr>
+    );
+
+    return (
+        <div className="mr-1">
+            { !viewConfigTracks ? null : (
+                <div className="flex-description-container">
+                    <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
+                    {/* <p className="text-normal ml-27 mt-1">{ viewConfigTracks.length }</p> */}
+                    <div className="row ml-27 mr-0">
+                        <table style={{ minWidth: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track in HiGlass view" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Width</span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Height</span></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tracksBody}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr className="desc-separator" />
+                </div>
+            )}
+            <h5 className="text-500 mb-0 mt-16">
+                <i className="icon icon-fw icon-list fas mr-08"/>Details
+            </h5>
+            <div className="item-page-detail ml-27">
+                <Detail context={result} open={false} schemas={schemas} excludedKeys={HiGlassFileDetailPane.excludedKeys} />
+            </div>
+        </div>
+    );
+}
+HiGlassFileDetailPane.excludedKeys = [
+    ...Detail.defaultProps.excludedKeys,
+    "title", "genome_assembly", "md5sum", "content_md5sum", "source_experiments", "upload_key", "tsv_notes",
+    "track_and_facet_info", "static_content", "filename", "file_format", "file_size", "file_type", "file_type_detailed",
+    "aliases", "tags", "alternate_accessions", "public_release", "contributing_labs", "href", "produced_from"
+];
 
 /**
  * This Component has a button and a text input and a button.
