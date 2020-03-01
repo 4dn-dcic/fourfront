@@ -43,9 +43,9 @@ env:
   - secure: ULUg4jjil5NND94FARuMbXS3cpS6pCIcu793tKTRaNvXAnpo5XHGd/VNStmWZez5EswA8NqI6KEWjl/0nnROWTkQXHczsJjebkzfhRwsqc2De+u3HZ+qAO1DieYQP++XGvvzWyry4ejFfy3qVC11GCV6CIJqMizQUt/D3QHHa3bwL8Tw8PubYsCW2wQa2lwKSc8Kw3Tj3x/pL/8Nw74dJ9M+Cyeh4XZq0Pp6Wlxkxe/zRPKydhV/DihT2rLEiMpxWsXMX1OS1cnXUJUvPf/bdwXMQMocZc3rjs/CMWWn7bx/k5Wdue481xGOdulIu9ljR/ZrxY+5xxm5a3UZd+ZYB8Y5tghiln4k7XDtdUXTSTBzZoDfRoboUbIiPzI0gma8XQJTeLXViS5T6p4M/SdUHkf5s0w8zJKRamqGDI0TL6wI3BnL85VQwXhMjWEmC5Zi1EZHgAGStFDxRGG2TLIHzFuSYly5zuTifyl80bcSj9czgkd6WoPKT3NKPsNTbWpQNF2Amixg4L5xr3Re5zFkTcpyaa05kySE9w84vqxPkczwKIDCmBuoTz6q1+rWaajM4KqlweNKo7OwPGy1R2zvZSq9vSa2a+f5YYpvUvjIYhvUpMQs1B0chC5kAFA2aTMXi+HMMabXq8AShoq8bnO7tBbPUxiu8OST72UQrF0j9Bg=
 matrix:
   include:
-  - python: '3.4'
+  - python: '3.6'
     env: NPM=Test
-  - python: '3.4'
+  - python: '3.6'
     env: UNIT=Test
 notifications:
   slack:
