@@ -77,8 +77,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     static getTilesetUids(obj) {
+        const tilesetUids = {};
         if (obj && obj.views && Array.isArray(obj.views) && obj.views.length > 0) {
-            const tilesetUids = {};
             const trackNames = ['top', 'right', 'bottom', 'left', 'center', 'whole', 'gallery'];
             _.each(obj.views, function (view) {
                 if (view.tracks && typeof view.tracks === 'object') {
@@ -105,11 +105,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     });
                 }
             });
-
-            return tilesetUids;
         }
 
-        return [];
+        return tilesetUids;
     }
 
     static defaultProps = {
@@ -155,7 +153,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'addFileLoading'        : false,
             'modal'                 : null,
             'filesTableSearchHref'  : null,
-            'tilesetUids'  : []
+            'tilesetUids'           : {},
         };
         this.higlassRef = React.createRef();
 
@@ -658,7 +656,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (!_.isEqual(oldData, newData)) {
             const newDataKeys = _.keys(newData);
-            const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.join('&higlass_uid=') : null;
+            const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null;
             //const timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
             this.setState({ 'tilesetUids': newData, 'filesTableSearchHref': searchHref });
         }
@@ -669,7 +667,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { tilesetUids } = this.state;
         const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
 
-        return <HiGlassFileDetailPane {...{ result, schemas, viewConfigTracks: tracks }} key={"tilesetUid-" + result.higlass_uid}/>;
+        return <HiGlassFileDetailPane {...{ result, schemas, viewConfigTracks: tracks }} />;
     }
 
     render(){
@@ -699,6 +697,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         const hideColumns = ['@type'];
+        console.log('xxx filesTableSearchHref:', filesTableSearchHref);
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
