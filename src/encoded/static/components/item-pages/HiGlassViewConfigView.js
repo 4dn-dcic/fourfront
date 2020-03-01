@@ -697,7 +697,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         const hideColumns = ['@type'];
-        console.log('xxx filesTableSearchHref:', filesTableSearchHref);
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
