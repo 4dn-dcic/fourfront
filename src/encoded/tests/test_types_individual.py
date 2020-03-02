@@ -46,11 +46,13 @@ def test_validate_individual_relation_species(testapp, award, lab, mouse_child, 
 def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_child, mouse_individual, mouse_individual_2):
     res = testapp.post_json('/individual_mouse', mouse_child, status=201)
     assert not res.json.get('errors')
-    patch_body = [
-        {'relationship_type': 'derived from', 'individual': mouse_individual['@id']},
-        {'relationship_type': 'derived from', 'individual': mouse_individual_2['@id']}
-    ]
-    res2 = testapp.patch_json(res.json['@graph'][0]['@id'], {'individual_relation': patch_body})
+    patch_body = {
+        'individual_relation': [
+            {'relationship_type': 'derived from', 'individual': mouse_individual['@id']},
+            {'relationship_type': 'derived from', 'individual': mouse_individual_2['@id']}
+        ]
+    }
+    res2 = testapp.patch_json(res.json['@graph'][0]['@id'], patch_body, status=200)
     assert not res2.json.get('errors')
 
 
