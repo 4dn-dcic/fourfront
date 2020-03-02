@@ -54,6 +54,19 @@ def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_chi
     assert not res2.json.get('errors')
 
 
+def test_validate_individual_relation_valid_patch_contains_uuid(testapp, award, lab, mouse_child, mouse_individual, mouse_individual_2):
+    child_mouse = testapp.post_json('/individual_mouse', mouse_child, status=201).json['@graph'][0]
+    patch_body = {
+        'uuid': child_mouse.get('uuid'),
+        'individual_relation': [
+            {'relationship_type': 'derived from', 'individual': mouse_individual['@id']},
+            {'relationship_type': 'derived from', 'individual': mouse_individual_2['@id']}
+        ]
+    }
+    res2 = testapp.patch_json(child_mouse['@id'], patch_body, status=200)
+    assert not res2.json.get('errors')
+
+
 def test_validate_individual_relation_self(testapp, award, lab, mouse_child):
     res = testapp.post_json('/individual_mouse', mouse_child, status=201)
     assert not res.json.get('errors')

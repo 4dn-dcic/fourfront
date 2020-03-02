@@ -145,21 +145,18 @@ def validate_individual_relations(context, request):
     limited to two relations per individual (max 1 paternal and 1 maternal),
     not self relations, and unique (no duplicate relations).
     '''
-    data = request.json
-    related_individuals = data.get('individual_relation')  # a list of dicts
+    related_individuals = request.json.get('individual_relation')  # a list of dicts
     if related_individuals is None:
         return
     any_failures = False
+
     # check if the individual info is in request (POST) or in context (PATCH)
-    if 'uuid' in data:  # it's a POST
-        individual_uuid = data['uuid']
-    else:  # get it from the context it's a PATCH
-        try:
-            individual_uuid = str(context.uuid)
-        except Exception:  # would be very wonky if this happened
-            pass
-        finally:
-            data = context.properties  # organism will be here now
+    try:
+        individual_uuid = str(context.uuid)
+        data = context.properties
+    except AttributeError:
+        data = request.json
+        individual_uuid = data.get('uuid')
     organism_id = data.get('organism')
     organism = get_item_if_you_can(request, organism_id, 'organisms')
 
