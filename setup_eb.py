@@ -50,7 +50,7 @@ def flatten_config_data(key, dictionary):
 
 
 def entry_points():
-    result = flatten_config_data("[console-scripts]", POETRY_DATA['scripts'])
+    result = flatten_config_data("[console_scripts]", POETRY_DATA['scripts'])
     paste_dict = PYPROJECT_TOML['paste']
     for subkey in paste_dict:
         result += flatten_config_data('[paste.%s]' % subkey, paste_dict[subkey])
@@ -71,8 +71,7 @@ INSTALL_REQUIRES = get_requirements()
 TESTS_REQUIRE = get_requirements('dev-dependencies')
 VERSION = POETRY_DATA['version']
 
-
-if __name__ == "setup.py":
+if __name__ == '__main__':
 
     setup(
         name=PACKAGE_NAME,
