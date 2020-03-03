@@ -1,1 +1,3 @@
-python -m "encoded.commands.$(basename "$0" | tr '-' '_')" "$@"
+commands="from encoded.commands.$(basename "$0" | tr '-' '_') import main; main()"
+# echo commands=$commands
+python -c "$commands" "$@"
