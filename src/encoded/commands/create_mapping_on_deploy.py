@@ -224,3 +224,6 @@ def main():
     _run_create_mapping(app, args)
     exit(0)
 
+
+if __name__ == '__main__':
+    main()

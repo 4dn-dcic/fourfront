@@ -1,0 +1,1 @@
+python -m "encoded.commands.$(basename "$0" | tr '-' '_')" "$@"
