@@ -90,14 +90,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                     if (!tilesetUids[trackItem.tilesetUid]) {
                                         tilesetUids[trackItem.tilesetUid] = [];
                                     }
-                                    tilesetUids[trackItem.tilesetUid].push({ track: trackName, width: trackItem.width, height: trackItem.height });
+                                    tilesetUids[trackItem.tilesetUid].push({ track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name });
                                 }
                                 else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
                                     _.each(trackItem.contents, function (subTrackItem) {
                                         if (!tilesetUids[subTrackItem.tilesetUid]) {
                                             tilesetUids[subTrackItem.tilesetUid] = [];
                                         }
-                                        tilesetUids[subTrackItem.tilesetUid].push({ track: trackName, width: subTrackItem.width, height: subTrackItem.height });
+                                        tilesetUids[subTrackItem.tilesetUid].push({ track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name });
                                     });
                                 }
                             });
@@ -696,7 +696,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
 
-        const hideColumns = ['@type'];
+        const filesTableProps = {
+            schemas, width,
+            searchHref: filesTableSearchHref,
+            hideColumns : ['@type'],
+            renderDetailPane: this.renderFilesDetailPane,
+            maxHeight: 800,
+            defaultOpenIndices: [0],
+            facets: null
+        };
 
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
@@ -727,7 +735,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 <h3 className="tab-section-title">
                                     <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
                                 </h3>
-                                <EmbeddedItemSearchTable {...{ searchHref: filesTableSearchHref, schemas, width, hideColumns, renderDetailPane: this.renderFilesDetailPane, maxHeight: 800 }} facets={null} />
+                                <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
                             </div>
                         </React.Fragment>
                     ) : null
@@ -748,7 +756,7 @@ function HiGlassFileDetailPane(props){
     }, []);
 
     const tracksBody = _.map(viewConfigTracks, (item, idx) =>
-        <tr><td>{idx + 1}</td><td>{item.track}</td><td>{item.width || '-'}</td><td>{item.height || '-'}</td></tr>
+        <tr><td>-</td><td>{item.track}</td><td>{item.width || '-'}</td><td>{item.height || '-'}</td><td>{item.title}</td></tr>
     );
 
     return (
@@ -761,10 +769,11 @@ function HiGlassFileDetailPane(props){
                         <table style={{ minWidth: '100%' }}>
                             <thead>
                                 <tr>
-                                    <th>#</th>
+                                    <th><div className="tooltip-info-container"><span>In View</span></div></th>
                                     <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track in HiGlass view" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
                                     <th><div className="tooltip-info-container"><span>Width</span></div></th>
                                     <th><div className="tooltip-info-container"><span>Height</span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Title</span></div></th>
                                 </tr>
                             </thead>
                             <tbody>
