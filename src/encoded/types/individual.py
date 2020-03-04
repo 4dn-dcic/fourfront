@@ -171,6 +171,8 @@ def validate_individual_relations(context, request):
     relations_counter = {}
     relations_unique = {}
     for a_related_individual in related_individuals:
+        if len(a_related_individual.keys()) < 2:
+            continue
         parent = a_related_individual.get('individual')
         parent_props = get_item_if_you_can(request, parent, 'individuals')
         parent_organism = get_item_if_you_can(request, parent_props.get('organism'), 'organisms')
