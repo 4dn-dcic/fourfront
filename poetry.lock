@@ -168,11 +168,11 @@ pycparser = "*"
 
 [[package]]
 category = "dev"
-description = "checks cloudformation for practices and behaviour         that could potentially be improved"
+description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 name = "cfn-lint"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "0.28.2"
+version = "0.28.3"
 
 [package.dependencies]
 aws-sam-translator = ">=1.19.1"
@@ -291,7 +291,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "2.0.1b2"
+version = "2.0.2b1"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -1692,7 +1692,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "089b4fb0ae4e94d6dce2e8067f2c6d86e5d252f3e755a570a53980cd985af3b8"
+content-hash = "23d949d4e40a7ccddf60ef48883dd269627830975a957855093bccc1eba020d5"
 python-versions = ">=3.5,<3.7"
 
 [metadata.files]
@@ -1774,8 +1774,8 @@ cffi = [
     {file = "cffi-1.14.0.tar.gz", hash = "sha256:2d384f4a127a15ba701207f7639d94106693b6cd64173d6c8988e2c25f3ac2b6"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.28.2.tar.gz", hash = "sha256:91915e60c0c9971740895b20010bca3b6d016e7c6ed78b32cd9eb51529a5711f"},
-    {file = "cfn_lint-0.28.2-py3-none-any.whl", hash = "sha256:82d2d2872ed77bb6858e698c924267676c00878d8fbd612b903cb9fc71063bcb"},
+    {file = "cfn-lint-0.28.3.tar.gz", hash = "sha256:e7d93eac5dd20eb9012bf33eef8d2ac6124dab3dfd408b46ffe7d6c9b0f8426f"},
+    {file = "cfn_lint-0.28.3-py3-none-any.whl", hash = "sha256:0e40e56c2b5b06d248f8ae6464ec55d671cbcd9bc8fb68694dbd42a29cb07fc7"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
@@ -1851,8 +1851,8 @@ cryptography = [
     {file = "cryptography-2.8.tar.gz", hash = "sha256:3cda1f0ed8747339bbdf71b9f38ca74c7b592f24f65cdb3ab3765e4b02871651"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-2.0.1b2-py3-none-any.whl", hash = "sha256:ed5bbf10857e9398e73e23654fd3b98194d6a3f0915c90449ed6d041c8efe430"},
-    {file = "dcicsnovault-2.0.1b2.tar.gz", hash = "sha256:d371ae992d89a09bcdee3ea656c580434e65145e8e6ff20c88ac7172e4822992"},
+    {file = "dcicsnovault-2.0.2b1-py3-none-any.whl", hash = "sha256:e209c3defbf08283a95fc5d25b510d9603958ffd9d98e10124702caf00aa8ee5"},
+    {file = "dcicsnovault-2.0.2b1.tar.gz", hash = "sha256:aa6b1501d51380c91e75730c1be5a8af9f14fa3be362a0804003940e01487b01"},
 ]
 dcicutils = [
     {file = "dcicutils-0.9.3b0-py3-none-any.whl", hash = "sha256:5c451e5678662d8a6785e5f9eaf227e1c87f65977d8f6d7e2bc2c7f0db37d7b7"},
