@@ -1,8 +1,9 @@
 import pytest
 import time
-from .features.conftest import app_settings, app, teardown
-from webtest import AppError
-from .test_search import delay_rerun
+import webtest
+
+from .workbook_fixtures import app_settings, app
+
 
 pytestmark = [pytest.mark.indexing, pytest.mark.working]
 
@@ -72,7 +73,7 @@ def help_page(testapp, posted_help_page_section, help_page_json):
     try:
         res = testapp.post_json('/pages/', help_page_json, status=201)
         val = res.json['@graph'][0]
-    except AppError:
+    except webtest.AppError:
         res = testapp.get('/' + help_page_json['uuid'], status=301).follow()
         val = res.json
     return val
@@ -83,7 +84,7 @@ def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
     try:
         res = testapp.post_json('/pages/', help_page_json_draft, status=201)
         val = res.json['@graph'][0]
-    except AppError:
+    except webtest.AppError:
         res = testapp.get('/' + help_page_json_draft['uuid'], status=301).follow()
         val = res.json
     return val
@@ -94,7 +95,7 @@ def help_page_restricted(testapp, posted_help_page_section, help_page_json_delet
     try:
         res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
         val = res.json['@graph'][0]
-    except AppError:
+    except webtest.AppError:
         res = testapp.get('/' + help_page_json_deleted['uuid'], status=301).follow()
         val = res.json
     return val

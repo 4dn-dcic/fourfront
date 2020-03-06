@@ -18,7 +18,7 @@ import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { QCMetricFromSummary } from './FileView';
 
-import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components/file-tables';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, renderFileQCDetailLinkButton } from './../browse/components/file-tables';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
@@ -453,10 +453,11 @@ class QCMetricsTable extends React.PureComponent {
                             return f && f.quality_metric && f.quality_metric.url;
                         });
 
-                        if(anyFilesWithMetricURL) {
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render: renderFileQCReportLinkButton });
+                        if (anyFilesWithMetricURL) {
+                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
+                            columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
                         } else {
-                            columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render: function () { return ''; } });
+                            columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
                         }
 
                         return (

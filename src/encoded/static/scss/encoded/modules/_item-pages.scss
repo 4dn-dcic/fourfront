@@ -2083,6 +2083,11 @@ $badge-item-min-height: 90px;
 	.rc-tabs-content {
 		margin-left: 0px !important;
 	}
+
+	.react-resizable-handle {
+		right: -7px !important;
+		bottom: -7px !important;
+	}
 }
 .microscopy-create-modal .modal-body .btn {width: 100% !important;}
 
