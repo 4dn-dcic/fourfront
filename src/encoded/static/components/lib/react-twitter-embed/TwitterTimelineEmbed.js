@@ -99,6 +99,13 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
             this.embedContainerRef.current,
             options
             ).then((element) => {
+
+                if (!element) {
+                    // Happens occasionally, maybe due to network or adblocker.
+                    analytics.exception("TwitterTimelineEmbed - Couldn't load/get element");
+                    return false;
+                }
+
                 // `element` here is the iframe that TwitterJS created.
                 this.setState({
                     isLoading: false

@@ -1,4 +1,10 @@
 from functools import wraps
+from snovault import TYPES
+
+# TODO: Production code should not depend on tests. -kmp 14-Feb-2020
+from .tests.test_create_mapping import test_create_mapping
+from .tests.test_embedding import test_add_default_embeds, test_manual_embeds
+from .tests.test_schemas import master_mixins, test_load_schema
 
 
 def verifier(func):
@@ -52,13 +58,11 @@ def verify_profile(item_type, indexer_testapp):
 @verifier
 def verify_schema(item_type_camel, registry):
     # test schema
-    from encoded.tests.test_schemas import master_mixins, test_load_schema
     test_load_schema(item_type_camel + ".json", master_mixins(), registry)
 
 
 @verifier
 def verify_can_embed(item_type_camel, es_item, indexer_testapp, registry):
-    from snovault import TYPES
     # get the embedds
     pyr_item_type = registry[TYPES].by_item_type[item_type_camel]
     embeds = pyr_item_type.embedded
@@ -77,14 +81,12 @@ def verify_indexing(item_uuid, indexer_testapp):
 
 @verifier
 def verify_embeds(registry, item_type):
-    from encoded.tests.test_embedding import test_add_default_embeds, test_manual_embeds
     test_add_default_embeds(registry, item_type)
     test_manual_embeds(registry, item_type)
 
 
 @verifier
 def verify_mapping(registry, item_type):
-    from encoded.tests.test_create_mapping import test_create_mapping
     test_create_mapping(registry, item_type)
 
 

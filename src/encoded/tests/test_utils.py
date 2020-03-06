@@ -2,7 +2,7 @@ import datetime
 import pytest
 import re
 
-from encoded.utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str
+from ..utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str, customized_delay_rerun
 
 
 pytestmark = pytest.mark.working
@@ -45,11 +45,25 @@ def test_find_other_in_pair():
         find_other_in_pair(None, lst)
 
 
+DELAY_FUZZ_SECONDS = 0.1
+
 def test_delay_rerun():
+    expected_delay = 1.0
     t0 = datetime.datetime.now()
     delay_rerun()
     t1 = datetime.datetime.now()
-    assert (t1 - t0).total_seconds() > 1
+    assert (t1 - t0).total_seconds() > expected_delay
+    assert (t1 - t0).total_seconds() < expected_delay + DELAY_FUZZ_SECONDS
+
+
+def test_customize_delay_rerun():
+    custom_delay = 0.5
+    half_delay_rerun = customized_delay_rerun(sleep_seconds=custom_delay)
+    t0 = datetime.datetime.now()
+    half_delay_rerun()
+    t1 = datetime.datetime.now()
+    assert (t1 - t0).total_seconds() > custom_delay
+    assert (t1 - t0).total_seconds() < custom_delay + DELAY_FUZZ_SECONDS
 
 
 def test_utc_today_str():

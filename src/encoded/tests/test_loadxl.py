@@ -1,10 +1,12 @@
 import pytest
-from encoded import loadxl
 import json
-from unittest import mock
+
 from past.builtins import basestring
 from pkg_resources import resource_filename
-from encoded.commands.run_upgrader_on_inserts import get_inserts
+from unittest import mock
+from .. import loadxl
+from ..commands.run_upgrader_on_inserts import get_inserts
+
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 

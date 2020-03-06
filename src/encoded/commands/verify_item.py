@@ -1,7 +1,10 @@
-from pyramid.paster import get_app
+import argparse
 import logging
+
+from pyramid.paster import get_app
 from webtest import TestApp
-from encoded.verifier import verify_item
+from ..verifier import verify_item
+
 
 EPILOG = __doc__
 
@@ -27,7 +30,6 @@ def run(app, uuids=None):
 def main():
     ''' Verifies and item against database / ES and checks embeds '''
 
-    import argparse
     parser = argparse.ArgumentParser(
         description="Verifies and item against database / ES and checks embeds", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,

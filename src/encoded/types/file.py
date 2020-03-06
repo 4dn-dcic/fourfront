@@ -1,3 +1,25 @@
+import boto3
+import datetime
+import json
+import logging
+import os
+import pytz
+import requests
+import structlog
+import urllib.parse
+
+from botocore.exceptions import ClientError
+from copy import deepcopy
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPTemporaryRedirect,
+    HTTPNotFound,
+    HTTPBadRequest
+)
+from pyramid.response import Response
+from pyramid.settings import asbool
+from pyramid.traversal import resource_path
+from pyramid.view import view_config
 from snovault import (
     AfterModified,
     BeforeModified,
@@ -7,7 +29,14 @@ from snovault import (
     load_schema,
     abstract_collection,
 )
+from snovault.attachment import ItemWithAttachment
+from snovault.crud_views import (
+    collection_add,
+    item_edit,
+)
+from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.schema_utils import schema_validator
+from snovault.util import debug_log
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -17,49 +46,24 @@ from snovault.validators import (
     no_validate_item_content_put,
     no_validate_item_content_patch
 )
-from snovault.crud_views import (
-    collection_add,
-    item_edit,
+from urllib.parse import (
+    parse_qs,
+    urlparse,
 )
-from snovault.attachment import ItemWithAttachment
+from uuid import uuid4
+from ..authentication import session_properties
+from ..search import make_search_subreq
+from . import TrackingItem
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
     get_item_if_you_can,
     lab_award_attribution_embed_list
 )
-from pyramid.httpexceptions import (
-    HTTPForbidden,
-    HTTPTemporaryRedirect,
-    HTTPNotFound,
-    HTTPBadRequest
-)
-from pyramid.response import Response
-from pyramid.settings import asbool
-from pyramid.view import view_config
-from urllib.parse import (
-    parse_qs,
-    urlparse,
-)
-import boto3
-from botocore.exceptions import ClientError
-import datetime
-import json
-import pytz
-import os
-import requests
-from uuid import uuid4
-import urllib.parse
-from pyramid.traversal import resource_path
-from encoded.search import make_search_subreq
-from snovault.elasticsearch import ELASTIC_SEARCH
-from snovault.util import debug_log
-from copy import deepcopy
-from . import TrackingItem
-from ..authentication import session_properties
-import structlog
-import logging
+
+
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
+
 log = structlog.getLogger(__name__)
 
 file_workflow_run_embeds = [
