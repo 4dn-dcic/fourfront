@@ -368,8 +368,17 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 class QCMetricsTable extends React.PureComponent {
 
-    static filterQCSummaryItemsHavingTitleTooltips(fileGroup) {
-        return _.filter(_.flatten(_.pluck(fileGroup, 'quality_metric_summary')), function (qmsItem) { return qmsItem.title_tooltip && qmsItem.title_tooltip.length > 0; });
+    static qcSummaryItemTitleTooltipsByTitle(fileGroup) {
+        const tooltipsByTitle = {};
+        fileGroup.forEach(function({ title: qmsTitle, quality_metric_summary: { title_tooltip = null } = {} }){
+            if (typeof tooltipsByTitle[qmsTitle] === "string") {
+                return; // skip/continue; already found a tooltip_title for this qms title.
+            }
+            if (title_tooltip && typeof title_tooltip === "string"){
+                tooltipsByTitle[qmsTitle] = title_tooltip;
+            }
+        });
+        return tooltipsByTitle;
     }
 
     static renderForFileColValue(file) {
@@ -396,6 +405,42 @@ class QCMetricsTable extends React.PureComponent {
             </React.Fragment>);
     }
 
+    static generateAlignedColumnHeaders(fileGroups){
+        return fileGroups.map(function(fileGroup, i){
+            const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
+            const columnHeaders = [ // Static / present-for-each-table headers
+                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
+            ].concat(_.map(fileGroup[0].quality_metric_summary, (sampleQMSItem, qmsIndex) => { // Dynamic Headers
+                // title tooltip: if missing in the first item then try to get it from the first valid one in array
+                return {
+                    columnClass: 'file-detail',
+                    title: sampleQMSItem.title,
+                    title_tooltip: sampleQMSItem.title_tooltip || titleTooltipsByQMSTitle[sampleQMSItem.title] || null,
+                    initialWidth: 80,
+                    render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
+                        const qmsItem = file.quality_metric_summary[qmsIndex];
+                        const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                        return <span className="inline-block" data-tip={tooltip}>{value}</span>;
+                    }
+                };
+            }));
+
+            // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
+            const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
+                return f && f.quality_metric && f.quality_metric.url;
+            });
+
+            if (anyFilesWithMetricURL) {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
+            } else {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
+            }
+            return columnHeaders;
+        });
+    }
+
     static defaultProps = {
         heading: (
             <h3 className="tab-section-title mt-12">
@@ -409,7 +454,7 @@ class QCMetricsTable extends React.PureComponent {
         this.memoized = {
             filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
             groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles),
-            filterQCSummaryItemsHavingTitleTooltips: memoize(QCMetricsTable.filterQCSummaryItemsHavingTitleTooltips)
+            generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
         };
     }
 
@@ -421,48 +466,20 @@ class QCMetricsTable extends React.PureComponent {
         if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
         const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
+        const commonTableProps = {
+            width, windowWidth, href,
+            collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
+            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics"
+        };
 
         return (
             <div className="row">
                 <div className="exp-table-container col-12">
-                    {heading}
-                    {_.map(filesByTitles, (fileGroup, i) => {
-                        const columnHeaders = [ // Static / present-for-each-table headers
-                            { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
-                            { columnClass: 'file', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
-                        ].concat(_.map(fileGroup[0].quality_metric_summary, (sampleQMSItem, qmsIndex) => { // Dynamic Headers
-                            function renderColValue(file, field, colIndex, fileEntryBlockProps) {
-                                const qmsItem = file.quality_metric_summary[qmsIndex];
-                                const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
-                                return <span className="inline-block" data-tip={tooltip}>{value}</span>;
-                            }
-                            //title tooltip: if missing in the first item then try to get it from the first valid one in array
-                            let { title_tooltip } = sampleQMSItem;
-                            if (!title_tooltip) {
-                                //quality metric summary items having title tooltip
-                                const qmsItemsHavingTitleTooltip = this.memoized.filterQCSummaryItemsHavingTitleTooltips(fileGroup);
-                                const match = _.findWhere(qmsItemsHavingTitleTooltip, { title: sampleQMSItem.title });
-                                title_tooltip = match ? match.title_tooltip : null;
-                            }
-
-                            return { columnClass: 'file-detail', title: sampleQMSItem.title, title_tooltip: title_tooltip, initialWidth: 80, render: renderColValue };
-                        }));
-
-                        // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
-                        const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
-                            return f && f.quality_metric && f.quality_metric.url;
-                        });
-
-                        if (anyFilesWithMetricURL) {
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
-                        } else {
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
-                        }
-
+                    { heading }
+                    { filesByTitles.map(function(fileGroup, i){
                         return (
-                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i} analyticsImpressionOnMount={false}
-                                files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
+                            <ProcessedFilesStackedTable {...commonTableProps} key={i} files={fileGroup} columnHeaders={columnHeadersForFileGroups[i]} />
                         );
                     })}
                 </div>
