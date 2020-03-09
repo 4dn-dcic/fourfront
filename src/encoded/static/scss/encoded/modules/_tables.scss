@@ -198,8 +198,8 @@ table.matrix {
 				> .name {
 					text-align: center;
 					line-height: 16px !important;
-					padding-top: 27px !important;
-					padding-bottom: 27px !important;
+					/* padding-top: 27px !important; */
+					/* padding-bottom: 27px !important; */
 					min-height: 70px;
 				}
 			}
@@ -219,13 +219,14 @@ table.matrix {
 
 			&.experiment {
 				@include stacked-block-table-multi-size-block(2);
-				> .name.col-experiment {
-
+				> .name.col-experiment,
+				> .name.col-experiment > a {
 					text-overflow: ellipsis;
 					white-space: nowrap;
 					overflow-x: hidden;
+				}
+				> .name.col-experiment {
 					font-weight: 500;
-
 					.mono-text {
 						text-shadow: 0 0 0;
 					}
@@ -236,10 +237,6 @@ table.matrix {
 				@include gradient-x(rgba(255, 255, 255, 0), #f7f8f9, 0%, 12%);
 				> .experiments > .view-more-button {
 					@include gradient-x(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-				}
-				> .name.double-line {
-					padding-top: 19px !important;
-    				padding-bottom: 19px !important;
 				}
 			}
 
@@ -267,10 +264,7 @@ table.matrix {
 						border-top-style: dotted;
 					}
 				}
-			}
-
-
-			
+			}			
 
 			// All/any file rows
 			.s-block.file {

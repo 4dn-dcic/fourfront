@@ -406,17 +406,18 @@ class QCMetricsTable extends React.PureComponent {
     }
 
     static generateAlignedColumnHeaders(fileGroups){
-        return fileGroups.map(function(fileGroup, i){
+        return fileGroups.map(function(fileGroup){
             const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
             const columnHeaders = [ // Static / present-for-each-table headers
                 { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
                 { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
-            ].concat(_.map(fileGroup[0].quality_metric_summary, (sampleQMSItem, qmsIndex) => { // Dynamic Headers
+            ].concat(fileGroup[0].quality_metric_summary.map(function(qmsObj, qmsIndex){ // Dynamic Headers
+                const { title, title_tooltip } = qmsObj;
                 // title tooltip: if missing in the first item then try to get it from the first valid one in array
                 return {
                     columnClass: 'file-detail',
-                    title: sampleQMSItem.title,
-                    title_tooltip: sampleQMSItem.title_tooltip || titleTooltipsByQMSTitle[sampleQMSItem.title] || null,
+                    title,
+                    title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
                     initialWidth: 80,
                     render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
                         const qmsItem = file.quality_metric_summary[qmsIndex];

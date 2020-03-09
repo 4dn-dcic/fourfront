@@ -369,13 +369,14 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     render(){
-        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth } = this.props;
+        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth, columnClass } = this.props;
         const isReallySingleItem = this.isSingleItem(isSingleItem, files);
         const cls = (
             "s-block file-group keep-label-on-name-hover" +
             (hideNameOnHover ? ' hide-name-on-block-hover' : '') +
             " stack-depth-" + stackDepth
         );
+        const useStyle = colWidthStyles["list:file-group"]; // columnClass here is of parent StackedBlock, not of its children.
 
         let childBlocks;
 
@@ -397,7 +398,7 @@ export class FilePairBlock extends React.PureComponent {
         return (
             <div className={cls}>
                 { this.nameColumn() }
-                <div className={"files s-block-list stack-depth-" + stackDepth}>{ childBlocks }</div>
+                <div className={"files s-block-list stack-depth-" + stackDepth} style={useStyle}>{ childBlocks }</div>
             </div>
         );
     }
