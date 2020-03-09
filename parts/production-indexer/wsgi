@@ -1,0 +1,7 @@
+from paste.deploy import loadapp
+from logging.config import fileConfig
+
+# XXX: This is hard coded to production. Resolve it some other way.
+configfile = "/opt/python/current/app/production.ini"
+fileConfig(configfile)
+application = loadapp("config:" + configfile, name="indexer")

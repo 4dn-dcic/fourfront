@@ -26,7 +26,6 @@ beanstalk.cfg
 /deploy/post_deploy_testing/cypress/screenshots/
 /documentation/
 /ontology.json
-/parts/
 /session-secret.b64
 /src/encoded/static/coverage
 /src/encoded/static/components/lib/react-infinite
