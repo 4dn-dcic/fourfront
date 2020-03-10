@@ -1,5 +1,5 @@
 clean:
-	rm -rf node_modules eggs parts
+	rm -rf node_modules eggs
 	rm -rf .sass-cache
 	rm -f src/encoded/static/css/*.css
 	rm -f src/encoded/static/build/*.js
