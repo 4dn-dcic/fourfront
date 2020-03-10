@@ -9,8 +9,9 @@ from paste.deploy import loadapp
 # except we want to bind to the bundle name so that when links change
 # between /opt/python/ondeck/app and /opt/python/current/app
 # we continue to point to the right directory.
+# NOTE: If this doesn't work, we might try using "../../production.ini"
 
-FILE_DIR = os.path.dirname(__file__)
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 PARTS_DIR = os.path.dirname(FILE_DIR)
 
