@@ -1,7 +1,24 @@
-from paste.deploy import loadapp
-from logging.config import fileConfig
+import os
 
-# XXX: This is hard coded to production. Resolve it some other way.
-configfile = "/opt/python/current/app/production.ini"
-fileConfig(configfile)
-application = loadapp("config:" + configfile, name=None)
+from logging.config import fileConfig
+from paste.deploy import loadapp
+
+
+# This is sort of like as if we did:
+#  CONFIG_FILE = "/opt/python/current/app/production.ini"
+# except we want to bind to the bundle name so that when links change
+# between /opt/python/ondeck/app and /opt/python/current/app
+# we continue to point to the right directory.
+# NOTE: If this doesn't work, we might try using "../../production.ini"
+
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+PARTS_DIR = os.path.dirname(FILE_DIR)
+
+HOME_DIR = os.path.dirname(PARTS_DIR)
+
+CONFIG_FILE = os.path.join(HOME_DIR, "production.ini")
+
+fileConfig(CONFIG_FILE)
+
+application = loadapp("config:" + CONFIG_FILE, name=None)
