@@ -125,6 +125,7 @@ ITEM_INDEX_ORDER = [
     'Page',
 ]
 
+ENV_STAGING = 'fourfront-staging'
 ENV_WEBPROD = 'fourfront-webprod'
 ENV_WEBPROD2 = 'fourfront-webprod2'
 ENV_MASTERTEST = 'fourfront-mastertest'
@@ -135,6 +136,7 @@ ENV_WEBDEV = 'fourfront-webdev'
 BEANSTALK_PROD_ENVS = [
     ENV_WEBPROD,
     ENV_WEBPROD2,
+    ENV_STAGING,
 ]
 
 BEANSTALK_TEST_ENVS = [
@@ -193,13 +195,8 @@ def _run_create_mapping(app, args):
     """
     try:
         deploy_cfg = get_deployment_config(app)
-        if args.wipe_es:  # override deploy_cfg WIPE_ES option
-            deploy_cfg['WIPE_ES'] = True
         log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
-        if deploy_cfg['WIPE_ES']:  # if we want to wipe ES
-            run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
-        else:
-            run_create_mapping(app, check_first=True, item_order=ITEM_INDEX_ORDER)
+        run_create_mapping(app, check_first=(not args.wipe_es), purge_queue=args.clear_queue, item_order=ITEM_INDEX_ORDER)
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
         log.error(str(e))
@@ -214,6 +211,7 @@ def main():
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('--wipe-es', help="Specify to wipe ES", action='store_true', default=False)
+    parser.add_argument('--clear-queue', help="Specify to clear the SQS queue", action='store_true', default=False)
 
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
