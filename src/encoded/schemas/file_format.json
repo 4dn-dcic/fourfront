@@ -127,6 +127,39 @@
                 "description": "Item class name (e.g. FileFastq)",
                 "type": "string"
             }
+        },
+        "assay_types": {
+            "title": "Assay types",
+            "description": "Assays that make use of this file format",
+            "type": "array",
+            "items": {
+                "title": "Assay or Category",
+                "type": "string",
+                "suggested_enum": [
+                    "All Sequencing",
+                    "Microscopy",
+                    "All Hi-C",
+                    "SPRITE",
+                    "RNA-seq",
+                    "Generic"
+                ]
+            }
+        },
+        "visualization": {
+            "title": "Visualization",
+            "description": "platforms this format can be visualized on",
+            "type": "array",
+            "items": {
+                "title": "Visualization platform",
+                "type": "string",
+                "enum": ["HiGlass", "Juicebox", "Genome Browsers"]
+            }
+        },
+        "url": {
+            "title": "External Link",
+            "description": "link to a site with more information about this format",
+            "type": "string",
+            "format": "uri"
         }
     },
     "columns": {
@@ -137,12 +170,24 @@
         "other_allowed_extensions": {
             "title": "Allowed extensions",
             "description": "Other common extensions that are allowed when uploading files of this format"
+        },
+        "assay_types": {
+            "title": "Assay Types"
+        },
+        "visualization": {
+            "title": "Visualization"
         }
     },
     "facets": {
         "valid_item_types" : {
             "title" : "Valid item types",
             "disabled" : true
+        },
+        "assay_types": {
+            "title": "Assay Types"
+        },
+        "visualization": {
+            "title": "Visualization"
         }
     }
 }
