@@ -88,7 +88,6 @@ const optimization = {
             terserOptions:{
                 compress: true,
                 mangle: true,
-                warnings: true,
                 output: {
                     comments: false
                 }
