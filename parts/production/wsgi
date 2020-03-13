@@ -11,7 +11,7 @@ from paste.deploy import loadapp
 # we continue to point to the right directory.
 # NOTE: If this doesn't work, we might try using "../../production.ini"
 
-FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+FILE_DIR = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
 
 PARTS_DIR = os.path.dirname(FILE_DIR)
 
