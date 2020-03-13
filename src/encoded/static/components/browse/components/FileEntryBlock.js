@@ -440,7 +440,7 @@ export class FileHeaderWithCheckbox extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'children')} {...{ indeterminate, checked }}
+                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'handleFileCheckboxChange', 'children')} {...{ indeterminate, checked }}
                     data-select-files={accessionTriples} onChange={this.onChange} className="file-header-select-checkbox" />
                 { children }
             </React.Fragment>
