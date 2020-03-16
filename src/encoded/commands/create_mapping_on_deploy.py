@@ -179,8 +179,8 @@ def get_deployment_config(app):
         log.info('This looks like our staging environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False  # do not wipe ES
     elif my_env in NEW_BEANSTALK_PROD_ENVS:
-        log.info('This looks like a new production environment -- do not wipe ES')
-        deploy_cfg['WIPE_ES'] = False
+        log.info('This looks like a new production environment -- do nothing for now')
+        exit(0)
     elif my_env in BEANSTALK_TEST_ENVS:
         if my_env == ENV_HOTSEAT:
             log.info('Looks like we are on hotseat -- do not wipe ES')
