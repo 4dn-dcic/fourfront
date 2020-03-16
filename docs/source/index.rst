@@ -217,3 +217,36 @@ Force compiling
 ::
 
     $ npm run build-scss
+
+*Contents*
+
+ .. toctree::
+   :maxdepth: 4
+
+   self
+   overview
+   search_info
+   security
+   auth
+   beanstalk_deployment
+   apache_modwsgi
+   database
+   higlass-visualization
+   inserts
+   invalidation
+   local_deployment_troubleshooting
+   object_lifecycle
+   static-pages
+   rev-links
+   unittest
+   locust
+
+   introduction
+   introduction2
+   getting_started
+   account_creation
+   biosample_metadata
+   excel_submission
+   rest_api_submissions
+   schema_info
+   web_submission
