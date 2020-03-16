@@ -126,11 +126,20 @@ ITEM_INDEX_ORDER = [
 ]
 
 ENV_STAGING = 'fourfront-staging'
+ENV_PRODUCTION_BLUE = 'fourfront-blue'
+ENV_PRODUCTION_GREEN = 'fourfront-green'
 ENV_WEBPROD = 'fourfront-webprod'
 ENV_WEBPROD2 = 'fourfront-webprod2'
 ENV_MASTERTEST = 'fourfront-mastertest'
 ENV_HOTSEAT = 'fourfront-hotseat'
 ENV_WEBDEV = 'fourfront-webdev'
+
+
+NEW_BEANSTALK_PROD_ENVS = [
+    ENV_STAGING,
+    ENV_PRODUCTION_BLUE,
+    ENV_PRODUCTION_GREEN,
+]
 
 
 BEANSTALK_PROD_ENVS = [
@@ -169,6 +178,9 @@ def get_deployment_config(app):
     elif my_env in BEANSTALK_PROD_ENVS:
         log.info('This looks like our staging environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False  # do not wipe ES
+    elif my_env in NEW_BEANSTALK_PROD_ENVS:
+        log.info('This looks like a new production environment -- do not wipe ES')
+        deploy_cfg['WIPE_ES'] = False
     elif my_env in BEANSTALK_TEST_ENVS:
         if my_env == ENV_HOTSEAT:
             log.info('Looks like we are on hotseat -- do not wipe ES')
