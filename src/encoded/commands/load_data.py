@@ -43,8 +43,8 @@ def main():
     load_test_data = DottedNameResolver().resolve(load_test_data)
 
     # do not run on webprod/webprod2 unless we set --prod flag
-    if ('webprod' in env or 'staging' in env) and not args.prod:
-        log.info('load_data: skipping, since we are on webprod/webprod2 and --prod not used')
+    if ('webprod' in env or 'blue' in env or 'green' in env) and not args.prod:
+        log.info('load_data: skipping, since we are on blue/green and --prod not used')
         return
 
     load_test_data(app, args.overwrite)
