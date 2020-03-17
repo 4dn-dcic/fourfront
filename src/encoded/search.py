@@ -20,7 +20,7 @@ from snovault.util import (
 )
 from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, Index
 from elasticsearch import (
     TransportError,
     RequestError,
@@ -97,7 +97,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             result['search_header']['filetype'] = item['filetype']
 
     from_, size = get_pagination(request)
-
     # get desired frame for this search
     search_frame = request.normalized_params.get('frame', 'embedded')
 
@@ -116,6 +115,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     # establish elasticsearch_dsl class that will perform the search
     search = Search(using=es, index=es_index)
+
+    # get es mapping for given doc type so we can handle type=nested
+    item_type = list(es.indices.get(es_index)[es_index]['mappings'].keys())[0]  # no other way to get it
+    item_type_es_mapping = es.indices.get(es_index)[es_index]['mappings'][item_type]['properties']
 
     # set up clear_filters path
     result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
@@ -137,7 +140,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here?
 
     ### Set filters
-    search, query_filters = set_filters(request, search, result, principals, doc_types)
+    search, query_filters = set_filters(request, search, result, principals, doc_types, item_type_es_mapping)
 
     ### Set starting facets
     facets = initialize_facets(request, doc_types, prepared_terms, schemas)
@@ -676,7 +679,29 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
-def set_filters(request, search, result, principals, doc_types):
+def is_field_nested(field, es_mapping):
+    """ Walks ES mapping based on given field, levels separated by '.'
+        Returns True if the given field is nested, false otherwise
+    """
+    location = es_mapping
+    for level in field.split('.'):
+        try:
+            location = location[level]
+        except KeyError:
+            try:
+                location = location.get('properties', location)
+                location = location[level]
+            except Exception:
+                return False
+        except Exception:
+            return False
+        finally:
+            if location.get('type', None) == 'nested':
+                return True
+    return False
+
+
+def set_filters(request, search, result, principals, doc_types, es_mapping):
     """
     Sets filters in the query
     """
@@ -821,22 +846,29 @@ def set_filters(request, search, result, principals, doc_types):
 
     must_filters = []
     must_not_filters = []
+    must_filters_nested = []
+    must_not_filters_nested = []
     for query_field, filters in field_filters.items():
-        must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
-        must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
-        if filters['add_no_value'] is True:
-            # add to must_not in an OR case, which is equivalent to filtering on 'No value'
-            should_arr = [must_terms] if must_terms else []
-            should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
-            must_filters.append({'bool': {'should': should_arr}})
-        elif filters['add_no_value'] is False:
-            # add to must_not in an OR case, which is equivalent to filtering on '! No value'
-            should_arr = [must_terms] if must_terms else []
-            should_arr.append({'exists': {'field': query_field}})
-            must_filters.append({'bool': {'should': should_arr}})
-        else: # no filtering on 'No value'
-            if must_terms: must_filters.append(must_terms)
-        if must_not_terms: must_not_filters.append(must_not_terms)
+        if is_field_nested(query_field, es_mapping):
+            pass  # fill out the nested lists above like below but in nested format
+        
+        else:
+            must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
+            must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
+            if filters['add_no_value'] is True:
+                # add to must_not in an OR case, which is equivalent to filtering on 'No value'
+                should_arr = [must_terms] if must_terms else []
+                should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
+                must_filters.append({'bool': {'should': should_arr}})
+            elif filters['add_no_value'] is False:
+                # add to must_not in an OR case, which is equivalent to filtering on '! No value'
+                should_arr = [must_terms] if must_terms else []
+                should_arr.append({'exists': {'field': query_field}})
+                must_filters.append({'bool': {'should': should_arr}})
+            else: # no filtering on 'No value'
+                if must_terms: must_filters.append(must_terms)
+            if must_not_terms: must_not_filters.append(must_not_terms)
+        
 
     # lastly, add range limits to filters if given
     for range_field, range_def in range_filters.items():
@@ -1037,16 +1069,6 @@ def schema_for_field(field, request, doc_types, should_log=False):
     return field_schema
 
 
-def is_linkto_or_object_array_root_field(field, types, doc_types):
-    '''Not used currently. May be useful for if we want to enabled "type" : "nested" mappings on lists of dictionaries'''
-    schema = types[doc_types[0]].schema
-    field_root = field.split('.')[0]
-    fr_schema = (schema and schema.get('properties', {}).get(field_root, None)) or None
-    if fr_schema and fr_schema['type'] == 'array' and (fr_schema['items'].get('linkTo') is not None or fr_schema['items']['type'] == 'object'):
-        return True
-    return False
-
-
 def generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query):
     '''
     We add a copy of our filters to each facet, minus that of
@@ -1134,6 +1156,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         field_schema = schema_for_field(field, request, doc_types, should_log=True)
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
         is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
+        is_nested = field_schema and field_schema['type'] == 'nested'
 
         if field == 'type':
             query_field = 'embedded.@type.raw'

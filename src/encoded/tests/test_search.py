@@ -17,7 +17,7 @@ pytestmark = [
     pytest.mark.working,
     pytest.mark.schema,
     pytest.mark.indexing,
-    pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+    #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10)),
 ]
 
 
@@ -190,7 +190,7 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):
-    res = testapp.get('/search/?type=ExperimentHiC&files.accession=4DNFIO67APU1').json
+    res = testapp.get('/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1').json
     assert len(res['@graph']) > 0
     item_uuids = [item['uuid'] for item in res['@graph'] if 'uuid' in item]
     for item_uuid in item_uuids:
