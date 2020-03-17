@@ -22,6 +22,7 @@ import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, render
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
+import { columnsToColumnDefinitions } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
@@ -464,7 +465,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderProcessedFilesTableAsRightPanel');
+        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderExpsLacksRawOrProcessedFiles', 'renderProcessedFilesTableAsRightPanel');
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
@@ -508,13 +509,22 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         );
     }
 
-
+    renderExpsLacksRawOrProcessedFiles() {
+        const { context } = this.props;
+        const expsLacksRawOrProcessedFiles = _.filter(context.experiments_in_set, function (exp) {
+            return !((exp.files && Array.isArray(exp.files) && exp.files.length > 0) || (exp.processed_files && Array.isArray(exp.processed_files) && exp.processed_files.length > 0));
+        });
+        if (expsLacksRawOrProcessedFiles.length > 0) {
+            return (<strong>Hello World!</strong>);
+        }
+    }
 
     render(){
         return (
             <div className="processed-files-table-section exp-table-section">
                 {this.renderHeader()}
                 {this.renderTopRow()}
+                {this.renderExpsLacksRawOrProcessedFiles()}
                 <QCMetricsTable {...this.props} />
             </div>
         );
