@@ -86,7 +86,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         'filenamePrefix' : "metadata_",
         'children' : "Download",
         'className' : "btn-primary",
-        'analyticsAddFilesToCart' : false
+        'analyticsAddFilesToCart': false,
+        'action': "/metadata/?type=ExperimentSet&sort=accession"
     };
 
     constructor(props){
@@ -110,7 +111,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     render(){
         const {
             selectedFiles, filenamePrefix, children, disabled,
-            windowWidth, context, analyticsAddFilesToCart,
+            windowWidth, context, analyticsAddFilesToCart, action,
             ...btnProps
         } = this.props;
         const { modalOpen } = this.state;
@@ -127,7 +128,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                     { children }
                 </button>
                 { modalOpen ?
-                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, context, fileCountUnique, fileCountWithDupes, analyticsAddFilesToCart }}
+                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, context, fileCountUnique, fileCountWithDupes, analyticsAddFilesToCart, action }}
                         onHide={this.hideModal}/>
                     : null }
             </React.Fragment>
@@ -184,6 +185,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
     render(){
         const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context } = this.props;
+        let { action } = this.props;
         const { disclaimerAccepted } = this.state;
 
         const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
@@ -192,6 +194,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);
 
+        if ('search' === analytics.hrefToListName(window && window.location.href)) {
+            action = "/metadata/?type=File&sort=accession";
+        }
         return (
             <Modal show className="batch-files-download-modal" onHide={onHide} bsSize="large">
 
@@ -235,7 +240,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             I have read and understand the notes.
                         </button>
                         :
-                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context }} />
+                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context, action }} />
                     }
 
                     <button type="reset" onClick={onHide} className="btn btn-outline-dark ml-05">Cancel</button>
@@ -265,8 +270,7 @@ const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
  * the POSTed form fields which identify the individual files to download.
  */
 const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownloadStartButton(props){
-    const { suggestedFilename, selectedFiles, context } = props;
-
+    const { suggestedFilename, selectedFiles, context, action } = props;
     const { accessionTripleArrays, onClick } = useMemo(function(){
         const filenameAccessions = new Set();
         const accessionTripleArrays = _.map(_.keys(selectedFiles), function(accessionTripleString){
@@ -304,7 +308,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
     }, [ selectedFiles, context ]);
 
     return (
-        <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
+        <form method="POST" action={action} className="inline-block">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
             <button type="submit" name="Download" className="btn btn-primary" onClick={onClick}

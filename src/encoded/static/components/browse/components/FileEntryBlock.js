@@ -67,7 +67,7 @@ function SingleFileCheckbox(props){
         return null;
     }
     const isChecked = SingleFileCheckbox.isChecked(file, selectedFiles);
-    const accessionTriple = expFxn.fileToAccessionTriple(file, true);
+    const accessionTriple = expFxn.fileToAccessionTriple(file, true, true);
     return (
         <input type="checkbox" checked={isChecked} name="file-checkbox" id={'checkbox-for-' + accessionTriple}
             className="file-entry-table-checkbox" data-select-files={[accessionTriple]}
@@ -83,7 +83,7 @@ SingleFileCheckbox.hasCheckbox = function(file){
 };
 SingleFileCheckbox.isChecked = function(file, selectedFiles){
     if (!file || !file.accession || !selectedFiles) return null;
-    var accessionTriple = expFxn.fileToAccessionTriple(file, true);
+    var accessionTriple = expFxn.fileToAccessionTriple(file, true, true);
     // We must return a bool here to be fed into the `checked` attribute of a checkbox.
     return !!(selectedFiles[accessionTriple]);
 };

@@ -358,10 +358,11 @@ def metadata_tsv(context, request):
         '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
+        
         for set_accession, exp_accession, file_accession in accession_triples:
             if (
-                (set_accession  == column_vals_dict['Experiment Set Accession'] or set_accession  == 'NONE') and
-                (exp_accession  == column_vals_dict['Experiment Accession']     or exp_accession  == 'NONE') and
+                (('Experiment Set Accession' in column_vals_dict and set_accession  == column_vals_dict['Experiment Set Accession']) or set_accession  == 'NONE') and
+                (('Experiment Accession' in column_vals_dict and exp_accession  == column_vals_dict['Experiment Accession']) or exp_accession  == 'NONE') and
                 (file_accession == column_vals_dict['File Accession']           or file_accession == 'NONE')
             ):
                 return True

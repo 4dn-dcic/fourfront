@@ -12,7 +12,7 @@ import { console, object, ajax, analytics, memoizedUrlParse } from '@hms-dbmi-bg
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';
-import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
+import { allFilesFromExperimentSet, filesToAccessionTriples, fileToAccessionTriple } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
 
@@ -93,8 +93,12 @@ export class SelectAllFilesButton extends React.PureComponent {
                 const reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
                 ajax.load(reqHref, (resp)=>{
                     const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
-                    const filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
-
+                    let filesToSelect;
+                    if (extData.list === 'browse') {
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
+                    } else {
+                        filesToSelect = _.zip(fileToAccessionTriple(allExtendedFiles, false, true), allExtendedFiles);
+                    }
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
 
