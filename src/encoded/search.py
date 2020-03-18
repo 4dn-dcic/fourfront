@@ -848,27 +848,30 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     must_not_filters = []
     must_filters_nested = []
     must_not_filters_nested = []
+
+    def handle_filters(_must_filters, _must_not_filters, query_field):
+        must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
+        must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
+        if filters['add_no_value'] is True:
+            # add to must_not in an OR case, which is equivalent to filtering on 'No value'
+            should_arr = [must_terms] if must_terms else []
+            should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
+            _must_filters.append((query_field, {'bool': {'should': should_arr}}))
+        elif filters['add_no_value'] is False:
+            # add to must_not in an OR case, which is equivalent to filtering on '! No value'
+            should_arr = [must_terms] if must_terms else []
+            should_arr.append({'exists': {'field': query_field}})
+            _must_filters.append((query_field, {'bool': {'should': should_arr}}))
+        else:  # no filtering on 'No value'
+            if must_terms: _must_filters.append((query_field, must_terms))
+        if must_not_terms: _must_not_filters.append((query_field, must_not_terms))
+
     for query_field, filters in field_filters.items():
-        if is_field_nested(query_field, es_mapping):
-            pass  # fill out the nested lists above like below but in nested format
-        
+        if is_field_nested(query_field, es_mapping):  # separate the filters into two groups
+            handle_filters(must_filters_nested, must_not_filters_nested, query_field)
         else:
-            must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
-            must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
-            if filters['add_no_value'] is True:
-                # add to must_not in an OR case, which is equivalent to filtering on 'No value'
-                should_arr = [must_terms] if must_terms else []
-                should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
-                must_filters.append({'bool': {'should': should_arr}})
-            elif filters['add_no_value'] is False:
-                # add to must_not in an OR case, which is equivalent to filtering on '! No value'
-                should_arr = [must_terms] if must_terms else []
-                should_arr.append({'exists': {'field': query_field}})
-                must_filters.append({'bool': {'should': should_arr}})
-            else: # no filtering on 'No value'
-                if must_terms: must_filters.append(must_terms)
-            if must_not_terms: must_not_filters.append(must_not_terms)
-        
+            handle_filters(must_filters, must_not_filters, query_field)  # do things normally
+
 
     # lastly, add range limits to filters if given
     for range_field, range_def in range_filters.items():
@@ -880,7 +883,14 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     # modify that, then update from the new dict
     prev_search = search.to_dict()
     # initialize filter hierarchy
-    final_filters = {'bool': {'must': must_filters, 'must_not': must_not_filters}}
+    final_filters = {'bool': {'must': [f for _, f in must_filters], 'must_not': [f for _, f in must_not_filters]}}
+    final_nested_filters = []
+    for field, query in must_filters_nested + must_not_filters_nested:
+        final_nested_filters.append({
+            'path': field,
+            'query': query
+        })
+
     prev_search['query']['bool']['filter'] = final_filters
     search.update_from_dict(prev_search)
 
