@@ -48,6 +48,11 @@ def main():
         log.info('load_data: skipping, since we are on blue/green and --prod not used')
         return
 
+    # do not run on hotseat since it is a prod snapshot
+    if 'hotseat' in env:
+        log.info('load_data: skipping, since we are on hotseat')
+        return
+
     load_test_data(app, args.overwrite)
 
 
