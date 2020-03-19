@@ -22,27 +22,31 @@ import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/com
 
 class FileSearchViewCheckBox extends React.PureComponent {
 
-    static filesToObjectKeyedByAccessionTriples(file) {
+    static filesToObjectKeyedByAccessionTriples(file, isSelected) {
         const allFileAccessionTriples = fileToAccessionTriple(file, false, true);
-        return (_.zip([allFileAccessionTriples], [file]));
+        if (isSelected) {
+            return (_.zip([allFileAccessionTriples], [file]));
+        }
+        else { return allFileAccessionTriples; }
     }
 
     constructor(props) {
         super(props);
         this.onChange = this.onChange.bind(this);
         this.memoized = {
-            filesToObjectKeyedByAccessionTriples: memoize(FileSearchViewCheckBox.filesToObjectKeyedByAccessionTriples)
+            filesToObjectKeyedByAccessionTriples: memoize(FileSearchViewCheckBox.filesToObjectKeyedByAccessionTriples),
         };
     }
     onChange(e) {
-        const { file,  selectFile, unselectFile } = this.props;
-        const allFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file);
+        const { file, selectFile, unselectFile } = this.props;
         const isChecked = e.target.checked;
         if (isChecked) {
+            const allFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file, true);
             selectFile(allFilesKeyedByTriples);
         }
         else {
-            unselectFile(file.accession);
+            const unselectFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file, false);
+            unselectFile(unselectFilesKeyedByTriples);
         }
     }
 

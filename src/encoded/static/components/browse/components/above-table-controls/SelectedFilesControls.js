@@ -92,12 +92,15 @@ export class SelectAllFilesButton extends React.PureComponent {
                 currentHrefQuery.limit = 'all';
                 const reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
                 ajax.load(reqHref, (resp)=>{
-                    const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                    let allExtendedFiles;
                     let filesToSelect;
                     if (extData.list === 'browse') {
-                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
+
+                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,true, true), allExtendedFiles);
                     } else {
-                        filesToSelect = _.zip(fileToAccessionTriple(allExtendedFiles, false, true), allExtendedFiles);
+                        allExtendedFiles =(resp['@graph'] || []);
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,false, true), resp['@graph'] );
                     }
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });

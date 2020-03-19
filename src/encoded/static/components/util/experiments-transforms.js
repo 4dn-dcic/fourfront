@@ -103,9 +103,9 @@ export function fileToAccessionTriple(file, hasExperiment = true, toString = fal
  * @param {boolean|string} [toString=false]     Whether to concatanate resulting accession items into strings delimited by a tilde (`~`). If string is supplied, it is used as delimiter instead.
  * @returns {string[]} List of arrays or strings in form of EXPSETACCESSION~EXPACESSION~FILEACCESSION. EXPACESSION may be "NONE".
  */
-export function filesToAccessionTriples(files, toString = false){
+export function filesToAccessionTriples(files,hasExperiment = true, toString = false){
     return _.map(files || [], function(file){
-        return fileToAccessionTriple(file, true, toString);
+        return fileToAccessionTriple(file, hasExperiment, toString);
     });
 }
 
