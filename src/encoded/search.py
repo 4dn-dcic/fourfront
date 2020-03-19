@@ -117,7 +117,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search = Search(using=es, index=es_index)
 
     # get es mapping for given doc type so we can handle type=nested
-    if '*' in es_index:  # no type=nested searches can be done here
+    if '*' in es_index or ',' in es_index:  # no type=nested searches can be done on * or multi-index
         item_type = '*'
         item_type_es_mapping = {}
     else:
@@ -683,6 +683,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
+# XXX: The following 2 functions to similar things, can probably just use one
 def is_field_nested(field, es_mapping):
     """ Walks ES mapping based on given field, levels separated by '.'
         Returns True if the given field is nested, false otherwise
@@ -703,6 +704,22 @@ def is_field_nested(field, es_mapping):
             if location.get('type', None) == 'nested':
                 return True
     return False
+
+
+def find_nested_path(field, es_mapping):
+    """ Returns path to highest level nested field """
+    location = es_mapping
+    path = []
+    for level in field.split('.'):
+        try:
+            location = location[level]
+        except:
+            location = location['properties']
+            location = location[level]
+        path.append(level)
+        if location.get('type', None) == 'nested':
+            return '.'.join(path)
+    return None
 
 
 def set_filters(request, search, result, principals, doc_types, es_mapping):
@@ -853,7 +870,9 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     must_filters_nested = []
     must_not_filters_nested = []
 
-    def handle_filters(_must_filters, _must_not_filters, query_field):
+    def handle_filters(_must_filters, _must_not_filters, query_field, is_nested=False):
+        if is_nested:  # remove 'properties' from query_field
+            query_field = query_field.replace('.properties', '')
         must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
         must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
         if filters['add_no_value'] is True:
@@ -872,16 +891,27 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
 
     for query_field, filters in field_filters.items():
         if is_field_nested(query_field, es_mapping):  # separate the filters into two groups
-            handle_filters(must_filters_nested, must_not_filters_nested, query_field)
+            handle_filters(must_filters_nested, must_not_filters_nested, query_field, is_nested=True)
         else:
             handle_filters(must_filters, must_not_filters, query_field)  # do things normally
 
 
     # lastly, add range limits to filters if given
+    # tuple format is required to handle nested fields that are non-range (it is discarded in this case)
     for range_field, range_def in range_filters.items():
-        must_filters.append({
-            'range' : { range_field : range_def }
-        })
+        if is_field_nested(range_field, es_mapping):
+            must_filters.append(('range', {
+                'nested': {
+                    'path': find_nested_path(range_field, es_mapping),
+                    'query': {
+                        'range': {range_field: range_def}
+                    }
+                }
+            }))
+        else:
+            must_filters.append(('range', {
+                'range': {range_field: range_def}
+            }))
 
     # To modify filters of elasticsearch_dsl Search, must call to_dict(),
     # modify that, then update from the new dict
@@ -889,19 +919,18 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     # initialize filter hierarchy
     final_filters = {'bool': {'must': [f for _, f in must_filters], 'must_not': [f for _, f in must_not_filters]}}
     for field, query in must_filters_nested:
-        terms = query['terms']
-        query['terms'] = field.split('.')[-2]
+        nested_path = field[:field.index('.', field.index('.') + 1)]  # XXX: I don't think this will work in general -will
         final_filters['bool']['must'].append({
             'nested': {
-                'path': field,
+                'path': nested_path,
                 'query': query
             }
         })
     for field, query in must_not_filters_nested:
-        query['path'] = field.split('.')[-2]
+        nested_path = field[:field.index('.', field.index('.') + 1)]
         final_filters['bool']['must_not'].append({
             'nested': {
-                'path': field,
+                'path': nested_path,
                 'query': query
             }
         })
