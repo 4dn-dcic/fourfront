@@ -117,8 +117,12 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search = Search(using=es, index=es_index)
 
     # get es mapping for given doc type so we can handle type=nested
-    item_type = list(es.indices.get(es_index)[es_index]['mappings'].keys())[0]  # no other way to get it
-    item_type_es_mapping = es.indices.get(es_index)[es_index]['mappings'][item_type]['properties']
+    if '*' in es_index:  # no type=nested searches can be done here
+        item_type = '*'
+        item_type_es_mapping = {}
+    else:
+        item_type = list(es.indices.get(es_index)[es_index]['mappings'].keys())[0]  # no other way to get it
+        item_type_es_mapping = es.indices.get(es_index)[es_index]['mappings'][item_type]['properties']
 
     # set up clear_filters path
     result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
@@ -884,11 +888,22 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     prev_search = search.to_dict()
     # initialize filter hierarchy
     final_filters = {'bool': {'must': [f for _, f in must_filters], 'must_not': [f for _, f in must_not_filters]}}
-    final_nested_filters = []
-    for field, query in must_filters_nested + must_not_filters_nested:
-        final_nested_filters.append({
-            'path': field,
-            'query': query
+    for field, query in must_filters_nested:
+        terms = query['terms']
+        query['terms'] = field.split('.')[-2]
+        final_filters['bool']['must'].append({
+            'nested': {
+                'path': field,
+                'query': query
+            }
+        })
+    for field, query in must_not_filters_nested:
+        query['path'] = field.split('.')[-2]
+        final_filters['bool']['must_not'].append({
+            'nested': {
+                'path': field,
+                'query': query
+            }
         })
 
     prev_search['query']['bool']['filter'] = final_filters
