@@ -11,6 +11,7 @@ log = structlog.getLogger(__name__)
 
 
 EPILOG = __doc__
+PRODUCTION_NAME_PARTS = ('webprod', 'blue', 'green')
 
 
 def main():
@@ -43,11 +44,12 @@ def main():
     load_test_data = DottedNameResolver().resolve(load_test_data)
 
     # do not run on webprod/webprod2 unless we set --prod flag
-    if ('webprod' in env or 'blue' in env or 'green' in env) and not args.prod:
+    if any(part in env for part in PRODUCTION_NAME_PARTS) and not args.prod:
         log.info('load_data: skipping, since we are on blue/green and --prod not used')
         return
 
     load_test_data(app, args.overwrite)
+
 
 if __name__ == "__main__":
     main()
