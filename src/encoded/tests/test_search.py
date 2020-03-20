@@ -201,17 +201,26 @@ def test_search_embedded_file_by_accession(workbook, testapp):
 
 
 def test_search_nested(workbook, testapp):
-    """ Tests that searching on two conditions within a nested field returns only results that contain
-        an element that satisfies both conditions
-    """
+    """ Tests multiple search conditions that are handled differently under mapping type=nested """
     res = testapp.get('/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&award.project=4DN').json
-    assert len(res['@graph']) == 1  # should work either way since award is non-nested
+    assert len(res['@graph']) == 1  # sanity check - should work either way since award is non-nested
 
     # should return no results since these two properties do not occur in the same nested object
-    testapp.get('/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.properties.file_size=500', status=404)
+    accession_and_file_size = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.properties.file_size=500'
+    testapp.get(accession_and_file_size, status=404)
 
     # should return results since these two properties occur in the same nested object
-    testapp.get('/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.properties.file_size=1000')
+    accession_and_file_size = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.properties.file_size=1000'
+    testapp.get(accession_and_file_size)
+
+    # should return results since both properties occur
+    accession_and_file_size_upper_bound = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.file_size.to=1500'
+    testapp.get(accession_and_file_size_upper_bound)
+
+    # should not return results since no files will match
+    accession_and_file_size_upper_bound = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.file_size.to=499'
+    testapp.get(accession_and_file_size_upper_bound, status=404)
+
 
 @pytest.fixture
 def mboI_dts(testapp, workbook):

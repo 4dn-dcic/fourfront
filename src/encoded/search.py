@@ -722,32 +722,27 @@ def find_nested_path(field, es_mapping):
     return None
 
 
-def set_filters(request, search, result, principals, doc_types, es_mapping):
+def initialize_field_filters(request, principals, doc_types):
+    """ Helper function for set_filters
+        Initializes field filters with filters that exist on all searches, does some basic updates
     """
-    Sets filters in the query
-    """
-
-    # these next two dictionaries should each have keys equal to query_field
-    # and values: must_terms: [<list of terms>], must_not_terms: [<list of terms>], add_no_value: True/False/None
     field_filters = {
-        'principals_allowed.view' : {
+        'principals_allowed.view': {
             'must_terms': principals,
             'must_not_terms': [],
             'add_no_value': None
         },
-        'embedded.@type.raw' : {
+        'embedded.@type.raw': {
             'must_terms': doc_types,
             'must_not_terms': [],
             'add_no_value': None
         },
-        'embedded.status.raw' : {
+        'embedded.status.raw': {
             'must_terms': [],
             'must_not_terms': [],
             'add_no_value': None
         }
     }
-
-    range_filters = {}
 
     # Exclude status=deleted Items unless explicitly requested/filtered-in.
     if 'deleted' not in request.normalized_params.getall('status'):
@@ -760,6 +755,51 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
         field_filters['embedded.@type.raw']['must_not_terms'].append('TrackingItem')
     if 'OntologyTerm' not in doc_types:
         field_filters['embedded.@type.raw']['must_not_terms'].append('OntologyTerm')
+
+    return field_filters
+
+
+def handle_nested_filters(nested_filters, final_filters, key='must'):
+    """ Helper function for set_filters
+        Collapses nested filters together into a single query
+        Modifies final_filters in place
+    """
+    if key not in ['must', 'must_not']:
+        raise RuntimeError('Tried to handle nested filter with key other than must/must_not: %s' % key)
+    for field, query in nested_filters:
+        nested_path = field[:field.index('.', field.index('.') + 1)]  # This seems to work in general but feels fragile... - Will
+        sub_queries = final_filters['bool'][key]
+        found = False
+        for _q in sub_queries:
+            if _q.get('nested', None):
+                if _q['nested']['path'] == nested_path:
+                    try:
+                        _q['nested']['query']['bool'][key].append(query['bool'][key][0])  # XXX: must also handle multiple options
+                        found = True
+                        break
+                    except:       # Why? We found a 'range' nested query and must add this one separately
+                        continue  # This behavior is absurd. Somehow it knows to combine separate nested range
+                                  # queries with AND, but of course not regular queries and of course you cannot
+                                  # combine the range query here due to syntax  - Will
+        if not found:
+            final_filters['bool'][key].append({
+                    'nested': {
+                        'path': nested_path,
+                        'query': query
+                    }
+                })
+
+
+def set_filters(request, search, result, principals, doc_types, es_mapping):
+    """
+    Sets filters in the query
+    """
+
+    # these next two dictionaries should each have keys equal to query_field
+    # and values: must_terms: [<list of terms>], must_not_terms: [<list of terms>], add_no_value: True/False/None
+    field_filters = initialize_field_filters(request, principals, doc_types)
+
+    range_filters = {}
 
     for field, term in request.normalized_params.items():
         not_field = False # keep track if query is NOT (!)
@@ -945,6 +985,7 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
 
     # lastly, add range limits to filters if given
     # tuple format is required to handle nested fields that are non-range (it is discarded in this case)
+    # nested range fields must also be separated from other nested sub queries - see comment in try/except
     for range_field, range_def in range_filters.items():
         if is_field_nested(range_field, es_mapping):
             must_filters.append(('range', {
@@ -965,41 +1006,8 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     prev_search = search.to_dict()
     # initialize filter hierarchy
     final_filters = {'bool': {'must': [f for _, f in must_filters], 'must_not': [f for _, f in must_not_filters]}}
-    for field, query in must_filters_nested:
-        nested_path = field[:field.index('.', field.index('.') + 1)]  # XXX: I don't think this will work in general -will
-        sub_queries = final_filters['bool']['must']
-        found = False
-        for _q in sub_queries:
-            if _q.get('nested', None):
-                if _q['nested']['path'] == nested_path:
-                    _q['nested']['query']['bool']['must'].append(query['bool']['must'][0])  # XXX: must also handle multiple options
-                    found = True
-                    break
-        if not found:
-            final_filters['bool']['must'].append({
-                    'nested': {
-                        'path': nested_path,
-                        'query': query
-                    }
-                })
-    for field, query in must_not_filters_nested:
-        nested_path = field[:field.index('.', field.index('.') + 1)]
-        sub_queries = final_filters['bool']['must_not']
-        found = False
-        for _q in sub_queries:
-            if _q.get('nested', None):
-                if _q['nested']['path'] == nested_path:
-                    _q['nested']['query']['bool']['must_not'].append(query['bool']['must_not'][0])  # XXX: must also handle multiple options
-                    found = True
-                    break
-        if not found:
-            final_filters['bool']['must_not'].append({
-                'nested': {
-                    'path': nested_path,
-                    'query': query
-                }
-            })
-
+    handle_nested_filters(must_filters_nested, final_filters, key='must')
+    handle_nested_filters(must_not_filters_nested, final_filters, key='must_not')
     prev_search['query']['bool']['filter'] = final_filters
     search.update_from_dict(prev_search)
 
