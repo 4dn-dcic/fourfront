@@ -54,6 +54,28 @@ COMMON_EXCLUDED_URI_PARAMS = [
 ]
 
 
+# from now on, use these constants when referring to elastic search
+# query keywords when writing elastic search queries - Will 3-20-2020
+QUERY = 'query'
+FILTER = 'filter'
+MUST = 'must'
+MUST_NOT = 'must_not'
+BOOL = 'bool'
+MATCH = 'match'
+SHOULD = 'should'
+EXISTS = 'exists'
+FIELD = 'field'
+NESTED = 'nested'
+PATH = 'path'
+TERMS = 'terms'
+RANGE = 'range'
+# just for book-keeping/readability but is 'unused' for now
+# ie: it should be obvious when you are 'effectively' writing lucene
+ELASTIC_SEARCH_QUERY_KEYWORDS = [
+    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE,
+]
+
+
 @view_config(route_name='search', request_method='GET', permission='search')
 @debug_log
 def search(context, request, search_type=None, return_generator=False, forced_type='Search', custom_aggregations=None):
@@ -559,6 +581,7 @@ def list_source_fields(request, doc_types, frame):
 def build_query(search, prepared_terms, source_fields):
     """
     Prepare the query within the Search object.
+    NOTE: this is only for basic and simple_query_string! See 'set_filters' for how "real" searches are done.
     """
     query_info = {}
     string_query = None
@@ -869,6 +892,33 @@ def handle_range_filters(request, result, field_filters, doc_types):
     return range_filters
 
 
+def construct_nested_sub_queries(query_field, filters, key='must_terms'):
+    """ Helper for build_sub_queries that constructs the base layer of sub-queries """
+
+    # check args, determine es_key or raise exception
+    if key == 'must_terms':
+        es_key = MUST
+    elif key == 'must_not_terms':
+        es_key = MUST_NOT
+    else:
+        raise RuntimeError('Tried to handle nested filter with key other than must/must_not: %s' % key)
+
+    # handle length 0, 1 and n cases
+    try:
+        my_filters = filters[key]
+    except KeyError:
+        return {}  # just in case, we want this to be recoverable if it happens
+    if len(my_filters) == 0:
+        return {}
+    elif len(my_filters) == 1:  # see standard bool/match query
+        return {BOOL: {es_key: [{MATCH: {query_field: my_filters[0]}}]}}
+    else:
+        sub_queries = {BOOL: {es_key: {BOOL: {SHOULD: []}}}}
+        for option in my_filters:  # see how to combine queries on the same field
+            sub_queries[BOOL][es_key][BOOL][SHOULD].append({MATCH: {query_field: option}})
+        return sub_queries
+
+
 def build_sub_queries(field_filters, es_mapping):
     """ Builds queries based on data type """
     must_filters = []
@@ -881,49 +931,17 @@ def build_sub_queries(field_filters, es_mapping):
         if is_field_nested(query_field, es_mapping):
             query_field = query_field.replace('.properties', '')
 
-            # construct must_terms first
-            if len(filters['must_terms']) == 0:
-                must_terms = {}
-            elif len(filters['must_terms']) == 1:
-                must_terms = {'bool': {'must': [{
-                                'match': {
-                                    query_field: filters['must_terms'][0]
-                                }
-                            }]}}
-            else:
-                must_terms = {'bool': {'must': {'bool': {'should': []}}}}
-                for option in filters['must_terms']:
-                    must_terms['bool']['must']['bool']['should'].append({
-                        'match': {
-                            query_field: option
-                        }
-                    })
+            # Build must/must_not sub-queries
+            must_terms = construct_nested_sub_queries(query_field, filters, key='must_terms')
+            must_not_terms = construct_nested_sub_queries(query_field, filters, key='must_not_terms')
 
-            # construct must_not_terms second
-            if len(filters['must_not_terms']) == 0:
-                must_not_terms = {}
-            elif len(filters['must_not_terms']) == 1:
-                must_not_terms = {'bool': {'must_not': [{
-                    'match': {
-                        query_field: filters['must_not_terms'][0]
-                    }
-                }]}}
-            else:  # query must be constructed differently in this case, unlike with terms
-                must_not_terms = {'bool': {'must_not': {'bool': {'should': []}}}}
-                for option in filters['must_not_terms']:
-                    must_not_terms['bool']['must_not']['bool']['should'].append({
-                        'match': {
-                            query_field: option
-                        }
-                    })
-
-            if filters['add_no_value'] is True:
+            if filters['add_no_value'] is True:  # when searching on 'No Value'
                 should_arr = [must_terms] if must_terms else []
-                should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
+                should_arr.append({BOOL: {MUST_NOT: {EXISTS: {FIELD: query_field}}}})
                 must_filters_nested.append((query_field, should_arr))
-            elif filters['add_no_value'] is False:
+            elif filters['add_no_value'] is False:  # when not searching on 'No Value'
                 should_arr = [must_terms] if must_terms else []
-                should_arr.append({'exists': {'field': query_field}})
+                should_arr.append({EXISTS: {FIELD: query_field}})
                 must_filters_nested.append((query_field, should_arr))
             else:
                 if must_terms: must_filters_nested.append((query_field, must_terms))
@@ -931,18 +949,18 @@ def build_sub_queries(field_filters, es_mapping):
 
         # if we are not nested, handle this with 'terms' query like usual
         else:
-            must_terms = {'terms': {query_field: filters['must_terms']}} if filters['must_terms'] else {}
-            must_not_terms = {'terms': {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
+            must_terms = {TERMS: {query_field: filters['must_terms']}} if filters['must_terms'] else {}
+            must_not_terms = {TERMS: {query_field: filters['must_not_terms']}} if filters['must_not_terms'] else {}
             if filters['add_no_value'] is True:
                 # add to must_not in an OR case, which is equivalent to filtering on 'No value'
                 should_arr = [must_terms] if must_terms else []
-                should_arr.append({'bool': {'must_not': {'exists': {'field': query_field}}}})
-                must_filters.append((query_field, {'bool': {'should': should_arr}}))
+                should_arr.append({BOOL: {MUST_NOT: {EXISTS: {FIELD: query_field}}}})
+                must_filters.append((query_field, {BOOL: {SHOULD: should_arr}}))
             elif filters['add_no_value'] is False:
                 # add to must_not in an OR case, which is equivalent to filtering on '! No value'
                 should_arr = [must_terms] if must_terms else []
-                should_arr.append({'exists': {'field': query_field}})
-                must_filters.append((query_field, {'bool': {'should': should_arr}}))
+                should_arr.append({EXISTS: {FIELD: query_field}})
+                must_filters.append((query_field, {BOOL: {SHOULD: should_arr}}))
             else:  # no filtering on 'No value'
                 if must_terms: must_filters.append((query_field, must_terms))
             if must_not_terms: must_not_filters.append((query_field, must_not_terms))
@@ -957,20 +975,20 @@ def apply_range_filters(range_filters, must_filters, es_mapping):
     """
 
     # tuple format is required to handle nested fields that are non-range (it is discarded in this case)
-    # nested range fields must also be separated from other nested sub queries - see comment in try/except
+    # nested range fields must also be separated from other nested sub queries - see comment in 'handle_nested_filters'
     for range_field, range_def in range_filters.items():
         if is_field_nested(range_field, es_mapping):
             must_filters.append(('range', {
-                'nested': {
-                    'path': find_nested_path(range_field, es_mapping),
-                    'query': {
-                        'range': {range_field: range_def}
+                NESTED: {
+                    PATH: find_nested_path(range_field, es_mapping),
+                    QUERY: {
+                        RANGE: {range_field: range_def}
                     }
                 }
             }))
         else:
             must_filters.append(('range', {
-                'range': {range_field: range_def}
+                RANGE: {range_field: range_def}
             }))
 
 
@@ -983,17 +1001,17 @@ def handle_nested_filters(nested_filters, final_filters, key='must'):
         Collapses nested filters together into a single query
         Modifies final_filters in place
     """
-    if key not in ['must', 'must_not']:
+    if key not in [MUST, MUST_NOT]:
         raise RuntimeError('Tried to handle nested filter with key other than must/must_not: %s' % key)
     for field, query in nested_filters:
         nested_path = extract_nested_path_from_field(field)
         sub_queries = final_filters['bool'][key]
         found = False
         for _q in sub_queries:
-            if _q.get('nested', None):
-                if _q['nested']['path'] == nested_path:
+            if _q.get(NESTED, None):
+                if _q[NESTED][PATH] == nested_path:
                     try:
-                        _q['nested']['query']['bool'][key].append(query['bool'][key][0])  # XXX: must also handle multiple options
+                        _q[NESTED][QUERY][BOOL][key].append(query[BOOL][key][0])  # XXX: must also handle multiple options
                         found = True
                         break
                     except:       # Why? We found a 'range' nested query and must add this one separately
@@ -1001,10 +1019,10 @@ def handle_nested_filters(nested_filters, final_filters, key='must'):
                                   # queries with AND, but of course not regular queries and of course you cannot
                                   # combine the range query here due to syntax  - Will
         if not found:
-            final_filters['bool'][key].append({
-                    'nested': {
-                        'path': nested_path,
-                        'query': query
+            final_filters[BOOL][key].append({
+                    NESTED: {
+                        PATH: nested_path,
+                        QUERY: query
                     }
                 })
 
@@ -1070,10 +1088,10 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     # modify that, then update from the new dict
     prev_search = search.to_dict()
     # initialize filter hierarchy
-    final_filters = {'bool': {'must': [f for _, f in must_filters], 'must_not': [f for _, f in must_not_filters]}}
-    handle_nested_filters(must_filters_nested, final_filters, key='must')
-    handle_nested_filters(must_not_filters_nested, final_filters, key='must_not')
-    prev_search['query']['bool']['filter'] = final_filters
+    final_filters = {BOOL: {MUST: [f for _, f in must_filters], MUST_NOT: [f for _, f in must_not_filters]}}
+    handle_nested_filters(must_filters_nested, final_filters, key=MUST)
+    handle_nested_filters(must_not_filters_nested, final_filters, key=MUST_NOT)
+    prev_search[QUERY][BOOL][FILTER] = final_filters  # drop in full query
     search.update_from_dict(prev_search)
 
     return search, final_filters
