@@ -37,6 +37,8 @@ build:  # builds
 build-dev:  # same as build but gives moto setup as well
 	make build
 	make moto-setup
+
+build-locust:  # just pip installs locust - may cause instability
 	pip install locust
 
 deploy1:  # starts postgres/ES locally and loads inserts
@@ -63,4 +65,5 @@ info:
 	   $(info   Use 'make npm-setup' to build the front-end)
 	   $(info   Use 'make moto-setup' to install moto, for less flaky tests)
 	   $(info   Use 'make macpoetry-install' to install fourfront on OSX catalina)
+	   $(info   Use 'make build-locust' to intall locust. Do not do this unless you know what you are doing)
 	   $(info   Use 'make configure' to install poetry. You should not have to do this directly)
