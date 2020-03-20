@@ -215,6 +215,7 @@ export default class App extends React.PureComponent {
      */
     componentDidMount() {
         const { href, context } = this.props;
+        const { statusMessagesURL = null } = portalConfig;
 
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
@@ -297,6 +298,27 @@ export default class App extends React.PureComponent {
             });
         }
 
+        if (statusMessagesURL) {
+            ajax.load(
+                statusMessagesURL,
+                function(res){
+                    const { events = [] } = res;
+                    console.info(`Received ${events.length} events from "${statusMessagesURL}".`);
+                    events.forEach(function({ name: title, message, style = "warning", navigateDisappearThreshold = 3 }){
+                        Alerts.queue({ title, message, style, navigateDisappearThreshold });
+                    });
+                },
+                "GET",
+                null,
+                function(err){
+                    console.error("Error getting status events", err);
+                },
+                // Clear headers for CORS
+                {}, //{ "Cache-Control": "max-age=120" }
+                ["Accept", "Content-Type", "Authorization", "X-Requested-With"]
+            );
+        }
+
         // Post-mount stuff
         this.setState({ 'mounted' : true, browserInfo }, () => {
 
@@ -333,6 +355,7 @@ export default class App extends React.PureComponent {
                 }, 3000);
             }
         });
+
     }
 
     /** @ignore */

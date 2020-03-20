@@ -23,7 +23,9 @@ const portalConfig = {
         "www.data.4dnucleome.org",
         "data.4dnucleome.org",
         "fourfront-webdev.us-east-1.elasticbeanstalk.com"
-    ]
+    ],
+
+    "statusMessagesURL": "https://505darvwgc.execute-api.us-east-1.amazonaws.com/4dn-status?format=json"
 };
 
 
