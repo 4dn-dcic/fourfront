@@ -46,25 +46,6 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 }
 
-// recursive and basic version of getTilesetUids func
-// function getTilesetUids(obj) {
-//     if (!obj) {
-//         return [];
-//     }
-//     else {
-//         return Object.keys(obj).reduce(function (acc, key) {
-//             const value = obj[key];
-//             if (typeof value === 'object') {
-//                 acc.push.apply(acc, getTilesetUids(value));
-//             }
-//             else if (key === 'tilesetUid') {
-//                 acc.push(value);
-//             }
-//             return acc;
-//         }, []);
-//     }
-// }
-
 export class HiGlassViewConfigTabView extends React.PureComponent {
 
     static getTabObject(props, width){
@@ -79,25 +60,48 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     static getTilesetUids(obj) {
         const tilesetUids = {};
         if (obj && obj.views && Array.isArray(obj.views) && obj.views.length > 0) {
+            obj.views = _.chain(obj.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
+            //very simple implementation of naming views
+            const groupedLayout = _.groupBy(_.map(obj.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; }), (it) => it.y);
+            if (obj.views.length > 1) {
+                const groupedLayoutKeys = _.keys(groupedLayout);
+                const rowNames = groupedLayoutKeys.length === 3 ? ['top', 'middle', 'bottom'] : (groupedLayoutKeys.length === 2 ? ['top', 'bottom'] : null);
+                for (var i = 0; i < groupedLayoutKeys.length; i++) {
+                    const rowItem = groupedLayout[groupedLayoutKeys[i]];
+                    const colNames = rowItem.length === 3 ? ['left', 'center', 'right'] : (rowItem.length === 2 ? ['left', 'right'] : null);
+                    for (var j = 0; j < rowItem.length; j++) {
+                        // rowItem[j].row = (i+1);
+                        // rowItem[j].col = (j+1);
+                        rowItem[j].displayText = [
+                            groupedLayoutKeys.length > 3 ? (i + 1) : ((rowNames && rowNames[i]) || null),
+                            rowItem.length > 3 ? (j + 1) : ((colNames && colNames[j]) || null)
+                        ].filter(Boolean).join(' - ');
+                    }
+                }
+            }
+            //loop tracks
             const trackNames = ['top', 'right', 'bottom', 'left', 'center', 'whole', 'gallery'];
-            _.each(obj.views, function (view) {
+            _.each(obj.views, function (view, viewIdx) {
+                const layout = _.find(groupedLayout[view.layout.y], (it) => it.x == view.layout.x);
                 if (view.tracks && typeof view.tracks === 'object') {
                     _.each(trackNames, function (trackName) {
                         const track = view.tracks[trackName];
                         if (track && Array.isArray(track) && track.length > 0) {
                             _.each(track, function (trackItem) {
+                                //top, left, right, bottom and gallery?? & whole??
                                 if (trackItem.tilesetUid) {
                                     if (!tilesetUids[trackItem.tilesetUid]) {
                                         tilesetUids[trackItem.tilesetUid] = [];
                                     }
-                                    tilesetUids[trackItem.tilesetUid].push({ track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name });
+                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name });
                                 }
+                                //center
                                 else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
                                     _.each(trackItem.contents, function (subTrackItem) {
                                         if (!tilesetUids[subTrackItem.tilesetUid]) {
                                             tilesetUids[subTrackItem.tilesetUid] = [];
                                         }
-                                        tilesetUids[subTrackItem.tilesetUid].push({ track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name });
+                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name });
                                     });
                                 }
                             });
@@ -657,7 +661,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (!_.isEqual(oldData, newData)) {
             const newDataKeys = _.keys(newData);
             const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null;
-            //const timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
             this.setState({ 'tilesetUids': newData, 'filesTableSearchHref': searchHref });
         }
     }
@@ -755,9 +758,10 @@ function HiGlassFileDetailPane(props){
         ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
     }, []);
 
-    const tracksBody = _.map(viewConfigTracks, (item, idx) =>
-        <tr><td>-</td><td>{item.track}</td><td>{item.width || '-'}</td><td>{item.height || '-'}</td><td>{item.title}</td></tr>
-    );
+    const tracksBody = _.map(viewConfigTracks, (item, idx) => {
+        const wh = (item.width || item.height) ? (item.width || '-') + '/' + (item.height || '-') : "-";
+        return <tr><td>{item.view}</td><td>{item.track}</td><td>{wh}</td><td>{item.title}</td></tr>;
+    });
 
     return (
         <div className="mr-1">
@@ -770,9 +774,8 @@ function HiGlassFileDetailPane(props){
                             <thead>
                                 <tr>
                                     <th><div className="tooltip-info-container"><span>In View</span></div></th>
-                                    <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track in HiGlass view" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
-                                    <th><div className="tooltip-info-container"><span>Width</span></div></th>
-                                    <th><div className="tooltip-info-container"><span>Height</span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>W/H&nbsp;<i data-tip="Width/Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
                                     <th><div className="tooltip-info-container"><span>Title</span></div></th>
                                 </tr>
                             </thead>
