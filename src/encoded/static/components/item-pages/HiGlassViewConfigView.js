@@ -57,32 +57,48 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         };
     }
 
+    static getGroupedLayouts = memoize(function (layouts) {
+        let groupedLayouts = null;
+        if (layouts.length > 1) {
+            groupedLayouts = _.groupBy(layouts, (it) => it.y);
+            const groupedLayoutKeys = _.keys(groupedLayouts);
+            const rowNames = groupedLayoutKeys.length === 3 ? ['top', 'middle', 'bottom'] : (groupedLayoutKeys.length === 2 ? ['top', 'bottom'] : null);
+            for (let i = 0; i < groupedLayoutKeys.length; i++) {
+                const rowItem = groupedLayouts[groupedLayoutKeys[i]];
+                const colNames = rowItem.length === 3 ? ['left', 'center', 'right'] : (rowItem.length === 2 ? ['left', 'right'] : null);
+                for (let j = 0; j < rowItem.length; j++) {
+                    rowItem[j].displayText = [
+                        groupedLayoutKeys.length > 3 ? (i + 1) : ((rowNames && rowNames[i]) || null),
+                        rowItem.length > 3 ? (j + 1) : ((colNames && colNames[j]) || null)
+                    ].filter(Boolean).join(' - ');
+                }
+            }
+        } else {
+            const data = {};
+            groupedLayouts = data[layouts[0].y.toString()] = [layouts];
+        }
+        return groupedLayouts;
+    }, function (A, B) {
+        const arrA = A[0];
+        const arrB = B[0];
+        if (arrA.length !== arrB.length) { return false; }
+        for (let i = 0; i < arrA.length; i++) {
+            if ((arrA[i].x !== arrB[i].x) || (arrA[i].y !== arrB[i].y)) { return false; }
+        }
+        return true;
+    });
+
     static getTilesetUids(obj) {
         const tilesetUids = {};
         if (obj && obj.views && Array.isArray(obj.views) && obj.views.length > 0) {
             obj.views = _.chain(obj.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
-            //very simple implementation of naming views
-            const groupedLayout = _.groupBy(_.map(obj.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; }), (it) => it.y);
-            if (obj.views.length > 1) {
-                const groupedLayoutKeys = _.keys(groupedLayout);
-                const rowNames = groupedLayoutKeys.length === 3 ? ['top', 'middle', 'bottom'] : (groupedLayoutKeys.length === 2 ? ['top', 'bottom'] : null);
-                for (var i = 0; i < groupedLayoutKeys.length; i++) {
-                    const rowItem = groupedLayout[groupedLayoutKeys[i]];
-                    const colNames = rowItem.length === 3 ? ['left', 'center', 'right'] : (rowItem.length === 2 ? ['left', 'right'] : null);
-                    for (var j = 0; j < rowItem.length; j++) {
-                        // rowItem[j].row = (i+1);
-                        // rowItem[j].col = (j+1);
-                        rowItem[j].displayText = [
-                            groupedLayoutKeys.length > 3 ? (i + 1) : ((rowNames && rowNames[i]) || null),
-                            rowItem.length > 3 ? (j + 1) : ((colNames && colNames[j]) || null)
-                        ].filter(Boolean).join(' - ');
-                    }
-                }
-            }
+            //very simple implementation of naming views - assumes views' top edge is aligned in a row
+            const layouts = _.map(obj.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
+            const groupedLayouts = HiGlassViewConfigTabView.getGroupedLayouts(layouts);
             //loop tracks
             const trackNames = ['top', 'right', 'bottom', 'left', 'center', 'whole', 'gallery'];
-            _.each(obj.views, function (view, viewIdx) {
-                const layout = _.find(groupedLayout[view.layout.y], (it) => it.x == view.layout.x);
+            _.each(obj.views, function (view) {
+                const layout = _.find(groupedLayouts[view.layout.y], (it) => it.x == view.layout.x);
                 if (view.tracks && typeof view.tracks === 'object') {
                     _.each(trackNames, function (trackName) {
                         const track = view.tracks[trackName];
