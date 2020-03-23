@@ -179,6 +179,17 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
+        "email": "kent_pitman@hms.harvard.edu",
+        "first_name": "Kent",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Pitman",
+        "uuid": "682f31f5-64df-4dd6-bb45-ca3b1726e27c",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "last_name": "App",
         "viewing_groups": ["4DN"],
         "aliases": ["4dn-dcic-lab:foursight_app"],
