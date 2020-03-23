@@ -75,14 +75,14 @@ NOTES:
     $ brew upgrade
     $ rm -rf encoded/eggs
 
-Step 3: Running Buildout
+Step 3: Running Make
 ------------------------
 
-Run buildout::
+Run make::
 
-    $ pip install -U zc.buildout setuptools
-    $ buildout bootstrap --buildout-version 2.9.5 --setuptools-version 36.6.0
-    $ bin/buildout
+    $ make build-dev  # for all dependencies
+    OR
+    $ make build      # for only application level dependencies
 
 NOTES:
 
@@ -119,7 +119,7 @@ Start the application locally
 
 In one terminal startup the database servers and nginx proxy with::
 
-    $ bin/dev-servers development.ini --app-name app --clear --init --load
+    $ make deploy1
 
 This will first clear any existing data in /tmp/encoded.
 Then postgres and elasticsearch servers will be initiated within /tmp/encoded.
@@ -128,7 +128,7 @@ The servers are started, and finally the test set will be loaded.
 
 In a second terminal, run the app with::
 
-    $ bin/pserve development.ini
+    $ make deploy2
 
 Indexing will then proceed in a background thread similar to the production setup.
 
@@ -224,24 +224,3 @@ Force compiling
 ::
 
     $ npm run build-scss
-
-
-
-SublimeLinter
-=============
-
-To setup SublimeLinter with Sublime Text 3, first install the linters::
-
-    $ easy_install-2.7 flake8
-    $ npm install -g jshint
-    $ npm install -g jsxhint
-
-After first setting up `Package Control`_ (follow install and usage instructions on site), use it to install the following packages in Sublime Text 3:
-
-    * sublimelinter
-    * sublimelinter-flake8
-    * sublimelinter-jsxhint
-    * jsx
-    * sublimelinter-jshint
-
-.. _`Package Control`: https://sublime.wbond.net/

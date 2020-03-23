@@ -208,9 +208,10 @@ export class FileEntryBlock extends React.PureComponent {
 
 
     renderName(){
-        const { file, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
+        const { file,  columnHeaders, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
         const classList = ['name', 'col-file'];
-        if (file && file.accession) classList.push('mono-text');
+        const colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null;
+        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('mono-text');
         if (!excludeCheckbox && selectedFiles && SingleFileCheckbox.hasCheckbox(file)){
             classList.push('has-checkbox');
         }
@@ -368,13 +369,14 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     render(){
-        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth } = this.props;
+        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth, columnClass } = this.props;
         const isReallySingleItem = this.isSingleItem(isSingleItem, files);
         const cls = (
             "s-block file-group keep-label-on-name-hover" +
             (hideNameOnHover ? ' hide-name-on-block-hover' : '') +
             " stack-depth-" + stackDepth
         );
+        const useStyle = colWidthStyles["list:file-group"]; // columnClass here is of parent StackedBlock, not of its children.
 
         let childBlocks;
 
@@ -396,7 +398,7 @@ export class FilePairBlock extends React.PureComponent {
         return (
             <div className={cls}>
                 { this.nameColumn() }
-                <div className={"files s-block-list stack-depth-" + stackDepth}>{ childBlocks }</div>
+                <div className={"files s-block-list stack-depth-" + stackDepth} style={useStyle}>{ childBlocks }</div>
             </div>
         );
     }
@@ -438,7 +440,7 @@ export class FileHeaderWithCheckbox extends React.PureComponent {
 
         return (
             <React.Fragment>
-                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'children')} {...{ indeterminate, checked }}
+                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'handleFileCheckboxChange', 'children')} {...{ indeterminate, checked }}
                     data-select-files={accessionTriples} onChange={this.onChange} className="file-header-select-checkbox" />
                 { children }
             </React.Fragment>
