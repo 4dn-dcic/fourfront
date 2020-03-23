@@ -4,16 +4,14 @@ import { navUserAcctDropdownBtnSelector } from './../support/variables';
 describe('Search As You Type functionality on SubmissionView', function () {
     var testItemsToDelete = [];
 
-    context('Test suggested_enums on Software Items', function() {
+    context('Test enums, suggested_enums on Software Items', function() {
         before(function() {
             // Navigate to and create a new software item for testing suggested_enums
-            cy.visit('/');
+            cy.visit('/search/?type=Software&currentAction=add');
             cy.login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
                 .get(navUserAcctDropdownBtnSelector).then((accountListItem)=>{
                     expect(accountListItem.text()).to.contain('Cypress');
                 }).end();
-            cy.visit('/search/?type=Software').get(".above-results-table-row .btn").should('contain', 'Create New')
-                .get("a.btn.btn-primary.btn").should('contain', 'Create New').click().end().wait(5000);
 
             // Generate an identifier and use that for alias
             const identifier = ("sv-sayt-test-" + new Date().getTime());
@@ -85,14 +83,71 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('contain', 'variant aggregator').end();
         });
 
+        it('Can select enum from dropdown ', function() {
+            // Select last item from dropdown
+            cy.get(".field-row[data-field-name=status] .dropdown-toggle")
+                .should('contain', "No value").click().wait(1500)
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items .dropdown-item")
+                .first().click().end();
+
+            // Check that new value has been added to the button
+            cy.get(".field-row[data-field-name=status] .dropdown-toggle")
+                .should('contain', 'released').end();
+        });
+
+        it.only('Can select enum via search to type ', function() {
+            // Attempt to make a selection that is not in the enumerated list
+            cy.get(".field-row[data-field-name=status] .dropdown-toggle").click()
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
+                .focus().type("Currently")
+                // Check that UI indicates new item is NOT being added
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items em")
+                .should('contain', "No results found")
+                // Check the value of the button to make sure value wasn't changed there
+                .get(".field-row[data-field-name=status] .dropdown-toggle")
+                .should('not.contain', 'Currently').end();
+
+            // Make a new selection "current" by typing
+            cy.get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
+                // Note: Superfluous get commands used to fix a bug due to this input somehow "detaching from the DOM"; suggestion
+                // was to re-query in multiple places.
+                .focus().clear()
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
+                .type("current").wait(1000)
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 1).click().end();
+
+            // Test deleting an item
+            cy.get(".field-row[data-field-name=status] .remove-button-container button")
+                .click()
+                .get(".field-row[data-field-name=status] .dropdown-toggle")
+                .should("contain", "No value").click().end();
+
+            /*
+            TODO: Fix this test for keyboard navigation -- behaving REALLY strangely
+            // Load final value and select via arrow key & enter
+            cy.get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
+                .focus().clear() // Note: again, double querying a result of 'detachment from DOM' post-clear
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
+                .type("released")
+                .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 2).first().focus()
+                .trigger('keydown', { keyCode: '9' })
+                .trigger('keydown', { keyCode: '13' })
+                // Check that new value has been added to the button
+                .get(".field-row[data-field-name=status] .dropdown-toggle")
+                .should('contain', 'released').end();
+            */
+        });
+
         it('Can validate and submit software items', function() {
             // Try to validate and submit the form.
             cy.get(".action-buttons-container .btn").within(function () {
-                return cy.contains('Validate').click().end().wait(1000);
+                return cy.contains('Validate').click().end().wait(5000);
             }).end()
                 // Click Submit button
                 .get(".action-buttons-container .btn").within(function () {
-                    return cy.contains('Submit').click().end().wait(1000);
+                    return cy.contains('Submit').click().end().wait(5000);
                 }).end()
                 // Navigate new biosample data page
                 .get(".action-buttons-container .btn").within(function () {
@@ -103,7 +158,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 const context = $context.text();
                 const contextData = JSON.parse(context);
                 const atId = contextData['@id'];
-                testItemsToDelete.push(atId);//Test biosample data @id
+                testItemsToDelete.push(atId); // Test software data @id
             });
         });
 
@@ -138,6 +193,36 @@ describe('Search As You Type functionality on SubmissionView', function () {
 
             // Empty the array for next suite of tests
             testItemsToDelete = [];
+        });
+    });
+
+    context('Test linked object selection on Software Items', function() {
+        before(function() {
+            // Pick option in list for required suggested_enum
+            cy.get(".field-row [data-field-name=software_type] .dropdown-toggle")
+                .should('contain', 'No value').click()
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .scroll-items .dropdown-item")
+                .last().click().end();
+        });
+
+        it("Can link and object via SearchAsYouTypeAjax ", function() {
+
+        });
+
+        it("Can link an object via Advanced Search ", function() {
+
+        });
+
+        it("Can link multiple objects via Advanced Search ", function() {
+
+        });
+
+        it("Can delete objects found via SearchAsYouType", function() {
+
+        });
+
+        it("Can delete objects found via Advanced Search ", function() {
+
         });
     });
 });
