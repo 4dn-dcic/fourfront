@@ -304,7 +304,13 @@ export default class App extends React.PureComponent {
                 function(res){
                     const { events = [] } = res;
                     console.info(`Received ${events.length} events from "${statusMessagesURL}".`);
-                    events.forEach(function({ name: title, message, style = "warning", navigateDisappearThreshold = 3 }){
+                    events.forEach(function({
+                        name: title,
+                        message,
+                        alertStyle: style = null,       // One of "warning", "danger", "info", ... (or null/undefined)
+                        navigateDisappearThreshold = 3
+                    }){
+                        if (!alertStyle) return; // Don't show on UI.
                         Alerts.queue({ title, message, style, navigateDisappearThreshold });
                     });
                 },
