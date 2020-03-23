@@ -136,10 +136,10 @@ ENV_WEBPROD2 = 'fourfront-webprod2'
 ENV_WOLF = 'fourfront-wolf'
 
 
+# there are 2 at any time, adding more will break it
 NEW_BEANSTALK_PROD_ENVS = [
     ENV_PRODUCTION_BLUE,
     ENV_PRODUCTION_GREEN,
-    ENV_STAGING,
 ]
 
 
