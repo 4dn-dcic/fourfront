@@ -117,6 +117,14 @@ Step 4: Running the Application Locally
 
 Start the application locally
 
+You'll need to prepare your local python library search rules by doing
+the following::
+
+    $ python setup_eb.py develop
+
+This setup only needs to be done once, even as you may do the rest of the
+operations that follow more than once.
+
 In one terminal startup the database servers and nginx proxy with::
 
     $ make deploy1
