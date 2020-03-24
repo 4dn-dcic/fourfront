@@ -115,7 +115,7 @@ NOTES:
 Step 4: Running the Application Locally
 ---------------------------------------
 
-Start the application locally
+Start the application locally.
 
 You'll need to prepare your local python library search rules by doing
 the following::
