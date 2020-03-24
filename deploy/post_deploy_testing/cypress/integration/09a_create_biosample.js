@@ -27,17 +27,18 @@ describe('Biosample create page', function () {
             const identifier = ("bs-test-" + new Date().getTime());
             cy.get('.modal-dialog input#aliasInput.form-control').focus().type(identifier).wait(100).end()
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end().wait(10000);
-            cy.get('.field-row [data-field-name=biosource] .linked-object-buttons-container .select-create-linked-item-button').first().should('contain', 'Select existing').click().end();
 
             //Add biosources data file
-            cy.get('.array-field-container  .field-row .field-column .linked-object-text-input-container  .form-control').focus().type('0f011b1e-b772-4f2a-8c24-cc55de28a994').wait(100).end();
+            cy.get(".field-row[data-field-name=biosource] .dropdown-toggle").click().wait(100)
+                .get(".field-row[data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
+                .type("0f011b1e-b772-4f2a-8c24-cc55de28a994").wait(10000)
+                .get(".field-row[data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 1).click().end();
 
-            //Biosource data file check succes
-            cy.get('.remove-button-container .btn-success').click().end().wait(10000)
-                //Click Validate button
-                .get(".action-buttons-container .btn").within(function () {
-                    return cy.contains('Validate').click().end();
-                }).end()
+            //Click Validate button
+            cy.get(".action-buttons-container .btn").within(function () {
+                return cy.contains('Validate').click().end();
+            }).end()
                 //Click Submit button
                 .get(".action-buttons-container .btn").within(function () {
                     return cy.contains('Submit').click().end().wait(500);
