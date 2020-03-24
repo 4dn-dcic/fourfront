@@ -114,7 +114,7 @@ describe("HiGlass Display pages", function(){
                 .get(".tab-section-title .tabview-title-controls-container").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
-                .get('.alert div').should('have.text', 'Saved new display.').end()
+                .get('.alert div').should('contain.text', 'Saved new display.').end()
                 // Inspect POST response.
                 .get('@newHiglassDisplay').then(function (xhr) {
 
@@ -149,7 +149,7 @@ describe("HiGlass Display pages", function(){
                 }).end()
 
                 // Confirm there is a success message.
-                .get('.alert div').should('have.text', 'Saved new display.').end()
+                .get('.alert div').should('contain.text', 'Saved new display.').end()
 
                 // Inspect the AJAX response so we can capture the new uuid.
                 .get('@newHiglassDisplay').then(function (xhr) {
