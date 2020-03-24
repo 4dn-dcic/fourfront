@@ -85,6 +85,7 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         this.setState({ 'selecting' : true }, () => {
             const extData = { list: analytics.hrefToListName(window && window.location.href) };
+
             if (!this.isAllSelected()){
                 const currentHrefParts = memoizedUrlParse(href);
                 const currentHrefQuery = _.extend({}, currentHrefParts.query);
@@ -115,6 +116,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                         }
                     );
                 });
+
             } else {
                 resetSelectedFiles();
                 this.setState({ 'selecting' : false });

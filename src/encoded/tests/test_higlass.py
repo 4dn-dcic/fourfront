@@ -52,7 +52,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                     "h": 12,
                     "x": 0,
                     "y": 0,
-                    "i": "view-4dn-mcool-0",
                     "moved": False,
                     "static": True
                 },
@@ -305,7 +304,6 @@ def higlass_blank_viewconf(testapp, lab, award):
                     "h": 12,
                     "x": 0,
                     "y": 0,
-                    "i": "aa",
                     "moved": False,
                     "static": False
                 },
@@ -684,14 +682,12 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     assert_true(len(new_higlass_json["views"]) == 2)
 
     layout0 = new_higlass_json["views"][0]["layout"]
-    assert_true(layout0["i"] == new_higlass_json["views"][0]["uid"])
     assert_true(layout0["x"] == 0)
     assert_true(layout0["y"] == 0)
     assert_true(layout0["w"] == 6)
     assert_true(layout0["h"] == 12)
 
     layout1 = new_higlass_json["views"][1]["layout"]
-    assert_true(layout1["i"] == new_higlass_json["views"][1]["uid"])
     assert_true(layout1["x"] == 6)
     assert_true(layout1["y"] == 0)
     assert_true(layout1["w"] == 6)
@@ -824,9 +820,6 @@ def assert_expected_viewconf_dimensions(viewconf, expected_dimensions):
 
     for index, expected_layout in enumerate(expected_dimensions):
         layout = viewconf["views"][index]["layout"]
-
-        # Make sure the uid matches the layout's index.
-        assert_true(layout["i"] == viewconf["views"][index]["uid"])
 
         # Make sure each dimension matches.
         for dimension in ("x", "y", "w", "h"):
