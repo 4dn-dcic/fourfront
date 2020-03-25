@@ -37,6 +37,11 @@ beanstalk.cfg
 /src/encoded/tests/data/temp-local-inserts/*
 !/src/encoded/tests/data/temp-local-inserts/.gitkeep
 
+/bin
+!/bin/test
+!/bin/test.py
+!/bin/macpoetry-install
+
 *.swp
 *.hprof
 *.DS_Store

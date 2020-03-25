@@ -50,6 +50,7 @@ deploy2:  # spins up waittress to serve the application
 
 clean-python:
 	@echo -n "Are you sure? This will wipe all libraries installed on this virtualenv [y/N] " && read ans && [ $${ans:-N} = y ]
+	pip uninstall encoded
 	pip freeze | xargs pip uninstall -y
 
 

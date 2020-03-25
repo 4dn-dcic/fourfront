@@ -60,7 +60,8 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'viewConfig' : PropTypes.object.isRequired,
         'isValidating' : PropTypes.bool,
         'height' : PropTypes.number,
-        'mountDelay' : PropTypes.number.isRequired
+        'mountDelay' : PropTypes.number.isRequired,
+        'onViewConfigUpdated': PropTypes.func
     };
 
     static defaultProps = {
@@ -89,12 +90,18 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-        const { mountDelay } = this.props;
+        const { mountDelay, onViewConfigUpdated } = this.props;
         const finish = () => {
             this.setState(function(currState){
                 return { 'mounted' : true, 'mountCount' : currState.mountCount + 1 };
             }, () => {
                 setTimeout(this.correctTrackDimensions, 500);
+                if (onViewConfigUpdated && typeof onViewConfigUpdated === 'function') {
+                    const hgc = this.getHiGlassComponent();
+                    if (hgc) {
+                        hgc.api.on("viewConfig", onViewConfigUpdated);
+                    }
+                }
             });
         };
 
