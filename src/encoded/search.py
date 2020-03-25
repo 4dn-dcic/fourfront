@@ -996,10 +996,18 @@ def extract_nested_path_from_field(field):
     return field[:field.index('.', field.index('.') + 1)]  # This seems to work in general but feels fragile... - Will
 
 
+def handle_should_query(field_name, options):
+    """ Builds a 'should' subquery for every option for the field """
+    should_query = {BOOL: {SHOULD: {TERMS: {field_name: []}}}}
+    for option in options:
+        should_query[BOOL][SHOULD][TERMS][field_name].append(option)
+    return should_query
+
+
 def handle_nested_filters(nested_filters, final_filters, key='must'):
     """ Helper function for set_filters
         Collapses nested filters together into a single query
-        Modifies final_filters in place
+        ** Modifies final_filters and final_filters in place **
     """
     if key not in [MUST, MUST_NOT]:
         raise RuntimeError('Tried to handle nested filter with key other than must/must_not: %s' % key)
@@ -1011,7 +1019,12 @@ def handle_nested_filters(nested_filters, final_filters, key='must'):
             if _q.get(NESTED, None):
                 if _q[NESTED][PATH] == nested_path:
                     try:
-                        _q[NESTED][QUERY][BOOL][key].append(query[BOOL][key][0])  # XXX: must also handle multiple options
+                        options = query[BOOL][key][0][MATCH][field].split(',')
+                        if len(options) > 1:  # construct SHOULD sub-query for all options
+                            sub_query = handle_should_query(field, options)
+                        else:
+                            sub_query = options[0]
+                        _q[NESTED][QUERY][BOOL][key].append(sub_query)
                         found = True
                         break
                     except:       # Why? We found a 'range' nested query and must add this one separately
@@ -1019,10 +1032,16 @@ def handle_nested_filters(nested_filters, final_filters, key='must'):
                                   # queries with AND, but of course not regular queries and of course you cannot
                                   # combine the range query here due to syntax  - Will
         if not found:
+            options = query[BOOL][key][0][MATCH][field].split(',')  # must repeat this work here
+            if len(options) > 1:
+                sub_query = handle_should_query(field, options)
+            else:
+                sub_query = query
+
             final_filters[BOOL][key].append({
                     NESTED: {
                         PATH: nested_path,
-                        QUERY: query
+                        QUERY: sub_query
                     }
                 })
 
@@ -1045,9 +1064,16 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
                         'bool': {
                             'must': {
                                 <positive+range sub-queries>
+                                +
+                                'bool': {
+                                    'should': { option1, option2 ... }
+                                }
                             },
                             'must_not': {
                                 <negative sub-queries>
+                                +
+                                'bool': {
+                                    'should': { option1, option2 ...
                             }}}}}
         }
 

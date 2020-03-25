@@ -221,6 +221,9 @@ def test_search_nested(workbook, testapp):
     accession_and_file_size_upper_bound = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.file_size.to=499'
     testapp.get(accession_and_file_size_upper_bound, status=404)
 
+    # should return results since OR property in nested will match the second accession with file_size=500
+    two_accessions_with_file_size = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1,4DNFIO67APT1&files.properties.file_size=500'
+    testapp.get(two_accessions_with_file_size)
 
 @pytest.fixture
 def mboI_dts(testapp, workbook):
