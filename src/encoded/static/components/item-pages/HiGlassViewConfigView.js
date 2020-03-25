@@ -88,16 +88,20 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return true;
     });
 
-    static getTilesetUids(obj) {
+    /**
+     * get tilesets and positions, width/height and view's position
+     * @param {Object} viewConf: even if viewConf.views modified in function, it has no side-effect since calling function always provides a fresh new argument
+     */
+    static getTilesetUids(viewConf) {
         const tilesetUids = {};
-        if (obj && obj.views && Array.isArray(obj.views) && obj.views.length > 0) {
-            obj.views = _.chain(obj.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
-            //very simple implementation of naming views - assumes views' top edge is aligned in a row
-            const layouts = _.map(obj.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
+        if (viewConf && viewConf.views && Array.isArray(viewConf.views) && viewConf.views.length > 0) {
+            viewConf.views = _.chain(viewConf.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
+            //very simple implementation of naming views - assumes views' top edge in a row is aligned
+            const layouts = _.map(viewConf.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
             const groupedLayouts = HiGlassViewConfigTabView.getGroupedLayouts(layouts);
             //loop tracks
             const trackNames = ['top', 'right', 'bottom', 'left', 'center', 'whole', 'gallery'];
-            _.each(obj.views, function (view) {
+            _.each(viewConf.views, function (view) {
                 const layout = _.find(groupedLayouts[view.layout.y], (it) => it.x == view.layout.x);
                 if (view.tracks && typeof view.tracks === 'object') {
                     _.each(trackNames, function (trackName) {
@@ -151,7 +155,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
-        this.onViewConfigUpdated = this.onViewConfigUpdated.bind(this);
+        this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
         this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
 
         /**
@@ -176,10 +180,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'tilesetUids'           : {},
         };
         this.higlassRef = React.createRef();
-
-        this.memoized = {
-            getTilesetUids: memoize(HiGlassViewConfigTabView.getTilesetUids)
-        };
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -672,7 +672,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     onViewConfigUpdated(viewConf){
         const { tilesetUids: oldData } = this.state;
-        const newData = this.memoized.getTilesetUids(JSON.parse(viewConf));
+        const newData = HiGlassViewConfigTabView.getTilesetUids(JSON.parse(viewConf));
 
         if (!_.isEqual(oldData, newData)) {
             const newDataKeys = _.keys(newData);
