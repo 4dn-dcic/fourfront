@@ -33,7 +33,7 @@ describe('Biosample create page', function () {
                 .get(".field-row[data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
                 .type("0f011b1e-b772-4f2a-8c24-cc55de28a994").wait(10000)
                 .get(".field-row[data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
-                .should('have.length', 1).click().end();
+                .should('have.length', 1).click().wait(1000).end();
 
             //Click Validate button
             cy.get(".action-buttons-container .btn").within(function () {
