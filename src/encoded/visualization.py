@@ -1449,21 +1449,7 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["width"] = temp_width
             del track["height"]
-
-        # Also the minimum width/height
-        temp_height = track.get("minWidth", None)
-        temp_width = track.get("minHeight", None)
-
-        if temp_height and temp_width:
-            track["minHeight"] = temp_height
-            track["minWidth"] = temp_width
-        elif temp_height:
-            track["minHeight"] = temp_height
-            del track["minWidth"]
-        elif temp_width:
-            track["minWidth"] = temp_width
-            del track["minHeight"]
-
+        
         # And the orientation
         track_orientation = track.get("orientation", None)
         if track_orientation in orientation_mappings:
