@@ -37,7 +37,7 @@ describe('Biosample create page', function () {
 
             //Click Validate button
             cy.get(".action-buttons-container .btn").within(function () {
-                return cy.contains('Validate').click().end();
+                return cy.contains('Validate').click().end().wait(1000);
             }).end()
                 //Click Submit button
                 .get(".action-buttons-container .btn").within(function () {
