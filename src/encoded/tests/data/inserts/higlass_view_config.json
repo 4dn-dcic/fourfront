@@ -52,7 +52,6 @@
                                 "name": "4DNFIWG6CQQA.beddb",
                                 "type": "horizontal-gene-annotations",
                                 "tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
-                                "minHeight": 55,
                                 "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                                 "height": 55,
                                 "position": "top"
@@ -68,7 +67,6 @@
                                     "color": "#777777",
                                     "labelColor": "#888",
                                     "mousePositionColor": "#999999",
-                                    "valueScaling": "linear",
                                     "fontSize": 12,
                                     "labelPosition": "hidden",
                                     "trackBorderWidth": 0,
@@ -81,7 +79,6 @@
                                 "name": "Chromosome Axis",
                                 "type": "horizontal-chromosome-labels",
                                 "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "minHeight": 30,
                                 "height": 35,
                                 "local": true,
                                 "position": "top"
@@ -188,7 +185,7 @@
                         -166316769.39873636,
                         3257874853.005984
                     ],
-                    "layout": { 
+                    "layout": {
                         "static": false,
                         "h": 12,
                         "x": 0,

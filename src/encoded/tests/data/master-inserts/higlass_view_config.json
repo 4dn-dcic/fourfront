@@ -108,7 +108,6 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
                                     "fontIsAligned": false,
@@ -212,7 +211,6 @@
                             {
                                 "height": 35,
                                 "thumbnail": null,
-                                "minHeight": 30,
                                 "orientation": "1d-horizontal",
                                 "name": "Chromosome Axis",
                                 "options": {
@@ -310,7 +308,6 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
@@ -413,7 +410,6 @@
                             {
                                 "height": 35,
                                 "thumbnail": null,
-                                "minHeight": 30,
                                 "orientation": "1d-horizontal",
                                 "name": "Chromosome Axis",
                                 "options": {
@@ -422,7 +418,6 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
@@ -482,7 +477,7 @@
                                     "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    
+
                                     "minusStrandColor": "black",
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
@@ -515,7 +510,6 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
@@ -617,7 +611,6 @@
                         "top": [
                             {
                                 "height": 55,
-                                "minHeight": 55,
                                 "orientation": "1d-horizontal",
                                 "name": "Gene Annotations (hg38)",
                                 "options": {
@@ -665,7 +658,7 @@
                         "x": 0,
                         "h": 6,
                         "static": false
-                        
+
                     }
                 },
                 {
@@ -725,7 +718,6 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
@@ -826,7 +818,6 @@
                         "top": [
                             {
                                 "height": 55,
-                                "minHeight": 55,
                                 "orientation": "1d-horizontal",
                                 "name": "Gene Annotations (hg38)",
                                 "options": {
@@ -1083,7 +1074,6 @@
                                 "orientation": "1d-horizontal",
                                 "height": 30,
                                 "position": "top",
-                                "minHeight": 30,
                                 "type": "horizontal-chromosome-labels",
                                 "uid": "top-chromosome-track",
                                 "local": true,
