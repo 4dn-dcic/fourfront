@@ -1009,41 +1009,87 @@ def handle_nested_filters(nested_filters, final_filters, key='must'):
         Collapses nested filters together into a single query
         ** Modifies final_filters and final_filters in place **
     """
-    if key not in [MUST, MUST_NOT]:
+    KEY_MAP = {MUST: MUST_NOT, MUST_NOT: MUST}
+    if key not in KEY_MAP:
         raise RuntimeError('Tried to handle nested filter with key other than must/must_not: %s' % key)
+
+    # iterate through all nested filters
     for field, query in nested_filters:
+
+        # iterate through all sub_query parts - note that this is modified in place hence the need
+        # to re-iterate after every nested filer is applied
         nested_path = extract_nested_path_from_field(field)
         sub_queries = final_filters['bool'][key]
         found = False
         for _q in sub_queries:
+
+            # Try to add to an existing 'nested' sub-query if possible
             if _q.get(NESTED, None):
                 if _q[NESTED][PATH] == nested_path:
                     try:
+                        # check if this field has multiple options
                         options = query[BOOL][key][0][MATCH][field].split(',')
-                        if len(options) > 1:  # construct SHOULD sub-query for all options
+                        if len(options) > 1:
+
+                            # construct SHOULD sub-query for all options
                             sub_query = handle_should_query(field, options)
+                            _q[NESTED][QUERY][BOOL][key].append(sub_query)
+
+                        # if we don't have options, our original 'query' is what we need
                         else:
-                            sub_query = options[0]
-                        _q[NESTED][QUERY][BOOL][key].append(sub_query)
-                        found = True
+                            _q[NESTED][QUERY][BOOL][key].append(query[BOOL][key][0])
+
+                        found = True  # break is not sufficient, see below
                         break
                     except:       # Why? We found a 'range' nested query and must add this one separately
                         continue  # This behavior is absurd. Somehow it knows to combine separate nested range
                                   # queries with AND, but of course not regular queries and of course you cannot
                                   # combine the range query here due to syntax  - Will
         if not found:
-            options = query[BOOL][key][0][MATCH][field].split(',')  # must repeat this work here
-            if len(options) > 1:
-                sub_query = handle_should_query(field, options)
-            else:
-                sub_query = query
 
+            # It's possible we're looking at a sub-query that's wrapped in a (length 1) list
+            if type(query) == list:
+                if len(query) == 1:
+                    query = query[0]
+                else:
+                    raise Exception  # malformed
+
+            # Check that key is in the sub-query first, it's possible that it in fact uses it's opposite
+            # This can happen when adding no value, the opposite 'key' can occur in the sub-query
+            opposite_key = None
+            if key not in query[BOOL]:
+                opposite_key = KEY_MAP[key]
+                outer_query = query[BOOL][opposite_key]
+            else:
+                outer_query = query[BOOL][key]
+
+            # It's possible we have multiple options for the same field (OR). Take those in place.
+            if BOOL in outer_query:
+                if SHOULD in outer_query[BOOL]:
+                    sub_query = query
+                else:
+                    raise Exception  # malformed
+
+            # Otherwise, we have a standard 'match' and must repeat 'options' work here since its
+            # possible we are the first nested field on the given path
+            else:
+                if opposite_key:  # in case we are in an 'opposite scenario', pass query directly
+                    options = []
+                else:
+                    options = query[BOOL][key][0][MATCH][field].split(',')
+
+                if len(options) > 1:
+                    sub_query = handle_should_query(field, options)
+                else:
+                    sub_query = query
+
+            # add the 'nested' sub query to the main query for this path
+            # all remaining nested filters on this path will be part of this object unless they are of type 'range'
+            # in which case they will get their own NESTED sub-query
             final_filters[BOOL][key].append({
-                    NESTED: {
-                        PATH: nested_path,
-                        QUERY: sub_query
-                    }
-                })
+                    NESTED: {PATH: nested_path,
+                             QUERY: sub_query}
+            })
 
 
 def set_filters(request, search, result, principals, doc_types, es_mapping):

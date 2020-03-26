@@ -222,8 +222,20 @@ def test_search_nested(workbook, testapp):
     testapp.get(accession_and_file_size_upper_bound, status=404)
 
     # should return results since OR property in nested will match the second accession with file_size=500
-    two_accessions_with_file_size = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1,4DNFIO67APT1&files.properties.file_size=500'
+    two_accessions_with_file_size = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.properties.accession=4DNFIO67APT1&files.properties.file_size=500'
     testapp.get(two_accessions_with_file_size)
+
+    # should return no results since NOT'ing the second accession who has file_size=500
+    negative_second_accession_with_file_size = '/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1&files.properties.accession!=4DNFIO67APT1&files.properties.file_size=500'
+    testapp.get(negative_second_accession_with_file_size, status=404)
+
+    # should return no results, just checking logic of 'no value'
+    strange_search_with_no_value = '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.experiment_type.display_title=No+value&experiments_in_set.biosample.biosource.individual.organism.name=No+value'
+    testapp.get(strange_search_with_no_value, status=404)
+
+    # should return results since there are experiments, another sanity check
+    main_page_search = '/browse/?experimentset_type=replicate&type=ExperimentSetReplicate'
+    testapp.get(main_page_search)
 
 @pytest.fixture
 def mboI_dts(testapp, workbook):
