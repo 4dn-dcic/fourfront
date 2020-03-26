@@ -1,0 +1,179 @@
+[tool.poetry]
+name = "encoded"
+version = "1.0b1"
+description = "4DN-DCIC Fourfront"
+authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
+license = "MIT"
+readme = "README.rst"
+homepage = "https://github.com/4dn-dcic/fourfront"
+repository = "https://github.com/4dn-dcic/fourfront"
+documentation = "https://github.com/4dn-dcic/fourfront"
+packages = [
+  { include="encoded", from="src" }
+]
+classifiers = [
+    # How mature is this project? Common values are
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - Production/Stable
+    'Development Status :: 3 - Alpha',
+
+    # Indicate who your project is intended for
+    'Intended Audience :: Developers',
+    'Intended Audience :: Science/Research',
+    'Framework :: Pyramid',
+
+    # Pick your license as you wish (should match "license" above)
+    'License :: OSI Approved :: MIT License',
+    'Topic :: Database :: Database Engines/Servers',
+
+    # Specify the Python versions you support here. In particular, ensure
+    # that you indicate whether you support Python 2, Python 3 or both.
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6'
+]
+
+[tool.poetry.dependencies]
+python = ">=3.5,<3.7"
+boto3 = "^1.10.46"
+botocore = "^1.13.46"
+certifi = "2018.4.16"
+chardet = "3.0.4"
+"collective.recipe.cmd" = "0.11"
+"collective.recipe.modwsgi" = "2.1"
+"collective.recipe.template" = "1.13"
+colorama = "0.3.3"
+coverage = "4.0.3"  # TODO: Maybe move to dev-dependencies?
+dcicutils = "0.9.3b0"
+dcicsnovault = "2.0.4"
+docutils = "0.12"
+elasticsearch = "5.5.3"
+elasticsearch-dsl = "5.4.0"
+execnet = "1.4.1"
+flaky = "3.6.1"  # TODO: Maybe move to dev-dependencies?
+future = "0.15.2"
+humanfriendly = "1.44.5"
+hupper = "1.5"
+idna = "2.7"
+isodate = "0.5.4"
+jmespath = "0.9.0"
+jsonschema-serialize-fork = "2.1.1"
+keepalive = "0.5"
+loremipsum = "1.0.5"
+netaddr = "0.7.18"
+passlib = "1.6.5"
+PasteDeploy = "1.5.2"
+pbkdf2 = "1.3"
+Pillow = "3.1.1"
+plaster = "1.0"
+plaster-pastedeploy = "0.6"
+psutil = "^4.3.0"
+psycopg2-binary = "2.7.7"
+py = "1.4.31"
+pyasn1 = "0.1.9"
+PyBrowserID = "0.10.0"
+pycparser = "2.14"
+PyJWT = "1.5.3"
+pyparsing = "2.1.1"
+pyramid-localroles = "0.1"
+pyramid-multiauth = "0.8.0"
+pyramid-retry = "1.0"
+pyramid-tm = "2.2.1"
+pyramid-translogger = "0.1"
+# Hoping for bug fix in pytest = "2.9.1"
+pytest = "2.9.2"
+pytest-cov = "2.2.1"
+pytest-exact-fixtures = "0.1"
+pytest-instafail = "0.3.0"
+pytest-mock = "0.11.0"
+pytest-timeout = "1.0.0"
+pytest-xdist = "1.14"
+python-dateutil = "2.5.3"
+python-magic = "0.4.12"
+pytz = ">=2016.3"
+# Snovault has been updated to use PyYAML 5, and needs it for testing only.
+# We don't use the yaml package that PyYAML provides at all, so I'm just omitting this. -kmp 1-Mar-2020
+# PyYAML = "3.12"
+rdflib = "4.2.2"
+rdflib-jsonld = "0.3"
+"repoze.debug" = "1.0.2"
+requests = "^2.21.0"
+rfc3987 = "^1.3.6"
+rsa = "3.3"
+rutter = "0.2"
+s3transfer = "^0.2.0"
+simplejson = "^3.17.0"
+SPARQLWrapper = "1.7.6"
+SQLAlchemy = "1.2.16"
+structlog = ">=18.1.0,<20"
+submit4dn = "0.9.7"
+subprocess-middleware = "0.3"
+# Useful for picking apart pyproject.toml
+toml = ">=0.10.0,<1"
+transaction = "2.4.0"
+translationstring = "1.3"
+urllib3 = "^1.24.3"
+venusian = "1.2.0"
+waitress = "1.2.0"
+WebOb = "1.8.5"
+WebTest = "^2.0.21"
+wheel = "0.29.0"
+WSGIProxy2 = "0.4.2"
+xlrd = "^1.0.0"
+xlwt = "1.2.0"
+"zope.deprecation" = "4.4.0"
+"zope.interface" = "4.6.0"
+"zope.sqlalchemy" = "^1.2"
+
+[tool.poetry.dev-dependencies]
+# flask only for moto[server]
+flask = ">=1.1.1"
+moto = ">=1.3.14"
+
+[tool.poetry.scripts]
+# snovault commands
+batchupgrade = "snovault.batchupgrade:main"
+create-mapping = "snovault.elasticsearch.create_mapping:main"
+es-index-listener = "snovault.elasticsearch.es_index_listener:main"
+wipe-test-indices = "snovault.commands.wipe_test_indices:main"
+# encoded commands
+add-date-created = "encoded.commands.add_date_created:main"
+check-rendering = "encoded.commands.check_rendering:main"
+clear-db-es-contents = "encoded.commands.clear_db_es_contents:main"
+configure-kibana-index = "encoded.commands.configure_kibana_index:main"
+create-mapping-on-deploy = "encoded.commands.create_mapping_on_deploy:main"
+dev-servers = "encoded.dev_servers:main"
+dis2pheno = "encoded.commands.parse_hpoa:main"
+es-index-data = "encoded.commands.es_index_data:main"
+example-command = "encoded.commands.example_command:main"
+export-data = "encoded.commands.export_data:main"
+extract-test-data = "encoded.commands.extract_test_data:main"
+import-data = "encoded.commands.import_data:main"
+jsonld-rdf = "encoded.commands.jsonld_rdf:main"
+load-access-keys = "encoded.commands.load_access_keys:main"
+load-data = "encoded.commands.load_data:main"
+load-items = "encoded.commands.load_items:main"
+migrate-attachments-aws = "encoded.commands.migrate_attachments_aws:main"
+migrate-dataset-type = "encoded.commands.migrate_dataset_type:main"
+migrate-files-aws = "encoded.commands.migrate_files_aws:main"
+owl-to-items = "encoded.commands.generate_items_from_owl:main"
+profile = "encoded.commands.profile:main"
+run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
+spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
+update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
+verify-item = "encoded.commands.verify_item:main"
+
+
+[paste.app_factory]
+main = "encoded:main"
+
+[paste.composite_factory]
+indexer = "snovault.elasticsearch.es_index_listener:composite"
+
+[paste.filter_app_factory]
+memlimit = "encoded.memlimit:filter_app"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "^poetry.masonry.api"

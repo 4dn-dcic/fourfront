@@ -1343,7 +1343,6 @@ def add_2d_file(views, new_content, viewconfig_info, maximum_height):
     new_view = deepcopy(views[0])
     new_view["uid"] = uuid.uuid4()
     new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
-    new_view["layout"]["i"] = new_view["uid"]
 
     # Replace the central track with the new file
     for i, track in enumerate(new_view["tracks"]["center"][0]["contents"]):
