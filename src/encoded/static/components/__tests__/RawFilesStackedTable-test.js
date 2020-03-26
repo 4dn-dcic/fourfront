@@ -3,6 +3,7 @@
 import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
+import { StackedBlockTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { RawFilesStackedTable } from './../browse/components/file-tables';
 import { SelectedFilesController } from './../browse/components/SelectedFilesController';
 import { expFxn } from './../util';
@@ -19,7 +20,7 @@ jest.dontMock('underscore');
 describe('Testing RawFilesStackedTable', function() {
     var testRawFilesStackedTable, context, schemas, initiallySelectedFiles;
 
-    beforeEach(function() {
+    beforeAll(function() { // (ran once only)
 
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
@@ -91,36 +92,30 @@ describe('Testing RawFilesStackedTable', function() {
         ).toEqual(checkIfHaveHeaders);
     });
 
-    it('Header columns have width styles which fit available width', function() {
+    it('Header columns have minWidth styles which fit available width', function() {
         const headers = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
-        const availableWidthForTests = 960;
         const orderedHeaderWidths = headers.map(function(h, i){
-            const w = parseInt(h.style._values.width); 
+            const w = parseInt(h.style._values['min-width']); 
             if (Number.isNaN(w)){
-                return 120;
+                return StackedBlockTable.defaultProps.defaultInitialColumnWidth;
             }
             return w;
         });
-
         const totalHeadersWidth = _.reduce(orderedHeaderWidths, function(m,v,i){ return m+v; }, 0); // Sum of heading block widths.
-        // Difference of available space minus sum of heading block widths should be ~ +0-2 (margin of error for remainder).
-        expect(availableWidthForTests - totalHeadersWidth).toBeGreaterThan(-0.01);
-        expect(availableWidthForTests - totalHeadersWidth).toBeLessThan(2.01);
-        // Need to update jest for toBeGreaterThanOrEqual to work. 
+        expect(totalHeadersWidth).toBeGreaterThan(300);
     });
 
     it('All child columns/blocks with matching classNames (col-experiment, etc.), match header block widths', function() {
-        var headers = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
-        var headerWidths = _.map(headers, function(h, i){
-            var w = parseInt(h.style._values.width);
-            var columnClassName = h.getAttribute('data-column-class');
-            if (Number.isNaN(w)) w = 120; // Default
-            return [columnClassName, w];
+        const headers = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'heading-block');
+        const minHeaderWidths = _.map(headers, function(h, i){
+            let w = parseInt(h.style._values['min-width']);
+            if (Number.isNaN(w)) w = StackedBlockTable.defaultProps.defaultInitialColumnWidth; // Default
+            return [ h.getAttribute('data-column-class'), w ];
         })
 
-        console.log('Header Block Widths for test:', headerWidths);
+        console.log('Header Block Widths for test:', minHeaderWidths);
 
-        var sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
+        const sBlocks = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block');
 
         sBlocks.map(function(sBlock){
             return _.find(sBlock.children, function(child){
@@ -131,12 +126,12 @@ describe('Testing RawFilesStackedTable', function() {
             if (typeof v === 'undefined') return false;
             return true;
         }).forEach(function(nameColumn){
-            var colClassName = _.find(
+            const colClassName = _.find(
                 nameColumn.className.split(' '),
                 function(c) { return c.indexOf('col-') > -1; }
             ).replace('col-', '');
             expect(
-                _.any(headerWidths, function(hw){ return hw[1] === parseInt(nameColumn.style._values.width) && hw[0] === colClassName })
+                _.any(minHeaderWidths, function(hw){ return hw[1] === parseInt(nameColumn.style._values['min-width']) && hw[0] === colClassName })
             ).toEqual(true); // Test for each
         });
 
@@ -201,6 +196,33 @@ describe('Testing RawFilesStackedTable', function() {
 
     });
 
+    it('Clicking "Show X More Ys" collapse button works', function() {
+
+        const viewMoreButtons = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'view-more-button');
+        const collapsibleSections = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'collapsible-s-block-ext');
+        const countSBlocksOrig = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block').length;
+
+        // Every collapsible section collapsed
+        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') === -1; })).toBe(true);
+
+        _.forEach(viewMoreButtons, function(b){
+            TestUtils.Simulate.click(b);
+        });
+
+        // Every collapsible section in transition state
+        expect(_.every(collapsibleSections, function(c){
+            return c.className.split(' ').indexOf('collapsing') > -1;
+        })).toBe(true);
+
+        jest.runAllTimers(); // Finish transitions
+
+        // Every collapsible section visible
+        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') > -1; })).toBe(true);
+
+        const countSBlocksNew = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 's-block').length;
+        expect(countSBlocksNew).toBeGreaterThan(countSBlocksOrig);
+    });
+
     it('Selecting a file pair block changes selectedFiles state', function() {
 
         function getFilePairCheckboxElement(sBlock){
@@ -245,10 +267,9 @@ describe('Testing RawFilesStackedTable', function() {
 
         // Check that the selected file pairs / files in state match checkboxes that are selected.
         function selectedFilesMatchSelectedCheckboxes(stateKeys){
-            
-            if (!stateKeys) stateKeys = _.keys(testRawFilesStackedTable.ref.current.state.selectedFiles).sort();
+            stateKeys = stateKeys || _.keys(testRawFilesStackedTable.ref.current.state.selectedFiles).sort();
+            const fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
 
-            var fileKeys = _.keys(selectedFilePairBlocksFileUUIDObj(filePairBlocksWithCheckboxes)).sort();
             if (fileKeys.length !== stateKeys.length) return false;
             for (var i = 0; i < fileKeys.length; i++){
                 if (fileKeys[i] !== stateKeys[i]) return false;
@@ -258,7 +279,8 @@ describe('Testing RawFilesStackedTable', function() {
 
         function clickRandomFilePairCheckboxes(){
             // Click on 7 random checkboxes (odd number so selectedFiles.size differs after)
-            _.sample(filePairBlocksWithCheckboxes, 7).forEach(function(sBlock){
+            const clickOnCount = Math.round(filePairBlocksWithCheckboxes.length / 2) - 1;
+            _.sample(filePairBlocksWithCheckboxes, clickOnCount).forEach(function(sBlock){
                 TestUtils.Simulate.change(
                     getFilePairCheckboxElement(sBlock)
                 );
@@ -287,31 +309,6 @@ describe('Testing RawFilesStackedTable', function() {
 
         console.log("Initially selected files:\n", _.keys(originalSelectedFiles));
         console.log("Last pass (randomized clicking) selected files (this will differ between test runs) :\n", _.keys(testRawFilesStackedTable.ref.current.state.selectedFiles));
-
-    });
-
-
-    it('Clicking "Show X More Ys" collapse button works', function() {
-
-        var viewMoreButtons = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'view-more-button');
-        var collapsibleSections = TestUtils.scryRenderedDOMComponentsWithClass(testRawFilesStackedTable, 'collapsible-s-block-ext');
-
-        // Every collapsible section collapsed
-        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') === -1; })).toBe(true);
-
-        _.forEach(viewMoreButtons, function(b){
-            TestUtils.Simulate.click(b);
-        });
-
-        // Every collapsible section in transition state
-        expect(_.every(collapsibleSections, function(c){
-            return c.className.split(' ').indexOf('collapsing') > -1;
-        })).toBe(true);
-
-        jest.runAllTimers(); // Finish transitions
-
-        // Every collapsible section visible
-        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') > -1; })).toBe(true);
 
     });
 

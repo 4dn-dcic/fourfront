@@ -125,11 +125,22 @@ ITEM_INDEX_ORDER = [
     'Page',
 ]
 
+ENV_HOTSEAT = 'fourfront-hotseat'
+ENV_MASTERTEST = 'fourfront-mastertest'
+ENV_PRODUCTION_BLUE = 'fourfront-blue'
+ENV_PRODUCTION_GREEN = 'fourfront-green'
+ENV_STAGING = 'fourfront-staging'
+ENV_WEBDEV = 'fourfront-webdev'
 ENV_WEBPROD = 'fourfront-webprod'
 ENV_WEBPROD2 = 'fourfront-webprod2'
-ENV_MASTERTEST = 'fourfront-mastertest'
-ENV_HOTSEAT = 'fourfront-hotseat'
-ENV_WEBDEV = 'fourfront-webdev'
+ENV_WOLF = 'fourfront-wolf'
+
+
+# there are 2 at any time, adding more will break it
+NEW_BEANSTALK_PROD_ENVS = [
+    ENV_PRODUCTION_BLUE,
+    ENV_PRODUCTION_GREEN,
+]
 
 
 BEANSTALK_PROD_ENVS = [
@@ -137,37 +148,48 @@ BEANSTALK_PROD_ENVS = [
     ENV_WEBPROD2,
 ]
 
+
 BEANSTALK_TEST_ENVS = [
-    ENV_MASTERTEST,
     ENV_HOTSEAT,
+    ENV_MASTERTEST,
     ENV_WEBDEV,
+    ENV_WOLF,
 ]
 
 
 def get_my_env(app):
     """
-    Gets the env name of the currently running environments
+    Gets the env name of the currently running environment
+
+    :param app: handle to Pyramid app
+    :return: current env
     """
+    # Return value is presumably one of the above-declared environments
     return app.registry.settings.get('env.name')
 
 
 def get_deployment_config(app):
     """
-        Gets the current data environment from 'whodaman()' and checks
-        via environment variable if we are on production.
-        Returns a dictionary with deployment options based on
-        the environment we are on with keys: 'ENV_NAME' and 'WIPE_ES'
+    Gets deployment configuration for the current environment.
+
+    Sets ENV_NAME and WIPE_ES as side-effects.
+
+    :param app: handle to Pyramid app
+    :return: dict of config options
     """
     deploy_cfg = {}
-    current_data_env = whodaman()
+    current_prod_env = whodaman()  # current_prod_end = <current-data-env>
     my_env = get_my_env(app)
     deploy_cfg['ENV_NAME'] = my_env
-    if current_data_env == my_env:
+    if current_prod_env == my_env:
         log.info('This looks like our production environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False
     elif my_env in BEANSTALK_PROD_ENVS:
         log.info('This looks like our staging environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False  # do not wipe ES
+    elif my_env in NEW_BEANSTALK_PROD_ENVS:
+        log.info('This looks like a new production environment -- do nothing for now')
+        exit(0)
     elif my_env in BEANSTALK_TEST_ENVS:
         if my_env == ENV_HOTSEAT:
             log.info('Looks like we are on hotseat -- do not wipe ES')
@@ -176,8 +198,8 @@ def get_deployment_config(app):
             log.info('Looks like we are on webdev or mastertest -- wipe ES')
             deploy_cfg['WIPE_ES'] = True
     else:
-        log.warning('Looks like we are on an unrecognized env: %s' % my_env)
-        log.warning('Defaulting to not wipe ES')
+        log.warning('This environment is not recognized: %s' % my_env)
+        log.warning('Proceeding without wiping ES')
         deploy_cfg['WIPE_ES'] = False
     return deploy_cfg
 
@@ -193,13 +215,11 @@ def _run_create_mapping(app, args):
     """
     try:
         deploy_cfg = get_deployment_config(app)
-        if args.wipe_es:  # override deploy_cfg WIPE_ES option
-            deploy_cfg['WIPE_ES'] = True
         log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
-        if deploy_cfg['WIPE_ES']:  # if we want to wipe ES
-            run_create_mapping(app, check_first=False, item_order=ITEM_INDEX_ORDER)
-        else:
-            run_create_mapping(app, check_first=True, item_order=ITEM_INDEX_ORDER)
+        if args.wipe_es:  # override deploy_cfg WIPE_ES option
+            log.info('Overriding deploy_cfg and wiping ES')
+            deploy_cfg['WIPE_ES'] = True
+        run_create_mapping(app, check_first=(not deploy_cfg['WIPE_ES']), purge_queue=args.clear_queue, item_order=ITEM_INDEX_ORDER)
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
         log.error(str(e))
@@ -214,6 +234,7 @@ def main():
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('--wipe-es', help="Specify to wipe ES", action='store_true', default=False)
+    parser.add_argument('--clear-queue', help="Specify to clear the SQS queue", action='store_true', default=False)
 
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
@@ -224,3 +245,6 @@ def main():
     _run_create_mapping(app, args)
     exit(0)
 
+
+if __name__ == '__main__':
+    main()

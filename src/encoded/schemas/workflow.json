@@ -183,6 +183,34 @@
             "description": "The name of the image that is downloaded",
             "type": "string"
         },
+        "custom_errors": {
+            "title": "Known error types",
+            "description": "Known error types for this workflow",
+            "type": "array",
+            "items": {
+                "title": "error",
+                "description": "a known error of the workflow",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "error_type": {
+                        "title": "Error type",
+                        "description": "Name of the type of the error",
+                        "type": "string"
+                    },
+                    "pattern": {
+                        "title": "Pattern in log",
+                        "description": "Regex pattern in the output log for the type of the error",
+                        "type": "string"
+                    },
+                    "multiline": {
+                        "title": "Multiline",
+                        "description": "True if pattern spans multiple lines",
+                        "type": "boolean"
+                    }
+                }
+            }
+        },
         "arguments": {
             "title": "Workflow Arguments",
             "description": "arguments of the workflow.",
