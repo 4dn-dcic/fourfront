@@ -33,11 +33,7 @@ from snovault.app import (
 )
 from dcicutils.log_utils import set_logging
 from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from .commands.create_mapping_on_deploy import (
-    ENV_WEBPROD,
-    ENV_WEBPROD2,
-    BEANSTALK_PROD_ENVS,
-)
+from .commands.create_mapping_on_deploy import BEANSTALK_PROD_MIRRORS
 from .utils import find_other_in_pair
 import structlog
 import logging
@@ -46,7 +42,7 @@ import logging
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
-def get_mirror_env(settings):
+def get_mirror_env_from_settings(settings):
     """
         Figures out who the mirror beanstalk Env is if applicable
         This is important in our production environment because in our
@@ -54,9 +50,7 @@ def get_mirror_env(settings):
         must be up to date with each other.
     """
     who_i_am = settings.get('env.name', '')
-    if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
-        return None
-    return find_other_in_pair(who_i_am, BEANSTALK_PROD_ENVS)
+    return BEANSTALK_PROD_MIRRORS.get(who_i_am)
 
 
 def static_resources(config):
@@ -191,7 +185,7 @@ def main(global_config, **local_config):
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = get_mirror_env(settings)
+    settings['mirror.env.name'] = get_mirror_env_from_settings(settings)
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY

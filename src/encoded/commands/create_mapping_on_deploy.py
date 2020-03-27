@@ -135,19 +135,13 @@ ENV_WEBPROD = 'fourfront-webprod'
 ENV_WEBPROD2 = 'fourfront-webprod2'
 ENV_WOLF = 'fourfront-wolf'
 
-
-# there are 2 at any time, adding more will break it
-NEW_BEANSTALK_PROD_ENVS = [
-    ENV_PRODUCTION_BLUE,
-    ENV_PRODUCTION_GREEN,
-]
-
-
-BEANSTALK_PROD_ENVS = [
-    ENV_WEBPROD,
-    ENV_WEBPROD2,
-]
-
+# These operate as pairs. Don't add extras.
+BEANSTALK_PROD_MIRRORS = {
+    ENV_PRODUCTION_BLUE: ENV_PRODUCTION_GREEN,
+    ENV_PRODUCTION_GREEN: ENV_PRODUCTION_BLUE,
+    ENV_WEBPROD: ENV_WEBPROD2,
+    ENV_WEBPROD2: ENV_WEBPROD,
+}
 
 BEANSTALK_TEST_ENVS = [
     ENV_HOTSEAT,
@@ -184,11 +178,11 @@ def get_deployment_config(app):
     if current_prod_env == my_env:
         log.info('This looks like our production environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False
-    elif my_env in BEANSTALK_PROD_ENVS:
+    elif my_env == BEANSTALK_PROD_MIRRORS[current_prod_env]:
         log.info('This looks like our staging environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False  # do not wipe ES
-    elif my_env in NEW_BEANSTALK_PROD_ENVS:
-        log.info('This looks like a new production environment -- do nothing for now')
+    elif my_env in BEANSTALK_PROD_MIRRORS:
+        log.info('This looks like an uncorrelated production environment. Something is definitely wrong.')
         exit(0)
     elif my_env in BEANSTALK_TEST_ENVS:
         if my_env == ENV_HOTSEAT:

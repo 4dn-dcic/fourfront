@@ -2,10 +2,13 @@ import pytest
 
 from snovault import COLLECTIONS
 from unittest.mock import patch, MagicMock
-from ..commands.create_mapping_on_deploy import ITEM_INDEX_ORDER
-from ..commands.create_mapping_on_deploy import get_deployment_config
-# TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
-from ..types.experiment import *
+from ..commands.create_mapping_on_deploy import (
+    ITEM_INDEX_ORDER, get_deployment_config,
+    ENV_MASTERTEST, ENV_WEBPROD, ENV_WEBPROD2, ENV_PRODUCTION_BLUE, ENV_PRODUCTION_GREEN, BEANSTALK_PROD_MIRRORS,
+)
+# Experimentally commenting out this strange import. -kmp 27-Mar-2020
+# # TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
+# from ..types.experiment import *
 from .datafixtures import ORDER
 
 
@@ -44,6 +47,23 @@ def test_create_mapping(registry, item_type):
             else:
                 assert split_ in mapping_pointer['properties']
                 mapping_pointer = mapping_pointer['properties'][split_]
+
+def test_beanstalk_constants():
+
+    assert BEANSTALK_PROD_MIRRORS[ENV_PRODUCTION_GREEN] == ENV_PRODUCTION_BLUE
+    assert BEANSTALK_PROD_MIRRORS[ENV_PRODUCTION_BLUE] == ENV_PRODUCTION_GREEN
+
+    assert BEANSTALK_PROD_MIRRORS[ENV_WEBPROD] == ENV_WEBPROD2
+    assert BEANSTALK_PROD_MIRRORS[ENV_WEBPROD2] == ENV_WEBPROD
+
+    assert ENV_MASTERTEST not in BEANSTALK_PROD_MIRRORS
+    assert BEANSTALK_PROD_MIRRORS[ENV_PRODUCTION_GREEN] == ENV_PRODUCTION_BLUE
+    assert BEANSTALK_PROD_MIRRORS[ENV_PRODUCTION_BLUE] == ENV_PRODUCTION_GREEN
+
+    assert BEANSTALK_PROD_MIRRORS[ENV_WEBPROD] == ENV_WEBPROD2
+    assert BEANSTALK_PROD_MIRRORS[ENV_WEBPROD2] == ENV_WEBPROD
+
+    assert ENV_MASTERTEST not in BEANSTALK_PROD_MIRRORS
 
 
 def test_create_mapping_item_order(registry):
