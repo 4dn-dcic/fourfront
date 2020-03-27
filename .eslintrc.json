@@ -16,7 +16,7 @@
         "no-invalid-this" : "error",
         "no-tabs" : "error",
         "no-trailing-spaces" : "error",
-        "no-undef": 0,
+        "no-undef": "error",
         "no-unused-vars": ["warn", { "args" : "none" }],
         "no-useless-concat": "error",
         "no-useless-constructor": "error",
@@ -71,5 +71,15 @@
     "plugins": [
         "react",
         "cypress"
+    ],
+    "overrides": [
+        {
+            "files" : ["/src/encoded/static/data/*.jsx"],
+            "rules" : {
+                "react/jsx-no-undef" : 0,
+                "semi" : 0,
+                "react/react-in-jsx-scope" : 0
+            }
+        }
     ]
 }
