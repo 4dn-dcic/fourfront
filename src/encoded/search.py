@@ -1652,15 +1652,19 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
             else:  # 'terms' assumed.
 
+                # Default - terms, range, or histogram buckets. Buckets may not be present
+                result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
+
+                # Choosing to show facets with one term for summary info on search it provides
+                # XXX: The above comment is misleading - this drops all facets with no buckets
+                # we apparently want this for non-nested fields based on the tests, but should be
+                # investigated as having to do this doesn't really make sense.
+                if len(result_facet.get('terms', [])) < 1 and not facet['aggregation_type'] == 'nested':
+                    continue
+
                 # XXX: front-end does not care about 'nested', only what the inner thing is, so lets pretend...
                 if facet['aggregation_type'] == 'nested':
                     result_facet['aggregation_type'] = 'terms'
-
-                # Default - terms, range, or histogram buckets. Buckets may not be present
-                result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
-                # Choosing to show facets with one term for summary info on search it provides
-                if len(result_facet.get('terms', [])) < 1:
-                    continue
 
             if len(aggregations[full_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }

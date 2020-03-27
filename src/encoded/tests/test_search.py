@@ -182,7 +182,7 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     schema_facets = [fct for fct in schema_facets if not fct[1].get('disabled', False)]
     sort_facets = sorted(schema_facets, key=lambda fct: fct[1].get('order', 0))
     res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
-    for i,val in enumerate(sort_facets):
+    for i,val in enumerate(sort_facets):  # XXX: Why does this behave wrongly when dropping nested fields with no buckets? -will 3-27-2020
         assert res['facets'][i]['field'] == val[0]
     # assert order of columns when we officially upgrade to python 3.6 (ordered dicts)
     for key,val in schema.get('columns', {}).items():
@@ -190,7 +190,7 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
 
 
 def test_search_embedded_file_by_accession(workbook, testapp):
-    res = testapp.get('/search/?type=ExperimentHiC&files.properties.accession=4DNFIO67APU1').json
+    res = testapp.get('/search/?type=ExperimentHiC&files.accession=4DNFIO67APU1').json
     assert len(res['@graph']) > 0
     item_uuids = [item['uuid'] for item in res['@graph'] if 'uuid' in item]
     for item_uuid in item_uuids:
@@ -203,46 +203,46 @@ def test_search_embedded_file_by_accession(workbook, testapp):
 def test_search_nested(workbook, testapp):
     """ Tests multiple search conditions that are handled differently under mapping type=nested """
     res = testapp.get('/search/?type=ExperimentHiC'
-                      '&files.properties.accession=4DNFIO67APU1'
+                      '&files.accession=4DNFIO67APU1'
                       '&award.project=4DN').json
     assert len(res['@graph']) == 1  # sanity check - should work either way since award is non-nested
 
     # should return no results since these two properties do not occur in the same nested object
     accession_and_file_size = ('/search/?type=ExperimentHiC'
-                              '&files.properties.accession=4DNFIO67APU1'
-                              '&files.properties.file_size=500')
+                              '&files.accession=4DNFIO67APU1'
+                              '&files.file_size=500')
     testapp.get(accession_and_file_size, status=404)
 
     # should return results since these two properties occur in the same nested object
     accession_and_file_size = ('/search/?type=ExperimentHiC'
-                               '&files.properties.accession=4DNFIO67APU1'
-                               '&files.properties.file_size=1000')
+                               '&files.accession=4DNFIO67APU1'
+                               '&files.file_size=1000')
     testapp.get(accession_and_file_size)
 
     # should return results since both properties occur
     accession_and_file_size_upper_bound = ('/search/?type=ExperimentHiC'
-                                           '&files.properties.accession=4DNFIO67APU1'
+                                           '&files.accession=4DNFIO67APU1'
                                            '&files.file_size.to=1500')
     testapp.get(accession_and_file_size_upper_bound)
 
     # should not return results since no files will match
     accession_and_file_size_upper_bound = ('/search/?type=ExperimentHiC'
-                                           '&files.properties.accession=4DNFIO67APU1'
+                                           '&files.accession=4DNFIO67APU1'
                                            '&files.file_size.to=499')
     testapp.get(accession_and_file_size_upper_bound, status=404)
 
     # should return results since OR property in nested will match the second accession with file_size=500
     two_accessions_with_file_size = ('/search/?type=ExperimentHiC'
-                                     '&files.properties.accession=4DNFIO67APU1'
-                                     '&files.properties.accession=4DNFIO67APT1'
-                                     '&files.properties.file_size=500')
+                                     '&files.accession=4DNFIO67APU1'
+                                     '&files.accession=4DNFIO67APT1'
+                                     '&files.file_size=500')
     res = testapp.get(two_accessions_with_file_size)
 
     # should return no results since NOT'ing the second accession who has file_size=500
     negative_second_accession_with_file_size = ('/search/?type=ExperimentHiC'
-                                                '&files.properties.accession=4DNFIO67APU1'
-                                                '&files.properties.accession!=4DNFIO67APT1'
-                                                '&files.properties.file_size=500')
+                                                '&files.accession=4DNFIO67APU1'
+                                                '&files.accession!=4DNFIO67APT1'
+                                                '&files.file_size=500')
     testapp.get(negative_second_accession_with_file_size, status=404)
 
     # should return no results, just checking logic of 'no value'
