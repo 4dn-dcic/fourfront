@@ -172,7 +172,7 @@ description = "Checks CloudFormation templates for practices and behaviour that 
 name = "cfn-lint"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "0.29.0"
+version = "0.29.2"
 
 [package.dependencies]
 aws-sam-translator = ">=1.21.0"
@@ -295,7 +295,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "2.0.4"
+version = "2.0.5b1"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -551,7 +551,7 @@ marker = "python_version < \"3.8\""
 name = "importlib-metadata"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
-version = "1.5.0"
+version = "1.6.0"
 
 [package.dependencies]
 zipp = ">=0.5"
@@ -1054,7 +1054,7 @@ description = "Persistent/Functional/Immutable data structures"
 name = "pyrsistent"
 optional = false
 python-versions = "*"
-version = "0.15.7"
+version = "0.16.0"
 
 [package.dependencies]
 six = "*"
@@ -1730,7 +1730,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "07b241d33ad7eb4c0cccb85997fb514ca9465f0978893f13a52a3b6623bb1c70"
+content-hash = "ccd09a7f9445a82b7b1f313c3baa0b61a45d2387ee873608ca901ff2571ab9af"
 python-versions = ">=3.5,<3.7"
 
 [metadata.files]
@@ -1812,8 +1812,8 @@ cffi = [
     {file = "cffi-1.14.0.tar.gz", hash = "sha256:2d384f4a127a15ba701207f7639d94106693b6cd64173d6c8988e2c25f3ac2b6"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.29.0.tar.gz", hash = "sha256:bceff7ce8556b1e6ea129e9cbf89834561820f63ed1fc96b250015498a041c03"},
-    {file = "cfn_lint-0.29.0-py3-none-any.whl", hash = "sha256:594600e461d902b6faf0a276743589dc6db4f9d381d63a22c3a2631a6d5cfd8e"},
+    {file = "cfn-lint-0.29.2.tar.gz", hash = "sha256:b41018ad7a49ec4ad07cb00646e2c052dd024db99281111cf53cbb90f72d6104"},
+    {file = "cfn_lint-0.29.2-py3-none-any.whl", hash = "sha256:4a94c93fc64ecfd4602d9c2b71d8c622906f6d74f87f37393de4a9516ab36459"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
@@ -1889,8 +1889,8 @@ cryptography = [
     {file = "cryptography-2.8.tar.gz", hash = "sha256:3cda1f0ed8747339bbdf71b9f38ca74c7b592f24f65cdb3ab3765e4b02871651"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-2.0.4-py3-none-any.whl", hash = "sha256:3d65789f02a59760c2b3e01e7d35e875c4e8fdc3124ecbbf78dc541990f1b6b4"},
-    {file = "dcicsnovault-2.0.4.tar.gz", hash = "sha256:fba9ab7b7caa2ee8f87751534f56d81f910c8385726d345ec5d885c07670b234"},
+    {file = "dcicsnovault-2.0.5b1-py3-none-any.whl", hash = "sha256:bdee3aa81b50ea6b6f70f895b247f42f85261ce229dd5f181182daa0315389c1"},
+    {file = "dcicsnovault-2.0.5b1.tar.gz", hash = "sha256:e5c1f8ae361087cc621f58f48b1777b2184f8ad96701fbec8c56dbaa46765d22"},
 ]
 dcicutils = [
     {file = "dcicutils-0.9.3b0-py3-none-any.whl", hash = "sha256:5c451e5678662d8a6785e5f9eaf227e1c87f65977d8f6d7e2bc2c7f0db37d7b7"},
@@ -1955,8 +1955,8 @@ idna = [
     {file = "idna-2.7.tar.gz", hash = "sha256:684a38a6f903c1d71d6d5fac066b58d7768af4de2b832e426ec79c30daa94a16"},
 ]
 importlib-metadata = [
-    {file = "importlib_metadata-1.5.0-py2.py3-none-any.whl", hash = "sha256:b97607a1a18a5100839aec1dc26a1ea17ee0d93b20b0f008d80a5a050afb200b"},
-    {file = "importlib_metadata-1.5.0.tar.gz", hash = "sha256:06f5b3a99029c7134207dd882428a66992a9de2bef7c2b699b5641f9886c3302"},
+    {file = "importlib_metadata-1.6.0-py2.py3-none-any.whl", hash = "sha256:2a688cbaa90e0cc587f1df48bdc97a6eadccdcd9c35fb3f976a09e3b5016d90f"},
+    {file = "importlib_metadata-1.6.0.tar.gz", hash = "sha256:34513a8a0c4962bc66d35b359558fd8a5e10cd472d37aec5f66858addef32c1e"},
 ]
 importlib-resources = [
     {file = "importlib_resources-1.0.2-py2.py3-none-any.whl", hash = "sha256:6e2783b2538bd5a14678284a3962b0660c715e5a0f10243fd5e00a4b5974f50b"},
@@ -2241,7 +2241,7 @@ pyramid-translogger = [
     {file = "pyramid_translogger-0.1.tar.gz", hash = "sha256:0bae9a98a7ba62316917272d06c553fbb9116cbc561592b6ebfabcb335724589"},
 ]
 pyrsistent = [
-    {file = "pyrsistent-0.15.7.tar.gz", hash = "sha256:cdc7b5e3ed77bed61270a47d35434a30617b9becdf2478af76ad2c6ade307280"},
+    {file = "pyrsistent-0.16.0.tar.gz", hash = "sha256:28669905fe725965daa16184933676547c5bb40a5153055a8dee2a4bd7933ad3"},
 ]
 pytest = [
     {file = "pytest-2.9.2-py2.py3-none-any.whl", hash = "sha256:ccc23b4aab3ef3e19e731de9baca73f3b1a7e610d9ec65b28c36a5a3305f0349"},
