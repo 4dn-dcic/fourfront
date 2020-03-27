@@ -20,7 +20,8 @@ from snovault.util import (
 )
 from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
-from elasticsearch_dsl import Search, Index
+from elasticsearch_dsl import Search
+from elasticsearch_dsl.aggs import Terms, Nested
 from elasticsearch import (
     TransportError,
     RequestError,
@@ -69,10 +70,11 @@ NESTED = 'nested'
 PATH = 'path'
 TERMS = 'terms'
 RANGE = 'range'
+AGGS = 'aggs'
 # just for book-keeping/readability but is 'unused' for now
 # ie: it should be obvious when you are 'effectively' writing lucene
 ELASTIC_SEARCH_QUERY_KEYWORDS = [
-    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE,
+    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE, AGGS,
 ]
 
 
@@ -169,11 +171,12 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, query_filters = set_filters(request, search, result, principals, doc_types, item_type_es_mapping)
 
     ### Set starting facets
-    facets = initialize_facets(request, doc_types, prepared_terms, schemas)
+    facets = initialize_facets(request, doc_types, prepared_terms, schemas, item_type_es_mapping)
 
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
-    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations, size, from_)
+    search = set_facets(search, facets, query_filters, string_query, request, doc_types, custom_aggregations,
+                        size, from_, item_type_es_mapping)
 
     ### Add preference from session, if available
     search_session_id = None
@@ -734,6 +737,8 @@ def find_nested_path(field, es_mapping):
     location = es_mapping
     path = []
     for level in field.split('.'):
+        if level == 'raw':
+            break
         try:
             location = location[level]
         except:
@@ -1169,7 +1174,7 @@ def set_filters(request, search, result, principals, doc_types, es_mapping):
     return search, final_filters
 
 
-def initialize_facets(request, doc_types, prepared_terms, schemas):
+def initialize_facets(request, doc_types, prepared_terms, schemas, es_mapping):
     """
     Initialize the facets used for the search. If searching across multiple
     doc_types, only use the default 'Data Type' and 'Status' facets.
@@ -1225,7 +1230,10 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
             use_field = '.'.join(split_field[1:])
 
             # 'terms' is the default per-term bucket aggregation for all non-schema facets
-            aggregation_type = 'terms'
+            if es_mapping and is_field_nested(field, es_mapping):
+                aggregation_type = 'nested'
+            else:
+                aggregation_type = 'terms'
 
             # Use the last part of the split field to get the field title
             title_field = split_field[-1]
@@ -1415,7 +1423,8 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
-def set_facets(search, facets, search_filters, string_query, request, doc_types, custom_aggregations=None, size=25, from_=0):
+def set_facets(search, facets, search_filters, string_query, request, doc_types,
+               custom_aggregations=None, size=25, from_=0, es_mapping=None):
     """
     Sets facets in the query as ElasticSearch aggregations, with each aggregation to be
     filtered by search_filters minus filter affecting facet field in order to get counts
@@ -1432,13 +1441,10 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         return search
 
     aggs = OrderedDict()
-
     for field, facet in facets: # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
-
         field_schema = schema_for_field(field, request, doc_types, should_log=True)
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
         is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
-        is_nested = field_schema and field_schema['type'] == 'nested'
 
         if field == 'type':
             query_field = 'embedded.@type.raw'
@@ -1449,6 +1455,7 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         else:
             query_field = 'embedded.' + field + '.raw'
 
+        nested_path = find_nested_path(query_field, es_mapping)
 
         ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
@@ -1471,18 +1478,45 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
                 'filter': {'bool': facet_filters}
             }
 
-        else: # Default -- facetable terms
+        # XXX: Unfortunately, elasticsearch_dsl will not update_from_dict with a nested aggregation (bug?), so we must
+        #      update the search manually after processing all the "terms". The below code SHOULD work but doesn't.
+        #      The purpose of leaving this code here is to illustrate what is necessary
+        # elif nested_path:
+        #     facet['aggregation_type'] = 'nested'
+        #     facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters,
+        #                                                                        string_query)
+        #     term_aggregation = {
+        #         TERMS: {
+        #             'size': 100,
+        #             'field': query_field,
+        #             'missing': facet.get("missing_value_replacement", "No value")
+        #         }
+        #     }
+        #
+        #     aggs[facet['aggregation_type'] + ":" + agg_name] = {
+        #         NESTED: {  # required for doing this on nested fields
+        #           PATH: nested_path
+        #         },
+        #         AGGS: {
+        #             "primary_agg": term_aggregation
+        #         },
+        #         FILTER: {BOOL: facet_filters},
+        #     }
 
-            facet['aggregation_type'] = 'terms'
+        else:
+            if nested_path:
+                facet['aggregation_type'] = NESTED
+            else:
+                facet['aggregation_type'] = TERMS
+
             facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
             term_aggregation = {
                 "terms" : {
-                    'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
+                    'size'    : 100,  # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
                     'field'   : query_field,
                     'missing' : facet.get("missing_value_replacement", "No value")
                 }
             }
-
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
                 'aggs': {
                     "primary_agg" : term_aggregation
@@ -1513,7 +1547,14 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         # We do currently have (hidden) monthly date histogram facets which may yet to be utilized for common size!=0 agg use cases.
         set_additional_aggregations(search_as_dict, request, doc_types, custom_aggregations)
 
+    # update with all terms aggregations
     search.update_from_dict(search_as_dict)
+
+    # update with nested information so aggregations on nested fields work, see comment on else above
+    for agg in search.aggs['all_items']:
+        if NESTED in agg:
+            dsl_subquery = search.aggs['all_items']
+            search.aggs['all_items'].bucket(agg, Nested(path=find_nested_path(dsl_subquery.aggs[agg]['primary_agg'].field, es_mapping))).bucket('primary_agg', Terms(field=dsl_subquery.aggs[agg]['primary_agg'].field, size=100, missing='No value'))
     return search
 
 
@@ -1617,7 +1658,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 # Used for fields on which can do range filter on, to provide min + max bounds
                 for k in aggregations[full_agg_name]["primary_agg"].keys():
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
-            else: # 'terms' assumed.
+            else:  # 'terms' assumed.
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 # Choosing to show facets with one term for summary info on search it provides
