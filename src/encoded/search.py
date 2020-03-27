@@ -709,41 +709,32 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     return search
 
 
-# XXX: The following 2 functions to similar things, can probably just use one
-def is_field_nested(field, es_mapping):
-    """ Walks ES mapping based on given field, levels separated by '.'
-        Returns True if the given field is nested, false otherwise
-    """
-    location = es_mapping
-    for level in field.split('.'):
-        try:
-            location = location[level]
-        except KeyError:
-            try:
-                location = location.get('properties', location)
-                location = location[level]
-            except Exception:
-                return False
-        except Exception:
-            return False
-        finally:
-            if location.get('type', None) == 'nested':
-                return True
-    return False
-
-
 def find_nested_path(field, es_mapping):
-    """ Returns path to highest level nested field """
+    """ Returns path to highest level nested field
+
+        This function relies on information about the structure of the es_mapping to extract
+        the *path to the object who's mapping is nested*. This information is needed to construct nested
+        queries (it is the PATH). It returns None if the given field is not nested.
+
+        Args:
+            field (str): the *full path* to the field we are filtering/aggregating on.
+                         For example: "experiments_in_set.biosample.biosource.individual.organism.name"
+            es_mapping (dict): dictionary representation of the es_mapping of the type we are searching on
+        Returns:
+            PATH for nested query or None
+     """
     location = es_mapping
     path = []
     for level in field.split('.'):
-        if level == 'raw':
+        if level == 'raw':  # if we get to this point we're definitely at a leaf and should stop
             break
-        try:
-            location = location[level]
-        except:
-            location = location['properties']
-            location = location[level]
+        if level not in location:  # its possible we are at a sub-embedded object boundary. Check if it has properties.
+            if 'properties' not in location:  # if it doesn't have properties, there's nowhere to go, so return None.
+                return None
+            location = location['properties']  # else move location forward, but do not add it to the PATH
+        if level not in location:  # if we still don't see our 'level', we are not a nested field
+            break
+        location = location[level]
         path.append(level)
         if location.get('type', None) == 'nested':
             return '.'.join(path)
@@ -933,7 +924,7 @@ def build_sub_queries(field_filters, es_mapping):
 
     for query_field, filters in field_filters.items():
         # if we are nested, we must construct the query differently than normal
-        if is_field_nested(query_field, es_mapping):
+        if find_nested_path(query_field, es_mapping):
             query_field = query_field.replace('.properties', '')
 
             # Build must/must_not sub-queries
@@ -982,10 +973,11 @@ def apply_range_filters(range_filters, must_filters, es_mapping):
     # tuple format is required to handle nested fields that are non-range (it is discarded in this case)
     # nested range fields must also be separated from other nested sub queries - see comment in 'handle_nested_filters'
     for range_field, range_def in range_filters.items():
-        if is_field_nested(range_field, es_mapping):
+        nested_path = find_nested_path(range_field, es_mapping)
+        if nested_path:
             must_filters.append(('range', {
                 NESTED: {
-                    PATH: find_nested_path(range_field, es_mapping),
+                    PATH: nested_path,
                     QUERY: {
                         RANGE: {range_field: range_def}
                     }
@@ -1230,7 +1222,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, es_mapping):
             use_field = '.'.join(split_field[1:])
 
             # 'terms' is the default per-term bucket aggregation for all non-schema facets
-            if es_mapping and is_field_nested(field, es_mapping):
+            if es_mapping and find_nested_path(field, es_mapping):
                 aggregation_type = 'nested'
             else:
                 aggregation_type = 'terms'
@@ -1659,6 +1651,11 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 for k in aggregations[full_agg_name]["primary_agg"].keys():
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
             else:  # 'terms' assumed.
+
+                # XXX: front-end does not care about 'nested', only what the inner thing is, so lets pretend...
+                if facet['aggregation_type'] == 'nested':
+                    result_facet['aggregation_type'] = 'terms'
+
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 # Choosing to show facets with one term for summary info on search it provides
