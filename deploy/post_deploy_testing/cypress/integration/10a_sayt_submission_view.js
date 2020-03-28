@@ -5,7 +5,9 @@ describe('Search As You Type functionality on SubmissionView', function () {
     var testItemsToDelete = [];
     let principalObject;
 
-    context('Test Biosource Item Edit page', function() {
+    context('Test Biosource Item Edit page (Enums Only)', function() {
+        // Test non-array enums
+
         beforeEach(function() {
             // Navigate to and create a new Biosample item for testing suggested_enums
             cy.visit('/search/?type=Biosource&currentAction=add', { 'failOnStatusCode': false })
@@ -56,12 +58,28 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .get(".field-row[data-field-name=biosource_type] .dropdown-toggle")
                 .should('contain', 'stem cell').end();
         });
+
+        it('Can delete enum value', function() {
+            cy.get(".field-row[data-field-name=biosource_type] .dropdown-toggle")
+                .should('contain', 'No value').click()
+                .get(".field-row[data-field-name=biosource_type] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 8).first().click()
+                .get(".field-row[data-field-name=biosource_type] .dropdown-toggle")
+                .should('contain', 'primary cell')
+                // Try deleting
+                .get(".field-row[data-field-name=biosource_type] .remove-button-column:not(.hidden) button").last().click()
+                // Check that value was cleared
+                .get(".field-row[data-field-name=biosource_type] .dropdown-toggle")
+                .should("contain", "No value").click().end();
+        });
     });
 
-    context('Test Biosample Item Edit page', function() {
+    context('Test Software Item Edit page (Suggested Enums)', function() {
+        // Test array suggested_enums
+
         beforeEach(function() {
             // Navigate to and create a new Biosample item for testing suggested_enums
-            cy.visit('/search/?type=Biosample&currentAction=add', { 'failOnStatusCode': false })
+            cy.visit('/search/?type=Software&currentAction=add', { 'failOnStatusCode': false })
                 .login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
                 .get(navUserAcctDropdownBtnSelector).then((accountListItem)=>{
                     expect(accountListItem.text()).to.contain('Cypress');
@@ -69,26 +87,127 @@ describe('Search As You Type functionality on SubmissionView', function () {
 
             // Generate an identifier and use that for alias
             principalObject = ("sv-sayt-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(principalObject).wait(100).end()
-                .get("button.btn-primary.btn").should('contain', 'Submit').click().end().wait(5000);
+            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(principalObject)
+                .should("have.value", principalObject).end()
+                .get("button.btn-primary.btn").should('contain', 'Submit').click().end();
         });
 
-        it.only('Can select enum via search to type ', function() {
-            // Attempt to make a selection that is not in the enumerated list
-            cy.get(".field-row[data-field-name=status] .dropdown-toggle").click()
-                .get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
-                .focus().type("Currently")
-                // Check that UI indicates new item is NOT being added
-                .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items em")
-                .should('contain', "No results found")
-                // Check the value of the button to make sure value wasn't changed there
-                .get(".field-row[data-field-name=status] .dropdown-toggle")
-                .should('not.contain', 'Currently').end();
+        it('Can select from suggested_enum dropdown', function() {
+            // Dropdown for suggested_enum should initialize to no value
+            cy.get(".field-row [data-field-name=software_type] .dropdown-toggle")
+                .should('contain', 'No value').click()
+                // Test type to search
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .text-input-container input.form-control")
+                .focus().type('ad')
+                // Should be two letters in the button
+                .get(".field-row [data-field-name=software_type] .field-column:not(.last-item-empty) .dropdown-toggle")
+                .should('contain', 'ad')
+                // Should be only one result: "adapter remover"; click it to select from drop
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 1).click()
+                // "Adapter remover" should now be present in the button
+                .get(".field-row [data-field-name=software_type] .field-column:not(.last-item-empty) .dropdown-toggle")
+                .should('contain', 'adapter remover')
+                // Check that there is an empty dropdown button in the same field-row
+                .get(".field-row [data-field-name=software_type] .last-item-empty .dropdown-toggle")
+                .should('contain', "No value").end();
         });
 
+        it('Can add new non-suggested value via search to type', function() {
+            // Check that there is an empty dropdown button in the same field-row
 
+            const button = Cypress.$('.field-row [data-field-name=software_type] .last-item-empty .dropdown-toggle');
+            // .last-item-empty class is applied only if there are >1 items; will be false if running ONLY this single test
+            if (button.length) {
+                cy.get(".field-row [data-field-name=software_type] .last-item-empty .dropdown-toggle")
+                    .should('contain', "No value").focus().click().end();
+            } else {
+                cy.get(".field-row [data-field-name=software_type] .dropdown-toggle")
+                    .should('contain', "No value").focus().click().end();
+            }
 
+            // Select it and start typing a suggestion that isn't in the list
+            cy.get(".field-row [data-field-name=software_type] .search-selection-menu-body .text-input-container input.form-control")
+                .focus().type("variant aggreg")
+                // Check that dropdown items are empty
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 0)
+                // Check that UI reflects that new item is being added
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .scroll-items em")
+                .should('contain', "Adding new entry")
+                // Finish typing new item name and click off
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .text-input-container input.form-control")
+                .focus().type("ator")
+                // Check that new value has been added to the button
+                .get(".field-row [data-field-name=software_type] .field-column:not(.last-item-empty) .dropdown-toggle")
+                .last().should('contain', 'variant aggregator').end();
+        });
+
+        it('Can delete suggested_enum value', function() {
+            cy.get(".field-row [data-field-name=software_type] .dropdown-toggle").last()
+                .should('contain', 'No value').click()
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('not.have.length', 0).first().click()
+                .get(".field-row [data-field-name=software_type] .dropdown-toggle")
+                .should('contain', 'adapter remover')
+                // Try deleting
+                .get(".field-row[data-field-name=software_type] .remove-button-column:not(.hidden) button").last().click()
+                // Check that value was cleared
+                .get(".field-row[data-field-name=software_type] .dropdown-toggle")
+                .should("contain", "No value").click().end();
+        });
     });
+
+    // context('Test Biosample Item Edit page (Linked Objects)', function() {
+    //     beforeEach(function() {
+    //         // Navigate to and create a new Biosample item for testing suggested_enums
+    //         cy.visit('/search/?type=Biosample&currentAction=add', { 'failOnStatusCode': false })
+    //             .login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
+    //             .get(navUserAcctDropdownBtnSelector).then((accountListItem)=>{
+    //                 expect(accountListItem.text()).to.contain('Cypress');
+    //             }).end();
+
+    //         // Generate an identifier and use that for alias
+    //         principalObject = ("sv-sayt-test-" + new Date().getTime());
+    //         cy.get('.modal-dialog input#aliasInput.form-control').focus().type(principalObject).wait(100).end()
+    //             .get("button.btn-primary.btn").should('contain', 'Submit').click().end().wait(5000);
+    //     });
+
+   // it("Can link and object via SearchAsYouTypeAjax ", function() {
+
+        //     });
+    
+        //     it("Can link an object via Advanced Search ", function() {
+    
+        //     });
+    
+        //     it("Can link multiple objects via Advanced Search ", function() {
+    
+        //     });
+    
+        //     it("Can delete objects found via SearchAsYouType", function() {
+    
+        //     });
+    
+        //     it("Can delete objects found via Advanced Search ", function() {
+    
+        //     });
+        // });
+
+    //     it('Can select enum via search to type ', function() {
+    //         // Attempt to make a selection that is not in the enumerated list
+    //         cy.get(".field-row[data-field-name=status] .dropdown-toggle").click()
+    //             .get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
+    //             .focus().type("Currently")
+    //             // Check that UI indicates new item is NOT being added
+    //             .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items em")
+    //             .should('contain', "No results found")
+    //             // Check the value of the button to make sure value wasn't changed there
+    //             .get(".field-row[data-field-name=status] .dropdown-toggle")
+    //             .should('not.contain', 'Currently').end();
+    //     });
+
+    // });
 });
 
         // it('should work with suggested_enums and enums', function() {
@@ -128,35 +247,6 @@ describe('Search As You Type functionality on SubmissionView', function () {
 
             
         // });
-
-    //     it('allows select from suggested_enum dropdown', function() {
-    //         // Dropdown for suggested_enum should initialize to no value
-    //         cy.get(".field-row [data-field-name=biosource] .dropdown-toggle")
-    //             .should('contain', 'No value').click().end();
-
-    //         // TODO: Add a means to auto-check what # of enum suggestions should be from; maybe pull from schemas if possible?
-
-    //         // Test type to search
-    //         cy.get(".field-row [data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
-    //             .focus().type('ad').wait(100).end();
-
-    //         // Should be two letters in the button
-    //         cy.get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
-    //             .should('contain', 'ad').end();
-
-    //         // Should be only one result: "adapter remover"; click it to select from drop
-    //         cy.get(".field-row [data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
-    //             .should('have.length', 1).click().end();
-
-    //         // "Adapter remover" should now be present in the button
-    //         cy.get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
-    //             .should('contain', 'adapter remover').end();
-
-    //         // Check that there is an empty dropdown button in the same field-row
-    //         cy.get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
-    //             .should('contain', "No value").end();
-
-    //     });
 
     //     it('allows add new non-suggested value via search to type', function() {
     //         // Check that there is an empty dropdown button in the same field-row
