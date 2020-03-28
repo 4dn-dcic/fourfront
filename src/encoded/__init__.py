@@ -1,29 +1,34 @@
 # Are these still needed? -kmp 28-Mar-2020
-from future.standard_library import install_aliases
-install_aliases()  # NOQA
+# from future.standard_library import install_aliases
+# install_aliases()  # NOQA
 
-import base64  # unused?
-import codecs  # unused?
+# import base64  # unused?
+# import codecs  # unused?
 import json
-import logging  # unused?
+# import logging  # unused?
 import netaddr
 import os
-import structlog  # unused?
+# import structlog
 import subprocess
+import sys
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.log_utils import set_logging
 from dcicutils.env_utils import get_mirror_env_from_context
-from pyramid.authorization import ACLAuthorizationPolicy
+# from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
-from pyramid.path import AssetResolver, caller_package
-from pyramid.session import SignedCookieSessionFactory
-from pyramid.settings import aslist, asbool
+# from pyramid.path import AssetResolver, caller_package
+# from pyramid.session import SignedCookieSessionFactory
+from pyramid.settings import asbool  # , aslist
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
-from snovault.json_renderer import json_renderer
-from sqlalchemy import engine_from_config
-from webob.cookies import JSONSerializer
+# from snovault.json_renderer import json_renderer
+# from sqlalchemy import engine_from_config
+# from webob.cookies import JSONSerializer
 # from .utils import find_other_in_pair
+
+
+if sys.version_info.major < 3:
+    raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
 
 
 def static_resources(config):
@@ -80,9 +85,6 @@ def load_workbook(app, workbook_filename, docsdir):
     load_all(testapp, workbook_filename, docsdir)
 
 
-
-
-
 def app_version(config):
     import hashlib
     if not config.registry.settings.get('snovault.app_version'):
@@ -97,7 +99,7 @@ def app_version(config):
                     ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
                 if diff:
                     version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-            except:
+            except Exception:
                 version = "test"
 
         config.registry.settings['snovault.app_version'] = version
@@ -108,8 +110,8 @@ def app_version(config):
     if ga_conf_file and not ga_conf_existing:
         ga_conf_file = os.path.normpath(
             os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), # Absolute loc. of this file
-                "../../",                                   # Go back up to repo dir
+                os.path.dirname(os.path.abspath(__file__)),  # Absolute loc. of this file
+                "../../",                                    # Go back up to repo dir
                 ga_conf_file
             )
         )
@@ -164,7 +166,7 @@ def main(global_config, **local_config):
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
-    #config.include(add_schemas_to_html_responses)
+    # config.include(add_schemas_to_html_responses)
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')
@@ -205,6 +207,5 @@ def main(global_config, **local_config):
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
     if workbook_filename:
         load_workbook(app, workbook_filename, docsdir)
-
 
     return app
