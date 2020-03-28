@@ -1,41 +1,29 @@
+# Are these still needed? -kmp 28-Mar-2020
 from future.standard_library import install_aliases
 install_aliases()  # NOQA
-import base64
-import codecs
+
+import base64  # unused?
+import codecs  # unused?
 import json
+import logging  # unused?
 import netaddr
 import os
-try:
-    import subprocess32 as subprocess  # Closes pipes on failure
-except ImportError:
-    import subprocess
-from pyramid.config import Configurator
-from pyramid.path import (
-    AssetResolver,
-    caller_package,
-)
+import structlog  # unused?
+import subprocess
+
+from dcicutils.beanstalk_utils import source_beanstalk_env_vars
+from dcicutils.log_utils import set_logging
+from dcicutils.env_utils import get_mirror_env_from_context
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.config import Configurator
+from pyramid.path import AssetResolver, caller_package
 from pyramid.session import SignedCookieSessionFactory
-from pyramid.settings import (
-    aslist,
-    asbool,
-)
+from pyramid.settings import aslist, asbool
+from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
+from snovault.json_renderer import json_renderer
 from sqlalchemy import engine_from_config
 from webob.cookies import JSONSerializer
-from snovault.json_renderer import json_renderer
-from snovault.app import (
-    STATIC_MAX_AGE,
-    session,
-    json_from_path,
-    configure_dbsession,
-    changelogs,
-    json_asset,
-)
-from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-from .utils import find_other_in_pair
-import structlog
-import logging
+# from .utils import find_other_in_pair
 
 
 def static_resources(config):
@@ -155,7 +143,7 @@ def main(global_config, **local_config):
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
     # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = get_mirror_env_from_settings(settings)
+    settings['mirror.env.name'] = get_mirror_env_from_context(settings)
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
