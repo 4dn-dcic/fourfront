@@ -32,25 +32,10 @@ from snovault.app import (
     json_asset,
 )
 from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from .commands.create_mapping_on_deploy import BEANSTALK_PROD_MIRRORS
+from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from .utils import find_other_in_pair
 import structlog
 import logging
-
-# location of environment variables on elasticbeanstalk
-BEANSTALK_ENV_PATH = "/opt/python/current/env"
-
-
-def get_mirror_env_from_settings(settings):
-    """
-        Figures out who the mirror beanstalk Env is if applicable
-        This is important in our production environment because in our
-        blue-green deployment we maintain two elasticsearch intances that
-        must be up to date with each other.
-    """
-    who_i_am = settings.get('env.name', '')
-    return BEANSTALK_PROD_MIRRORS.get(who_i_am)
 
 
 def static_resources(config):
@@ -107,21 +92,6 @@ def load_workbook(app, workbook_filename, docsdir):
     load_all(testapp, workbook_filename, docsdir)
 
 
-def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
-    """
-    set environment variables if we are on Elastic Beanstalk
-    AWS_ACCESS_KEY_ID is indicative of whether or not env vars are sourced
-
-    Args:
-        config_file (str): filepath to load env vars from
-    """
-    if os.path.exists(config_file) and not os.environ.get("AWS_ACCESS_KEY_ID"):
-        command = ['bash', '-c', 'source ' + config_file + ' && env']
-        proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
-        for line in proc.stdout:
-            key, _, value = line.partition("=")
-            os.environ[key] = value[:-1]
-        proc.communicate()
 
 
 

@@ -6,6 +6,7 @@ from pyramid.paster import get_app
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from dcicutils.log_utils import set_logging
 from dcicutils.beanstalk_utils import whodaman
+from dcicutils.env_utils import is_test_env, is_hotseat_env, guess_mirror_env, is_stg_or_prd_env
 
 log = structlog.getLogger(__name__)
 EPILOG = __doc__
@@ -125,31 +126,6 @@ ITEM_INDEX_ORDER = [
     'Page',
 ]
 
-ENV_HOTSEAT = 'fourfront-hotseat'
-ENV_MASTERTEST = 'fourfront-mastertest'
-ENV_PRODUCTION_BLUE = 'fourfront-blue'
-ENV_PRODUCTION_GREEN = 'fourfront-green'
-ENV_STAGING = 'fourfront-staging'
-ENV_WEBDEV = 'fourfront-webdev'
-ENV_WEBPROD = 'fourfront-webprod'
-ENV_WEBPROD2 = 'fourfront-webprod2'
-ENV_WOLF = 'fourfront-wolf'
-
-# These operate as pairs. Don't add extras.
-BEANSTALK_PROD_MIRRORS = {
-    ENV_PRODUCTION_BLUE: ENV_PRODUCTION_GREEN,
-    ENV_PRODUCTION_GREEN: ENV_PRODUCTION_BLUE,
-    ENV_WEBPROD: ENV_WEBPROD2,
-    ENV_WEBPROD2: ENV_WEBPROD,
-}
-
-BEANSTALK_TEST_ENVS = [
-    ENV_HOTSEAT,
-    ENV_MASTERTEST,
-    ENV_WEBDEV,
-    ENV_WOLF,
-]
-
 
 def get_my_env(app):
     """
@@ -178,14 +154,14 @@ def get_deployment_config(app):
     if current_prod_env == my_env:
         log.info('This looks like our production environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False
-    elif my_env == BEANSTALK_PROD_MIRRORS[current_prod_env]:
+    elif my_env == guess_mirror_env(current_prod_env):
         log.info('This looks like our staging environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False  # do not wipe ES
-    elif my_env in BEANSTALK_PROD_MIRRORS:
+    elif is_stg_or_prd_env(my_env):
         log.info('This looks like an uncorrelated production environment. Something is definitely wrong.')
         exit(0)
-    elif my_env in BEANSTALK_TEST_ENVS:
-        if my_env == ENV_HOTSEAT:
+    elif is_test_env(my_env):
+        if is_hotseat_env(my_env):
             log.info('Looks like we are on hotseat -- do not wipe ES')
             deploy_cfg['WIPE_ES'] = False
         else:
@@ -213,7 +189,10 @@ def _run_create_mapping(app, args):
         if args.wipe_es:  # override deploy_cfg WIPE_ES option
             log.info('Overriding deploy_cfg and wiping ES')
             deploy_cfg['WIPE_ES'] = True
-        run_create_mapping(app, check_first=(not deploy_cfg['WIPE_ES']), purge_queue=args.clear_queue, item_order=ITEM_INDEX_ORDER)
+        run_create_mapping(app,
+                           check_first=(not deploy_cfg['WIPE_ES']),
+                           purge_queue=args.clear_queue,
+                           item_order=ITEM_INDEX_ORDER)
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
         log.error(str(e))
@@ -234,7 +213,9 @@ def main():
     app = get_app(args.config_uri, args.app_name)
     # Loading app will have configured from config file. Reconfigure here:
     set_logging(in_prod=app.registry.settings.get('production'), log_name=__name__, level=logging.DEBUG)
-    # set_logging(app.registry.settings.get('elasticsearch.server'), app.registry.settings.get('production'), level=logging.DEBUG)
+    # set_logging(app.registry.settings.get('elasticsearch.server'),
+    #             app.registry.settings.get('production'),
+    #             level=logging.DEBUG)
 
     _run_create_mapping(app, args)
     exit(0)
