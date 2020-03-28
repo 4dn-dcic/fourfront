@@ -51,8 +51,10 @@ class FileSearchViewCheckBox extends React.PureComponent {
     }
 
     render() {
-        const checked = 0;
-        return <Checkbox {...checked} onChange={this.onChange} className="expset-checkbox" />;
+        const { file, selectedFiles } = this.props;
+        const accessionTriple = ['NONE', 'NONE', file.accession].join('~');
+        const checked = selectedFiles[accessionTriple] ? 'checked' : undefined;
+        return <Checkbox {...{ checked }} onChange={this.onChange} className="expset-checkbox" />;
     }
 }
 

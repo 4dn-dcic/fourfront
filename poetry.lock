@@ -37,7 +37,7 @@ description = "AWS SAM Translator is a library that transform SAM templates into
 name = "aws-sam-translator"
 optional = false
 python-versions = "*"
-version = "1.21.0"
+version = "1.22.0"
 
 [package.dependencies]
 boto3 = ">=1.5,<2.0"
@@ -172,10 +172,10 @@ description = "Checks CloudFormation templates for practices and behaviour that 
 name = "cfn-lint"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "0.28.3"
+version = "0.29.0"
 
 [package.dependencies]
-aws-sam-translator = ">=1.19.1"
+aws-sam-translator = ">=1.21.0"
 jsonschema = ">=3.0,<4.0"
 six = ">=1.11,<2.0"
 
@@ -186,6 +186,10 @@ version = ">=1.0.2,<1.1.0"
 [package.dependencies.jsonpatch]
 python = "<3.4.0 || >=3.5.0"
 version = "*"
+
+[package.dependencies.networkx]
+python = ">=3.5"
+version = ">=2.4,<3.0"
 
 [package.dependencies.pyyaml]
 python = "<3.4.0 || >=3.5.0"
@@ -204,8 +208,8 @@ category = "dev"
 description = "Composable command line interface toolkit"
 name = "click"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "7.0"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+version = "7.1.1"
 
 [[package]]
 category = "main"
@@ -291,7 +295,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "2.0.2b1"
+version = "2.0.4"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -360,6 +364,15 @@ elasticsearch = ">=5.5.3,<6.0.0"
 requests = ">=2.21.0,<3.0.0"
 structlog = ">=19.2.0,<20.0.0"
 urllib3 = ">=1.24.3,<2.0.0"
+
+[[package]]
+category = "dev"
+description = "Decorators for Humans"
+marker = "python_version >= \"3.5\""
+name = "decorator"
+optional = false
+python-versions = ">=2.6, !=3.0.*, !=3.1.*"
+version = "4.4.2"
 
 [[package]]
 category = "dev"
@@ -707,7 +720,7 @@ description = "Rolling backport of unittest.mock for all Pythons"
 name = "mock"
 optional = false
 python-versions = ">=3.6"
-version = "4.0.1"
+version = "4.0.2"
 
 [package.extras]
 build = ["twine", "wheel", "blurb"]
@@ -755,6 +768,31 @@ name = "netaddr"
 optional = false
 python-versions = "*"
 version = "0.7.18"
+
+[[package]]
+category = "dev"
+description = "Python package for creating and manipulating graphs and networks"
+marker = "python_version >= \"3.5\""
+name = "networkx"
+optional = false
+python-versions = ">=3.5"
+version = "2.4"
+
+[package.dependencies]
+decorator = ">=4.3.0"
+
+[package.extras]
+all = ["numpy", "scipy", "pandas", "matplotlib", "pygraphviz", "pydot", "pyyaml", "gdal", "lxml", "pytest"]
+gdal = ["gdal"]
+lxml = ["lxml"]
+matplotlib = ["matplotlib"]
+numpy = ["numpy"]
+pandas = ["pandas"]
+pydot = ["pydot"]
+pygraphviz = ["pygraphviz"]
+pytest = ["pytest"]
+pyyaml = ["pyyaml"]
+scipy = ["scipy"]
 
 [[package]]
 category = "main"
@@ -1553,7 +1591,7 @@ description = "Module for decorators, wrappers and monkey patching."
 name = "wrapt"
 optional = false
 python-versions = "*"
-version = "1.12.0"
+version = "1.12.1"
 
 [[package]]
 category = "main"
@@ -1692,7 +1730,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "23d949d4e40a7ccddf60ef48883dd269627830975a957855093bccc1eba020d5"
+content-hash = "07b241d33ad7eb4c0cccb85997fb514ca9465f0978893f13a52a3b6623bb1c70"
 python-versions = ">=3.5,<3.7"
 
 [metadata.files]
@@ -1708,7 +1746,7 @@ aws-requests-auth = [
     {file = "aws-requests-auth-0.4.2.tar.gz", hash = "sha256:112c85fe938a01e28f7e1a87168615b6977b28596362b1dcbafbf4f2cc69f720"},
 ]
 aws-sam-translator = [
-    {file = "aws-sam-translator-1.21.0.tar.gz", hash = "sha256:320a341d659580ad04e79c46fc93f50996363745a0c2728f9cd025ad78c43e36"},
+    {file = "aws-sam-translator-1.22.0.tar.gz", hash = "sha256:3ba6a821eda29ca8ea1306e27a8135256d6136f1b0b29c6cbf9a107dfd1c2dd9"},
 ]
 aws-xray-sdk = [
     {file = "aws-xray-sdk-2.4.3.tar.gz", hash = "sha256:263a38f3920d9dc625e3acb92e6f6d300f4250b70f538bd009ce6e485676ab74"},
@@ -1774,16 +1812,16 @@ cffi = [
     {file = "cffi-1.14.0.tar.gz", hash = "sha256:2d384f4a127a15ba701207f7639d94106693b6cd64173d6c8988e2c25f3ac2b6"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.28.3.tar.gz", hash = "sha256:e7d93eac5dd20eb9012bf33eef8d2ac6124dab3dfd408b46ffe7d6c9b0f8426f"},
-    {file = "cfn_lint-0.28.3-py3-none-any.whl", hash = "sha256:0e40e56c2b5b06d248f8ae6464ec55d671cbcd9bc8fb68694dbd42a29cb07fc7"},
+    {file = "cfn-lint-0.29.0.tar.gz", hash = "sha256:bceff7ce8556b1e6ea129e9cbf89834561820f63ed1fc96b250015498a041c03"},
+    {file = "cfn_lint-0.29.0-py3-none-any.whl", hash = "sha256:594600e461d902b6faf0a276743589dc6db4f9d381d63a22c3a2631a6d5cfd8e"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
     {file = "chardet-3.0.4.tar.gz", hash = "sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae"},
 ]
 click = [
-    {file = "Click-7.0-py2.py3-none-any.whl", hash = "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13"},
-    {file = "Click-7.0.tar.gz", hash = "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"},
+    {file = "click-7.1.1-py2.py3-none-any.whl", hash = "sha256:e345d143d80bf5ee7534056164e5e112ea5e22716bbb1ce727941f4c8b471b9a"},
+    {file = "click-7.1.1.tar.gz", hash = "sha256:8a18b4ea89d8820c5d0c7da8a64b2c324b4dabb695804dbfea19b9be9d88c0cc"},
 ]
 "collective.recipe.cmd" = [
     {file = "collective.recipe.cmd-0.11.tar.gz", hash = "sha256:5c251ed2100de54a435594e297aa2173cfa55e9f335373523718c83aa470e173"},
@@ -1851,12 +1889,16 @@ cryptography = [
     {file = "cryptography-2.8.tar.gz", hash = "sha256:3cda1f0ed8747339bbdf71b9f38ca74c7b592f24f65cdb3ab3765e4b02871651"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-2.0.2b1-py3-none-any.whl", hash = "sha256:e209c3defbf08283a95fc5d25b510d9603958ffd9d98e10124702caf00aa8ee5"},
-    {file = "dcicsnovault-2.0.2b1.tar.gz", hash = "sha256:aa6b1501d51380c91e75730c1be5a8af9f14fa3be362a0804003940e01487b01"},
+    {file = "dcicsnovault-2.0.4-py3-none-any.whl", hash = "sha256:3d65789f02a59760c2b3e01e7d35e875c4e8fdc3124ecbbf78dc541990f1b6b4"},
+    {file = "dcicsnovault-2.0.4.tar.gz", hash = "sha256:fba9ab7b7caa2ee8f87751534f56d81f910c8385726d345ec5d885c07670b234"},
 ]
 dcicutils = [
     {file = "dcicutils-0.9.3b0-py3-none-any.whl", hash = "sha256:5c451e5678662d8a6785e5f9eaf227e1c87f65977d8f6d7e2bc2c7f0db37d7b7"},
     {file = "dcicutils-0.9.3b0.tar.gz", hash = "sha256:f7f14cf15a0bd14dbdb3ad6608e4ce2e630a98bab7de422ca5fe0592b96ebaa8"},
+]
+decorator = [
+    {file = "decorator-4.4.2-py2.py3-none-any.whl", hash = "sha256:41fa54c2a0cc4ba648be4fd43cff00aedf5b9465c9bf18d64325bc225f08f760"},
+    {file = "decorator-4.4.2.tar.gz", hash = "sha256:e3a62f0520172440ca0dcc823749319382e377f37f140a0b99ef45fecb84bfe7"},
 ]
 docker = [
     {file = "docker-4.2.0-py2.py3-none-any.whl", hash = "sha256:1c2ddb7a047b2599d1faec00889561316c674f7099427b9c51e8cb804114b553"},
@@ -1974,8 +2016,8 @@ markupsafe = [
 mock = [
     {file = "mock-3.0.5-py2.py3-none-any.whl", hash = "sha256:d157e52d4e5b938c550f39eb2fd15610db062441a9c2747d3dbfa9298211d0f8"},
     {file = "mock-3.0.5.tar.gz", hash = "sha256:83657d894c90d5681d62155c82bda9c1187827525880eda8ff5df4ec813437c3"},
-    {file = "mock-4.0.1-py3-none-any.whl", hash = "sha256:5e48d216809f6f393987ed56920305d8f3c647e6ed35407c1ff2ecb88a9e1151"},
-    {file = "mock-4.0.1.tar.gz", hash = "sha256:2a572b715f09dd2f0a583d8aeb5bb67d7ed7a8fd31d193cf1227a99c16a67bc3"},
+    {file = "mock-4.0.2-py3-none-any.whl", hash = "sha256:3f9b2c0196c60d21838f307f5825a7b86b678cedc58ab9e50a8988187b4d81e0"},
+    {file = "mock-4.0.2.tar.gz", hash = "sha256:dd33eb70232b6118298d516bbcecd26704689c386594f0f3c4f13867b2c56f72"},
 ]
 moto = [
     {file = "moto-1.3.14-py2.py3-none-any.whl", hash = "sha256:2b3fa22778504b45715868cad95ad458fdea7227f9005b12e522fc9c2ae0cabc"},
@@ -1986,6 +2028,10 @@ netaddr = [
     {file = "netaddr-0.7.18-py3.4.egg", hash = "sha256:98c3d6fe831d119785c37af25f032169dd653a0dad86e54b387f4a5b83da4383"},
     {file = "netaddr-0.7.18.tar.gz", hash = "sha256:a1f5c9fcf75ac2579b9995c843dade33009543c04f218ff7c007b3c81695bd19"},
     {file = "netaddr-0.7.18.zip", hash = "sha256:c64c570ac612e20e8b8a6eee72034c924fff9d76c7a46f50a9f919085f1bfbed"},
+]
+networkx = [
+    {file = "networkx-2.4-py3-none-any.whl", hash = "sha256:cdfbf698749a5014bf2ed9db4a07a5295df1d3a53bf80bf3cbd61edf9df05fa1"},
+    {file = "networkx-2.4.tar.gz", hash = "sha256:f8f4ff0b6f96e4f9b16af6b84622597b5334bf9cae8cf9b2e42e7985d5c95c64"},
 ]
 passlib = [
     {file = "passlib-1.6.5-py2.py3-none-any.whl", hash = "sha256:ad631a58dc8abeb0f48016c13f4b3b0f3a7b1045a8cb3c61dd15e2d95b45c472"},
@@ -2411,7 +2457,7 @@ wheel = [
     {file = "wheel-0.29.0.tar.gz", hash = "sha256:1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648"},
 ]
 wrapt = [
-    {file = "wrapt-1.12.0.tar.gz", hash = "sha256:0ec40d9fd4ec9f9e3ff9bdd12dbd3535f4085949f4db93025089d7a673ea94e8"},
+    {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
 ]
 wsgiproxy2 = [
     {file = "WSGIProxy2-0.4.2.zip", hash = "sha256:a4b236fac5d4a2b51d9b3ed34cbe0d01aae173dce0ab9877f225b1dcdb4a6e8e"},
