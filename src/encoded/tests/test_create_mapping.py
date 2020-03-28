@@ -55,7 +55,8 @@ def test_create_mapping_item_order(registry):
         assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER
 
 
-@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod'))
 def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the staging case """
@@ -64,7 +65,11 @@ def test_get_deployment_config_staging():
     assert cfg['WIPE_ES'] is False  # no wipe
 
 
-@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod'))
+# It is essential to patch the place the function is referenced from, not the place it's defined from.
+# Sometimes both are needed, but not here. So we'll hold this other in reserve in case of a code change,
+# because these kinds of patches are sensitive to that. -kmp 28-Mar-2020
+#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
 def test_get_deployment_config_mastertest():
     """ Tests get_deployment_config in the mastertest case """
@@ -73,7 +78,8 @@ def test_get_deployment_config_mastertest():
     assert cfg['WIPE_ES'] is True  # wipe
 
 
-@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
+@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
 def test_get_deployment_config_hotseat():
     """ Tests get_deployment_config in the hotseat case """
