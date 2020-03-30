@@ -226,6 +226,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .first().click()
                 .get(".field-row[data-field-name=biosource_type] .dropdown-toggle").should("contain", "primary cell").end();
 
+            // Submit the child linked Item
             cy.get(".action-buttons-container .btn").within(function () {
                 return cy.contains('Validate').click().should("be.disabled");
             })
@@ -236,36 +237,38 @@ describe('Search As You Type functionality on SubmissionView', function () {
             // Check that switch back to primary item has occurred
             cy.get('.depth-level-1.last-title .working-subtitle').should("not.exist")
                 // Check that navigation tree has updated
-                .get(".submission-nav-leaf.leaf-depth-1:not(.active)").should("exist") // TODO: update to check contents
+                .get(".submission-nav-leaf.leaf-depth-1:not(.active)")
+                .should("contain", "dcic-testing-lab:" + identifier)
+                .get(".submission-nav-leaf.leaf-depth-0.active .title-text")
+                .should("contain", "dcic-testing-lab:" + principalObject)
+                // Add the newly created item to the list of items to get rid of
                 .get(".field-row [data-field-name=biosource] .dropdown-toggle").first().should("have.attr", "data-tip")
                 .get(".field-row [data-field-name=biosource] .dropdown-toggle").first().invoke('attr', 'data-tip')
                 .then((atID) => { console.log("add to delete", atID); testItemsToDelete.push(atID); }).end();
+
+            // Submit the principal object
+            cy.get(".action-buttons-container .btn").within(function () {
+                return cy.contains('Validate').should("not.be.disabled").click().end();
+            }).end()
+                // Click Submit button
+                .get(".action-buttons-container .btn").should("not.be.disabled").within(function () {
+                    return cy.contains('Submit').should("not.be.disabled").click().end();
+                }).end()
+                // Navigate new biosample data page
+                .get(".action-buttons-container .btn").within(function () {
+                    return cy.contains('Skip').should("not.be.disabled").click().end();
+                }).end();
+
+            // Add principal object @ID to delete array
+            cy.get('script[data-prop-name=context]').should("exist").then(($context) => {
+                const context = $context.text();
+                const contextData = JSON.parse(context);
+                const atId = contextData['@id'];
+                testItemsToDelete.push(atId); // Test software data @id
+            });
         });
 
-        // it('Can validate and submit software items', function() {
-        //     // Try to validate and submit the form.
-        //     cy.get(".action-buttons-container .btn").within(function () {
-        //         return cy.contains('Validate').click().end().wait(5000);
-        //     }).end()
-        //         // Click Submit button
-        //         .get(".action-buttons-container .btn").within(function () {
-        //             return cy.contains('Submit').click().end().wait(5000);
-        //         }).end()
-        //         // Navigate new biosample data page
-        //         .get(".action-buttons-container .btn").within(function () {
-        //             return cy.contains('Skip').click().end().wait(1000);
-        //         }).end();
-
-        //     cy.get('script[data-prop-name=context]').then(($context) => {
-        //         const context = $context.text();
-        //         const contextData = JSON.parse(context);
-        //         const atId = contextData['@id'];
-        //         testItemsToDelete.push(atId); // Test software data @id
-        //     });
-        // });
-
         it.only('Properly deletes submitted items', function() {
-            console.log("Items to delete:", testItemsToDelete);
             // Log in _as admin_.
             cy.visit('/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(500);
 
