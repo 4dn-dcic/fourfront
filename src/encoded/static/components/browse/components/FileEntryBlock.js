@@ -292,7 +292,7 @@ class MultipleFileCheckbox extends React.PureComponent {
             return null;
         }
 
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
         const lineHeight = (filesCount * 35 - 14) + 'px';
@@ -341,7 +341,7 @@ export class FilePairBlock extends React.PureComponent {
 
     onCheckboxChange(e){
         const { files, handleFileCheckboxChange } = this.props;
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         handleFileCheckboxChange(accessionTriples, files);
     }
 
@@ -427,14 +427,14 @@ export class FileHeaderWithCheckbox extends React.PureComponent {
     onChange(){
         const { allFiles, handleFileCheckboxChange } = this.props;
         const files = this.filesWithViewPermission(allFiles);
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         handleFileCheckboxChange(accessionTriples, files);
     }
 
     render(){
         const { allFiles, selectedFiles, children } = this.props;
         const files = this.filesWithViewPermission(allFiles);
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
 
