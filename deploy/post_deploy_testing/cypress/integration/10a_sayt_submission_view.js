@@ -190,7 +190,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end();
         });
 
-        it.only("Can link an object via SearchAsYouTypeAjax ", function() {
+        it("Can link an object via SearchAsYouTypeAjax ", function() {
             // Dropdown for SAYTAJAX should initialize to no value
             cy.get(".field-row [data-field-name=biosource] .dropdown-toggle")
                 .should('contain', 'No value').click()
@@ -202,14 +202,14 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('contain', 'No value')
                 // Should be a bunch of results; click first to select from drop
                 .get(".field-row [data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
-                .should('have.length', 4).first().click()
+                .should('not.have.length', 0).first().click()
                 // Item display title should now be present in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
                 .should('contain', 'immortalized cell line - 4DNSRCM79SZS')
                 // Check that side nav was updated with new item
                 .get(".submission-nav-leaf.leaf-depth-1:not(.active)")
                 .should("contain", "immortalized cell line - 4DNSRCM79SZS")
-                // Check that there is an empty dropdown button in the same field-row
+                // Check that there is an empty dropdown button in the next field-row
                 .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
                 .should('contain', "No value").end();
         });
@@ -222,32 +222,37 @@ describe('Search As You Type functionality on SubmissionView', function () {
 
         });
 
-        it("Can delete objects found via SearchAsYouType", function() {
-
+        it.only("Can delete objects found via SearchAsYouType", function() {
+            // Dropdown for SAYTAJAX should initialize to no value
+            cy.get(".field-row [data-field-name=biosource] .dropdown-toggle")
+                .should('contain', 'No value').click()
+                // Test type to search
+                .get(".field-row [data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
+                .focus().type('0f011b1e-b772-4f2a-8c24-cc55de28a994')
+                // Should still be nothing in the button
+                .get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
+                .should('contain', 'No value')
+                // Should be only one result: "adapter remover"; click it to select from drop
+                .get(".field-row [data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length', 1).click()
+                // Item display title should now be present in the button
+                .get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
+                .should('contain', 'immortalized cell line - 4DNSRCM79SZS')
+                // Check that side nav was updated with new item
+                .get(".submission-nav-leaf.leaf-depth-1:not(.active)")
+                .should("contain", "immortalized cell line - 4DNSRCM79SZS")
+                // Check that there is an empty dropdown button in the next field-row
+                .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
+                .should('contain', "No value")
+                // Attempt to delete item
+                .get('.field-row [data-field-name=biosource] .remove-button-column:not(.hidden) button').click()
+                // Check that item is removed from sidebar
+                .get(".submission-nav-leaf.leaf-depth-1.linked-item-title").should("have.length", 0)
+                .end();
         });
 
         it("Can delete objects found via Advanced Search ", function() {
-            // Dropdown for SAYTAJAX should initialize to no value
-            cy.get(".field-row [data-field-name=biosource] .dropdown-toggle")
-            .should('contain', 'No value').click()
-            // Test type to search
-            .get(".field-row [data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
-            .focus().type('0f011b1e-b772-4f2a-8c24-cc55de28a994')
-            // Should still be nothing in the button
-            .get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
-            .should('contain', 'No value')
-            // Should be only one result: "adapter remover"; click it to select from drop
-            .get(".field-row [data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
-            .should('have.length', 1).click()
-            // Item display title should now be present in the button
-            .get(".field-row [data-field-name=biosource] .field-column:not(.last-item-empty) .dropdown-toggle")
-            .should('contain', 'immortalized cell line - 4DNSRCM79SZS')
-            // Check that side nav was updated with new item
-            .get(".submission-nav-leaf.leaf-depth-1:not(.active)")
-            .should("contain", "immortalized cell line - 4DNSRCM79SZS")
-            // Check that there is an empty dropdown button in the same field-row
-            .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
-            .should('contain', "No value").end();
+
         });
 
         it("Can create and link and object via 'Create New'", function() {
