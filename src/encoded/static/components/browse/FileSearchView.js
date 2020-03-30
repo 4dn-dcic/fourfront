@@ -37,13 +37,7 @@ export default class FileSearchView extends React.PureComponent {
     render() {
         const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
-        let createNewVisible = false;
-        if (context && Array.isArray(context.actions) && !currentAction) {
-            const addAction = _.findWhere(context.actions, { 'name': 'add' });
-            if (addAction && typeof addAction.href === 'string') {
-                createNewVisible = true;
-            }
-        }
+        
         return (
             <div className="container" id="content">
                 <SelectedFilesController {...{ href, context }}>
@@ -184,13 +178,41 @@ class ControlsAndResults extends React.PureComponent {
             selectedFiles, registerWindowOnScrollHandler, hiddenColumns,
         };
 
+        let totalResults = null;
+        if (context && typeof context.total !== 'undefined' && context.total > 0) {
+            totalResults = (
+                <span className="inline-block mt-08">
+                    {context.total} Results
+                </span>
+            )
+        } else {
+            totalResults = (<span className="inline-block mt-08">&nbsp;</span>)
+        }
+
+        let addButton = null;
+        if (context && Array.isArray(context.actions) && !currentAction) {
+            const addAction = _.findWhere(context.actions, { 'name': 'add' });
+            if (addAction && typeof addAction.href === 'string') {
+                addButton = (
+                    <a className={"btn btn-primary btn-xs ml-1"} href={addAction.href} data-skiprequest="true">
+                        <i className="icon icon-fw icon-plus fas mr-03 fas" />Create New&nbsp;
+                    </a>);
+            }
+        }
+
         return (
             <div className="row">
                 {facets && facets.length > 0 ?
-                    <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
-                        <FacetList {...facetListProps} className="with-header-bg" itemTypeForSchemas="ExperimentSetReplicate"
-                            termTransformFxn={Schemas.Term.toName} onClearFilters={this.onClearFiltersClick} separateSingleTermFacets />
-                    </div>
+                    <React.Fragment>
+                        <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
+                            <div className="above-results-table-row text-right text-ellipsis-container">
+                                {totalResults}
+                                {addButton}
+                            </div>
+                            <FacetList {...facetListProps} className="with-header-bg" itemTypeForSchemas="ExperimentSetReplicate"
+                                termTransformFxn={Schemas.Term.toName} onClearFilters={this.onClearFiltersClick} separateSingleTermFacets />
+                        </div>
+                    </React.Fragment>
                     : null}
                 <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
                     <AboveBrowseViewTableControls {...aboveTableControlsProps} parentForceUpdate={this.forceUpdateOnSelf} showSelectedFileCount />
