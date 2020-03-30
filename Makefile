@@ -54,6 +54,9 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 
+test:
+	bin/test -vv --timeout=400
+
 info:
 	@: $(info Printing some info on how to use make)
 	   $(info   Use 'make build-dev' to build all dependencies)
@@ -68,3 +71,4 @@ info:
 	   $(info   Use 'make macpoetry-install' to install fourfront on OSX catalina)
 	   $(info   Use 'make build-locust' to intall locust. Do not do this unless you know what you are doing)
 	   $(info   Use 'make configure' to install poetry. You should not have to do this directly)
+	   $(info   Use 'make test' to run tests with the normal options we use on travis)
