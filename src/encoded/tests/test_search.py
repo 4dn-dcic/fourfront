@@ -236,7 +236,7 @@ def test_search_nested(workbook, testapp):
                                      '&files.accession=4DNFIO67APU1'
                                      '&files.accession=4DNFIO67APT1'
                                      '&files.file_size=500')
-    res = testapp.get(two_accessions_with_file_size)
+    testapp.get(two_accessions_with_file_size)
 
     # should return no results since NOT'ing the second accession who has file_size=500
     negative_second_accession_with_file_size = ('/search/?type=ExperimentHiC'
@@ -252,15 +252,21 @@ def test_search_nested(workbook, testapp):
                                     '&experiments_in_set.biosample.biosource.individual.organism.name=No+value')
     testapp.get(strange_search_with_no_value, status=404)
 
-    # should return results since there are experiments, another sanity check
-    # check that facet a nested facet was returned correctly
+
+def test_search_nested_handles_facets(workbook, testapp):
+    """ Tests that facets resolve to correct values and that reverse_nested doc_counts are propagated upward """
     main_page_search = ('/browse/?experimentset_type=replicate'
                         '&type=ExperimentSetReplicate')
     resulting_facets = testapp.get(main_page_search).json['facets']
     for facet in resulting_facets:
         if facet['field'] == 'experiments_in_set.experiment_categorizer.combined':
             assert facet['terms'][0]['key'] == 'Enzyme: DNaseI'
-            break
+        else:
+            try:
+                if len(facet['terms']) > 0:
+                    assert facet['terms'][0]['doc_count'] == facet['terms'][0]['primary_agg_reverse_nested']['doc_count']
+            except KeyError:
+                continue  # we are on a non-nested field
 
 
 @pytest.fixture

@@ -107,47 +107,20 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     }
     principals = request.effective_principals
     es = request.registry[ELASTIC_SEARCH]
-
-    # Get static section (if applicable) when searching a single item type
-    # Note: Because we rely on 'source', if the static_section hasn't been indexed
-    # into Elasticsearch it will not be loaded
-    if (len(doc_types) == 1) and 'Item' not in doc_types:
-        search_term = 'search-info-header.' + doc_types[0]
-        static_section = request.registry['collections']['StaticSection'].get(search_term)
-        if static_section and hasattr(static_section.model, 'source'):
-            item = static_section.model.source['object']
-            result['search_header'] = {}
-            result['search_header']['content'] = item['content']
-            result['search_header']['title'] = item.get('title', item['display_title'])
-            result['search_header']['filetype'] = item['filetype']
-
+    add_search_header_if_needed(request, doc_types, result)
     from_, size = get_pagination(request)
+
     # get desired frame for this search
     search_frame = request.normalized_params.get('frame', 'embedded')
 
     ### PREPARE SEARCH TERM
     prepared_terms = prepare_search_term(request)
-
     schemas = [types[item_type].schema for item_type in doc_types]
-
-    # set ES index based on doc_type (one type per index)
-    # if doc_type is item, search all indexes by setting es_index to None
-    # If multiple, search all specified
-    if 'Item' in doc_types:
-        es_index = get_namespaced_index(request, '*')
-    else:
-        es_index = find_index_by_doc_types(request, doc_types, ['Item'])
+    es_index = get_es_index(request, doc_types)
+    item_type_es_mapping = get_es_mapping(es, es_index)
 
     # establish elasticsearch_dsl class that will perform the search
     search = Search(using=es, index=es_index)
-
-    # get es mapping for given doc type so we can handle type=nested
-    if '*' in es_index or ',' in es_index:  # no type=nested searches can be done on * or multi-index
-        item_type = '*'
-        item_type_es_mapping = {}
-    else:
-        item_type = list(es.indices.get(es_index)[es_index]['mappings'].keys())[0]  # no other way to get it
-        item_type_es_mapping = es.indices.get(es_index)[es_index]['mappings'][item_type]['properties']
 
     # set up clear_filters path
     result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
@@ -290,6 +263,59 @@ def collection_view(context, request):
     This is a redirect directly to the search page
     """
     return search(context, request, context.type_info.name, False, forced_type='Search')
+
+
+def add_search_header_if_needed(request, doc_types, result):
+    """
+    Get static section (if applicable) when searching a single item type
+    Note: Because we rely on 'source', if the static_section hasn't been indexed
+    into Elasticsearch it will not be loaded
+
+    :param request: current request
+    :param doc_types: item type(s) we are searching on
+    :param result: the final result to populate search header info with
+    :return: Nothing, modifies result in place
+    """
+    if (len(doc_types) == 1) and 'Item' not in doc_types:
+        search_term = 'search-info-header.' + doc_types[0]
+        static_section = request.registry['collections']['StaticSection'].get(search_term)
+        if static_section and hasattr(static_section.model, 'source'):
+            item = static_section.model.source['object']
+            result['search_header'] = {}
+            result['search_header']['content'] = item['content']
+            result['search_header']['title'] = item.get('title', item['display_title'])
+            result['search_header']['filetype'] = item['filetype']
+
+
+def get_es_index(request, doc_types):
+    """
+    set ES index based on doc_type (one type per index)
+    if doc_type is item, search all indexes by setting es_index to None
+    If multiple, search all specified
+
+    :param request: current request, to be passed
+    :param doc_types: item types we are searching on
+    :return: index name
+    """
+    if 'Item' in doc_types:
+        return get_namespaced_index(request, '*')
+    else:
+        return find_index_by_doc_types(request, doc_types, ['Item'])
+
+
+def get_es_mapping(es, es_index):
+    """
+    Get es mapping for given doc type (so we can handle type=nested)
+
+    :param es: elasticsearch client
+    :param es_index: index to get mapping from
+    :return: the mapping for this item type or {}
+    """
+    if '*' in es_index or ',' in es_index:  # no type=nested searches can be done on * or multi-index
+        return {}
+    else:
+        item_type = list(es.indices.get(es_index)[es_index]['mappings'].keys())[0]  # no other way to get it
+        return es.indices.get(es_index)[es_index]['mappings'][item_type]['properties']
 
 
 def get_collection_actions(request, type_info):
@@ -614,7 +640,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     example: /search/?type=Biosource&sort=display_title
     will sort by display_title in ascending order. To set descending order,
     use the "-" flag: sort_by=-date_created.
-    Sorting is done alphatbetically, case sensitive by default.
+    Sorting is done alphabetically, case sensitive by default.
     TODO: add a schema flag for case sensitivity/insensitivity?
 
     ES5: simply pass in the sort OrderedDict into search.sort
@@ -991,11 +1017,29 @@ def apply_range_filters(range_filters, must_filters, es_mapping):
 
 
 def extract_nested_path_from_field(field):
-    return field[:field.index('.', field.index('.') + 1)]  # This seems to work in general but feels fragile... - Will
+    """
+    Extracts the nested path from the field by splicing the field from start:second_idx_of_('.').
+    This seems to work in general but feels fragile... It is specific to how we map things. - Will
+
+    Example: 'embedded.files.accession.raw' --> 'embedded.files' is the nested path
+
+    :param field: full field path at the most, nested path at the least
+    :return: nested
+    """
+    return field[:field.index('.', field.index('.') + 1)]
 
 
 def handle_should_query(field_name, options):
-    """ Builds a 'should' subquery for every option for the field """
+    """
+    Builds a 'should' subquery for every option for the field
+
+    :param field_name: full path to field
+    :param options: list of options for that field
+
+    Example: field_name='embedded.files.file_size.raw', options=[20, 30, 40]
+
+    :return: dsl-subquery that is effectively an OR of all options on the field. See SHOULD.
+    """
     should_query = {BOOL: {SHOULD: {TERMS: {field_name: []}}}}
     for option in options:
         should_query[BOOL][SHOULD][TERMS][field_name].append(option)
@@ -1004,8 +1048,12 @@ def handle_should_query(field_name, options):
 
 def handle_nested_filters(nested_filters, final_filters, key='must'):
     """ Helper function for set_filters
-        Collapses nested filters together into a single query
-        ** Modifies final_filters and final_filters in place **
+    Collapses nested filters together into a single query
+    ** Modifies final_filters and final_filters in place **
+
+    :param nested_filters: All nested fields that we would like to search on
+    :param final_filters: Collection of filters formatted in lucene, to be extended with nested filters
+    :param key: 'must' or 'must_not'
     """
     KEY_MAP = {MUST: MUST_NOT, MUST_NOT: MUST}
     if key not in KEY_MAP:
@@ -1416,6 +1464,25 @@ def generate_filters_for_terms_agg_from_search_filters(query_field, search_filte
     return facet_filters
 
 
+def fix_nested_aggregations(search, es_mapping):
+    """ Unfortunately, elasticsearch_dsl will not update_from_dict with a nested aggregation (bug?), so we must
+        update the search manually after processing all the "terms". This method handles that update in place.
+        It does this in 3 steps: first by overwriting the current 'agg bucket' with a empty new one, recreating the
+        'primary_agg' and adding a REVERSE_NESTED bucket called 'primary_agg_reverse_nested', to be used later.
+
+    :param search: search object
+    :param es_mapping: mapping of this item
+    """
+    aggs_ptr = search.aggs['all_items']
+    for agg in aggs_ptr:
+        if NESTED in agg:
+            search.aggs['all_items'] \
+                .bucket(agg, Nested(path=find_nested_path(aggs_ptr.aggs[agg]['primary_agg'].field, es_mapping))) \
+                .bucket('primary_agg',
+                        Terms(field=aggs_ptr.aggs[agg]['primary_agg'].field, size=100, missing='No value')) \
+                .bucket('primary_agg_reverse_nested', REVERSE_NESTED)
+
+
 def set_facets(search, facets, search_filters, string_query, request, doc_types,
                custom_aggregations=None, size=25, from_=0, es_mapping=None):
     """
@@ -1471,31 +1538,6 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
                 'filter': {'bool': facet_filters}
             }
 
-        # XXX: Unfortunately, elasticsearch_dsl will not update_from_dict with a nested aggregation (bug?), so we must
-        #      update the search manually after processing all the "terms". The below code SHOULD work but doesn't.
-        #      The purpose of leaving this code here is to illustrate what is necessary
-        # elif nested_path:
-        #     facet['aggregation_type'] = 'nested'
-        #     facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters,
-        #                                                                        string_query)
-        #     term_aggregation = {
-        #         TERMS: {
-        #             'size': 100,
-        #             'field': query_field,
-        #             'missing': facet.get("missing_value_replacement", "No value")
-        #         }
-        #     }
-        #
-        #     aggs[facet['aggregation_type'] + ":" + agg_name] = {
-        #         NESTED: {  # required for doing this on nested fields
-        #           PATH: nested_path
-        #         },
-        #         AGGS: {
-        #             "primary_agg": term_aggregation
-        #         },
-        #         FILTER: {BOOL: facet_filters},
-        #     }
-
         else:
             if nested_path:
                 facet['aggregation_type'] = NESTED
@@ -1543,14 +1585,8 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
     # update with all terms aggregations
     search.update_from_dict(search_as_dict)
 
-    # update with nested information so aggregations on nested fields work, see comment on else above
-    for agg in search.aggs['all_items']:
-        if NESTED in agg:
-            dsl_subquery = search.aggs['all_items']
-            search.aggs['all_items'] \
-                .bucket(agg, Nested(path=find_nested_path(dsl_subquery.aggs[agg]['primary_agg'].field, es_mapping))) \
-                .bucket('primary_agg', Terms(field=dsl_subquery.aggs[agg]['primary_agg'].field, size=100, missing='No value')) \
-                .bucket('primary_agg_reverse_nested', REVERSE_NESTED)
+    # update with correct nested aggregations, see docstring
+    fix_nested_aggregations(search, es_mapping)
     return search
 
 
@@ -1684,10 +1720,17 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
 
     return result
 
+
 def format_extra_aggregations(es_results):
+    """
+    Just copies over any aggregations not under 'all_items' directly
+
+    :param es_results: search results
+    :return: dictionary containing all aggregations not encompassed by 'all_items'. They are copied directly in.
+    """
     if 'aggregations' not in es_results:
         return {}
-    return { k:v for k,v in es_results['aggregations'].items() if k != 'all_items' }
+    return {k: v for k, v in es_results['aggregations'].items() if k != 'all_items' }
 
 
 def format_results(request, hits, search_frame):
