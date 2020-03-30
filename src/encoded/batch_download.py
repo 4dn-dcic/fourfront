@@ -51,6 +51,7 @@ TSV_MAPPING = OrderedDict([
     ('Experiment Set Accession',    (EXP_SET,   ['accession'])),
     ('Experiment Accession',        (EXP,       ['accession'])),
     ('File Accession',              (FILE,      ['accession'])),
+    ('File Experiment Accesion',    (FILE,      ['experiments.accession'])),
 
     ('Size',                        (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
@@ -74,6 +75,9 @@ TSV_MAPPING = OrderedDict([
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
+    ('Lab Name',                    (FILE,      ['track_and_facet_info.lab_name'])),
+    ('Tsv Notes',                   (FILE,      ['track_and_facet_info.tsv_notes'])),
+    ('Track And Facet Status',      (FILE,      ['track_and_facet_info.status'])),
     ('Notes',                       (FILE,      ['notes_to_tsv'])),
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
