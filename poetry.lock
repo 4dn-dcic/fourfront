@@ -295,7 +295,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "2.1.1b1"
+version = "2.1.1"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -311,7 +311,7 @@ aws_requests_auth = ">=0.4.1,<0.5.0"
 awscli = ">=1.15.42,<2.0.0"
 "backports.statistics" = "0.1.0"
 boto3 = ">=1.7.42,<2.0.0"
-dcicutils = "0.12.0b1"
+dcicutils = ">=0.12.0,<1"
 elasticsearch_dsl = ">=5.3.0,<6.0.0"
 future = ">=0.15.2,<0.16.0"
 futures = ">=3.1.1,<4.0.0"
@@ -354,7 +354,7 @@ description = "Utility package for interacting with the 4DN Data Portal and othe
 name = "dcicutils"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "0.12.0b1"
+version = "0.12.0"
 
 [package.dependencies]
 aws-requests-auth = ">=0.4.2,<1"
@@ -1730,7 +1730,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "c783aaf5746f8196755c5ef26d204813609e72c312ffea61bf871ed5cf62e42e"
+content-hash = "ee50cfa95927bc4cfb919e76d9a5e75c6d18bac54620df0cabe26e01ba09f986"
 python-versions = ">=3.5,<3.7"
 
 [metadata.files]
@@ -1889,12 +1889,12 @@ cryptography = [
     {file = "cryptography-2.8.tar.gz", hash = "sha256:3cda1f0ed8747339bbdf71b9f38ca74c7b592f24f65cdb3ab3765e4b02871651"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-2.1.1b1-py3-none-any.whl", hash = "sha256:3a36bd2ccc3e4a01e46d0c6e417e40a2ffbeae07aa9eff6fc5e3e43cfd743387"},
-    {file = "dcicsnovault-2.1.1b1.tar.gz", hash = "sha256:42f77c5ebb1a8164af545d12162d3d0600e92802c73fea2cf9d87c59bdc95f66"},
+    {file = "dcicsnovault-2.1.1-py3-none-any.whl", hash = "sha256:5b1c5fe25f839052d46723e03030d548612a2bbfaee69dbf6eb1c5b1761b627e"},
+    {file = "dcicsnovault-2.1.1.tar.gz", hash = "sha256:33686d3e2d731899a4a8e92fe6a4c8b4c9a648a5f414fccd51aa1c9d45ef267b"},
 ]
 dcicutils = [
-    {file = "dcicutils-0.12.0b1-py3-none-any.whl", hash = "sha256:a9cfcbf3e268337c08761a2e32ecb43be5bb040783e37ba81ca7de7aef541c69"},
-    {file = "dcicutils-0.12.0b1.tar.gz", hash = "sha256:8da8711168bb2639b2b64a70bab6762ff1bba1917d8563d7199bc213064ab24d"},
+    {file = "dcicutils-0.12.0-py3-none-any.whl", hash = "sha256:36b1dd96e7f61057a6d91eaf7fc84cffbfa3d7a8e6c15b46c05ceb5f6ca643d9"},
+    {file = "dcicutils-0.12.0.tar.gz", hash = "sha256:b68d6aa02028b090af8038dfbee65728ca73343ab15caf8a7dd40ffe2b94fda5"},
 ]
 decorator = [
     {file = "decorator-4.4.2-py2.py3-none-any.whl", hash = "sha256:41fa54c2a0cc4ba648be4fd43cff00aedf5b9465c9bf18d64325bc225f08f760"},
