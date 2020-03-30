@@ -1483,6 +1483,23 @@ def fix_nested_aggregations(search, es_mapping):
                 .bucket('primary_agg_reverse_nested', REVERSE_NESTED)
 
 
+def get_query_field(field, facet):
+    """ Converts a field from its generic field name to a more specific field name referencing it's embedded nature
+
+    :param field: generic field name, such as 'files.accession'
+    :param facet: facet on this field
+    :return: full path to field on ES mapping
+    """
+    if field == 'type':
+        return 'embedded.@type.raw'
+    elif field.startswith('validation_errors') or field.startswith('aggregated_items'):
+        return field + '.raw'
+    elif facet.get('aggregation_type') in ('stats', 'date_histogram', 'histogram', 'range'):
+        return 'embedded.' + field
+    else:
+        return 'embedded.' + field + '.raw'
+
+
 def set_facets(search, facets, search_filters, string_query, request, doc_types,
                custom_aggregations=None, size=25, from_=0, es_mapping=None):
     """
@@ -1505,21 +1522,11 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
         field_schema = schema_for_field(field, request, doc_types, should_log=True)
         is_date_field = field_schema and determine_if_is_date_field(field, field_schema)
         is_numerical_field = field_schema and field_schema['type'] in ("integer", "float", "number")
-
-        if field == 'type':
-            query_field = 'embedded.@type.raw'
-        elif field.startswith('validation_errors') or field.startswith('aggregated_items'):
-            query_field = field + '.raw'
-        elif facet.get('aggregation_type') in ('stats', 'date_histogram', 'histogram', 'range'):
-            query_field = 'embedded.' + field
-        else:
-            query_field = 'embedded.' + field + '.raw'
-
+        query_field = get_query_field(field, facet)
         nested_path = find_nested_path(query_field, es_mapping)
 
         ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
-
         if facet.get('aggregation_type') == 'stats':
 
             if is_date_field:
@@ -1528,14 +1535,14 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
                 facet['field_type'] = field_schema['type'] or "number"
 
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
-                'aggs': {
-                    "primary_agg" : {
-                        'stats' : {
-                            'field' : query_field
+                AGGS: {
+                    'primary_agg': {
+                        'stats': {
+                            'field': query_field
                         }
                     }
                 },
-                'filter': {'bool': facet_filters}
+                FILTER: {BOOL: facet_filters}
             }
 
         else:
@@ -1546,17 +1553,17 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
             facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
             term_aggregation = {
-                "terms" : {
-                    'size'    : 100,  # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
-                    'field'   : query_field,
-                    'missing' : facet.get("missing_value_replacement", "No value")
+                TERMS: {
+                    'size': 100,  # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
+                    'field': query_field,
+                    'missing': facet.get("missing_value_replacement", "No value")
                 }
             }
             aggs[facet['aggregation_type'] + ":" + agg_name] = {
-                'aggs': {
-                    "primary_agg" : term_aggregation
+                AGGS: {
+                    'primary_agg': term_aggregation
                 },
-                'filter': {'bool': facet_filters},
+                FILTER: {BOOL: facet_filters},
             }
 
         # Update facet with title, description from field_schema, if missing.
@@ -1649,6 +1656,23 @@ def execute_search(search):
     return es_results
 
 
+def fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name):
+    """ 2 things must happen here (both occur in place):
+            1. front-end does not care about 'nested', only what the inner thing is, so lets pretend (so it doesn't break)
+            2. We must overwrite the "second level" doc_count with the "third level" because the "third level"
+               is the 'root' level doc_count, which is what we care about, NOT the nested doc count
+
+    :param result_facet: facet to be created - 'aggregation_type' is overwritten as 'terms'
+    :param aggregations: handle to all aggregations that we can access based on name
+    :param full_agg_name: full name of the aggregation
+    """
+    result_facet['aggregation_type'] = 'terms'
+    buckets = aggregations[full_agg_name]['primary_agg']['buckets']
+    for bucket in buckets:
+        if 'primary_agg_reverse_nested' in bucket:
+            bucket['doc_count'] = bucket['primary_agg_reverse_nested']['doc_count']
+
+
 def format_facets(es_results, facets, total, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
@@ -1702,16 +1726,9 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 if len(result_facet.get('terms', [])) < 1 and not facet['aggregation_type'] == 'nested':
                     continue
 
-                # XXX: 2 things must happen here:
-                # 1. front-end does not care about 'nested', only what the inner thing is, so lets pretend...
-                # 2. we must overwrite the "second level" doc_count with the "third level" because the "third level"
-                #    is the 'root' level doc_count, which is what we care about, NOT the nested doc count
+                # if we are nested, apply fix + replace
                 if facet['aggregation_type'] == 'nested':
-                    result_facet['aggregation_type'] = 'terms'
-                    buckets = aggregations[full_agg_name]['primary_agg']['buckets']
-                    for bucket in buckets:
-                        if 'primary_agg_reverse_nested' in bucket:
-                            bucket['doc_count'] = bucket['primary_agg_reverse_nested']['doc_count']
+                    fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name)
 
             if len(aggregations[full_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
