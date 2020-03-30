@@ -278,11 +278,17 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
         currentOpenPanel
     } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
-    const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
-    // This gets unique file count from ES aggs. In future we might be able to get total including
-    // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
-    // in SelectAllFilesButton & similar.
-    const totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+
+    let totalUniqueFilesCount;
+    if (Array.isArray(context['@type']) && context['@type'].indexOf('FileSearchResults') > -1) {
+        totalUniqueFilesCount = context.total || 0;
+    } else {
+        const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
+        // This gets unique file count from ES aggs. In future we might be able to get total including
+        // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
+        // in SelectAllFilesButton & similar.
+        totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+    }
 
     return (
         <div>

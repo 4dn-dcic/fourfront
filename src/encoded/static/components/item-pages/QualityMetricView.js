@@ -44,7 +44,7 @@ class QualityMetricViewOverview extends React.PureComponent {
         const { context } = this.props;
 
         ajax.load('/search/?type=File&quality_metric.uuid=' + context.uuid, (r) => {
-            if (r['@graph'] && Array.isArray(r['@graph']) && r['@graph'].length > 0) {
+            if (r['@graph'] && Array.isArray(r['@graph']) && r['@graph'].length > 0 && r['@graph'][0].quality_metric_summary) {
                 const qcSummary = r['@graph'][0].quality_metric_summary;
                 this.setState({ 'qcSummary': qcSummary });
             } else {
@@ -52,6 +52,7 @@ class QualityMetricViewOverview extends React.PureComponent {
             }
         }, 'GET', (err) => {
             console.error('No results found');
+            this.setState({ 'qcSummary': {} });
         });
     }
 

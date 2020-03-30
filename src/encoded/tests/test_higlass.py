@@ -79,13 +79,11 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "plusStrandColor": "black",
                             "minusStrandColor": "black",
                             "trackBorderWidth": 0,
-                            "coordSystem": "GRCm38",
                             "trackBorderColor": "black",
                             "name": "Gene Annotations (GRCm38)",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
-                        "minHeight": 55,
                         "height": 55,
                         "header": "",
                         "position": "top",
@@ -97,10 +95,8 @@ def higlass_mcool_viewconf(testapp, award, lab):
                         "tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
                         "type": "horizontal-chromosome-labels",
                         "local": True,
-                        "minHeight": 30,
                         "thumbnail": None,
                         "options": {
-                            "coordSystem": "GRCm38",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
@@ -127,7 +123,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "minusStrandColor": "black",
                             "trackBorderWidth": 0,
                             "trackBorderColor": "black",
-                            "coordSystem": "GRCm38",
                             "name": "Gene Annotations (GRCm38)",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
@@ -189,8 +184,7 @@ def higlass_mcool_viewconf(testapp, award, lab):
                                 "#eeeeee",
                                 "labelPosition":
                                 "topLeft",
-                                "coordSystem":
-                                "GRCm38",
+
                                 "colorRange": [
                                     "white", "rgba(245,166,35,1.0)",
                                     "rgba(208,2,27,1.0)", "black"
@@ -1558,8 +1552,6 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
             assert_true("options" in track)
             options = track["options"]
-            assert_true("valueScaling" in options)
-            assert_true(options["valueScaling"] == "linear")
 
             assert_true("colorRange" in options)
             assert_true(len(options["colorRange"]) == 256)
