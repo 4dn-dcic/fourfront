@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "encoded"
-version = "1.0b1"
+version = "1.1.0b1"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -45,8 +45,8 @@ chardet = "3.0.4"
 "collective.recipe.template" = "1.13"
 colorama = "0.3.3"
 coverage = "4.0.3"  # TODO: Maybe move to dev-dependencies?
-dcicutils = "0.9.3b0"
-dcicsnovault = "2.0.4"
+dcicutils = ">=0.12.0,<1"
+dcicsnovault = "^2.1.1"
 docutils = "0.12"
 elasticsearch = "5.5.3"
 elasticsearch-dsl = "5.4.0"
