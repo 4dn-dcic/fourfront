@@ -47,24 +47,26 @@ deploy1:  # starts postgres/ES locally and loads inserts
 deploy2:  # spins up waittress to serve the application
 	pserve development.ini
 
-
 clean-python:
 	@echo -n "Are you sure? This will wipe all libraries installed on this virtualenv [y/N] " && read ans && [ $${ans:-N} = y ]
 	pip uninstall encoded
 	pip freeze | xargs pip uninstall -y
 
+test:
+	bin/test -vv --timeout=400
 
 info:
 	@: $(info Printing some info on how to use make)
-	   $(info   Use 'make build-dev' to build all dependencies)
-	   $(info   Use 'make build' to build only application dependencies)
-	   $(info   Use 'make deploy1' to spin up postgres/elasticsearch and load inserts)
-	   $(info   Use 'make deploy2' to spin up the application server)
-	   $(info   Use 'make clean' to clear out (non-python) dependencies)
-	   $(info   Use 'make clean-python' to clear python virtualenv for fresh poetry install)
-	   $(info   Use 'make aws-ip-ranges' to download latest ip range information. You should never have to do this yourself.)
-	   $(info   Use 'make npm-setup' to build the front-end)
-	   $(info   Use 'make moto-setup' to install moto, for less flaky tests)
-	   $(info   Use 'make macpoetry-install' to install fourfront on OSX catalina)
-	   $(info   Use 'make build-locust' to intall locust. Do not do this unless you know what you are doing)
-	   $(info   Use 'make configure' to install poetry. You should not have to do this directly)
+	   $(info - Use 'make build-dev' to build all dependencies)
+	   $(info - Use 'make build' to build only application dependencies)
+	   $(info - Use 'make deploy1' to spin up postgres/elasticsearch and load inserts)
+	   $(info - Use 'make deploy2' to spin up the application server)
+	   $(info - Use 'make clean' to clear out (non-python) dependencies)
+	   $(info - Use 'make clean-python' to clear python virtualenv for fresh poetry install)
+	   $(info - Use 'make aws-ip-ranges' to download latest ip range information. You should never have to do this yourself.)
+	   $(info - Use 'make npm-setup' to build the front-end)
+	   $(info - Use 'make moto-setup' to install moto, for less flaky tests)
+	   $(info - Use 'make macpoetry-install' to install fourfront on OSX catalina)
+	   $(info - Use 'make build-locust' to intall locust. Do not do this unless you know what you are doing)
+	   $(info - Use 'make configure' to install poetry. You should not have to do this directly)
+	   $(info - Use 'make test' to run tests with the normal options we use on travis)
