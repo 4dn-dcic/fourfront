@@ -211,9 +211,9 @@ describe('Search As You Type functionality on SubmissionView', function () {
         });
 
         it.only("Can create and link and object via 'Create New'", function() {
-            const identifier = ("sv-sayt-test-" + new Date().getTime());
+            let identifier = ("sv-sayt-test-" + new Date().getTime());
 
-            // Create a new biosource item for testing enums
+            // Create a new linked biosource item
             cy.get('.field-row [data-field-name=biosource] .linked-object-buttons-container .create-new-obj').click()
                 // Create an alias for this item
                 .get('.modal-dialog input#aliasInput.form-control').focus().type(identifier).should('have.value', identifier).end()
@@ -226,13 +226,27 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .first().click()
                 .get(".field-row[data-field-name=biosource_type] .dropdown-toggle").should("contain", "primary cell").end();
 
-            // Submit the child linked Item
-            cy.get(".action-buttons-container .btn").within(function () {
-                return cy.contains('Validate').click().should("be.disabled");
-            })
-                .get(".action-buttons-container .btn").within(function() {
-                    return cy.contains('Submit').should("not.be.disabled").click();
-                }).end();
+            // Try switching back to the principal object and back again.
+            cy.get(".submission-nav-leaf.leaf-depth-0 .inner-title.not-complete").click()
+                // Check that header updated
+                .get('.depth-level-1.last-title .working-subtitle').should("not.exist")
+                // Check that tree updated to reflect new state
+                .get('.submission-nav-leaf.leaf-depth-0.active .inner-title.not-complete').should("exist")
+                .get('.submission-nav-leaf.leaf-depth-1 .inner-title.validated').should("exist")
+                // Switch back via navigation sidebar
+                .click()
+                .get('.depth-level-1.last-title .working-subtitle').should("contain", "Biosource")
+                // Then switch back again via field link
+                .get(".submission-nav-leaf.leaf-depth-0 .inner-title.not-complete").click()
+                .get('.submission-nav-leaf.leaf-depth-0.active .inner-title.not-complete').should("exist")
+                .get('.submission-nav-leaf.leaf-depth-1 .inner-title.validated').should("exist")
+                .get(".field-row[data-field-name=biosource] .incomplete-linked-object-display-container a")
+                .click().end();
+
+            // Submit the child linked Item (post auto-validate from switching)
+            cy.get(".action-buttons-container .btn").within(function() {
+                return cy.contains('Submit').should("not.be.disabled").click().should("be.disabled");
+            }).end();
 
             // Check that switch back to primary item has occurred
             cy.get('.depth-level-1.last-title .working-subtitle').should("not.exist")
@@ -246,7 +260,27 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .get(".field-row [data-field-name=biosource] .dropdown-toggle").first().invoke('attr', 'data-tip')
                 .then((atID) => { console.log("add to delete", atID); testItemsToDelete.push(atID); }).end();
 
+            // Create a new biosource item for testing deletion
+            identifier = ("sv-sayt-test-" + new Date().getTime());
+            cy.get('.field-row [data-field-name=biosource] .last-item-empty .linked-object-buttons-container .create-new-obj').click()
+                // Create an alias for this item
+                .get('.modal-dialog input#aliasInput.form-control').focus().type(identifier).should('have.value', identifier).end()
+                .get("button.btn-primary.btn").should('contain', 'Submit').click()
+                // Check for successful switch (subtitle should change to Biosource)
+                .get('.depth-level-1.last-title .working-subtitle').should("contain", "Biosource")
+                // Don't make selections for required fields (make auto-validate fail upon switching)
+                .get(".submission-nav-leaf.leaf-depth-0 .inner-title.not-complete").click()
+                // Check that item is not shown as validated in sidebar
+                .get(".submission-nav-leaf.leaf-depth-1.linked-item-title").should("have.length", 2)
+                .first().invoke('hasClass', 'failed-validation')
+                // Attempt to delete item
+                .get('.field-row [data-field-name=biosource] .remove-button-column:not(.hidden) button')
+                .last().click()
+                // Check that item is removed from sidebar
+                .get(".submission-nav-leaf.leaf-depth-1.linked-item-title").should("have.length", 1).end();
+
             // Submit the principal object
+            // Note: Currently fails due to a bug in submission view that needs fixing.
             cy.get(".action-buttons-container .btn").within(function () {
                 return cy.contains('Validate').should("not.be.disabled").click().end();
             }).end()
