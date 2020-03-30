@@ -71,10 +71,11 @@ PATH = 'path'
 TERMS = 'terms'
 RANGE = 'range'
 AGGS = 'aggs'
+REVERSE_NESTED = 'reverse_nested'
 # just for book-keeping/readability but is 'unused' for now
 # ie: it should be obvious when you are 'effectively' writing lucene
 ELASTIC_SEARCH_QUERY_KEYWORDS = [
-    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE, AGGS,
+    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE, AGGS, REVERSE_NESTED,
 ]
 
 
@@ -1546,7 +1547,10 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
     for agg in search.aggs['all_items']:
         if NESTED in agg:
             dsl_subquery = search.aggs['all_items']
-            search.aggs['all_items'].bucket(agg, Nested(path=find_nested_path(dsl_subquery.aggs[agg]['primary_agg'].field, es_mapping))).bucket('primary_agg', Terms(field=dsl_subquery.aggs[agg]['primary_agg'].field, size=100, missing='No value'))
+            search.aggs['all_items'] \
+                .bucket(agg, Nested(path=find_nested_path(dsl_subquery.aggs[agg]['primary_agg'].field, es_mapping))) \
+                .bucket('primary_agg', Terms(field=dsl_subquery.aggs[agg]['primary_agg'].field, size=100, missing='No value')) \
+                .bucket('primary_agg_reverse_nested', REVERSE_NESTED)
     return search
 
 
@@ -1662,9 +1666,16 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 if len(result_facet.get('terms', [])) < 1 and not facet['aggregation_type'] == 'nested':
                     continue
 
-                # XXX: front-end does not care about 'nested', only what the inner thing is, so lets pretend...
+                # XXX: 2 things must happen here:
+                # 1. front-end does not care about 'nested', only what the inner thing is, so lets pretend...
+                # 2. we must overwrite the "second level" doc_count with the "third level" because the "third level"
+                #    is the 'root' level doc_count, which is what we care about, NOT the nested doc count
                 if facet['aggregation_type'] == 'nested':
                     result_facet['aggregation_type'] = 'terms'
+                    buckets = aggregations[full_agg_name]['primary_agg']['buckets']
+                    for bucket in buckets:
+                        if 'primary_agg_reverse_nested' in bucket:
+                            bucket['doc_count'] = bucket['primary_agg_reverse_nested']['doc_count']
 
             if len(aggregations[full_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
