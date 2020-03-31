@@ -155,26 +155,24 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 // Check that value was cleared
                 .get(".field-row[data-field-name=software_type] .dropdown-toggle")
                 .should("contain", "No value").click().end();
+        });
 
-            /*
-            // TODO: Fix this test for keyboard navigation -- behaving REALLY strangely
-            // Load final value and select via arrow key & enter
-            cy.get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
-                .focus().clear() // Note: again, double querying a result of 'detachment from DOM' post-clear
-                .get(".field-row[data-field-name=status] .search-selection-menu-body .text-input-container input.form-control")
-                .type("released")
-                .get(".field-row[data-field-name=status] .search-selection-menu-body .scroll-items .dropdown-item")
-                .should('have.length', 2).first().focus()
-                .trigger('keydown', { keyCode: '9' })
-                .trigger('keydown', { keyCode: '13' })
-                // Check that new value has been added to the button
-                .get(".field-row[data-field-name=status] .dropdown-toggle")
-                .should('contain', 'released').end();
-             */
+        it('Can make selections via keyboard navigation', function() {
+            cy.get(".field-row [data-field-name=software_type] .dropdown-toggle").last()
+                .should('contain', 'No value').click()
+                // Check that items loaded
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .scroll-items .dropdown-item")
+                .should('have.length.greaterThan', 0)
+                // Press down and enter to select first item
+                .get(".field-row [data-field-name=software_type] .search-selection-menu-body .text-input-container input.form-control").focus()
+                .type('{downarrow} {enter}')
+                // Check that new value (first item) has been added to the button
+                .get(".field-row [data-field-name=software_type] .field-column:not(.last-item-empty) .dropdown-toggle").last()
+                .should('not.contain', 'No value').end();
         });
     });
 
-    context.only('Test Biosample Item Edit page (Linked Objects)', function() {
+    context('Test Biosample Item Edit page (Linked Objects)', function() {
         beforeEach(function() {
             // Navigate to and create a new Biosample item for testing suggested_enums
             cy.visit('/search/?type=Biosample&currentAction=add',
