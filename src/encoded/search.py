@@ -1661,6 +1661,8 @@ def fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name):
             1. front-end does not care about 'nested', only what the inner thing is, so lets pretend (so it doesn't break)
             2. We must overwrite the "second level" doc_count with the "third level" because the "third level"
                is the 'root' level doc_count, which is what we care about, NOT the nested doc count
+            3. We must then re-sort the aggregations so they show up in from greatest to least doc_count wrt the root
+               level count instead of the "old" nested doc count.
 
     :param result_facet: facet to be created - 'aggregation_type' is overwritten as 'terms'
     :param aggregations: handle to all aggregations that we can access based on name
@@ -1671,6 +1673,7 @@ def fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name):
     for bucket in buckets:
         if 'primary_agg_reverse_nested' in bucket:
             bucket['doc_count'] = bucket['primary_agg_reverse_nested']['doc_count']
+    aggregations[full_agg_name]['primary_agg']['buckets'] = sorted(buckets, key=lambda d: d['primary_agg_reverse_nested']['doc_count'], reverse=True)
 
 
 def format_facets(es_results, facets, total, search_frame='embedded'):
@@ -1716,9 +1719,6 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
             else:  # 'terms' assumed.
 
-                # Default - terms, range, or histogram buckets. Buckets may not be present
-                result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
-
                 # Choosing to show facets with one term for summary info on search it provides
                 # XXX: The above comment is misleading - this drops all facets with no buckets
                 # we apparently want this for non-nested fields based on the tests, but should be
@@ -1730,11 +1730,13 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 if facet['aggregation_type'] == 'nested':
                     fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name)
 
+                # Add buckets under 'terms' AFTER we have fixed the doc_counts
+                result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
+
             if len(aggregations[full_agg_name].keys()) > 2:
                 result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
 
         result.append(result_facet)
-
     return result
 
 
