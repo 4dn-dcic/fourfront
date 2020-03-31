@@ -27,9 +27,8 @@ describe('Biosample create page', function () {
             const identifier = ("bs-test-" + new Date().getTime());
             cy.get('.modal-dialog input#aliasInput.form-control').focus().type(identifier).wait(100).end()
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end().wait(10000);
-            cy.get('.field-row [data-field-name=biosource] .linked-object-buttons-container .adv-search').click().end();
+            cy.get('.field-row [data-field-name=biosource] .linked-object-buttons-container .select-create-linked-item-button').first().should('contain', 'Select existing').click().end();
 
-            // TODO: Find a way to locate this item via advanced search WITHOUT access to UUID; can't SAYT on a UUID
             //Add biosources data file
             cy.get('.array-field-container  .field-row .field-column .linked-object-text-input-container  .form-control').focus().type('0f011b1e-b772-4f2a-8c24-cc55de28a994').wait(100).end();
 
