@@ -1719,6 +1719,10 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
             else:  # 'terms' assumed.
 
+                # XXX: This needs to be done in case we 'continue' below, unclear why needed in that case
+                # but tests will fail if its not there when expected.
+                result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
+
                 # Choosing to show facets with one term for summary info on search it provides
                 # XXX: The above comment is misleading - this drops all facets with no buckets
                 # we apparently want this for non-nested fields based on the tests, but should be
@@ -1730,7 +1734,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                 if facet['aggregation_type'] == 'nested':
                     fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name)
 
-                # Add buckets under 'terms' AFTER we have fixed the doc_counts
+                # Re-add buckets under 'terms' AFTER we have fixed the doc_counts
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
 
             if len(aggregations[full_agg_name].keys()) > 2:
