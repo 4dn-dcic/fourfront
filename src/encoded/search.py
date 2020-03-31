@@ -21,7 +21,7 @@ from snovault.util import (
 from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
-from elasticsearch_dsl.aggs import Terms, Nested
+from elasticsearch_dsl.aggs import Terms, Nested, Cardinality, ValueCount
 from elasticsearch import (
     TransportError,
     RequestError,
@@ -77,6 +77,8 @@ REVERSE_NESTED = 'reverse_nested'
 ELASTIC_SEARCH_QUERY_KEYWORDS = [
     QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE, AGGS, REVERSE_NESTED,
 ]
+BARPLOT_AGGS = 'field_0'  # identifier for barplot aggs, which we will 'adjust' in this file
+
 
 
 @view_config(route_name='search', request_method='GET', permission='search')
@@ -161,6 +163,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             search_session_id = 'SESSION-' + str(uuid.uuid1())
             created_new_search_session_id = True
         search = search.params(preference=search_session_id)
+
+    ### Fix BARPLOT_AGGS if they exist (see note in function on why we do this here)
+    fix_barplot_aggs(search, item_type_es_mapping)
 
     ### Execute the query
     if size == 'all':
@@ -766,6 +771,44 @@ def find_nested_path(field, es_mapping):
         if location.get('type', None) == 'nested':
             return '.'.join(path)
     return None
+
+
+def fix_barplot_aggs(search, es_mapping):
+    """ Reformats the bar plot aggs set in visualization.py into proper nested form on the current search
+
+        **Unfortunately due to the dsl bug where you can't update_from_dict on nested aggregations this has
+        to be done here using DSL, see 'fix_nested_aggregations'**
+
+        XXX: At some point, visualization.py aggs should be augmented/removed in favor of having this info on the main
+        search result instead of doing an extra request to Elasticsearch
+
+    :param search: the dsl search we are about to execute
+    :param es_mapping: the mapping of the item we are computing bar_plot_aggregations on
+    """
+    search_dict = search.to_dict()
+    if es_mapping == {}:
+        return  # do nothing if there is no mapping (should not be the case if we care about this happening)
+
+    # 'walk' the dsl in dictionary form, then update it with the dsl if needed
+    if BARPLOT_AGGS in search_dict.get('aggs', {}):
+        barplot_aggs = search_dict['aggs'][BARPLOT_AGGS]['aggs']
+        for bucket_name, agg in barplot_aggs.items():
+            if 'cardinality' in agg:
+                field_name = agg['cardinality']['field']
+                sub_query = Cardinality(field=field_name, precision_threshold=10000)
+            elif 'value_count' in agg:
+                field_name = agg['value_count']['field']
+                sub_query = ValueCount(field=field_name)
+            else:
+                continue  # anything else we don't care
+
+            nested_path = find_nested_path(field_name, es_mapping)
+            if nested_path:
+                search.aggs[BARPLOT_AGGS].bucket(bucket_name, Nested(path=nested_path)) \
+                                         .bucket(bucket_name, sub_query)
+                if bucket_name in search_dict['aggs']:
+                    search.aggs.bucket(bucket_name, Nested(path=nested_path)) \
+                               .bucket(bucket_name, sub_query)
 
 
 def initialize_field_filters(request, principals, doc_types):
