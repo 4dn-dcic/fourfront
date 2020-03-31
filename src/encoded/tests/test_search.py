@@ -509,7 +509,7 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     res = anontestapp.get('/biosamples/', status=404)
     assert len(res.json['@graph']) == 0
 
-
+@pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
