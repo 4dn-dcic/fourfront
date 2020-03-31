@@ -164,7 +164,9 @@ describe('Search As You Type functionality on SubmissionView', function () {
     });
 
     context.only('Test Biosample Item Edit page (Linked Objects)', function() {
-        before(function() {
+        // NOTE: Could probably update this to make it work with just a single page load, but would need to make more
+        // test Biosample objects, so that I wouldn't be adding the same one repeatedly (this is buggy)
+        beforeEach(function() {
             // Navigate to and create a new Biosample item for testing suggested_enums
             cy.visit('/search/?type=Biosample&currentAction=add',
                 {
@@ -189,7 +191,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('contain', 'No value').click()
                 // Test type to search
                 .get(".field-row [data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
-                .focus().type('immortalized cell line - 4DNSRTMTV')
+                .focus().type('immortalized cell line - 4DN')
                 // Should still be nothing in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not('.last-item-empty') .dropdown-toggle")
                 .should('contain', 'No value')
@@ -198,10 +200,10 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('not.have.length', 0).first().click()
                 // Item display title should now be present in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not('.last-item-empty') .dropdown-toggle")
-                .should('contain', 'immortalized cell line - 4DNSRTMTV')
+                .should('contain', 'immortalized cell line - 4DN')
                 // Check that side nav was updated with new item
                 .get(".submission-nav-leaf.leaf-depth-1:not('.active')")
-                .should("contain", "immortalized cell line - 4DNSRTMTV")
+                .should("contain", "immortalized cell line - 4DN")
                 // Check that there is an empty dropdown button in the next field-row
                 .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
                 .should('contain', "No value").end();
@@ -209,7 +211,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
 
         it("Can delete objects found via SearchAsYouType", function() {
             // Dropdown for SAYTAJAX should initialize to no value
-            cy.get(".field-row [data-field-name=biosource] .dropdown-toggle")
+            cy.get(".field-row [data-field-name=biosource] .dropdown-toggle").last()
                 .should('contain', 'No value').click()
                 // Test type to search
                 .get(".field-row [data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
@@ -222,10 +224,10 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('have.length', 1).click()
                 // Item display title should now be present in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not('.last-item-empty') .dropdown-toggle")
-                .should('contain', 'immortalized cell line - 4DNSRTMTV')
+                .should('contain', 'immortalized cell line - 4DN')
                 // Check that side nav was updated with new item
                 .get(".submission-nav-leaf.leaf-depth-1:not('.active')")
-                .should("contain", "immortalized cell line - 4DNSRTMTV")
+                .should("contain", "immortalized cell line - 4DN")
                 // Check that there is an empty dropdown button in the next field-row
                 .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
                 .should('contain', "No value")
@@ -330,7 +332,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                     return cy.contains('Skip').should('contain', 'Skip').should("not.be.disabled").click().end();
                 })
                 // TODO: Figure out a better way to do this; need to wait until full page load (including JS to finish running)
-                // for @id to be added to context via JS in next f(X). This is really important; otherwise delete request in next test will fail.
+                // for @id to be added to context via JS in next f(X). This is really fiddly w/o wait; easily results in delete request in next test failing.
                 .wait(5000).end();
 
             // Add principal object @ID to delete array
