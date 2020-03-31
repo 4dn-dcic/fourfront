@@ -78,7 +78,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
         // Test array suggested_enums
 
         beforeEach(function() {
-            // Navigate to and create a new Biosample item for testing suggested_enums
+            // Navigate to and create a new Software item for testing suggested_enums
             cy.visit('/search/?type=Software&currentAction=add', { 'failOnStatusCode': false })
                 .login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
                 .get(navUserAcctDropdownBtnSelector).then((accountListItem)=>{
@@ -177,7 +177,11 @@ describe('Search As You Type functionality on SubmissionView', function () {
     context.only('Test Biosample Item Edit page (Linked Objects)', function() {
         beforeEach(function() {
             // Navigate to and create a new Biosample item for testing suggested_enums
-            cy.visit('/search/?type=Biosample&currentAction=add', { 'failOnStatusCode': false })
+            cy.visit('/search/?type=Biosample&currentAction=add',
+                {
+                    'failOnStatusCode': false,
+                    'onBeforeLoad' : (win) => {cy.stub(win, 'open');}
+                })
                 .login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
                 .get(navUserAcctDropdownBtnSelector).then((accountListItem)=>{
                     expect(accountListItem.text()).to.contain('Cypress');
@@ -214,15 +218,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('contain', "No value").end();
         });
 
-        it("Can link an object via Advanced Search ", function() {
-
-        });
-
-        it("Can link multiple objects via Advanced Search ", function() {
-
-        });
-
-        it.only("Can delete objects found via SearchAsYouType", function() {
+        it("Can delete objects found via SearchAsYouType", function() {
             // Dropdown for SAYTAJAX should initialize to no value
             cy.get(".field-row [data-field-name=biosource] .dropdown-toggle")
                 .should('contain', 'No value').click()
@@ -251,8 +247,15 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .end();
         });
 
-        it("Can delete objects found via Advanced Search ", function() {
-
+        it("Can open advanced search window ", function() {
+            /*
+            Note: For more detailed tests of this window see test 08a and 08b; cannot test the
+            data transfer between windows due to: https://docs.cypress.io/faq/questions/using-cypress-faq.html#Can-I-test-anchor-links-that-open-in-a-new-tab
+            */
+            cy.get('.field-row [data-field-name=biosource] .linked-object-buttons-container .adv-search')
+                .click()
+                .window().its('open').should('be.called')
+                .end();
         });
 
         it("Can create and link and object via 'Create New'", function() {
@@ -330,7 +333,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 return cy.contains('Validate').should("not.be.disabled").click().end();
             }).end()
                 // Click Submit button
-                .get(".action-buttons-container .btn").should("not.be.disabled").within(function () {
+                .get(".action-buttons-container .btn").within(function () {
                     return cy.contains('Submit').should("not.be.disabled").click().end();
                 }).end()
                 // Navigate new biosample data page
@@ -351,7 +354,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
             // Log in _as admin_.
             cy.visit('/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(500);
 
-            // Delete item biosample data.
+            // Delete data for any submitted objects
             cy.wrap(testItemsToDelete).each(function (testItem) { // Synchronously process async stuff.
                 cy.window().then(function (w) {
                     const token = w.fourfront.JWT.get();
