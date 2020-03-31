@@ -163,7 +163,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
         });
     });
 
-    context.only('Test Biosample Item Edit page (Linked Objects)', function() {
+    context('Test Biosample Item Edit page (Linked Objects)', function() {
         // NOTE: Could probably update this to make it work with just a single page load, but would need to make more
         // test Biosample objects, so that I wouldn't be adding the same one repeatedly (this is buggy)
         beforeEach(function() {
