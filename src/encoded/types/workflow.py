@@ -934,7 +934,7 @@ def pseudo_run(context, request):
     # for testing
     if not env:
         env = 'fourfront-webdev'
-    if env == 'fourfront-webprod2':
+    if env in ['data', 'staging', 'fourfront-green', 'fourfront-blue', 'fourfront-webprod2']:
         input_json['output_bucket'] = 'elasticbeanstalk-fourfront-webprod-wfoutput'
     else:
         input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
