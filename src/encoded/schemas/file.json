@@ -225,6 +225,11 @@
                         "description": "Title of the Quality Metric",
                         "title": "Title of the Quality Metric"
                     },
+                    "title_tooltip":{
+                        "type": "string",
+                        "title": "Tooltip for the Quality Metric Title",
+                        "description": "tooltip for the quality metric title to be displayed upon mouseover"
+                    },
                     "value": {
                         "type": "string",
                         "title": "Value of the Quality Metric",

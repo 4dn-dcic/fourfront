@@ -18,11 +18,12 @@ import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
 import { QCMetricFromSummary } from './FileView';
 
-import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components/file-tables';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, renderFileQCDetailLinkButton } from './../browse/components/file-tables';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
 import { columnsToColumnDefinitions } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { combineExpsWithReplicateNumbersForExpSet } from './../util/experiments-transforms';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
@@ -368,6 +369,80 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 class QCMetricsTable extends React.PureComponent {
 
+    static qcSummaryItemTitleTooltipsByTitle(fileGroup) {
+        const tooltipsByTitle = {};
+        fileGroup.forEach(function({ title: qmsTitle, quality_metric_summary: { title_tooltip = null } = {} }){
+            if (typeof tooltipsByTitle[qmsTitle] === "string") {
+                return; // skip/continue; already found a tooltip_title for this qms title.
+            }
+            if (title_tooltip && typeof title_tooltip === "string"){
+                tooltipsByTitle[qmsTitle] = title_tooltip;
+            }
+        });
+        return tooltipsByTitle;
+    }
+
+    static renderForFileColValue(file) {
+        const fileAtId = file && object.atIdFromObject(file);
+        let fileTitleString;
+        if (file.accession) {
+            fileTitleString = file.accession;
+        }
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0, 5) === '4DNFI') {
+                fileTitleString = idParts[1];
+            }
+        }
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
+        }
+        return (
+            <React.Fragment>
+                <div>{ Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true) }</div>
+                <a className="text-500 name-title" href={fileAtId}>
+                    {fileTitleString}
+                </a>
+            </React.Fragment>);
+    }
+
+    static generateAlignedColumnHeaders(fileGroups){
+        return fileGroups.map(function(fileGroup){
+            const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
+            const columnHeaders = [ // Static / present-for-each-table headers
+                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
+            ].concat(fileGroup[0].quality_metric_summary.map(function(qmsObj, qmsIndex){ // Dynamic Headers
+                const { title, title_tooltip } = qmsObj;
+                // title tooltip: if missing in the first item then try to get it from the first valid one in array
+                return {
+                    columnClass: 'file-detail',
+                    title,
+                    title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
+                    initialWidth: 80,
+                    render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
+                        const qmsItem = file.quality_metric_summary[qmsIndex];
+                        const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                        return <span className="inline-block" data-tip={tooltip}>{value}</span>;
+                    }
+                };
+            }));
+
+            // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
+            const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
+                return f && f.quality_metric && f.quality_metric.url;
+            });
+
+            if (anyFilesWithMetricURL) {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
+            } else {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
+            }
+            return columnHeaders;
+        });
+    }
+
     static defaultProps = {
         heading: (
             <h3 className="tab-section-title mt-12">
@@ -380,7 +455,8 @@ class QCMetricsTable extends React.PureComponent {
         super(props);
         this.memoized = {
             filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
-            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles)
+            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles),
+            generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
         };
     }
 
@@ -392,38 +468,20 @@ class QCMetricsTable extends React.PureComponent {
         if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
         const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
+        const commonTableProps = {
+            width, windowWidth, href,
+            collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
+            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics"
+        };
 
         return (
             <div className="row">
                 <div className="exp-table-container col-12">
-                    {heading}
-                    {_.map(filesByTitles, function (fileGroup, i) {
-                        const columnHeaders = [ // Static / present-for-each-table headers
-                            { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
-                            { columnClass: 'file', title: 'For File', initialWidth: 100 }
-                        ].concat(_.map(fileGroup[0].quality_metric_summary, function (sampleQMSItem, qmsIndex) { // Dynamic Headers
-                            function renderColValue(file, field, colIndex, fileEntryBlockProps) {
-                                const qmsItem = file.quality_metric_summary[qmsIndex];
-                                const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
-                                return <span className="inline-block" data-tip={tooltip}>{value}</span>;
-                            }
-                            return { columnClass: 'file-detail', title: sampleQMSItem.title, initialWidth: 80, render: renderColValue };
-                        }));
-
-                        // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
-                        const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
-                            return f && f.quality_metric && f.quality_metric.url;
-                        });
-
-                        if(anyFilesWithMetricURL) {
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render: renderFileQCReportLinkButton });
-                        } else {
-                            columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render: function () { return ''; } });
-                        }
-
+                    { heading }
+                    { filesByTitles.map(function(fileGroup, i){
                         return (
-                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i} analyticsImpressionOnMount={false}
-                                files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
+                            <ProcessedFilesStackedTable {...commonTableProps} key={i} files={fileGroup} columnHeaders={columnHeadersForFileGroups[i]} />
                         );
                     })}
                 </div>
@@ -716,12 +774,18 @@ class SupplementaryFilesTabView extends React.PureComponent {
      * @returns {{ files: File[], title: string, type: string, description: string }[]} List of uniqued-by-title viewable collections.
      */
     static combinedOtherProcessedFiles = memoize(function(context){
+        // Clone context
+        let experiment_set = _.extend({}, context);
+        // Add in Exp Bio & Tec Rep Nos, if available.
+        if (Array.isArray(context.replicate_exps) && Array.isArray(context.experiments_in_set)) {
+            experiment_set = combineExpsWithReplicateNumbersForExpSet(context);
+        }
 
         // Clone -- so we don't modify props.context in place
-        const collectionsFromExpSet = _.map(context.other_processed_files, function(collection){
+        const collectionsFromExpSet = _.map(experiment_set.other_processed_files, function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment_set' : context, 'from_experiment' : { 'from_experiment_set' : context, 'accession' : 'NONE' } }, file);
+                return _.extend({ 'from_experiment_set' : experiment_set, 'from_experiment' : { 'from_experiment_set' : experiment_set, 'accession' : 'NONE' } }, file);
             });
             return _.extend({}, collection, { files });
         });
@@ -734,11 +798,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         // Also required for SelectedFilesController
-        const allCollectionsFromExperiments = _.reduce(context.experiments_in_set || [], function(memo, exp){
+        const allCollectionsFromExperiments = _.reduce(experiment_set.experiments_in_set || [], function(memo, exp){
             _.forEach(exp.other_processed_files || [], function(collection){
                 const { files : origFiles } = collection;
                 const files = _.map(origFiles || [], function(file){
-                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : context }, exp), 'from_experiment_set' : context }, file);
+                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : experiment_set }, exp), 'from_experiment_set' : experiment_set }, file);
                 });
                 memo.push(_.extend({}, collection, { files }));
             });

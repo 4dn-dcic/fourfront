@@ -84,11 +84,9 @@
                                     "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 11,
-                                    "coordSystem": "mm10",
                                     "labelTopMargin": 0,
                                     "labelPosition": "hidden",
                                     "geneStrandSpacing": 4,
-                                    "valueScaling": "linear",
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
                                     "geneAnnoHeight": 10,
@@ -98,9 +96,7 @@
                                 "type": "vertical-gene-annotations",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "name": "Gene Annotations (hg38)",
-                                "height": 158,
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "left"
+                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14"
                             },
                             {
                                 "width": 35,
@@ -112,10 +108,8 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
-                                    "coordSystem": "mm10",
                                     "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
                                     "fontSize": 12,
@@ -217,7 +211,6 @@
                             {
                                 "height": 35,
                                 "thumbnail": null,
-                                "minHeight": 30,
                                 "orientation": "1d-horizontal",
                                 "name": "Chromosome Axis",
                                 "options": {
@@ -225,12 +218,6 @@
                                     "showMousePosition": false,
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
-                                    "color": "#777777",
-                                    "valueScaling": "linear",
-                                    "stroke": "#FFFFFF",
-                                    "plusStrandColor": "blue",
-                                    "coordSystem": "mm10",
-                                    "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
                                     "fontSize": 12,
                                     "labelColor": "#888",
@@ -260,7 +247,6 @@
                         "y": 0,
                         "w": 6,
                         "x": 0,
-                        "i": "view-4dn-mcool-0",
                         "h": 6,
                         "static": false
                     }
@@ -296,11 +282,9 @@
                                     "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 11,
-                                    "coordSystem": "mm10",
                                     "labelTopMargin": 0,
                                     "labelPosition": "hidden",
                                     "geneStrandSpacing": 4,
-                                    "valueScaling": "linear",
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
                                     "geneAnnoHeight": 10,
@@ -324,11 +308,8 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
-                                    "coordSystem": "mm10",
-                                    "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
                                     "fontSize": 12,
                                     "labelColor": "black",
@@ -429,7 +410,6 @@
                             {
                                 "height": 35,
                                 "thumbnail": null,
-                                "minHeight": 30,
                                 "orientation": "1d-horizontal",
                                 "name": "Chromosome Axis",
                                 "options": {
@@ -438,11 +418,8 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
-                                    "coordSystem": "mm10",
-                                    "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
                                     "fontSize": 12,
                                     "labelColor": "#888",
@@ -472,7 +449,6 @@
                         "y": 0,
                         "w": 6,
                         "x": 6,
-                        "i": "view-4dn-mcool-1",
                         "h": 6,
                         "static": false
                     }
@@ -501,18 +477,16 @@
                                     "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
+
                                     "minusStrandColor": "black",
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
                                     "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 11,
-                                    "coordSystem": "mm10",
                                     "labelTopMargin": 0,
                                     "labelPosition": "hidden",
                                     "geneStrandSpacing": 4,
-                                    "valueScaling": "linear",
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
                                     "geneAnnoHeight": 10,
@@ -536,11 +510,8 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
-                                    "coordSystem": "mm10",
-                                    "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
                                     "fontSize": 12,
                                     "labelColor": "black",
@@ -603,7 +574,6 @@
                                                 "rgba(208,2,27,1.0)",
                                                 "black"
                                             ],
-                                            "coordSystem": "GRCh38",
                                             "labelTopMargin": 0,
                                             "labelPosition": "bottomRight",
                                             "scaleEndPercent": "1.00000",
@@ -641,7 +611,6 @@
                         "top": [
                             {
                                 "height": 55,
-                                "minHeight": 55,
                                 "orientation": "1d-horizontal",
                                 "name": "Gene Annotations (hg38)",
                                 "options": {
@@ -655,11 +624,9 @@
                                     "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 11,
-                                    "coordSystem": "mm10",
                                     "labelTopMargin": 0,
                                     "labelPosition": "hidden",
                                     "geneStrandSpacing": 4,
-                                    "valueScaling": "linear",
                                     "mousePositionColor": "#999999",
                                     "minusStrandColor": "black",
                                     "labelBottomMargin": 0,
@@ -689,9 +656,9 @@
                         "y": 6,
                         "w": 6,
                         "x": 0,
-                        "i": "93a36311-2eb5-4c74-9663-6d2be03ae348",
                         "h": 6,
                         "static": false
+
                     }
                 },
                 {
@@ -725,11 +692,9 @@
                                     "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 11,
-                                    "coordSystem": "mm10",
                                     "labelTopMargin": 0,
                                     "labelPosition": "hidden",
                                     "geneStrandSpacing": 4,
-                                    "valueScaling": "linear",
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
                                     "geneAnnoHeight": 10,
@@ -753,11 +718,8 @@
                                     "showTooltip": false,
                                     "trackBorderWidth": 0,
                                     "color": "#777777",
-                                    "valueScaling": "linear",
                                     "stroke": "#FFFFFF",
                                     "plusStrandColor": "blue",
-                                    "coordSystem": "mm10",
-                                    "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
                                     "fontSize": 12,
                                     "labelColor": "black",
@@ -808,7 +770,6 @@
                                             "showMousePosition": false,
                                             "showTooltip": false,
                                             "heatmapValueScaling": "log",
-                                            "maxZoom": null,
                                             "scaleStartPercent": "0.00000",
                                             "labelRightMargin": 0,
                                             "name": "HFFc6 Micro-C",
@@ -820,7 +781,6 @@
                                                 "rgba(208,2,27,1.0)",
                                                 "black"
                                             ],
-                                            "coordSystem": "GRCh38",
                                             "labelTopMargin": 0,
                                             "labelPosition": "bottomRight",
                                             "scaleEndPercent": "1.00000",
@@ -858,7 +818,6 @@
                         "top": [
                             {
                                 "height": 55,
-                                "minHeight": 55,
                                 "orientation": "1d-horizontal",
                                 "name": "Gene Annotations (hg38)",
                                 "options": {
@@ -872,11 +831,9 @@
                                     "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 11,
-                                    "coordSystem": "mm10",
                                     "labelTopMargin": 0,
                                     "labelPosition": "hidden",
                                     "geneStrandSpacing": 4,
-                                    "valueScaling": "linear",
                                     "mousePositionColor": "#999999",
                                     "minusStrandColor": "black",
                                     "labelBottomMargin": 0,
@@ -906,7 +863,6 @@
                         "y": 6,
                         "w": 6,
                         "x": 6,
-                        "i": "d273a8ff-1980-4b83-8220-119595d81ee7",
                         "h": 6,
                         "static": false
                     }
@@ -1026,7 +982,6 @@
                                             "showMousePosition": false,
                                             "trackBorderWidth": 0,
                                             "labelPosition": "bottomRight",
-                                            "maxZoom": null,
                                             "colorRange": [
                                                 "white",
                                                 "rgba(245,166,35,1.0)",
@@ -1063,9 +1018,7 @@
                                     "name": "Gene Annotations (GRCm38)",
                                     "showMousePosition": false,
                                     "trackBorderWidth": 0,
-                                    "labelPosition": "hidden",
-                                    "valueScaling": "linear",
-                                    "coordSystem": "mm10"
+                                    "labelPosition": "hidden"
                                 },
                                 "header": ""
                             },
@@ -1087,9 +1040,7 @@
                                     "showTooltip": false,
                                     "labelPosition": "hidden",
                                     "plusStrandColor": "blue",
-                                    "valueScaling": "linear",
-                                    "mousePositionColor": "#999999",
-                                    "coordSystem": "mm10"
+                                    "mousePositionColor": "#999999"
                                 },
                                 "tilesetUid": "EMo5uFThS5S263tNLbzeVw"
                             }
@@ -1104,7 +1055,6 @@
                                 "height": 55,
                                 "position": "top",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "minHeight": 55,
                                 "type": "horizontal-gene-annotations",
                                 "options": {
                                     "labelColor": "black",
@@ -1116,9 +1066,7 @@
                                     "name": "Gene Annotations (GRCm38)",
                                     "showMousePosition": false,
                                     "trackBorderWidth": 0,
-                                    "labelPosition": "hidden",
-                                    "valueScaling": "linear",
-                                    "coordSystem": "mm10"
+                                    "labelPosition": "hidden"
                                 },
                                 "header": ""
                             },
@@ -1126,7 +1074,6 @@
                                 "orientation": "1d-horizontal",
                                 "height": 30,
                                 "position": "top",
-                                "minHeight": 30,
                                 "type": "horizontal-chromosome-labels",
                                 "uid": "top-chromosome-track",
                                 "local": true,
@@ -1143,9 +1090,7 @@
                                     "showTooltip": false,
                                     "labelPosition": "hidden",
                                     "plusStrandColor": "blue",
-                                    "valueScaling": "linear",
-                                    "mousePositionColor": "#999999",
-                                    "coordSystem": "mm10"
+                                    "mousePositionColor": "#999999"
                                 }
                             }
                         ],
@@ -1221,7 +1166,6 @@
                         "static": false,
                         "w": 12,
                         "x": 0,
-                        "i": "aa",
                         "h": 12,
                         "moved": false,
                         "y": 0
@@ -1258,7 +1202,7 @@
         "name": "empty-higlass-viewconf",
         "schema_version": "1",
         "title": "Empty Higlass Viewconfig",
-        "genome_assembly": "",
+        "genome_assembly": "GRCh38",
         "uuid": "00000000-1111-0000-1111-000000000000"
     }
 ]
