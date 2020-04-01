@@ -52,6 +52,7 @@ TSV_MAPPING = OrderedDict([
     ('Experiment Accession',        (EXP,       ['accession'])),
     ('File Accession',              (FILE,      ['accession'])),
     ('File Experiment Accesion',    (FILE,      ['experiments.accession'])),
+    ('File Experiment Set Accesion',(FILE,      ['experiment_sets.accession'])),
 
     ('Size',                        (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
