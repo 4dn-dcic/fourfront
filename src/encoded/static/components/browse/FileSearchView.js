@@ -1,6 +1,7 @@
 'use strict';
 
 import React, { useMemo } from 'react';
+import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
@@ -10,7 +11,7 @@ import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/compon
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { SelectedFilesController } from './../browse/components/SelectedFilesController';
-import { Schemas } from './../util';
+import { navigate, Schemas } from './../util';
 import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
 import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';
 import { WindowNavigationController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/WindowNavigationController';
@@ -105,6 +106,27 @@ function FileTableWithSelectedFilesCheckboxes(props){
         </WindowNavigationController>
     );
 }
+FileTableWithSelectedFilesCheckboxes.propTypes = {
+    // Props' type validation based on contents of this.props during render.
+    'href'                      : PropTypes.string.isRequired,
+    'columnExtensionMap'        : PropTypes.object.isRequired,
+    'context'                   : PropTypes.shape({
+        'columns'                   : PropTypes.objectOf(PropTypes.object).isRequired,
+        'total'                     : PropTypes.number.isRequired
+    }).isRequired,
+    'facets'                    : PropTypes.arrayOf(PropTypes.shape({
+        'title'                     : PropTypes.string.isRequired
+    })),
+    'schemas'                   : PropTypes.object,
+    'browseBaseState'           : PropTypes.string.isRequired,
+    'selectFile'                : PropTypes.func,
+    'unselectFile'              : PropTypes.func,
+    'selectedFiles'             : PropTypes.objectOf(PropTypes.object),
+};
+FileTableWithSelectedFilesCheckboxes.defaultProps = {
+    'navigate'  : navigate,
+    'columnExtensionMap' : colExtensionMap4DN
+};
 
 class ControlsAndResults extends React.PureComponent {
     static defaultProps = {
@@ -175,7 +197,7 @@ class ControlsAndResults extends React.PureComponent {
 
         const tableProps = {
             results, href, context, sortBy, sortColumn, sortReverse, windowWidth, columnDefinitions,
-            selectedFiles, registerWindowOnScrollHandler, hiddenColumns,
+            selectedFiles, registerWindowOnScrollHandler, hiddenColumns, schemas
         };
 
         let totalResults = null;
