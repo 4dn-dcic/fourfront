@@ -221,9 +221,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                     <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
                                 </li>
                                 : null }
-                            <li className="mb-05">
+                            {/* <li className="mb-05">
                                 {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
-                            </li>
+                            </li> */}
                             { foundUnpublishedFiles ?
                                 <li>
                                     For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
