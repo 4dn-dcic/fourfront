@@ -84,7 +84,7 @@ TSV_MAPPING = OrderedDict([
     ('Condition',                   (FILE_ONLY, ['track_and_facet_info.condition'])),
     ('Dataset',                     (FILE_ONLY, ['track_and_facet_info.dataset'])),
     ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
-    ('Generic Lab',                 (FILE_ONLY, ['track_and_facet_info.lab_name'])),
+    ('Generating Lab',                 (FILE_ONLY, ['track_and_facet_info.lab_name'])),
     ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'])),
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
