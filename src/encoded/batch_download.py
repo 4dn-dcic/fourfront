@@ -41,18 +41,20 @@ def includeme(config):
     config.add_route('report_download', '/report.tsv')
     config.scan(__name__)
 
-EXP_SET = 0
-EXP     = 1
-FILE    = 2
+EXP_SET     = 0
+EXP         = 1
+FILE        = 2
+FILE_ONLY   = 3
 
 # includes concatenated properties
 TSV_MAPPING = OrderedDict([
     ('File Download URL',           (FILE,      ['href'])),
     ('Experiment Set Accession',    (EXP_SET,   ['accession'])),
     ('Experiment Accession',        (EXP,       ['accession'])),
+    ('Exp. Set Accession',          (FILE_ONLY, ['experiment_sets.accession'])),
+    ('Exp. Accession',              (FILE_ONLY, ['experiments.accession'])),
     ('File Accession',              (FILE,      ['accession'])),
-    ('Experiment Set Accession',     (FILE,      ['experiment_sets.accession'])),
-    ('Experiment Accession',         (FILE,      ['experiments.accession'])),
+
 
     ('Size',                        (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
@@ -76,14 +78,14 @@ TSV_MAPPING = OrderedDict([
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
-    ('Experiment Type',             (FILE,      ['track_and_facet_info.experiment_type'])),
-    ('Assay Details',               (FILE,      ['track_and_facet_info.assay_info'])),
-    ('Biosource',                   (FILE,      ['track_and_facet_info.biosource_name'])),
-    ('Condition',                   (FILE,      ['track_and_facet_info.condition'])),
-    ('Dataset',                     (FILE,      ['track_and_facet_info.dataset'])),
-    ('In Experiment As',            (FILE,      ['track_and_facet_info.experiment_bucket'])),
-    ('Generic Lab',                 (FILE,      ['track_and_facet_info.lab_name'])),
-    ('Replicate Info',              (FILE,      ['track_and_facet_info.replicate_info'])),
+    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'])),
+    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'])),
+    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'])),
+    ('Condition',                   (FILE_ONLY, ['track_and_facet_info.condition'])),
+    ('Dataset',                     (FILE_ONLY, ['track_and_facet_info.dataset'])),
+    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
+    ('Generic Lab',                 (FILE_ONLY, ['track_and_facet_info.lab_name'])),
+    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'])),
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
     #('Biosample sex', ['replicates.library.biosample.sex']),
@@ -280,16 +282,16 @@ def metadata_tsv(context, request):
                 search_params['field'].append('experiment_set.' + param_field)
             elif itemType == EXP:
                 search_params['field'].append('experiment.' + param_field)
-            elif itemType == FILE:
+            elif itemType == FILE or itemType == FILE_ONLY:
                 search_params['field'].append(param_field)
         else:
             raise HTTPBadRequest("Metadata can only be retrieved currently for Experiment Sets or Files. Received \"" + search_params['type'] + "\"")
 
     for prop in TSV_MAPPING:
         if search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
-            if TSV_MAPPING[prop][0] == FILE:
+            if TSV_MAPPING[prop][0] == FILE or TSV_MAPPING[prop][0] == FILE_ONLY:
                 header.append(prop)
-        else:
+        elif TSV_MAPPING[prop][0] != FILE_ONLY:
             header.append(prop)
         for param_field in TSV_MAPPING[prop][1]:
             add_field_to_search_params(TSV_MAPPING[prop][0], param_field)
@@ -439,7 +441,7 @@ def metadata_tsv(context, request):
         files_returned = [] # Function output
         f['href'] = request.host_url + f['href']
         f_row_vals = {}
-        file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE ]
+        file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE or TSV_MAPPING[col][0] == FILE_ONLY ]
         for column in file_cols:
             f_row_vals[column] = get_value_for_column(f, column)
 
