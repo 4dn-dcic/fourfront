@@ -789,19 +789,23 @@ def fix_barplot_aggs(search, es_mapping):
     if es_mapping == {}:
         return  # do nothing if there is no mapping (should not be the case if we care about this happening)
 
+    def build_sub_query(agg):
+        if 'cardinality' in agg:
+            field_name = agg['cardinality']['field']
+            return field_name, Cardinality(field=field_name, precision_threshold=10000)
+        elif 'value_count' in agg:
+            field_name = agg['value_count']['field']
+            return field_name, ValueCount(field=field_name)
+        else:
+            return None, None
+
     # 'walk' the dsl in dictionary form, then update it with the dsl if needed
     if BARPLOT_AGGS in search_dict.get('aggs', {}):
         barplot_aggs = search_dict['aggs'][BARPLOT_AGGS]['aggs']
         for bucket_name, agg in barplot_aggs.items():
-            if 'cardinality' in agg:
-                field_name = agg['cardinality']['field']
-                sub_query = Cardinality(field=field_name, precision_threshold=10000)
-            elif 'value_count' in agg:
-                field_name = agg['value_count']['field']
-                sub_query = ValueCount(field=field_name)
-            else:
-                continue  # anything else we don't care
-
+            field_name, sub_query = build_sub_query(agg)
+            if sub_query is None:
+                continue
             nested_path = find_nested_path(field_name, es_mapping)
             if nested_path:
                 search.aggs[BARPLOT_AGGS].bucket(bucket_name, Nested(path=nested_path)) \
@@ -809,6 +813,26 @@ def fix_barplot_aggs(search, es_mapping):
                 if bucket_name in search_dict['aggs']:
                     search.aggs.bucket(bucket_name, Nested(path=nested_path)) \
                                .bucket(bucket_name, sub_query)
+
+    # Handle the sub-buckets for the graph, should really only be two
+    # this does something eerily similar to the above but just different enough to be difficult
+    # to completely factor out into a function
+    top_level_id = 'field_0'
+    aggs = search_dict.get('aggs', {})
+    if top_level_id in aggs:
+        inner_aggs = aggs[top_level_id]
+        second_level_id = 'field_1'
+        if second_level_id in inner_aggs[AGGS]:
+            inner_inner_aggs = inner_aggs[AGGS][second_level_id]
+            for bucket_name, agg in inner_inner_aggs[AGGS].items():
+                field_name, sub_query = build_sub_query(agg)
+                if sub_query is None:
+                    continue
+                nested_path = find_nested_path(field_name, es_mapping)
+                if nested_path:
+                    search.aggs[top_level_id].aggs[second_level_id].bucket(bucket_name, Nested(path=nested_path)) \
+                        .bucket(bucket_name, sub_query)
+
 
 
 def initialize_field_filters(request, principals, doc_types):
