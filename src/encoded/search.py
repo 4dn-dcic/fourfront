@@ -814,6 +814,14 @@ def fix_barplot_aggs(search, es_mapping):
                     search.aggs.bucket(bucket_name, Nested(path=nested_path)) \
                                .bucket(bucket_name, sub_query)
 
+        # repair the terms query as well if need be
+        if TERMS in search_dict['aggs'][BARPLOT_AGGS]:
+            field_name = search_dict['aggs'][BARPLOT_AGGS][TERMS]['field']
+            nested_path = find_nested_path(field_name, es_mapping)
+            if nested_path:
+                search.aggs[BARPLOT_AGGS].bucket(field_name, Nested(path=nested_path)) \
+                                         .bucket(field_name, Terms(field=field_name, size=30, missing='No value'))
+
     # Handle the sub-buckets for the graph, should really only be two
     # this does something eerily similar to the above but just different enough to be difficult
     # to completely factor out into a function
@@ -832,6 +840,15 @@ def fix_barplot_aggs(search, es_mapping):
                 if nested_path:
                     search.aggs[top_level_id].aggs[second_level_id].bucket(bucket_name, Nested(path=nested_path)) \
                         .bucket(bucket_name, sub_query)
+
+            # repair terms query here as well
+            if TERMS in inner_inner_aggs:
+                field_name = inner_inner_aggs[TERMS]['field']
+                nested_path = find_nested_path(field_name, es_mapping)
+                if nested_path:
+                    search.aggs[BARPLOT_AGGS].aggs[second_level_id].bucket(field_name, Nested(path=nested_path)) \
+                                                                   .bucket(field_name,
+                                                                           Terms(field=field_name, size=30, missing='No value'))
 
 
 
