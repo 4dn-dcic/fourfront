@@ -172,7 +172,7 @@ description = "Checks CloudFormation templates for practices and behaviour that 
 name = "cfn-lint"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "0.29.2"
+version = "0.29.3"
 
 [package.dependencies]
 aws-sam-translator = ">=1.21.0"
@@ -354,7 +354,7 @@ description = "Utility package for interacting with the 4DN Data Portal and othe
 name = "dcicutils"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "0.12.1"
+version = "0.13.0"
 
 [package.dependencies]
 aws-requests-auth = ">=0.4.2,<1"
@@ -1567,10 +1567,10 @@ description = "The comprehensive WSGI web application library."
 name = "werkzeug"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "1.0.0"
+version = "1.0.1"
 
 [package.extras]
-dev = ["pytest", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinx-issues"]
+dev = ["pytest", "pytest-timeout", "coverage", "tox", "sphinx", "pallets-sphinx-themes", "sphinx-issues"]
 watchdog = ["watchdog"]
 
 [[package]]
@@ -1730,7 +1730,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "ea77860bf48dde91f344994ed4ac357561ab72d86daa0702df7e83f91a1af844"
+content-hash = "81d3f77e46f94652cb61e6127765708da596ecae704fc58bf64602efdab3f73d"
 python-versions = ">=3.5,<3.7"
 
 [metadata.files]
@@ -1812,8 +1812,8 @@ cffi = [
     {file = "cffi-1.14.0.tar.gz", hash = "sha256:2d384f4a127a15ba701207f7639d94106693b6cd64173d6c8988e2c25f3ac2b6"},
 ]
 cfn-lint = [
-    {file = "cfn-lint-0.29.2.tar.gz", hash = "sha256:b41018ad7a49ec4ad07cb00646e2c052dd024db99281111cf53cbb90f72d6104"},
-    {file = "cfn_lint-0.29.2-py3-none-any.whl", hash = "sha256:4a94c93fc64ecfd4602d9c2b71d8c622906f6d74f87f37393de4a9516ab36459"},
+    {file = "cfn-lint-0.29.3.tar.gz", hash = "sha256:98d5b2187eff9d40e742dbd4289bd3053907d50d6e72a69e22d7066fa6972f83"},
+    {file = "cfn_lint-0.29.3-py3-none-any.whl", hash = "sha256:fdc2ca69889b8cf791d19e52cbeecd68799fa5286d3d8823f1220ab0c70d1de9"},
 ]
 chardet = [
     {file = "chardet-3.0.4-py2.py3-none-any.whl", hash = "sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691"},
@@ -1893,8 +1893,8 @@ dcicsnovault = [
     {file = "dcicsnovault-2.1.1.tar.gz", hash = "sha256:33686d3e2d731899a4a8e92fe6a4c8b4c9a648a5f414fccd51aa1c9d45ef267b"},
 ]
 dcicutils = [
-    {file = "dcicutils-0.12.1-py3-none-any.whl", hash = "sha256:7842ff72a424db2d23c4530861704aff3da494a905351e48a109a864f44c6658"},
-    {file = "dcicutils-0.12.1.tar.gz", hash = "sha256:8b2d33dde22344f5685bd552dbd9ce27de9025dff4badd0e8b1196bc6c8f88d5"},
+    {file = "dcicutils-0.13.0-py3-none-any.whl", hash = "sha256:5b2b5c9ce22ad1ac3c4f7323a9fc2000e0a22b30722fa01c560b491010a6450f"},
+    {file = "dcicutils-0.13.0.tar.gz", hash = "sha256:d1b14cf703f55cd54cec369a100de5c1e02a7fb0be8dacc3fe7b41b2e178762c"},
 ]
 decorator = [
     {file = "decorator-4.4.2-py2.py3-none-any.whl", hash = "sha256:41fa54c2a0cc4ba648be4fd43cff00aedf5b9465c9bf18d64325bc225f08f760"},
@@ -2449,8 +2449,8 @@ webtest = [
     {file = "WebTest-2.0.34.tar.gz", hash = "sha256:71114cd778a7d7b237ec5c8a5c32084f447d869ae62e48bcd5b73af211133e74"},
 ]
 werkzeug = [
-    {file = "Werkzeug-1.0.0-py2.py3-none-any.whl", hash = "sha256:6dc65cf9091cf750012f56f2cad759fa9e879f511b5ff8685e456b4e3bf90d16"},
-    {file = "Werkzeug-1.0.0.tar.gz", hash = "sha256:169ba8a33788476292d04186ab33b01d6add475033dfc07215e6d219cc077096"},
+    {file = "Werkzeug-1.0.1-py2.py3-none-any.whl", hash = "sha256:2de2a5db0baeae7b2d2664949077c2ac63fbd16d98da0ff71837f7d1dea3fd43"},
+    {file = "Werkzeug-1.0.1.tar.gz", hash = "sha256:6c80b1e5ad3665290ea39320b91e1be1e0d5f60652b964a3070216de83d2e47c"},
 ]
 wheel = [
     {file = "wheel-0.29.0-py2.py3-none-any.whl", hash = "sha256:ea8033fc9905804e652f75474d33410a07404c1a78dd3c949a66863bd1050ebd"},
