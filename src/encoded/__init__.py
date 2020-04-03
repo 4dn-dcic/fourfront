@@ -144,7 +144,7 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
-    # set mirrored Elasticsearch location (for webprod/webprod2)
+    # set mirrored Elasticsearch location (for staging and production servers)
     settings['mirror.env.name'] = get_mirror_env_from_context(settings)
     config = Configurator(settings=settings)
 
