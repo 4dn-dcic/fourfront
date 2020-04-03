@@ -1,8 +1,9 @@
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest
-from snovault import CONNECTION
+from snovault import CONNECTION, TYPES
 from snovault.util import debug_log
+from snovault.elasticsearch import ELASTIC_SEARCH
 from copy import (
     copy,
     deepcopy
@@ -14,8 +15,9 @@ from urllib.parse import (
 )
 from datetime import datetime
 import uuid
+from elasticsearch_dsl import Search
+from elasticsearch_dsl.aggs import Terms, Nested, Cardinality, ValueCount
 from .search import (
-    DEFAULT_BROWSE_PARAM_LISTS,
     make_search_subreq,
     search as perform_search_request,
     BARPLOT_AGGS,
@@ -28,6 +30,15 @@ from .types.workflow import (
     item_model_to_object
 )
 from .types.base import get_item_if_you_can
+from .search_utils import (
+    get_es_index,
+    get_es_mapping,
+    find_nested_path,
+    DEFAULT_BROWSE_PARAM_LISTS,
+    prepare_search_term_from_raw_params,
+    list_source_fields_from_raw_params,
+    build_query,
+)
 
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
@@ -192,11 +203,69 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 }
 
 
-
-
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 @debug_log
 def bar_plot_chart(context, request):
+    MAX_BUCKET_COUNT = 30  # Max amount of bars or bar sections to return, excluding 'other'.
+
+    # Collect params from request
+    try:
+        json_body = request.json_body
+        search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
+        fields_to_aggregate_for = json_body.get('fields_to_aggregate_for',  request.params.getall('field'))
+    except json.decoder.JSONDecodeError:
+        search_param_lists      = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
+        del search_param_lists['award.project']
+        fields_to_aggregate_for = request.params.getall('field')
+
+    if len(fields_to_aggregate_for) == 0:
+        raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
+
+    # Determine which fields that we are aggregating on are nested
+    nested_paths = {}
+    for field in fields_to_aggregate_for:
+        path = find_nested_path(field)
+        if path:
+            nested_paths[field] = path
+
+    # Construct the search
+    es = request.registry[ELASTIC_SEARCH]
+    types = request.registry[TYPES]
+    doc_types = search_param_lists['type']
+    principals = request.effective_principals
+    es_index = get_es_index(request, doc_types)
+    item_type_es_mapping = get_es_mapping(es, es_index)
+    prepared_terms = prepare_search_term_from_raw_params(search_param_lists)
+    source_fields = list_source_fields_from_raw_params(fields_to_aggregate_for)
+
+
+    # establish elasticsearch_dsl class that will perform the search
+    search = Search(using=es, index=es_index)
+    search, string_query = build_query(search, prepared_terms, source_fields)
+
+    # Build primary agg
+    primary_agg_name = fields_to_aggregate_for[0]
+    field_name = "embedded." + primary_agg_name + '.raw'
+    if primary_agg_name in nested_paths:
+        nested_path = nested_paths[primary_agg_name]
+        field_name = "embedded." + primary_agg_name + '.raw'
+        search.aggs[BARPLOT_AGGS].bucket(field_name, Nested(path=nested_path)) \
+                                 .bucket(field_name, Terms(field=field_name,
+                                                           size=MAX_BUCKET_COUNT,
+                                                           missing=TERM_NAME_FOR_NO_VALUE))
+    else:
+        search.aggs[BARPLOT_AGGS].bucket(Terms(field=field_name,
+                                               size=MAX_BUCKET_COUNT,
+                                               missing=TERM_NAME_FOR_NO_VALUE))
+
+    # Populate with the bucket aggregations in the correct form from above
+    # XXX: TODO
+    return {}
+
+
+#@view_config(route_name='bar_plot_chart_old', request_method=['GET', 'POST'])
+@debug_log
+def bar_plot_chart_old(context, request):
     MAX_BUCKET_COUNT = 30 # Max amount of bars or bar sections to return, excluding 'other'.
 
     try:

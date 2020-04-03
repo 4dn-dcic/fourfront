@@ -11,15 +11,11 @@ from snovault import (
 from snovault.embed import make_subrequest
 from snovault.elasticsearch import ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import determine_if_is_date_field
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
-from snovault.resource_views import collection_view_listing_db
 from snovault.util import (
-    find_collection_subtypes,
     crawl_schema,
-    debug_log
+    debug_log,
 )
 from snovault.typeinfo import AbstractTypeInfo
-from elasticsearch.helpers import scan
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.aggs import Terms, Nested, Cardinality, ValueCount
 from elasticsearch import (
@@ -30,6 +26,16 @@ from elasticsearch import (
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPFound
+)
+from .search_utils import (
+    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED,
+    PATH, TERMS, RANGE, AGGS, REVERSE_NESTED,
+    get_es_index,
+    get_es_mapping,
+    find_nested_path,
+    DEFAULT_BROWSE_PARAM_LISTS,
+    COMMON_EXCLUDED_URI_PARAMS,
+    build_query,
 )
 from urllib.parse import urlencode
 from collections import OrderedDict
@@ -48,37 +54,7 @@ def includeme(config):
 sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?]')
 
 
-COMMON_EXCLUDED_URI_PARAMS = [
-    'frame', 'format', 'limit', 'sort', 'from', 'field',
-    'mode', 'redirected_from', 'datastore', 'referrer',
-    'currentAction'
-]
-
-
-# from now on, use these constants when referring to elastic search
-# query keywords when writing elastic search queries - Will 3-20-2020
-QUERY = 'query'
-FILTER = 'filter'
-MUST = 'must'
-MUST_NOT = 'must_not'
-BOOL = 'bool'
-MATCH = 'match'
-SHOULD = 'should'
-EXISTS = 'exists'
-FIELD = 'field'
-NESTED = 'nested'
-PATH = 'path'
-TERMS = 'terms'
-RANGE = 'range'
-AGGS = 'aggs'
-REVERSE_NESTED = 'reverse_nested'
-# just for book-keeping/readability but is 'unused' for now
-# ie: it should be obvious when you are 'effectively' writing lucene
-ELASTIC_SEARCH_QUERY_KEYWORDS = [
-    QUERY, FILTER, MUST, MUST_NOT, BOOL, MATCH, SHOULD, EXISTS, FIELD, NESTED, PATH, TERMS, RANGE, AGGS, REVERSE_NESTED,
-]
 BARPLOT_AGGS = 'field_0'  # identifier for barplot aggs, which we will 'adjust' in this file
-
 
 
 @view_config(route_name='search', request_method='GET', permission='search')
@@ -128,6 +104,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
 
     ### SET TYPE FILTERS
+    import pdb; pdb.set_trace()
     build_type_filters(result, request, doc_types, types)
 
     # get the fields that will be used as source for the search
@@ -163,9 +140,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
             search_session_id = 'SESSION-' + str(uuid.uuid1())
             created_new_search_session_id = True
         search = search.params(preference=search_session_id)
-
-    ### Fix BARPLOT_AGGS if they exist (see note in function on why we do this here)
-    fix_barplot_aggs(search, item_type_es_mapping)
 
     ### Execute the query
     if size == 'all':
@@ -222,13 +196,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
     return result
 
-
-DEFAULT_BROWSE_PARAM_LISTS = {
-    'type'                  : ["ExperimentSetReplicate"],
-    'experimentset_type'    : ['replicate'],
-    # Uncomment if changing back to showing external data: false by default
-    # 'award.project'         : ['4DN']
-}
 
 @view_config(route_name='browse', request_method='GET', permission='search')
 @debug_log
@@ -290,37 +257,6 @@ def add_search_header_if_needed(request, doc_types, result):
             result['search_header']['content'] = item['content']
             result['search_header']['title'] = item.get('title', item['display_title'])
             result['search_header']['filetype'] = item['filetype']
-
-
-def get_es_index(request, doc_types):
-    """
-    set ES index based on doc_type (one type per index)
-    if doc_type is item, search all indexes by setting es_index to None
-    If multiple, search all specified
-
-    :param request: current request, to be passed
-    :param doc_types: item types we are searching on
-    :return: index name
-    """
-    if 'Item' in doc_types:
-        return get_namespaced_index(request, '*')
-    else:
-        return find_index_by_doc_types(request, doc_types, ['Item'])
-
-
-def get_es_mapping(es, es_index):
-    """
-    Get es mapping for given doc type (so we can handle type=nested)
-
-    :param es: elasticsearch client
-    :param es_index: index to get mapping from
-    :return: the mapping for this item type or {}
-    """
-    if '*' in es_index or ',' in es_index:  # no type=nested searches can be done on * or multi-index
-        return {}
-    else:
-        item_type = list(es.indices.get(es_index)[es_index]['mappings'].keys())[0]  # no other way to get it
-        return es.indices.get(es_index)[es_index]['mappings'][item_type]['properties']
 
 
 def get_collection_actions(request, type_info):
@@ -515,7 +451,6 @@ def prepare_search_term(request):
     Ignore certain keywords, such as type, format, and field
     """
     prepared_terms = {}
-    prepared_vals = []
     for field, val in request.normalized_params.iteritems():
         if field.startswith('validation_errors') or field.startswith('aggregated_items'):
             continue
@@ -611,32 +546,6 @@ def list_source_fields(request, doc_types, frame):
     else:
         fields = ['embedded.*']
     return fields
-
-
-def build_query(search, prepared_terms, source_fields):
-    """
-    Prepare the query within the Search object.
-    NOTE: this is only for basic and simple_query_string! See 'set_filters' for how "real" searches are done.
-    """
-    query_info = {}
-    string_query = None
-    # set _source fields for the search
-    search = search.source(list(source_fields))
-    # prepare the query from prepared_terms
-    for field, value in prepared_terms.items():
-        if field == 'q':
-            query_info['query'] = value
-            query_info['lenient'] = True
-            query_info['default_operator'] = 'AND'
-            query_info['fields'] = ['_all']
-            break
-    if query_info != {}:
-        string_query = {'must': {'simple_query_string': query_info}}
-        query_dict = {'query': {'bool': string_query}}
-    else:
-        query_dict = {'query': {'bool':{}}}
-    search.update_from_dict(query_dict)
-    return search, string_query
 
 
 def set_sort_order(request, search, search_term, types, doc_types, result):
@@ -739,38 +648,6 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
         result['sort'] = result_sort
         search = search.sort(sort)
     return search
-
-
-def find_nested_path(field, es_mapping):
-    """ Returns path to highest level nested field
-
-        This function relies on information about the structure of the es_mapping to extract
-        the *path to the object who's mapping is nested*. This information is needed to construct nested
-        queries (it is the PATH). It returns None if the given field is not nested.
-
-        Args:
-            field (str): the *full path* to the field we are filtering/aggregating on.
-                         For example: "experiments_in_set.biosample.biosource.individual.organism.name"
-            es_mapping (dict): dictionary representation of the es_mapping of the type we are searching on
-        Returns:
-            PATH for nested query or None
-     """
-    location = es_mapping
-    path = []
-    for level in field.split('.'):
-        if level == 'raw':  # if we get to this point we're definitely at a leaf and should stop
-            break
-        if level not in location:  # its possible we are at a sub-embedded object boundary. Check if it has properties.
-            if 'properties' not in location:  # if it doesn't have properties, there's nowhere to go, so return None.
-                return None
-            location = location['properties']  # else move location forward, but do not add it to the PATH
-        if level not in location:  # if we still don't see our 'level', we are not a nested field
-            break
-        location = location[level]
-        path.append(level)
-        if location.get('type', None) == 'nested':
-            return '.'.join(path)
-    return None
 
 
 def fix_barplot_aggs(search, es_mapping):
@@ -1866,29 +1743,6 @@ def format_results(request, hits, search_frame):
                 frame_result['aggregated_items'] = hit['_source']['aggregated_items']
             yield frame_result
         return
-
-
-def find_index_by_doc_types(request, doc_types, ignore):
-    """
-    Find the correct index(es) to be search given a list of doc_types.
-    The types in doc_types are the item class names, formatted like
-    'Experiment HiC' and index names are the item types, formatted like
-    'experiment_hi_c'.
-    Ignore any collection names provided in the ignore param, an array.
-    Formats output indexes as a string usable by elasticsearch
-    """
-    indexes = []
-    for doc_type in doc_types:
-        if doc_type in ignore:
-            continue
-        else:
-            result = find_collection_subtypes(request.registry, doc_type)
-            namespaced_results = map(lambda t: get_namespaced_index(request, t), result)
-            indexes.extend(namespaced_results)
-    # remove any duplicates
-    indexes = list(set(indexes))
-    index_string = ','.join(indexes)
-    return index_string
 
 
 def make_search_subreq(request, path):
