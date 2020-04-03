@@ -56,7 +56,7 @@ TSV_MAPPING = OrderedDict([
     ('File Accession',              (FILE,      ['accession'])),
 
 
-    ('Size',                        (FILE,      ['file_size'])),
+    ('Size (MB)',                   (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
     ('File Type',                   (FILE,      ['file_type'])),
     ('File Format',                 (FILE,      ['file_format.display_title'])),
@@ -79,13 +79,16 @@ TSV_MAPPING = OrderedDict([
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
     ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'])),
-    ('Dataset',                     (FILE_ONLY, ['track_and_facet_info.dataset'])),
-    ('Condition',                   (FILE_ONLY, ['track_and_facet_info.condition'])),
-    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'])),
-    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'])),    
-    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
     ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'])),
-    ('Generating Lab',              (FILE_ONLY, ['track_and_facet_info.lab_name'])),
+    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'])),
+    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'])),
+    ('Condition',                   (FILE_ONLY, ['track_and_facet_info.condition'])),
+    ('Dataset',                     (FILE_ONLY, ['track_and_facet_info.dataset'])),
+    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
+    ('Generating Lab',              (FILE_ONLY, ['track_and_facet_info.lab_name'])),   
+    ('Contributing Lab',            (FILE_ONLY, ['contributing_labs.display_title'])), 
+        
+    
 
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
@@ -482,14 +485,14 @@ def metadata_tsv(context, request):
                 xfile_vals['File Download URL'] = request.host_url + xfile['href'] if xfile.get('href') else None
                 xfile_vals['File Format'] = xfile.get('file_format', {}).get('display_title')
                 xfile_vals['md5sum'] = xfile.get('md5sum')
-                xfile_vals['Size'] = xfile.get('file_size')
+                xfile_vals['Size (MB)'] = xfile.get('file_size')
                 xfile_vals['Related File Relationship'] = 'secondary file for'
                 xfile_vals['Related File'] = all_row_vals.get('File Accession')
                 files_returned.append(xfile_vals)
 
         return files_returned
 
-
+    
     def post_process_file_row_dict(file_row_dict_tuple):
         idx, file_row_dict = file_row_dict_tuple
 
@@ -513,7 +516,7 @@ def metadata_tsv(context, request):
             return file_row_dict
 
         file_cache[file_row_dict['File Download URL']] = idx
-
+        file_row_dict['Size (MB)'] =format((float(file_row_dict['Size (MB)'])/1024)/1024,'.3f')
         if file_row_dict['File Status'] in ['uploading', 'to be uploaded', 'upload failed']:
             file_row_dict['File Download URL'] = '### Not Yet Uploaded: ' + file_row_dict['File Download URL']
             summary['counts']['Total Files'] += 1

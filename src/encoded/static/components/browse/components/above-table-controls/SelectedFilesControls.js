@@ -28,7 +28,8 @@ export class SelectAllFilesButton extends React.PureComponent {
         'accession',
         'produced_in_pub.display_title',
         'lab.display_title',
-
+        'file_type_detailed',
+        
         'processed_files.accession',
         'processed_files.display_title',
         'processed_files.@id',
