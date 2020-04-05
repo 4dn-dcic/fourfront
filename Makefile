@@ -1,5 +1,4 @@
 clean:  # clear node modules, eggs, npm build stuff
-	rm -rf src/*.egg-info/
 	rm -rf node_modules eggs
 	rm -rf .sass-cache
 	rm -f src/encoded/static/css/*.css

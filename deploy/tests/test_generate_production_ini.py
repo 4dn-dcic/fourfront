@@ -50,7 +50,7 @@ def test_template_environment_names():
 
     names = template_environment_names()
 
-    required_names = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
+    required_names = ['hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
 
     for required_name in required_names:
         assert required_name in names
