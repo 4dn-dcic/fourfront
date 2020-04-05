@@ -486,7 +486,7 @@ def metadata_tsv(context, request):
                 xfile_vals['File Format'] = xfile.get('file_format', {}).get('display_title')
                 xfile_vals['md5sum'] = xfile.get('md5sum')
                 if(xfile.get('file_size') != None):
-                    xfile_vals['Size (MB)'] =float(format(float(xfile.get('file_size')) / (1024 * 1024), '.2f'))
+                    xfile_vals['Size (MB)'] = format(float(xfile.get('file_size')) / (1024 * 1024), '.2f')
                 else:
                     xfile_vals['Size (MB)'] = None
                 xfile_vals['Related File Relationship'] = 'secondary file for'
@@ -520,8 +520,8 @@ def metadata_tsv(context, request):
 
         file_cache[file_row_dict['File Download URL']] = idx
         if('Size (MB)' in file_row_dict and file_row_dict['Size (MB)'] != None):
-            file_row_dict['Size (MB)'] = float(format(
-                float(file_row_dict['Size (MB)']) / (1024 * 1024), '.2f'))
+            file_row_dict['Size (MB)'] = format(
+                float(file_row_dict['Size (MB)']) / (1024 * 1024), '.2f')
         if file_row_dict['File Status'] in ['uploading', 'to be uploaded', 'upload failed']:
             file_row_dict['File Download URL'] = '### Not Yet Uploaded: ' + file_row_dict['File Download URL']
             summary['counts']['Total Files'] += 1
