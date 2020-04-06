@@ -18,7 +18,7 @@ from ..generate_production_ini import (
 # TODO: Maybe this should move to env_utils? If not, at least to a non-test file.
 #       Then again, if we used the "single parameterized ini file" we could side-step that. -kmp 3-Apr-2020
 
-FOURFRONT_DEPLOY_NAMES = ['hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
+FOURFRONT_DEPLOY_NAMES = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
 
 
 @contextmanager
