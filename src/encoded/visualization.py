@@ -248,7 +248,6 @@ def bar_plot_chart(context, request):
     field_name = "embedded." + primary_agg_name + '.raw'
     if primary_agg_name in nested_paths:
         nested_path = nested_paths[primary_agg_name]
-        field_name = "embedded." + primary_agg_name + '.raw'
         search.aggs[BARPLOT_AGGS].bucket(field_name, Nested(path=nested_path)) \
                                  .bucket(field_name, Terms(field=field_name,
                                                            size=MAX_BUCKET_COUNT,
@@ -523,8 +522,10 @@ def add_files_to_higlass_viewconf(context, request):
     """
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
-    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
+    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)    
     if not higlass_viewconfig:
+        
+        # @todo: this block will be removed when a workaround to run tests correctly.
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
         # Add a view section if the default higlass_viewconfig lacks one
@@ -538,7 +539,7 @@ def add_files_to_higlass_viewconf(context, request):
             "errors": "No view config found.",
             "new_viewconfig": None,
             "new_genome_assembly" : None
-        }
+        }    
 
     # Get the list of files.
     file_uuids = request.json_body.get('files')
@@ -924,7 +925,6 @@ def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, m
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
             "labelPosition": "topLeft",
         },
         "type": "horizontal-divergent-bar",
@@ -983,9 +983,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
             "colorRange": [],
-            "valueScaling": "linear",
             "labelPosition": "topLeft",
             "heatmapValueScaling": "log",
         },
@@ -1200,7 +1198,6 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
         }
     }
 
@@ -1288,7 +1285,6 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
         }
     }
 
@@ -1311,7 +1307,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
 
     new_tracks_by_side["center"]["name"] = "Chromosome Grid"
     del new_tracks_by_side["center"]["options"]["name"]
-    del new_tracks_by_side["center"]["options"]["coordSystem"]
+   
 
     # For each view:
     for view in views:
@@ -1462,7 +1458,6 @@ def create_2d_content(file, viewtype):
 
     # Add specific information for this file.
     contents["options"] = {}
-    contents["options"]["coordSystem"] = file["genome_assembly"]
     contents["options"]["name"] = get_title(file)
 
     if file.get("higlass_defaults"):
@@ -1528,21 +1523,7 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["width"] = temp_width
             del track["height"]
-
-        # Also the minimum width/height
-        temp_height = track.get("minWidth", None)
-        temp_width = track.get("minHeight", None)
-
-        if temp_height and temp_width:
-            track["minHeight"] = temp_height
-            track["minWidth"] = temp_width
-        elif temp_height:
-            track["minHeight"] = temp_height
-            del track["minWidth"]
-        elif temp_width:
-            track["minWidth"] = temp_width
-            del track["minHeight"]
-
+        
         # And the orientation
         track_orientation = track.get("orientation", None)
         if track_orientation in orientation_mappings:
