@@ -14,6 +14,13 @@ from ..generate_production_ini import (
     template_environment_names,
 )
 
+
+# TODO: Maybe this should move to env_utils? If not, at least to a non-test file.
+#       Then again, if we used the "single parameterized ini file" we could side-step that. -kmp 3-Apr-2020
+
+FOURFRONT_DEPLOY_NAMES = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
+
+
 @contextmanager
 def override_environ(**overrides):
     to_delete = []
@@ -50,7 +57,7 @@ def test_template_environment_names():
 
     names = template_environment_names()
 
-    required_names = ['hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
+    required_names = FOURFRONT_DEPLOY_NAMES
 
     for required_name in required_names:
         assert required_name in names
