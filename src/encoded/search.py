@@ -64,7 +64,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # list of item types used from the query
     doc_types = set_doc_types(request, types, search_type)
     # calculate @type. Exclude ItemSearchResults unless no other types selected.
-    search_types = [dt + 'SearchResults' for dt in doc_types]
+    search_types = [dt + 'SearchResults' for dt in doc_types if dt != 'File']
     search_types.append(forced_type)  # the old base search type
 
     # add FileSearchResults if searching on 'File' types
@@ -274,6 +274,10 @@ def add_file_search_results(types, doc_types, search_types):
     if not doc_types:
         return
     for doc_type in doc_types:
+        if doc_type == 'File':
+            continue
+        if not hasattr(types[doc_type], 'base_types'):
+            return  # we are searching on an abstract type
         if 'File' not in types[doc_type].base_types:
             return  # all doc_types must match
     search_types.append('FileSearchResults')  # if we got here, all must match

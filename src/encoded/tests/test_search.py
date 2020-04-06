@@ -121,6 +121,11 @@ def test_file_search_type(workbook, testapp):
     assert 'FileSearchResults' not in res['@type']
     res = testapp.get('/search/?type=FileProcessed&type=FileReference').json
     assert 'FileSearchResults' in res['@type']
+    res = testapp.get('/search').follow().json
+    assert 'FileSearchResults' not in res['@type']
+    res = testapp.get('/search/?type=File').json
+    assert 'FileSearchResults' in res['@type']
+    assert res['@type'].count('FileSearchResults') == 1
 
 
 def test_search_with_simple_query(workbook, testapp):
