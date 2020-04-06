@@ -109,6 +109,20 @@ def test_search_with_embedding(workbook, testapp):
     assert test_json['lab'].get('awards') is None
 
 
+def test_file_search_type(workbook, testapp):
+    """ Tests that searching on a type that inherits from File adds a FileSearchResults
+        identifier in the @type field
+    """
+    res = testapp.get('/search/?type=FileProcessed').json
+    assert 'FileSearchResults' in res['@type']
+    res = testapp.get('/search/?type=Biosample').json
+    assert 'FileSearchResults' not in res['@type']
+    res = testapp.get('/search/?type=FileProcessed&type=Biosample').json
+    assert 'FileSearchResults' not in res['@type']
+    res = testapp.get('/search/?type=FileProcessed&type=FileReference').json
+    assert 'FileSearchResults' in res['@type']
+
+
 def test_search_with_simple_query(workbook, testapp):
     # run a simple query with type=Organism and q=mouse
     res = testapp.get('/search/?type=Organism&q=mouse').json

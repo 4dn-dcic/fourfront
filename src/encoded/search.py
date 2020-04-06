@@ -66,6 +66,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # calculate @type. Exclude ItemSearchResults unless no other types selected.
     search_types = [dt + 'SearchResults' for dt in doc_types]
     search_types.append(forced_type)  # the old base search type
+
+    # add FileSearchResults if searching on 'File' types
+    add_file_search_results(types, doc_types, search_types)
+
     # sets request.normalized_params
     search_base = normalize_query(request, types, doc_types)
     ### INITIALIZE RESULT.
@@ -257,6 +261,22 @@ def collection_view(context, request):
     This is a redirect directly to the search page
     """
     return search(context, request, context.type_info.name, False, forced_type='Search')
+
+
+def add_file_search_results(types, doc_types, search_types):
+    """ If every doc_type in doc_types inherits from 'File', add 'FileSearchResults' to
+        the search types (to be returned in @type)
+
+    :param types: global typestool from registry
+    :param doc_type: all doc_types we are searching on
+    :param search_types: to be extended in place if necessary
+    """
+    if not doc_types:
+        return
+    for doc_type in doc_types:
+        if 'File' not in types[doc_type].base_types:
+            return  # all doc_types must match
+    search_types.append('FileSearchResults')  # if we got here, all must match
 
 
 def get_collection_actions(request, type_info):
