@@ -317,7 +317,7 @@ def test_search_multiple_types(workbook, testapp):
     # multiple types work with @type in response
     search = '/search/?type=Biosample&type=ExperimentHiC'
     res = testapp.get(search).json
-    assert res['@type'] == ['BiosampleSearchResults', 'ExperimentHiCSearchResults', 'Search']
+    assert res['@type'] == ['ItemSearchResults', 'Search']
 
 
 def test_search_query_string_with_booleans(workbook, testapp):

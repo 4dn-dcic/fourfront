@@ -272,7 +272,7 @@ def build_search_types(types, doc_types):
     if len(doc_types) == 1:  # if we have one, add it and its base_type
         ti = types[doc_types[0]]
         search_types.append(ti.name + "SearchResults")
-        if hasattr(ti, 'base_types'):
+        if hasattr(types[ti], 'base_types'):
             for base_type in ti.base_types:
                 search_types.append(base_type + "SearchResults")
 
