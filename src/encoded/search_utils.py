@@ -1,3 +1,11 @@
+from elasticsearch import (
+    TransportError,
+    RequestError,
+    ConnectionTimeout
+)
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+)
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
 from snovault.util import find_collection_subtypes
 
@@ -210,3 +218,38 @@ def build_query(search, prepared_terms, source_fields):
         query_dict = {'query': {'bool':{}}}
     search.update_from_dict(query_dict)
     return search, string_query
+
+
+def execute_search(search):
+    """
+    Execute the given Elasticsearch-dsl search. Raise HTTPBadRequest for any
+    exceptions that arise.
+    Args:
+        search: the Elasticsearch-dsl prepared in the search() function
+    Returns:
+        Dictionary search results
+    """
+    err_exp = None
+    try:
+        es_results = search.execute().to_dict()
+    except ConnectionTimeout as exc:
+        err_exp = 'The search failed due to a timeout. Please try a different query.'
+    except RequestError as exc:
+        # try to get a specific error message. May fail in some cases
+        try:
+            err_detail = str(exc.info['error']['root_cause'][0]['reason'])
+        except:
+            err_detail = str(exc)
+        err_exp = 'The search failed due to a request error: ' + err_detail
+    except TransportError as exc:
+        # most general exception
+        exc_status = getattr(exc, 'status_code')
+        if exc_status == 'TIMEOUT':
+            err_exp = 'The search failed due to a timeout. Please try a different query.'
+        else:
+            err_exp = 'The search failed due to a transport error: ' + str(exc)
+    except Exception as exc:
+        err_exp = 'The search failed. The DCIC team has been notified.'
+    if err_exp:
+        raise HTTPBadRequest(explanation=err_exp)
+    return es_results

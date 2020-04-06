@@ -18,11 +18,6 @@ from snovault.util import (
 from snovault.typeinfo import AbstractTypeInfo
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.aggs import Terms, Nested, Cardinality, ValueCount
-from elasticsearch import (
-    TransportError,
-    RequestError,
-    ConnectionTimeout
-)
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPFound
@@ -36,6 +31,7 @@ from .search_utils import (
     DEFAULT_BROWSE_PARAM_LISTS,
     COMMON_EXCLUDED_URI_PARAMS,
     build_query,
+    execute_search,
 )
 from urllib.parse import urlencode
 from collections import OrderedDict
@@ -104,7 +100,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
 
     ### SET TYPE FILTERS
-    import pdb; pdb.set_trace()
     build_type_filters(result, request, doc_types, types)
 
     # get the fields that will be used as source for the search
@@ -1580,41 +1575,6 @@ def set_additional_aggregations(search_as_dict, request, doc_types, extra_aggreg
             search_as_dict['aggs'][extra_agg_name] = extra_aggregations[extra_agg_name]
 
     return search_as_dict
-
-
-def execute_search(search):
-    """
-    Execute the given Elasticsearch-dsl search. Raise HTTPBadRequest for any
-    exceptions that arise.
-    Args:
-        search: the Elasticsearch-dsl prepared in the search() function
-    Returns:
-        Dictionary search results
-    """
-    err_exp = None
-    try:
-        es_results = search.execute().to_dict()
-    except ConnectionTimeout as exc:
-        err_exp = 'The search failed due to a timeout. Please try a different query.'
-    except RequestError as exc:
-        # try to get a specific error message. May fail in some cases
-        try:
-            err_detail = str(exc.info['error']['root_cause'][0]['reason'])
-        except:
-            err_detail = str(exc)
-        err_exp = 'The search failed due to a request error: ' + err_detail
-    except TransportError as exc:
-        # most general exception
-        exc_status = getattr(exc, 'status_code')
-        if exc_status == 'TIMEOUT':
-            err_exp = 'The search failed due to a timeout. Please try a different query.'
-        else:
-            err_exp = 'The search failed due to a transport error: ' + str(exc)
-    except Exception as exc:
-        err_exp = 'The search failed. The DCIC team has been notified.'
-    if err_exp:
-        raise HTTPBadRequest(explanation=err_exp)
-    return es_results
 
 
 def fix_and_replace_nested_doc_count(result_facet, aggregations, full_agg_name):

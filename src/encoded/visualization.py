@@ -38,6 +38,7 @@ from .search_utils import (
     prepare_search_term_from_raw_params,
     list_source_fields_from_raw_params,
     build_query,
+    execute_search,
 )
 
 def includeme(config):
@@ -203,6 +204,13 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 }
 
 
+# Default bucket aggregations
+TOTAL_EXP_RAW_FILES = 'total_exp_raw_files'
+TOTAL_EXP_PROCESSED_FILES = 'total_exp_processed_files'
+TOTAL_EXPSET_PROCESSED_FILES = 'total_expset_processed_files'
+TOTAL_EXP = 'total_experiments'
+
+
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 @debug_log
 def bar_plot_chart(context, request):
@@ -221,13 +229,6 @@ def bar_plot_chart(context, request):
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
-    # Determine which fields that we are aggregating on are nested
-    nested_paths = {}
-    for field in fields_to_aggregate_for:
-        path = find_nested_path(field)
-        if path:
-            nested_paths[field] = path
-
     # Construct the search
     es = request.registry[ELASTIC_SEARCH]
     types = request.registry[TYPES]
@@ -238,6 +239,12 @@ def bar_plot_chart(context, request):
     prepared_terms = prepare_search_term_from_raw_params(search_param_lists)
     source_fields = list_source_fields_from_raw_params(fields_to_aggregate_for)
 
+    # Determine which fields that we are aggregating on are nested
+    nested_paths = {}
+    for field in fields_to_aggregate_for:
+        path = find_nested_path(field, item_type_es_mapping)
+        if path:
+            nested_paths[field] = path
 
     # establish elasticsearch_dsl class that will perform the search
     search = Search(using=es, index=es_index)
@@ -253,13 +260,83 @@ def bar_plot_chart(context, request):
                                                            size=MAX_BUCKET_COUNT,
                                                            missing=TERM_NAME_FOR_NO_VALUE))
     else:
-        search.aggs[BARPLOT_AGGS].bucket(Terms(field=field_name,
+        search.aggs.bucket(BARPLOT_AGGS, Terms(field=field_name,
                                                size=MAX_BUCKET_COUNT,
                                                missing=TERM_NAME_FOR_NO_VALUE))
 
     # Populate with the bucket aggregations in the correct form from above
-    # XXX: TODO
-    return {}
+    search.aggs.bucket(TOTAL_EXP_RAW_FILES, Nested(path='embedded.experiments_in_set')) \
+               .bucket(TOTAL_EXP_RAW_FILES, Cardinality(field='embedded.experiments_in_set.files.accession.raw',
+                                                        precision_threshold=10000))
+    search.aggs.bucket(TOTAL_EXP_PROCESSED_FILES, Nested(path='embedded.experiments_in_set')) \
+               .bucket(TOTAL_EXP_PROCESSED_FILES, Cardinality(field='embedded.experiments_in_set.processed_files.accession.raw',
+                                                              precision_threshold=10000))
+    search.aggs.bucket(TOTAL_EXPSET_PROCESSED_FILES, Nested(path='embedded.processed_files')) \
+               .bucket(TOTAL_EXPSET_PROCESSED_FILES, Cardinality(field='embedded.processed_files.accession.raw',
+                                                                 precision_threshold=10000))
+    search.aggs.bucket(TOTAL_EXP, Nested(path='embedded.experiments_in_set')) \
+               .bucket(TOTAL_EXP, ValueCount(field='embedded.experiments_in_set.accession.raw'))
+
+    # TODO: Nest additional fields, if any
+
+    # execute search
+    search_result = execute_search(search)
+    ret_result = {  # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
+        "field": fields_to_aggregate_for[0],
+        "terms": {},
+        "total": {
+            "experiment_sets": search_result['hits']['total'],
+            "experiments": search_result['aggregations']['total_experiments']['total_experiments']['value'],
+            "files": (
+                    search_result['aggregations']['total_expset_processed_files']['total_expset_processed_files'][
+                        'value'] +
+                    search_result['aggregations']['total_exp_raw_files']['total_exp_raw_files']['value'] +
+                    search_result['aggregations']['total_exp_processed_files']['total_exp_processed_files']['value']
+            )
+        },
+        "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
+        "time_generated": str(datetime.utcnow())
+    }
+
+
+    def format_bucket_result(bucket_result, returned_buckets, curr_field_depth = 0):
+
+        curr_bucket_totals = {
+            'experiment_sets'   : int(bucket_result['doc_count']),
+            'experiments'       : int(bucket_result['total_experiments']['total_experiments']['value']),
+            'files'             : int(
+                bucket_result['total_expset_processed_files']['total_expset_processed_files']['value'] +
+                bucket_result['total_exp_raw_files']['total_exp_raw_files']['value'] +
+                bucket_result['total_exp_processed_files']['total_exp_processed_files']['value']
+            )
+        }
+
+        next_field_name = None
+        if len(fields_to_aggregate_for) > curr_field_depth + 1: # More fields agg results to add
+            next_field_name = fields_to_aggregate_for[curr_field_depth + 1]
+            returned_buckets[bucket_result['key']] = {
+                "term"              : bucket_result['key'],
+                "field"             : next_field_name,
+                "total"             : curr_bucket_totals,
+                "terms"             : {},
+                "other_doc_count"   : bucket_result['field_' + str(curr_field_depth + 1)].get('sum_other_doc_count', 0),
+            }
+            for bucket in bucket_result['field_' + str(curr_field_depth + 1)]['buckets']:
+                format_bucket_result(bucket, returned_buckets[bucket_result['key']]['terms'], curr_field_depth + 1)
+
+        else:
+            # Terminal field aggregation -- return just totals, nothing else.
+            returned_buckets[bucket_result['key']] = curr_bucket_totals
+
+    for bucket in search_result['aggregations']['field_0']['buckets']:
+        try:
+            format_bucket_result(bucket, ret_result['terms'], 0)
+        except:
+            continue
+
+
+    #import pdb; pdb.set_trace()
+    return ret_result
 
 
 #@view_config(route_name='bar_plot_chart_old', request_method=['GET', 'POST'])
@@ -522,9 +599,9 @@ def add_files_to_higlass_viewconf(context, request):
     """
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
-    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)    
+    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     if not higlass_viewconfig:
-        
+
         # @todo: this block will be removed when a workaround to run tests correctly.
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
@@ -539,7 +616,7 @@ def add_files_to_higlass_viewconf(context, request):
             "errors": "No view config found.",
             "new_viewconfig": None,
             "new_genome_assembly" : None
-        }    
+        }
 
     # Get the list of files.
     file_uuids = request.json_body.get('files')
@@ -1307,7 +1384,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
 
     new_tracks_by_side["center"]["name"] = "Chromosome Grid"
     del new_tracks_by_side["center"]["options"]["name"]
-   
+
 
     # For each view:
     for view in views:
@@ -1523,7 +1600,7 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["width"] = temp_width
             del track["height"]
-        
+
         # And the orientation
         track_orientation = track.get("orientation", None)
         if track_orientation in orientation_mappings:
