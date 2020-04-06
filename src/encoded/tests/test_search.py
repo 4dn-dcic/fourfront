@@ -17,7 +17,7 @@ pytestmark = [
     pytest.mark.working,
     pytest.mark.schema,
     pytest.mark.indexing,
-    pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+    #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
 ]
 
 
@@ -117,6 +117,8 @@ def test_file_search_type(workbook, testapp):
     assert 'FileSearchResults' in res['@type']
     res = testapp.get('/search/?type=Biosample').json
     assert 'FileSearchResults' not in res['@type']
+    assert res['@type'][0] == 'BiosampleSearchResults'
+    assert res['@type'][1] == 'ItemSearchResults'
     res = testapp.get('/search/?type=FileProcessed&type=Biosample').json
     assert 'FileSearchResults' not in res['@type']
     res = testapp.get('/search/?type=FileProcessed&type=FileReference').json
@@ -126,6 +128,15 @@ def test_file_search_type(workbook, testapp):
     res = testapp.get('/search/?type=File').json
     assert 'FileSearchResults' in res['@type']
     assert res['@type'].count('FileSearchResults') == 1
+    res = testapp.get('/search/?type=FileFastq').json
+    assert res['@type'][0] == 'FileFastqSearchResults'
+    assert res['@type'][1] == 'FileSearchResults'
+    assert res['@type'][2] == 'ItemSearchResults'
+    assert res['@type'][3] == 'Search'
+    res = testapp.get('/search/?type=FileFastq&type=Biosample').json
+    assert res['@type'][0] == 'ItemSearchResults'
+    res = testapp.get('/search/?type=FileFastq&type=File').json
+    assert res['@type'][0] == 'FileSearchResults'
 
 
 def test_search_with_simple_query(workbook, testapp):

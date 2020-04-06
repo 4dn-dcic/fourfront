@@ -1,6 +1,7 @@
 import re
 import math
 import itertools
+from functools import reduce
 from pyramid.view import view_config
 from webob.multidict import MultiDict
 from snovault import (
@@ -64,11 +65,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # list of item types used from the query
     doc_types = set_doc_types(request, types, search_type)
     # calculate @type. Exclude ItemSearchResults unless no other types selected.
-    search_types = [dt + 'SearchResults' for dt in doc_types if dt != 'File']
+    search_types = build_search_types(types, doc_types)
     search_types.append(forced_type)  # the old base search type
-
-    # add FileSearchResults if searching on 'File' types
-    add_file_search_results(types, doc_types, search_types)
 
     # sets request.normalized_params
     search_base = normalize_query(request, types, doc_types)
@@ -263,24 +261,37 @@ def collection_view(context, request):
     return search(context, request, context.type_info.name, False, forced_type='Search')
 
 
-def add_file_search_results(types, doc_types, search_types):
-    """ If every doc_type in doc_types inherits from 'File', add 'FileSearchResults' to
-        the search types (to be returned in @type)
+def build_search_types(types, doc_types):
+    """ Builds search_types based on the given doc_types
 
-    :param types: global typestool from registry
-    :param doc_type: all doc_types we are searching on
-    :param search_types: to be extended in place if necessary
+    :param types: TypesTool from the registry
+    :param doc_types: Type names we would like to search on
+    :return: search_types, or a list of 'SearchResults' type candidates
     """
-    if not doc_types:
-        return
-    for doc_type in doc_types:
-        if doc_type == 'File':
-            continue
-        if not hasattr(types[doc_type], 'base_types'):
-            return  # we are searching on an abstract type
-        if 'File' not in types[doc_type].base_types:
-            return  # all doc_types must match
-    search_types.append('FileSearchResults')  # if we got here, all must match
+    search_types = []
+    if len(doc_types) == 1:  # if we have one, add it and its base_type
+        ti = types[doc_types[0]]
+        search_types.append(ti.name + "SearchResults")
+        if hasattr(ti, 'base_types'):
+            for base_type in ti.base_types:
+                search_types.append(base_type + "SearchResults")
+
+    # If we have more than one, compute and add common ancestors to search_types
+    # TODO: handle more than 2 common ancestors
+    else:
+        base_types = []
+        for ti in doc_types:
+            if hasattr(types[ti], 'base_types'):
+                base_types.append(set(types[ti].base_types))
+        common_ancestors = reduce(lambda x, y: x & y, base_types)
+        if not common_ancestors:
+            raise HTTPBadRequest("Tried to search on types with no common ancestor. This should never happen.")
+
+        for ancestor in common_ancestors:
+            if ancestor != "Item":
+                search_types.append(ancestor + "SearchResults")
+        search_types.append("ItemSearchResults")
+    return search_types
 
 
 def get_collection_actions(request, type_info):
