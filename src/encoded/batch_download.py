@@ -64,6 +64,8 @@ TSV_MAPPING = OrderedDict([
     ('Experiment Type',             (EXP,       ['experiment_type.display_title'])),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
     ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'])),
+    ('Condition ',                  (EXP_SET,   ['condition'])),
+    ('Dataset ',                    (EXP_SET,   ['dataset_label'])),
 
     ('Biosource',                   (EXP,       ['biosample.biosource_summary'])),
     ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'])),
@@ -72,9 +74,8 @@ TSV_MAPPING = OrderedDict([
    #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
     ('Related File',                (FILE,      ['related_files.file.accession'])),
-    ('Paired end',                  (FILE,      ['paired_end'])),
-    ('Lab',                         (EXP_SET,   ['lab.display_title'])),
-    ('Project',                     (EXP_SET,   ['award.project'])),
+    ('Paired end',                  (FILE,      ['paired_end'])),    
+    # ('Contributing  Lab',           (EXP_SET,   ['contributing_labs.display_title'])),    
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
@@ -85,8 +86,10 @@ TSV_MAPPING = OrderedDict([
     ('Condition',                   (FILE_ONLY, ['track_and_facet_info.condition'])),
     ('Dataset',                     (FILE_ONLY, ['track_and_facet_info.dataset'])),
     ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
-    ('Generating Lab',              (FILE_ONLY, ['track_and_facet_info.lab_name'])),   
-    ('Contributing Lab',            (FILE_ONLY, ['contributing_labs.display_title'])), 
+    ('Project',                     (EXP_SET,   ['award.project'])),
+    ('Generating Lab',              (FILE,      ['lab.display_title'])),
+    # ('Generating Lab',              (FILE_ONLY, ['track_and_facet_info.lab_name'])),   
+    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])), 
         
     
 

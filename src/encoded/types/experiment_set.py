@@ -169,6 +169,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.messages",
         "experiments_in_set.files.notes_to_tsv",
+        "experiments_in_set.files.contributing_labs.display_title",
+        "experiments_in_set.files.lab.display_title",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -195,6 +197,8 @@ class ExperimentSet(Item):
         "processed_files.static_content.location",
         "processed_files.static_content.description",
         "processed_files.static_content.content.@type",
+        "processed_files.contributing_labs.display_title",
+        "processed_files.lab.display_title",
 
         # "processed_files.quality_metric.Total reads",
         # "processed_files.quality_metric.Total Sequences",
@@ -228,6 +232,8 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
         "experiments_in_set.processed_files.last_modified.date_modified",
         "experiments_in_set.processed_files.notes_to_tsv",
+        "experiments_in_set.processed_files.contributing_labs.display_title",
+        "experiments_in_set.processed_files.lab.display_title",
         # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
