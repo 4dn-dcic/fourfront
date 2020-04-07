@@ -51,10 +51,9 @@ TSV_MAPPING = OrderedDict([
     ('File Download URL',           (FILE,      ['href'])),
     ('Experiment Set Accession',    (EXP_SET,   ['accession'])),
     ('Experiment Accession',        (EXP,       ['accession'])),
-    ('Exp. Set Accession',          (FILE_ONLY, ['experiment_sets.accession'])),
-    ('Exp. Accession',              (FILE_ONLY, ['experiments.accession'])),
+    ('Experiment Set Accession ',   (FILE_ONLY, ['experiment_sets.accession'])), #do not remove trailing whitespace
+    ('Experiment Accession ',       (FILE_ONLY, ['experiments.accession'])), #do not remove trailing whitespace
     ('File Accession',              (FILE,      ['accession'])),
-
 
     ('Size (MB)',                   (FILE,      ['file_size'])),
     ('md5sum',                      (FILE,      ['md5sum'])),
@@ -64,8 +63,8 @@ TSV_MAPPING = OrderedDict([
     ('Experiment Type',             (EXP,       ['experiment_type.display_title'])),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
     ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'])),
-    ('Condition ',                  (EXP_SET,   ['condition'])),
-    ('Dataset ',                    (EXP_SET,   ['dataset_label'])),
+    ('Condition',                   (EXP_SET,   ['condition'])),
+    ('Dataset',                     (EXP_SET,   ['dataset_label'])),
 
     ('Biosource',                   (EXP,       ['biosample.biosource_summary'])),
     ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'])),
@@ -74,8 +73,7 @@ TSV_MAPPING = OrderedDict([
    #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
     ('Related File',                (FILE,      ['related_files.file.accession'])),
-    ('Paired end',                  (FILE,      ['paired_end'])),    
-    # ('Contributing  Lab',           (EXP_SET,   ['contributing_labs.display_title'])),    
+    ('Paired End',                  (FILE,      ['paired_end'])),    
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
@@ -83,12 +81,11 @@ TSV_MAPPING = OrderedDict([
     ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'])),
     ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'])),
     ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'])),
-    ('Condition',                   (FILE_ONLY, ['track_and_facet_info.condition'])),
-    ('Dataset',                     (FILE_ONLY, ['track_and_facet_info.dataset'])),
+    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'])), #do not remove trailing whitespace
+    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'])), #do not remove trailing whitespace
     ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
     ('Project',                     (EXP_SET,   ['award.project'])),
     ('Generating Lab',              (FILE,      ['lab.display_title'])),
-    # ('Generating Lab',              (FILE_ONLY, ['track_and_facet_info.lab_name'])),   
     ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])), 
         
     
@@ -591,7 +588,7 @@ def metadata_tsv(context, request):
             'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L [--user <access_key_id>:<access_key_secret>]'.format(filename_to_suggest)
         ])
         yield line.read().encode('utf-8')
-        writer.writerow(header)
+        writer.writerow([column.strip() for column in header])
         yield line.read().encode('utf-8')
 
         for file_row_dict in file_row_dictionaries:
