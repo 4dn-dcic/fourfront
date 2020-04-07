@@ -4,7 +4,7 @@ import pytest
 import tempfile
 
 from pyramid.httpexceptions import HTTPForbidden
-from .. import source_beanstalk_env_vars
+from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from ..types.file import FileFastq, post_upload
 from ..types.file import external_creds
 

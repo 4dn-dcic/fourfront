@@ -1,34 +1,23 @@
 """The type file for the workflow related items.
 """
-from collections import (
-    OrderedDict,
-    deque
-)
-from inspect import signature
+
 import copy
-from pyramid.view import view_config
-from pyramid.response import Response
-from pyramid.httpexceptions import (
-    HTTPUnprocessableEntity,
-)
-from snovault import (
-    calculated_property,
-    collection,
-    load_schema,
-    CONNECTION,
-    TYPES
-)
-from snovault.util import debug_log
-from .base import (
-    Item,
-    lab_award_attribution_embed_list
-)
 import cProfile
-import pstats
-import io
 import boto3
+import io
 import json
+import pstats
+
+from collections import OrderedDict, deque
+from dcicutils.env_utils import FF_ENV_WEBDEV, is_stg_or_prd_env, prod_bucket_env
+from inspect import signature
+from pyramid.httpexceptions import HTTPUnprocessableEntity
+from pyramid.response import Response
+from pyramid.view import view_config
+from snovault import calculated_property, collection, load_schema, CONNECTION, TYPES
+from snovault.util import debug_log
 from time import sleep
+from .base import Item, lab_award_attribution_embed_list
 
 
 steps_run_data_schema = {
@@ -933,12 +922,8 @@ def pseudo_run(context, request):
     env = request.registry.settings.get('env.name')
     # for testing
     if not env:
-        env = 'fourfront-webdev'
-    if env == 'fourfront-webprod2':
-        input_json['output_bucket'] = 'elasticbeanstalk-fourfront-webprod-wfoutput'
-    else:
-        input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
-
+        env = FF_ENV_WEBDEV
+    input_json['output_bucket'] = _wfoutput_bucket_for_env(env)
     input_json['env_name'] = env
     if input_json.get('app_name', None) is None:
         input_json['app_name'] = 'pseudo-workflow-run'
@@ -978,6 +963,10 @@ def pseudo_run(context, request):
     return res_dict
 
 
+def _wfoutput_bucket_for_env(env):
+    return 'elasticbeanstalk-%s-wfoutput' % (prod_bucket_env(env) if is_stg_or_prd_env(env) else env)
+
+
 @view_config(name='run', context=WorkflowRun.Collection, request_method='POST',
              permission='add')
 @debug_log
@@ -988,12 +977,8 @@ def run_workflow(context, request):
     env = request.registry.settings.get('env.name')
     # for testing
     if not env:
-        env = 'fourfront-webdev'
-    if env == 'fourfront-webprod2':
-        input_json['output_bucket'] = 'elasticbeanstalk-fourfront-webprod-wfoutput'
-    else:
-        input_json['output_bucket'] = 'elasticbeanstalk-%s-wfoutput' % env
-
+        env = FF_ENV_WEBDEV
+    input_json['output_bucket'] = _wfoutput_bucket_for_env(env)
     input_json['env_name'] = env
 
     # hand-off to tibanna for further processing
