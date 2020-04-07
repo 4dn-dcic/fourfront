@@ -15,7 +15,9 @@ from urllib.parse import (
 )
 from datetime import datetime
 import uuid
-from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search, A
+from elasticsearch_dsl.search import AggsProxy
+from elasticsearch_dsl.utils import AttrDict
 from elasticsearch_dsl.aggs import Terms, Nested, Cardinality, ValueCount
 from .search import (
     make_search_subreq,
@@ -31,6 +33,7 @@ from .types.workflow import (
 )
 from .types.base import get_item_if_you_can
 from .search_utils import (
+    REVERSE_NESTED,
     get_es_index,
     get_es_mapping,
     find_nested_path,
@@ -211,6 +214,38 @@ TOTAL_EXPSET_PROCESSED_FILES = 'total_expset_processed_files'
 TOTAL_EXP = 'total_experiments'
 
 
+def add_standard_aggregations_to_search(subsearch):
+    """ This method is a little wonky but adds aggregation buckets to a subsearch
+        Formatted to illustrate actual format in Lucene
+
+    :param subsearch: any part of a dsl search that implements 'bucket'
+    """
+    if not hasattr(subsearch, 'bucket'):
+        return  # XXX: exception?
+    subsearch.bucket(TOTAL_EXP_RAW_FILES,
+                     Nested(path='embedded.experiments_in_set')) \
+             .bucket(TOTAL_EXP_RAW_FILES,
+                     Cardinality(field='embedded.experiments_in_set.files.accession.raw',
+                                 precision_threshold=10000))
+
+    subsearch.bucket(TOTAL_EXP_PROCESSED_FILES,
+                     Nested(path='embedded.experiments_in_set')) \
+             .bucket(TOTAL_EXP_PROCESSED_FILES,
+                    Cardinality(field='embedded.experiments_in_set.processed_files.accession.raw',
+                                precision_threshold=10000))
+
+    subsearch.bucket(TOTAL_EXPSET_PROCESSED_FILES,
+                     Nested(path='embedded.processed_files')) \
+             .bucket(TOTAL_EXPSET_PROCESSED_FILES,
+                     Cardinality(field='embedded.processed_files.accession.raw',
+                                 precision_threshold=10000))
+
+    subsearch.bucket(TOTAL_EXP,
+                     Nested(path='embedded.experiments_in_set')) \
+             .bucket(TOTAL_EXP,
+                     ValueCount(field='embedded.experiments_in_set.accession.raw'))
+
+
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 @debug_log
 def bar_plot_chart(context, request):
@@ -264,20 +299,28 @@ def bar_plot_chart(context, request):
                                                size=MAX_BUCKET_COUNT,
                                                missing=TERM_NAME_FOR_NO_VALUE))
 
-    # Populate with the bucket aggregations in the correct form from above
-    search.aggs.bucket(TOTAL_EXP_RAW_FILES, Nested(path='embedded.experiments_in_set')) \
-               .bucket(TOTAL_EXP_RAW_FILES, Cardinality(field='embedded.experiments_in_set.files.accession.raw',
-                                                        precision_threshold=10000))
-    search.aggs.bucket(TOTAL_EXP_PROCESSED_FILES, Nested(path='embedded.experiments_in_set')) \
-               .bucket(TOTAL_EXP_PROCESSED_FILES, Cardinality(field='embedded.experiments_in_set.processed_files.accession.raw',
-                                                              precision_threshold=10000))
-    search.aggs.bucket(TOTAL_EXPSET_PROCESSED_FILES, Nested(path='embedded.processed_files')) \
-               .bucket(TOTAL_EXPSET_PROCESSED_FILES, Cardinality(field='embedded.processed_files.accession.raw',
-                                                                 precision_threshold=10000))
-    search.aggs.bucket(TOTAL_EXP, Nested(path='embedded.experiments_in_set')) \
-               .bucket(TOTAL_EXP, ValueCount(field='embedded.experiments_in_set.accession.raw'))
+    add_standard_aggregations_to_search(search.aggs)  # populate buckets at top level
+    add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS])  # populate buckets in BARPLOT_AGGS
 
-    # TODO: Nest additional fields, if any
+    # Nest additional aggregations using A()
+    curr_field_aggs = search.aggs[BARPLOT_AGGS]
+    for field_index, field in enumerate(fields_to_aggregate_for):
+        entry_name = 'field_' + str(field_index)
+        if field_index == 0:
+            continue
+        elif field in nested_paths:
+            curr_field_aggs[entry_name] = A('nested',
+                                            path=nested_paths[field],
+                                            filter=Terms(field=field,
+                                                         size=MAX_BUCKET_COUNT,
+                                                         missing=TERM_NAME_FOR_NO_VALUE))
+        else:
+            curr_field_aggs[entry_name] = A('terms', field=field,
+                                                    size=MAX_BUCKET_COUNT,
+                                                    missing=TERM_NAME_FOR_NO_VALUE)
+
+        add_standard_aggregations_to_search(curr_field_aggs[entry_name])
+        curr_field_aggs = curr_field_aggs[entry_name]
 
     # execute search
     search_result = execute_search(search)
@@ -329,13 +372,8 @@ def bar_plot_chart(context, request):
             returned_buckets[bucket_result['key']] = curr_bucket_totals
 
     for bucket in search_result['aggregations']['field_0']['buckets']:
-        try:
-            format_bucket_result(bucket, ret_result['terms'], 0)
-        except:
-            continue
+        format_bucket_result(bucket, ret_result['terms'], 0)
 
-
-    #import pdb; pdb.set_trace()
     return ret_result
 
 
