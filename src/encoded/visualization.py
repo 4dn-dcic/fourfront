@@ -144,10 +144,10 @@ def add_standard_aggregations_to_search(subsearch):
     total_exp_agg = A('value_count', field='embedded.experiments_in_set.accession.raw')
 
     # add aggs to subsearch
-    subsearch[TOTAL_EXP_RAW_FILES] = Nested(path='embedded.experiments_in_set').metric(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
-    subsearch[TOTAL_EXP_PROCESSED_FILES] = Nested(path='embedded.experiments_in_set').metric(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
-    subsearch[TOTAL_EXPSET_PROCESSED_FILES] = Nested(path='embedded.processed_files').metric(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
-    subsearch[TOTAL_EXP] = Nested(path='embedded.experiments_in_set').metric(TOTAL_EXP, total_exp_agg)
+    subsearch[TOTAL_EXP_RAW_FILES] = Nested(path='embedded.experiments_in_set').bucket(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
+    subsearch[TOTAL_EXP_PROCESSED_FILES] = Nested(path='embedded.experiments_in_set').bucket(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
+    subsearch[TOTAL_EXP] = Nested(path='embedded.experiments_in_set').bucket(TOTAL_EXP, total_exp_agg)
+    subsearch[TOTAL_EXPSET_PROCESSED_FILES] = Nested(path='embedded.processed_files').bucket(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
 
 
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
@@ -170,9 +170,7 @@ def bar_plot_chart(context, request):
 
     # Construct the search
     es = request.registry[ELASTIC_SEARCH]
-    types = request.registry[TYPES]
     doc_types = search_param_lists['type']
-    principals = request.effective_principals
     es_index = get_es_index(request, doc_types)
     item_type_es_mapping = get_es_mapping(es, es_index)
     prepared_terms = prepare_search_term_from_raw_params(search_param_lists)
@@ -196,10 +194,11 @@ def bar_plot_chart(context, request):
     primary_agg_name = fields_to_aggregate_for[0]
     field_name = "embedded." + primary_agg_name + '.raw'
     if primary_agg_name in nested_paths:
-        search.aggs[BARPLOT_AGGS] = \
-            Nested(path=nested_paths[primary_agg_name]).metric(field_name, Terms(field=field_name,
-                                                                                  size=MAX_BUCKET_COUNT,
-                                                                                  missing=TERM_NAME_FOR_NO_VALUE))
+        search.aggs.bucket(BARPLOT_AGGS, 'nested', path=nested_paths[primary_agg_name]) \
+                   .bucket(BARPLOT_AGGS, 'reverse_nested', path=nested_paths[primary_agg_name]) \
+                   .bucket(BARPLOT_AGGS, 'terms', field=field_name, size=MAX_BUCKET_COUNT, missing=TERM_NAME_FOR_NO_VALUE)
+        # search.aggs[BARPLOT_AGGS] = Nested(path=nested_paths[primary_agg_name]).metric(BARPLOT_AGGS, Terms(field=field_name,size=MAX_BUCKET_COUNT,missing=TERM_NAME_FOR_NO_VALUE))
+        # search.aggs[BARPLOT_AGGS].aggs['rv'] = {'reverse_nested': {}}  # our primary agg is on the docs themselves so set reverse_nested
     else:
         search.aggs[BARPLOT_AGGS] = Terms(field=field_name,
                                           size=MAX_BUCKET_COUNT,
@@ -207,7 +206,7 @@ def bar_plot_chart(context, request):
 
     # add standard aggs
     add_standard_aggregations_to_search(search.aggs)  # populate buckets at top level
-    add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS].aggs[field_name].aggs)  # populate buckets in BARPLOT_AGGS
+    add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS].aggs[BARPLOT_AGGS].aggs[BARPLOT_AGGS].aggs)  # populate buckets in BARPLOT_AGGS
 
     # Nest additional aggregations using A()
     curr_field_aggs = search.aggs[BARPLOT_AGGS].aggs
@@ -244,7 +243,6 @@ def bar_plot_chart(context, request):
     }
 
     def format_bucket_result(bucket_result, returned_buckets, curr_field_depth = 0):
-
         curr_bucket_totals = {
             'experiment_sets'   : int(bucket_result['doc_count']),
             'experiments'       : int(bucket_result['total_experiments']['total_experiments']['value']),
@@ -254,7 +252,7 @@ def bar_plot_chart(context, request):
                 bucket_result['total_exp_processed_files']['total_exp_processed_files']['value']
             )
         }
-
+        #import ipdb; ipdb.set_trace()
         next_field_name = None
         if len(fields_to_aggregate_for) > curr_field_depth + 1: # More fields agg results to add
             next_field_name = fields_to_aggregate_for[curr_field_depth + 1]
@@ -263,18 +261,25 @@ def bar_plot_chart(context, request):
                 "field"             : next_field_name,
                 "total"             : curr_bucket_totals,
                 "terms"             : {},
-                "other_doc_count"   : bucket_result['field_' + str(curr_field_depth + 1)].get('sum_other_doc_count', 0),
+                #"other_doc_count"   : bucket_result['field_' + str(curr_field_depth + 1)].get('sum_other_doc_count', 0)
             }
-            for bucket in bucket_result['field_' + str(curr_field_depth + 1)]['buckets']:
-                format_bucket_result(bucket, returned_buckets[bucket_result['key']]['terms'], curr_field_depth + 1)
+            # for bucket in bucket_result['field_' + str(curr_field_depth + 1)]['buckets']:
+            #     format_bucket_result(bucket, returned_buckets[bucket_result['key']]['terms'], curr_field_depth + 1)
 
         else:
             # Terminal field aggregation -- return just totals, nothing else.
             returned_buckets[bucket_result['key']] = curr_bucket_totals
 
-
-    for bucket in search_result['aggregations']['field_0']['buckets']:
-        format_bucket_result(bucket, ret_result['terms'], 0)
+    #import ipdb; ipdb.set_trace()
+    if primary_agg_name not in nested_paths:  # this will maybe work
+        for bucket in search_result['aggregations']['field_0']['buckets']:
+            format_bucket_result(bucket, ret_result['terms'], 0)
+    else:
+        for bucket in search_result['aggregations']['field_0']['field_0']['buckets']:
+            format_bucket_result(bucket, ret_result['terms'], 0)
+        # for bucket in search_result['aggregations']['field_0']['field_1']['buckets']:
+        #     format_bucket_result(bucket, ret_result['terms'], 1)
+    #import ipdb; ipdb.set_trace()
     return ret_result
 
 
