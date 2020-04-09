@@ -133,7 +133,7 @@ BARPLOT_NESTED_AGGS = 'barplot_nested_aggs'
 SUM_FILES_EXPS_AGGREGATION_DEFINITION = {}  # TODO: restore
 
 
-def add_standard_aggregations_to_search(subsearch, bucket=True):
+def add_standard_aggregations_to_search(subsearch, raw=False):
     """ This method is a little wonky but adds aggregation buckets to a subsearch
         Formatted to illustrate actual format in Lucene
 
@@ -147,17 +147,18 @@ def add_standard_aggregations_to_search(subsearch, bucket=True):
                                                         precision_threshold=10000)
     total_exp_agg = A('value_count', field='embedded.experiments_in_set.accession.raw')
 
-    # Give buckets
-    if bucket:
-        subsearch[TOTAL_EXP_RAW_FILES] = Nested(path='embedded.experiments_in_set').bucket(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
-        subsearch[TOTAL_EXP_PROCESSED_FILES] = Nested(path='embedded.experiments_in_set').bucket(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
-        subsearch[TOTAL_EXP] = Nested(path='embedded.experiments_in_set').bucket(TOTAL_EXP, total_exp_agg)
-        subsearch[TOTAL_EXPSET_PROCESSED_FILES] = Nested(path='embedded.processed_files').bucket(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
-    else:  # Give metrics
-        subsearch[TOTAL_EXP_RAW_FILES] = Nested(path='embedded.experiments_in_set').metric(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
-        subsearch[TOTAL_EXP_PROCESSED_FILES] = Nested(path='embedded.experiments_in_set').metric(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
-        subsearch[TOTAL_EXP] = Nested(path='embedded.experiments_in_set').metric(TOTAL_EXP, total_exp_agg)
-        subsearch[TOTAL_EXPSET_PROCESSED_FILES] = Nested(path='embedded.processed_files').metric(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
+    # Attach aggregation as appropriate
+    # TODO: 'reverse_nested' must come into play here for TOTAL_EXPSET_PROCESSED_FILES
+    if raw:
+        subsearch[TOTAL_EXP_RAW_FILES] = total_exp_raw_files_agg
+        subsearch[TOTAL_EXP_PROCESSED_FILES] = total_exp_processed_files_agg
+        subsearch[TOTAL_EXP] = total_exp_agg
+        subsearch[TOTAL_EXPSET_PROCESSED_FILES] = total_expset_processed_files_agg
+    else:
+        subsearch.bucket(TOTAL_EXP_RAW_FILES, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
+        subsearch.bucket(TOTAL_EXP_PROCESSED_FILES, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
+        subsearch.bucket(TOTAL_EXP, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP, total_exp_agg)
+        subsearch.bucket(TOTAL_EXPSET_PROCESSED_FILES, 'nested', path='embedded.processed_files').metric(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
 
 
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
@@ -203,23 +204,21 @@ def bar_plot_chart(context, request):
     # Build primary agg
     primary_agg_name = fields_to_aggregate_for[0]
     field_name = "embedded." + primary_agg_name + '.raw'
-    #import ipdb; ipdb.set_trace()
     if primary_agg_name in nested_paths:
         search.aggs[BARPLOT_AGGS] = Nested(path=nested_paths[primary_agg_name]).metric(BARPLOT_NESTED_AGGS, Terms(field=field_name,size=MAX_BUCKET_COUNT,missing=TERM_NAME_FOR_NO_VALUE))
-        add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS].aggs[BARPLOT_NESTED_AGGS].aggs, bucket=False)
+        add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS].aggs[BARPLOT_NESTED_AGGS].aggs, raw=True)
     else:
         search.aggs[BARPLOT_AGGS] = Terms(field=field_name,
                                           size=MAX_BUCKET_COUNT,
                                           missing=TERM_NAME_FOR_NO_VALUE)
-        add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS], bucket=False)
+        add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS], raw=True)
 
     # add standard aggs to main search
-    add_standard_aggregations_to_search(search.aggs, bucket=False)  # populate metrics at top level
+    add_standard_aggregations_to_search(search.aggs)  # populate metrics at top level
 
     # Nest additional aggregations using A()
-    # TODO: Something is not right on how this is done.
-    #       Alex's query doesn't seem to work with nested aggregations, perhaps not surprisingly.
-    #       A new query strategy must be divised.
+    # TODO: This seems correct when the remaining agg is also nested, but is still broken
+    #       when not nested.
     curr_field_aggs = search.aggs[BARPLOT_AGGS].aggs[BARPLOT_NESTED_AGGS].aggs
     for field_index, field in enumerate(fields_to_aggregate_for):
         if field_index == 0:
@@ -230,7 +229,7 @@ def bar_plot_chart(context, request):
         if field in nested_paths:
             agg = Nested(path=nested_paths[field]).bucket(_field, agg)
 
-        add_standard_aggregations_to_search(agg.aggs, bucket=False)  # where this goes is super important!
+        add_standard_aggregations_to_search(agg.aggs, raw=True)  # where this goes is super important!
         curr_field_aggs[entry_name] = agg
         curr_field_aggs = curr_field_aggs[entry_name].aggs
 
@@ -256,11 +255,11 @@ def bar_plot_chart(context, request):
     def format_bucket_result(bucket_result, returned_buckets, curr_field_depth = 0):
         curr_bucket_totals = {
             'experiment_sets'   : int(bucket_result['doc_count']),
-            'experiments'       : int(bucket_result['total_experiments']['total_experiments']['value']),
+            'experiments'       : int(bucket_result['total_experiments']['value']),
             'files'             : int(
-                bucket_result['total_expset_processed_files']['total_expset_processed_files']['value'] +
-                bucket_result['total_exp_raw_files']['total_exp_raw_files']['value'] +
-                bucket_result['total_exp_processed_files']['total_exp_processed_files']['value']
+                bucket_result['total_expset_processed_files']['value'] +
+                bucket_result['total_exp_raw_files']['value'] +
+                bucket_result['total_exp_processed_files']['value']
             )
         }
         next_field_name = None
@@ -282,7 +281,7 @@ def bar_plot_chart(context, request):
 
     # will be in original format if non-nested
     if primary_agg_name not in nested_paths:  # this will maybe work
-        for bucket in search_result['aggregations']['field_0']['buckets']:
+        for bucket in search_result['aggregations'][BARPLOT_AGGS]['buckets']:
             format_bucket_result(bucket, ret_result['terms'], 0)
     else:
         for bucket in search_result['aggregations'][BARPLOT_AGGS][BARPLOT_NESTED_AGGS]['buckets']:
