@@ -3,7 +3,7 @@ import { navUserAcctDropdownBtnSelector } from './../support/variables';
 
 describe('Search As You Type functionality on SubmissionView', function () {
     var testItemsToDelete = [];
-    let principalObject; // temp id for main item (NOT db-generated @id); used for aliasing
+    let newItemLocalAlias; // temp id for main item (NOT db-generated @id); used for aliasing
 
     context('Test Biosource Item Edit page (Enums Only)', function() {
         // Test non-array enums
@@ -17,9 +17,9 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 }).end();
 
             // Generate an identifier and use that for alias
-            principalObject = ("sv-sayt-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(principalObject)
-                .should("have.value", principalObject).end()
+            newItemLocalAlias = ("sv-sayt-test-" + new Date().getTime());
+            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(newItemLocalAlias)
+                .should("have.value", newItemLocalAlias).end()
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end();
         });
 
@@ -88,9 +88,9 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 }).end();
 
             // Generate an identifier and use that for alias
-            principalObject = ("sv-sayt-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(principalObject)
-                .should("have.value", principalObject).end()
+            newItemLocalAlias = ("sv-sayt-test-" + new Date().getTime());
+            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(newItemLocalAlias)
+                .should("have.value", newItemLocalAlias).end()
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end();
         });
 
@@ -179,9 +179,9 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 }).end();
 
             // Generate an identifier and use that for alias
-            principalObject = ("sv-sayt-test-" + new Date().getTime());
-            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(principalObject)
-                .should("have.value", principalObject).end()
+            newItemLocalAlias = ("sv-sayt-test-" + new Date().getTime());
+            cy.get('.modal-dialog input#aliasInput.form-control').focus().type(newItemLocalAlias)
+                .should("have.value", newItemLocalAlias).end()
                 .get("button.btn-primary.btn").should('contain', 'Submit').click().end();
         });
 
@@ -293,7 +293,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .get(".submission-nav-leaf.leaf-depth-1:not('.active')")
                 .should("contain", "dcic-testing-lab:" + identifier)
                 .get(".submission-nav-leaf.leaf-depth-0.active .title-text")
-                .should("contain", "dcic-testing-lab:" + principalObject)
+                .should("contain", "dcic-testing-lab:" + newItemLocalAlias)
                 // Add the newly created item to the list of items to get rid of
                 .get(".field-row [data-field-name=biosource] .dropdown-toggle").first().should("have.attr", "data-tip")
                 .get(".field-row [data-field-name=biosource] .dropdown-toggle").first().invoke('attr', 'data-tip')
