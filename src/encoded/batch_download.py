@@ -420,7 +420,6 @@ def metadata_tsv(context, request):
             )
         ), key=sort_files_from_expset_by_replicate_numbers)
 
-
     def format_experiment(exp, exp_set, exp_set_row_vals):
         '''
         :returns Iterable of dictionaries which represent File item rows, with column headers as keys.
@@ -436,7 +435,6 @@ def metadata_tsv(context, request):
                 sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
             )
         )
-
 
     def format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals):
         '''
@@ -480,10 +478,15 @@ def metadata_tsv(context, request):
 
         # Add attached secondary files, if any; copies most values over from primary file & overrides distinct File Download URL, md5sum, etc.
         if f.get('extra_files') and len(f['extra_files']) > 0:
+            # @todo: instead of hardcode check, allowed file formats control might be moved to schema
+            extra_files_allowed_formats = ['pairs_px2', 'pairsam_px2', 'bai', 'bg_px2']
             for xfile in f['extra_files']:
+                file_format = xfile.get('file_format', {}).get('display_title')
+                if file_format not in extra_files_allowed_formats:
+                    continue
                 xfile_vals = all_row_vals.copy()
                 xfile_vals['File Download URL'] = request.host_url + xfile['href'] if xfile.get('href') else None
-                xfile_vals['File Format'] = xfile.get('file_format', {}).get('display_title')
+                xfile_vals['File Format'] = file_format
                 xfile_vals['md5sum'] = xfile.get('md5sum')
                 if(xfile.get('file_size') != None and xfile.get('file_size') != ''):
                     xfile_vals['Size (MB)'] = format(float(xfile.get('file_size')) / (1024 * 1024), '.2f')
@@ -495,7 +498,6 @@ def metadata_tsv(context, request):
 
         return files_returned
 
-    
     def post_process_file_row_dict(file_row_dict_tuple):
         idx, file_row_dict = file_row_dict_tuple
 
@@ -573,7 +575,6 @@ def metadata_tsv(context, request):
 
         return ret_rows
 
-
     def stream_tsv_output(file_row_dictionaries):
         '''
         Generator which converts file-metatada dictionaries into a TSV stream.
@@ -598,7 +599,6 @@ def metadata_tsv(context, request):
         for summary_line in generate_summary_lines():
             writer.writerow(summary_line)
             yield line.read().encode('utf-8')
-
 
     if not endpoints_initialized['metadata']: # For some reason first result after bootup returns empty, so we do once extra for first request.
         initial_path = '{}?{}'.format(search_path, urlencode(dict(search_params, limit=10), True))
