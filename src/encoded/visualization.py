@@ -15,7 +15,7 @@ from urllib.parse import (
 from datetime import datetime
 import uuid
 from elasticsearch_dsl import Search, A
-from elasticsearch_dsl.aggs import Terms, Nested, Cardinality, ValueCount
+from elasticsearch_dsl.aggs import Terms, Nested, ReverseNested
 from .search import (
     make_search_subreq,
     search as perform_search_request,
@@ -153,7 +153,8 @@ def add_standard_aggregations_to_search(subsearch, raw=False):
         subsearch[TOTAL_EXP_RAW_FILES] = total_exp_raw_files_agg
         subsearch[TOTAL_EXP_PROCESSED_FILES] = total_exp_processed_files_agg
         subsearch[TOTAL_EXP] = total_exp_agg
-        subsearch[TOTAL_EXPSET_PROCESSED_FILES] = total_expset_processed_files_agg
+        subsearch[TOTAL_EXPSET_PROCESSED_FILES] = ReverseNested()  # This metric is on a different path, so reverse_nested and sub-aggregate
+        subsearch[TOTAL_EXPSET_PROCESSED_FILES][BARPLOT_NESTED_AGGS] = Nested(path='embedded.processed_files').metric(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
     else:
         subsearch.bucket(TOTAL_EXP_RAW_FILES, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
         subsearch.bucket(TOTAL_EXP_PROCESSED_FILES, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
@@ -252,16 +253,24 @@ def bar_plot_chart(context, request):
         "time_generated": str(datetime.utcnow())
     }
 
+    # TODO: This method may need to completely change based on the type of aggregation we are summing on.
+    #       The recursive nature makes this doubley-hard
     def format_bucket_result(bucket_result, returned_buckets, curr_field_depth = 0):
-        curr_bucket_totals = {
-            'experiment_sets'   : int(bucket_result['doc_count']),
-            'experiments'       : int(bucket_result['total_experiments']['value']),
-            'files'             : int(
-                bucket_result['total_expset_processed_files']['value'] +
-                bucket_result['total_exp_raw_files']['value'] +
-                bucket_result['total_exp_processed_files']['value']
-            )
-        }
+
+        # TODO: How you get these values is going to differ in several scenarios
+        def extract_bucket_totals(bucket_result):
+            curr_bucket_totals = {
+                'experiment_sets'   : int(bucket_result['doc_count']),
+                'experiments'       : int(bucket_result['total_experiments']['value']),
+                'files'             : int(
+                    bucket_result['total_expset_processed_files'][BARPLOT_NESTED_AGGS][TOTAL_EXPSET_PROCESSED_FILES]['value'] +
+                    bucket_result['total_exp_raw_files']['value'] +
+                    bucket_result['total_exp_processed_files']['value']
+                )
+            }
+            return curr_bucket_totals
+
+        curr_bucket_totals = extract_bucket_totals(bucket_result)
         next_field_name = None
         if len(fields_to_aggregate_for) > curr_field_depth + 1: # More fields agg results to add
             next_field_name = fields_to_aggregate_for[curr_field_depth + 1]
