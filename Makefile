@@ -16,7 +16,7 @@ npm-setup:  # runs all front-end setup
 	npm run build-scss
 
 moto-setup:  # optional moto setup that must be done separately
-	pip install "moto[server]"
+	pip install "moto[server]==1.3.7"
 
 macpoetry-install:  # install for OSX Catalina
 	bin/macpoetry-install
@@ -32,6 +32,7 @@ configure:  # does any pre-requisite installs
 build:  # builds
 	make configure
 	poetry install
+	make moto-setup
 	make npm-setup
 	python setup_eb.py develop
 
