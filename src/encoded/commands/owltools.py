@@ -1,3 +1,4 @@
+import re
 from rdflib import ConjunctiveGraph, exceptions, Namespace
 from rdflib import RDFS, RDF, BNode, URIRef
 from rdflib.collection import Collection
@@ -160,7 +161,11 @@ class Owler(object):
                 if 'releases' in v:
                     v = v[v.index('releases') + 1]
                 else:
-                    v = uris[0]
+                    match = re.search('(20)?([0-9]{2})-[0-9]{2}-(20)?[0-9]{2}', uris[0])
+                    if match:
+                        v = match.group()
+                    else:
+                        v = uris[0]
                 if return_as_string:
                     return str(v)
                 else:
