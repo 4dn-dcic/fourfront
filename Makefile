@@ -44,10 +44,10 @@ build-locust:  # just pip installs locust - may cause instability
 	pip install locust
 
 deploy1:  # starts postgres/ES locally and loads inserts
-	dev-servers development.ini --app-name app --clear --init --load
+	poetry run dev-servers development.ini --app-name app --clear --init --load
 
 deploy2:  # spins up waittress to serve the application
-	pserve development.ini
+	poetry run pserve development.ini
 
 clean-python:
 	@echo -n "Are you sure? This will wipe all libraries installed on this virtualenv [y/N] " && read ans && [ $${ans:-N} = y ]

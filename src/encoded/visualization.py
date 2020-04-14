@@ -1,8 +1,8 @@
-from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest
-from snovault import CONNECTION
+from snovault import CONNECTION, TYPES
 from snovault.util import debug_log
+from snovault.elasticsearch import ELASTIC_SEARCH
 from copy import (
     copy,
     deepcopy
@@ -14,10 +14,12 @@ from urllib.parse import (
 )
 from datetime import datetime
 import uuid
+from elasticsearch_dsl import Search, A
+from elasticsearch_dsl.aggs import Terms, Nested, ReverseNested
 from .search import (
-    DEFAULT_BROWSE_PARAM_LISTS,
     make_search_subreq,
-    search as perform_search_request
+    search as perform_search_request,
+    BARPLOT_AGGS,
 )
 from .types.base import Item
 from .types.workflow import (
@@ -27,6 +29,16 @@ from .types.workflow import (
     item_model_to_object
 )
 from .types.base import get_item_if_you_can
+from .search_utils import (
+    get_es_index,
+    get_es_mapping,
+    find_nested_path,
+    DEFAULT_BROWSE_PARAM_LISTS,
+    prepare_search_term_from_raw_params,
+    list_source_fields_from_raw_params,
+    build_query,
+    execute_search,
+)
 
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
@@ -105,100 +117,57 @@ def trace_workflow_runs(context, request):
 
 
 
-# This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value, so that clicking on bar section to filter by this value works.
+# This must be same as can be used for search query, e.g. &?experiments_in_set.digestion_enzyme.name=No%20value,
+# so that clicking on bar section to filter by this value works.
 TERM_NAME_FOR_NO_VALUE  = "No value"
 
-# Common definition for aggregating all files, exps, and set **counts**.
-# This works four our ElasticSearch mapping though has some non-ideal-ities.
-# For example, we use "cardinality" instead of "value_count" agg (which would (more correctly) count duplicate files, etc.)
-# because without a more complex "type" : "nested" it will uniq file accessions within a hit (ExpSetReplicate).
-SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
-    # Returns count of _unique_ raw file accessions encountered along the search.
-    "total_exp_raw_files" : {
-        "cardinality" : {
-            "field" : "embedded.experiments_in_set.files.accession.raw",
-            "precision_threshold" : 10000
-        }
-    },
 
-    # Alternate approaches -- saved for record / potential future usage:
-    #
-    # (a) Needs to have "type" : "nested" mapping, but then faceting & filtering needs to be changed (lots of effort)
-    #     Without "type" : "nested", "value_count" agg will not account for nested arrays and _unique_ on file accessions within a hit (exp set).
-    #
-    #"total_exp_raw_files_new2" : {
-    #    "nested" : {
-    #        "path" : "embedded.experiments_in_set"
-    #    },
-    #    "aggs" : {
-    #        "total" : {
-    #            "value_count" : {
-    #                "field" : "embedded.experiments_in_set.files.accession.raw",
-    #                #"script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value",
-    #                #"precision_threshold" : 10000
-    #            }
-    #        }
-    #    }
-    #},
-    #
-    # (b) Returns only 1 value per exp-set
-    #     When using a script without "type" : "nested". If "type" : "nested" exists, need to loop over the array (2nd example -ish).
-    #
-    #"total_exp_raw_files_new" : {
-    #    "terms" : {
-    #        "script" : "doc['embedded.experiments_in_set.accession.raw'].value + '~' + doc['embedded.experiments_in_set.files.accession.raw'].value"
-    #        #"script" : "int total = 0; for (int i = 0; i < doc['embedded.experiments_in_set.accession.raw'].length; ++i) { total += doc['links.experiments_in_set'][i]['embedded.files.accession.raw'].length; } return total;",
-    #        #"precision_threshold" : 10000
-    #   }
-    #},
-    #
-    # (c) Same as (b)
-    #
-    #"test" : {
-    #    "terms" : {
-    #        "script" : "return doc['embedded.experiments_in_set.accession.raw'].getValue().concat('~').concat(doc['embedded.experiments_in_set.accession.raw'].getValue()).concat('~').concat(doc['embedded.experiments_in_set.files.accession.raw'].getValue());",
-    #        #"precision_threshold" : 10000
-    #    }
-    #},
-
-    "total_exp_processed_files" : {
-        "cardinality" : {
-            "field" : "embedded.experiments_in_set.processed_files.accession.raw",
-            "precision_threshold" : 10000
-        }
-    },
-    "total_expset_processed_files" : {
-        "cardinality" : {
-            "field" : "embedded.processed_files.accession.raw",
-            "precision_threshold" : 10000
-        }
-    },
-    "total_files" : {
-        "bucket_script" : {
-            "buckets_path": {
-                "expSetProcessedFiles": "total_expset_processed_files",
-                "expProcessedFiles": "total_exp_processed_files",
-                "expRawFiles": "total_exp_raw_files"
-            },
-            "script" : "params.expSetProcessedFiles + params.expProcessedFiles + params.expRawFiles"
-        }
-    },
-    "total_experiments" : {
-        "value_count" : {
-            "field" : "embedded.experiments_in_set.accession.raw"
-        }
-    }
-}
+# Default bucket aggregations
+TOTAL_EXP_RAW_FILES = 'total_exp_raw_files'
+TOTAL_EXP_PROCESSED_FILES = 'total_exp_processed_files'
+TOTAL_EXPSET_PROCESSED_FILES = 'total_expset_processed_files'
+TOTAL_EXP = 'total_experiments'
 
 
+BARPLOT_NESTED_AGGS = 'barplot_nested_aggs'
+SUM_FILES_EXPS_AGGREGATION_DEFINITION = {}  # TODO: restore
+
+
+def add_standard_aggregations_to_search(subsearch, raw=False):
+    """ This method is a little wonky but adds aggregation buckets to a subsearch
+        Formatted to illustrate actual format in Lucene
+
+    :param subsearch: any part of a dsl search that implements 'bucket'
+    """
+    total_exp_raw_files_agg = A('cardinality', field='embedded.experiments_in_set.files.accession.raw',
+                                               precision_threshold=10000)
+    total_exp_processed_files_agg = A('cardinality', field='embedded.experiments_in_set.processed_files.accession.raw',
+                                                     precision_threshold=10000)
+    total_expset_processed_files_agg = A('cardinality', field='embedded.processed_files.accession.raw',
+                                                        precision_threshold=10000)
+    total_exp_agg = A('value_count', field='embedded.experiments_in_set.accession.raw')
+
+    # Attach aggregation as appropriate
+    # TODO: 'reverse_nested' must come into play here for TOTAL_EXPSET_PROCESSED_FILES
+    if raw:
+        subsearch[TOTAL_EXP_RAW_FILES] = total_exp_raw_files_agg
+        subsearch[TOTAL_EXP_PROCESSED_FILES] = total_exp_processed_files_agg
+        subsearch[TOTAL_EXP] = total_exp_agg
+        subsearch[TOTAL_EXPSET_PROCESSED_FILES] = ReverseNested()  # This metric is on a different path, so reverse_nested and sub-aggregate
+        subsearch[TOTAL_EXPSET_PROCESSED_FILES][BARPLOT_NESTED_AGGS] = Nested(path='embedded.processed_files').metric(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
+    else:
+        subsearch.bucket(TOTAL_EXP_RAW_FILES, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP_RAW_FILES, total_exp_raw_files_agg)
+        subsearch.bucket(TOTAL_EXP_PROCESSED_FILES, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP_PROCESSED_FILES, total_exp_processed_files_agg)
+        subsearch.bucket(TOTAL_EXP, 'nested', path='embedded.experiments_in_set').metric(TOTAL_EXP, total_exp_agg)
+        subsearch.bucket(TOTAL_EXPSET_PROCESSED_FILES, 'nested', path='embedded.processed_files').metric(TOTAL_EXPSET_PROCESSED_FILES, total_expset_processed_files_agg)
 
 
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
 @debug_log
 def bar_plot_chart(context, request):
+    MAX_BUCKET_COUNT = 30  # Max amount of bars or bar sections to return, excluding 'other'.
 
-    MAX_BUCKET_COUNT = 30 # Max amount of bars or bar sections to return, excluding 'other'.
-
+    # Collect params from request
     try:
         json_body = request.json_body
         search_param_lists      = json_body.get('search_query_params',      deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
@@ -211,71 +180,97 @@ def bar_plot_chart(context, request):
     if len(fields_to_aggregate_for) == 0:
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
-    primary_agg = {
-        "field_0" : {
-            "terms" : {
-                "field" : "embedded." + fields_to_aggregate_for[0] + '.raw',
-                "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : MAX_BUCKET_COUNT
-            },
-            "aggs" : deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
-        }
-    }
+    # Construct the search
+    es = request.registry[ELASTIC_SEARCH]
+    doc_types = search_param_lists['type']
+    es_index = get_es_index(request, doc_types)
+    item_type_es_mapping = get_es_mapping(es, es_index)
+    prepared_terms = prepare_search_term_from_raw_params(search_param_lists)
+    source_fields = list_source_fields_from_raw_params(fields_to_aggregate_for)
 
-    primary_agg.update(deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION))
-    del primary_agg['total_files'] # "bucket_script" not supported on root-level aggs
+    # Determine which fields that we are aggregating on are nested
+    nested_paths = {}
+    for field in fields_to_aggregate_for:
+        if 'embedded' not in field:
+            path = find_nested_path('embedded.' + field, item_type_es_mapping)
+        else:
+            path = find_nested_path(field, item_type_es_mapping)
+        if path:
+            nested_paths[field] = path
 
-    # Nest in additional fields, if any
-    curr_field_aggs = primary_agg['field_0']['aggs']
+    # establish elasticsearch_dsl class that will perform the search
+    search = Search(using=es, index=es_index)
+    search, string_query = build_query(search, prepared_terms, source_fields)
+
+    # Build primary agg
+    primary_agg_name = fields_to_aggregate_for[0]
+    field_name = "embedded." + primary_agg_name + '.raw'
+    if primary_agg_name in nested_paths:
+        search.aggs[BARPLOT_AGGS] = Nested(path=nested_paths[primary_agg_name]).metric(BARPLOT_NESTED_AGGS, Terms(field=field_name,size=MAX_BUCKET_COUNT,missing=TERM_NAME_FOR_NO_VALUE))
+        add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS].aggs[BARPLOT_NESTED_AGGS].aggs, raw=True)
+    else:
+        search.aggs[BARPLOT_AGGS] = Terms(field=field_name,
+                                          size=MAX_BUCKET_COUNT,
+                                          missing=TERM_NAME_FOR_NO_VALUE)
+        add_standard_aggregations_to_search(search.aggs[BARPLOT_AGGS], raw=True)
+
+    # add standard aggs to main search
+    add_standard_aggregations_to_search(search.aggs)  # populate metrics at top level
+
+    # Nest additional aggregations using A()
+    # TODO: This seems correct when the remaining agg is also nested, but is still broken
+    #       when not nested.
+    curr_field_aggs = search.aggs[BARPLOT_AGGS].aggs[BARPLOT_NESTED_AGGS].aggs
     for field_index, field in enumerate(fields_to_aggregate_for):
         if field_index == 0:
             continue
-        curr_field_aggs['field_' + str(field_index)] = {
-            'terms' : {
-                "field" : "embedded." + field + '.raw',
-                "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : MAX_BUCKET_COUNT
-            },
-            "aggs" : deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
-        }
-        curr_field_aggs = curr_field_aggs['field_' + str(field_index)]['aggs']
+        entry_name = 'field_' + str(field_index)
+        _field = 'embedded.' + field + '.raw'
+        agg = A('terms', field=_field, size=MAX_BUCKET_COUNT, missing=TERM_NAME_FOR_NO_VALUE)
+        if field in nested_paths:
+            agg = Nested(path=nested_paths[field]).bucket(_field, agg)
 
+        add_standard_aggregations_to_search(agg.aggs, raw=True)  # where this goes is super important!
+        curr_field_aggs[entry_name] = agg
+        curr_field_aggs = curr_field_aggs[entry_name].aggs
 
-    search_param_lists['limit'] = search_param_lists['from'] = [0]
-    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
-    search_result   = perform_search_request(None, subreq, custom_aggregations=primary_agg)
-
-    for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:
-        if search_result.get(field_to_delete) is None:
-            continue
-        del search_result[field_to_delete]
-
-
-    ret_result = { # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
-        "field" : fields_to_aggregate_for[0],
-        "terms" : {},
-        "total" : {
-            "experiment_sets" : search_result['total'],
-            "experiments" : search_result['aggregations']['total_experiments']['value'],
-            "files" : (
-                search_result['aggregations']['total_expset_processed_files']['value'] +
-                search_result['aggregations']['total_exp_raw_files']['value'] +
-                search_result['aggregations']['total_exp_processed_files']['value']
+    # execute search
+    search_result = execute_search(search)
+    ret_result = {  # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
+        "field": fields_to_aggregate_for[0],
+        "terms": {},
+        "total": {
+            "experiment_sets": search_result['hits']['total'],
+            "experiments": search_result['aggregations']['total_experiments']['total_experiments']['value'],
+            "files": (
+                    search_result['aggregations']['total_expset_processed_files']['total_expset_processed_files'][
+                        'value'] +
+                    search_result['aggregations']['total_exp_raw_files']['total_exp_raw_files']['value'] +
+                    search_result['aggregations']['total_exp_processed_files']['total_exp_processed_files']['value']
             )
         },
         "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
-        "time_generated" : str(datetime.utcnow())
+        "time_generated": str(datetime.utcnow())
     }
 
-
+    # TODO: This method may need to completely change based on the type of aggregation we are summing on.
+    #       The recursive nature makes this doubley-hard
     def format_bucket_result(bucket_result, returned_buckets, curr_field_depth = 0):
 
-        curr_bucket_totals = {
-            'experiment_sets'   : int(bucket_result['doc_count']),
-            'experiments'       : int(bucket_result['total_experiments']['value']),
-            'files'             : int(bucket_result['total_files']['value'])
-        }
+        # TODO: How you get these values is going to differ in several scenarios
+        def extract_bucket_totals(bucket_result):
+            curr_bucket_totals = {
+                'experiment_sets'   : int(bucket_result['doc_count']),
+                'experiments'       : int(bucket_result['total_experiments']['value']),
+                'files'             : int(
+                    bucket_result['total_expset_processed_files'][BARPLOT_NESTED_AGGS][TOTAL_EXPSET_PROCESSED_FILES]['value'] +
+                    bucket_result['total_exp_raw_files']['value'] +
+                    bucket_result['total_exp_processed_files']['value']
+                )
+            }
+            return curr_bucket_totals
 
+        curr_bucket_totals = extract_bucket_totals(bucket_result)
         next_field_name = None
         if len(fields_to_aggregate_for) > curr_field_depth + 1: # More fields agg results to add
             next_field_name = fields_to_aggregate_for[curr_field_depth + 1]
@@ -284,7 +279,7 @@ def bar_plot_chart(context, request):
                 "field"             : next_field_name,
                 "total"             : curr_bucket_totals,
                 "terms"             : {},
-                "other_doc_count"   : bucket_result['field_' + str(curr_field_depth + 1)].get('sum_other_doc_count', 0),
+                "other_doc_count"   : bucket_result['field_' + str(curr_field_depth + 1)].get('sum_other_doc_count', 0)
             }
             for bucket in bucket_result['field_' + str(curr_field_depth + 1)]['buckets']:
                 format_bucket_result(bucket, returned_buckets[bucket_result['key']]['terms'], curr_field_depth + 1)
@@ -293,12 +288,14 @@ def bar_plot_chart(context, request):
             # Terminal field aggregation -- return just totals, nothing else.
             returned_buckets[bucket_result['key']] = curr_bucket_totals
 
-
-    for bucket in search_result['aggregations']['field_0']['buckets']:
-        format_bucket_result(bucket, ret_result['terms'], 0)
-
+    # will be in original format if non-nested
+    if primary_agg_name not in nested_paths:  # this will maybe work
+        for bucket in search_result['aggregations'][BARPLOT_AGGS]['buckets']:
+            format_bucket_result(bucket, ret_result['terms'], 0)
+    else:
+        for bucket in search_result['aggregations'][BARPLOT_AGGS][BARPLOT_NESTED_AGGS]['buckets']:
+            format_bucket_result(bucket, ret_result['terms'], 0)
     return ret_result
-
 
 
 @view_config(route_name='date_histogram_aggregations', request_method=['GET', 'POST'])
@@ -448,9 +445,9 @@ def add_files_to_higlass_viewconf(context, request):
     """
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
-    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)    
+    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     if not higlass_viewconfig:
-        
+
         # @todo: this block will be removed when a workaround to run tests correctly.
         default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
@@ -465,7 +462,7 @@ def add_files_to_higlass_viewconf(context, request):
             "errors": "No view config found.",
             "new_viewconfig": None,
             "new_genome_assembly" : None
-        }    
+        }
 
     # Get the list of files.
     file_uuids = request.json_body.get('files')
@@ -1233,7 +1230,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
 
     new_tracks_by_side["center"]["name"] = "Chromosome Grid"
     del new_tracks_by_side["center"]["options"]["name"]
-   
+
 
     # For each view:
     for view in views:
@@ -1449,7 +1446,7 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["width"] = temp_width
             del track["height"]
-        
+
         # And the orientation
         track_orientation = track.get("orientation", None)
         if track_orientation in orientation_mappings:

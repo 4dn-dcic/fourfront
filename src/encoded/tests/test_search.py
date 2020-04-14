@@ -17,7 +17,7 @@ pytestmark = [
     pytest.mark.working,
     pytest.mark.schema,
     pytest.mark.indexing,
-    pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+    #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10)),
 ]
 
 
@@ -182,7 +182,7 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     schema_facets = [fct for fct in schema_facets if not fct[1].get('disabled', False)]
     sort_facets = sorted(schema_facets, key=lambda fct: fct[1].get('order', 0))
     res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
-    for i,val in enumerate(sort_facets):
+    for i,val in enumerate(sort_facets):  # XXX: Why does this behave wrongly when dropping nested fields with no buckets? -will 3-27-2020
         assert res['facets'][i]['field'] == val[0]
     # assert order of columns when we officially upgrade to python 3.6 (ordered dicts)
     for key,val in schema.get('columns', {}).items():
@@ -198,6 +198,75 @@ def test_search_embedded_file_by_accession(workbook, testapp):
         exp = item_res.follow().json
         file_uuids = [f['uuid'] for f in exp['files']]
         assert '46e82a90-49e5-4c33-afab-9ec90d65faa0' in file_uuids
+
+
+def test_search_nested(workbook, testapp):
+    """ Tests multiple search conditions that are handled differently under mapping type=nested """
+    res = testapp.get('/search/?type=ExperimentHiC'
+                      '&files.accession=4DNFIO67APU1'
+                      '&award.project=4DN').json
+    assert len(res['@graph']) == 1  # sanity check - should work either way since award is non-nested
+
+    # should return no results since these two properties do not occur in the same nested object
+    accession_and_file_size = ('/search/?type=ExperimentHiC'
+                              '&files.accession=4DNFIO67APU1'
+                              '&files.file_size=500')
+    testapp.get(accession_and_file_size, status=404)
+
+    # should return results since these two properties occur in the same nested object
+    accession_and_file_size = ('/search/?type=ExperimentHiC'
+                               '&files.accession=4DNFIO67APU1'
+                               '&files.file_size=1000')
+    testapp.get(accession_and_file_size)
+
+    # should return results since both properties occur
+    accession_and_file_size_upper_bound = ('/search/?type=ExperimentHiC'
+                                           '&files.accession=4DNFIO67APU1'
+                                           '&files.file_size.to=1500')
+    testapp.get(accession_and_file_size_upper_bound)
+
+    # should not return results since no files will match
+    accession_and_file_size_upper_bound = ('/search/?type=ExperimentHiC'
+                                           '&files.accession=4DNFIO67APU1'
+                                           '&files.file_size.to=499')
+    testapp.get(accession_and_file_size_upper_bound, status=404)
+
+    # should return results since OR property in nested will match the second accession with file_size=500
+    two_accessions_with_file_size = ('/search/?type=ExperimentHiC'
+                                     '&files.accession=4DNFIO67APU1'
+                                     '&files.accession=4DNFIO67APT1'
+                                     '&files.file_size=500')
+    testapp.get(two_accessions_with_file_size)
+
+    # should return no results since NOT'ing the second accession who has file_size=500
+    negative_second_accession_with_file_size = ('/search/?type=ExperimentHiC'
+                                                '&files.accession=4DNFIO67APU1'
+                                                '&files.accession!=4DNFIO67APT1'
+                                                '&files.file_size=500')
+    testapp.get(negative_second_accession_with_file_size, status=404)
+
+    # should return no results, just checking logic of 'no value'
+    strange_search_with_no_value = ('/browse/?type=ExperimentSetReplicate'
+                                    '&experimentset_type=replicate'
+                                    '&experiments_in_set.experiment_type.display_title=No+value'
+                                    '&experiments_in_set.biosample.biosource.individual.organism.name=No+value')
+    testapp.get(strange_search_with_no_value, status=404)
+
+
+def test_search_nested_handles_facets(workbook, testapp):
+    """ Tests that facets resolve to correct values and that reverse_nested doc_counts are propagated upward """
+    main_page_search = ('/browse/?experimentset_type=replicate'
+                        '&type=ExperimentSetReplicate')
+    resulting_facets = testapp.get(main_page_search).json['facets']
+    for facet in resulting_facets:
+        if facet['field'] == 'experiments_in_set.experiment_categorizer.combined':
+            assert facet['terms'][0]['key'] == 'Enzyme: DNaseI'
+        else:
+            try:
+                if len(facet['terms']) > 0:
+                    assert facet['terms'][0]['doc_count'] == facet['terms'][0]['primary_agg_reverse_nested']['doc_count']
+            except KeyError:
+                continue  # we are on a non-nested field
 
 
 @pytest.fixture
