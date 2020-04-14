@@ -162,9 +162,7 @@ class QualityMetricBamqc(QualityMetric):
             duplicates = 0
             walks = 0
 
-            print('walks: ' + str(walks))
             for key in qc.keys():
-                print('key: ' + key + ' : ' + str(qc.get(key)))
                 if "N" in key or "X" in key:
                     unmapped = unmapped + qc.get(key)
                 elif "M" in key and key != "NM":
