@@ -21,35 +21,35 @@ QC_SUMMARY_SCHEMA = {
             "title": "Selected Quality Metric",
             "type": "object",
             "required": ["title", "value", "numberType"],
-        "additionalProperties": False,
-        "properties": {
-                    "title": {
-                        "type": "string",
-                        "description": "Title of the Quality Metric",
-                        "title": "Title of the Quality Metric"
-                    },
+            "additionalProperties": False,
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "Title of the Quality Metric",
+                    "title": "Title of the Quality Metric"
+                },
                 "title_tooltip": {
-                        "type": "string",
-                        "title": "Tooltip for the Quality Metric Title",
-                        "description": "tooltip for the quality metric title to be displayed upon mouseover"
-                    },
+                    "type": "string",
+                    "title": "Tooltip for the Quality Metric Title",
+                    "description": "tooltip for the quality metric title to be displayed upon mouseover"
+                },
                 "value": {
-                        "type": "string",
-                        "title": "Value of the Quality Metric",
-                        "description": "value of the quality metric as a string"
-                    },
+                    "type": "string",
+                    "title": "Value of the Quality Metric",
+                    "description": "value of the quality metric as a string"
+                },
                 "tooltip": {
-                        "type": "string",
-                        "title": "Tooltip for the Quality Metric",
-                        "description": "tooltip for the quality metric to be displayed upon mouseover"
-                    },
+                    "type": "string",
+                    "title": "Tooltip for the Quality Metric",
+                    "description": "tooltip for the quality metric to be displayed upon mouseover"
+                },
                 "numberType": {
-                        "type": "string",
-                        "title": "Type of the Quality Metric",
-                        "description": "type of the quality metric",
-                        "enum": ["string", "integer", "float", "percent"]
-                    }
-        }
+                    "type": "string",
+                    "title": "Type of the Quality Metric",
+                    "description": "type of the quality metric",
+                    "enum": ["string", "integer", "float", "percent"]
+                }
+            }
     }
 }
 
