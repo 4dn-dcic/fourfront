@@ -25,27 +25,27 @@ QC_SUMMARY_SCHEMA = {
             "properties": {
                 "title": {
                     "type": "string",
+                    "title": "Title",
                     "description": "Title of the Quality Metric",
-                    "title": "Title of the Quality Metric"
                 },
                 "title_tooltip": {
                     "type": "string",
-                    "title": "Tooltip for the Quality Metric Title",
+                    "title": "Tooltip Title",
                     "description": "tooltip for the quality metric title to be displayed upon mouseover"
                 },
                 "value": {
                     "type": "string",
-                    "title": "Value of the Quality Metric",
+                    "title": "Value",
                     "description": "value of the quality metric as a string"
                 },
                 "tooltip": {
                     "type": "string",
-                    "title": "Tooltip for the Quality Metric",
+                    "title": "Tooltip",
                     "description": "tooltip for the quality metric to be displayed upon mouseover"
                 },
                 "numberType": {
                     "type": "string",
-                    "title": "Type of the Quality Metric",
+                    "title": "Type",
                     "description": "type of the quality metric",
                     "enum": ["string", "integer", "float", "percent"]
                 }
@@ -98,7 +98,7 @@ class QualityMetric(Item):
     })
 class QualityMetricFastqc(QualityMetric):
     """Subclass of quality matrics for fastq files."""
-    #summary - ok
+
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
     embedded_list = QualityMetric.embedded_list
@@ -116,7 +116,7 @@ class QualityMetricFastqc(QualityMetric):
     })
 class QualityMetricBamcheck(QualityMetric):
     """Subclass of quality matrics for bam files."""
-    #summary - ok
+
     item_type = 'quality_metric_bamcheck'
     schema = load_schema('encoded:schemas/quality_metric_bamcheck.json')
     embedded_list = QualityMetric.embedded_list
@@ -147,14 +147,18 @@ class QualityMetricBamcheck(QualityMetric):
     })
 class QualityMetricBamqc(QualityMetric):
     """Subclass of quality matrics for bam files."""
-    #summary - ok
+
     item_type = 'quality_metric_bamqc'
     schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
     embedded_list = QualityMetric.embedded_list
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
+        qc = self.properties
         qc_summary = []
+        
+        if 'Total Reads' not in qc:
+            return []
 
         def total_number_of_reads_per_type(qc):
             unmapped = 0
@@ -175,11 +179,11 @@ class QualityMetricBamqc(QualityMetric):
             return unmapped, multimapped, duplicates, walks
 
         unmapped_reads, multi_reads, duplicates, walks = total_number_of_reads_per_type(
-            self.properties)
+            qc)
 
         def percent_of_reads(numVal):
             '''convert to percentage of Total reads in bam file'''
-            return round((int(numVal) / int(self.properties.get('Total Reads'))) * 100 * 1000) / 1000
+            return round((int(numVal) / int(qc.get('Total Reads'))) * 100 * 1000) / 1000
 
         def million(numVal):
             return str(round(int(numVal) / 10000) / 100) + "m"
@@ -188,7 +192,7 @@ class QualityMetricBamqc(QualityMetric):
             return "Percent of total reads (=%s)" % million(int(numVal))
 
         qc_summary.append({"title": "Total Reads",
-                           "value": str(self.properties.get("Total Reads")),
+                           "value": str(qc.get("Total Reads")),
                            "numberType": "integer"})
         qc_summary.append({"title": "Unmapped Reads",
                            "value": str(percent_of_reads(unmapped_reads)),
@@ -207,8 +211,8 @@ class QualityMetricBamqc(QualityMetric):
                            "tooltip": tooltip(walks),
                            "numberType": "percent"})
         qc_summary.append({"title": "Minor Contigs",
-                           "value": str(percent_of_reads(self.properties.get("Minor Contigs"))),
-                           "tooltip": tooltip(self.properties.get("Minor Contigs")),
+                           "value": str(percent_of_reads(qc.get("Minor Contigs"))),
+                           "tooltip": tooltip(qc.get("Minor Contigs")),
                            "numberType": "percent"})
 
         return qc_summary                   
@@ -222,18 +226,22 @@ class QualityMetricBamqc(QualityMetric):
     })
 class QualityMetricPairsqc(QualityMetric):
     """Subclass of quality matrics for pairs files."""
-    #summary - ok
+
     item_type = 'quality_metric_pairsqc'
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
     embedded_list = QualityMetric.embedded_list
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
+        qc = self.properties
         qc_summary = []
+        
+        if 'Total reads' not in qc:
+            return []
 
         def percent(numVal):
             '''convert to percentage of Total reads'''
-            return round((numVal / self.properties.get('Total reads')) * 100 * 1000) / 1000
+            return round((numVal / qc.get('Total reads')) * 100 * 1000) / 1000
 
         def million(numVal):
             return str(round(numVal / 10000) / 100) + "m"
@@ -242,19 +250,19 @@ class QualityMetricPairsqc(QualityMetric):
             return "Percent of total reads (=%s)" % million(numVal)
 
         qc_summary.append({"title": "Filtered Reads",
-                           "value": str(self.properties.get("Total reads")),
+                           "value": str(qc.get("Total reads")),
                            "numberType": "integer"})
         qc_summary.append({"title": "Cis reads (>20kb)",
-                           "value": str(percent(self.properties.get("Cis reads (>20kb)"))),
-                           "tooltip": tooltip(self.properties.get("Cis reads (>20kb)")),
+                           "value": str(percent(qc.get("Cis reads (>20kb)"))),
+                           "tooltip": tooltip(qc.get("Cis reads (>20kb)")),
                            "numberType": "percent"})
         qc_summary.append({"title": "Short cis reads",
-                           "value": str(percent(self.properties.get("Short cis reads (<20kb)"))),
-                           "tooltip": tooltip(self.properties.get("Short cis reads (<20kb)")),
+                           "value": str(percent(qc.get("Short cis reads (<20kb)"))),
+                           "tooltip": tooltip(qc.get("Short cis reads (<20kb)")),
                            "numberType": "percent"})
         qc_summary.append({"title": "Trans Reads",
-                           "value": str(percent(self.properties.get("Trans reads"))),
-                           "tooltip": tooltip(self.properties.get("Trans reads")),
+                           "value": str(percent(qc.get("Trans reads"))),
+                           "tooltip": tooltip(qc.get("Trans reads")),
                            "numberType": "percent"})
 
         return qc_summary
@@ -268,7 +276,7 @@ class QualityMetricPairsqc(QualityMetric):
     })
 class QualityMetricDedupqcRepliseq(QualityMetric):
     """Subclass of quality matrics for repli-seq dedup."""
-    #summary - ok
+
     item_type = 'quality_metric_dedupqc_repliseq'
     schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
     embedded_list = QualityMetric.embedded_list
@@ -322,19 +330,20 @@ class QualityMetricAtacseq(QualityMetric):
     })
 class QualityMetricRnaseq(QualityMetric):
     """Subclass of quality matrics for rna-seq"""
-    #summary - ok
+
     item_type = 'quality_metric_rnaseq'
     schema = load_schema('encoded:schemas/quality_metric_rnaseq.json')
     embedded_list = QualityMetric.embedded_list
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
+        qc = self.properties
         qc_summary = []
 
-        if 'star_log_qc' in self.properties:
-            uniquely_mapped = self.properties.get(
+        if 'star_log_qc' in qc:
+            uniquely_mapped = qc.get(
                 'star_log_qc')['Uniquely mapped reads number']
-            multi_mapped = self.properties.get(
+            multi_mapped = qc.get(
                 'star_log_qc')['Number of reads mapped to multiple loci']
             total_mapped = int(uniquely_mapped) + int(multi_mapped)
             qc_summary.append({"title": "Total mapped reads (genome)",
@@ -343,15 +352,12 @@ class QualityMetricRnaseq(QualityMetric):
             qc_summary.append({"title": "Total uniquely mapped reads (genome)",
                                "value": str(uniquely_mapped),
                                "numberType": "integer"})
-        else:
-            if 'gene_type_count' not in self.properties:
-                raise Exception(
-                    "Quality Metric Object does not have the correct fields")
+        elif 'gene_type_count' in qc:
             qc_summary.append({"title": "Reads mapped to protein-coding genes",
-                               "value": str(self.properties.get('gene_type_count')['protein_coding']),
+                               "value": str(qc.get('gene_type_count')['protein_coding']),
                                "numberType": "integer"})
             qc_summary.append({"title": "Reads mapped to rRNA",
-                               "value": str(self.properties.get('gene_type_count')['rRNA']),
+                               "value": str(qc.get('gene_type_count')['rRNA']),
                                "numberType": "integer"})
 
         return qc_summary
@@ -365,7 +371,7 @@ class QualityMetricRnaseq(QualityMetric):
     })
 class QualityMetricRnaseqMadqc(QualityMetric):
     """Subclass of quality matrics for rna-seq MAD QC"""
-    #summary - ok
+
     item_type = 'quality_metric_rnaseq_madqc'
     schema = load_schema('encoded:schemas/quality_metric_rnaseq_madqc.json')
     embedded_list = QualityMetric.embedded_list
@@ -383,18 +389,22 @@ class QualityMetricRnaseqMadqc(QualityMetric):
     })
 class QualityMetricMargi(QualityMetric):
     """Subclass of quality matrics for MARGI"""
-    #summary - ok
+
     item_type = 'quality_metric_margi'
     schema = load_schema('encoded:schemas/quality_metric_margi.json')
     embedded_list = QualityMetric.embedded_list
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
+        qc = self.properties
         qc_summary = []
+
+        if 'Total number of interactions' not in qc:
+            return []
 
         def percent_interactions(numVal):
             '''convert to percentage of Total interactions in combined pairs'''
-            return round((int(numVal) / int(self.properties.get('Total number of interactions'))) * 100 * 1000) / 1000
+            return round((int(numVal) / int(qc.get('Total number of interactions'))) * 100 * 1000) / 1000
 
         def million(numVal):
             return str(round(int(numVal) / 10000) / 100) + "m"
@@ -403,19 +413,19 @@ class QualityMetricMargi(QualityMetric):
             return "Percent of total interactions (=%s)" % million(int(numVal))
 
         qc_summary.append({"title": "Filtered Reads",
-                           "value": str(self.properties.get("Total number of interactions")),
+                           "value": str(qc.get("Total number of interactions")),
                            "numberType": "integer"})
-        qc_summary.append({"title": "Cis reads (>%s)" % self.properties.get("Type"),
-                           "value": str(percent_interactions(self.properties.get("Distal"))),
-                           "tooltip": tooltip(self.properties.get("Distal")),
+        qc_summary.append({"title": "Cis reads (>%s)" % qc.get("Type"),
+                           "value": str(percent_interactions(qc.get("Distal"))),
+                           "tooltip": tooltip(qc.get("Distal")),
                            "numberType": "percent"})
         qc_summary.append({"title": "Short cis reads",
-                           "value": str(percent_interactions(self.properties.get("Proximal"))),
-                           "tooltip": tooltip(self.properties.get("Proximal")),
+                           "value": str(percent_interactions(qc.get("Proximal"))),
+                           "tooltip": tooltip(qc.get("Proximal")),
                            "numberType": "percent"})
         qc_summary.append({"title": "Trans Reads",
-                           "value": str(percent_interactions(self.properties.get("Inter-chromosome interactions"))),
-                           "tooltip": tooltip(self.properties.get("Inter-chromosome interactions")),
+                           "value": str(percent_interactions(qc.get("Inter-chromosome interactions"))),
+                           "tooltip": tooltip(qc.get("Inter-chromosome interactions")),
                            "numberType": "percent"})
 
         return qc_summary
@@ -429,7 +439,7 @@ class QualityMetricMargi(QualityMetric):
     })
 class QualityMetricWorkflowrun(QualityMetric):
     """Subclass of quality matrics for Workflow run"""
-    #summary - ok
+
     item_type = 'quality_metric_workflowrun'
     schema = load_schema('encoded:schemas/quality_metric_workflowrun.json')
     embedded_list = QualityMetric.embedded_list
@@ -449,7 +459,9 @@ class QualityMetricQclist(QualityMetric):
     """Subclass of quality matrics for QCList"""
     item_type = 'quality_metric_qclist'
     schema = load_schema('encoded:schemas/quality_metric_qclist.json')
-    embedded_list = QualityMetric.embedded_list
+    embedded_list = QualityMetric.embedded_list + [
+        'qc_list.value.quality_metric_summary.*'
+    ]
 
 
 def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
