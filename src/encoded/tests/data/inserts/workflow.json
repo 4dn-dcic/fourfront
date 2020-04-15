@@ -11977,7 +11977,8 @@
             {
                 "argument_format": "76dc8c06-67d8-487b-8fc8-d841752a0b60",
                 "argument_type": "Output to-be-extra-input file",
-                "workflow_argument_name": "beddbfile"
+                "workflow_argument_name": "beddbfile",
+                "extra_file_use_for": "visualization"
             },
             {
                 "argument_type": "parameter",
