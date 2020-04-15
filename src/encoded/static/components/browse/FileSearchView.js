@@ -40,7 +40,7 @@ export default class FileSearchView extends React.PureComponent {
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         
         return (
-            <div className="container" id="content">
+            <div className="search-page-container container" id="content">
                 <SelectedFilesController {...{ href, context }}>
                     <FileTableWithSelectedFilesCheckboxes {...this.props} facets={facets} />
                 </SelectedFilesController>
@@ -223,7 +223,7 @@ class ControlsAndResults extends React.PureComponent {
         }
 
         return (
-            <div className="row">
+            <div className="row search-view-controls-and-results">
                 {facets && facets.length > 0 ?
                     <React.Fragment>
                         <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
