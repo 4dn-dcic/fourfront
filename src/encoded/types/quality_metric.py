@@ -105,7 +105,7 @@ class QualityMetricFastqc(QualityMetric):
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
-        return []
+        return
 
 
 @collection(
@@ -136,7 +136,7 @@ class QualityMetricBamcheck(QualityMetric):
     
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
-        return []
+        return
 
 
 @collection(
@@ -158,7 +158,7 @@ class QualityMetricBamqc(QualityMetric):
         qc_summary = []
         
         if 'Total Reads' not in qc:
-            return []
+            return
 
         def total_number_of_reads_per_type(qc):
             unmapped = 0
@@ -215,7 +215,7 @@ class QualityMetricBamqc(QualityMetric):
                            "tooltip": tooltip(qc.get("Minor Contigs")),
                            "numberType": "percent"})
 
-        return qc_summary                   
+        return qc_summary           
 
 
 @collection(
@@ -237,7 +237,7 @@ class QualityMetricPairsqc(QualityMetric):
         qc_summary = []
         
         if 'Total reads' not in qc:
-            return []
+            return
 
         def percent(numVal):
             '''convert to percentage of Total reads'''
@@ -283,7 +283,7 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
-        return []
+        return
 
 
 @collection(
@@ -360,7 +360,7 @@ class QualityMetricRnaseq(QualityMetric):
                                "value": str(qc.get('gene_type_count')['rRNA']),
                                "numberType": "integer"})
 
-        return qc_summary
+        return qc_summary if qc_summary else None
 
 
 @collection(
@@ -378,7 +378,7 @@ class QualityMetricRnaseqMadqc(QualityMetric):
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
-        return []
+        return
 
 
 @collection(
@@ -400,7 +400,7 @@ class QualityMetricMargi(QualityMetric):
         qc_summary = []
 
         if 'Total number of interactions' not in qc:
-            return []
+            return
 
         def percent_interactions(numVal):
             '''convert to percentage of Total interactions in combined pairs'''
@@ -446,7 +446,7 @@ class QualityMetricWorkflowrun(QualityMetric):
 
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
-        return []
+        return
 
 
 @collection(
@@ -462,6 +462,19 @@ class QualityMetricQclist(QualityMetric):
     embedded_list = QualityMetric.embedded_list + [
         'qc_list.value.quality_metric_summary.*'
     ]
+
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc_list = self.properties.get('qc_list')
+        qc_summary = []
+        if qc_list:
+            for qc_item in qc_list:
+                qc_obj = request.embed(qc_item['value'], '@@object')
+                if 'quality_metric_summary' in qc_obj:
+                    for qcs_item in qc_obj['quality_metric_summary']:
+                        qc_summary.append(qcs_item)            
+        
+        return qc_summary if qc_summary else None
 
 
 def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
@@ -526,4 +539,4 @@ def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
                            "value": str(final_reads),
                            "numberType": "integer"})
 
-    return qc_summary
+    return qc_summary if qc_summary else None
