@@ -141,7 +141,10 @@
                     "use_for": {
                         "title": "Use for",
                         "description": "The use of the extra file.",
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "visualization"
+                        ]
                     }
                 }
             }
