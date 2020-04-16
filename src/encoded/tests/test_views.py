@@ -1,4 +1,5 @@
 import pytest
+import toml
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 from time import sleep
 from snovault import TYPES
@@ -68,6 +69,8 @@ def test_get_health_page(testapp):
     Tests that we can get the health page and various fields we expect are there
     """
     res = testapp.get('/health', status=200).json
+    version_we_read = toml.load('pyproject.toml')['tool']['poetry']['version']
+    assert version_we_read == res['application_version']
     assert 'namespace' in res
     assert 'blob_bucket' in res
     assert 'elasticsearch' in res

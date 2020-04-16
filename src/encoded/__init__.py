@@ -11,6 +11,7 @@ import os
 # import structlog
 import subprocess
 import sys
+import toml
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.log_utils import set_logging
@@ -30,6 +31,12 @@ from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbse
 
 if sys.version_info.major < 3:
     raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
+
+
+def set_version(settings):
+    """ Sets the application version in the registry by parsing 'pyproject.toml' """
+    project_config = toml.load('pyproject.toml')  # XXX: resolve this path correctly? this works with tests, may not with wsgi -Will
+    settings['application.version'] = project_config['tool']['poetry']['version']
 
 
 def static_resources(config):
@@ -151,6 +158,9 @@ def main(global_config, **local_config):
     if mirror is not None:
         settings['mirror.env.name'] = mirror
         settings['mirror_health'] = get_health_page(ff_env=mirror)
+
+    # Set version number from pyproject.toml
+    set_version(settings)
 
     config = Configurator(settings=settings)
 
