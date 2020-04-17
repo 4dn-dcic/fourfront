@@ -137,6 +137,14 @@
                             "archived to project",
                             "to be uploaded by workflow"
                         ]
+                    },
+                    "use_for": {
+                        "title": "Use for",
+                        "description": "The use of the extra file.",
+                        "type": "string",
+                        "enum": [
+                            "visualization"
+                        ]
                     }
                 }
             }
