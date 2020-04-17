@@ -101,12 +101,17 @@
             "description": "The specific microscope modality",
             "type": "string",
             "suggested_enum": [
-                "Confocal",
-                "HILO",
-                "Spinning disk confocal",
+                "Widefield",
+                "Epifluorescence",
+                "SIM",
+                "CLSM",
+                "SDCM",
                 "STED",
+                "STORM",
+                "Light sheet",
+                "EM",
                 "TIRF",
-                "Widefield"
+                "HILO"
             ],
             "lookup": 30
         },
