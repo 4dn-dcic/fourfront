@@ -58,6 +58,7 @@
                 "domain calls",
                 "dot calls",
                 "gene expression",
+                "image mask",
                 "insulation score-diamond",
                 "insulation score-potential",
                 "intensity values",
