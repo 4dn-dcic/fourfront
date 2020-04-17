@@ -1,7 +1,13 @@
+import json
 import os
 import pytest
+
 from collections import OrderedDict
-from encoded.commands import generate_ontology as go
+from rdflib import URIRef
+from ..commands import generate_ontology as go
+from ..commands.owltools import Owler
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -337,7 +343,6 @@ def test_remove_obsoletes_and_unnamed_obsoletes(terms):
 
 
 def check_if_URIRef(uri):
-    from rdflib import URIRef
     return isinstance(uri, URIRef)
 
 
@@ -659,25 +664,21 @@ def test_get_termid_from_uri_funky_uri2():
 
 @pytest.fixture
 def uberon_owler():
-    from encoded.commands.owltools import Owler
     return Owler('src/encoded/tests/data/documents/test_uberon.owl')
 
 
 @pytest.fixture
 def uberon_owler2():
-    from encoded.commands.owltools import Owler
     return Owler('src/encoded/tests/data/documents/test_uberon2.owl')
 
 
 @pytest.fixture
 def uberon_owler3():
-    from encoded.commands.owltools import Owler
     return Owler('src/encoded/tests/data/documents/test_uberon3.owl')
 
 
 @pytest.fixture
 def uberon_owler4():
-    from encoded.commands.owltools import Owler
     return Owler('src/encoded/tests/data/documents/test_uberon4.owl')
 
 
@@ -883,7 +884,6 @@ def test_add_additional_term_info(mocker, simple_terms):
 
 
 def test_write_outfile_pretty(simple_terms):
-    import json
     filename = 'tmp_test_file'
     go.write_outfile(list(simple_terms.values()), filename, pretty=True)
     infile = open(filename, 'r')
@@ -897,7 +897,6 @@ def test_write_outfile_pretty(simple_terms):
 def test_write_outfile_notpretty(simple_terms):
     # import pdb; pdb.set_trace()
     print(simple_terms)
-    import json
     filename = 'tmp_test_file'
     go.write_outfile(list(simple_terms.values()), filename)
     with open(filename, 'r') as infile:

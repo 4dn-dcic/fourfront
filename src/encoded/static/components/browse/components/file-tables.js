@@ -238,7 +238,6 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
     );
 }
 
-
 export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
     const fileFormat = commonFileUtil.getFileFormatStr(file);
     const summary = (
@@ -254,7 +253,6 @@ export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryB
     return summary;
 }
 
-
 export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
     if (!file || !file.quality_metric || !file.quality_metric.url){
         return '-';
@@ -264,6 +262,22 @@ export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntry
         <a className="btn btn-xs btn-primary" data-tip={"View report - " + filename}
             href={file.quality_metric.url} target="_blank" rel="noopener noreferrer">
             <i className="icon icon-fw icon-file-alt far" />
+        </a>
+    );
+}
+
+export function renderFileQCDetailLinkButton(file, field, detailIndex, fileEntryBlockProps) {
+    if (!file || !file.quality_metric) {
+        return '-';
+    }
+    const href = object.atIdFromObject(file.quality_metric);
+    if (!href) {
+        return '-';
+    }
+    return (
+        <a className="btn btn-xs btn-primary" data-tip="View quality metric details"
+            href={href}>
+            <i className="icon icon-fw icon-folder-open far" />
         </a>
     );
 }

@@ -24,10 +24,13 @@ from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
 from snovault.util import debug_log
+from dcicutils.env_utils import is_fourfront_env, is_stg_or_prd_env
 from dcicutils.s3_utils import s3Utils
 import requests
 import structlog
 import logging
+
+
 logging.getLogger('boto3').setLevel(logging.WARNING)
 log = structlog.getLogger(__name__)
 
@@ -135,7 +138,7 @@ class User(Item):
             })
         properties['subscriptions'] = new_subscriptions
 
-        # if we are on webprod/webprod2, make sure there is an account for the
+        # if we are on a production environment, make sure there is an account for the
         # user that reflects any email changes
         ff_env = self.registry.settings.get('env.name')
         # compare previous and updated emails, respectively
@@ -145,7 +148,8 @@ class User(Item):
             prev_email = None
         new_email = properties.get('email')
         update_email = new_email if prev_email != new_email else None
-        if ff_env is not None and update_email is not None and 'webprod' in ff_env:
+        # Is this only for fourfront or does cgap want to do this, too? -kmp 3-Apr-2020
+        if ff_env is not None and update_email is not None and is_fourfront_env(ff_env) and is_stg_or_prd_env(ff_env):
             try:
                 s3Obj = s3Utils(env='data')
                 jh_key = s3Obj.get_jupyterhub_key()

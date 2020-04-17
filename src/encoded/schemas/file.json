@@ -137,6 +137,14 @@
                             "archived to project",
                             "to be uploaded by workflow"
                         ]
+                    },
+                    "use_for": {
+                        "title": "Use for",
+                        "description": "The use of the extra file.",
+                        "type": "string",
+                        "enum": [
+                            "visualization"
+                        ]
                     }
                 }
             }
@@ -213,6 +221,7 @@
             "type": "array",
             "title": "Quality Metric Summary",
             "description": "Selected Quality Metrics for Summary",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Selected Quality Metric",
                 "type": "object",
@@ -223,6 +232,11 @@
                         "type": "string",
                         "description": "Title of the Quality Metric",
                         "title": "Title of the Quality Metric"
+                    },
+                    "title_tooltip":{
+                        "type": "string",
+                        "title": "Tooltip for the Quality Metric Title",
+                        "description": "tooltip for the quality metric title to be displayed upon mouseover"
                     },
                     "value": {
                         "type": "string",

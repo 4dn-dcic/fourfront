@@ -52,7 +52,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                     "h": 12,
                     "x": 0,
                     "y": 0,
-                    "i": "view-4dn-mcool-0",
                     "moved": False,
                     "static": True
                 },
@@ -80,13 +79,11 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "plusStrandColor": "black",
                             "minusStrandColor": "black",
                             "trackBorderWidth": 0,
-                            "coordSystem": "GRCm38",
                             "trackBorderColor": "black",
                             "name": "Gene Annotations (GRCm38)",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
-                        "minHeight": 55,
                         "height": 55,
                         "header": "",
                         "position": "top",
@@ -98,10 +95,8 @@ def higlass_mcool_viewconf(testapp, award, lab):
                         "tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
                         "type": "horizontal-chromosome-labels",
                         "local": True,
-                        "minHeight": 30,
                         "thumbnail": None,
                         "options": {
-                            "coordSystem": "GRCm38",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
@@ -128,7 +123,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "minusStrandColor": "black",
                             "trackBorderWidth": 0,
                             "trackBorderColor": "black",
-                            "coordSystem": "GRCm38",
                             "name": "Gene Annotations (GRCm38)",
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
@@ -190,8 +184,7 @@ def higlass_mcool_viewconf(testapp, award, lab):
                                 "#eeeeee",
                                 "labelPosition":
                                 "topLeft",
-                                "coordSystem":
-                                "GRCm38",
+
                                 "colorRange": [
                                     "white", "rgba(245,166,35,1.0)",
                                     "rgba(208,2,27,1.0)", "black"
@@ -305,7 +298,6 @@ def higlass_blank_viewconf(testapp, lab, award):
                     "h": 12,
                     "x": 0,
                     "y": 0,
-                    "i": "aa",
                     "moved": False,
                     "static": False
                 },
@@ -684,14 +676,12 @@ def test_add_mcool_to_mcool(testapp, higlass_mcool_viewconf, mcool_file_json):
     assert_true(len(new_higlass_json["views"]) == 2)
 
     layout0 = new_higlass_json["views"][0]["layout"]
-    assert_true(layout0["i"] == new_higlass_json["views"][0]["uid"])
     assert_true(layout0["x"] == 0)
     assert_true(layout0["y"] == 0)
     assert_true(layout0["w"] == 6)
     assert_true(layout0["h"] == 12)
 
     layout1 = new_higlass_json["views"][1]["layout"]
-    assert_true(layout1["i"] == new_higlass_json["views"][1]["uid"])
     assert_true(layout1["x"] == 6)
     assert_true(layout1["y"] == 0)
     assert_true(layout1["w"] == 6)
@@ -824,9 +814,6 @@ def assert_expected_viewconf_dimensions(viewconf, expected_dimensions):
 
     for index, expected_layout in enumerate(expected_dimensions):
         layout = viewconf["views"][index]["layout"]
-
-        # Make sure the uid matches the layout's index.
-        assert_true(layout["i"] == viewconf["views"][index]["uid"])
 
         # Make sure each dimension matches.
         for dimension in ("x", "y", "w", "h"):
@@ -1565,8 +1552,6 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
             assert_true("options" in track)
             options = track["options"]
-            assert_true("valueScaling" in options)
-            assert_true(options["valueScaling"] == "linear")
 
             assert_true("colorRange" in options)
             assert_true(len(options["colorRange"]) == 256)

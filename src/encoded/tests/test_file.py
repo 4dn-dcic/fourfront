@@ -1,8 +1,14 @@
-import pytest
-from encoded.types.file import FileFastq, post_upload
-from pyramid.httpexceptions import HTTPForbidden
-import os
 import boto3
+import os
+import pytest
+import tempfile
+
+from pyramid.httpexceptions import HTTPForbidden
+from dcicutils.beanstalk_utils import source_beanstalk_env_vars
+from ..types.file import FileFastq, post_upload
+from ..types.file import external_creds
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -439,7 +445,6 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
 def test_external_creds(mocker):
     mocker.patch('encoded.types.file.boto3', autospec=True)
 
-    from encoded.types.file import external_creds
     ret = external_creds('test-wfout-bucket', 'test-key', 'name')
     assert ret['key'] == 'test-key'
     assert ret['bucket'] == 'test-wfout-bucket'
@@ -616,8 +621,6 @@ def test_force_beanstalk_env(mocker):
     This test is a bit outdated, since env variable loading has moved to
     application __init__ from file.py. But let's keep the test...
     """
-    import tempfile
-    from encoded import source_beanstalk_env_vars
     secret = os.environ.get("AWS_SECRET_ACCESS_KEY")
     key = os.environ.get("AWS_ACCESS_KEY_ID")
     os.environ.pop("AWS_SECRET_ACCESS_KEY")

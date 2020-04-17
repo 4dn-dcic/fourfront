@@ -1,19 +1,25 @@
+import json
+import pytest
+import time
+
+from datetime import datetime, timedelta
+from snovault import TYPES, COLLECTIONS
+from snovault.elasticsearch import create_mapping
+from snovault.elasticsearch.indexer_utils import get_namespaced_index
+from snovault.util import add_default_embeds
+from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-import pytest
-from encoded.commands.run_upgrader_on_inserts import get_inserts
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
-import json
-import time
-from snovault import TYPES, COLLECTIONS
-
-def delay_rerun(*args):
-    """ Rerun function for flaky """
-    time.sleep(1)
-    return True
+from ..utils import customized_delay_rerun
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing] #pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [
+    pytest.mark.working,
+    pytest.mark.schema,
+    pytest.mark.indexing,
+    pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+]
+
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
@@ -198,7 +204,6 @@ def test_search_embedded_file_by_accession(workbook, testapp):
 def mboI_dts(testapp, workbook):
     # returns a dictionary of strings of various date and datetimes
     # relative to the creation date of the mboI one object in test inserts
-    from datetime import (datetime, timedelta)
     enz = testapp.get('/search/?type=Enzyme&name=MboI').json['@graph'][0]
 
     cdate = enz['date_created']
@@ -385,8 +390,6 @@ def test_metadata_tsv_view(workbook, htmltestapp):
 
 
 def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
-    from snovault import TYPES
-    from snovault.util import add_default_embeds
     test_type = 'biosample'
     type_info = registry[TYPES].by_item_type[test_type]
     schema = type_info.schema
@@ -506,9 +509,8 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     res = anontestapp.get('/biosamples/', status=404)
     assert len(res.json['@graph']) == 0
 
-
+@pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
-    from snovault.elasticsearch import create_mapping
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     create_mapping.run(app, sync_index=True)

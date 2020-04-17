@@ -5,16 +5,17 @@ http://pyramid.readthedocs.org/en/latest/narr/testing.html
 import logging
 import pytest
 import webtest
-
-from encoded import main
+import os
+import tempfile
+import subprocess
+import time
 
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest, setUp, tearDown
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
-
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH
-
+from .. import main
 from .conftest_settings import make_app_settings_dictionary
 
 
@@ -202,3 +203,52 @@ def embed_testapp(app):
 @pytest.fixture
 def wsgi_app(wsgi_server):
     return webtest.TestApp(wsgi_server)
+
+
+def _check_server_is_up(output):
+    """ Polls the given output file to detect
+
+        :args output: file to which server is piping out
+        :returns: True if server is up, False if failed
+    """
+    tries = 5
+    while tries > 0:
+        output.seek(0)  # should be first thing to be output.
+        out = output.read()
+        if 'Running' in out.decode('utf-8'):
+            return True
+        tries -= 1
+        time.sleep(1)  # give it a sec
+    return False
+
+
+@pytest.yield_fixture(scope='session', autouse=True)
+def start_moto_server_sqs():
+    """
+    Spins off a moto server running sqs, yields to the tests and cleans up.
+    """
+    delete_sqs_url = 'SQS_URL' not in os.environ
+    old_sqs_url = os.environ.get('SQS_URL', None)
+    server_output = tempfile.TemporaryFile()
+    server = None
+    try:
+        try:
+            os.environ['SQS_URL'] = 'http://localhost:3000'  # must exists globally because of MPIndexer
+            server_args = ['moto_server', 'sqs', '-p3000']
+            server = subprocess.Popen(server_args, stdout=server_output, stderr=server_output)
+            assert _check_server_is_up(server_output)
+        except AssertionError:
+            raise AssertionError('Could not get moto server up')
+        except Exception as e:
+            raise Exception('Encountered an exception bringing up the server: %s' % str(e))
+
+        yield  # run tests
+
+    finally:
+        if delete_sqs_url:
+            del os.environ['SQS_URL']
+        else:
+            os.environ['SQS_URL'] = old_sqs_url
+        if server:
+            server.terminate()
+

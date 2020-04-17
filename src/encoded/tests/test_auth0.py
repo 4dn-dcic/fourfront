@@ -1,8 +1,10 @@
+import os
 import pytest
 import requests
-import os
+
+from ..authentication import get_jwt
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
-from encoded.authentication import get_jwt
 
 
 @pytest.fixture(scope='session')
