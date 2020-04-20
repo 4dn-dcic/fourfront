@@ -333,6 +333,14 @@
                             "bz2"
                         ]
                     },
+                    "extra_file_use_for": {
+                        "title": "extra file use for",
+                        "description": "value for use_for field of extra file, valid for only to-be-extra-input type argument",
+                        "type": "string",
+                        "enum": [
+                            "visualization"
+                        ]
+                    },
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",
