@@ -98,7 +98,6 @@
         },
         "microscope_modality":{
             "title": "Microscope modality",
-<<<<<<< HEAD
             "description": "The specific microscope modality",
             "type": "string",
             "suggested_enum": [
@@ -114,10 +113,6 @@
                 "TIRF",
                 "HILO"
             ],
-=======
-            "description": "e.g. widefield, confocal, TIRF, STED ...",
-            "type": "string",
->>>>>>> parent of 3e4212eae... Update microscope_setting_d1.json
             "lookup": 30
         },
         "ch00_light_source_type":{
