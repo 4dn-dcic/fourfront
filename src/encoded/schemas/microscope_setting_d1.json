@@ -98,16 +98,8 @@
         },
         "microscope_modality":{
             "title": "Microscope modality",
-            "description": "The specific microscope modality",
+            "description": "e.g. widefield, confocal, TIRF, STED ...",
             "type": "string",
-            "suggested_enum": [
-                "Confocal",
-                "HILO",
-                "Spinning disk confocal",
-                "STED",
-                "TIRF",
-                "Widefield"
-            ],
             "lookup": 30
         },
         "ch00_light_source_type":{
