@@ -53,7 +53,8 @@
                 "STED",
                 "STORM",
                 "Light sheet",
-                "EM",
+                "SEM",
+                "TEM",
                 "TIRF",
                 "HILO"
             ]
