@@ -564,7 +564,7 @@ def metadata_tsv(context, request):
             ret_rows.append(['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Duplicate Files'])
         if len(summary['lists']['Not Available']) > 0:
-            ret_rows.append(['###', '- Commented out {} file{} which are not yet available (i.e. file restricted, or not yet finished uploading):'.format(str(len(summary['lists']['Not Available'])), 's' if len(summary['lists']['Not Available']) > 1 else ''), '', '', '', ''])
+            ret_rows.append(['###', '- Commented out {} file{} which are currently not available (i.e. file restricted, or not yet finished uploading):'.format(str(len(summary['lists']['Not Available'])), 's' if len(summary['lists']['Not Available']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Not Available'])
 
         return ret_rows
