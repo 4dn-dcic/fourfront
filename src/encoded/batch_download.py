@@ -127,7 +127,7 @@ TSV_MAPPING = OrderedDict([
 EXTRA_FIELDS = {
     EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
     EXP     : [],
-    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum']
+    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size']
 }
 
 
@@ -478,20 +478,14 @@ def metadata_tsv(context, request):
 
         # Add attached secondary files, if any; copies most values over from primary file & overrides distinct File Download URL, md5sum, etc.
         if f.get('extra_files') and len(f['extra_files']) > 0:
-            # @todo: instead of hardcode check, allowed file formats control might be moved to schema
-            extra_files_allowed_formats = ['pairs_px2', 'pairsam_px2', 'bai', 'bg_px2']
             for xfile in f['extra_files']:
-                file_format = xfile.get('file_format', {}).get('display_title')
-                if file_format not in extra_files_allowed_formats:
+                if xfile.get('use_for') == 'visualization':
                     continue
                 xfile_vals = all_row_vals.copy()
                 xfile_vals['File Download URL'] = request.host_url + xfile['href'] if xfile.get('href') else None
-                xfile_vals['File Format'] = file_format
+                xfile_vals['File Format'] = xfile.get('file_format', {}).get('display_title')
                 xfile_vals['md5sum'] = xfile.get('md5sum')
-                if(xfile.get('file_size') != None and xfile.get('file_size') != ''):
-                    xfile_vals['Size (MB)'] = format(float(xfile.get('file_size')) / (1024 * 1024), '.2f')
-                else:
-                    xfile_vals['Size (MB)'] = None
+                xfile_vals['Size (MB)'] = xfile.get('file_size')
                 xfile_vals['Related File Relationship'] = 'secondary file for'
                 xfile_vals['Related File'] = all_row_vals.get('File Accession')
                 files_returned.append(xfile_vals)
