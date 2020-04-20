@@ -15,6 +15,7 @@ import sys
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.log_utils import set_logging
 from dcicutils.env_utils import get_mirror_env_from_context
+from dcicutils.ff_utils import get_health_page
 # from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 # from pyramid.path import AssetResolver, caller_package
@@ -144,8 +145,13 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+
     # set mirrored Elasticsearch location (for staging and production servers)
-    settings['mirror.env.name'] = get_mirror_env_from_context(settings)
+    mirror = get_mirror_env_from_context(settings)
+    if mirror is not None:
+        settings['mirror.env.name'] = mirror
+        settings['mirror_health'] = get_health_page(ff_env=mirror)
+
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
