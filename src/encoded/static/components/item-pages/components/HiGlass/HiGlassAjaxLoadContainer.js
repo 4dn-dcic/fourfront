@@ -57,14 +57,21 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
                 scaledHeightFor1DTracks = (heightPerView / 3) | 0;
             }
 
+            const tracksEligibleForScaling = _.filter(view["tracks"]["top"], function(track) { 
+                // Don't scale gene annotation tracks, they need to be completely visible
+                return (("height" in track) && track["type"] !== "horizontal-gene-annotations");
+            });
+
+            if (tracksEligibleForScaling.length === 0) { return; }
+
             const sumOfOriginal1DTracks = _.reduce(
-                _.filter(view["tracks"]["top"], function(track) { return ("height" in track);}),
+                tracksEligibleForScaling,
                 function(memo, track) { return memo + track["height"];},
                 0
             );
             // Resize each 1D track to fit the given display height (round to the nearest integer so Higlass can use them)
             _.each(
-                _.filter(view["tracks"]["top"], function(track) { return ("height" in track);}),
+                tracksEligibleForScaling,
                 function (track) {
                     track["height"] = (track["height"] * scaledHeightFor1DTracks / sumOfOriginal1DTracks) | 0;
                 }
