@@ -46,9 +46,9 @@
             "lookup": 60,
             "enum": [
                 "Widefield",
-                "Epifluorescence",
                 "SIM",
                 "CLSM",
+                "PALM",
                 "SDCM",
                 "STED",
                 "STORM",
