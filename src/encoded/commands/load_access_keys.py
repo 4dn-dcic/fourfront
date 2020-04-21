@@ -5,8 +5,7 @@ import json
 import os
 import boto3
 from pyramid.paster import get_app
-from pyramid.exceptions import HTTPNotFound
-from webtest import TestApp
+from webtest import TestApp, AppError
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
 
 log = structlog.getLogger(__name__)
@@ -120,7 +119,7 @@ def main():
         for key_id in key_ids:
             try:
                 testapp.patch_json(key_id, {'status': 'deleted'})
-            except HTTPNotFound:
+            except AppError:
                 log.error('load_access_keys: key_id: %s does not exist in database but exists in ES' % key_id)
 
 
