@@ -191,7 +191,7 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('contain', 'No value').click()
                 // Test type to search
                 .get(".field-row [data-field-name=biosource] .search-selection-menu-body .text-input-container input.form-control")
-                .focus().type('immortalized cell line - 4DN')
+                .focus().type('0f011b1e-b772-4f2a-8c24-cc55de28a994')
                 // Should still be nothing in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not('.last-item-empty') .dropdown-toggle")
                 .should('contain', 'No value')
@@ -200,10 +200,10 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('not.have.length', 0).first().click()
                 // Item display title should now be present in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not('.last-item-empty') .dropdown-toggle")
-                .should('contain', 'immortalized cell line - 4DN')
+                .should('not.contain', 'No value')
                 // Check that side nav was updated with new item
                 .get(".submission-nav-leaf.leaf-depth-1:not('.active')")
-                .should("contain", "immortalized cell line - 4DN")
+                .should("exist")
                 // Check that there is an empty dropdown button in the next field-row
                 .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
                 .should('contain', "No value").end();
@@ -224,10 +224,10 @@ describe('Search As You Type functionality on SubmissionView', function () {
                 .should('have.length', 1).click()
                 // Item display title should now be present in the button
                 .get(".field-row [data-field-name=biosource] .field-column:not('.last-item-empty') .dropdown-toggle")
-                .should('contain', 'immortalized cell line - 4DN')
+                .should('not.contain', 'No value')
                 // Check that side nav was updated with new item
                 .get(".submission-nav-leaf.leaf-depth-1:not('.active')")
-                .should("contain", "immortalized cell line - 4DN")
+                .should("exist")
                 // Check that there is an empty dropdown button in the next field-row
                 .get(".field-row [data-field-name=biosource] .last-item-empty .dropdown-toggle")
                 .should('contain', "No value")
