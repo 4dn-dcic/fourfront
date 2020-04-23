@@ -275,13 +275,11 @@ class Publication(Item, ItemWithAttachment):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, authors=None, date_published=None, title=None):
+    def display_title(self, ID, authors=None, date_published=None):
         minipub = self.short_attribution(authors, date_published)
-        if minipub and title:
-            return minipub + ' ' + title[0:100]
-        if not minipub and title:
-            return title[0:120]
-        return Item.display_title(self)
+        if minipub:
+            return minipub + ' ' + ID
+        return ID
 
     @calculated_property(schema={
         "title": "Number of Experiment Sets",

@@ -139,7 +139,7 @@ def test_find_best_date_da_only():
 
 def test_publication_display_title(testapp, publication_PMID):
     print(publication_PMID)
-    assert publication_PMID['display_title'].startswith('Kirli K et al. (2015) A deep proteomics')
+    assert publication_PMID['display_title'] == 'Kirli K et al. (2015) PMID:26673895'
 
 
 def test_publication_unique_ID(testapp, publication_doi_pubmed, publication_doi_biorxiv):
