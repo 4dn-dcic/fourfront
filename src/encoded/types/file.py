@@ -245,7 +245,10 @@ class File(Item):
         'related_files.relationship_type',
         'related_files.file.accession',
         'quality_metric.display_title',
-        'quality_metric.@type'
+        'quality_metric.@type',
+        'quality_metric.qc_list.qc_type',
+        'quality_metric.qc_list.value.display_title',
+        'quality_metric.qc_list.value.@type',
     ]
     name_key = 'accession'
     rev = {
