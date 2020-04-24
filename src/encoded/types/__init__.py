@@ -111,6 +111,10 @@ def download(context, request):
     We customized it since default implementation renames filename w/ s3 blob id.
     """
 
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        raise HTTPForbidden('This is a restricted file not available for download')
+
     prop_name, filename = request.subpath
     try:
         downloads = context.propsheets['downloads']
@@ -143,7 +147,7 @@ def download(context, request):
             ExpiresIn = 36*60*60
         )
         raise HTTPFound(location=location)
-    elif hasattr(blob_storage, 'get_blob_url'):
+    elif hasattr(blob_storage, 'get_blob_url'): #default fallback - filename is s3 blob id
         blob_url = blob_storage.get_blob_url(download_meta)
         raise HTTPFound(location=str(blob_url))
 
