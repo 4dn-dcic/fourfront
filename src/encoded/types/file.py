@@ -1299,7 +1299,7 @@ def download(context, request):
             "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
             "pr1id": file_at_id,                    # Product ID/SKU
             "pr1nm": filename,                      # Product Name
-            "pr1br": ab.get("display_title"),     # Product Branch
+            "pr1br": lab.get("display_title"),     # Product Branch
             "pr1qt": 1,                             # Product Quantity
             # Product Category from @type, e.g. "File/FileProcessed"
             "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
