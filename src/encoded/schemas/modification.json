@@ -43,6 +43,7 @@
             "enum" : [
               "Crispr",
               "Stable Transfection",
+              "Viral Transduction",
               "Other"
             ]
         },

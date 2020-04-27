@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "encoded"
-version = "1.2.5"
+version = "1.2.6"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
