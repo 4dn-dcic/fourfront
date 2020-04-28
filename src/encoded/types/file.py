@@ -245,7 +245,10 @@ class File(Item):
         'related_files.relationship_type',
         'related_files.file.accession',
         'quality_metric.display_title',
-        'quality_metric.@type'
+        'quality_metric.@type',
+        'quality_metric.qc_list.qc_type',
+        'quality_metric.qc_list.value.display_title',
+        'quality_metric.qc_list.value.@type',
     ]
     name_key = 'accession'
     rev = {
@@ -590,7 +593,7 @@ class File(Item):
                 # go to the `else` statement. Works for empty lists as well
                 for target_relation in target_fl_props.get('related_files', []):
                     if (target_relation.get('file') == my_uuid and
-                        target_relation.get('relationship_type') == rev_switch):
+                       target_relation.get('relationship_type') == rev_switch):
                         break
                 else:
                     import transaction
@@ -612,7 +615,6 @@ class File(Item):
                                 'info': 'queued from %s _update' % my_uuid}
                     curr_txn.addAfterCommitHook(add_to_indexing_queue,
                                                 args=(curr_request, to_queue, 'edit'))
-
 
     @property
     def __name__(self):
@@ -745,6 +747,7 @@ class File(Item):
         else:
             notes_to_tsv_string = ','.join(notes_to_tsv)
         return notes_to_tsv_string
+
 
 @collection(
     name='files-fastq',
@@ -897,12 +900,12 @@ class FileProcessed(File):
         "type": "string"
     })
     def pairsqc_table(self, request, file_format, accession, quality_metric=None):
-       if file_format.endswith('pairs/') and quality_metric:
-           bucket = request.registry.settings.get('file_wfout_bucket')
-           s3_url = 'https://s3.amazonaws.com/{bucket}/{accession}/{accession}.plot_table.out'
-           return s3_url.format(bucket=bucket, accession=accession)
-       else:
-           return None
+        if file_format.endswith('pairs/') and quality_metric:
+            bucket = request.registry.settings.get('file_wfout_bucket')
+            s3_url = 'https://s3.amazonaws.com/{bucket}/{accession}/{accession}.plot_table.out'
+            return s3_url.format(bucket=bucket, accession=accession)
+        else:
+            return None
 
     # processed files don't want md5 as unique key
     def unique_keys(self, properties):
@@ -1074,7 +1077,7 @@ def post_upload(context, request):
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'to be uploaded by workflow', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
-    accession_or_external = properties.get('accession')
+    # accession_or_external = properties.get('accession')
     external = context.propsheets.get('external', None)
 
     if external is None:
@@ -1156,7 +1159,7 @@ def download(context, request):
     try:
         user_props = session_properties(request)
     except Exception as e:
-        user_props = { "error": str(e) }
+        user_props = {"error": str(e)}
 
     user_uuid = user_props.get('details', {}).get('uuid', None)
     user_groups = user_props.get('details', {}).get('groups', None)
@@ -1169,7 +1172,6 @@ def download(context, request):
     #     "request_path"    : request.path_info,
     #     "request_headers" : str(dict(request.headers))
     # }
-
 
     # TODO:
     # if not user_uuid or file_size_downloaded < 25 * (1024**2): # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
@@ -1205,7 +1207,7 @@ def download(context, request):
                 external = context.propsheets.get('external' + eformat.get('uuid'))
                 if eformat is not None:
                     file_format_name = eformat.get('file_format')
-                    #tracking_values['file_format'] = eformat.get('file_format')
+                    # tracking_values['file_format'] = eformat.get('file_format')
                 break
         if not found:
             raise HTTPNotFound(_filename)
@@ -1253,14 +1255,13 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
-
     # Analytics Stuff
     ga_config = request.registry.settings.get('ga_config')
 
     if ga_config:
 
         ga_cid = request.cookies.get("clientIdentifier")
-        if not ga_cid: # Fallback, potentially can stop working as GA is updated
+        if not ga_cid:  # Fallback, potentially can stop working as GA is updated
             ga_cid = request.cookies.get("_ga")
             if ga_cid:
                 ga_cid = ".".join(ga_cid.split(".")[2:])
@@ -1279,7 +1280,7 @@ def download(context, request):
             "uip": request.remote_addr,
             "ua": request.user_agent,
             "dl": request.url,
-            "dt" : filename,
+            "dt": filename,
 
             # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
             # if don't provided uid. While we still allow users to not be logged in,
@@ -1291,7 +1292,7 @@ def download(context, request):
             "cid": "555",
             "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
             "ec": "Serverside File Download",       # Event Category
-            "ea": "Range Query" if request.range else "File Download", # Event Action
+            "ea": "Range Query" if request.range else "File Download",  # Event Action
             "el": filename,                         # Event Label
             "ev": file_size_downloaded,             # Event Value
             # Product fields
@@ -1299,12 +1300,12 @@ def download(context, request):
             "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
             "pr1id": file_at_id,                    # Product ID/SKU
             "pr1nm": filename,                      # Product Name
-            "pr1br" : lab.get("display_title"),     # Product Branch
+            "pr1br": lab.get("display_title"),     # Product Branch
             "pr1qt": 1,                             # Product Quantity
             # Product Category from @type, e.g. "File/FileProcessed"
-            "pr1ca": "/".join([ ty for ty in reversed(context.jsonld_type()[:-1]) ]),
+            "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
             # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-            "pr1va": properties.get("file_type", "other") # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
+            "pr1va": properties.get("file_type", "other")  # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
         }
 
         # Custom dimensions
@@ -1325,14 +1326,13 @@ def download(context, request):
             ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
             ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
 
-
         # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
         # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
         if user_uuid:
             ga_payload['uid'] = user_uuid
 
         if user_groups:
-            groups_json = json.dumps(user_groups, separators=(',', ':')) # Compcact JSON; aligns w. what's passed from JS.
+            groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.
             ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
             ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
 
@@ -1348,7 +1348,7 @@ def download(context, request):
             "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
             data=urllib.parse.urlencode(ga_payload),
             timeout=5.0,
-            headers = {'user-agent': ga_payload['ua']}
+            headers={'user-agent': ga_payload['ua']}
         )
 
         # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
@@ -1359,7 +1359,6 @@ def download(context, request):
         #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
         # except Exception as e:
         #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
-
 
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
@@ -1590,8 +1589,8 @@ def validate_extra_file_format(context, request):
             try:
                 off_uuid = ok_format_item.get('uuid')
             except AttributeError:
-                raise  Exception("FileFormat Item %s contains unknown FileFormats"
-                                 " in the extrafile_formats property" % file_format_item.get('uuid'))
+                raise Exception("FileFormat Item %s contains unknown FileFormats"
+                                " in the extrafile_formats property" % file_format_item.get('uuid'))
             valid_ext_formats.append(off_uuid)
     seen_ext_formats = []
     # formats = request.registry['collections']['FileFormat']
@@ -1677,7 +1676,7 @@ def file_add(context, request, render=None):
                          validate_file_format_validity_for_file_type,
                          validate_processed_file_unique_md5_with_bypass,
                          validate_processed_file_produced_from_field],
-            request_param=['check_only=true'])
+             request_param=['check_only=true'])
 @debug_log
 def file_edit(context, request, render=None):
     return item_edit(context, request, render)

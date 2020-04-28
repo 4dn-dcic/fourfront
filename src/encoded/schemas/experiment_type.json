@@ -100,7 +100,8 @@
                 "Single Particle Tracking",
                 "Context-dependent Reporter Expression",
                 "Scanning Electron Microscopy",
-                "Transmission Electron Microscopy"
+                "Transmission Electron Microscopy",
+                "Synthetic Condensation"
             ]
         },
         "assay_subclass_short": {
@@ -128,6 +129,7 @@
                 "SPT",
                 "Immunofluorescence",
                 "Reporter Expression",
+                "OptoDroplet",
                 "SEM",
                 "TEM"
             ],
