@@ -1,14 +1,7 @@
-# Are these still needed? -kmp 28-Mar-2020
-# from future.standard_library import install_aliases
-# install_aliases()  # NOQA
-
-# import base64  # unused?
-# import codecs  # unused?
 import json
 # import logging  # unused?
 import netaddr
 import os
-# import structlog
 import subprocess
 import sys
 
@@ -16,20 +9,17 @@ from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.log_utils import set_logging
 from dcicutils.env_utils import get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
-# from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
-# from pyramid.path import AssetResolver, caller_package
-# from pyramid.session import SignedCookieSessionFactory
-from pyramid.settings import asbool  # , aslist
+from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
-# from snovault.json_renderer import json_renderer
-# from sqlalchemy import engine_from_config
-# from webob.cookies import JSONSerializer
-# from .utils import find_other_in_pair
 
 
 if sys.version_info.major < 3:
     raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
+
+
+# location of environment variables on elasticbeanstalk
+BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
 def static_resources(config):
@@ -86,9 +76,15 @@ def load_workbook(app, workbook_filename, docsdir):
     load_all(testapp, workbook_filename, docsdir)
 
 
+# This key is best interpreted not as the 'snovault version' but rather the 'version of the app built on snovault'.
+# As such, it should be left this way, even though it may appear redundant with the 'eb_app_version' registry key
+# that we also have, which tries to be the value eb uses. -kmp 28-Apr-2020
+APP_VERSION_REGISTRY_KEY = 'snovault.app_version'
+
+
 def app_version(config):
     import hashlib
-    if not config.registry.settings.get('snovault.app_version'):
+    if not config.registry.settings.get(APP_VERSION_REGISTRY_KEY):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
         version = os.environ.get("ENCODED_VERSION")
@@ -103,7 +99,7 @@ def app_version(config):
             except Exception:
                 version = "test"
 
-        config.registry.settings['snovault.app_version'] = version
+        config.registry.settings[APP_VERSION_REGISTRY_KEY] = version
 
     # GA Config
     ga_conf_file = config.registry.settings.get('ga_config_location')

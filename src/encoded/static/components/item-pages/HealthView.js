@@ -32,13 +32,21 @@ export default class HealthView extends React.PureComponent {
     static defaultProps = {
         "excludedKeys" : [ ...ItemDetailList.Detail.defaultProps.excludedKeys, 'content' ],
         "keyTitleDescriptionMapConfig" : {
-            'blob_bucket' : {
-                title : "Blob Bucket",
-                description : "Name of blob storage bucket used for blob data."
+            'aggregations' : {
+                title : 'Aggregations',
+                description : "Aggregations of ES-indexed data."
+            },
+            'beanstalk_app_version': {
+                title : "Beanstalk App Version",
+                description : "Unique descriptive identifier for this app's ElasticBeanstalk source bundle."
             },
             'beanstalk_env' : {
                 title : "Beanstalk Environment",
                 description : "Which Elastic Beanstalk environment this instance running on."
+            },
+            'blob_bucket' : {
+                title : "Blob Bucket",
+                description : "Name of blob storage bucket used for blob data."
             },
             'content' : {
                 title : "Extra Information"
@@ -55,26 +63,42 @@ export default class HealthView extends React.PureComponent {
                 title : "File Upload Bucket",
                 description : "Where uploaded files are stored."
             },
+            'foursight' : {
+                title : "Foursight",
+                description : "URI of corresponding Foursight page."
+            },
             'load_data' : {
-                title : "Data Loaded",
+                title : "Loaded Data",
                 description : "Data which was loaded into database on initialization or boot."
             },
-            'ontology_updated' : {
-                title : 'Last Ontology Update',
-                description : "Last time ontologies were updated."
+            'namespace': {
+                title : "Namespace",
+                description : "The ElasticSearch namespace to use. This is often the same as the Beanstalk Environment, but don't rely on that."
             },
-            'system_bucket' : {
-                title : 'System Bucket',
-                description : "Name of blob storage bucket used for system data."
+            'ontology_updated' : {
+                title : 'Ontology Last Updated',
+                description : "Last time ontologies were updated."
             },
             'processed_file_bucket' : {
                 title: "Processed File Bucket",
                 description : "Blob storage bucket name of processed files."
             },
-            'aggregations' : {
-                title : 'Aggregations',
-                description : "Aggregations of ES-indexed data."
-            }
+            'project_version': {
+                title : "Project Version",
+                description : "Software version for this portal's software."
+            },
+            'snovault_version': {
+                title : "Snovault Version",
+                description : "Software version of dcicsnovault being used."
+            },
+            'system_bucket' : {
+                title : 'System Bucket',
+                description : "Name of blob storage bucket used for system data."
+            },
+            'utils_version': {
+                title : "Utils Version",
+                description : "Software version of dcicutils being used."
+            },
         },
         "keyTitleDescriptionMapCounts" : {
             'db_es_total' : {

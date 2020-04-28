@@ -13,6 +13,7 @@ from ..generate_production_ini import (
     TEMPLATE_DIR,
     build_ini_file_from_template,
     build_ini_stream_from_template,
+    any_environment_template_filename,
     environment_template_filename,
     template_environment_names,
     get_local_git_version,
@@ -48,6 +49,7 @@ def override_environ(**overrides):
         for k, v in to_restore.items():
             os.environ[k] = v
 
+
 def test_environment_template_filename():
 
     with pytest.raises(ValueError):
@@ -59,6 +61,12 @@ def test_environment_template_filename():
     assert os.path.exists(actual)
 
     assert environment_template_filename('webdev') == environment_template_filename('fourfront-webdev')
+
+
+def test_any_environment_template_filename():
+
+    actual = os.path.abspath(any_environment_template_filename())
+    assert actual.endswith("/ini_files/any.ini")
 
 
 def test_template_environment_names():
@@ -164,10 +172,6 @@ def test_build_ini_file_from_template():
                 with mock.patch("io.open", side_effect=mocked_open):
                     build_ini_file_from_template(some_template_file_name, some_ini_file_name)
 
-
-#        with mock.patch("io.open", side_effect=mocked_open):
-#            build_ini_file_from_template(some_template_file_name, some_ini_file_name)
-
         assert MockFileStream.FILE_SYSTEM[some_ini_file_name] == [
             '[Foo]',
             'DATABASE = "snow_white"',
@@ -240,7 +244,7 @@ def test_build_ini_file_from_template():
 
         # Uncomment this for debugging...
         # assert False, "PASSED"
-        
+
 
 def test_get_app_version():
 
