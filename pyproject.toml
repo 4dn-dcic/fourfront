@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "encoded"
-version = "1.2.6"
+version = "1.3.0"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -129,6 +129,8 @@ xlwt = "1.2.0"
 [tool.poetry.dev-dependencies]
 # flask only for moto[server]
 flask = ">=1.1.1"
+# Here and elsewhere we pin use of moto 1.3.7.
+# It would help to have a record of why. -kmp 27-Apr-2020
 moto = "1.3.7"
 
 [tool.poetry.scripts]

@@ -21,17 +21,20 @@ moto-setup:  # optional moto setup that must be done separately
 macpoetry-install:  # install for OSX Catalina
 	bin/macpoetry-install
 
-macbuild:
-	make clean
-	make macpoetry-install
-	make moto-setup
-
 configure:  # does any pre-requisite installs
 	pip install poetry
+
+macbuild:
+	make configure
+	make macpoetry-install
+	make build-after-poetry
 
 build:  # builds
 	make configure
 	poetry install
+	make build-after-poetry
+
+build-after-poetry:
 	make moto-setup
 	make npm-setup
 	python setup_eb.py develop
