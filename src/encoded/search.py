@@ -261,24 +261,31 @@ def collection_view(context, request):
     return search(context, request, context.type_info.name, False, forced_type='Search')
 
 
-def build_search_types(types, doc_types = ["Item"]):
-    """ Builds search_types based on the given doc_types
+def build_search_types(types, doc_types):
+    """
+    Builds `search_types` based on the requested search `type` in URI param (=> `doc_types`).
 
     :param types: TypesTool from the registry
-    :param doc_types: Type names we would like to search on
+    :param doc_types: Type names we would like to search on.
     :return: search_types, or a list of 'SearchResults' type candidates
     """
     encompassing_ti_for_all_items = None
+    print('\n\n\nAA', doc_types, types["Item"], dir(types["Item"]))
+    if len(doc_types) < 1:
+        # Sometimes we're passed an empty list instead of ["Item"]
+        # when search has no type param. TODO: Debug/fix.
+        doc_types = [ "Item" ]
     for requested_search_type in doc_types:
-        ti = types[requested_search_type]
-        if encompassing_ti_for_all_items.name == "Item"
+        ti = types[requested_search_type] # 'Type Item'
+        if ti.name == "Item":
             # We received "Item" as encompassing base type from comparsion of previous types,
             # so no use to iterate further.
+            encompassing_ti_for_all_items = ti
             break
-        if encompassing_ti_for_all_items is None: # Set initial 'all-encompassing' item type
+        elif encompassing_ti_for_all_items is None: # Set initial 'all-encompassing' item type
             encompassing_ti_for_all_items = ti
             continue
-        if hasattr(ti, 'base_types'):
+        elif hasattr(ti, 'base_types'):
             # Also handles if same / duplicate requested_search_type encountered (for some reason).
             types_list = [requested_search_type]
             for base_type in ti.base_types:
@@ -291,10 +298,11 @@ def build_search_types(types, doc_types = ["Item"]):
                     encompassing_ti_for_all_items = types[base_type]
                     break # out of inner loop and continue
 
-    search_types.append(encompassing_ti_for_all_items.name)
+    search_types = [ encompassing_ti_for_all_items.name ]
+
     if hasattr(encompassing_ti_for_all_items, "base_types"):
         for base_type in encompassing_ti_for_all_items.base_types:
-            search_types.append(base_type.name)
+            search_types.append(base_type)
 
     if search_types[-1] != "Item":
         search_types.append("Item")
