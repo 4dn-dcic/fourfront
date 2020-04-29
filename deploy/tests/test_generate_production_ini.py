@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from io import StringIO
 from unittest import mock
 
+from dcicutils.qa_utils import override_environ
 from .. import generate_production_ini
 from ..generate_production_ini import (
     TEMPLATE_DIR,
@@ -28,26 +29,6 @@ from ..generate_production_ini import (
 #       Then again, if we used the "single parameterized ini file" we could side-step that. -kmp 3-Apr-2020
 
 FOURFRONT_DEPLOY_NAMES = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
-
-
-@contextmanager
-def override_environ(**overrides):
-    to_delete = []
-    to_restore = {}
-    env = os.environ
-    try:
-        for k, v in overrides.items():
-            if k in env:
-                to_restore[k] = env[k]
-            else:
-                to_delete.append(k)
-            env[k] = v
-        yield
-    finally:
-        for k in to_delete:
-            del os.environ[k]
-        for k, v in to_restore.items():
-            os.environ[k] = v
 
 
 def test_environment_template_filename():
