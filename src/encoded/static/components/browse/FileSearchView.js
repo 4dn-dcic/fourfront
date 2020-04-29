@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { ColumnCombiner } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { ColumnCombiner, DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
 import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SortController';
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
@@ -74,13 +74,14 @@ function FileTableWithSelectedFilesCheckboxes(props){
             // incase the prop version's render fxn is different than what we expect.
             'display_title' : _.extend({}, colExtensionMap4DN.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
-                'render': (file, columnDefinition, paneProps, width) => {
-                    const origTitleBlock = colExtensionMap4DN.display_title.render(file, columnDefinition, paneProps, width);
-                    const newChildren = origTitleBlock.props.children.slice(0);
-                    newChildren[2] = newChildren[1];
-                    newChildren[2] = React.cloneElement(newChildren[2], { 'className': newChildren[2].props.className + ' mono-text' });
-                    newChildren[1] = <FileSearchViewCheckBox key="checkbox" {...{ file, selectedFiles, selectFile, unselectFile }} />;
-                    return React.cloneElement(origTitleBlock, { 'children': newChildren });
+                'render': (file, parentProps) => {
+                    const { rowNumber, detailOpen, toggleDetailOpen } = parentProps;
+                    return (
+                        <DisplayTitleColumnWrapper {...{ href, context, rowNumber, detailOpen, toggleDetailOpen }} result={file}>
+                            <FileSearchViewCheckBox key="checkbox" {...{ file, selectedFiles, selectFile, unselectFile }} />
+                            <DisplayTitleColumnDefault result={file} />
+                        </DisplayTitleColumnWrapper>
+                    );
                 }
             })
         });
@@ -97,7 +98,7 @@ function FileTableWithSelectedFilesCheckboxes(props){
     return (
         <WindowNavigationController {...{ href, context }} navigate={propNavigate}>
             <ColumnCombiner columnExtensionMap={columnExtensionMapWithSelectedFilesCheckboxes}>
-                <CustomColumnController>
+                <CustomColumnController {...{ windowWidth }}>
                     <SortController>
                         <ControlsAndResults {...bodyViewProps} />
                     </SortController>
@@ -136,16 +137,7 @@ class ControlsAndResults extends React.PureComponent {
     constructor(props){
         super(props);
         this.onClearFiltersClick = this.onClearFiltersClick.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.renderSearchDetailPane = this.renderSearchDetailPane.bind(this);
-
-        this.searchResultTableRef = React.createRef();
-    }
-
-    forceUpdateOnSelf(){
-        const searchResultTable = this.searchResultTableRef.current;
-        const dimsContainer = searchResultTable && searchResultTable.getDimensionContainer();
-        return dimsContainer && dimsContainer.resetWidths();
     }
 
     onClearFiltersClick(evt, callback = null){
@@ -174,7 +166,8 @@ class ControlsAndResults extends React.PureComponent {
             // From WindowNavigationController (or similar) (possibly from Redux store re: href)
             href, onFilter, getTermStatus,
             // From CustomColumnController:
-            hiddenColumns, addHiddenColumn, removeHiddenColumn,
+            hiddenColumns, addHiddenColumn, removeHiddenColumn, visibleColumnDefinitions,
+            setColumnWidths, columnWidths,
             // From ColumnCombiner:
             columnDefinitions,
             // From SortController:
@@ -196,8 +189,11 @@ class ControlsAndResults extends React.PureComponent {
         };
 
         const tableProps = {
-            results, href, context, sortBy, sortColumn, sortReverse, windowWidth, columnDefinitions,
-            selectedFiles, registerWindowOnScrollHandler, hiddenColumns, schemas
+            results, href, context, schemas,
+            sortBy, sortColumn, sortReverse, windowWidth,
+            columnDefinitions, visibleColumnDefinitions,
+            selectedFiles, registerWindowOnScrollHandler,
+            hiddenColumns, columnWidths, setColumnWidths
         };
 
         let totalResults = null;
@@ -237,8 +233,8 @@ class ControlsAndResults extends React.PureComponent {
                     </React.Fragment>
                     : null}
                 <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
-                    <AboveBrowseViewTableControls {...aboveTableControlsProps} parentForceUpdate={this.forceUpdateOnSelf} showSelectedFileCount />
-                    <SearchResultTable {...tableProps} ref={this.searchResultTableRef} termTransformFxn={Schemas.Term.toName} renderDetailPane={this.renderSearchDetailPane} />
+                    <AboveBrowseViewTableControls {...aboveTableControlsProps} showSelectedFileCount />
+                    <SearchResultTable {...tableProps} termTransformFxn={Schemas.Term.toName} renderDetailPane={this.renderSearchDetailPane} />
                 </div>
             </div>
         );
@@ -279,7 +275,6 @@ class FileSearchViewCheckBox extends React.PureComponent {
     render() {
         const { file, selectedFiles } = this.props;
         const accessionTriple = ['NONE', 'NONE', file.accession].join('~');
-        const checked = selectedFiles[accessionTriple] ? 'checked' : undefined;
-        return <Checkbox {...{ checked }} onChange={this.onChange} className="expset-checkbox" />;
+        return <Checkbox checked={!!(selectedFiles[accessionTriple])} onChange={this.onChange} className="expset-checkbox" />;
     }
 }
