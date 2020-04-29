@@ -270,7 +270,6 @@ def build_search_types(types, doc_types):
     :return: search_types, or a list of 'SearchResults' type candidates
     """
     encompassing_ti_for_all_items = None
-    print('\n\n\nAA', doc_types, types["Item"], dir(types["Item"]))
     if len(doc_types) < 1:
         # Sometimes we're passed an empty list instead of ["Item"]
         # when search has no type param. TODO: Debug/fix.
