@@ -261,37 +261,45 @@ def collection_view(context, request):
     return search(context, request, context.type_info.name, False, forced_type='Search')
 
 
-def build_search_types(types, doc_types):
+def build_search_types(types, doc_types = ["Item"]):
     """ Builds search_types based on the given doc_types
 
     :param types: TypesTool from the registry
     :param doc_types: Type names we would like to search on
     :return: search_types, or a list of 'SearchResults' type candidates
     """
-    search_types = []
-    if len(doc_types) == 1:  # if we have one, add it and its base_type
-        ti = types[doc_types[0]]
-        search_types.append(ti.name + "SearchResults")
+    encompassing_ti_for_all_items = None
+    for requested_search_type in doc_types:
+        ti = types[requested_search_type]
+        if encompassing_ti_for_all_items.name == "Item"
+            # We received "Item" as encompassing base type from comparsion of previous types,
+            # so no use to iterate further.
+            break
+        if encompassing_ti_for_all_items is None: # Set initial 'all-encompassing' item type
+            encompassing_ti_for_all_items = ti
+            continue
         if hasattr(ti, 'base_types'):
+            # Also handles if same / duplicate requested_search_type encountered (for some reason).
+            types_list = [requested_search_type]
             for base_type in ti.base_types:
-                search_types.append(base_type + "SearchResults")
+                types_list.append(base_type)
+            for base_type in types_list:
+                if ti.name == base_type:
+                    break # out of inner loop and continue
+                if hasattr(encompassing_ti_for_all_items, "base_types") and base_type in encompassing_ti_for_all_items.base_types:
+                    # Will ultimately succeed at when base_type="Item", if not any earlier.
+                    encompassing_ti_for_all_items = types[base_type]
+                    break # out of inner loop and continue
 
-    # If we have more than one, compute and add common ancestors to search_types
-    # TODO: handle more than 2 common ancestors
-    else:
-        base_types = []
-        for ti in doc_types:
-            if hasattr(types[ti], 'base_types'):
-                base_types.append(set(types[ti].base_types))
-        common_ancestors = reduce(lambda x, y: x & y, base_types)
-        if not common_ancestors:
-            raise HTTPBadRequest("Tried to search on types with no common ancestor. This should never happen.")
+    search_types.append(encompassing_ti_for_all_items.name)
+    if hasattr(encompassing_ti_for_all_items, "base_types"):
+        for base_type in encompassing_ti_for_all_items.base_types:
+            search_types.append(base_type.name)
 
-        for ancestor in common_ancestors:
-            if ancestor != "Item":
-                search_types.append(ancestor + "SearchResults")
-        search_types.append("ItemSearchResults")
-    return search_types
+    if search_types[-1] != "Item":
+        search_types.append("Item")
+
+    return [ t + "SearchResults" for t in search_types ]
 
 
 def get_collection_actions(request, type_info):
