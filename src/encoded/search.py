@@ -270,12 +270,8 @@ def build_search_types(types, doc_types):
     :return: search_types, or a list of 'SearchResults' type candidates
     """
     encompassing_ti_for_all_items = None
-    if len(doc_types) < 1:
-        # Sometimes we're passed an empty list instead of ["Item"]
-        # when search has no type param. TODO: Debug/fix.
-        doc_types = [ "Item" ]
-    for requested_search_type in doc_types:
-        ti = types[requested_search_type] # 'Type Item'
+    for requested_search_type in doc_types: # Handles if only 1 type in here, also.
+        ti = types[requested_search_type]   # 'ti' == 'Type Item'
         if ti.name == "Item":
             # We received "Item" as encompassing base type from comparsion of previous types,
             # so no use to iterate further.
