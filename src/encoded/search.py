@@ -272,15 +272,12 @@ def build_search_types(types, doc_types):
     encompassing_ti_for_all_items = None
     for requested_search_type in doc_types: # Handles if only 1 type in here, also.
         ti = types[requested_search_type]   # 'ti' == 'Type Item'
-        if ti.name == "Item":
-            # We received "Item" as encompassing base type from comparsion of previous types,
-            # so no use to iterate further.
-            encompassing_ti_for_all_items = ti
-            break
-        elif encompassing_ti_for_all_items is None: # Set initial 'all-encompassing' item type
+        if encompassing_ti_for_all_items and encompassing_ti_for_all_items.name == "Item":
+            break # No other higher-level base type
+        if encompassing_ti_for_all_items is None: # Set initial 'all-encompassing' item type
             encompassing_ti_for_all_items = ti
             continue
-        elif hasattr(ti, 'base_types'):
+        if hasattr(ti, 'base_types'):
             # Also handles if same / duplicate requested_search_type encountered (for some reason).
             types_list = [requested_search_type]
             for base_type in ti.base_types:
