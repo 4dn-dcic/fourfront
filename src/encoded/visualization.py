@@ -1124,6 +1124,8 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
+            "fontSize": 10, # has to be set explicitly since Higlass has a different default value
+            "geneAnnotationHeight": 12 # has to be set explicitly since Higlass has a different default value
         }
     }
 
@@ -1137,10 +1139,12 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
 
     new_tracks_by_side["top"]["type"] = "horizontal-gene-annotations"
     new_tracks_by_side["top"]["orientation"] = "1d-horizontal"
+    new_tracks_by_side["top"]["height"] = 55 # has to be set explicitly since Higlass has a different default value
     new_tracks_by_side["top"]["uid"] = uuid.uuid4()
 
     new_tracks_by_side["left"]["type"] = "vertical-gene-annotations"
     new_tracks_by_side["left"]["orientation"] = "1d-vertical"
+    new_tracks_by_side["left"]["width"] = 55 # has to be set explicitly since Higlass has a different default value
     new_tracks_by_side["left"]["uid"] = uuid.uuid4()
 
     # For each view:
