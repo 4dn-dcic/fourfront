@@ -1,4 +1,5 @@
 import datetime
+import io
 import os
 import pytest
 import re
@@ -284,3 +285,98 @@ def test_get_eb_bundled_version():
                 raise Exception("Simulated file error (file not found or permissions problem).")
             mock_open.side_effect = mocked_open_error
             assert get_eb_bundled_version() is None
+
+
+def test_transitional_equivalence():
+    """
+    We used to use separate files for each environment. This tests that the new any.ini technology,
+    with a few new environment variables, will produce the same thing.
+
+    This proves that if we set at least "ENCODED_ES_SERVER" and "ENCODED_BS_ENV" environment variables,
+    or invoke generate_ini_file adding the "--es_server" nad "--bs_env" arguments, we should get a proper
+    production.ini.
+    """
+
+    # TODO: Once this mechanism is in place, the files blue.ini, green.ini, hotseat.ini, mastertest.ini,
+    #       webdev.ini, webprod.ini, and webprod2.ini
+    #       can either be removed (and these transitional tests removed) or transitioned to be test data.
+
+    def tester(ref_ini, bs_env, data_set, es_server, es_namespace=None, line_checker=None):
+
+        assert ref_ini[:-4] == bs_env[10:]  # "xxx.ini" needs to match "fourfront-xxx"
+
+        es_namespace = es_namespace or bs_env
+
+        # Test of build_ini_from_template with just 2 keyword arguments explicitly supplied (bs_env, es_server),
+        # and others defaulted.
+
+        old_output = StringIO()
+        new_output = StringIO()
+
+        build_ini_stream_from_template(os.path.join(TEMPLATE_DIR, ref_ini), old_output)
+        build_ini_stream_from_template(os.path.join(TEMPLATE_DIR, "any.ini"), new_output,
+                                       # data_env and es_namespace are something we should be able to default
+                                       bs_env=bs_env, es_server=es_server)
+
+        old_content = old_output.getvalue()
+        new_content = new_output.getvalue()
+        assert old_content == new_content
+
+        # Test of build_ini_from_template with all 4 keyword arguments explicitly supplied (bs_env, data_set,
+        # es_server, es_namespace), none defaulted.
+
+
+        old_output = StringIO()
+        new_output = StringIO()
+
+        build_ini_stream_from_template(os.path.join(TEMPLATE_DIR, ref_ini), old_output)
+        build_ini_stream_from_template(os.path.join(TEMPLATE_DIR, "any.ini"), new_output,
+                                       bs_env=bs_env, data_set=data_set, es_server=es_server, es_namespace=es_namespace)
+
+        old_content = old_output.getvalue()
+        new_content = new_output.getvalue()
+        problems = []
+        if line_checker:
+            for raw_line in io.StringIO(new_content):
+                line = raw_line.rstrip()
+                problem = line_checker(line)
+                if problem:
+                    problems.append(problem)
+            assert problems == [], "Problems found:\n%s" % "\n".join(problems)
+
+    with mock.patch.object(generate_production_ini, "get_app_version", return_value=MOCKED_PROJECT_VERSION):
+        with mock.patch("toml.load", return_value={"tool": {"poetry": {"version": MOCKED_LOCAL_GIT_VERSION}}}):
+
+            def prod_line_checker(line):
+                if 'bucket =' in line:
+                    fragment = 'fourfront-webprod'
+                    if fragment not in line:
+                        return "'%s' missing in '%s'" % (fragment, line)
+
+            tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                   es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
+
+            tester(ref_ini="green.ini", bs_env="fourfront-green", data_set="prod",
+                   es_server="search-fourfront-green-cghpezl64x4uma3etijfknh7ja.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
+
+            tester(ref_ini="hotseat.ini", bs_env="fourfront-hotseat", data_set="prod",
+                   es_server="search-fourfront-hotseat-f3oxd2wjxw3h2wsxxbcmzhhd4i.us-east-1.es.amazonaws.com:80")
+
+            tester(ref_ini="mastertest.ini", bs_env="fourfront-mastertest", data_set="test",
+                   es_server="search-fourfront-mastertest-wusehbixktyxtbagz5wzefffp4.us-east-1.es.amazonaws.com:80")
+
+            tester(ref_ini="webdev.ini", bs_env="fourfront-webdev", data_set="prod",
+                   es_server="search-fourfront-webdev-5uqlmdvvshqew46o46kcc2lxmy.us-east-1.es.amazonaws.com:80")
+
+            tester(ref_ini="webprod.ini", bs_env="fourfront-webprod", data_set="prod",
+                   es_server="search-fourfront-webprod-hmrrlalm4ifyhl4bzbvl73hwv4.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
+
+            tester(ref_ini="webprod2.ini", bs_env="fourfront-webprod2", data_set="prod",
+                   es_server="search-fourfront-webprod2-fkav4x4wjvhgejtcg6ilrmczpe.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
+
+    # Uncomment this for debugging...
+    # assert False, "PASSED"
