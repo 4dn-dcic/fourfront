@@ -1,4 +1,5 @@
 import datetime
+import io
 import os
 import pytest
 import re
@@ -300,7 +301,7 @@ def test_transitional_equivalence():
     #       webdev.ini, webprod.ini, and webprod2.ini
     #       can either be removed (and these transitional tests removed) or transitioned to be test data.
 
-    def tester(ref_ini, bs_env, data_set, es_server, es_namespace=None):
+    def tester(ref_ini, bs_env, data_set, es_server, es_namespace=None, line_checker=None):
 
         assert ref_ini[:-4] == bs_env[10:]  # "xxx.ini" needs to match "fourfront-xxx"
 
@@ -334,16 +335,31 @@ def test_transitional_equivalence():
 
         old_content = old_output.getvalue()
         new_content = new_output.getvalue()
-        assert old_content == new_content
+        problems = []
+        if line_checker:
+            for raw_line in io.StringIO(new_content):
+                line = raw_line.rstrip()
+                problem = line_checker(line)
+                if problem:
+                    problems.append(problem)
+            assert problems == [], "Problems found:\n%s" % "\n".join(problems)
 
     with mock.patch.object(FourfrontDeployer, "get_app_version", return_value=MOCKED_PROJECT_VERSION):
         with mock.patch("toml.load", return_value={"tool": {"poetry": {"version": MOCKED_LOCAL_GIT_VERSION}}}):
 
+            def prod_line_checker(line):
+                if 'bucket =' in line:
+                    fragment = 'fourfront-webprod'
+                    if fragment not in line:
+                        return "'%s' missing in '%s'" % (fragment, line)
+
             tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
-                   es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80")
+                   es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
 
             tester(ref_ini="green.ini", bs_env="fourfront-green", data_set="prod",
-                   es_server="search-fourfront-green-cghpezl64x4uma3etijfknh7ja.us-east-1.es.amazonaws.com:80")
+                   es_server="search-fourfront-green-cghpezl64x4uma3etijfknh7ja.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
 
             tester(ref_ini="hotseat.ini", bs_env="fourfront-hotseat", data_set="prod",
                    es_server="search-fourfront-hotseat-f3oxd2wjxw3h2wsxxbcmzhhd4i.us-east-1.es.amazonaws.com:80")
@@ -355,7 +371,12 @@ def test_transitional_equivalence():
                    es_server="search-fourfront-webdev-5uqlmdvvshqew46o46kcc2lxmy.us-east-1.es.amazonaws.com:80")
 
             tester(ref_ini="webprod.ini", bs_env="fourfront-webprod", data_set="prod",
-                   es_server="search-fourfront-webprod-hmrrlalm4ifyhl4bzbvl73hwv4.us-east-1.es.amazonaws.com:80")
+                   es_server="search-fourfront-webprod-hmrrlalm4ifyhl4bzbvl73hwv4.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
 
             tester(ref_ini="webprod2.ini", bs_env="fourfront-webprod2", data_set="prod",
-                   es_server="search-fourfront-webprod2-fkav4x4wjvhgejtcg6ilrmczpe.us-east-1.es.amazonaws.com:80")
+                   es_server="search-fourfront-webprod2-fkav4x4wjvhgejtcg6ilrmczpe.us-east-1.es.amazonaws.com:80",
+                   line_checker=prod_line_checker)
+
+    # Uncomment this for debugging...
+    # assert False, "PASSED"
