@@ -88,7 +88,12 @@ def get_app_version():  # This logic (perhaps most or all of this file) should m
         return 'unknown-version-at-' + datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
 
+PARAMETERIZED_ASSIGNMENT = re.compile(r'^[ \t]*[A-Za-z][A-Za-z0-9.-_]*[ \t]*=[ \t]*[$][{]?[A-Za-z].*$')
 EMPTY_ASSIGNMENT = re.compile(r'^[ \t]*[A-Za-z][A-Za-z0-9.-_]*[ \t]*=[ \t\r\n]*$')
+
+
+def omittable(line, expanded_line):
+    return PARAMETERIZED_ASSIGNMENT.match(line) and EMPTY_ASSIGNMENT.match(expanded_line)
 
 
 def build_ini_stream_from_template(template_file_name, init_file_stream,
@@ -166,7 +171,7 @@ def build_ini_stream_from_template(template_file_name, init_file_stream,
                 # if '$' in line:
                 #     print("line=", line)
                 #     print("expanded_line=", expanded_line)
-                if not EMPTY_ASSIGNMENT.match(expanded_line):
+                if not omittable(line, expanded_line):
                     init_file_stream.write(expanded_line)
 
     finally:

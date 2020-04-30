@@ -23,6 +23,7 @@ from ..generate_production_ini import (
     get_app_version,
     EB_MANIFEST_FILENAME,
     PYPROJECT_FILE_NAME,
+    omittable,
 )
 
 
@@ -30,6 +31,20 @@ from ..generate_production_ini import (
 #       Then again, if we used the "single parameterized ini file" we could side-step that. -kmp 3-Apr-2020
 
 FOURFRONT_DEPLOY_NAMES = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
+
+
+def test_omittable():
+
+    assert not omittable("foo", "foo")
+    assert not omittable("foo=", "foo=")
+    assert not omittable("foo=$X", "foo=bar")
+    assert not omittable("foo=$X", "foo=$X")
+    assert omittable("foo=$X", "foo=")
+    assert omittable("foo=$X", "foo= ")
+    assert omittable("foo=$X", "foo= ")
+    assert omittable("foo=$X", "foo= \r")
+    assert omittable("foo=$X", "foo= \r\n")
+    assert omittable("foo=$X", "foo=   \r\n \r\n ")
 
 
 def test_environment_template_filename():
