@@ -5,12 +5,10 @@ import pytest
 import re
 import subprocess
 
-from contextlib import contextmanager
 from io import StringIO
 from unittest import mock
 
 from dcicutils.qa_utils import override_environ
-from .. import generate_production_ini
 from ..generate_production_ini import FourfrontDeployer
 
 
