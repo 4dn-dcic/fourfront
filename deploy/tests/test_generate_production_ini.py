@@ -25,11 +25,26 @@ get_eb_bundled_version = FourfrontDeployer.get_eb_bundled_version
 get_app_version = FourfrontDeployer.get_app_version
 EB_MANIFEST_FILENAME = FourfrontDeployer.EB_MANIFEST_FILENAME
 PYPROJECT_FILE_NAME = FourfrontDeployer.PYPROJECT_FILE_NAME
+omittable = FourfrontDeployer.omittable
 
 # TODO: Maybe this should move to env_utils? If not, at least to a non-test file.
 #       Then again, if we used the "single parameterized ini file" we could side-step that. -kmp 3-Apr-2020
 
 FOURFRONT_DEPLOY_NAMES = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
+
+
+def test_omittable():
+
+    assert not omittable("foo", "foo")
+    assert not omittable("foo=", "foo=")
+    assert not omittable("foo=$X", "foo=bar")
+    assert not omittable("foo=$X", "foo=$X")
+    assert omittable("foo=$X", "foo=")
+    assert omittable("foo=$X", "foo= ")
+    assert omittable("foo=$X", "foo= ")
+    assert omittable("foo=$X", "foo= \r")
+    assert omittable("foo=$X", "foo= \r\n")
+    assert omittable("foo=$X", "foo=   \r\n \r\n ")
 
 
 def test_environment_template_filename():
