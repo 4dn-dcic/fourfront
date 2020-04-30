@@ -6,6 +6,7 @@ import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
+import { Term } from './../util/Schemas';
 
 import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
@@ -26,7 +27,7 @@ export default class HealthView extends React.PureComponent {
     }
 
     static termTransformFxn(field, term){
-        if (field === "foursight" && term.slice(0,4) === "http") {
+        if (field === "foursight" && term && term.slice(0,4) === "http") {
             return <a href={term} target="_blank" rel="noopener noreferrer">{ term }</a>;
         }
         return Term.toName(field, term, true);
@@ -174,7 +175,7 @@ export default class HealthView extends React.PureComponent {
                 { typeof description == "string" ? <p className="description">{ description }</p> : null }
 
                 <ItemDetailList {...{ excludedKeys, context }} hideButtons keyTitleDescriptionMap={keyTitleDescriptionMapConfig}
-                                termTransformFxn={HealthView.termTransformFxn} />
+                    termTransformFxn={HealthView.termTransformFxn} />
 
                 <DatabaseCountsInfo {...{ notYetLoaded, excludedKeys, schemas, db_es_compare, db_es_total, session, mounted, context, width, keyTitleDescriptionMapCounts }}
                     getCounts={this.getCounts} />

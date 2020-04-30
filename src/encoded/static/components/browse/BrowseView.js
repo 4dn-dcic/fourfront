@@ -8,7 +8,7 @@ import memoize from 'memoize-one';
 
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
 import { searchFilters, object, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ColumnCombiner } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { ColumnCombiner, DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
 import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
 import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
@@ -27,6 +27,8 @@ import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';
 import { SelectedFilesController } from './components/SelectedFilesController';
 import { ExperimentSetDetailPane } from './components/ExperimentSetDetailPane';
 import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';
+
+
 
 
 
@@ -143,22 +145,13 @@ class ControlsAndResults extends React.PureComponent {
         super(props);
         this.onClearFiltersClick = this.onClearFiltersClick.bind(this);
         this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
         this.updateDetailPaneFileSectionStateCache = this.updateDetailPaneFileSectionStateCache.bind(this);
-
-        this.searchResultTableRef = React.createRef();
 
         this.detailPaneFileSectionStateCache = {};
 
         this.memoized = {
             isClearFiltersBtnVisible: memoize(ControlsAndResults.isClearFiltersBtnVisible)
         };
-    }
-
-    forceUpdateOnSelf(){
-        const searchResultTable = this.searchResultTableRef.current;
-        const dimsContainer = searchResultTable && searchResultTable.getDimensionContainer();
-        return dimsContainer && dimsContainer.resetWidths();
     }
 
     onClearFiltersClick(evt, callback = null){
@@ -202,7 +195,7 @@ class ControlsAndResults extends React.PureComponent {
             href, onFilter, getTermStatus,
 
             // From CustomColumnController:
-            hiddenColumns, addHiddenColumn, removeHiddenColumn,
+            hiddenColumns, addHiddenColumn, removeHiddenColumn, visibleColumnDefinitions, columnWidths, setColumnWidths,
             // From ColumnCombiner:
             columnDefinitions,
             // From SortController:
@@ -228,8 +221,9 @@ class ControlsAndResults extends React.PureComponent {
         };
 
         const tableProps = {
-            results, href, context, sortBy, sortColumn, sortReverse, windowWidth, columnDefinitions,
-            selectedFiles, registerWindowOnScrollHandler, hiddenColumns,
+            results, href, context, schemas,
+            sortBy, sortColumn, sortReverse, windowWidth, columnDefinitions, visibleColumnDefinitions,
+            selectedFiles, registerWindowOnScrollHandler, hiddenColumns, setColumnWidths, columnWidths,
         };
 
         return (
@@ -242,8 +236,8 @@ class ControlsAndResults extends React.PureComponent {
                     </div>
                     : null }
                 <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
-                    <AboveBrowseViewTableControls {...aboveTableControlsProps} parentForceUpdate={this.forceUpdateOnSelf} showSelectedFileCount />
-                    <SearchResultTable {...tableProps} ref={this.searchResultTableRef} termTransformFxn={Schemas.Term.toName} renderDetailPane={this.browseExpSetDetailPane} />
+                    <AboveBrowseViewTableControls {...aboveTableControlsProps} showSelectedFileCount />
+                    <SearchResultTable {...tableProps} termTransformFxn={Schemas.Term.toName} renderDetailPane={this.browseExpSetDetailPane} />
                 </div>
             </div>
         );
@@ -507,7 +501,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
         selectedFiles, selectFile, unselectFile, resetSelectedFiles,
 
         // Default prop / hardcoded (may become customizable later)
-        columnExtensionMap
+        columnExtensionMap,
     } = props;
     const { total = 0, notification = null } = context;
 
@@ -532,14 +526,14 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
             // incase the prop version's render fxn is different than what we expect.
             'display_title' : _.extend({}, colExtensionMap4DN.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
-                'render' : (expSet, columnDefinition, paneProps, width) => {
-                    const origTitleBlock = colExtensionMap4DN.display_title.render(expSet, columnDefinition, paneProps, width);
-                    const newChildren = origTitleBlock.props.children.slice(0);
-
-                    newChildren[2] = newChildren[1];
-                    newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
-                    newChildren[1] = <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />;
-                    return React.cloneElement(origTitleBlock, { 'children' : newChildren });
+                'render' : (expSet, parentProps) => {
+                    const { rowNumber, detailOpen, toggleDetailOpen } = parentProps;
+                    return (
+                        <DisplayTitleColumnWrapper {...{ href, context, rowNumber, detailOpen, toggleDetailOpen }} result={expSet}>
+                            <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />
+                            <DisplayTitleColumnDefault result={expSet} />
+                        </DisplayTitleColumnWrapper>
+                    );
                 }
             })
         });
@@ -569,7 +563,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
     return (
         <WindowNavigationController {...{ href, context }} navigate={propNavigate}>
             <ColumnCombiner columnExtensionMap={columnExtensionMapWithSelectedFilesCheckboxes}>
-                <CustomColumnController>
+                <CustomColumnController {...{ windowWidth }}>
                     <SortController>
                         <ControlsAndResults {...bodyViewProps} />
                     </SortController>
