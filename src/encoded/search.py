@@ -279,11 +279,11 @@ def build_search_types(types, doc_types):
             continue
         if hasattr(ti, 'base_types'):
             # Also handles if same / duplicate requested_search_type encountered (for some reason).
-            types_list = [requested_search_type]
+            types_list = [requested_search_type] # Self type and base types of requested_search_type
             for base_type in ti.base_types:
                 types_list.append(base_type)
             for base_type in types_list:
-                if ti.name == base_type:
+                if encompassing_ti_for_all_items.name == base_type:
                     break # out of inner loop and continue
                 if hasattr(encompassing_ti_for_all_items, "base_types") and base_type in encompassing_ti_for_all_items.base_types:
                     # Will ultimately succeed at when base_type="Item", if not any earlier.
