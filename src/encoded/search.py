@@ -1,6 +1,7 @@
 import re
 import math
 import itertools
+from functools import reduce
 from pyramid.view import view_config
 from webob.multidict import MultiDict
 from snovault import (
@@ -64,8 +65,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # list of item types used from the query
     doc_types = set_doc_types(request, types, search_type)
     # calculate @type. Exclude ItemSearchResults unless no other types selected.
-    search_types = [dt + 'SearchResults' for dt in doc_types]
+    search_types = build_search_types(types, doc_types)
     search_types.append(forced_type)  # the old base search type
+
     # sets request.normalized_params
     search_base = normalize_query(request, types, doc_types)
     ### INITIALIZE RESULT.
@@ -257,6 +259,47 @@ def collection_view(context, request):
     This is a redirect directly to the search page
     """
     return search(context, request, context.type_info.name, False, forced_type='Search')
+
+
+def build_search_types(types, doc_types):
+    """
+    Builds `search_types` based on the requested search `type` in URI param (=> `doc_types`).
+
+    :param types: TypesTool from the registry
+    :param doc_types: Type names we would like to search on.
+    :return: search_types, or a list of 'SearchResults' type candidates
+    """
+    encompassing_ti_for_all_items = None
+    for requested_search_type in doc_types: # Handles if only 1 type in here, also.
+        ti = types[requested_search_type]   # 'ti' == 'Type Item'
+        if encompassing_ti_for_all_items and encompassing_ti_for_all_items.name == "Item":
+            break # No other higher-level base type
+        if encompassing_ti_for_all_items is None: # Set initial 'all-encompassing' item type
+            encompassing_ti_for_all_items = ti
+            continue
+        if hasattr(ti, 'base_types'):
+            # Also handles if same / duplicate requested_search_type encountered (for some reason).
+            types_list = [requested_search_type] # Self type and base types of requested_search_type
+            for base_type in ti.base_types:
+                types_list.append(base_type)
+            for base_type in types_list:
+                if encompassing_ti_for_all_items.name == base_type:
+                    break # out of inner loop and continue
+                if hasattr(encompassing_ti_for_all_items, "base_types") and base_type in encompassing_ti_for_all_items.base_types:
+                    # Will ultimately succeed at when base_type="Item", if not any earlier.
+                    encompassing_ti_for_all_items = types[base_type]
+                    break # out of inner loop and continue
+
+    search_types = [ encompassing_ti_for_all_items.name ]
+
+    if hasattr(encompassing_ti_for_all_items, "base_types"):
+        for base_type in encompassing_ti_for_all_items.base_types:
+            search_types.append(base_type)
+
+    if search_types[-1] != "Item":
+        search_types.append("Item")
+
+    return [ t + "SearchResults" for t in search_types ]
 
 
 def get_collection_actions(request, type_info):

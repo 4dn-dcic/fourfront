@@ -70,16 +70,18 @@ export function fileCountFromExperimentSet(experiment_set, includeProcessedFiles
 }
 
 
-export function fileToAccessionTriple(file, toString = false){
+export function fileToAccessionTriple(file, hasExperiment = true, toString = false){
     if (typeof file.accession !== 'string') throw new Error("No 'accession' property set on this file.");
-    if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file. " + (file.accession));
-    if (typeof file.from_experiment.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file. " + (file.accession));
-    if (typeof file.from_experiment.from_experiment_set === 'undefined') throw new Error("No 'from_experiment.from_experiment_set' property set on this file. " + (file.accession));
-    if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.from_experiment_set.accession' property set on this file. " + (file.accession));
+    if (hasExperiment === true) {
+        if (typeof file.from_experiment === 'undefined') throw new Error("No 'from_experiment' property set on this file. " + (file.accession));
+        if (typeof file.from_experiment.accession !== 'string') throw new Error("No 'from_experiment.accession' property set on this file. " + (file.accession));
+        if (typeof file.from_experiment.from_experiment_set === 'undefined') throw new Error("No 'from_experiment.from_experiment_set' property set on this file. " + (file.accession));
+        if (typeof file.from_experiment.from_experiment_set.accession !== 'string') throw new Error("No 'from_experiment.from_experiment_set.accession' property set on this file. " + (file.accession));
+    }
 
-    var triple = [
-        file.from_experiment.from_experiment_set.accession,
-        file.from_experiment.accession,
+    const triple = [
+        hasExperiment ? file.from_experiment.from_experiment_set.accession : 'NONE',
+        hasExperiment ? file.from_experiment.accession : 'NONE',
         file.accession
     ];
 
@@ -101,9 +103,9 @@ export function fileToAccessionTriple(file, toString = false){
  * @param {boolean|string} [toString=false]     Whether to concatanate resulting accession items into strings delimited by a tilde (`~`). If string is supplied, it is used as delimiter instead.
  * @returns {string[]} List of arrays or strings in form of EXPSETACCESSION~EXPACESSION~FILEACCESSION. EXPACESSION may be "NONE".
  */
-export function filesToAccessionTriples(files, toString = false){
+export function filesToAccessionTriples(files,hasExperiment = true, toString = false){
     return _.map(files || [], function(file){
-        return fileToAccessionTriple(file, toString);
+        return fileToAccessionTriple(file, hasExperiment, toString);
     });
 }
 

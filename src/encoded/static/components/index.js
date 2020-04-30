@@ -47,6 +47,7 @@ import SearchView               from './browse/SearchView';
 import MicroscopySearchView     from './browse/MicroscopySearchView';
 import PublicationSearchView    from './browse/PublicationSearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
+import FileSearchView           from './browse/FileSearchView';
 
 
 content_views.register(StaticPage,    'StaticPage');
@@ -102,7 +103,7 @@ content_views.register(MicroscopySearchView,    'MicroscopeConfigurationSearchRe
 content_views.register(SearchView,              'PublicationSearchResults', 'selection');
 content_views.register(SearchView,              'PublicationSearchResults', 'multiselect');
 content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
-
+content_views.register(FileSearchView,          'FileSearchResults');
 
 // Fallback for anything we haven't registered
 content_views.fallback = function () {

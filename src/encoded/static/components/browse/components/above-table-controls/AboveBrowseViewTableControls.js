@@ -99,7 +99,7 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
         }
 
         const aboveTableControlsProps = {
-            ..._.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen', 'parentForceUpdate'),
+            ..._.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen'),
             "panelMap" : {
                 "filterFilesBy" : {
                     "title" : (
