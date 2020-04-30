@@ -122,8 +122,16 @@ coverage = "^4.1"
 flaky = "3.6.1"
 # flask only for moto[server]
 flask = ">=1.1.1"
-# Here and elsewhere we pin use of moto 1.3.7.
-# It would help to have a record of why. -kmp 27-Apr-2020
+# Here AND ELSEWHERE (related scripts), we pin use of moto 1.3.7.
+# I asked Will today why we're pinning that and he explained to me that above there (i.e., in version 1.3.8),
+# an SQS-related bug is introduced, and that we cannot upgrade versions until this bug is fixed.
+# His belief is that moto has not had a "true" release in months, so we will have to stick with this version.
+# I searched the web and see this bug introduced in 1.3.8 and allegedly fixed. -kmp 29-Apr-2020
+# https://github.com/spulec/moto/issues/2172
+# Here's another report that might be related and it's not clear if this is fixed:
+# https://gitmemory.com/issue/spulec/moto/2118/474917895
+# TODO: Investigate whether this bug is fixed. If it is, update the version.
+#       If not, get a reference to an open bug report here so we can check back periodically.
 moto = "1.3.7"
 # TODO: Investigate whether a major version upgrade is allowable for 'pytest', which is several versions behind.
 pytest = "^2.9.2"
