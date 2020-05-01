@@ -107,7 +107,7 @@
     "detect-browser": "^3.0.1",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
-    "higlass": "^1.9.3",
+    "higlass": "1.6.11",
     "higlass-multivec": "github:higlass/higlass-multivec#es-modules-es",
     "higlass-register": "^0.1.0",
     "html-react-parser": "^0.4.7",
