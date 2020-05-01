@@ -351,47 +351,95 @@ def test_transitional_equivalence():
         old_content = old_output.getvalue()
         new_content = new_output.getvalue()
         problems = []
+
         if line_checker:
+
             for raw_line in io.StringIO(new_content):
                 line = raw_line.rstrip()
-                problem = line_checker(line)
+                problem = line_checker.check(line)
                 if problem:
                     problems.append(problem)
+
+            line_checker.check_finally()
+
             assert problems == [], "Problems found:\n%s" % "\n".join(problems)
 
     with mock.patch.object(generate_production_ini, "get_app_version", return_value=MOCKED_PROJECT_VERSION):
         with mock.patch("toml.load", return_value={"tool": {"poetry": {"version": MOCKED_LOCAL_GIT_VERSION}}}):
 
-            def prod_line_checker(line):
-                if 'bucket =' in line:
-                    fragment = 'fourfront-webprod'
-                    if fragment not in line:
-                        return "'%s' missing in '%s'" % (fragment, line)
+            class Checker:
 
-            tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
-                   es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
-                   line_checker=prod_line_checker)
+                def __init__(self, expect_indexer="true"):
+                    self.indexer = None
+                    self.expect_indexer = expect_indexer
 
-            tester(ref_ini="green.ini", bs_env="fourfront-green", data_set="prod",
-                   es_server="search-fourfront-green-cghpezl64x4uma3etijfknh7ja.us-east-1.es.amazonaws.com:80",
-                   line_checker=prod_line_checker)
+                def check_any(self, line):
+                    if line.startswith('indexer ='):
+                        print("saw indexer line:", repr(line))
+                        self.indexer = line.split('=')[1].strip()
 
-            tester(ref_ini="hotseat.ini", bs_env="fourfront-hotseat", data_set="prod",
-                   es_server="search-fourfront-hotseat-f3oxd2wjxw3h2wsxxbcmzhhd4i.us-east-1.es.amazonaws.com:80")
+                def check(self, line):
+                    self.check_any(line)
 
-            tester(ref_ini="mastertest.ini", bs_env="fourfront-mastertest", data_set="test",
-                   es_server="search-fourfront-mastertest-wusehbixktyxtbagz5wzefffp4.us-east-1.es.amazonaws.com:80")
+                def check_finally(self):
+                    assert self.indexer == self.expect_indexer, (
+                            "Expected 'indexer = %s' but value seen was %r." % (self.expect_indexer, self.indexer)
+                    )
 
-            tester(ref_ini="webdev.ini", bs_env="fourfront-webdev", data_set="prod",
-                   es_server="search-fourfront-webdev-5uqlmdvvshqew46o46kcc2lxmy.us-east-1.es.amazonaws.com:80")
+            class ProdChecker(Checker):
 
-            tester(ref_ini="webprod.ini", bs_env="fourfront-webprod", data_set="prod",
-                   es_server="search-fourfront-webprod-hmrrlalm4ifyhl4bzbvl73hwv4.us-east-1.es.amazonaws.com:80",
-                   line_checker=prod_line_checker)
+                def check(self, line):
+                    if 'bucket =' in line:
+                        fragment = 'fourfront-webprod'
+                        if fragment not in line:
+                            return "'%s' missing in '%s'" % (fragment, line)
+                    self.check_any(line)
 
-            tester(ref_ini="webprod2.ini", bs_env="fourfront-webprod2", data_set="prod",
-                   es_server="search-fourfront-webprod2-fkav4x4wjvhgejtcg6ilrmczpe.us-east-1.es.amazonaws.com:80",
-                   line_checker=prod_line_checker)
+            with override_environ(ENCODED_INDEXER=None):  # Make sure any global settings are masked.
+
+                tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                       es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                       line_checker=ProdChecker())
+
+                tester(ref_ini="green.ini", bs_env="fourfront-green", data_set="prod",
+                       es_server="search-fourfront-green-cghpezl64x4uma3etijfknh7ja.us-east-1.es.amazonaws.com:80",
+                       line_checker=ProdChecker())
+
+                tester(ref_ini="hotseat.ini", bs_env="fourfront-hotseat", data_set="prod",
+                       es_server="search-fourfront-hotseat-f3oxd2wjxw3h2wsxxbcmzhhd4i.us-east-1.es.amazonaws.com:80",
+                       line_checker=Checker())
+
+                tester(ref_ini="mastertest.ini", bs_env="fourfront-mastertest", data_set="test",
+                       es_server="search-fourfront-mastertest-wusehbixktyxtbagz5wzefffp4.us-east-1.es.amazonaws.com:80",
+                       line_checker=Checker())
+
+                tester(ref_ini="webdev.ini", bs_env="fourfront-webdev", data_set="prod",
+                       es_server="search-fourfront-webdev-5uqlmdvvshqew46o46kcc2lxmy.us-east-1.es.amazonaws.com:80",
+                       line_checker=Checker())
+
+                tester(ref_ini="webprod.ini", bs_env="fourfront-webprod", data_set="prod",
+                       es_server="search-fourfront-webprod-hmrrlalm4ifyhl4bzbvl73hwv4.us-east-1.es.amazonaws.com:80",
+                       line_checker=ProdChecker())
+
+                tester(ref_ini="webprod2.ini", bs_env="fourfront-webprod2", data_set="prod",
+                       es_server="search-fourfront-webprod2-fkav4x4wjvhgejtcg6ilrmczpe.us-east-1.es.amazonaws.com:80",
+                       line_checker=ProdChecker())
+
+                with override_environ(ENCODED_INDEXER=""):
+                    tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                           es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                           line_checker=ProdChecker())
+
+                with override_environ(ENCODED_INDEXER="TRUE"):
+                    tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                           es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                           line_checker=ProdChecker())
+
+                with override_environ(ENCODED_INDEXER="FALSE"):
+                    tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                           es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                           line_checker=ProdChecker(expect_indexer=None))
+
 
     # Uncomment this for debugging...
     # assert False, "PASSED"
