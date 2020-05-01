@@ -350,6 +350,8 @@ def test_transitional_equivalence():
 
         old_content = old_output.getvalue()
         new_content = new_output.getvalue()
+        assert old_content == new_content
+
         problems = []
 
         if line_checker:
