@@ -6,7 +6,6 @@ import url from 'url';
 import ReactTooltip from 'react-tooltip';
 import * as d3 from 'd3';
 import _ from 'underscore';
-import { Term } from './../util/Schemas';
 
 import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
