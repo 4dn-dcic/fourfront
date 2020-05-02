@@ -97,25 +97,29 @@ def health_check(config):
             foursight_url = None
 
         responseDict = {
-            "file_upload_bucket": settings.get('file_upload_bucket'),
-            "processed_file_bucket": settings.get('file_wfout_bucket'),
-            "blob_bucket": settings.get('blob_bucket'),
-            "system_bucket": settings.get('system_bucket'),
-            "elasticsearch": settings.get('elasticsearch.server'),
-            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
-            "load_data": settings.get('load_test_data'),
-            "beanstalk_env": env_name,
-            "namespace": settings.get('indexer.namespace'),
-            'project_version': settings.get('encoded_version'),
-            'beanstalk_app_version': settings.get('eb_app_version'),
-            'snovault_version': settings.get('snovault_version'),
-            'utils_version': settings.get('utils_version'),
-            "foursight": foursight_url,
+
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
             "content": None,
+
+            'beanstalk_app_version': settings.get('eb_app_version'),
+            "beanstalk_env": env_name,
+            "blob_bucket": settings.get('blob_bucket'),
+            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "display_title": "Fourfront Status and Foursight Monitoring",
+            "elasticsearch": settings.get('elasticsearch.server'),
+            "file_upload_bucket": settings.get('file_upload_bucket'),
+            "foursight": foursight_url,
+            "indexer": settings.get('indexer') or "false",
+            "load_data": settings.get('load_test_data'),
+            "namespace": settings.get('indexer.namespace'),
+            "processed_file_bucket": settings.get('file_wfout_bucket'),
+            'project_version': settings.get('encoded_version'),
+            "system_bucket": settings.get('system_bucket'),
+            'snovault_version': settings.get('snovault_version'),
+            'utils_version': settings.get('utils_version'),
+
         }
 
         return responseDict

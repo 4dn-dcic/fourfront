@@ -74,6 +74,10 @@ export default class HealthView extends React.PureComponent {
                 title : "Foursight",
                 description : "URI of corresponding Foursight page."
             },
+            'indexer' : {
+                title : "Indexer",
+                description : "Whether this server is an indexer."
+            },
             'load_data' : {
                 title : "Loaded Data",
                 description : "Data which was loaded into database on initialization or boot."
