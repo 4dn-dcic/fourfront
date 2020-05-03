@@ -369,19 +369,27 @@ def test_transitional_equivalence():
 
             class Checker:
 
-                def __init__(self, expect_indexer="true"):
+                def __init__(self, expect_indexer="true", expect_index_server=None):
                     self.indexer = None
+                    self.index_server = None
                     self.expect_indexer = expect_indexer
+                    self.expect_index_server = expect_index_server
 
                 def check_any(self, line):
                     if line.startswith('indexer ='):
                         print("saw indexer line:", repr(line))
                         self.indexer = line.split('=')[1].strip()
+                    if line.startswith('index_server ='):
+                        print("saw index_server line:", repr(line))
+                        self.index_server = line.split('=')[1].strip()
 
                 def check(self, line):
                     self.check_any(line)
 
                 def check_finally(self):
+                    assert self.indexer == self.expect_indexer, (
+                            "Expected 'indexer = %s' but value seen was %r." % (self.expect_indexer, self.indexer)
+                    )
                     assert self.indexer == self.expect_indexer, (
                             "Expected 'indexer = %s' but value seen was %r." % (self.expect_indexer, self.indexer)
                     )
@@ -425,20 +433,31 @@ def test_transitional_equivalence():
                        es_server="search-fourfront-webprod2-fkav4x4wjvhgejtcg6ilrmczpe.us-east-1.es.amazonaws.com:80",
                        line_checker=ProdChecker())
 
+                # The tests that follow are not really about the host (which we'll hold constant) but about the
+                # way various environment variables affect things.
+
+                fourfront_blue_es = "search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80"
+
                 with override_environ(ENCODED_INDEXER=""):
+
                     tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
-                           es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
+                           es_server=fourfront_blue_es,
                            line_checker=ProdChecker())
 
                 with override_environ(ENCODED_INDEXER="TRUE"):
-                    tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
-                           es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
-                           line_checker=ProdChecker())
 
-                with override_environ(ENCODED_INDEXER="FALSE"):
                     tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
-                           es_server="search-fourfront-blue-xkkzdrxkrunz35shbemkgrmhku.us-east-1.es.amazonaws.com:80",
-                           line_checker=ProdChecker(expect_indexer=None))
+                           es_server=fourfront_blue_es, line_checker=ProdChecker())
+
+                    with override_environ(ENCODED_INDEXER="FALSE"):
+
+                        tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                               es_server=fourfront_blue_es, line_checker=ProdChecker(expect_indexer=None))
+
+                        with override_environ(ENCODED_INDEX_SERVER="TRUE"):
+                            tester(ref_ini="blue.ini", bs_env="fourfront-blue", data_set="prod",
+                                   es_server=fourfront_blue_es,
+                                   line_checker=ProdChecker(expect_indexer=None, expect_index_server=True))
 
 
     # Uncomment this for debugging...
