@@ -6290,7 +6290,11 @@
                     "bg_px2",
                     "bw"
                 ],
-                "workflow_argument_name": "count_bg"
+                "workflow_argument_name": "count_bg",
+                "processed_extra_file_use_for": {
+                    "file_format": "bw",
+                    "use_for": "visualization"
+                }
             }
         ],
         "award": "1U01CA200059-01",

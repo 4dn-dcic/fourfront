@@ -20,6 +20,7 @@ from pyramid.security import (
     Everyone,
 )
 from collections import OrderedDict
+from encoded import APP_VERSION_REGISTRY_KEY
 
 
 def includeme(config):
@@ -86,6 +87,15 @@ def health_check(config):
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
 
+        env_name = settings.get('env.name')
+        # TODO: Move this logic to dcicutils.env_utils
+        # change when we get a CGAP-specific Foursight
+        if env_name and env_name.startswith('fourfront-'):
+            fs_env = env_name[len('fourfront-'):]
+            foursight_url = 'https://foursight.4dnucleome.org/view/' + fs_env
+        else:
+            foursight_url = None
+
         responseDict = {
             "file_upload_bucket": settings.get('file_upload_bucket'),
             "processed_file_bucket": settings.get('file_wfout_bucket'),
@@ -94,8 +104,13 @@ def health_check(config):
             "elasticsearch": settings.get('elasticsearch.server'),
             "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "load_data": settings.get('load_test_data'),
-            "beanstalk_env": settings.get('env.name'),
+            "beanstalk_env": env_name,
             "namespace": settings.get('indexer.namespace'),
+            'project_version': settings.get('encoded_version'),
+            'beanstalk_app_version': settings.get('eb_app_version'),
+            'snovault_version': settings.get('snovault_version'),
+            'utils_version': settings.get('utils_version'),
+            "foursight": foursight_url,
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
@@ -261,4 +276,4 @@ class FourfrontRoot(Root):
         "type": "string",
     })
     def app_version(self, registry):
-        return registry.settings['snovault.app_version']
+        return registry.settings[APP_VERSION_REGISTRY_KEY]

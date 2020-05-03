@@ -341,6 +341,28 @@
                             "visualization"
                         ]
                     },
+                    "processed_extra_file_use_for": {
+                        "title": "processed extra file use for",
+                        "description": "value for use_for field of extra file, valid for only processed file type argument",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "file_format": {
+                                "title": "file format",
+                                "description": "file format for extra file",
+                                "type": "string",
+                                "linkTo": "FileFormat"
+                            },
+                            "use_for": {
+                                "title": "use_for",
+                                "description": "value for use_for field of extra file",
+                                "type": "string",
+                                "enum": [
+                                    "visualization"
+                                ]
+                            }
+                        }
+                    },
                     "description": {
                         "title": "Description",
                         "description": "Argument Description",
