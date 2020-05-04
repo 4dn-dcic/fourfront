@@ -76,7 +76,11 @@ export default class HealthView extends React.PureComponent {
             },
             'indexer' : {
                 title : "Indexer",
-                description : "Whether this server is an indexer."
+                description : "Whether this server processes indexing requests at all."
+            },
+            'index_server' : {
+                title : "Indexer",
+                description : "Whether this server is only for indexing."
             },
             'load_data' : {
                 title : "Loaded Data",
