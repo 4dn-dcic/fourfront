@@ -60,7 +60,7 @@ def item_counts(config):
 
 def uptime_info():
     try:
-        return lang_utils.relative_time_string(uptime.uptime(), detailed=False)
+        return lang_utils.relative_time_string(uptime.uptime())
     except Exception:
         return "unavailable"
 
