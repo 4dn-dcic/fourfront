@@ -11,7 +11,7 @@ aws-ip-ranges:
 	curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json
 
 npm-setup:  # runs all front-end setup
-	npm install
+	npm ci
 	npm run build | grep -v "node_modules\|\[built\]"
 	npm run build-scss
 
