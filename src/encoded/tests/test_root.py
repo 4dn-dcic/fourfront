@@ -1,6 +1,8 @@
 from unittest import mock
 from ..root import uptime_info
 from dcicutils import lang_utils
+from dcicutils.misc_utils import ignored
+
 
 def test_uptime_info():
 
@@ -8,6 +10,7 @@ def test_uptime_info():
         assert uptime_info() == "1 hour, 5 minutes"
 
     def fail(*args, **kwargs):
+        ignored(args, kwargs)
         raise RuntimeError("Failure")
 
     with mock.patch("uptime.uptime", side_effect=fail):
