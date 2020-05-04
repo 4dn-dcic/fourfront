@@ -106,6 +106,10 @@ export default class HealthView extends React.PureComponent {
                 title : 'System Bucket',
                 description : "Name of blob storage bucket used for system data."
             },
+            'uptime': {
+                title : 'Uptime',
+                description : "How long this server has been running."
+            },
             'utils_version': {
                 title : "Utils Version",
                 description : "Software version of dcicutils being used."

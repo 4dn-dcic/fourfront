@@ -1,17 +1,8 @@
-import json
-import requests
-from re import escape
+import uptime
 from pyramid.decorator import reify
-from snovault import (
-    Root,
-    calculated_property,
-    root,
-    COLLECTIONS,
-    STORAGE
-)
-from snovault.util import find_collection_subtypes
+from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
 from .schema_formats import is_accession
-from .search import make_search_subreq
+from dcicutils import lang_utils
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -53,19 +44,25 @@ def item_counts(config):
             es_total += es_count
             warn_str = build_warn_string(db_count, es_count)
             item_name = request.registry[COLLECTIONS][item_type].type_info.name
-            db_es_compare[item_name] = ("DB: %s   ES: %s %s" %
-                                         (str(db_count), str(es_count), warn_str))
+            db_es_compare[item_name] = ("DB: %s   ES: %s %s" % (str(db_count), str(es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
                        (str(db_total), str(es_total), warn_str))
-        responseDict = {
+        response_dict = {
             'title': 'Item Counts',
             'db_es_total': db_es_total,
             'db_es_compare': db_es_compare
         }
-        return responseDict
+        return response_dict
 
     config.add_view(counts_view, route_name='item-counts')
+
+
+def uptime_info():
+    try:
+        return lang_utils.relative_time_string(uptime.uptime(), detailed=False)
+    except Exception:
+        return "unavailable"
 
 
 def health_check(config):
@@ -96,7 +93,7 @@ def health_check(config):
         else:
             foursight_url = None
 
-        responseDict = {
+        response_dict = {
 
             "@type": ["Health", "Portal"],
             "@context": "/health",
@@ -118,11 +115,12 @@ def health_check(config):
             'project_version': settings.get('encoded_version'),
             "system_bucket": settings.get('system_bucket'),
             'snovault_version': settings.get('snovault_version'),
+            'uptime': uptime_info(),
             'utils_version': settings.get('utils_version'),
 
         }
 
-        return responseDict
+        return response_dict
 
     config.add_view(health_page_view, route_name='health-check')
 
@@ -145,20 +143,21 @@ def submissions_page(config):
         'submissions-page',
         '/submissions'
     )
+
     def submissions_page_view(request):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
 
-        responseDict = {
-            "title" : "Submissions",
-            "notification" : "success",
-            "@type" : [ "Submissions", "Portal" ],
-            "@context" : "/submissions",
-            "@id" : "/submissions",
-            "content" : None
+        response_dict = {
+            "title": "Submissions",
+            "notification": "success",
+            "@type": ["Submissions", "Portal"],
+            "@context": "/submissions",
+            "@id": "/submissions",
+            "content": None
         }
 
-        return responseDict
+        return response_dict
 
     config.add_view(submissions_page_view, route_name='submissions-page')
 
@@ -201,9 +200,11 @@ class FourfrontRoot(Root):
             (Allow, Everyone, ['list', 'search']),
             (Allow, 'group.admin', ALL_PERMISSIONS),
             (Allow, 'remoteuser.EMBED', 'import_items'),
-        ] + [(Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
-        (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
-        (Allow, Everyone, ['visible_for_edit'])]
+        ] + [
+            (Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
+            (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
+            (Allow, Everyone, ['visible_for_edit'])
+        ]
         return acl
 
     def get(self, name, default=None):
@@ -227,11 +228,11 @@ class FourfrontRoot(Root):
         return self.connection.get_by_uuid(uuid, default)
 
     def jsonld_context(self):
-        '''Inherits from '@context' calculated property of Resource in snovault/resources.py'''
+        """Inherits from '@context' calculated property of Resource in snovault/resources.py"""
         return '/home'
 
     def jsonld_type(self):
-        '''Inherits from '@type' calculated property of Root in snovault/resources.py'''
+        """Inherits from '@type' calculated property of Root in snovault/resources.py"""
         return ['HomePage', 'StaticPage'] + super(FourfrontRoot, self).jsonld_type()
 
     @calculated_property(schema={
@@ -239,7 +240,7 @@ class FourfrontRoot(Root):
         "type": "array"
     })
     def content(self, request):
-        '''Returns -object- with pre-named sections'''
+        """Returns -object- with pre-named sections"""
         sections_to_get = ['home.introduction']
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         return_list = []
