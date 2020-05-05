@@ -4,6 +4,6 @@
     "GEO": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",
     "BioSample": "https://www.ncbi.nlm.nih.gov/biosample/",
     "ENA": "https://www.ebi.ac.uk/ena/data/search?query=",
-    "ENC": "https://www.encodeproject.org/",
+    "ENCODE": "https://www.encodeproject.org/",
     "CIL": "http://www.cellimagelibrary.org/images/"
 }
