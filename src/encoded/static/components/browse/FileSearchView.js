@@ -79,7 +79,7 @@ function FileTableWithSelectedFilesCheckboxes(props){
                     return (
                         <DisplayTitleColumnWrapper {...{ href, context, rowNumber, detailOpen, toggleDetailOpen }} result={file}>
                             <FileSearchViewCheckBox key="checkbox" {...{ file, selectedFiles, selectFile, unselectFile }} />
-                            <DisplayTitleColumnDefault result={file} />
+                            <DisplayTitleColumnDefault />
                         </DisplayTitleColumnWrapper>
                     );
                 }
@@ -197,11 +197,13 @@ class ControlsAndResults extends React.PureComponent {
         };
 
         let totalResults = null;
-        if (context && typeof context.total !== 'undefined' && context.total > 0) {
+        if (context && typeof context.total === 'number' && context.total > 0) {
             totalResults = (
-                <span className="inline-block mt-08">
-                    {context.total} Results
-                </span>
+                <div className="inline-block mt-08">
+                    <span id="results-count">
+                        { context.total }
+                    </span> Results
+                </div>
             )
         } else {
             totalResults = (<span className="inline-block mt-08">&nbsp;</span>)
