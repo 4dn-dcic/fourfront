@@ -135,17 +135,7 @@ def download(context, request):
     # If blob is on s3, redirect us there
     blob_storage = request.registry[BLOBS]
     if 'bucket' in download_meta:
-        conn = boto3.client('s3')
-        param_get_object = {
-            'Bucket': download_meta['bucket'],
-            'Key': download_meta['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
-        }
-        location = conn.generate_presigned_url(
-            ClientMethod = 'get_object',
-            Params = param_get_object,
-            ExpiresIn = 36*60*60
-        )
+        location = get_s3_presigned_url(download_meta, filename)
         raise HTTPFound(location=location)
     elif hasattr(blob_storage, 'get_blob_url'): #default fallback - filename is s3 blob id
         blob_url = blob_storage.get_blob_url(download_meta)
@@ -158,6 +148,19 @@ def download(context, request):
     }
     return Response(body=blob, headers=headers)
 
+def get_s3_presigned_url(download_meta, filename):
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': download_meta['bucket'],
+            'Key': download_meta['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        location = conn.generate_presigned_url(
+            ClientMethod = 'get_object',
+            Params = param_get_object,
+            ExpiresIn = 36*60*60
+        )
+        return location
 
 @collection(
     name='enzymes',
