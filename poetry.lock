@@ -249,7 +249,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "2.2.0"
+version = "2.2.1"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -308,7 +308,7 @@ description = "Utility package for interacting with the 4DN Data Portal and othe
 name = "dcicutils"
 optional = false
 python-versions = ">=3.4,<3.7"
-version = "0.19.0"
+version = "0.23.0"
 
 [package.dependencies]
 aws-requests-auth = ">=0.4.2,<1"
@@ -1360,6 +1360,14 @@ version = "1.3"
 
 [[package]]
 category = "main"
+description = "Cross-platform uptime library"
+name = "uptime"
+optional = false
+python-versions = "*"
+version = "3.0.1"
+
+[[package]]
+category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
 optional = false
@@ -1603,7 +1611,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "1abf5f5769582cc9345bda6ce24fc00108982757942ea91446602a0e55e6a36b"
+content-hash = "c1b302a75d51968b053b5d005020fba3002f7b581aaafea500fcc779fd362b30"
 python-versions = ">=3.5,<3.7"
 
 [metadata.files]
@@ -1758,12 +1766,12 @@ cryptography = [
     {file = "cryptography-2.9.2.tar.gz", hash = "sha256:a0c30272fb4ddda5f5ffc1089d7405b7a71b0b0f51993cb4e5dbb4590b2fc229"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-2.2.0-py3-none-any.whl", hash = "sha256:32ed80ff18bbc693437d00658b1a48fff2c1ffee5a562d3728e6d3fb47af3fa6"},
-    {file = "dcicsnovault-2.2.0.tar.gz", hash = "sha256:83bf879d05a6a20183bb8695559c7daa591b86e664dfebb288d6c864a4d83ed7"},
+    {file = "dcicsnovault-2.2.1-py3-none-any.whl", hash = "sha256:1e9790388df8cddbf327427b15f7b02d0825801ccf185ae8c36d2feccb4a190f"},
+    {file = "dcicsnovault-2.2.1.tar.gz", hash = "sha256:d7727cd0e6236dd72e903e4d7dc6ea4f35d6bf19d0418039c42fd99aac92b9d1"},
 ]
 dcicutils = [
-    {file = "dcicutils-0.19.0-py3-none-any.whl", hash = "sha256:ab9e0d81a7683f69ae1410571739baf16c79010579ff3a6556621787bdfbb12d"},
-    {file = "dcicutils-0.19.0.tar.gz", hash = "sha256:35ca3077b74033620f1001cc9526567644292140f76d57e07892441241c133c6"},
+    {file = "dcicutils-0.23.0-py3-none-any.whl", hash = "sha256:1dae78cd06f0b9c5deb382344fbef150cb867a5bc0f81678cfde1221638885c9"},
+    {file = "dcicutils-0.23.0.tar.gz", hash = "sha256:f10dd78cd0fd7bcc4dd220aee65ed4ac75c6b98a03cf5210d261b1cd31c77a06"},
 ]
 docker = [
     {file = "docker-4.2.0-py2.py3-none-any.whl", hash = "sha256:1c2ddb7a047b2599d1faec00889561316c674f7099427b9c51e8cb804114b553"},
@@ -2318,6 +2326,9 @@ transaction = [
 translationstring = [
     {file = "translationstring-1.3-py2.py3-none-any.whl", hash = "sha256:e26c7bf383413234ed442e0980a2ebe192b95e3745288a8fd2805156d27515b4"},
     {file = "translationstring-1.3.tar.gz", hash = "sha256:4ee44cfa58c52ade8910ea0ebc3d2d84bdcad9fa0422405b1801ec9b9a65b72d"},
+]
+uptime = [
+    {file = "uptime-3.0.1.tar.gz", hash = "sha256:7c300254775b807ce46e3dcbcda30aa3b9a204b9c57a7ac1e79ee6dbe3942973"},
 ]
 urllib3 = [
     {file = "urllib3-1.25.9-py2.py3-none-any.whl", hash = "sha256:88206b0eb87e6d677d424843ac5209e3fb9d0190d0ee169599165ec25e9d9115"},
