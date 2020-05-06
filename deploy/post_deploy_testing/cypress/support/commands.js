@@ -34,7 +34,7 @@ import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from './v
 Cypress.Commands.add('searchPageTotalResultCount', function(options){
 
     function getValue(){
-        const $elem = Cypress.$('div.above-results-table-row .box.results-count > div.inline-block > span.text-500');
+        const $elem = Cypress.$('#results-count');
         const count = parseInt($elem.text());
         expect(typeof count).to.equal("number");
         expect(isNaN(count)).to.be.false;

@@ -531,7 +531,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
                     return (
                         <DisplayTitleColumnWrapper {...{ href, context, rowNumber, detailOpen, toggleDetailOpen }} result={expSet}>
                             <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />
-                            <DisplayTitleColumnDefault result={expSet} />
+                            <DisplayTitleColumnDefault />
                         </DisplayTitleColumnWrapper>
                     );
                 }
