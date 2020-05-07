@@ -2,8 +2,8 @@
 """
 
 import copy
-import cProfile
 import boto3
+import cProfile
 import io
 import json
 import pstats
@@ -20,34 +20,40 @@ from time import sleep
 from .base import Item, lab_award_attribution_embed_list
 
 
+TIBANNA_CODE_NAME = 'pony'
+TIBANNA_WORKFLOW_RUNNER_LAMBDA_FUNCTION = 'run_workflow_pony'
+TIBANNA_WORKFLOW_STATUS_LAMBDA_FUNCTION = 'status_wfr_pony'
+
+ENV_WEBDEV = FF_ENV_WEBDEV
+
 steps_run_data_schema = {
-    "type" : "object",
-    "properties" : {
-        "file" : {
-            "type" : "array",
-            "title" : "File(s)",
-            "description" : "File(s) for this step input/output argument.",
-            "items" : {
-                "type" : ["string", "object"], # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
-                "linkTo" : "File" # TODO: (Med/High Priority) Make this work. Will likely wait until after embedding edits b.c. want to take break from WF stuff and current solution works.
+    "type": "object",
+    "properties": {
+        "file": {
+            "type": "array",
+            "title": "File(s)",
+            "description": "File(s) for this step input/output argument.",
+            "items": {
+                "type": ["string", "object"],  # Either string (uuid) or a object/dict containing uuid & other front-end-relevant properties from File Item.
+                "linkTo": "File"  # TODO: (Med/High Priority) Make this work. Will likely wait until after embedding edits b.c. want to take break from WF stuff and current solution works.
             }
         },
-        "meta" : {
-            "type" : "array",
-            "title" : "Additional metadata for input/output file(s)",
-            "description" : "List of additional info that might be related to file, but not part of File Item itself, such as ordinal.",
-            "items" : {
-                "type" : "object"
+        "meta": {
+            "type": "array",
+            "title": "Additional metadata for input/output file(s)",
+            "description": "List of additional info that might be related to file, but not part of File Item itself, such as ordinal.",
+            "items": {
+                "type": "object"
             }
         },
-        "value" : { # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
-            "title" : "Value",
-            "type" : "string",
-            "description" : "Value used for this output argument."
+        "value": {  # This is used in place of run_data.file, e.g. for a parameter string value, that does not actually have a file.
+            "title": "Value",
+            "type": "string",
+            "description": "Value used for this output argument."
         },
-        "type" : {
-            "type" : "string",
-            "title" : "I/O Type"
+        "type": {
+            "type": "string",
+            "title": "I/O Type"
         }
     }
 }
@@ -69,11 +75,11 @@ def get_unique_key_from_at_id(at_id):
 
 
 DEFAULT_TRACING_OPTIONS = {
-    'max_depth_history' : 9,
-    'max_depth_future' : 9,
-    "group_similar_workflow_runs" : True,
-    "track_performance" : False,
-    "trace_direction" : ["history"]
+    'max_depth_history': 9,
+    'max_depth_future': 9,
+    "group_similar_workflow_runs": True,
+    "track_performance": False,
+    "trace_direction": ["history"]
 }
 
 
@@ -178,7 +184,6 @@ def common_props_from_file(file_obj):
             })
 
     return ret_obj
-
 
 
 def trace_workflows(original_file_set_to_trace, request, options=None):
@@ -652,18 +657,22 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = workflow_schema
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'steps.name',
-        'steps.inputs',
-        'steps.outputs',
-        'steps.meta.software_used.name',
-        'steps.meta.software_used.title',
-        'steps.meta.software_used.version',
-        'steps.meta.software_used.source_url',
-        'arguments.argument_type',
-        'arguments.argument_format',
-        'arguments.workflow_argument_name'
-    ]
+    embedded_list = (
+        Item.embedded_list +
+        lab_award_attribution_embed_list +
+        [
+            'steps.name',
+            'steps.inputs',
+            'steps.outputs',
+            'steps.meta.software_used.name',
+            'steps.meta.software_used.title',
+            'steps.meta.software_used.version',
+            'steps.meta.software_used.source_url',
+            'arguments.argument_type',
+            'arguments.argument_format',
+            'arguments.workflow_argument_name'
+        ]
+    )
     rev = {
         'newer_versions': ('Workflow', 'previous_version')
     }
@@ -694,44 +703,47 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'workflow.category',
-        'workflow.experiment_types',
-        'workflow.app_name',
-        'workflow.title',
-        'workflow.steps.name',
-        'workflow.steps.meta.software_used.name',
-        'workflow.steps.meta.software_used.title',
-        'workflow.steps.meta.software_used.version',
-        'workflow.steps.meta.software_used.source_url',
-        'input_files.workflow_argument_name',
-        'input_files.value.filename',
-        'input_files.value.display_title',
-        'input_files.value.href',
-        'input_files.value.file_format',
-        'input_files.value.accession',
-        'input_files.value.@type',
-        'input_files.value.@id',
-        'input_files.value.file_size',
-        'input_files.value.quality_metric.url',
-        'input_files.value.quality_metric.overall_quality_status',
-        'input_files.value.status',
-        'output_files.workflow_argument_name',
-        'output_files.value.filename',
-        'output_files.value.display_title',
-        'output_files.value.href',
-        'output_files.value.file_format',
-        'output_files.value.accession',
-        'output_files.value.@type',
-        'output_files.value.@id',
-        'output_files.value.file_size',
-        'output_files.value.quality_metric.url',
-        'output_files.value.quality_metric.overall_quality_status',
-        'output_files.value.status',
-        'output_files.value_qc.url',
-        'output_files.value_qc.overall_quality_status'
-    ]
-
+    embedded_list = (
+        Item.embedded_list +
+        lab_award_attribution_embed_list +
+        [
+            'workflow.category',
+            'workflow.experiment_types',
+            'workflow.app_name',
+            'workflow.title',
+            'workflow.steps.name',
+            'workflow.steps.meta.software_used.name',
+            'workflow.steps.meta.software_used.title',
+            'workflow.steps.meta.software_used.version',
+            'workflow.steps.meta.software_used.source_url',
+            'input_files.workflow_argument_name',
+            'input_files.value.filename',
+            'input_files.value.display_title',
+            'input_files.value.href',
+            'input_files.value.file_format',
+            'input_files.value.accession',
+            'input_files.value.@type',
+            'input_files.value.@id',
+            'input_files.value.file_size',
+            'input_files.value.quality_metric.url',
+            'input_files.value.quality_metric.overall_quality_status',
+            'input_files.value.status',
+            'output_files.workflow_argument_name',
+            'output_files.value.filename',
+            'output_files.value.display_title',
+            'output_files.value.href',
+            'output_files.value.file_format',
+            'output_files.value.accession',
+            'output_files.value.@type',
+            'output_files.value.@id',
+            'output_files.value.file_size',
+            'output_files.value.quality_metric.url',
+            'output_files.value.quality_metric.overall_quality_status',
+            'output_files.value.status',
+            'output_files.value_qc.url',
+            'output_files.value_qc.overall_quality_status'
+        ]
+    )
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
     def steps(self, request):
         '''
@@ -922,7 +934,7 @@ def pseudo_run(context, request):
     env = request.registry.settings.get('env.name')
     # for testing
     if not env:
-        env = FF_ENV_WEBDEV
+        env = ENV_WEBDEV
     input_json['output_bucket'] = _wfoutput_bucket_for_env(env)
     input_json['env_name'] = env
     if input_json.get('app_name', None) is None:
@@ -935,14 +947,14 @@ def pseudo_run(context, request):
 
     # hand-off to tibanna for further processing
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
-    res = aws_lambda.invoke(FunctionName='run_workflow_pony',
+    res = aws_lambda.invoke(FunctionName=TIBANNA_WORKFLOW_RUNNER_LAMBDA_FUNCTION,
                             Payload=json.dumps(input_json))
     res_decode = res['Payload'].read().decode()
     res_dict = json.loads(res_decode)
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
     for i in range(100):
-        res = aws_lambda.invoke(FunctionName='status_wfr_pony',
+        res = aws_lambda.invoke(FunctionName=TIBANNA_WORKFLOW_STATUS_LAMBDA_FUNCTION,
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)
@@ -977,20 +989,20 @@ def run_workflow(context, request):
     env = request.registry.settings.get('env.name')
     # for testing
     if not env:
-        env = FF_ENV_WEBDEV
+        env = ENV_WEBDEV
     input_json['output_bucket'] = _wfoutput_bucket_for_env(env)
     input_json['env_name'] = env
 
     # hand-off to tibanna for further processing
     aws_lambda = boto3.client('lambda', region_name='us-east-1')
-    res = aws_lambda.invoke(FunctionName='run_workflow_pony',
+    res = aws_lambda.invoke(FunctionName=TIBANNA_WORKFLOW_RUNNER_LAMBDA_FUNCTION,
                             Payload=json.dumps(input_json))
     res_decode = res['Payload'].read().decode()
     res_dict = json.loads(res_decode)
     arn = res_dict['_tibanna']['response']['executionArn']
     # just loop until we get proper status
     for _ in range(2):
-        res = aws_lambda.invoke(FunctionName='status_wfr_pony',
+        res = aws_lambda.invoke(FunctionName=TIBANNA_WORKFLOW_STATUS_LAMBDA_FUNCTION,
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
         res_dict = json.loads(res_decode)
