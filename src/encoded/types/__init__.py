@@ -153,7 +153,7 @@ def get_s3_presigned_url(download_meta, filename):
         param_get_object = {
             'Bucket': download_meta['bucket'],
             'Key': download_meta['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
+            'ResponseContentDisposition': "inline; filename=" + filename
         }
         location = conn.generate_presigned_url(
             ClientMethod = 'get_object',
