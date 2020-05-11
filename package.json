@@ -127,7 +127,7 @@
     "react-jsx-parser": "^1.19.1",
     "react-redux": "^6.0.1",
     "react-tooltip": "^3.11.1",
-    "react-transition-group": "4.3.0",
+    "react-transition-group": "^4.4.1",
     "redux": "^3.7.0",
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.9.1"
