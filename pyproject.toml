@@ -30,12 +30,11 @@ classifiers = [
     # Specify the Python versions you support here. In particular, ensure
     # that you indicate whether you support Python 2, Python 3 or both.
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6'
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.5,<3.7"
+python = ">=3.6,<3.7"
 boto3 = "^1.10.46"
 botocore = "^1.13.46"
 certifi = "2018.4.16"
@@ -45,7 +44,7 @@ chardet = "3.0.4"
 "collective.recipe.modwsgi" = "2.1"
 "collective.recipe.template" = "1.13"
 colorama = "0.3.3"
-dcicsnovault = "^2.2.1"
+dcicsnovault = "3.0.0b0"  # ">=3.0.0,<4"
 dcicutils = ">=0.23.0,<1"
 docutils = "0.12"
 elasticsearch = "5.5.3"
@@ -83,7 +82,7 @@ pyramid-tm = "^2.2.1"
 pyramid-translogger = "^0.1"
 python-dateutil = "^2.5.3"
 python-magic = ">=0.4.12,<1"
-pytz = ">=2016.4"
+pytz = ">=2020.1"
 # Snovault has been updated to use PyYAML 5, and needs it for testing only.
 # We don't use the yaml package that PyYAML provides at all, so I'm just omitting this. -kmp 1-Mar-2020
 # PyYAML = "3.12"
