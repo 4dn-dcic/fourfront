@@ -142,6 +142,10 @@ blockquote {
 	@include navbar-fixed-position {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+		body[data-current-action="selection"] &,
+		body[data-current-action="multiselect"] & {
+			height: 41px;
+		}
 	}
 }
 
