@@ -60,6 +60,11 @@
             ],
             "additionalProperties": true,
             "properties":{
+                "ID": {
+                    "title": "ID",
+                    "comment": "ID for the Microscope Configuration",
+                    "type": "string"
+                },
                 "Name": {
                     "title": "Name",
                     "comment": "Title for the Microscope Configuration",
