@@ -44,7 +44,7 @@ chardet = "3.0.4"
 "collective.recipe.modwsgi" = "2.1"
 "collective.recipe.template" = "1.13"
 colorama = "0.3.3"
-dcicsnovault = "3.0.0b0"  # ">=3.0.0,<4"
+dcicsnovault = "3.0.0b1"  # ">=3.0.0,<4"
 dcicutils = ">=0.23.0,<1"
 docutils = "0.12"
 elasticsearch = "5.5.3"
@@ -81,7 +81,8 @@ pyramid-retry = "^1.0"
 pyramid-tm = "^2.2.1"
 pyramid-translogger = "^0.1"
 python-dateutil = "^2.5.3"
-python-magic = ">=0.4.12,<1"
+# python-magic is presently pinned to 0.4.15 in lockstep with dcicsnovault's requirements. See explanation there.
+python-magic = "0.4.15"
 pytz = ">=2020.1"
 # Snovault has been updated to use PyYAML 5, and needs it for testing only.
 # We don't use the yaml package that PyYAML provides at all, so I'm just omitting this. -kmp 1-Mar-2020
