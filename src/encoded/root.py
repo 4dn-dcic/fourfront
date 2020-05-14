@@ -3,6 +3,7 @@ from pyramid.decorator import reify
 from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
 from .schema_formats import is_accession
 from dcicutils import lang_utils
+from dcicutils.env_utils import is_stg_or_prd_env
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -88,7 +89,13 @@ def health_check(config):
         # TODO: Move this logic to dcicutils.env_utils
         # change when we get a CGAP-specific Foursight
         if env_name and env_name.startswith('fourfront-'):
-            fs_env = env_name[len('fourfront-'):]
+            if is_stg_or_prd_env(env_name):
+                if 'data.4dnucleome.org' in request.domain:  # constant should go in utils as well - Will
+                    fs_env = 'data'
+                else:
+                    fs_env = 'staging'
+            else:
+                fs_env = env_name[len('fourfront-'):]
             foursight_url = 'https://foursight.4dnucleome.org/view/' + fs_env
         else:
             foursight_url = None
