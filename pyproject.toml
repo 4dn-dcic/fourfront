@@ -63,7 +63,7 @@ netaddr = ">=0.7.18,<1"
 passlib = "^1.6.5"
 PasteDeploy = "1.5.2"
 pbkdf2 = "1.3"
-Pillow = "^3.1.1"
+Pillow = "3.1.1"  # Higher version might be causing a problem
 plaster = "1.0"
 plaster-pastedeploy = "0.6"
 psutil = "^4.3.0"
