@@ -994,7 +994,7 @@ class FileVistrack(File):
     })
     def display_title(self, request, file_format, accession=None, external_accession=None, dbxrefs=None):
         if dbxrefs:
-            acclist = [d.replace('ENC:', '') for d in dbxrefs if 'ENCFF' in d]
+            acclist = [d.replace('ENCODE:', '') for d in dbxrefs if 'ENCFF' in d]
             if acclist:
                 accession = acclist[0]
         if not accession:
