@@ -306,7 +306,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
 
 export function QCMetricFromEmbed(props){
     const { metric, qcProperty, fallbackTitle, tips, percent } = props;
-    if (!metric[qcProperty]) return null;
+    if (typeof metric[qcProperty] === 'undefined') return null;
     return (
         <div className="overview-list-element">
             <div className="row">
