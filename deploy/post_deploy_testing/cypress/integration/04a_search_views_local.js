@@ -42,7 +42,7 @@ describe('Deployment/CI Search View Tests', function () {
 
     });
 
-    context('Publications, Files Collections', function(){
+    context('Publications, Files, Microscope Configurations Collections', function(){
         // These are similarly implemently to the BrowseView, we should have specific tests for these
 
         it('/publications/ should redirect to /search/?type=Publication', function(){
@@ -79,6 +79,16 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         // TODO test facets
+
+        it('Can add new Microsope Configurations', function(){
+
+            cy.login4DN({ 'email' : '4dndcic@gmail.com', 'useEnvToken' : false }).end()
+                .visit('/search/?type=MicroscopeConfiguration').end()
+                .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+                    expect($searchResultElems.length).to.be.greaterThan(0);
+                }).end()
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration");
+        });
 
     });
 
