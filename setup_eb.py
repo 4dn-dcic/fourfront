@@ -10,7 +10,7 @@ ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 PYPROJECT_TOML = toml.decoder.load(os.path.join(ROOT_DIR, 'pyproject.toml'))
 POETRY_DATA = PYPROJECT_TOML['tool']['poetry']
 
-_CARET_MATCH = re.compile(r"[\^]([0-9]+)([.].*)$")
+_CARET_MATCH = re.compile(r"[\^]([0-9]+)([.].*)?$")
 
 
 def fix_requirement(requirement):
