@@ -29,15 +29,18 @@
         },
         "Total aligned": {
             "type": "number",
-            "description": "Dedup QC Summary metric for Repli-seq"
+            "description": "Dedup QC Summary metric for Repli-seq",
+            "qc_order": 1
         },
         "Number of removed duplicates": {
             "type": "number",
-            "description": "Dedup QC Summary metric for Repli-seq"
+            "description": "Dedup QC Summary metric for Repli-seq",
+            "qc_order": 2
         },
         "Proportion of removed duplicates": {
             "type": "number",
-            "description": "Dedup QC Summary metric for Repli-seq"
+            "description": "Dedup QC Summary metric for Repli-seq",
+            "qc_order": 3
         }
     },
     "facets": {
