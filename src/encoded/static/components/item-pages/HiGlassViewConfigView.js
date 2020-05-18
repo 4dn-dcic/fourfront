@@ -18,9 +18,32 @@ import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemVi
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import DefaultItemView from './DefaultItemView';
+import { columnExtensionMap  } from './../browse/columnExtensionMap';
 
 
-
+const higlassFilesColExtensionMap = _.extend({}, columnExtensionMap, {    
+    "source_experiment_sets.@id" : {
+        'widthMap': { 'lg': 200, 'md': 180, 'sm': 160 },
+        'minColumnWidth' : 200,
+        "render" : sourceDisplayTitleRenderFxn,
+        }    
+});
+function sourceDisplayTitleRenderFxn(result){
+    const { source_experiment_sets } = result;
+    let expSetLink;
+    if (!source_experiment_sets) return null;
+    source_experiment_sets.map((source_experiment_sets,i) => {
+        expSetLink =(<a href={object.atIdFromObject(source_experiment_sets)}>{ source_experiment_sets.display_title }{ i<source_experiment_sets.length? <span>, </span> : null}</a>);
+        if (!expSetLink){
+            return <span className="value">{ expSetLink} </span>
+        }
+    })  
+    return (
+            <span>
+            { expSetLink }
+            </span>
+        );  
+}
 export default class HiGlassViewConfigView extends DefaultItemView {
 
     itemHeader(){
@@ -754,7 +777,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 <h3 className="tab-section-title">
                                     <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
                                 </h3>
-                                <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
+                                <EmbeddedItemSearchTable {...filesTableProps} columnExtensionMap={higlassFilesColExtensionMap} facets={null} />
                             </div>
                         </React.Fragment>
                     ) : null
@@ -804,12 +827,12 @@ function HiGlassFileDetailPane(props){
                     <hr className="desc-separator" />
                 </div>
             )}
-            <h5 className="text-500 mb-0 mt-16">
-                <i className="icon icon-fw icon-list fas mr-08"/>Details
+            {/* <h5 className="text-500 mb-0 mt-16">
+                <i className="icon icon-fw icon-list fas mr-08" />Details
             </h5>
             <div className="item-page-detail ml-27">
                 <Detail context={result} open={false} schemas={schemas} excludedKeys={HiGlassFileDetailPane.excludedKeys} />
-            </div>
+            </div> */}
         </div>
     );
 }
