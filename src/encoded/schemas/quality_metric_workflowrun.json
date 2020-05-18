@@ -26,6 +26,12 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "url": {
+            "qc_order": 2
         }
     },
     "facets": {
