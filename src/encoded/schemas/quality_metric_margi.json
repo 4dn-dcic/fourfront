@@ -26,6 +26,65 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "Sequence mapping QC": {
+            "type": "string",
+            "qc_order": 2
+        },
+        "total_read_pairs": {
+            "title": "Total Read Pairs",
+            "type": "string",
+            "qc_order": 3
+        },
+        "unique_mapped_pairs": {
+            "title": "Unique Mapped Pairs",
+            "type": "string",
+            "qc_order": 4
+        },
+        "single_side_unique_mapped": {
+            "title": "Single Side Unique Mapped",
+            "type": "string",
+            "qc_order": 5
+        },
+        "nondup_unique_mapped_pairs": {
+            "title": "Nondup Unique Mapped Pairs",
+            "type": "string",
+            "qc_order": 6
+        },
+        "Total number of interactions": {
+            "type": "string",
+            "qc_order": 7
+        },
+        "Inter-chromosome interactions": {
+            "type": "string",
+            "qc_order": 8
+        },
+        "Intra-chromosome interactions": {
+            "type": "string",
+            "qc_order": 9
+        },
+        "Type": {
+            "type": "string",
+            "qc_order": 10
+        },
+        "Distal": {
+            "type": "string",
+            "qc_order": 11
+        },
+        "Proximal": {
+            "type": "string",
+            "qc_order": 12
+        },
+        "#total_valid_interactions/#nondup_unique_mapped_pairs": {
+            "type": "string",
+            "qc_order": 13
+        },
+        "(#unique_mapped_pairs + #single_side_unique_mapped)/#total_read_pairs": {
+            "type": "string",
+            "qc_order": 14
         }
     },
     "facets": {

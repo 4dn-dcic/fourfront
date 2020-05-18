@@ -20,14 +20,6 @@ export default class QualityMetricView extends DefaultItemView {
 
 }
 
-const excludedKeys = [
-    'public_release', 'aggregated-items', 'status',
-    'principals_allowed', 'validation-errors', 'date_created',
-    'uuid', 'submitted_by', 'last_modified', '@type', '@context',
-    'lab', 'award', 'display_title', 'external_references', 'project_release',
-    'schema_version', '@id', 'actions', 'static_headers', 'url'
-];
-
 class QualityMetricViewOverview extends React.PureComponent {
 
     constructor(props) {
@@ -73,7 +65,7 @@ class QualityMetricViewOverview extends React.PureComponent {
     render() {
         const { schemas, context } = this.props;
         const tips = object.tipsFromSchema(schemas, context);
-        const commonProps = { 'metric': context, 'tips': tips };
+        const commonProps = { 'metric': context, tips, schemas };
 
 
         //QC Metrics Summary
