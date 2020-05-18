@@ -37,7 +37,7 @@ classifiers = [
 python = ">=3.6,<3.7"
 boto3 = "^1.10.46"
 botocore = "^1.13.46"
-certifi = "2018.4.16"
+certifi = ">=2020.4.5.1"  # was "2018.4.16"
 chardet = "3.0.4"
 # TODO: These next three are not used in cgap. Are they really needed? -kmp 29-Apr-2020
 "collective.recipe.cmd" = "0.11"
@@ -54,7 +54,7 @@ future = "^0.15.2"
 # humanfriendly = "^1.44.5"
 humanfriendly = "1.44.5"
 hupper = "1.5"
-idna = "2.7"
+idna = ">=2.7,<3"  # was "2.7"
 isodate = "0.5.4"
 jmespath = "0.9.0"
 jsonschema-serialize-fork = "2.1.1"
@@ -73,12 +73,12 @@ plaster-pastedeploy = "0.6"
 psutil = "^4.3.0"
 # psycopg2-binary = "^2.7.7"
 psycopg2-binary = "2.7.7"
-py = "1.4.31"
+py = "^1.8.1"  # was "1.4.31" (used by pytest, not sure if elsewhere)
 pyasn1 = "0.1.9"
 PyBrowserID = "^0.10.0"
 pycparser = "2.14"
 PyJWT = "1.5.3"
-pyparsing = "2.1.1"
+pyparsing = "^2.4.7"  # was "2.1.1"
 pyramid = "1.10.4"
 pyramid-localroles = ">=0.1,<1"
 # pyramid-multiauth = ">=0.8.0,<1"
@@ -138,7 +138,8 @@ xlwt = "1.2.0"
 
 [tool.poetry.dev-dependencies]
 # coverage = "^4.1"
-coverage = "4.0.3"
+coverage = "5.1"  # was "4.0.3" (4.5.4 might work, too)
+flake8 = "^3.7.8"
 flaky = "3.6.1"
 # flask only for moto[server]
 flask = ">=1.1.1"
@@ -153,21 +154,15 @@ flask = ">=1.1.1"
 # TODO: Investigate whether this bug is fixed. If it is, update the version.
 #       If not, get a reference to an open bug report here so we can check back periodically.
 moto = "1.3.7"
-# TODO: Investigate whether a major version upgrade is allowable for 'pytest', which is several versions behind.
-pytest = "^2.9.2"
-# pytest-cov = "^2.2.1"
-# 2.6.0 exists
-pytest-cov = "2.2.1"
-pytest-exact-fixtures = ">=0.1,<1"
-pytest-instafail = "^0.3.0"
-pytest-mock = ">=0.11.0,<1"
-# pytest-timeout = "^1.0.0"
-# 1.2.1 exists
-pytest-timeout = "1.0.0"
-pytest-xdist = "1.14"
-# "repoze.debug" = "^1.0.2"
-# 1.1 exists
-"repoze.debug" = "1.0.2"
+pytest = "4.5.0"  # was "2.9.2"
+pytest-cov = "2.8.1"  # was "2.2.1"  (2.7.1 might also work)
+pytest-exact-fixtures = "0.3"  # was "0.1"
+pytest-instafail = "0.4.1"  # was "0.3.0"
+pytest-mock = "3.1.0"  # was "0.11.0" (1.10.4 might also work)
+pytest-timeout = "1.3.4"  # was "1.0.0"
+pytest-xdist = ">=1.14"  # was "1.14"
+"repoze.debug" = "1.1"  # was "1.0.2"
+responses = "0.10.14"
 
 [tool.poetry.scripts]
 # snovault commands
