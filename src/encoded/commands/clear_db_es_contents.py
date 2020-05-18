@@ -2,6 +2,7 @@ import argparse
 import logging
 import structlog
 
+from dcicutils.env_utils import is_stg_or_prd_env
 from pyramid.paster import get_app
 from snovault import DBSESSION
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
@@ -51,11 +52,17 @@ def clear_db_tables(app):
 
 def run_clear_db_es(app, arg_env, arg_skip_es=False):
     """
-    Use with care!
-    Function that actually clears DB/ES. Takes a Pyramid app as well as two
-    flags. Does some env checking for the given app; currently, will NOT run
-    at all on webprod/webprod2. If `arg_env` is provided, exit if the current
-    app environment does not match the given one.
+    This function actually clears DB/ES. Takes a Pyramid app as well as two flags. _Use with care!_
+
+    For safety, this function will return without side-effect on any production system.
+
+    Also does additional checks based on arguments supplied:
+
+    If an `arg_env` (default None) is given as a non-empty string value,
+    this function will return without side-effect if the current app environment does not match the given value.
+
+    If `arg_skip_es` (default False) is True, this function will return after DB clear
+    and before running create_mapping.
 
     Args:
         app: Pyramid application
@@ -66,8 +73,8 @@ def run_clear_db_es(app, arg_env, arg_skip_es=False):
         bool: True if DB was cleared (regardless of ES)
     """
     env = app.registry.settings.get('env.name', '')
-    # for now, do NOT allow dropping of webprod/webprod2
-    if 'webprod' in env:
+    # for now, do NOT allow clearing of production systems
+    if is_stg_or_prd_env(env):
         log.error('clear_db_es_contents: will NOT run on env %s. Exiting...' % env)
         return False
     if arg_env and arg_env != env:

@@ -24,17 +24,17 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     "display_title" : {
         "widthMap" : { "sm" : 320, "md" : 520, "lg" : 640 },
         'minColumnWidth' : 200,
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             return <PublicationSearchResultTitle {...props} {...{ result }} />;
         }
     },
     "date_published" : {
         "widthMap" : { "sm" : 60, "md" : 60, "lg" : 60 },
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             const { date_published = null } = result;
             if (!date_published) return null;
             return (
-                <span className="value">
+                <span className="value text-center">
                     <LocalizedTime timestamp={date_published} formatType="date-year" />
                 </span>
             );
@@ -42,7 +42,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     },
     "journal" : {
         "widthMap" : { "sm" : 100, "md" : 120, "lg" : 150 },
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             const { journal = null } = result;
             if (!journal) return null;
             return (
@@ -55,11 +55,11 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     "number_of_experiment_sets" : {
         "colTitle" : "Exp Sets",
         "widthMap" : { "sm" : 50, "md" : 70, "lg" : 80 },
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             const { number_of_experiment_sets: numSets = null } = result;
             if (numSets === null) return null;
             return (
-                <span className="value">
+                <span className="value text-center">
                     { valueTransforms.decorateNumberWithCommas(numSets) }
                 </span>
             );

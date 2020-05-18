@@ -60,6 +60,7 @@ before_install:
 - npm config set python /usr/bin/python2.7
 install:
 # need to manually change the version of six used by Travis for some reason
+- pip install --upgrade pip==19.0.3
 - pip uninstall -y six
 - pip install six==1.11.0
 - pip install --upgrade pip==19.0.3
