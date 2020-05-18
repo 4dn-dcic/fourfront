@@ -175,49 +175,6 @@ version = "7.1.2"
 
 [[package]]
 category = "main"
-description = "A Buildout recipe to execute commands in the console user interface"
-name = "collective.recipe.cmd"
-optional = false
-python-versions = "*"
-version = "0.11"
-
-[package.dependencies]
-setuptools = "*"
-"zc.buildout" = "*"
-
-[package.extras]
-tests = ["zope.testing", "zc.buildout", "manuel"]
-
-[[package]]
-category = "main"
-description = "WSGI from buildout"
-name = "collective.recipe.modwsgi"
-optional = false
-python-versions = "*"
-version = "2.1"
-
-[package.dependencies]
-setuptools = "*"
-"zc.recipe.egg" = "*"
-
-[[package]]
-category = "main"
-description = "Buildout recipe to generate a text file from a template"
-name = "collective.recipe.template"
-optional = false
-python-versions = "*"
-version = "1.13"
-
-[package.dependencies]
-setuptools = "*"
-"zc.buildout" = "*"
-
-[package.extras]
-genshi = ["genshi"]
-test = ["zope.testing"]
-
-[[package]]
-category = "main"
 description = "Cross-platform colored terminal text."
 name = "colorama"
 optional = false
@@ -1599,32 +1556,6 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "0.12.0"
 
 [[package]]
-category = "main"
-description = "System for managing development buildouts"
-name = "zc.buildout"
-optional = false
-python-versions = "*"
-version = "2.13.3"
-
-[package.dependencies]
-setuptools = ">=8.0"
-
-[package.extras]
-test = ["zope.testing", "manuel", "bobo (2.3.0)", "zdaemon", "zc.zdaemonrecipe", "zc.recipe.deployment"]
-
-[[package]]
-category = "main"
-description = "Recipe for installing Python package distributions as eggs"
-name = "zc.recipe.egg"
-optional = false
-python-versions = "*"
-version = "2.0.7"
-
-[package.dependencies]
-setuptools = "*"
-"zc.buildout" = ">=2.12.0"
-
-[[package]]
 category = "dev"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 marker = "python_version < \"3.8\""
@@ -1686,7 +1617,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "73174cb752d5102520872df6dd248ecc069922bf435a5f7e7753477746936366"
+content-hash = "93e7a9b103d31beaf7991c87d857f1e18539f597ab357ff4e09d02649d5023a4"
 python-versions = ">=3.6,<3.7"
 
 [metadata.files]
@@ -1775,16 +1706,6 @@ chardet = [
 click = [
     {file = "click-7.1.2-py2.py3-none-any.whl", hash = "sha256:dacca89f4bfadd5de3d7489b7c8a566eee0d3676333fbb50030263894c38c0dc"},
     {file = "click-7.1.2.tar.gz", hash = "sha256:d2b5255c7c6349bc1bd1e59e08cd12acbbd63ce649f2588755783aa94dfb6b1a"},
-]
-"collective.recipe.cmd" = [
-    {file = "collective.recipe.cmd-0.11.tar.gz", hash = "sha256:5c251ed2100de54a435594e297aa2173cfa55e9f335373523718c83aa470e173"},
-]
-"collective.recipe.modwsgi" = [
-    {file = "collective.recipe.modwsgi-2.1.tar.gz", hash = "sha256:7c56032e3f949a34a276a91d281672d7f3311b0e225a95abb8592d7ffd5fad9e"},
-]
-"collective.recipe.template" = [
-    {file = "collective.recipe.template-1.13-py2-none-any.whl", hash = "sha256:df3de0ad2f0e9b60ed10912e936eaeaadaadf72c9dc6898c2a09fb6455273eed"},
-    {file = "collective.recipe.template-1.13.tar.gz", hash = "sha256:737f4c75542bb39d91979dbc1d39104c2344e323b3aeba05d331867a2e649d01"},
 ]
 colorama = [
     {file = "colorama-0.3.3.tar.gz", hash = "sha256:eb21f2ba718fbf357afdfdf6f641ab393901c7ca8d9f37edd0bee4806ffa269c"},
@@ -2445,13 +2366,6 @@ xlwt = [
 xmltodict = [
     {file = "xmltodict-0.12.0-py2.py3-none-any.whl", hash = "sha256:8bbcb45cc982f48b2ca8fe7e7827c5d792f217ecf1792626f808bf41c3b86051"},
     {file = "xmltodict-0.12.0.tar.gz", hash = "sha256:50d8c638ed7ecb88d90561beedbf720c9b4e851a9fa6c47ebd64e99d166d8a21"},
-]
-"zc.buildout" = [
-    {file = "zc.buildout-2.13.3-py2.py3-none-any.whl", hash = "sha256:0880f131cd5f3c5f6a5e1d17add9d6bead079a4236056c3f896609ebd680c8c1"},
-    {file = "zc.buildout-2.13.3.tar.gz", hash = "sha256:d6691a864a7f14b3302ed9a9ab5790f2efc883375033371c1c959fedc72bccb7"},
-]
-"zc.recipe.egg" = [
-    {file = "zc.recipe.egg-2.0.7.tar.gz", hash = "sha256:b89eb00979614e3584bb4e8431172b2345d00b983a04ebf00a401fb695f4e6d3"},
 ]
 zipp = [
     {file = "zipp-3.1.0-py3-none-any.whl", hash = "sha256:aa36550ff0c0b7ef7fa639055d797116ee891440eac1a56f378e2d3179e0320b"},
