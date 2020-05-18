@@ -89,7 +89,7 @@
                                     "geneStrandSpacing": 4,
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
-                                    "geneAnnoHeight": 10,
+                                    "geneAnnotationHeight": 10,
                                     "labelColor": "black",
                                     "plusStrandColor": "black"
                                 },
@@ -287,7 +287,7 @@
                                     "geneStrandSpacing": 4,
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
-                                    "geneAnnoHeight": 10,
+                                    "geneAnnotationHeight": 10,
                                     "labelColor": "black",
                                     "plusStrandColor": "black"
                                 },
@@ -489,7 +489,7 @@
                                     "geneStrandSpacing": 4,
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
-                                    "geneAnnoHeight": 10,
+                                    "geneAnnotationHeight": 10,
                                     "labelColor": "black",
                                     "plusStrandColor": "black"
                                 },
@@ -697,7 +697,7 @@
                                     "geneStrandSpacing": 4,
                                     "mousePositionColor": "#999999",
                                     "labelBottomMargin": 0,
-                                    "geneAnnoHeight": 10,
+                                    "geneAnnotationHeight": 10,
                                     "labelColor": "black",
                                     "plusStrandColor": "black"
                                 },
