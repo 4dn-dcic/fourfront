@@ -204,9 +204,9 @@ class ControlsAndResults extends React.PureComponent {
                         { context.total }
                     </span> Results
                 </div>
-            )
+            );
         } else {
-            totalResults = (<span className="inline-block mt-08">&nbsp;</span>)
+            totalResults = <span className="inline-block mt-08">&nbsp;</span>;
         }
 
         let addButton = null;
@@ -261,6 +261,7 @@ class FileSearchViewCheckBox extends React.PureComponent {
             filesToObjectKeyedByAccessionTriples: memoize(FileSearchViewCheckBox.filesToObjectKeyedByAccessionTriples),
         };
     }
+
     onChange(e) {
         const { file, selectFile, unselectFile } = this.props;
         const isChecked = e.target.checked;
