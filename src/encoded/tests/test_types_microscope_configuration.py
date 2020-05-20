@@ -1,5 +1,5 @@
 import pytest
-from ..schema_formats import is_uuid 
+from ..schema_formats import is_uuid
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 

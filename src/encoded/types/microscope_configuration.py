@@ -38,7 +38,7 @@ class MicroscopeConfiguration(Item):
     }
 
     def _update(self, properties, sheets=None):
-        '''set preferred_name field to term_name if it's not already populated
+        '''set microscope ID if empty
         '''
         if properties.get('microscope'):
             microscope = properties.get('microscope')
