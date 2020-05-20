@@ -238,5 +238,16 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "bianca_morris@hms.harvard.edu",
+        "first_name": "Bianca",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Morris",
+        "uuid": "682f31f5-64df-4dd6-bb45-ca3b1726e27f",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
     }
 ]
