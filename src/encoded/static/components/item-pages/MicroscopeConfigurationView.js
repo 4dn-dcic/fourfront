@@ -268,6 +268,7 @@ export class MicroMetaTabView extends React.PureComponent {
         };
 
         microscope.Name = microConfTitle;
+        microscope.ID = ''; //remove old microscope's ID to be re-set in backend
 
         const payload = {
             'title': microConfTitle,
