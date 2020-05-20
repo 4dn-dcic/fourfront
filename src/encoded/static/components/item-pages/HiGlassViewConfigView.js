@@ -18,39 +18,46 @@ import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemVi
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import DefaultItemView from './DefaultItemView';
-import { columnExtensionMap  } from './../browse/columnExtensionMap';
 
 
-const higlassFilesColExtensionMap = _.extend({}, columnExtensionMap, {    
-    "source_experiment_sets.@id" : {
-        'widthMap': { 'lg': 200, 'md': 180, 'sm': 160 },
-        'minColumnWidth' : 200,
-        "render" : sourceDisplayTitleRenderFxn,
-        }    
-});
-function sourceDisplayTitleRenderFxn(result){
-    const { source_experiment_sets } = result;
-    let expSetLink;
-    if (!source_experiment_sets) return null;
-    source_experiment_sets.map((source_experiment_sets,i) => {
-        expSetLink =(<a href={object.atIdFromObject(source_experiment_sets)}>{ source_experiment_sets.display_title }{ i<source_experiment_sets.length? <span>, </span> : null}</a>);
-        if (!expSetLink){
-            return <span className="value">{ expSetLink} </span>
-        }
-    })  
-    return (
-            <span>
-            { expSetLink }
-            </span>
-        );  
-}
+// const higlassFilesColExtensionMap = _.extend({}, columnExtensionMap, {
+//     "source_experiment_sets.@id": {
+//         'widthMap': { 'lg': 200, 'md': 180, 'sm': 160 },
+//         "colTitle": "Source",
+//         'minColumnWidth': 200,
+//         "render": sourceDisplayTitleRenderFxn,
+//     }
+// });
+
+// function sourceDisplayTitleRenderFxn(result) {
+//     const { source_experiment_sets } = result;
+//     if (!source_experiment_sets || !Array.isArray(source_experiment_sets)) return null;
+//     source_experiment_sets.push(source_experiment_sets[0]);
+//     if (source_experiment_sets.length == 1) {
+//         const exp_set = source_experiment_sets[0];
+//         return (
+//             <span>
+//                 <a href={object.atIdFromObject(exp_set)}>{exp_set.display_title}</a>
+//             </span>
+//         );
+//     } else {
+//         const expSetLinks = source_experiment_sets.map((exp_set) => {
+//             return (
+//                 <li>
+//                     <a href={object.atIdFromObject(exp_set)}>{exp_set.display_title}</a>
+//                 </li>
+//             );
+//         })
+//         return (<ol style={{ marginTop: 'auto' }}>{expSetLinks}</ol>);
+//     }
+// }
+
 export default class HiGlassViewConfigView extends DefaultItemView {
-
+    
     itemHeader(){
         const itemActionsDescriptions = {
             'edit' : 'Edit the properties of this Item.',
         };
-
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
@@ -381,7 +388,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (this.state.genome_assembly){
             payload.genome_assembly = this.state.genome_assembly;
         }
-
         // Try to POST/PUT a new viewconf.
         this.setState(
             { 'cloneLoading' : true },
@@ -777,7 +783,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 <h3 className="tab-section-title">
                                     <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
                                 </h3>
-                                <EmbeddedItemSearchTable {...filesTableProps} columnExtensionMap={higlassFilesColExtensionMap} facets={null} />
+                                <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
                             </div>
                         </React.Fragment>
                     ) : null
