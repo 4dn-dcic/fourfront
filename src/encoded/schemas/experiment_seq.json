@@ -1,5 +1,5 @@
 {
-    "title": "1D Enrichment Sequencing Experiments",
+    "title": "Sequencing Experiment",
     "description": "Schema for ChIP-seq, RNA-seq and other related genomics experiments.",
     "id": "/profiles/experiment_seq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
