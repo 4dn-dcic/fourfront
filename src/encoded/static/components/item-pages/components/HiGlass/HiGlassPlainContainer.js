@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+import { default as installedPackageLockJson } from './../../../../../../../package-lock.json';
 
 
 /**
@@ -186,6 +187,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
     render(){
         const { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig, placeholder } = this.props;
         const { mounted, mountCount, hasRuntimeError } = this.state;
+        const { dependencies : { higlass : { version: higlassVersionUsed } } } = installedPackageLockJson;
         let hiGlassInstance = null;
         const outerKey = "mount-number-" + mountCount;
 
@@ -222,7 +224,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.6.11/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href={`https://unpkg.com/higlass@${higlassVersionUsed}/dist/hglib.css`} crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper">{ hiGlassInstance }</div>
             </div>
