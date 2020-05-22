@@ -142,7 +142,10 @@ def get_deployment_config(app):
     """
     Gets deployment configuration for the current environment.
 
-    Sets ENV_NAME and WIPE_ES as side-effects.
+    Sets ENV_NAME, WIPE_ES and SKIP as side-effects.
+        ENV_NAME: env we are deploying to
+        WIPE_ES: whether or not to completely wipe ES, otherwise only re-index different mappings
+        SKIP: whether or not to skip the create_mapping step entirely
 
     :param app: handle to Pyramid app
     :return: dict of config options
@@ -151,19 +154,20 @@ def get_deployment_config(app):
     current_prod_env = whodaman()  # current_prod_end = <current-data-env>
     my_env = get_my_env(app)
     deploy_cfg['ENV_NAME'] = my_env
+    deploy_cfg['SKIP'] = False  # set to True to skip the create_mapping step
     if current_prod_env == my_env:
         log.info('This looks like our production environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False
     elif my_env == guess_mirror_env(current_prod_env):
-        log.info('This looks like our staging environment -- do not wipe ES')
-        deploy_cfg['WIPE_ES'] = False  # do not wipe ES
+        log.info('This looks like our staging environment -- wipe ES')
+        deploy_cfg['WIPE_ES'] = True
     elif is_stg_or_prd_env(my_env):
         log.info('This looks like an uncorrelated production environment. Something is definitely wrong.')
         exit(0)
     elif is_test_env(my_env):
         if is_hotseat_env(my_env):
-            log.info('Looks like we are on hotseat -- do not wipe ES')
-            deploy_cfg['WIPE_ES'] = False
+            log.info('Looks like we are on hotseat -- do nothing to ES')
+            deploy_cfg['SKIP'] = True
         else:
             log.info('Looks like we are on webdev or mastertest -- wipe ES')
             deploy_cfg['WIPE_ES'] = True
@@ -174,10 +178,26 @@ def get_deployment_config(app):
     return deploy_cfg
 
 
+def override_deploy_cfg(deploy_cfg, b, key):
+    """ Overrides the given deployment_config's "key" option if 'b' is True.
+
+    :param deploy_cfg: deployment configuration, from function above
+    :param b: Boolean if True, will set deploy_cfg[key] to True, otherwise will leave
+    :param key: key to set
+    """
+    if not isinstance(b, bool):
+        raise RuntimeError('Passed non-boolean object %s for "b", aborting.' % b)
+    if b:
+        log.info('Overriding deploy_cfg: %s with True' % key)
+        deploy_cfg[key] = b
+
+
 def _run_create_mapping(app, args):
     """
     Runs create_mapping with deploy options and report errors. Allows args passed from argparse in main to override
-    the default deployment configuration
+    the default deployment configuration.
+
+    XXX: Should be refactored into CMDeployer in dcicutils.deployment_utils.py - Will 5/22/2020
 
     :param app: pyramid application handle
     :param args: args from argparse
@@ -186,13 +206,13 @@ def _run_create_mapping(app, args):
     try:
         deploy_cfg = get_deployment_config(app)
         log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
-        if args.wipe_es:  # override deploy_cfg WIPE_ES option
-            log.info('Overriding deploy_cfg and wiping ES')
-            deploy_cfg['WIPE_ES'] = True
-        run_create_mapping(app,
-                           check_first=(not deploy_cfg['WIPE_ES']),
-                           purge_queue=args.clear_queue,
-                           item_order=ITEM_INDEX_ORDER)
+        override_deploy_cfg(deploy_cfg, args.wipe_es, 'WIPE_ES')
+        override_deploy_cfg(deploy_cfg, args.skip, 'SKIP')
+        if not deploy_cfg['SKIP']:
+            run_create_mapping(app,
+                               check_first=(not deploy_cfg['WIPE_ES']),
+                               purge_queue=args.clear_queue,  # this option does not vary, so no need to override
+                               item_order=ITEM_INDEX_ORDER)
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
         log.error(str(e))
@@ -207,6 +227,7 @@ def main():
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('--wipe-es', help="Specify to wipe ES", action='store_true', default=False)
+    parser.add_argument('--skip', help='Specify to skip this step altogether', default=False)
     parser.add_argument('--clear-queue', help="Specify to clear the SQS queue", action='store_true', default=False)
 
     args = parser.parse_args()
