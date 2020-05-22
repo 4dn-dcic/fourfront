@@ -1,5 +1,5 @@
 {
-    "title": "Microscopy Files",
+    "title": "Microscopy file",
     "description": "Imaging Files of Microscopy",
     "id": "/profiles/file_microscopy.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
