@@ -142,10 +142,11 @@ def get_deployment_config(app):
     """
     Gets deployment configuration for the current environment.
 
-    Sets ENV_NAME, WIPE_ES and SKIP as side-effects.
+    Sets ENV_NAME, WIPE_ES, SKIP and STRICT as side-effects.
         ENV_NAME: env we are deploying to
         WIPE_ES: whether or not to completely wipe ES, otherwise only re-index different mappings
         SKIP: whether or not to skip the create_mapping step entirely
+        STRICT: whether or not to "strictly" reindex things (no invalidation)
 
     :param app: handle to Pyramid app
     :return: dict of config options
@@ -155,12 +156,14 @@ def get_deployment_config(app):
     my_env = get_my_env(app)
     deploy_cfg['ENV_NAME'] = my_env
     deploy_cfg['SKIP'] = False  # set to True to skip the create_mapping step
+    deploy_cfg['STRICT'] = False
     if current_prod_env == my_env:
         log.info('This looks like our production environment -- do not wipe ES')
         deploy_cfg['WIPE_ES'] = False
     elif my_env == guess_mirror_env(current_prod_env):
         log.info('This looks like our staging environment -- wipe ES')
         deploy_cfg['WIPE_ES'] = True
+        deploy_cfg['STRICT'] = True
     elif is_stg_or_prd_env(my_env):
         log.info('This looks like an uncorrelated production environment. Something is definitely wrong.')
         exit(0)
@@ -168,6 +171,7 @@ def get_deployment_config(app):
         if is_hotseat_env(my_env):
             log.info('Looks like we are on hotseat -- do nothing to ES')
             deploy_cfg['SKIP'] = True
+            deploy_cfg['STRICT'] = True
         else:
             log.info('Looks like we are on webdev or mastertest -- wipe ES')
             deploy_cfg['WIPE_ES'] = True
@@ -208,11 +212,13 @@ def _run_create_mapping(app, args):
         log.info('Running create mapping on env: %s' % deploy_cfg['ENV_NAME'])
         override_deploy_cfg(deploy_cfg, args.wipe_es, 'WIPE_ES')
         override_deploy_cfg(deploy_cfg, args.skip, 'SKIP')
+        override_deploy_cfg(deploy_cfg, args.strict, 'STRICT')
         if not deploy_cfg['SKIP']:
             run_create_mapping(app,
                                check_first=(not deploy_cfg['WIPE_ES']),
                                purge_queue=args.clear_queue,  # this option does not vary, so no need to override
-                               item_order=ITEM_INDEX_ORDER)
+                               item_order=ITEM_INDEX_ORDER,
+                               strict=deploy_cfg['STRICT'])
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
         log.error(str(e))
@@ -229,6 +235,7 @@ def main():
     parser.add_argument('--wipe-es', help="Specify to wipe ES", action='store_true', default=False)
     parser.add_argument('--skip', help='Specify to skip this step altogether', default=False)
     parser.add_argument('--clear-queue', help="Specify to clear the SQS queue", action='store_true', default=False)
+    parser.add_argument('--strict', help='Specify to do a strict reindex', default=False)
 
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
