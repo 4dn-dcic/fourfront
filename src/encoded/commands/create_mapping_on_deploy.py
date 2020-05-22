@@ -157,16 +157,14 @@ def get_deployment_config(app):
     deploy_cfg['ENV_NAME'] = my_env
     deploy_cfg['SKIP'] = False  # set to True to skip the create_mapping step
     deploy_cfg['STRICT'] = False
-    if current_prod_env == my_env:
-        log.info('This looks like our production environment -- do not wipe ES')
-        deploy_cfg['WIPE_ES'] = False
-    elif my_env == guess_mirror_env(current_prod_env):
+    deploy_cfg['WIPE_ES'] = False
+    if my_env == guess_mirror_env(current_prod_env):
         log.info('This looks like our staging environment -- wipe ES')
         deploy_cfg['WIPE_ES'] = True
         deploy_cfg['STRICT'] = True
     elif is_stg_or_prd_env(my_env):
         log.info('This looks like an uncorrelated production environment. Something is definitely wrong.')
-        exit(0)
+        raise RuntimeError('Tried to run CMOD on production - error\'ing deployment')  # note that this will cause any deployments to production to fail!
     elif is_test_env(my_env):
         if is_hotseat_env(my_env):
             log.info('Looks like we are on hotseat -- do nothing to ES')
@@ -178,7 +176,6 @@ def get_deployment_config(app):
     else:
         log.warning('This environment is not recognized: %s' % my_env)
         log.warning('Proceeding without wiping ES')
-        deploy_cfg['WIPE_ES'] = False
     return deploy_cfg
 
 

@@ -62,7 +62,7 @@ def test_get_deployment_config_staging_old():
     """ Tests get_deployment_config in the old staging case """
     cfg = get_deployment_config(None)
     assert cfg['ENV_NAME'] == 'fourfront-webprod'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe
+    assert cfg['WIPE_ES'] is True  # wipe
 
 
 #@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-green'))
@@ -72,7 +72,7 @@ def test_get_deployment_config_staging_new():
     """ Tests get_deployment_config in the new staging case """
     cfg = get_deployment_config(None)
     assert cfg['ENV_NAME'] == 'fourfront-blue'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe
+    assert cfg['WIPE_ES'] is True  # wipe
 
 
 #@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
@@ -80,9 +80,8 @@ def test_get_deployment_config_staging_new():
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod2'))
 def test_get_deployment_config_prod_old():
     """ Tests get_deployment_config in the old production case """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-webprod2'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe
+    with pytest.raises(RuntimeError):
+        get_deployment_config(None)
 
 
 #@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-green'))
@@ -90,9 +89,8 @@ def test_get_deployment_config_prod_old():
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
 def test_get_deployment_config_prod_new():
     """ Tests get_deployment_config in the new production case """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-green'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe
+    with pytest.raises(RuntimeError):
+        get_deployment_config(None)
 
 
 # It is essential to patch the place the function is referenced from, not the place it's defined from.
