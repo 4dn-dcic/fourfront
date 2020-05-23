@@ -1,7 +1,6 @@
 import pytest
 
 from dcicutils.deployment_utils import CreateMappingOnDeployManager
-from dcicutils.misc_utils import ignored
 from snovault import COLLECTIONS
 from unittest.mock import patch, MagicMock
 from ..commands import create_mapping_on_deploy
@@ -9,9 +8,6 @@ from ..commands.create_mapping_on_deploy import (
     ITEM_INDEX_ORDER,
     _run_create_mapping  # noqa - yeah, it's internal but we want to test it
 )
-# Experimentally commenting out this strange import. -kmp 27-Mar-2020
-# # TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
-# from ..types.experiment import *
 from .datafixtures import ORDER
 
 
