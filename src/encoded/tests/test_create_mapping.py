@@ -253,3 +253,24 @@ def test_run_create_mapping_mastertest(mock_run_create_mapping, app):
         ('info', 'Environment fourfront-mastertest is a non-hotseat test environment. Processing mode: WIPE_ES'),
         ('info', 'Calling run_create_mapping for env fourfront-mastertest.')
     ]
+
+
+@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
+@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
+def test_run_create_mapping_mastertest_with_clear_queue(mock_run_create_mapping, app):
+
+    simulation = Simulation(mocked_app=app, expect_check_first=False, expect_purge_queue=True, expect_strict=False)
+    mocked_log = create_mapping_on_deploy.log
+    try:
+        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
+        _run_create_mapping(app, MockedCommandArgs(clear_queue=True))
+    except SystemExit as e:
+        print(e)
+        assert e.code == 0
+    assert simulation.run_has_been_called is True
+    assert mocked_log.log == [
+        ('info', 'Environment fourfront-mastertest is a non-hotseat test environment. Processing mode: WIPE_ES'),
+        ('info', 'Calling run_create_mapping for env fourfront-mastertest.')
+    ]
