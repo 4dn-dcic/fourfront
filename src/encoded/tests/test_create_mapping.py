@@ -1,8 +1,14 @@
 import pytest
 
+from dcicutils.deployment_utils import CreateMappingOnDeployManager
+from dcicutils.misc_utils import ignored
 from snovault import COLLECTIONS
 from unittest.mock import patch, MagicMock
-from ..commands.create_mapping_on_deploy import ITEM_INDEX_ORDER, get_deployment_config
+from ..commands import create_mapping_on_deploy
+from ..commands.create_mapping_on_deploy import (
+    ITEM_INDEX_ORDER,
+    _run_create_mapping  # noqa - yeah, it's internal but we want to test it
+)
 # Experimentally commenting out this strange import. -kmp 27-Mar-2020
 # # TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
 # from ..types.experiment import *
@@ -55,85 +61,199 @@ def test_create_mapping_item_order(registry):
         assert registry[COLLECTIONS][i_type].type_info.name in ITEM_INDEX_ORDER
 
 
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod'))
-def test_get_deployment_config_staging_old():
-    """ Tests get_deployment_config in the old staging case """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-webprod'  # sanity
-    assert cfg['WIPE_ES'] is True  # wipe
+class MockedCommandArgs:
+
+    def __init__(self, wipe_es=None, skip=None, strict=None, clear_queue=None):
+        self.wipe_es = wipe_es
+        self.skip = skip
+        self.strict = strict
+        self.clear_queue = clear_queue
 
 
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-green'))
+class MockedLog:
+
+    def __init__(self):
+        self.log = []
+
+    def info(self, msg):
+        self.log.append(('info', msg))
+
+    def error(self, msg):
+        self.log.append(('error', msg))
+
+
+# These next are more extensively tested in dcicutils.
+# This is just plausibility checking that we've received things OK.
+
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-blue'))
-def test_get_deployment_config_staging_new():
+def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the new staging case """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-blue'  # sanity
-    assert cfg['WIPE_ES'] is True  # wipe
+    my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
+    assert my_env == 'fourfront-blue'
+    cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
+    assert cfg['ENV_NAME'] == my_env  # sanity
+    assert cfg['SKIP'] is False
+    assert cfg['WIPE_ES'] is True
+    assert cfg['STRICT'] is True
 
 
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-webprod2'))
-def test_get_deployment_config_prod_old():
-    """ Tests get_deployment_config in the old production case """
-    with pytest.raises(RuntimeError):
-        get_deployment_config(None)
-
-
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
-def test_get_deployment_config_prod_new():
+def test_get_deployment_config_prod():
     """ Tests get_deployment_config in the new production case """
+    my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
+    assert my_env == 'fourfront-green'
     with pytest.raises(RuntimeError):
-        get_deployment_config(None)
+        CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
 
 
-# It is essential to patch the place the function is referenced from, not the place it's defined from.
-# Sometimes both are needed, but not here. So we'll hold this other in reserve in case of a code change,
-# because these kinds of patches are sensitive to that. -kmp 28-Mar-2020
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
-def test_get_deployment_config_mastertest_old():
-    """ Tests get_deployment_config in the mastertest case with an old-style ecosystem. """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-mastertest'  # sanity
-    assert cfg['WIPE_ES'] is True  # wipe
-
-
-# It is essential to patch the place the function is referenced from, not the place it's defined from.
-# Sometimes both are needed, but not here. So we'll hold this other in reserve in case of a code change,
-# because these kinds of patches are sensitive to that. -kmp 28-Mar-2020
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
-def test_get_deployment_config_mastertest_new():
-    """ Tests get_deployment_config in the mastertest case with a new-style ecosystem. """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-mastertest'  # sanity
-    assert cfg['WIPE_ES'] is True  # wipe
-
-
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-webprod2'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-webprod2'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
-def test_get_deployment_config_hotseat_old():
-    """ Tests get_deployment_config in the hotseat case with an old-style ecosystem. """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-hotseat'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe
-
-
-#@patch('dcicutils.beanstalk_utils.whodaman', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.whodaman', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
-def test_get_deployment_config_hotseat_new():
+def test_get_deployment_config_hotseat():
     """ Tests get_deployment_config in the hotseat case with a new-style ecosystem. """
-    cfg = get_deployment_config(None)
-    assert cfg['ENV_NAME'] == 'fourfront-hotseat'  # sanity
-    assert cfg['WIPE_ES'] is False  # no wipe
+    my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
+    assert my_env == 'fourfront-hotseat'
+    cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
+    assert cfg['ENV_NAME'] == my_env  # sanity
+    assert cfg['SKIP'] is True  # The other values don't matter if this is set.
+    # assert cfg['WIPE_ES'] is ...
+    # assert cfg['STRICT'] is ...
+
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
+def test_get_deployment_config_mastertest():
+    """ Tests get_deployment_config in the hotseat case with a new-style ecosystem. """
+    my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
+    assert my_env == 'fourfront-mastertest'
+    cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
+    assert cfg['ENV_NAME'] == my_env  # sanity
+    assert cfg['SKIP'] is False
+    assert cfg['WIPE_ES'] is True
+    assert cfg['STRICT'] is False
+
+
+class Simulation:
+
+    def __init__(self, mocked_app, expect_check_first=False, expect_purge_queue=False, expect_strict=False):
+        self.run_has_been_called = False
+        self.mocked_app = mocked_app
+        self.expect_check_first = expect_check_first
+        self.expect_purge_queue = expect_purge_queue
+        self.expect_strict = expect_strict
+
+    def __str__(self):
+        return ("<{cls} run {called} expecting cf={cf} pq={pq} es={es} {id}>"
+                .format(cls=self.__class__.__name__, called="CALLED" if self.run_has_been_called else "UNCALLED",
+                        cf=self.expect_check_first, pq=self.expect_purge_queue, es=self.expect_strict, id=id(self)))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def mocked_run_create_mapping(self, app, check_first=False, strict=False, purge_queue=False, item_order=None,
+                                  **kwargs):
+        self.run_has_been_called = True
+        assert kwargs == {}, "mocked_run_create_mapping needs adjusting. It doesn't expect these keywords: %s" % kwargs
+        assert app == self.mocked_app, "Mocked app was not as expected: %s" % app
+        # check_first is (not WIPE_ES)
+        assert check_first is self.expect_check_first, "check_first is not False: %s" % check_first
+        # purge_queue is whether --clear-queue was in command args
+        assert bool(purge_queue) is self.expect_purge_queue, (
+                "bool(purge_queue) is not False. purge_queue=%s" % purge_queue)
+        # This should be a constant for our purposes
+        assert item_order == ITEM_INDEX_ORDER, "item_order was not as expected: %s" % item_order
+        # strict is the STRICT argument
+        assert strict is self.expect_strict, "strict is not False: %s" % strict
+
+
+@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
+def test_run_create_mapping_production(mock_run_create_mapping, app):
+
+    simulation = Simulation(mocked_app=app)  # Expectations don't matter because we're not expecting to get called.
+    mocked_log = create_mapping_on_deploy.log
+    try:
+        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
+        _run_create_mapping(app, MockedCommandArgs())
+    except SystemExit as e:
+        print(e)
+        assert e.code == 1
+    assert simulation.run_has_been_called is False
+    assert mocked_log.log == [
+        ('info', 'Environment fourfront-green is currently the production environment.'
+                 ' Something is definitely wrong. We never deploy there, we always CNAME swap.'
+                 ' This deploy cannot proceed. DeploymentFailure will be raised.'),
+        ('error', 'Exception encountered while gathering deployment information or running create_mapping'),
+        ('error', 'DeploymentFailure: Tried to run create_mapping_on_deploy on production.'),
+    ]
+
+
+@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-blue'))
+@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
+def test_run_create_mapping_staging(mock_run_create_mapping, app):
+
+    simulation = Simulation(mocked_app=app, expect_check_first=False, expect_purge_queue=False, expect_strict=True)
+    mocked_log = create_mapping_on_deploy.log
+    exit_condition = None
+    try:
+        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
+        _run_create_mapping(app, MockedCommandArgs())
+    except SystemExit as e:
+        exit_condition = e
+        print(exit_condition)
+    except Exception as e:
+        print("log =", mocked_log.log)
+        raise AssertionError("Unexpected error exit (%s): %s" % (e.__class__.__name__, e))
+    assert simulation.run_has_been_called is True
+    assert mocked_log.log == [
+        ('info', 'Environment fourfront-blue is currently the staging environment. Processing mode: STRICT,WIPE_ES'),
+        ('info', 'Calling run_create_mapping for env fourfront-blue.')
+    ]
+    assert exit_condition, "Unexpected non-error exit."
+    assert exit_condition.code == 0
+
+
+@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
+@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
+def test_run_create_mapping_hotseat(mock_run_create_mapping, app):
+
+    simulation = Simulation(mocked_app=app)  # Expectations don't matter because we're not expecting to get called.
+    mocked_log = create_mapping_on_deploy.log
+    try:
+        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
+        _run_create_mapping(app, MockedCommandArgs())
+    except SystemExit as e:
+        print(e)
+        assert e.code == 0
+    assert simulation.run_has_been_called is False
+    assert mocked_log.log == [
+        ('info', 'Environment fourfront-hotseat is a hotseat test environment. Processing mode: SKIP'),
+        ('info', 'NOT calling run_create_mapping for env fourfront-hotseat.')
+    ]
+
+
+@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
+@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
+def test_run_create_mapping_mastertest(mock_run_create_mapping, app):
+
+    simulation = Simulation(mocked_app=app, expect_check_first=False, expect_purge_queue=False, expect_strict=False)
+    mocked_log = create_mapping_on_deploy.log
+    try:
+        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
+        _run_create_mapping(app, MockedCommandArgs())
+    except SystemExit as e:
+        print(e)
+        assert e.code == 0
+    assert simulation.run_has_been_called is True
+    assert mocked_log.log == [
+        ('info', 'Environment fourfront-mastertest is a non-hotseat test environment. Processing mode: WIPE_ES'),
+        ('info', 'Calling run_create_mapping for env fourfront-mastertest.')
+    ]

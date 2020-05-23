@@ -5,9 +5,7 @@ import logging
 from pyramid.paster import get_app
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import compute_ff_prd_env, compute_cgap_prd_env
-from dcicutils.deployment_utils import DeployConfigManager
-from dcicutils.env_utils import is_test_env, is_hotseat_env, guess_mirror_env, is_stg_or_prd_env, is_fourfront_env
+from dcicutils.deployment_utils import CreateMappingOnDeployManager
 
 
 log = structlog.getLogger(__name__)
@@ -154,12 +152,13 @@ def _run_create_mapping(app, args):
 
     try:
 
-        deploy_cfg = DeployConfigManager.get_deploy_config(env=get_my_env(app), args=args, log=log)
+        deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=get_my_env(app), args=args, log=log,
+                                                                    client='create_mapping_on_deploy')
 
         if not deploy_cfg['SKIP']:
 
             log.info('Calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
-            run_create_mapping(app,
+            run_create_mapping(app=app,
                                check_first=(not deploy_cfg['WIPE_ES']),
                                purge_queue=args.clear_queue,  # this option does not vary, so no need to override
                                item_order=ITEM_INDEX_ORDER,
@@ -169,9 +168,11 @@ def _run_create_mapping(app, args):
 
             log.info('NOT calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
 
+        exit(0)
+
     except Exception as e:
         log.error("Exception encountered while gathering deployment information or running create_mapping")
-        log.error(str(e))
+        log.error("%s: %s" % (e.__class__.__name__, e))
         exit(1)
 
 
@@ -183,7 +184,7 @@ def main():
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('--clear-queue', help="Specify to clear the SQS queue", action='store_true', default=False)
-    DeployConfigManager.add_config_options(parser)  # Should probably be called add_argparse_arguments options
+    CreateMappingOnDeployManager.add_argparse_arguments(parser)
 
     args = parser.parse_args()
     app = get_app(args.config_uri, args.app_name)
