@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -27,6 +27,12 @@
         "schema_version": {
             "default": "1"
         },
+        "name": {
+            "type": "string"
+        },
+        "desc": {
+            "type": "string"
+        },
         "overall_quality_status": {
             "qc_order": 1
         },
@@ -35,8 +41,8 @@
             "qc_order": 2,
             "items": {
                 "type": "object",
-                "additionalProperties": true,
-                "propeties": {
+                "additionalProperties": false,
+                "properties": {
                     "total": {
                         "type": "number",
                         "qc_order": 1
@@ -137,7 +143,7 @@
             "qc_order": 3,
             "items": {
                 "type": "object",
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "properties": {
                     "unpaired_reads": {
                         "type": "number",
@@ -175,7 +181,7 @@
             "qc_order": 4,
             "items": {
                 "type": "object",
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "properties": {
                     "total_read_pairs": {
                         "type": "number",
@@ -213,7 +219,7 @@
             "qc_order": 5,
             "items": {
                 "type": "object",
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "properties": {
                     "total": {
                         "type": "number",
@@ -313,8 +319,8 @@
         "overlap_reproducibility_qc": {
             "type": "object",
             "qc_order": 2,
-            "additionalProperties": true,
-            "items": {
+            "additionalProperties": false,
+            "properties": {
                 "Nt": {
                     "type": "number",
                     "qc_order": 1
@@ -364,12 +370,12 @@
         "frip_macs2_qc": {
             "type": "object",
             "qc_order": 3,
-            "additionalProperties": true,
-            "items": {
+            "additionalProperties": false,
+            "properties": {
                 "rep1": {
                     "type": "object",
                     "qc_order": 1,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -379,7 +385,8 @@
                 "rep2": {
                     "type": "object",
                     "qc_order": 2,
-                    "items": {
+                    "additionalProperties": false,
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -389,7 +396,7 @@
                 "rep1-pr1": {
                     "type": "object",
                     "qc_order": 3,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -399,7 +406,7 @@
                 "rep2-pr1": {
                     "type": "object",
                     "qc_order": 4,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -409,7 +416,7 @@
                 "rep1-pr2": {
                     "type": "object",
                     "qc_order": 5,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -419,7 +426,7 @@
                 "rep2-pr2": {
                     "type": "object",
                     "qc_order": 6,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -429,7 +436,7 @@
                 "pooled": {
                     "type": "object",
                     "qc_order": 7,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -439,7 +446,7 @@
                 "ppr1": {
                     "type": "object",
                     "qc_order": 8,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -449,7 +456,7 @@
                 "ppr2": {
                     "type": "object",
                     "qc_order": 9,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -461,12 +468,12 @@
         "overlap_frip_qc": {
             "type": "object",
             "qc_order": 4,
-            "additionalProperties": true,
-            "items": {
+            "additionalProperties": false,
+            "properties": {
                 "rep1-rep2": {
                     "type": "object",
                     "qc_order": 1,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -476,7 +483,7 @@
                 "rep1-pr": {
                     "type": "object",
                     "qc_order": 2,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -486,7 +493,7 @@
                 "rep2-pr": {
                     "type": "object",
                     "qc_order": 3,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1
@@ -496,7 +503,7 @@
                 "ppr": {
                     "type": "object",
                     "qc_order": 4,
-                    "items": {
+                    "properties": {
                         "FRiP": {
                             "type": "number",
                             "qc_order": 1

@@ -48,7 +48,9 @@ class QualityMetricViewOverview extends React.PureComponent {
 
         if (!schemaProp && !context && !schemas) { return []; }
 
-        let propObj = (schemaProp && schemaProp.type === 'object' && typeof schemaProp.items === 'object' && schemaProp.items) || null;
+        let propObj = schemaProp ?
+            ((schemaProp.type === 'object' && schemaProp.properties) ||
+            (schemaProp.type === 'array' && schemaProp.items && typeof schemaProp.items.type === 'object' && schemaProp.items.properties)) : null;
         if (!propObj && context && schemas) {
             const typeSchema = schemaTransforms.getSchemaForItemType(
                 schemaTransforms.getItemType(context), schemas || null
