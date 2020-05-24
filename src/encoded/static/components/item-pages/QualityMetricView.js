@@ -7,6 +7,7 @@ import { console, object, ajax, schemaTransforms, valueTransforms } from '@hms-d
 import DefaultItemView, { WrapInColumn } from './DefaultItemView';
 import { Schemas } from './../util';
 import { unstable_batchedUpdates } from 'react-dom';
+import { FileView } from './QualityMetricView';
 
 
 
@@ -128,7 +129,7 @@ class QualityMetricViewOverview extends React.PureComponent {
     }
 }
 
-function QCMetricFromEmbed(props){
+export function QCMetricFromEmbed(props){
     const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = props;
 
     if (!schemaItem && typeof schemaItem.qc_order !== 'number') return null;
@@ -188,7 +189,7 @@ QCMetricFromEmbed.percentOfTotalReads = function(quality_metric, field){
 };
 
 
-function QCMetricFromSummary(props){
+export function QCMetricFromSummary(props){
     const { title } = props;
     const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
 
@@ -254,7 +255,7 @@ export class QualityControlResults extends React.PureComponent {
         const metricURL = metric && metric.url;
         return (
             <div className="overview-list-elements-container">
-                { _.map(file.quality_metric_summary, function(qmsItem){ return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; }) }
+                { _.map(file.quality_metric.quality_metric_summary, function(qmsItem){ return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; }) }
                 { metricURL ?
                     <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
                         <React.Fragment>
@@ -274,7 +275,7 @@ export class QualityControlResults extends React.PureComponent {
         let metrics, titleProperty = "quality_metric_summary";
 
         const qualityMetricEmbeddedExists = file && file.quality_metric && object.itemUtil.atId(file.quality_metric);
-        const qualityMetricSummaryExists = file && Array.isArray(file.quality_metric_summary) && file.quality_metric_summary.length > 0;
+        const qualityMetricSummaryExists = file && file.quality_metric && Array.isArray(file.quality_metric.quality_metric_summary) && file.quality_metric.quality_metric_summary.length > 0;
 
         if (qualityMetricSummaryExists){
             metrics = this.metricsFromSummary();
@@ -285,7 +286,7 @@ export class QualityControlResults extends React.PureComponent {
             return null;
         }
 
-        const tips = FileView.schemaForFile(file, schemas);
+        const tips = object.tipsFromSchema(schemas, file);
 
         return (
             <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">

@@ -16,7 +16,7 @@ import { AdjustableDividerRow } from './components/AdjustableDividerRow';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { QCMetricFromSummary } from './FileView';
+import { QCMetricFromSummary } from './QualityMetricView';
 
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, renderFileQCDetailLinkButton } from './../browse/components/file-tables';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
