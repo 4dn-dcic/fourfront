@@ -148,7 +148,7 @@ class Experiment(Item):
         "files.quality_metric.Sequence length",
         "files.quality_metric.url",
         "files.quality_metric.overall_quality_status",
-        "files.quality_metric_summary.*",#todo - delete soon
+        #"files.quality_metric_summary.*",#todo - delete soon
         "files.quality_metric.quality_metric_summary.*",
 
         "processed_files.href",
@@ -161,7 +161,7 @@ class Experiment(Item):
         "processed_files.file_type_detailed",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
-        "processed_files.quality_metric_summary.*",#todo - delete soon
+        #"processed_files.quality_metric_summary.*",#todo - delete soon
         "processed_files.quality_metric.quality_metric_summary.*",
 
         "other_processed_files.files.href",
@@ -177,7 +177,7 @@ class Experiment(Item):
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
-        "other_processed_files.files.quality_metric_summary.*",#todo - delete soon
+        #"other_processed_files.files.quality_metric_summary.*",#todo - delete soon
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
 

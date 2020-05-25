@@ -163,7 +163,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        "experiments_in_set.files.quality_metric_summary.*", #todo - delete soon  # This may not yet be enabled on raw files.
+        #"experiments_in_set.files.quality_metric_summary.*", #todo - delete soon  # This may not yet be enabled on raw files.
         "experiments_in_set.files.quality_metric.quality_metric_summary.*", # This may not yet be enabled on raw files.
         "experiments_in_set.files.badges.badge.title",
         "experiments_in_set.files.badges.badge.commendation",
@@ -212,7 +212,7 @@ class ExperimentSet(Item):
         # "processed_files.quality_metric.Sequence length",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
-        "processed_files.quality_metric_summary.*", #todo - delete soon
+        #"processed_files.quality_metric_summary.*", #todo - delete soon
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.notes_to_tsv",
 
@@ -237,7 +237,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.extra_files.use_for",
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
-        "experiments_in_set.processed_files.quality_metric_summary.*", #todo - delete soon
+       # "experiments_in_set.processed_files.quality_metric_summary.*", #todo - delete soon
         "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",
@@ -259,7 +259,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
-        "other_processed_files.files.quality_metric_summary.*", #todo - delete soon
+        #"other_processed_files.files.quality_metric_summary.*", #todo - delete soon
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
         "other_processed_files.higlass_view_config.description",
@@ -279,7 +279,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.last_modified.date_modified",
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
-        "experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
+        #"experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
 
