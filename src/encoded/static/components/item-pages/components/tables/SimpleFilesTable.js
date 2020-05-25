@@ -40,15 +40,15 @@ SimpleFilesTable.propTypes = {
     'columns'                   : PropTypes.object
 };
 SimpleFilesTable.defaultProps = {
-    'columns' : {
-        "display_title"     : { "title" : "Title" },
-        "file_format"       : { "title" : "Format" },
-        "file_size"         : {
-            "title" : "Size",
-            'minColumnWidth' : 60,
-            'widthMap' : { 'sm' : 50, 'md' : 50, 'lg' : 60 }
+    'columns': {
+        "display_title": { "title": "Title" },
+        "file_format.display_title": { "title": "Format" },
+        "file_size": {
+            "title": "Size",
+            'minColumnWidth': 60,
+            'widthMap': { 'sm': 50, 'md': 50, 'lg': 60 }
         },
-        "file_type"         : { "title" : "File Type" },
+        "file_type": { "title": "File Type" },
     }
 };
 
