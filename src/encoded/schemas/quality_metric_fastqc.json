@@ -168,5 +168,6 @@
             "title" : "Overall Quality",
             "default_hidden": true
         }
-    }
+    },
+    "qc_order": 5
 }

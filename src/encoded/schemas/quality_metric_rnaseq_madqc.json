@@ -77,5 +77,6 @@
         "overall_quality_status": {
             "title" : "Overall Quality"
         }
-    }
+    },
+    "qc_order": 8
 }
