@@ -28,14 +28,15 @@ export const commonParsingFxn = {
      * MODIFIES OBJECTS IN PLACE
      */
     'countsToTotals' : function(parsedBuckets, excludeChildren = false){
-        var total = 0, subTotals = {};
+        let total = 0;
+        const subTotals = {};
 
-        _.forEach(parsedBuckets, function(bkt, index){
+        parsedBuckets.forEach(function(bkt, index){
             total += bkt.count;
             bkt.total = total;
             if (excludeChildren || !Array.isArray(bkt.children)) return;
 
-            _.forEach(bkt.children, function(c){
+            bkt.children.forEach(function(c){
                 c.total = subTotals[c.term] = (subTotals[c.term] || 0) + (c.count || 0);
             });
         });
@@ -47,9 +48,9 @@ export const commonParsingFxn = {
      * MODIFIES IN PLACE.
      */
     'countsToCountTotals' : function(parsedBuckets, excludeChildren = false){
-        _.forEach(parsedBuckets, function(bkt){
+        parsedBuckets.forEach(function(bkt){
             bkt.total = bkt.count;
-            _.forEach(bkt.children, function(c){
+            bkt.children.forEach(function(c){
                 c.total = c.count;
             });
         });
@@ -59,8 +60,8 @@ export const commonParsingFxn = {
      * MODIFIES OBJECTS IN PLACE
      */
     'fillMissingChildBuckets' : function(aggsList, subAggTerms = [], externalTermMap = {}){
-        _.forEach(aggsList, function(datum){
-            _.forEach(subAggTerms, function(term){
+        aggsList.forEach(function(datum){
+            subAggTerms.forEach(function(term){
                 if (externalTermMap && externalTermMap[term]) return;
                 if (!_.findWhere(datum.children, { term })){
                     datum.children.push({ term, 'count' : 0, 'total' : 0, 'date' : datum.date });
@@ -68,18 +69,19 @@ export const commonParsingFxn = {
             });
         });
 
-        var today = new Date(),
-            lastDate = aggsList.length > 0 && new Date(aggsList[aggsList.length - 1].date),
-            todayAsString = today.toISOString().slice(0,10);
+        const today = new Date();
+        const lastDate = aggsList.length > 0 && new Date(aggsList[aggsList.length - 1].date);
+        const todayAsString = today.toISOString().slice(0,10);
 
         if (lastDate && lastDate < today){
-            aggsList.push(_.extend({}, aggsList[aggsList.length - 1], {
+            aggsList.push({
+                ...aggsList[aggsList.length - 1],
                 'date' : todayAsString,
                 'count' : 0,
-                'children' : _.map(aggsList[aggsList.length - 1].children, function(c){
+                'children' : aggsList[aggsList.length - 1].children.map(function(c){
                     return _.extend({}, c, { 'date' : todayAsString, 'count' : 0 });
                 })
-            }));
+            });
         }
     },
     /**
@@ -91,32 +93,39 @@ export const commonParsingFxn = {
      * @param {boolean} [excludeChildren=false] - If true, skips aggregating up children to increase performance very slightly.
      */
     'bucketDocCounts' : function(intervalBuckets, groupByField, externalTermMap, excludeChildren = false){
-        var subBucketKeysToDate = new Set(),
-            aggsList = _.map(intervalBuckets, function(bucket, index){
-                if (excludeChildren === true){
-                    return {
-                        'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                        'count'    : bucket.doc_count
-                    };
-                } else {
+        const subBucketKeysToDate = new Set();
+        const aggsList = intervalBuckets.map(function(bucket, index){
+            const {
+                doc_count,
+                key_as_string,
+                [groupByField] : { buckets: subBuckets = [] } = {}
+            } = bucket;
 
-                    _.forEach(_.pluck((bucket[groupByField] && bucket[groupByField].buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
+            if (excludeChildren === true){
+                return {
+                    'date' : key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                    'count' : doc_count
+                };
+            } else {
+                _.pluck(subBuckets, 'key').forEach(function(k){
+                    subBucketKeysToDate.add(k);
+                });
 
-                    var children = _.map(Array.from(subBucketKeysToDate), function(term){
-                        // Create a parsed 'bucket' even if none returned from ElasticSearch agg but it has appeared earlier.
-                        var subBucket = bucket[groupByField] && bucket[groupByField].buckets && _.findWhere(bucket[groupByField].buckets, { 'key' : term }),
-                            count     = ((subBucket && subBucket.doc_count) || 0);
+                const children = [ ...subBucketKeysToDate ].map(function(term){
+                    // Create a parsed 'bucket' even if none returned from ElasticSearch agg but it has appeared earlier.
+                    const subBucket = _.findWhere(subBuckets, { 'key' : term });
+                    const count = ((subBucket && subBucket.doc_count) || 0);
 
-                        return { term, count };
-                    });
+                    return { term, count };
+                });
 
-                    return {
-                        'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                        'count'    : bucket.doc_count,
-                        'children' : groupExternalChildren(children, externalTermMap)
-                    };
-                }
-            });
+                return {
+                    'date' : key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                    'count' : doc_count,
+                    'children' : groupExternalChildren(children, externalTermMap)
+                };
+            }
+        });
 
         if (subBucketKeysToDate.size === 0){ // No group by defined, fill with dummy child for each.
             _.forEach(aggsList, function(dateBucket){
@@ -126,7 +135,7 @@ export const commonParsingFxn = {
         }
 
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference([ ...subBucketKeysToDate ], (externalTermMap && _.keys(externalTermMap)) || [] ));
 
         return aggsList;
     },
@@ -138,51 +147,65 @@ export const commonParsingFxn = {
      * @param {Object.<string>} [externalTermMap] - Object which maps external terms to true (external data) or false (internal data).
      */
     'bucketTotalFilesCounts' : function(intervalBuckets, groupByField, externalTermMap){
-        var subBucketKeysToDate = new Set(),
-            aggsList = _.map(intervalBuckets, function(bucket, index){
+        const subBucketKeysToDate = new Set();
+        const aggsList = intervalBuckets.map(function(bucket, index){
+            const {
+                key_as_string,
+                total_files : { value: totalFiles = 0 } = {},
+                [groupByField] : { buckets: subBuckets = [] } = {}
+            } = bucket;
 
-                _.forEach(_.pluck((bucket[groupByField] && bucket[groupByField].buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
-
-                var children = _.map(Array.from(subBucketKeysToDate), function(term){
-                    var subBucket = bucket[groupByField] && bucket[groupByField].buckets && _.findWhere(bucket[groupByField].buckets, { 'key' : term }),
-                        count     = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0);
-
-                    return { term, count };
-                });
-
-                return {
-                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                    'count'    : (bucket && bucket.total_files && bucket.total_files.value) || 0,
-                    'children' : groupExternalChildren(children, externalTermMap)
-                };
+            _.pluck(subBuckets, 'key').forEach(function(k){
+                subBucketKeysToDate.add(k);
             });
 
+            const children = [ ...subBucketKeysToDate ].map(function(term){
+                const subBucket = _.findWhere(subBuckets, { 'key' : term });
+                const count = ((subBucket && subBucket.total_files && subBucket.total_files.value) || 0);
+
+                return { term, count };
+            });
+
+            return {
+                'date' : key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                'count' : totalFiles,
+                'children' : groupExternalChildren(children, externalTermMap)
+            };
+        });
+
         // Ensure each datum has all child terms, even if blank.
-        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
+        commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference([ ...subBucketKeysToDate ], (externalTermMap && _.keys(externalTermMap)) || [] ));
 
         return aggsList;
     },
     'bucketTotalFilesVolume' : function(intervalBuckets, groupByField, externalTermMap){
-        var gigabyte = 1024 * 1024 * 1024,
-            subBucketKeysToDate = new Set(),
-            aggsList = _.map(intervalBuckets, function(bucket, index){
+        const gigabyte = 1024 * 1024 * 1024;
+        const subBucketKeysToDate = new Set();
+        const aggsList = intervalBuckets.map(function(bucket, index){
+            const {
+                key_as_string,
+                total_files_volume : { value: totalFilesVolume = 0 } = {},
+                [groupByField] : { buckets: subBuckets = [] } = {}
+            } = bucket;
 
-                _.forEach(_.pluck((bucket[groupByField] && bucket[groupByField].buckets) || [], 'key'), subBucketKeysToDate.add.bind(subBucketKeysToDate));
-
-                var fileSizeVol = ((bucket.total_files_volume && bucket.total_files_volume.value) || 0) / gigabyte,
-                    children = _.map(Array.from(subBucketKeysToDate), function(term){
-                        var subBucket      = bucket[groupByField] && bucket[groupByField].buckets && _.findWhere(bucket[groupByField].buckets, { 'key' : term }),
-                            subFileSizeVol = ((subBucket && subBucket.total_files_volume && subBucket.total_files_volume.value) || 0) / gigabyte;
-
-                        return { term, 'count' : subFileSizeVol };
-                    });
-
-                return {
-                    'date'     : bucket.key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
-                    'count'    : fileSizeVol,
-                    'children' : groupExternalChildren(children, externalTermMap)
-                };
+            _.pluck(subBuckets, 'key').forEach(function(k){
+                subBucketKeysToDate.add(k);
             });
+
+            const fileSizeVol = totalFilesVolume / gigabyte;
+            const children = [ ...subBucketKeysToDate ].map(function(term){
+                const subBucket = _.findWhere(subBuckets, { 'key' : term });
+                const subFileSizeVol = ((subBucket && subBucket.total_files_volume && subBucket.total_files_volume.value) || 0) / gigabyte;
+
+                return { term, 'count' : subFileSizeVol };
+            });
+
+            return {
+                'date'     : key_as_string.split('T')[0], // Sometimes we get a time back with date when 0 doc_count; correct it to date only.
+                'count'    : fileSizeVol,
+                'children' : groupExternalChildren(children, externalTermMap)
+            };
+        });
 
         // Ensure each datum has all child terms, even if blank.
         commonParsingFxn.fillMissingChildBuckets(aggsList, _.difference(Array.from(subBucketKeysToDate), (externalTermMap && _.keys(externalTermMap)) || [] ));
@@ -190,7 +213,7 @@ export const commonParsingFxn = {
         return aggsList;
     },
     'analytics_to_buckets' : function(resp, reportName, termBucketField, countKey){
-        var subBucketKeysToDate = new Set();
+        const subBucketKeysToDate = new Set();
 
         // De-dupe -- not particularly necessary as D3 handles this, however nice to have well-formatted data.
         const trackingItems = _.uniq(resp['@graph'], true, function(trackingItem){
@@ -198,9 +221,13 @@ export const commonParsingFxn = {
         });
 
         // Notably, we do NOT sum up total here.
-        const aggsList =  _.map(trackingItems, function(trackingItem, index, allTrackingItems){
+        const aggsList = trackingItems.map(function(trackingItem, index, allTrackingItems){
+            const { google_analytics : {
+                reports : { [reportName] : currentReport }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value)
+                for_date
+            } } = trackingItem;
 
-            const totalSessions = _.reduce(trackingItem.google_analytics.reports[reportName], function(sum, trackingItemItem){
+            const totalSessions = _.reduce(currentReport, function(sum, trackingItemItem){
                 return sum + trackingItemItem[countKey];
             }, 0);
 
@@ -208,14 +235,14 @@ export const commonParsingFxn = {
                 'date'      : trackingItem.google_analytics.for_date,
                 'count'     : totalSessions,
                 'total'     : totalSessions,
-                'children'  : _.map(trackingItem.google_analytics.reports[reportName], function(trackingItemItem){
-                    const term = typeof termBucketField === 'function' ? termBucketField(trackingItemItem) : trackingItemItem[termBucketField];
+                'children'  : currentReport.map(function(reportEntry){
+                    const term = typeof termBucketField === 'function' ? termBucketField(reportEntry) : reportEntry[termBucketField];
                     subBucketKeysToDate.add(term);
                     return {
                         'term'      : term,
-                        'count'     : trackingItemItem[countKey],
-                        'total'     : trackingItemItem[countKey],
-                        'date'      : trackingItem.google_analytics.for_date
+                        'count'     : reportEntry[countKey],
+                        'total'     : reportEntry[countKey],
+                        'date'      : for_date
                     };
                 })
             };
@@ -246,11 +273,14 @@ export const aggregationsToChartData = {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
-            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
+            const { aggregations : {
+                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
+            } } = resp;
+
+            if (publicBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap)
+                commonParsingFxn.bucketDocCounts(publicBuckets, props.currentGroupBy, props.externalTermMap)
             );
         }
     },
@@ -258,11 +288,14 @@ export const aggregationsToChartData = {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_project_release && resp.aggregations.weekly_interval_project_release.buckets;
-            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
+            const { aggregations : {
+                weekly_interval_project_release : { buckets: internalBuckets = [] } = {}
+            } } = resp;
+
+            if (internalBuckets.length < 2) return null;
 
             return commonParsingFxn.countsToTotals(
-                commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.currentGroupBy, props.externalTermMap)
+                commonParsingFxn.bucketDocCounts(internalBuckets, props.currentGroupBy, props.externalTermMap)
             );
         }
     },
@@ -271,42 +304,44 @@ export const aggregationsToChartData = {
         'function'  : function(resp, props){
             if (!resp || !resp.aggregations) return null;
 
-            var internalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_project_release && resp.aggregations.weekly_interval_project_release.buckets,
-                publicBuckets   = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
+            const { aggregations : {
+                weekly_interval_project_release : { buckets: internalBuckets = [] } = {},
+                weekly_interval_public_release : { buckets: publicBuckets = [] } = {}
+            } } = resp;
 
+            if (internalBuckets.length < 2) return null;
+            if (publicBuckets.length < 2) return null;
 
-            if (!Array.isArray(internalBuckets) || internalBuckets.length < 2) return null;
-            if (!Array.isArray(publicBuckets)   || publicBuckets.length < 2) return null;
+            function makeDatePairFxn(bkt){ return [ bkt.date, bkt ]; }
 
-            var internalList        = commonParsingFxn.bucketDocCounts(internalBuckets, props.externalTermMap, true),
-                publicList          = commonParsingFxn.bucketDocCounts(publicBuckets,   props.externalTermMap, true),
-                allDates            = _.uniq(_.pluck(internalList, 'date').concat(_.pluck(publicList, 'date'))).sort(), // Used as keys to zip up the non-index-aligned lists.
-                makeDatePairFxn     = function(bkt){ return [ bkt.date, bkt ]; },
-                internalKeyedByDate = _.object(_.map(internalList, makeDatePairFxn)),
-                publicKeyedByDate   = _.object(_.map(publicList,   makeDatePairFxn)),
-                combinedAggList     = _.map(allDates, function(dateString){
-                    var internalBucket  = internalKeyedByDate[dateString] || null,
-                        publicBucket    = publicKeyedByDate[dateString]   || null,
-                        comboBucket     = {
-                            'date' : dateString,
-                            'count' : 0,
-                            'children' : [
-                                { 'term' : 'Internally Released', 'count' : 0 }, // We'll fill these counts up shortly
-                                { 'term' : 'Publicly Released', 'count' : 0 }
-                            ]
-                        };
+            const internalList        = commonParsingFxn.bucketDocCounts(internalBuckets, props.externalTermMap, true);
+            const publicList          = commonParsingFxn.bucketDocCounts(publicBuckets,   props.externalTermMap, true);
+            const allDates            = _.uniq(_.pluck(internalList, 'date').concat(_.pluck(publicList, 'date'))).sort(); // Used as keys to zip up the non-index-aligned lists.
+            const internalKeyedByDate = _.object(internalList.map(makeDatePairFxn));
+            const publicKeyedByDate   = _.object(publicList.map(makeDatePairFxn));
+            const combinedAggList     = allDates.map(function(dateString){
+                const internalBucket = internalKeyedByDate[dateString] || null;
+                const publicBucket = publicKeyedByDate[dateString] || null;
+                const comboBucket = {
+                    'date' : dateString,
+                    'count' : 0,
+                    'children' : [
+                        { 'term' : 'Internally Released', 'count' : 0 }, // We'll fill these counts up shortly
+                        { 'term' : 'Publicly Released', 'count' : 0 }
+                    ]
+                };
 
-                    if (internalBucket){
-                        comboBucket.children[0].count = comboBucket.count = internalBucket.count; // Use as outer bucket count/bound, also
-                    }
-                    if (publicBucket){
-                        comboBucket.children[1].count = publicBucket.count;
-                    }
-                    return comboBucket;
-                });
+                if (internalBucket){
+                    comboBucket.children[0].count = comboBucket.count = internalBucket.count; // Use as outer bucket count/bound, also
+                }
+                if (publicBucket){
+                    comboBucket.children[1].count = publicBucket.count;
+                }
+                return comboBucket;
+            });
 
             commonParsingFxn.countsToTotals(combinedAggList);
-            _.forEach(combinedAggList, function(comboBucket){ // Calculate diff from totals-to-date.
+            combinedAggList.forEach(function(comboBucket){ // Calculate diff from totals-to-date.
                 if (comboBucket.total < comboBucket.children[1].total){
                     console.error('Public release count be higher than project release count!!!!', comboBucket.date, comboBucket);
                     // TODO: Trigger an e-mail alert to wranglers from Google Analytics UI if below exception occurs.
