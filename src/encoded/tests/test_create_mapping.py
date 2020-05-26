@@ -112,9 +112,7 @@ def test_get_deployment_config_hotseat():
     assert my_env == 'fourfront-hotseat'
     cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
     assert cfg['ENV_NAME'] == my_env  # sanity
-    assert cfg['SKIP'] is True  # The other values don't matter if this is set.
-    # assert cfg['WIPE_ES'] is ...
-    # assert cfg['STRICT'] is ...
+    assert cfg['SKIP'] is True  # The other values (WIPE_ES and STRICT) don't matter if this is set.
 
 @patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))

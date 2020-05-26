@@ -143,8 +143,6 @@ def _run_create_mapping(app, args):
     Runs create_mapping with deploy options and report errors. Allows args passed from argparse in main to override
     the default deployment configuration.
 
-    XXX: Should be refactored into CMDeployer in dcicutils.deployment_utils.py - Will 5/22/2020
-
     :param app: pyramid application handle
     :param args: args from argparse
     :return: None
