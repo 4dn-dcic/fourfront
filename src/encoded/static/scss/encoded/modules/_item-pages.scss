@@ -1576,7 +1576,7 @@ $badge-item-min-height: 90px;
 				> div.overview-list-elements-container {
 					margin-top: 10px;
 
-					> div.overview-list-element {
+					div.overview-list-element {
 						@include overview-block-value-block;
 						margin-bottom: 5px;
 						&:last-child {

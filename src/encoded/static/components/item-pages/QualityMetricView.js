@@ -4,10 +4,10 @@ import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { console, object, ajax, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import DefaultItemView, { WrapInColumn } from './DefaultItemView';
 import { Schemas } from './../util';
 import { unstable_batchedUpdates } from 'react-dom';
-import { FileView } from './QualityMetricView';
 
 
 
@@ -49,9 +49,15 @@ class QualityMetricViewOverview extends React.PureComponent {
 
         if (!schemaProp && !context && !schemas) { return []; }
 
-        let propObj = schemaProp ?
-            ((schemaProp.type === 'object' && schemaProp.properties) ||
-            (schemaProp.type === 'array' && schemaProp.items && typeof schemaProp.items.type === 'object' && schemaProp.items.properties)) : null;
+        let propObj = null;
+        if (schemaProp) {
+            if (schemaProp.type === 'object' && schemaProp.properties) {
+                propObj = schemaProp.properties;
+            } else if (schemaProp.type === 'array' && schemaProp.items && schemaProp.items.type === 'object' && schemaProp.items.properties) {
+                propObj = schemaProp.items.properties;
+            }
+        }
+        
         if (!propObj && context && schemas) {
             const typeSchema = schemaTransforms.getSchemaForItemType(
                 schemaTransforms.getItemType(context), schemas || null
@@ -113,14 +119,14 @@ class QualityMetricViewOverview extends React.PureComponent {
                     <WrapInColumn wrap="col-12 col-md-9" defaultWrapClassName="col-sm-12">
                         <div className="inner">
                             <object.TooltipInfoIconContainerAuto result={null} property={null} tips={tips}
-                                elementType="h5" fallbackTitle="Summary" />
+                                elementType="h4" fallbackTitle="Summary" />
                             {qcMetricsSummary}
                         </div>
                     </WrapInColumn>) : null}
                 <WrapInColumn wrap="col-12 col-md-9" defaultWrapClassName="col-sm-12">
                     <div className="inner">
-                        <object.TooltipInfoIconContainerAuto result={context} property={null} tips={tips}
-                            elementType="h5" fallbackTitle="All Metrics" />
+                        <object.TooltipInfoIconContainerAuto result={null} property={null} tips={tips}
+                            elementType="h4" fallbackTitle="All Metrics" />
                         {qcMetrics}
                     </div>
                 </WrapInColumn>
@@ -139,6 +145,12 @@ export function QCMetricFromEmbed(props){
     const tip = (schemaItem && schemaItem.description) || null;
     
     let value = metric[qcProperty];
+
+    // if (Array.isArray(value)) {
+    //    const x=  _.map(value, function (valueItem) {
+    //         return 
+    //     })
+    // }
     
     let subQCRows = null;
     if (schemaItem && typeof schemaItem === 'object') {
@@ -151,28 +163,37 @@ export function QCMetricFromEmbed(props){
             else {
                 subQCRows = _.map(pairs, function (pair) {
                     return QCMetricFromEmbed({ 'metric': value, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips });
-                })
+                });
             }
         }
     }
     
     return (
         <React.Fragment>
-            <div className="overview-list-element">
-                <div className="row">
-                    <div className="col-4 text-right">
-                        <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
-                            elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
-                            className="mb-0 mt-02 text-break" />
-                    </div>
-                    <div className="col-8">
-                        <div className="inner value">
-                            {percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, value, true)}
+            {!subQCRows ?
+                (<div className="overview-list-element">
+                    <div className="row">
+                        <div className="col-4 text-right">
+                            <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
+                                elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
+                                className="mb-0 mt-02 text-break" />
+                        </div>
+                        <div className="col-8">
+                            <div className="inner value">
+                                {percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, value, true)}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            {subQCRows}
+                </div>) : (<h5>{title || qcProperty}</h5>)}
+            {subQCRows ?
+                (
+                    <Collapse in={true}>
+                        <div className="inner">
+                            {subQCRows}
+                        </div>
+                    </Collapse>
+                )
+                : null}
         </React.Fragment>
     );
 }
