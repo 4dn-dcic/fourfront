@@ -119,14 +119,14 @@ class QualityMetricViewOverview extends React.PureComponent {
                     <WrapInColumn wrap="col-12 col-md-9" defaultWrapClassName="col-sm-12">
                         <div className="inner">
                             <object.TooltipInfoIconContainerAuto result={null} property={null} tips={tips}
-                                elementType="h4" fallbackTitle="Summary" />
+                                elementType="h4" fallbackTitle="Summary" className="qc-section-title" />
                             {qcMetricsSummary}
                         </div>
                     </WrapInColumn>) : null}
                 <WrapInColumn wrap="col-12 col-md-9" defaultWrapClassName="col-sm-12">
                     <div className="inner">
                         <object.TooltipInfoIconContainerAuto result={null} property={null} tips={tips}
-                            elementType="h4" fallbackTitle="All Metrics" />
+                            elementType="h4" fallbackTitle="All Metrics" className="qc-section-title" />
                         {qcMetrics}
                     </div>
                 </WrapInColumn>
@@ -146,12 +146,6 @@ export function QCMetricFromEmbed(props){
     
     let value = metric[qcProperty];
 
-    // if (Array.isArray(value)) {
-    //    const x=  _.map(value, function (valueItem) {
-    //         return 
-    //     })
-    // }
-    
     let subQCRows = null;
     if (schemaItem && typeof schemaItem === 'object') {
         const pairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(schemaItem, null, null);
@@ -161,9 +155,18 @@ export function QCMetricFromEmbed(props){
                 value = pairs[0][0] + ': ' + value[pairs[0][0]];
             }
             else {
-                subQCRows = _.map(pairs, function (pair) {
-                    return QCMetricFromEmbed({ 'metric': value, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips });
-                });
+                if (Array.isArray(value)) {
+                    subQCRows = _.reduce(value, function (memo, valueItem) {
+                        return memo.concat(_.map(pairs, function (pair) {
+                            return QCMetricFromEmbed({ 'metric': valueItem, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips });
+                        }));
+                    }, []);
+                }
+                else {
+                    subQCRows = _.map(pairs, function (pair) {
+                        return QCMetricFromEmbed({ 'metric': value, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips });
+                    });
+                }
             }
         }
     }
@@ -184,7 +187,7 @@ export function QCMetricFromEmbed(props){
                             </div>
                         </div>
                     </div>
-                </div>) : (<h5>{title || qcProperty}</h5>)}
+                </div>) : (<h5 className="qc-grouping-title">{title || qcProperty}</h5>)}
             {subQCRows ?
                 (
                     <Collapse in={true}>

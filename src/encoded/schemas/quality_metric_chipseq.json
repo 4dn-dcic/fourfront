@@ -37,6 +37,7 @@
             "qc_order": 1
         },
         "overlap_reproducibility_qc": {
+            "title": "Overlap Reproducibility QC",
             "type": "object",
             "qc_order": 2,
             "additionalProperties": false,
