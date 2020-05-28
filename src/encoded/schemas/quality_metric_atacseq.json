@@ -37,6 +37,7 @@
             "qc_order": 1
         },
         "flagstat_qc": {
+            "title": "Flagstat",
             "type": "array",
             "qc_order": 2,
             "items": {

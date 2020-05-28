@@ -147,9 +147,26 @@ export function QCMetricFromEmbed(props){
     let value = metric[qcProperty];
 
     let subQCRows = null;
-    if (schemaItem && typeof schemaItem === 'object') {
+    if (qcProperty === 'qc_list') { //very dirty workaround, should be fixed asap
+        subQCRows = _.map(value, function (qcItem, index) {
+            return (<div className="overview-list-element">
+                <div className="row">
+                    <div className="col-4 text-right">
+                        <object.TooltipInfoIconContainerAuto
+                            elementType="h5" fallbackTitle={index + 1}
+                            className="mb-0 mt-02 text-break" />
+                    </div>
+                    <div className="col-8">
+                        <div className="inner value">
+                            <a href={object.atIdFromObject(qcItem.value)}>{qcItem.value.display_title}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>)
+        });
+    } else if (schemaItem && typeof schemaItem === 'object') {
         const pairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(schemaItem, null, null);
-        
+
         if (pairs.length > 0) {
             if (pairs.length === 1 && pairs[0][1].type !== 'object' && typeof value[pairs[0][0]] !== 'undefined') {
                 value = pairs[0][0] + ': ' + value[pairs[0][0]];
