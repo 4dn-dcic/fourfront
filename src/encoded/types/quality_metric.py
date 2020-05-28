@@ -247,7 +247,7 @@ class QualityMetricPairsqc(QualityMetric):
             return str(round(numVal / 10000) / 100) + "m"
 
         def tooltip(numVal):
-            return "Percent of total reads (=%s)" % million(numVal)
+            return "Percent of filtered reads (=%s)" % million(numVal)
 
         qc_summary.append({"title": "Filtered Reads",
                            "value": str(qc.get("Total reads")),
