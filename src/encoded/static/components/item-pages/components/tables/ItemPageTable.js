@@ -155,7 +155,7 @@ export class ItemPageTable extends React.Component {
                         const typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
                         if (typeTitle) {
                             return (
-                                <div className="d-flex flex-wrap">
+                                <div className="flex-wrap">
                                     <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
                                         <div className="type-title text-ellipsis-container">{ typeTitle }</div>
                                         <DisplayTitleColumnDefault />
