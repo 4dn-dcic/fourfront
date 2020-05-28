@@ -215,7 +215,7 @@ class QualityMetricBamqc(QualityMetric):
                            "tooltip": tooltip(qc.get("Minor Contigs")),
                            "numberType": "percent"})
 
-        return qc_summary           
+        return qc_summary
 
 
 @collection(
@@ -472,7 +472,7 @@ class QualityMetricQclist(QualityMetric):
                 qc_obj = request.embed(qc_item['value'], '@@object')
                 if 'quality_metric_summary' in qc_obj:
                     for qcs_item in qc_obj['quality_metric_summary']:
-                        qc_summary.append(qcs_item)            
+                        qc_summary.append(qcs_item)
         
         return qc_summary if qc_summary else None
 

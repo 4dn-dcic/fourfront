@@ -138,7 +138,7 @@ class QualityMetricViewOverview extends React.PureComponent {
 export function QCMetricFromEmbed(props){
     const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = props;
 
-    if (!schemaItem && typeof schemaItem.qc_order !== 'number') return null;
+    if (schemaItem && typeof schemaItem.qc_order !== 'number') return null;
     if (typeof metric[qcProperty] === 'undefined') return null;
 
     const title = (schemaItem && schemaItem.title) || null;

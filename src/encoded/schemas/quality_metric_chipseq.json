@@ -37,7 +37,7 @@
             "qc_order": 1
         },
         "overlap_reproducibility_qc": {
-            "title": "Overlap Reproducibility QC",
+            "title": "Overlap Reproducibility",
             "type": "object",
             "qc_order": 2,
             "additionalProperties": false,
@@ -89,6 +89,7 @@
             }
         },
         "idr_reproducibility_qc": {
+            "title": "IDR Reproducibility",
             "type": "object",
             "qc_order": 3,
             "additionalProperties": false,
@@ -140,6 +141,7 @@
             }
         },
         "xcor_score": {
+            "title": "XCor Score",
             "type": "array",
             "qc_order": 4,
             "items": {
@@ -186,6 +188,7 @@
             }
         },
         "frip_macs2_qc": {
+            "title": "FRiP MACS2",
             "type": "object",
             "qc_order": 5,
             "additionalProperties": false,
