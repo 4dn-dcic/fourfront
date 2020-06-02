@@ -357,30 +357,6 @@ const aggregationsToChartData = {
             return combinedAggList;
         }
     },
-    /*
-    'expsets_created' : {
-        'requires'  : 'ExperimentSetReplicate',
-        'function'  : function(resp, props){
-            if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_date_created && resp.aggregations.weekly_interval_date_created.buckets;
-            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
-
-            return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.externalTermMap);
-        }
-    },
-    */
-    /*
-    'expsets_submitted' : {
-        'requires'  : 'ExperimentSetReplicate',
-        'function'  : function(resp, props){
-            if (!resp || !resp.aggregations) return null;
-            var weeklyIntervalBuckets = resp && resp.aggregations && resp.aggregations.weekly_interval_public_release && resp.aggregations.weekly_interval_public_release.buckets;
-            if (!Array.isArray(weeklyIntervalBuckets) || weeklyIntervalBuckets.length < 2) return null;
-
-            return commonParsingFxn.bucketDocCounts(weeklyIntervalBuckets, props.externalTermMap);
-        }
-    },
-    */
     'files_released' : {
         'requires'  : 'ExperimentSetReplicate',
         'function'  : function(resp, props){
@@ -735,13 +711,13 @@ class UsageChartsCountByDropdown extends React.PureComponent {
 }
 
 
-export const UsageStatsView = React.memo(function UsageStatsView(props){
+export function UsageStatsView(props){
     const {
-        loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, respTrackingItem, windowWidth,
+        loadingStatus, mounted, session, groupByOptions, handleGroupByChange, currentGroupBy, windowWidth,
         changeCountByForChart, countBy,
         // Passed in from StatsChartViewAggregator:
         sessions_by_country, chartToggles, fields_faceted, /* fields_faceted_group_by, browse_search_queries, other_search_queries, */
-        experiment_set_views, file_downloads, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
+        experiment_set_views, file_downloads, smoothEdges, onChartToggle, onSmoothEdgeToggle
     } = props;
 
     if (loadingStatus === 'failed'){
@@ -843,7 +819,10 @@ export const UsageStatsView = React.memo(function UsageStatsView(props){
 
                 : null }
 
-            {/* browse_search_queries || other_search_queries ?
+            {/*
+                Disabled for now until/if we want to bring this back:
+
+                browse_search_queries || other_search_queries ?
 
                 <ColorScaleProvider resetScalesWhenChange={browse_search_queries}>
 
@@ -900,17 +879,6 @@ export const UsageStatsView = React.memo(function UsageStatsView(props){
                 <ColorScaleProvider resetScaleLegendWhenChange={fields_faceted}>
 
                     <hr className="mt-3"/>
-                    {/*
-                    <div className="mb-15">
-                        <div className="text-400 inline-block">Grouping by&nbsp;&nbsp;</div>
-                        <DropdownButton id="select_fields_faceted_group_by" onSelect={this.changeFieldFacetedByGrouping}
-                            title={<span className="text-500">{ UsageStatsView.fieldsFacetedByOptions[fields_faceted_group_by] }</span>}>
-                            { _.map(_.pairs(UsageStatsView.fieldsFacetedByOptions), ([ key, title ]) =>
-                                <DropdownItem eventKey={key} key={key}>{ title }</DropdownItem>
-                            ) }
-                        </DropdownButton>
-                    </div>
-                    */}
 
                     <AreaChartContainer {...commonContainerProps} id="fields_faceted"
                         title={
@@ -930,129 +898,118 @@ export const UsageStatsView = React.memo(function UsageStatsView(props){
 
         </div>
     );
-});
+}
 
+export function SubmissionsStatsView(props) {
+    const {
+        loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth,
+        // Passed in from StatsChartViewAggregator:
+        expsets_released, expsets_released_internal, files_released, file_volume_released,
+        expsets_released_vs_internal, chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
+    } = props;
 
-export class SubmissionsStatsView extends React.PureComponent {
-
-    /**
-     * Use this only for charts with child terms 'Internal Release' and 'Public Release', which are
-     * meant to have a separate color scale and child terms from other charts.
-     *
-     * @param {string} term - One of 'Internal Release' or 'Public Release'.
-     * @returns {string} A CSS-valid color string.
-     */
-    static colorScaleForPublicVsInternal(term){
-        if (term === 'Internal Release' || term === 'Internally Released'){
-            return '#ff7f0e'; // Orange
-        } else if (term === 'Public Release' || term === 'Publicly Released'){
-            return '#1f77b4'; // Blue
-        } else {
-            throw new Error("Term supplied is not one of 'Internal Release' or 'Public Release': '" + term + "'.");
-        }
+    if (!mounted || (!expsets_released)){
+        return <div className="stats-charts-container" key="charts" id="submissions"><LoadingIcon/></div>;
     }
 
-    render(){
-        const {
-            loadingStatus, mounted, session, currentGroupBy, groupByOptions, handleGroupByChange, windowWidth,
-            // Passed in from StatsChartViewAggregator:
-            expsets_released, expsets_released_internal, files_released, file_volume_released,
-            expsets_released_vs_internal, /* expsets_created, */ chartToggles, smoothEdges, width, onChartToggle, onSmoothEdgeToggle
-        } = this.props;
+    if (loadingStatus === 'failed'){
+        return <div className="stats-charts-container" key="charts" id="submissions"><ErrorIcon/></div>;
+    }
 
-        if (!mounted || (!expsets_released)){
-            return <div className="stats-charts-container" key="charts" id="submissions"><LoadingIcon/></div>;
-        }
+    const anyExpandedCharts = _.any(_.values(chartToggles));
+    const commonContainerProps = {
+        'onToggle' : onChartToggle, chartToggles, windowWidth,
+        'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
+    };
+    const showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal;
+    const commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
 
-        if (loadingStatus === 'failed'){
-            return <div className="stats-charts-container" key="charts" id="submissions"><ErrorIcon/></div>;
-        }
+    return (
+        <div className="stats-charts-container" key="charts" id="submissions">
 
-        const anyExpandedCharts = _.any(_.values(chartToggles));
-        const commonContainerProps = {
-            'onToggle' : onChartToggle, chartToggles, windowWidth,
-            'defaultColSize' : '12', 'defaultHeight' : anyExpandedCharts ? 200 : 250
-        };
-        const showInternalReleaseCharts = session && expsets_released_internal && expsets_released_vs_internal;
-        const commonChartProps = { 'curveFxn' : smoothEdges ? d3.curveMonotoneX : d3.curveStepAfter };
+            { showInternalReleaseCharts ?
 
-        return (
-            <div className="stats-charts-container" key="charts" id="submissions">
+                <ColorScaleProvider width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
 
-                { showInternalReleaseCharts ?
-
-                    <ColorScaleProvider width={width} colorScale={SubmissionsStatsView.colorScaleForPublicVsInternal}>
-
-                        <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal"
-                            title={<h4 className="text-300 mt-0"><span className="text-500">Experiment Sets</span> - internal vs public release</h4>}>
-                            <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
-                        </AreaChartContainer>
-
-                        <hr/>
-
-                    </ColorScaleProvider>
-
-                    : null }
-
-                <ColorScaleProvider width={width} resetScalesWhenChange={expsets_released}>
-
-                    <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
-                        <div className="inline-block ml-15">
-                            <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
-                        </div>
-                    </GroupByDropdown>
+                    <AreaChartContainer {...commonContainerProps} id="expsets_released_vs_internal"
+                        title={<h4 className="text-300 mt-0"><span className="text-500">Experiment Sets</span> - internal vs public release</h4>}>
+                        <AreaChart {...commonChartProps} data={expsets_released_vs_internal} />
+                    </AreaChartContainer>
 
                     <hr/>
 
-                    <HorizontalD3ScaleLegend {...{ loadingStatus }} />
-
-                    <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
-                        <h4 className="text-300 mt-0">
-                            <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
-                        </h4>
-                    }>
-                        <AreaChart {...commonChartProps} data={expsets_released} />
-                    </AreaChartContainer>
-
-                    {/* expsets_created ?           // ~=== 'Experiment Sets Submitted'
-                        <AreaChartContainer {...commonContainerProps} id="expsets_created" title={<span><span className="text-500">Experiment Sets</span> submitted over time</span>}>
-                            <AreaChart data={expsets_created} />
-                        </AreaChartContainer>
-                    : null */}
-
-                    { showInternalReleaseCharts ?
-                        <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
-                            <h4 className="text-300 mt-0">
-                                <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
-                            </h4>
-                        }>
-                            <AreaChart {...commonChartProps} data={expsets_released_internal} />
-                        </AreaChartContainer>
-                        : null }
-
-                    <AreaChartContainer {...commonContainerProps} id="files_released" title={
-                        <h4 className="text-300 mt-0">
-                            <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
-                        </h4>
-                    }>
-                        <AreaChart {...commonChartProps} data={files_released} />
-                    </AreaChartContainer>
-
-                    <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
-                        <h4 className="text-300 mt-0">
-                            <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
-                        </h4>
-                    }>
-                        <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
-                    </AreaChartContainer>
-
                 </ColorScaleProvider>
 
-            </div>
-        );
-    }
+                : null }
 
+            <ColorScaleProvider width={width} resetScalesWhenChange={expsets_released}>
+
+                <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
+                    <div className="inline-block ml-15">
+                        <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
+                    </div>
+                </GroupByDropdown>
+
+                <hr/>
+
+                <HorizontalD3ScaleLegend {...{ loadingStatus }} />
+
+                <AreaChartContainer {...commonContainerProps} id="expsets_released" title={
+                    <h4 className="text-300 mt-0">
+                        <span className="text-500">Experiment Sets</span> - { session ? 'publicly released' : 'released' }
+                    </h4>
+                }>
+                    <AreaChart {...commonChartProps} data={expsets_released} />
+                </AreaChartContainer>
+
+                { showInternalReleaseCharts ?
+                    <AreaChartContainer {...commonContainerProps} id="expsets_released_internal" title={
+                        <h4 className="text-300 mt-0">
+                            <span className="text-500">Experiment Sets</span> - released (public or within 4DN)
+                        </h4>
+                    }>
+                        <AreaChart {...commonChartProps} data={expsets_released_internal} />
+                    </AreaChartContainer>
+                    : null }
+
+                <AreaChartContainer {...commonContainerProps} id="files_released" title={
+                    <h4 className="text-300 mt-0">
+                        <span className="text-500">Files</span> - { session ? 'publicly released' : 'released' }
+                    </h4>
+                }>
+                    <AreaChart {...commonChartProps} data={files_released} />
+                </AreaChartContainer>
+
+                <AreaChartContainer {...commonContainerProps} id="file_volume_released" title={
+                    <h4 className="text-300 mt-0">
+                        <span className="text-500">Total File Size</span> - { session ? 'publicly released' : 'released' }
+                    </h4>
+                }>
+                    <AreaChart {...commonChartProps} data={file_volume_released} yAxisLabel="GB" />
+                </AreaChartContainer>
+
+            </ColorScaleProvider>
+
+        </div>
+    );
 }
+
+/**
+ * Use this only for charts with child terms 'Internal Release' and 'Public Release', which are
+ * meant to have a separate color scale and child terms from other charts.
+ *
+ * @param {string} term - One of 'Internal Release' or 'Public Release'.
+ * @returns {string} A CSS-valid color string.
+ */
+SubmissionsStatsView.colorScaleForPublicVsInternal = function(term){
+    if (term === 'Internal Release' || term === 'Internally Released'){
+        return '#ff7f0e'; // Orange
+    } else if (term === 'Public Release' || term === 'Publicly Released'){
+        return '#1f77b4'; // Blue
+    } else {
+        throw new Error("Term supplied is not one of 'Internal Release' or 'Public Release': '" + term + "'.");
+    }
+};
 
 
 
@@ -1068,8 +1025,8 @@ function groupExternalChildren(children, externalTermMap){
         return children;
     }
 
-    var filteredOut = [];
-    children = _.filter(children, function(c){
+    const filteredOut = [];
+    const newChildren = children.filter(function(c){
         if (externalTermMap[c.term]) {
             filteredOut.push(c);
             return false;
@@ -1077,16 +1034,16 @@ function groupExternalChildren(children, externalTermMap){
         return true;
     });
     if (filteredOut.length > 0){
-        var externalChild = {
+        const externalChild = {
             'term' : 'External',
             'count': 0,
             'total': 0
         };
-        _.forEach(filteredOut, function(c){
+        filteredOut.forEach(function(c){
             externalChild.total += c.total;
             externalChild.count += c.count;
         });
-        children.push(externalChild);
+        newChildren.push(externalChild);
     }
-    return children;
+    return newChildren;
 }
