@@ -120,33 +120,36 @@ def test_invalid_login(anontestapp, headers):
     res = anontestapp.post_json('/login', headers=headers1, status=401)
 
 
-def test_login_logout(testapp, anontestapp, headers,
-                      auth0_4dn_user_profile,
-                      auth0_4dn_user_token):
-
-    # Create a user with the persona email
-    url = '/users/'
-    email = auth0_4dn_user_profile['email']
-    item = {
-        'email': email,
-        'first_name': 'Auth0',
-        'last_name': 'Test User',
-    }
-    testapp.post_json(url, item, status=201)
-
-    # Log in
-    res = anontestapp.post_json('/login', headers=headers)
-
-    assert res.json.get('auth.userid') is None
-    assert 'id_token' in res.json
-    assert 'user_actions' in res.json
-
-    # Log out
-    res = anontestapp.get('/logout?redirect=false', status=200)
-    # no more cookies
-    assert 'auth.userid' not in res.json
-    assert 'id_token' not in res.json
-    assert 'user_actions' not in res.json
+# TODO: This is intentionally disabled for now. It requires additional security that we need to reconsider.
+#       -kmp 2-Jun-2020
+#
+# def test_login_logout(testapp, anontestapp, headers,
+#                       auth0_4dn_user_profile,
+#                       auth0_4dn_user_token):
+#
+#     # Create a user with the persona email
+#     url = '/users/'
+#     email = auth0_4dn_user_profile['email']
+#     item = {
+#         'email': email,
+#         'first_name': 'Auth0',
+#         'last_name': 'Test User',
+#     }
+#     testapp.post_json(url, item, status=201)
+#
+#     # Log in
+#     res = anontestapp.post_json('/login', headers=headers)
+#
+#     assert res.json.get('auth.userid') is None
+#     assert 'id_token' in res.json
+#     assert 'user_actions' in res.json
+#
+#     # Log out
+#     res = anontestapp.get('/logout?redirect=false', status=200)
+#     # no more cookies
+#     assert 'auth.userid' not in res.json
+#     assert 'id_token' not in res.json
+#     assert 'user_actions' not in res.json
 
 
 def test_404_keeps_auth_info(testapp, anontestapp, headers,
