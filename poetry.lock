@@ -26,7 +26,7 @@ description = "AWS signature version 4 signing process for the python requests m
 name = "aws-requests-auth"
 optional = false
 python-versions = "*"
-version = "0.4.2"
+version = "0.4.3"
 
 [package.dependencies]
 requests = ">=0.14.0"
@@ -249,7 +249,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.6,<3.7"
-version = "3.0.2"
+version = "3.0.3"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -329,7 +329,7 @@ description = "A Python library for the Docker Engine API."
 name = "docker"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-version = "4.2.0"
+version = "4.2.1"
 
 [package.dependencies]
 requests = ">=2.14.2,<2.18.0 || >2.18.0"
@@ -468,7 +468,7 @@ description = "Python Git Library"
 name = "gitpython"
 optional = false
 python-versions = ">=3.4"
-version = "3.1.2"
+version = "3.1.3"
 
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
@@ -1594,7 +1594,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "4f0fd1b80d4233ef0cdd1f52ec917db76f7a4781ea38f8c859946285a72e4a7b"
+content-hash = "3ba6b6726b95af37d87c8df19089b96f7eefc2ee3ba868e5214f7a096ee841ca"
 python-versions = ">=3.6,<3.7"
 
 [metadata.files]
@@ -1607,7 +1607,8 @@ attrs = [
     {file = "attrs-19.3.0.tar.gz", hash = "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"},
 ]
 aws-requests-auth = [
-    {file = "aws-requests-auth-0.4.2.tar.gz", hash = "sha256:112c85fe938a01e28f7e1a87168615b6977b28596362b1dcbafbf4f2cc69f720"},
+    {file = "aws-requests-auth-0.4.3.tar.gz", hash = "sha256:33593372018b960a31dbbe236f89421678b885c35f0b6a7abfae35bb77e069b2"},
+    {file = "aws_requests_auth-0.4.3-py2.py3-none-any.whl", hash = "sha256:646bc37d62140ea1c709d20148f5d43197e6bd2d63909eb36fa4bb2345759977"},
 ]
 aws-xray-sdk = [
     {file = "aws-xray-sdk-0.95.tar.gz", hash = "sha256:9e7ba8dd08fd2939376c21423376206bff01d0deaea7d7721c6b35921fed1943"},
@@ -1744,16 +1745,16 @@ cryptography = [
     {file = "cryptography-2.9.2.tar.gz", hash = "sha256:a0c30272fb4ddda5f5ffc1089d7405b7a71b0b0f51993cb4e5dbb4590b2fc229"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-3.0.2-py3-none-any.whl", hash = "sha256:da2d084247cf218e00cd87f6b59f568c5930d417c72d7a7060dbfbe5742cc802"},
-    {file = "dcicsnovault-3.0.2.tar.gz", hash = "sha256:a4c0ed6447accf43f5f4c5498f3b55624cbefff751dd8abe19c70ab355c3586d"},
+    {file = "dcicsnovault-3.0.3-py3-none-any.whl", hash = "sha256:53e92480758733703380d7e20d3e95ba224748210e9da51e0204503a5038f9db"},
+    {file = "dcicsnovault-3.0.3.tar.gz", hash = "sha256:bd5cd6715a0691e79b446fff98d3bb580f5317477dd8c7fce4a22039a8e30636"},
 ]
 dcicutils = [
     {file = "dcicutils-0.31.1-py3-none-any.whl", hash = "sha256:9f2728d6ce4fe9b7a0cabdf5a46a20e34039147192854622881c9a46c3707fd1"},
     {file = "dcicutils-0.31.1.tar.gz", hash = "sha256:d64569962ef43d3091f9d3cb0e81312ee1fc9e529e23d699fd2874429b043686"},
 ]
 docker = [
-    {file = "docker-4.2.0-py2.py3-none-any.whl", hash = "sha256:1c2ddb7a047b2599d1faec00889561316c674f7099427b9c51e8cb804114b553"},
-    {file = "docker-4.2.0.tar.gz", hash = "sha256:ddae66620ab5f4bce769f64bcd7934f880c8abe6aa50986298db56735d0f722e"},
+    {file = "docker-4.2.1-py2.py3-none-any.whl", hash = "sha256:672f51aead26d90d1cfce84a87e6f71fca401bbc2a6287be18603583620a28ba"},
+    {file = "docker-4.2.1.tar.gz", hash = "sha256:380a20d38fbfaa872e96ee4d0d23ad9beb0f9ed57ff1c30653cbeb0c9c0964f2"},
 ]
 docutils = [
     {file = "docutils-0.12-py3-none-any.whl", hash = "sha256:dcebd4928112631626f4c4d0df59787c748404e66dda952110030ea883d3b8cd"},
@@ -1796,8 +1797,8 @@ gitdb = [
     {file = "gitdb-4.0.5.tar.gz", hash = "sha256:c9e1f2d0db7ddb9a704c2a0217be31214e91a4fe1dea1efad19ae42ba0c285c9"},
 ]
 gitpython = [
-    {file = "GitPython-3.1.2-py3-none-any.whl", hash = "sha256:da3b2cf819974789da34f95ac218ef99f515a928685db141327c09b73dd69c09"},
-    {file = "GitPython-3.1.2.tar.gz", hash = "sha256:864a47472548f3ba716ca202e034c1900f197c0fb3a08f641c20c3cafd15ed94"},
+    {file = "GitPython-3.1.3-py3-none-any.whl", hash = "sha256:ef1d60b01b5ce0040ad3ec20bc64f783362d41fa0822a2742d3586e1f49bb8ac"},
+    {file = "GitPython-3.1.3.tar.gz", hash = "sha256:e107af4d873daed64648b4f4beb89f89f0cfbe3ef558fc7821ed2331c2f8da1a"},
 ]
 html5lib = [
     {file = "html5lib-0.9999999.tar.gz", hash = "sha256:2612a191a8d5842bfa057e41ba50bbb9dcb722419d2408c78cff4758d0754868"},
