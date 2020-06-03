@@ -11,3 +11,5 @@ Disallow: /health*
 Disallow: /indexing_status*
 User-agent: SemrushBot
 Disallow: /
+User-agent: AhrefsBot
+Disallow: /
