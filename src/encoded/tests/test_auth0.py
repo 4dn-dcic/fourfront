@@ -120,7 +120,7 @@ def test_invalid_login(anontestapp, headers):
     res = anontestapp.post_json('/login', headers=headers1, status=401)
 
 
-# TODO: This is intentionally disabled for now. It requires additional security that we need to reconsider.
+# TODO (C4-173): This is intentionally disabled for now. It requires additional security that we need to reconsider.
 #       -kmp 2-Jun-2020
 #
 # def test_login_logout(testapp, anontestapp, headers,
@@ -191,29 +191,32 @@ def test_404_keeps_auth_info(testapp, anontestapp, headers,
             raise e
 
 
-def test_login_logout_redirect(testapp, anontestapp, headers,
-                      auth0_4dn_user_profile,
-                      auth0_4dn_user_token):
-
-    # Create a user with the persona email
-    url = '/users/'
-    email = auth0_4dn_user_profile['email']
-    item = {
-        'email': email,
-        'first_name': 'Auth0',
-        'last_name': 'Test User',
-    }
-    testapp.post_json(url, item, status=201)
-
-    # Log in
-    res = anontestapp.post_json('/login', headers=headers)
-
-    assert res.json.get('auth.userid') is None
-    assert 'id_token' in res.json
-    assert 'user_actions' in res.json
-
-    # Log out
-    res = anontestapp.get('/logout?redirect=True', status=302)
+# TODO (C4-173): This is intentionally disabled for now. It requires additional security that we need to reconsider.
+#       -kmp 2-Jun-2020
+#
+# def test_login_logout_redirect(testapp, anontestapp, headers,
+#                       auth0_4dn_user_profile,
+#                       auth0_4dn_user_token):
+#
+#     # Create a user with the persona email
+#     url = '/users/'
+#     email = auth0_4dn_user_profile['email']
+#     item = {
+#         'email': email,
+#         'first_name': 'Auth0',
+#         'last_name': 'Test User',
+#     }
+#     testapp.post_json(url, item, status=201)
+#
+#     # Log in
+#     res = anontestapp.post_json('/login', headers=headers)
+#
+#     assert res.json.get('auth.userid') is None
+#     assert 'id_token' in res.json
+#     assert 'user_actions' in res.json
+#
+#     # Log out
+#     res = anontestapp.get('/logout?redirect=True', status=302)
 
 
 def test_jwt_is_stateless_so_doesnt_actually_need_login(testapp, anontestapp, auth0_4dn_user_token,
