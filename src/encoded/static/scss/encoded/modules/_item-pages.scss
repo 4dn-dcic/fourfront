@@ -1465,9 +1465,15 @@ $badge-item-min-height: 90px;
 				}
 				
 				h5.qc-grouping-title {
+					border-top: 1px solid #f4f4f4;
+					border-bottom: 1px solid #f4f4f4;
 					margin-top: 10px;
 					margin-bottom: 10px;
-					font-weight: 400;
+					font-weight: 500;
+					padding-top: 15px;
+					padding-bottom: 15px;
+					cursor: pointer;
+					transition: border-color .5s, background-color .5s, padding-left .5s;
 				}
 
 				ol.overview-list-elements-container,

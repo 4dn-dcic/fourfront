@@ -3,11 +3,10 @@
 import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console, object, ajax, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import DefaultItemView, { WrapInColumn } from './DefaultItemView';
 import { Schemas } from './../util';
-import { unstable_batchedUpdates } from 'react-dom';
 
 
 
@@ -100,13 +99,18 @@ class QualityMetricViewOverview extends React.PureComponent {
             ) : null;
         //QC Metrics
         const schemaQCFieldsAsOrderedPairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(null, context, schemas);
+        const firstObjectOrArrayIdx =
+            _.findIndex(
+                schemaQCFieldsAsOrderedPairs,
+                (pair) => (pair[1].type === 'object' || pair[1].type === 'array') && context[pair[0]]);
         const qcMetrics = schemaQCFieldsAsOrderedPairs.length > 0 ?
             (
                 <div className="overview-list-elements-container">
-                    {_.map(schemaQCFieldsAsOrderedPairs, (pair) => {
+                    {_.map(schemaQCFieldsAsOrderedPairs, (pair, idx) => {
                         const qcSchemaFieldKey = pair[0];
-                        const qcSchemaFieldValue  = pair[1];
-                        return <QCMetricFromEmbed {...{ 'metric': context, schemas, tips, 'schemaItem': qcSchemaFieldValue, 'qcProperty': qcSchemaFieldKey }} />;
+                        const qcSchemaFieldValue = pair[1];
+                        const defaultOpen = (firstObjectOrArrayIdx === idx);
+                        return <QCMetricFromEmbed {...{ 'metric': context, schemas, tips, 'schemaItem': qcSchemaFieldValue, 'qcProperty': qcSchemaFieldKey, defaultOpen }} />;
                     })}
                 </div>
             ) : (
@@ -135,100 +139,132 @@ class QualityMetricViewOverview extends React.PureComponent {
     }
 }
 
-export function QCMetricFromEmbed(props){
-    const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = props;
-
-    if (schemaItem && typeof schemaItem.qc_order !== 'number') return null;
-    if (typeof metric[qcProperty] === 'undefined') return null;
-
-    const title = (schemaItem && schemaItem.title) || null;
-    const tip = (schemaItem && schemaItem.description) || null;
+class QCMetricFromEmbed extends React.PureComponent {
     
-    let value = metric[qcProperty];
+    static percentOfTotalReads(quality_metric, field){
+        var numVal = object.getNestedProperty(quality_metric, field);
+        if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
+            var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
+            var numValRounded = valueTransforms.roundLargeNumber(numVal);
+            return (
+                <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
+            );
+        }
+        return '-';
+    };
+    
+    constructor(props) {
+        super(props);
 
-    let subQCRows = null;
-    if (qcProperty === 'qc_list') { //very dirty workaround, should be fixed asap
-        subQCRows = _.map(value, function (qcItem, index) {
-            return (<div className="overview-list-element">
-                <div className="row">
-                    <div className="col-4 text-right">
-                        <object.TooltipInfoIconContainerAuto
-                            elementType="h5" fallbackTitle={index + 1}
-                            className="mb-0 mt-02 text-break" />
-                    </div>
-                    <div className="col-8">
-                        <div className="inner value">
-                            <a href={object.atIdFromObject(qcItem.value)}>{qcItem.value.display_title}</a>
-                        </div>
-                    </div>
-                </div>
-            </div>)
-        });
-    } else if (schemaItem && typeof schemaItem === 'object') {
-        const pairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(schemaItem, null, null);
+        const { defaultOpen } = props;
+        this.toggleOpen = _.throttle(this.toggleOpen.bind(this), 1000);
+        this.state = {
+            'open': defaultOpen || false,
+            'closing': false
+        };
+    }
 
-        if (pairs.length > 0) {
-            if (pairs.length === 1 && pairs[0][1].type !== 'object' && typeof value[pairs[0][0]] !== 'undefined') {
-                value = pairs[0][0] + ': ' + value[pairs[0][0]];
+    toggleOpen(open, e){
+        this.setState(function(currState){
+            if (typeof open !== 'boolean'){
+                open = !currState.open;
             }
-            else {
-                if (Array.isArray(value)) {
-                    subQCRows = _.reduce(value, function (memo, valueItem) {
-                        return memo.concat(_.map(pairs, function (pair) {
-                            return QCMetricFromEmbed({ 'metric': valueItem, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips });
-                        }));
-                    }, []);
+            var closing = !open && currState.open;
+            return { open, closing };
+        }, ()=>{
+            setTimeout(()=>{
+                this.setState(function(currState){
+                    if (!currState.open && currState.closing){
+                        return { 'closing' : false };
+                    }
+                    return null;
+                });
+            }, 500);
+        });
+    }
+
+    render() {
+        const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = this.props;
+        const { open, closing } = this.state;
+
+        if (schemaItem && typeof schemaItem.qc_order !== 'number') return null;
+        if (typeof metric[qcProperty] === 'undefined') return null;
+
+        const title = (schemaItem && schemaItem.title) || null;
+        const tip = (schemaItem && schemaItem.description) || null;
+
+        let value = metric[qcProperty];
+
+        let subQCRows = null;
+        if (qcProperty !== 'qc_list' && schemaItem && typeof schemaItem === 'object') {            
+            const pairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(schemaItem, null, null);
+            if (pairs.length > 0) {
+                if (pairs.length === 1 && pairs[0][1].type !== 'object' && typeof value[pairs[0][0]] !== 'undefined') {
+                    value = pairs[0][0] + ': ' + value[pairs[0][0]];
                 }
                 else {
-                    subQCRows = _.map(pairs, function (pair) {
-                        return QCMetricFromEmbed({ 'metric': value, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips });
-                    });
+                    if (Array.isArray(value)) {
+                        subQCRows = _.reduce(value, function (memo, valueItem) {
+                            return memo.concat(_.map(pairs, function (pair) {
+                                return <QCMetricFromEmbed {...{ 'metric': valueItem, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips }} />;
+                            }));
+                        }, []);
+                    }
+                    else {
+                        subQCRows = _.map(pairs, function (pair) {
+                            return <QCMetricFromEmbed {...{ 'metric': value, 'qcProperty': pair[0], schemas, 'schemaItem': pair[1], tips: pair[1].description || tips }} />;
+                        });
+                    }
                 }
             }
-        }
-    }
-    
-    return (
-        <React.Fragment>
-            {!subQCRows ?
-                (<div className="overview-list-element">
+        } else if (qcProperty === 'qc_list') { //qc_list workaround
+            subQCRows = _.map(value, function (qcItem, index) {
+                return (<div className="overview-list-element">
                     <div className="row">
                         <div className="col-4 text-right">
-                            <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
-                                elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
+                            <object.TooltipInfoIconContainerAuto
+                                elementType="h5" fallbackTitle={index + 1}
                                 className="mb-0 mt-02 text-break" />
                         </div>
                         <div className="col-8">
                             <div className="inner value">
-                                {percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, value, true)}
+                                <a href={object.atIdFromObject(qcItem.value)}>{qcItem.value.display_title}</a>
                             </div>
                         </div>
                     </div>
-                </div>) : (<h5 className="qc-grouping-title">{title || qcProperty}</h5>)}
-            {subQCRows ?
-                (
-                    <Collapse in={true}>
-                        <div className="inner">
-                            {subQCRows}
-                        </div>
-                    </Collapse>
-                )
-                : null}
-        </React.Fragment>
-    );
-}
-QCMetricFromEmbed.percentOfTotalReads = function(quality_metric, field){
-    var numVal = object.getNestedProperty(quality_metric, field);
-    if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
-        var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
-        var numValRounded = valueTransforms.roundLargeNumber(numVal);
+                </div>)
+            });
+        }
+
         return (
-            <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
+            <React.Fragment>
+                {!subQCRows ?
+                    (<div className="overview-list-element">
+                        <div className="row">
+                            <div className="col-4 text-right">
+                                <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
+                                    elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
+                                    className="mb-0 mt-02 text-break" />
+                            </div>
+                            <div className="col-8">
+                                <div className="inner value">
+                                    {percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, value, true)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>) : (<h5 className="qc-grouping-title" onClick={this.toggleOpen}><i className={"icon icon-fw fas mr-5 icon-" + (open ? 'minus' : 'plus')}/><span>{title || qcProperty}</span></h5>)}
+                {subQCRows ?
+                    (
+                        <Collapse in={open}>
+                            <div className="inner">
+                                {(open || closing) ? subQCRows : null}
+                            </div>
+                        </Collapse>
+                    ) : null}
+            </React.Fragment>
         );
     }
-    return '-';
-};
-
+}
 
 export function QCMetricFromSummary(props){
     const { title } = props;
@@ -271,7 +307,7 @@ export class QualityControlResults extends React.PureComponent {
         'hideIfNoValue' : false
     };
 
-    /** To be deprecated (?) */
+    /** To be deprecated (?) - still used in files view */
     metricsFromEmbeddedReport(){
         const { file, schemas } = this.props;
         const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas, file.quality_metric) };
