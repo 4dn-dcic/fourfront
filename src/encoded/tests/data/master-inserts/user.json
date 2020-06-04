@@ -156,6 +156,17 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
+        "email": "alexander_veit@hms.harvard.edu",
+        "first_name": "Alexander",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Veit",
+        "uuid": "e820dc86-0ed5-4c42-98dc-501f91036419",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "timezone": "US/Eastern",
         "email": "ud4dntest@gmail.com",
         "status": "current",
@@ -174,6 +185,17 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Ronchetti",
         "uuid": "1a12362f-4eb6-4a9c-8173-776667226988",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "kent_pitman@hms.harvard.edu",
+        "first_name": "Kent",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Pitman",
+        "uuid": "682f31f5-64df-4dd6-bb45-ca3b1726e27c",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]

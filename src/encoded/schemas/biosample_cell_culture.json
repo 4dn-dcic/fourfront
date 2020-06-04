@@ -120,13 +120,16 @@
             "linkTo": "OntologyTerm",
             "lookup": 99,
             "suggested_enum": [
-                "definitive endoderm",
-                "neuronal stem cell",
-                "primitive cardiac myocyte",
                 "cardiac muscle myoblast",
                 "cardiac muscle cell",
                 "cardiogenic mesoderm",
-                "mesoderm"]
+                "definitive endoderm",
+                "endoderm of foregut",
+                "mesoderm",
+                "neuronal stem cell",
+                "pancreatic endoderm",
+                "primitive cardiac myocyte",
+                "stem cell"]
         },
         "differentiation_state": {
             "title": "Differentiation State",

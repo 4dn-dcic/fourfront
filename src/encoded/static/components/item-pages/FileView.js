@@ -304,7 +304,7 @@ export class ExternalVisualizationButtons extends React.PureComponent {
 
 
 
-function QCMetricFromEmbed(props){
+export function QCMetricFromEmbed(props){
     const { metric, qcProperty, fallbackTitle, tips, percent } = props;
     if (!metric[qcProperty]) return null;
     return (

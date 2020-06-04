@@ -1808,7 +1808,7 @@ class BodyElement extends React.PureComponent {
 
                             <NavigationBar {...navbarProps} />
 
-                            {!isSelectPage ? <div id="pre-content-placeholder" /> : null}
+                            <div id="pre-content-placeholder" />
 
                             <PageTitleSection {...this.props} windowWidth={windowWidth} />
 

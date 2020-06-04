@@ -9,8 +9,8 @@ import queryString from 'querystring';
 import { get as getSchemas, Term } from './../../../util/Schemas';
 import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
-    ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton
+    ResultRowColumnBlockValue, columnsToColumnDefinitions, HeadersRow, TableRowToggleOpenButton,
+    DisplayTitleColumnWrapper, DisplayTitleColumnDefault
 } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
 import { columnExtensionMap as columnExtensionMap4DN } from './../../../browse/columnExtensionMap';
@@ -55,7 +55,8 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             renderDetailPane, defaultOpenIndices, maxHeight,
             columns, columnExtensionMap,
             searchHref,
-            filterFacetFxn, hideFacets
+            filterFacetFxn, hideFacets,
+            filterColumnFxn, hideColumns,
         } = this.props;
         const { totalCount } = this.state;
 
@@ -69,6 +70,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             facets, columns, columnExtensionMap, searchHref, session,
             schemas, renderDetailPane, defaultOpenIndices, maxHeight,
             filterFacetFxn, hideFacets,
+            filterColumnFxn, hideColumns,
             onLoad: this.getCountCallback,
             termTransformFxn: Term.toName
         };
@@ -114,6 +116,20 @@ export class ItemPageTable extends React.Component {
         });
     }
 
+    /**
+     * Adds a `baseWidth` property to each columnDefinition based off widthMap or default value (100).
+     */
+    static columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
+        return columnDefinitions.map(function(colDef){
+            const colDef2 = _.clone(colDef);
+            colDef2.baseWidth = colDef.widthMap.sm || colDef.widthMap.md || colDef.widthMap.lg || 100;
+            if (typeof colDef.render !== 'function'){
+                colDef2.render = null;
+            }
+            return colDef2;
+        });
+    }
+
     static propTypes = {
         'results' : PropTypes.arrayOf(PropTypes.shape({
             'display_title' : PropTypes.string.isRequired
@@ -132,46 +148,27 @@ export class ItemPageTable extends React.Component {
         'constantColumnDefinitions' : null,
         'columnExtensionMap' : {
             'display_title' : {
-                'render' : function(result, columnDefinition, props, width){
-                    const { hideTypeTitle, renderDetailPane, detailOpen, toggleDetailOpen, schemas } = props;
-                    let title           = object.itemUtil.getTitleStringFromContext(result);
-                    const link          = object.itemUtil.atId(result);
-                    const isAnAccession = false;
-                    let tooltip;
+                'render' : function(result, parentProps){
+                    const { schemas, rowNumber, detailOpen, toggleDetailOpen, renderDetailPane, hideTypeTitle = false } = parentProps;
 
-                    if (title && (title.length > 20 || width < 100)) tooltip = title;
-
-                    if (link){ // Link instead of plaintext
-                        title = (
-                            <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')} data-tip={tooltip}>
-                                { title }
-                            </a>
-                        );
-                    }
-
-                    let typeTitle = null;
                     if (!hideTypeTitle){
-                        typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
+                        const typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
+                        if (typeTitle) {
+                            return (
+                                <div className="flex-wrap">
+                                    <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
+                                        <div className="type-title text-ellipsis-container">{ typeTitle }</div>
+                                        <DisplayTitleColumnDefault />
+                                    </DisplayTitleColumnWrapper>
+                                </div>
+                            );
+                        }
                     }
-
-                    let toggleButton = null;
-                    if (typeof renderDetailPane === 'function'){
-                        toggleButton = <TableRowToggleOpenButton open={detailOpen} onClick={toggleDetailOpen} />;
-                    }
-
+    
                     return (
-                        <React.Fragment>
-                            { toggleButton }
-                            <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
-                                { typeTitle ? <div className="type-title text-ellipsis-container">{ typeTitle }</div> : null }
-                                { title }
-                            </span>
-                        </React.Fragment>
-                        // <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
-                        //     { toggleButton }
-                        //     { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
-                        //     { title }
-                        // </span>
+                        <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
+                            <DisplayTitleColumnDefault />
+                        </DisplayTitleColumnWrapper>
                     );
                 }
             }
@@ -191,7 +188,8 @@ export class ItemPageTable extends React.Component {
         super(props);
         this.state = { 'mounted' : false };
         this.memoized = {
-            scaleColumnDefinitionWidths : memoize(ItemPageTable.scaleColumnDefinitionWidths)
+            scaleColumnDefinitionWidths : memoize(ItemPageTable.scaleColumnDefinitionWidths),
+            columnDefinitionsToScaledColumnDefinitions : memoize(ItemPageTable.columnDefinitionsToScaledColumnDefinitions)
         };
     }
 
@@ -221,7 +219,8 @@ export class ItemPageTable extends React.Component {
         }
 
         columnDefinitions = this.memoized.scaleColumnDefinitionWidths(
-            useWidth, columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
+            useWidth,
+            this.memoized.columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
         );
 
         const commonRowProps = { width: useWidth, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };

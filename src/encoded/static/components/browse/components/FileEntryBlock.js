@@ -67,7 +67,7 @@ function SingleFileCheckbox(props){
         return null;
     }
     const isChecked = SingleFileCheckbox.isChecked(file, selectedFiles);
-    const accessionTriple = expFxn.fileToAccessionTriple(file, true);
+    const accessionTriple = expFxn.fileToAccessionTriple(file, true, true);
     return (
         <input type="checkbox" checked={isChecked} name="file-checkbox" id={'checkbox-for-' + accessionTriple}
             className="file-entry-table-checkbox" data-select-files={[accessionTriple]}
@@ -83,7 +83,7 @@ SingleFileCheckbox.hasCheckbox = function(file){
 };
 SingleFileCheckbox.isChecked = function(file, selectedFiles){
     if (!file || !file.accession || !selectedFiles) return null;
-    var accessionTriple = expFxn.fileToAccessionTriple(file, true);
+    var accessionTriple = expFxn.fileToAccessionTriple(file, true, true);
     // We must return a bool here to be fed into the `checked` attribute of a checkbox.
     return !!(selectedFiles[accessionTriple]);
 };
@@ -208,9 +208,10 @@ export class FileEntryBlock extends React.PureComponent {
 
 
     renderName(){
-        const { file, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
+        const { file,  columnHeaders, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
         const classList = ['name', 'col-file'];
-        if (file && file.accession) classList.push('mono-text');
+        const colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null;
+        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('mono-text');
         if (!excludeCheckbox && selectedFiles && SingleFileCheckbox.hasCheckbox(file)){
             classList.push('has-checkbox');
         }
@@ -291,7 +292,7 @@ class MultipleFileCheckbox extends React.PureComponent {
             return null;
         }
 
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
         const lineHeight = (filesCount * 35 - 14) + 'px';
@@ -340,7 +341,7 @@ export class FilePairBlock extends React.PureComponent {
 
     onCheckboxChange(e){
         const { files, handleFileCheckboxChange } = this.props;
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         handleFileCheckboxChange(accessionTriples, files);
     }
 
@@ -368,13 +369,14 @@ export class FilePairBlock extends React.PureComponent {
     }
 
     render(){
-        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth } = this.props;
+        const { files, columnHeaders, colWidthStyles, isSingleItem, excludeChildrenCheckboxes, hideNameOnHover, stackDepth, columnClass } = this.props;
         const isReallySingleItem = this.isSingleItem(isSingleItem, files);
         const cls = (
             "s-block file-group keep-label-on-name-hover" +
             (hideNameOnHover ? ' hide-name-on-block-hover' : '') +
             " stack-depth-" + stackDepth
         );
+        const useStyle = colWidthStyles["list:file-group"]; // columnClass here is of parent StackedBlock, not of its children.
 
         let childBlocks;
 
@@ -396,7 +398,7 @@ export class FilePairBlock extends React.PureComponent {
         return (
             <div className={cls}>
                 { this.nameColumn() }
-                <div className={"files s-block-list stack-depth-" + stackDepth}>{ childBlocks }</div>
+                <div className={"files s-block-list stack-depth-" + stackDepth} style={useStyle}>{ childBlocks }</div>
             </div>
         );
     }
@@ -425,20 +427,20 @@ export class FileHeaderWithCheckbox extends React.PureComponent {
     onChange(){
         const { allFiles, handleFileCheckboxChange } = this.props;
         const files = this.filesWithViewPermission(allFiles);
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         handleFileCheckboxChange(accessionTriples, files);
     }
 
     render(){
         const { allFiles, selectedFiles, children } = this.props;
         const files = this.filesWithViewPermission(allFiles);
-        const accessionTriples = expFxn.filesToAccessionTriples(files, true);
+        const accessionTriples = expFxn.filesToAccessionTriples(files, true, true);
         const checked = this.isChecked(accessionTriples, selectedFiles);
         const indeterminate = !checked && this.isIndeterminate(accessionTriples, selectedFiles);
 
         return (
             <React.Fragment>
-                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'children')} {...{ indeterminate, checked }}
+                <IndeterminateCheckbox {..._.omit(this.props, 'allFiles', 'selectedFiles', 'handleFileCheckboxChange', 'children')} {...{ indeterminate, checked }}
                     data-select-files={accessionTriples} onChange={this.onChange} className="file-header-select-checkbox" />
                 { children }
             </React.Fragment>

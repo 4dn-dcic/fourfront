@@ -39,6 +39,7 @@ import BiosourceView            from './item-pages/BiosourceView';
 import ProtocolView             from './item-pages/ProtocolView';
 import DocumentView             from './item-pages/DocumentView';
 import PublicationView          from './item-pages/PublicationView';
+import QualityMetricView        from './item-pages/QualityMetricView';
 import StaticSectionView        from './item-pages/StaticSectionView';
 import FourfrontSubmissionView  from './forms/FourfrontSubmissionView';
 import BrowseView               from './browse/BrowseView';
@@ -46,6 +47,7 @@ import SearchView               from './browse/SearchView';
 import MicroscopySearchView     from './browse/MicroscopySearchView';
 import PublicationSearchView    from './browse/PublicationSearchView';
 import SubscriptionsView        from './browse/SubscriptionsView';
+import FileSearchView           from './browse/FileSearchView';
 
 
 content_views.register(StaticPage,    'StaticPage');
@@ -74,6 +76,7 @@ content_views.register(HiGlassViewConfigView,   'HiglassViewConfig');
 content_views.register(ProtocolView,            'Protocol');
 content_views.register(DocumentView,            'Document');
 content_views.register(PublicationView,         'Publication');
+content_views.register(QualityMetricView,       'QualityMetric');
 content_views.register(SchemaView,              'JSONSchema');
 content_views.register(UserView,                'User');
 content_views.register(ImpersonateUserForm,     'User', 'impersonate-user');
@@ -100,7 +103,7 @@ content_views.register(MicroscopySearchView,    'MicroscopeConfigurationSearchRe
 content_views.register(SearchView,              'PublicationSearchResults', 'selection');
 content_views.register(SearchView,              'PublicationSearchResults', 'multiselect');
 content_views.register(SubscriptionsView,       'Submissions'); // TODO: Rename 'Submissions' to 'Subscriptions' on back-end (?)
-
+content_views.register(FileSearchView,          'FileSearchResults');
 
 // Fallback for anything we haven't registered
 content_views.fallback = function () {

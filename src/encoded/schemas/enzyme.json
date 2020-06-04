@@ -90,7 +90,7 @@
         }
     },
     "columns": {
-        "enzyme_source": {
+        "enzyme_source.title": {
             "title": "Source"
         },
         "recognition_sequence": {

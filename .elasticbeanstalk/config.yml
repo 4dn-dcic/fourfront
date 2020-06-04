@@ -6,7 +6,7 @@ branch-defaults:
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode
-  default_platform: Python 3.4
+  default_platform: Python 3.6
   default_region: us-east-1
   profile: null
   sc: git

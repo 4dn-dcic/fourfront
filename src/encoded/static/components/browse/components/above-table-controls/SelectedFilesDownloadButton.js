@@ -86,7 +86,8 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         'filenamePrefix' : "metadata_",
         'children' : "Download",
         'className' : "btn-primary",
-        'analyticsAddFilesToCart' : false
+        'analyticsAddFilesToCart': false,
+        'action': "/metadata/?type=ExperimentSet&sort=accession"
     };
 
     constructor(props){
@@ -110,7 +111,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     render(){
         const {
             selectedFiles, filenamePrefix, children, disabled,
-            windowWidth, context, analyticsAddFilesToCart,
+            windowWidth, context, analyticsAddFilesToCart, action,
             ...btnProps
         } = this.props;
         const { modalOpen } = this.state;
@@ -127,7 +128,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                     { children }
                 </button>
                 { modalOpen ?
-                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, context, fileCountUnique, fileCountWithDupes, analyticsAddFilesToCart }}
+                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, context, fileCountUnique, fileCountWithDupes, analyticsAddFilesToCart, action }}
                         onHide={this.hideModal}/>
                     : null }
             </React.Fragment>
@@ -184,6 +185,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
     render(){
         const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context } = this.props;
+        let { action } = this.props;
         const { disclaimerAccepted } = this.state;
 
         const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
@@ -192,6 +194,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);
 
+        if ('search' === analytics.hrefToListName(window && window.location.href)) {
+            action = "/metadata/?type=File&sort=accession";
+        }
         return (
             <Modal show className="batch-files-download-modal" onHide={onHide} bsSize="large">
 
@@ -207,27 +212,28 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
                     <ModalCodeSnippet filename={suggestedFilename} isSignedIn={isSignedIn} />
 
-                    <div className="extra-notes-section">
-                        <h4 className="mt-2 mb-07 text-500">Notes</h4>
-                        <ul className="mb-25">
-                            { isSignedIn ?
-                                <li className="mb-05">
-                                    To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
+                    { isSignedIn || foundUnpublishedFiles ?
+                        <div className="extra-notes-section">
+                            <h4 className="mt-2 mb-07 text-500">Notes</h4>
+                            <ul className="mb-25">
+                                { isSignedIn ?
+                                    <li className="mb-05">
+                                        To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
                                     <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
                                 </li>
-                                : null }
-                            <li className="mb-05">
+                                    : null }
+                                {/* <li className="mb-05">
                                 {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
-                            </li>
-                            { foundUnpublishedFiles ?
-                                <li>
-                                    For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
+                                </li> */}
+                                { foundUnpublishedFiles ?
+                                    <li>
+                                        For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
                                     In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
                                     Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
                                 </li>
-                                : null }
-                        </ul>
-                    </div>
+                                    : null }
+                            </ul>
+                        </div> : null }
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
                         <button type="button" className="btn btn-info" onClick={this.handleAcceptDisclaimer}>
@@ -235,7 +241,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             I have read and understand the notes.
                         </button>
                         :
-                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context }} />
+                        <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context, action }} />
                     }
 
                     <button type="reset" onClick={onHide} className="btn btn-outline-dark ml-05">Cancel</button>
@@ -265,8 +271,7 @@ const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
  * the POSTed form fields which identify the individual files to download.
  */
 const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownloadStartButton(props){
-    const { suggestedFilename, selectedFiles, context } = props;
-
+    const { suggestedFilename, selectedFiles, context, action } = props;
     const { accessionTripleArrays, onClick } = useMemo(function(){
         const filenameAccessions = new Set();
         const accessionTripleArrays = _.map(_.keys(selectedFiles), function(accessionTripleString){
@@ -304,7 +309,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
     }, [ selectedFiles, context ]);
 
     return (
-        <form method="POST" action="/metadata/?type=ExperimentSet&sort=accession" className="inline-block">
+        <form method="POST" action={action} className="inline-block">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
             <button type="submit" name="Download" className="btn btn-primary" onClick={onClick}

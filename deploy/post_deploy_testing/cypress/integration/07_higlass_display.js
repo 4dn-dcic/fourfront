@@ -15,7 +15,7 @@ describe("HiGlass Display pages", function(){
 
             // Visit the page and confirm you can see the table and facet properties.
             cy.visit('/higlass-view-configs').wait(100).end()
-                .get(".search-headers-column-block span.column-title").should('have.text', ['Title', 'Creator'].join('')).end()
+                .get(".search-headers-column-block .column-title").should('have.text', ['Title', 'Creator'].join('')).end()
                 .get(".facets-header .facets-title").should('have.text', 'Properties');
 
             // All of the higlass displays you can view should have the "released" status.
@@ -114,7 +114,7 @@ describe("HiGlass Display pages", function(){
                 .get(".tab-section-title .tabview-title-controls-container").within(function($panel){
                     return cy.contains('Clone').click().end();
                 }).end()
-                .get('.alert div').should('have.text', 'Saved new display.').end()
+                .get('.alert div').should('contain.text', 'Saved new display.').end()
                 // Inspect POST response.
                 .get('@newHiglassDisplay').then(function (xhr) {
 
@@ -149,7 +149,7 @@ describe("HiGlass Display pages", function(){
                 }).end()
 
                 // Confirm there is a success message.
-                .get('.alert div').should('have.text', 'Saved new display.').end()
+                .get('.alert div').should('contain.text', 'Saved new display.').end()
 
                 // Inspect the AJAX response so we can capture the new uuid.
                 .get('@newHiglassDisplay').then(function (xhr) {

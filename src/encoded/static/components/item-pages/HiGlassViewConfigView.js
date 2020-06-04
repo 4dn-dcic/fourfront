@@ -1,18 +1,22 @@
 'use strict';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import ReactTooltip from 'react-tooltip';
+import memoize from 'memoize-one';
 import { Dropdown, DropdownButton, DropdownItem, Modal } from 'react-bootstrap';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/LinkToSelector';
+import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
+import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import DefaultItemView from './DefaultItemView';
 
 
@@ -42,8 +46,6 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
 }
 
-
-
 export class HiGlassViewConfigTabView extends React.PureComponent {
 
     static getTabObject(props, width){
@@ -53,6 +55,83 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'disabled' : false,
             'content' : <HiGlassViewConfigTabView {...props} width={width} />
         };
+    }
+
+    static getGroupedLayouts = memoize(function (layouts) {
+        let groupedLayouts = null;
+        if (layouts.length > 1) {
+            groupedLayouts = _.groupBy(layouts, (it) => it.y);
+            const groupedLayoutKeys = _.keys(groupedLayouts);
+            const rowNames = groupedLayoutKeys.length === 3 ? ['top', 'middle', 'bottom'] : (groupedLayoutKeys.length === 2 ? ['top', 'bottom'] : null);
+            for (let i = 0; i < groupedLayoutKeys.length; i++) {
+                const rowItem = groupedLayouts[groupedLayoutKeys[i]];
+                const colNames = rowItem.length === 3 ? ['left', 'center', 'right'] : (rowItem.length === 2 ? ['left', 'right'] : null);
+                for (let j = 0; j < rowItem.length; j++) {
+                    rowItem[j].displayText = [
+                        groupedLayoutKeys.length > 3 ? (i + 1) : ((rowNames && rowNames[i]) || null),
+                        rowItem.length > 3 ? (j + 1) : ((colNames && colNames[j]) || null)
+                    ].filter(Boolean).join(' - ');
+                }
+            }
+        } else {
+            const data = {};
+            groupedLayouts = data[layouts[0].y.toString()] = [layouts];
+        }
+        return groupedLayouts;
+    }, function (A, B) {
+        const arrA = A[0];
+        const arrB = B[0];
+        if (arrA.length !== arrB.length) { return false; }
+        for (let i = 0; i < arrA.length; i++) {
+            if ((arrA[i].x !== arrB[i].x) || (arrA[i].y !== arrB[i].y)) { return false; }
+        }
+        return true;
+    });
+
+    /**
+     * get tilesets and positions, width/height and view's position
+     * @param {Object} viewConf: even if viewConf.views modified in function, it has no side-effect since calling function always provides a fresh new argument
+     */
+    static getTilesetUids(viewConf) {
+        const tilesetUids = {};
+        if (viewConf && viewConf.views && Array.isArray(viewConf.views) && viewConf.views.length > 0) {
+            viewConf.views = _.chain(viewConf.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
+            //very simple implementation of naming views - assumes views' top edge in a row is aligned
+            const layouts = _.map(viewConf.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
+            const groupedLayouts = HiGlassViewConfigTabView.getGroupedLayouts(layouts);
+            //loop tracks
+            const trackNames = ['top', 'right', 'bottom', 'left', 'center', 'whole', 'gallery'];
+            _.each(viewConf.views, function (view) {
+                const layout = _.find(groupedLayouts[view.layout.y], (it) => it.x == view.layout.x);
+                if (view.tracks && typeof view.tracks === 'object') {
+                    _.each(trackNames, function (trackName) {
+                        const track = view.tracks[trackName];
+                        if (track && Array.isArray(track) && track.length > 0) {
+                            _.each(track, function (trackItem) {
+                                //top, left, right, bottom and gallery?? & whole??
+                                if (trackItem.tilesetUid) {
+                                    if (!tilesetUids[trackItem.tilesetUid]) {
+                                        tilesetUids[trackItem.tilesetUid] = [];
+                                    }
+                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name });
+                                }
+                                //center
+                                else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
+                                    _.each(trackItem.contents, function (subTrackItem) {
+                                        if (!tilesetUids[subTrackItem.tilesetUid]) {
+                                            tilesetUids[subTrackItem.tilesetUid] = [];
+                                        }
+                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        return tilesetUids;
     }
 
     static defaultProps = {
@@ -76,6 +155,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
+        this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
+        this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
 
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
@@ -94,51 +175,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'cloneLoading'          : false,
             'releaseLoading'        : false,
             'addFileLoading'        : false,
-            'modal'                 : null
+            'modal'                 : null,
+            'filesTableSearchHref'  : null,
+            'tilesetUids'           : {},
         };
         this.higlassRef = React.createRef();
     }
-
-
-    /**
-     * @todo
-     * Think about different (non-componentWillReceiveProps) approaches to this - perhaps simply
-     * componentDidUpdate (?) now that we don't swap out state.viewConfig with nextProps.viewConfig.
-     * -- After cleanup.
-     */
-    // UNSAFE_componentWillReceiveProps(nextProps){
-    //     const nextState = {};
-
-    //     /*  Below code:
-    //         We will likely adjust/remove to no longer change viewConfig if receive new one from back-end because
-    //         backend will always deliver new object reference. Even if same context['@id'] and context.date_modified.
-    //     */
-
-    //     if (nextProps.viewConfig !== this.props.viewConfig){
-    //         _.extend(nextState, {
-    //             'originalViewConfig' : null, //object.deepClone(nextProps.viewConfig) // Not currently used.
-    //             'viewConfig'         : nextProps.viewConfig,
-    //             'genome_assembly'    : (nextProps.context && nextProps.context.genome_assembly) || this.state.genome_assembly || null
-    //         });
-    //     }
-    //     const hiGlassTabIndex = (this.props.hiGlassTabIndex !== 'undefined') ? this.props.hiGlassTabIndex : -1;
-    //     const recentTabIsHiglass = (hiGlassTabIndex === 0 ? this.props.href.indexOf('#') < 0 : false) || (this.props.href.indexOf('#higlass') >= 0);
-    //     if (recentTabIsHiglass && (nextProps.href !== this.props.href) && (object.itemUtil.atId(nextProps.context) === object.itemUtil.atId(this.props.context))) {
-    //         // If component is still same instance, then is likely that we're changing
-    //         // the URI hash as a consequence of changing tabs --or-- reloading current context due to change in session, etc.
-    //         // Export & save viewConfig from HiGlassComponent internal state to our own to preserve contents.
-    //         const hgc = this.getHiGlassComponent();
-    //         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-    //         const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-    //         //  currentViewConf && _.extend(nextState, {
-    //         //      'viewConfig' : currentViewConf
-    //         //  });
-    //     }
-
-    //     if (_.keys(nextState).length > 0) {
-    //         this.setState(nextState);
-    //     }
-    // }
 
     componentDidUpdate(pastProps, pastState){
         if (this.props.isFullscreen !== pastProps.isFullscreen){
@@ -156,25 +198,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         //    }
         // }
     }
-
-    // This is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
-    // componentDidMount(){
-    //     // Hacky... we need to wait for HGC to load up and resize itself and such...
-    //     var initOriginalViewConfState = () => {
-    //         var hgc = this.getHiGlassComponent();
-    //         if (hgc){
-    //             setTimeout(()=>{
-    //                 this.setState({
-    //                     'originalViewConfigString' : hgc.api.exportAsViewConfString()
-    //                 });
-    //             }, 2000);
-    //         } else {
-    //             setTimeout(initOriginalViewConfState, 200);
-    //         }
-    //     };
-    //
-    //     initOriginalViewConfState();
-    // }
 
     havePermissionToEdit(){
         const { session, context : { actions = [] } } = this.props;
@@ -647,9 +670,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         );
     }
 
+    onViewConfigUpdated(viewConf){
+        const { tilesetUids: oldData } = this.state;
+        const newData = HiGlassViewConfigTabView.getTilesetUids(JSON.parse(viewConf));
+
+        if (!_.isEqual(oldData, newData)) {
+            const newDataKeys = _.keys(newData);
+            const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null;
+            this.setState({ 'tilesetUids': newData, 'filesTableSearchHref': searchHref });
+        }
+    }
+
+    renderFilesDetailPane(result, rowNumber, containerWidth){
+        const { schemas } = this.props;
+        const { tilesetUids } = this.state;
+        const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
+
+        return <HiGlassFileDetailPane {...{ result, schemas, viewConfigTracks: tracks }} />;
+    }
+
     render(){
-        const { context, isFullscreen, windowWidth, windowHeight, width, session } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal } = this.state;
+        const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas } = this.props;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref } = this.state;
 
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
         // Setting the height of the HiGlass Component follows one of these rules:
@@ -673,6 +715,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
 
+        const filesTableProps = {
+            schemas, width,
+            searchHref: filesTableSearchHref,
+            hideColumns : ['@type'],
+            renderDetailPane: this.renderFilesDetailPane,
+            maxHeight: 800,
+            defaultOpenIndices: [0],
+            facets: null
+        };
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -691,14 +743,82 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
                             width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={viewConfig}
-                            ref={this.higlassRef} />
+                            ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
                     </div>
                 </div>
+                {filesTableSearchHref ?
+                    (
+                        <React.Fragment>
+                            <hr className="tab-section-title-horiz-divider" />
+                            <div className="raw-files-table-section">
+                                <h3 className="tab-section-title">
+                                    <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
+                                </h3>
+                                <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
+                            </div>
+                        </React.Fragment>
+                    ) : null
+                }
                 { modal }
             </div>
         );
     }
 }
+
+function HiGlassFileDetailPane(props){
+    const { result, viewConfigTracks = null, schemas } = props;
+
+    // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
+    // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
+    useEffect(function(){
+        ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
+    }, []);
+
+    const tracksBody = _.map(viewConfigTracks, (item, idx) => {
+        const wh = (item.width || item.height) ? (item.width || '-') + '/' + (item.height || '-') : "-";
+        return <tr><td>{item.view}</td><td>{item.track}</td><td>{wh}</td><td>{item.title}</td></tr>;
+    });
+
+    return (
+        <div className="mr-1">
+            { !viewConfigTracks ? null : (
+                <div className="flex-description-container">
+                    <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
+                    {/* <p className="text-normal ml-27 mt-1">{ viewConfigTracks.length }</p> */}
+                    <div className="row ml-27 mr-0">
+                        <table style={{ minWidth: '100%' }}>
+                            <thead>
+                                <tr>
+                                    <th><div className="tooltip-info-container"><span>In View</span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>W/H&nbsp;<i data-tip="Width/Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Title</span></div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {tracksBody}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <hr className="desc-separator" />
+                </div>
+            )}
+            <h5 className="text-500 mb-0 mt-16">
+                <i className="icon icon-fw icon-list fas mr-08"/>Details
+            </h5>
+            <div className="item-page-detail ml-27">
+                <Detail context={result} open={false} schemas={schemas} excludedKeys={HiGlassFileDetailPane.excludedKeys} />
+            </div>
+        </div>
+    );
+}
+HiGlassFileDetailPane.excludedKeys = [
+    ...Detail.defaultProps.excludedKeys,
+    "title", "genome_assembly", "md5sum", "content_md5sum", "source_experiments", "upload_key", "tsv_notes",
+    "track_and_facet_info", "static_content", "filename", "file_format", "file_size", "file_type", "file_type_detailed",
+    "aliases", "tags", "alternate_accessions", "public_release", "contributing_labs", "href", "produced_from"
+];
 
 /**
  * This Component has a button and a text input and a button.
