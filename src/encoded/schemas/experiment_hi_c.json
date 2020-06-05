@@ -79,9 +79,14 @@
             "title": "Digestion Enzyme",
             "description": "The enzyme used for digestion of the DNA.",
             "comment": "See Enzymes sheet or collection for existing items.",
-            "type": "string",
+            "type": "array",
             "lookup": 110,
-            "linkTo": "Enzyme"
+            "items": {
+                "title": "Enzyme",
+                "description": "Digestion Enzyme",
+                "type": "string",
+                "linkTo": "Enzyme"
+            }
         },
         "enzyme_lot_number": {
             "title": "Digestion Enzyme Lot Number",
