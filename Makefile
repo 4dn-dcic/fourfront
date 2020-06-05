@@ -6,6 +6,7 @@ clean:  # clear node modules, eggs, npm build stuff
 	rm -f src/encoded/static/build/*.js
 	rm -f src/encoded/static/build/*.html
 	rm -rf develop
+	rm -rf develop-eggs
 
 aws-ip-ranges:
 	curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json

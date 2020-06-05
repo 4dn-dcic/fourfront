@@ -73,7 +73,7 @@
     ],
     "overrides": [
         {
-            "files" : ["/src/encoded/static/data/*.jsx"],
+            "files" : ["src/encoded/static/data/*.jsx"],
             "rules" : {
                 "react/jsx-no-undef" : 0,
                 "semi" : 0,

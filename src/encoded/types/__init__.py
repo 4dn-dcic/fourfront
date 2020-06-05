@@ -153,7 +153,7 @@ def get_s3_presigned_url(download_meta, filename):
         param_get_object = {
             'Bucket': download_meta['bucket'],
             'Key': download_meta['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
+            'ResponseContentDisposition': "inline; filename=" + filename
         }
         location = conn.generate_presigned_url(
             ClientMethod = 'get_object',
@@ -265,27 +265,6 @@ class GenomicRegion(Item):
             if start_coordinate and end_coordinate:
                 value += ':' + str(start_coordinate) + '-' + str(end_coordinate)
         return value
-
-
-@collection(
-    name='microscope-configurations',
-    properties={
-        'title': 'Microscope Configurations',
-        'description': 'Collection of Metadata for microscope configurations of various Tiers',
-    })
-class MicroscopeConfiguration(Item):
-    """The MicroscopeConfiguration class that holds configuration of a microscope."""
-
-    item_type = 'microscope_configuration'
-    schema = load_schema('encoded:schemas/microscope_configuration.json')
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, microscope, title = None):
-        return microscope.get("Name") or title
 
 
 @collection(
