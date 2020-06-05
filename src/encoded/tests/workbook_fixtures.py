@@ -5,6 +5,7 @@ import webtest
 
 from snovault import DBSESSION
 from snovault.elasticsearch import create_mapping
+from snovault.tests import INDEXER_NAMESPACE_FOR_TESTING
 from .. import main
 from ..loadxl import load_all
 from .conftest_settings import make_app_settings_dictionary
@@ -29,7 +30,7 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server,
     settings['collection_datastore'] = 'elasticsearch'
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
-    settings['indexer.namespace'] = os.environ.get('TRAVIS_JOB_ID', '') # set namespace for tests
+    settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
 
     # use aws auth to access elasticsearch
     if aws_auth:
