@@ -313,7 +313,8 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     static builtInHeaders(expSetType = 'replicate'){
         switch (expSetType){
-            case 'replicate' :
+            case 'replicate':
+            case 'custom':
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
@@ -428,7 +429,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         this.memoized = {
             groupedData: memoize(function(experimentSet){
-                const { experiments_in_set, replicate_exps } = experimentSet;
+                const { experiments_in_set, replicate_exps = [] } = experimentSet;
                 const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
                     expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
                 );
