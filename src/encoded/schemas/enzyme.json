@@ -85,7 +85,7 @@
             "uniqueItems": true,
             "items": {
                 "title": "Enzyme",
-                "description": "The restriction enzyme",
+                "description": "The DNA digestion enzyme",
                 "type": "string",
                 "linkTo": "Enzyme"
             }
