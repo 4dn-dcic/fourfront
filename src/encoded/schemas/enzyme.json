@@ -1,6 +1,6 @@
 {
     "title": "Enzyme",
-    "description": "DNA restriction enzymes like HindIII or DNaseI",
+    "description": "DNA digestion enzymes like HindIII or DNaseI",
     "id": "/profiles/enzyme.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -30,7 +30,7 @@
         },
         "name": {
             "title": "Enzyme Name",
-            "description": "The name of the restriction enzyme.",
+            "description": "The name of the digestion enzyme.",
             "type": "string",
             "lookup": 20,
             "uniqueKey": "enzyme:name"
