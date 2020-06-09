@@ -79,6 +79,7 @@
         "mixed_enzymes": {
             "title": "Mixed Enzymes",
             "description": "The enzymes that are combined",
+            "comment": "If this is a multi-enzyme item, list here each single Enzyme item",
             "type": "array",
             "lookup": 90,
             "uniqueItems": true,
