@@ -15,6 +15,7 @@ import { content_views } from './globals';
 import { typedefs } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 // eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
 
@@ -99,16 +100,32 @@ export const OnlyTitle = React.memo(function OnlyTitle({ children, className, ..
     );
 });
 
-export const TitleAndSubtitleUnder = React.memo(function TitleAndSubtitleUnder(props){
-    const { children, subtitle, title, className, subTitleClassName, ...passProps } = props;
-    return (
-        <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
-            { children || title }
-            <div className={"page-subtitle " + (subTitleClassName || '')}>
-                { subtitle }
-            </div>
-        </h1>
-    );
+export const TitleAndSubtitleUnder = React.memo(function TitleAndSubtitleUnder(props) {
+    const { children, subtitle, context, title, schemas, href, className, subTitleClassName, ...passProps } = props;
+    if (context && context.filetype == 'HiglassViewConfig' && context!== 'undefined') {
+        return (
+            <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
+                {children || title}
+                <div className={"page-subtitle " + (subTitleClassName || '')}>
+                    <FieldSet context={context}
+                        schemas={schemas} href={href}>
+                        <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText={'click here to add new title'} placeholder={'title'}>
+                        </EditableField>
+                    </FieldSet>
+                </div>
+            </h1>
+        );
+    }
+    else {
+        return (
+            <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
+                { children || title }
+                <div className={"page-subtitle " + (subTitleClassName || '')}>
+                    { subtitle }
+                </div>
+            </h1>
+        );
+    }
 });
 
 export const TitleAndSubtitleBeside = React.memo(function TitleAndSubtitleNextTo(props){
@@ -209,7 +226,7 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
             return (
                 <PageTitleContainer alerts={alerts}>
                     <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
-                    <TitleAndSubtitleUnder subtitle={itemTitle}>{ itemTypeTitle }</TitleAndSubtitleUnder>
+                    <TitleAndSubtitleUnder context={context} subtitle={itemTitle}>{ itemTypeTitle }</TitleAndSubtitleUnder>
                 </PageTitleContainer>
             );
         } else {

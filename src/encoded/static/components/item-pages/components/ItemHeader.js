@@ -8,6 +8,7 @@ import queryString from 'query-string';
 import { console, object, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 
 /**
  * Object containing components required to build header shown on Item pages.
@@ -245,21 +246,25 @@ export class MiddleRow extends React.Component {
     }
 
     render(){
+        const { showIsEditableField } = this.props;
         var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
 
-        if (!description){
+        if (!description && !showIsEditableField){
             return <div className="item-page-heading no-description"/>;
         }
-
+        let defaultExpanded;
+        if (description !== null) { if (description.length < 600){defaultExpanded=true;}}
         return (
             <FlexibleDescriptionBox
                 windowWidth={this.props.windowWidth}
                 description={ description || <em>No description provided.</em> }
                 className="item-page-heading"
                 textClassName="text-medium"
-                defaultExpanded={description.length < 600}
+                defaultExpanded={defaultExpanded}
                 fitTo="grid"
                 lineHeight={22}
+                context={this.props.context}
+                showIsEditableField={showIsEditableField}
                 dimensions={{
                     'paddingWidth' : 0,
                     'paddingHeight' : 22, // Padding-top + border-top

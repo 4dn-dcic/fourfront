@@ -18,6 +18,7 @@ import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemVi
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import DefaultItemView from './DefaultItemView';
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 
 
 // const higlassFilesColExtensionMap = _.extend({}, columnExtensionMap, {
@@ -53,15 +54,16 @@ import DefaultItemView from './DefaultItemView';
 // }
 
 export default class HiGlassViewConfigView extends DefaultItemView {
-    
+
     itemHeader(){
         const itemActionsDescriptions = {
             'edit' : 'Edit the properties of this Item.',
         };
+        const showIsEditableField=true;
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
-                <MiddleRow />
+                <MiddleRow showIsEditableField={showIsEditableField}/>
                 <BottomRow />
             </ItemHeaderWrapper>
         );
@@ -125,6 +127,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     static getTilesetUids(viewConf) {
         const tilesetUids = {};
         if (viewConf && viewConf.views && Array.isArray(viewConf.views) && viewConf.views.length > 0) {
+            _.each(viewConf.views, function (view, idx) { view.vIndex = idx ;});
             viewConf.views = _.chain(viewConf.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
             //very simple implementation of naming views - assumes views' top edge in a row is aligned
             const layouts = _.map(viewConf.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
@@ -143,7 +146,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                     if (!tilesetUids[trackItem.tilesetUid]) {
                                         tilesetUids[trackItem.tilesetUid] = [];
                                     }
-                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name });
+                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name, uid: trackItem.uid });
                                 }
                                 //center
                                 else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
@@ -151,7 +154,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                         if (!tilesetUids[subTrackItem.tilesetUid]) {
                                             tilesetUids[subTrackItem.tilesetUid] = [];
                                         }
-                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name });
+                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name, uid: trackItem.uid });
                                     });
                                 }
                             });
@@ -187,6 +190,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
         this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
         this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
+        this.onChangeHiglassViewConfItems = this.onChangeHiglassViewConfItems.bind(this);
+        this.higlassInstanceHeightCalc = this.higlassInstanceHeightCalc.bind(this);
 
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
@@ -208,30 +213,68 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'modal'                 : null,
             'filesTableSearchHref'  : null,
             'tilesetUids'           : {},
+            'instanceHeight'        :props.context && props.context.instance_height|| 600,
         };
         this.higlassRef = React.createRef();
     }
 
-    componentDidUpdate(pastProps, pastState){
-        if (this.props.isFullscreen !== pastProps.isFullscreen){
+    componentDidUpdate(pastProps, pastState) {
+        if (this.props.isFullscreen !== pastProps.isFullscreen) {
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
-
-        // The following is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
-        //
-        // if (this.state.originalViewConfig === null && pastState.originalViewConfig){
-        //    var hgc = this.getHiGlassComponent();
-        //    if (hgc){
-        //        this.setState({
-        //            'originalViewConfigString' : hgc.api.exportAsViewConfString()
-        //        });
-        //    }
-        // }
     }
+    higlassInstanceHeightCalc(value) {
+        const { context, isFullscreen, windowHeight } = this.props;
 
-    havePermissionToEdit(){
-        const { session, context : { actions = [] } } = this.props;
-        return !!(session && _.findWhere(actions, { 'name' : 'edit' }));
+        if (value === undefined) {
+            let hiGlassComponentHeight;
+            if (isFullscreen) {
+                hiGlassComponentHeight = windowHeight - 120;
+            }
+            else {
+                if (this.state.instance_height > 0) {
+                    hiGlassComponentHeight = context.instance_height;
+                } else {
+                    hiGlassComponentHeight = 600;
+                }
+            }
+            this.setState({ 'instanceHeight': hiGlassComponentHeight });
+        }
+        else {
+            this.setState({ 'instanceHeight': value.instance_height });
+        }
+    }
+    onChangeHiglassViewConfItems(changeItem, trackInfo) {
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        if (!currentViewConf) {
+            throw new Error('Could not get current view configuration.');
+        }
+        _.each(currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track], (trackItemData, idx) => {
+            if (trackItemData.uid === trackInfo.uid) {
+                if (Object.keys(changeItem)[0] === 'height') {
+                    currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].height = changeItem.height;
+                }
+                else if (Object.keys(changeItem)[0] === 'widht') {
+                    currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].widht = changeItem.widht;
+                }
+                else if (Object.keys(changeItem)[0] === 'name') {
+                    currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].options.name = changeItem.name;
+                }
+
+            }
+        });
+        const viewConfControl = hgc.api.setViewConfig(currentViewConf);
+        viewConfControl.then(() => {
+            // the initial set of tiles has been loaded
+        });
+        return true;
+    }
+    havePermissionToEdit() {
+        const { session, context: { actions = [] } } = this.props;
+        return !!(session && _.findWhere(actions, { 'name': 'edit' }));
     }
 
     /**
@@ -715,29 +758,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { tilesetUids } = this.state;
         const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
 
-        return <HiGlassFileDetailPane {...{ result, schemas, viewConfigTracks: tracks }} />;
+        return <HiGlassFileDetailPane {...{ result, schemas, saveViewConf: this.onChangeHiglassViewConfItems, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
     }
 
     render(){
-        const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref } = this.state;
-
+        const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas, href } = this.props;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref,instanceHeight } = this.state;
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
-        // Setting the height of the HiGlass Component follows one of these rules:
-        // - If it's Fullscreen it should almost take up the entire window.
-        // - Set to a fixed height.
-        let hiGlassComponentHeight;
-        if (isFullscreen) {
-            hiGlassComponentHeight = windowHeight - 120;
-        }
-        else {
-            if (context && context.instance_height && context.instance_height > 0) {
-                hiGlassComponentHeight = context.instance_height;
-            } else {
-                hiGlassComponentHeight = 600;
-            }
-        }
-
         // If the user isn't logged in, add a tooltip reminding them to log in.
         let tooltip = null;
         if (!session) {
@@ -771,7 +798,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={viewConfig}
+                            width={hiGlassComponentWidth} height={instanceHeight} viewConfig={viewConfig}
                             ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
                     </div>
                 </div>
@@ -780,6 +807,19 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         <React.Fragment>
                             <hr className="tab-section-title-horiz-divider" />
                             <div className="raw-files-table-section">
+                                <FieldSet
+                                    context={context}
+                                    lineHeight={22}
+                                    dimensions={{
+                                        'paddingWidth': 0,
+                                        'paddingHeight': 22,
+                                        'buttonWidth': 30,
+                                        'initialHeight': 42
+                                    }}
+                                    className="profile-contact-fields" schemas={schemas} href={href}>
+                                    <EditableField label="Instance Height" labelID="instance_height" style="minimal-row" fallbackText="No intance data" fieldType="text" instanceHeightSave={this.higlassInstanceHeightCalc} dataType="int"  >
+                                    </EditableField>
+                                </FieldSet>
                                 <h3 className="tab-section-title">
                                     <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
                                 </h3>
@@ -795,17 +835,63 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 }
 
 function HiGlassFileDetailPane(props){
-    const { result, viewConfigTracks = null, schemas } = props;
-
+    const { result,  windowWidth, href, viewConfigTracks = null, schemas, saveViewConf, editPermission } = props;
     // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
     // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
     useEffect(function(){
         ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
     }, []);
 
-    const tracksBody = _.map(viewConfigTracks, (item, idx) => {
-        const wh = (item.width || item.height) ? (item.width || '-') + '/' + (item.height || '-') : "-";
-        return <tr><td>{item.view}</td><td>{item.track}</td><td>{wh}</td><td>{item.title}</td></tr>;
+    const tracksBody = _.map(viewConfigTracks, (item, idx) =>{
+        let width = null;
+        let height = null;
+        if (!editPermission) {
+            width = (item.width) ? (item.width || '-') : "-";
+            height = (item.height) ? (item.height || '-') : "-";
+            return <tr><td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td><td>{item.title}</td></tr>;
+        }
+        else {
+            if (item.track == 'top' || item.track == 'bottom') {
+
+                width = (item.width) ? (item.width || '-') : "-";
+                height =
+                    <FieldSet context={item}
+                        schemas={schemas} href={href}>
+                        <EditableField labelID="height" fallbackText="-" style="row" fieldType="text" higlassViewConfigItem={item} saveViewConf={saveViewConf} dataType="int"   >
+                        </EditableField>
+                    </FieldSet>;
+            }
+            else if (item.track == 'left' || item.track == 'right') {
+                height = (item.width) ? (item.width || '-') : "-";
+
+                width =
+                    <FieldSet context={item}>
+                        <EditableField labelID="width" fallbackText="-" style="row" fieldType="text" higlassViewConfigItem={item} saveViewConf={saveViewConf} valueConvertType="int" >
+                        </EditableField>
+                    </FieldSet>;
+            }
+            // const wh = (item.width || item.height) ? (item.width || '-') + '/' + (item.height || '-') : "-";
+            return (
+                <tr>
+                    <td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td>
+                    <td>
+                        <FieldSet context={item}
+                            lineHeight={22}
+                            dimensions={{
+                                'paddingWidth': 0,
+                                'paddingHeight': 22,
+                                'buttonWidth': 30,
+                                'initialHeight': 42
+                            }}
+                            className="profile-contact-fields"
+                            windowWidth={windowWidth}
+                            schemas={schemas} href={href}>
+                            <EditableField labelID="title" fallbackText="no data" fieldType="text" higlassViewConfigItem={item} labelIdChangeName="name" saveViewConf={saveViewConf} >
+                            </EditableField>
+                        </FieldSet>
+                    </td>
+                </tr>);
+        }
     });
 
     return (
@@ -820,7 +906,8 @@ function HiGlassFileDetailPane(props){
                                 <tr>
                                     <th><div className="tooltip-info-container"><span>In View</span></div></th>
                                     <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
-                                    <th><div className="tooltip-info-container"><span>W/H&nbsp;<i data-tip="Width/Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Width&nbsp;<i data-tip="Width of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Height&nbsp;<i data-tip="Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
                                     <th><div className="tooltip-info-container"><span>Title</span></div></th>
                                 </tr>
                             </thead>
