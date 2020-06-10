@@ -396,11 +396,11 @@ def metadata_tsv(context, request):
         def sort_files_from_expset_by_replicate_numbers(file_dict):
             try:
                 bio_rep_no = int(file_dict['Bio Rep No'])
-            except:
+            except Exception:
                 bio_rep_no = 999
             try:
                 tec_rep_no = int(file_dict['Tech Rep No'])
-            except:
+            except Exception:
                 tec_rep_no = 999
             return bio_rep_no * 100000 + tec_rep_no
 
@@ -708,12 +708,13 @@ def report_download(context, request):
     if len(types) != 1:
         msg = 'Report view requires specifying a single type.'
         raise HTTPBadRequest(explanation=msg)
+    the_type = types[0]
 
     # Make sure we get all results
     request.GET['limit'] = 'all'
 
-    schemas = [request.registry[TYPES][types[0]].schema]
-    columns = build_table_columns(request, schemas, types)
+    the_schema = [request.registry[TYPES][the_type.schema]]
+    columns = build_table_columns(request, the_schema, [the_type])
     header = [column.get('title') or field for field, column in columns.items()]
 
     def generate_rows():
