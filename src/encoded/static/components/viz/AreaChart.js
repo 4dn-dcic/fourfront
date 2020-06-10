@@ -37,13 +37,11 @@ export class StatsViewController extends React.PureComponent {
         super(props);
         this.performAggRequests  = this.performAggRequests.bind(this);
         this.stateToChildProps      = this.stateToChildProps.bind(this);
-        this.state = _.extend(
-            {
-                'mounted' : false,
-                'loadingStatus' : 'loading'
-            },
-            _.object(_.map(_.keys(props.searchURIs), function(k){ return [ 'resp' + k, null ]; }))
-        );
+        this.state = {
+            'mounted' : false,
+            'loadingStatus' : 'loading',
+            ..._.object(Object.keys(props.searchURIs).map(function(k){ return [ 'resp' + k, null ]; }))
+        };
     }
 
     componentDidMount(){
@@ -93,7 +91,7 @@ export class StatsViewController extends React.PureComponent {
             uponAllRequestsCompleteCallback();
         };
 
-        _.forEach(chartUrisAsPairs, ([key, uri]) => {
+        chartUrisAsPairs.forEach(([key, uri]) => {
             if (typeof uri === 'function') uri = uri(this.props);
             const uriHost = ownHost && url.parse(uri).host;
             ajax.load(
@@ -107,7 +105,7 @@ export class StatsViewController extends React.PureComponent {
     }
 
     stateToChildProps(state = this.state){
-        return _.object(_.filter(_.pairs(state), ([key, value])=>{
+        return _.object(_.pairs(state).filter(([key, value])=>{
             // Which key:value pairs to pass to children.
             if (key === 'mounted' || key === 'loadingStatus') return true;
             if (!state.mounted/* || state.loadingStatus !== 'complete'*/) return false; // Don't pass responses in until finished.
@@ -116,14 +114,10 @@ export class StatsViewController extends React.PureComponent {
     }
 
     render(){
-        var { children } = this.props,
-            childProps = _.extend(_.omit(this.props, 'children'), this.stateToChildProps(this.state));
+        const { children } = this.props;
+        const childProps = _.extend(_.omit(this.props, 'children'), this.stateToChildProps(this.state));
 
-        if (Array.isArray(children)){
-            return React.Children.map(children, (c) => React.cloneElement(c, childProps));
-        } else {
-            return React.cloneElement(children, childProps);
-        }
+        return React.Children.map(children, function(c){ return React.cloneElement(c, childProps); });
     }
 
 }
