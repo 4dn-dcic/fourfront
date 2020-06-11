@@ -261,15 +261,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                     currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].widht = changeItem.widht;
                 }
                 else if (Object.keys(changeItem)[0] === 'name') {
-                    currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].options.name = changeItem.name;
+                    if (trackInfo.track === 'center') { currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].contents[0].options.name = changeItem.name; }
+                    else {
+                        currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].options.name = changeItem.name;
+                    }
                 }
-
             }
         });
-        const viewConfControl = hgc.api.setViewConfig(currentViewConf);
-        viewConfControl.then(() => {
-            // the initial set of tiles has been loaded
-        });
+        const p = hgc.api.setViewConfig(currentViewConf, true);
         return true;
     }
     havePermissionToEdit() {
@@ -763,14 +762,31 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas, href } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref,instanceHeight } = this.state;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, instanceHeight } = this.state;
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
+        let instanceHeightField=null;
         // If the user isn't logged in, add a tooltip reminding them to log in.
         let tooltip = null;
         if (!session) {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
-
+        if(this.havePermissionToEdit()){
+            instanceHeightField = (
+                <FieldSet
+                    context={context}
+                    lineHeight={22}
+                    dimensions={{
+                        'paddingWidth': 0,
+                        'paddingHeight': 22,
+                        'buttonWidth': 30,
+                        'initialHeight': 42
+                    }}
+                    className="profile-contact-fields" schemas={schemas} href={href}>
+                    <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" instanceHeightSave={this.higlassInstanceHeightCalc} dataType="int"  >
+                        <ProfileContactFieldsIcon icon="arrows-alt-v fas" />&nbsp; { instanceHeight }
+                    </EditableField>
+                </FieldSet>);
+        }
         const filesTableProps = {
             schemas, width,
             searchHref: filesTableSearchHref,
@@ -780,7 +796,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             defaultOpenIndices: [0],
             facets: null
         };
-
+        function ProfileContactFieldsIcon({ icon }){
+            return <i className={"visible-lg-inline icon icon-fw icon-" + icon }/>;
+        }
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -807,19 +825,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         <React.Fragment>
                             <hr className="tab-section-title-horiz-divider" />
                             <div className="raw-files-table-section">
-                                <FieldSet
-                                    context={context}
-                                    lineHeight={22}
-                                    dimensions={{
-                                        'paddingWidth': 0,
-                                        'paddingHeight': 22,
-                                        'buttonWidth': 30,
-                                        'initialHeight': 42
-                                    }}
-                                    className="profile-contact-fields" schemas={schemas} href={href}>
-                                    <EditableField label="Instance Height" labelID="instance_height" style="minimal-row" fallbackText="No intance data" fieldType="text" instanceHeightSave={this.higlassInstanceHeightCalc} dataType="int"  >
-                                    </EditableField>
-                                </FieldSet>
+                                {instanceHeightField}
                                 <h3 className="tab-section-title">
                                     <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
                                 </h3>
@@ -857,7 +863,7 @@ function HiGlassFileDetailPane(props){
                 height =
                     <FieldSet context={item}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="height" fallbackText="-" style="row" fieldType="text" higlassViewConfigItem={item} saveViewConf={saveViewConf} dataType="int"   >
+                        <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" higlassViewConfigItem={item} saveViewConf={saveViewConf} dataType="int"   >
                         </EditableField>
                     </FieldSet>;
             }
@@ -866,7 +872,7 @@ function HiGlassFileDetailPane(props){
 
                 width =
                     <FieldSet context={item}>
-                        <EditableField labelID="width" fallbackText="-" style="row" fieldType="text" higlassViewConfigItem={item} saveViewConf={saveViewConf} valueConvertType="int" >
+                        <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" higlassViewConfigItem={item} saveViewConf={saveViewConf} valueConvertType="int" >
                         </EditableField>
                     </FieldSet>;
             }

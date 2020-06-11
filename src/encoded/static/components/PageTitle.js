@@ -101,31 +101,16 @@ export const OnlyTitle = React.memo(function OnlyTitle({ children, className, ..
 });
 
 export const TitleAndSubtitleUnder = React.memo(function TitleAndSubtitleUnder(props) {
-    const { children, subtitle, context, title, schemas, href, className, subTitleClassName, ...passProps } = props;
-    if (context && context.filetype == 'HiglassViewConfig' && context!== 'undefined') {
-        return (
-            <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
-                {children || title}
-                <div className={"page-subtitle " + (subTitleClassName || '')}>
-                    <FieldSet context={context}
-                        schemas={schemas} href={href}>
-                        <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText={'click here to add new title'} placeholder={'title'}>
-                        </EditableField>
-                    </FieldSet>
-                </div>
-            </h1>
-        );
-    }
-    else {
-        return (
-            <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
-                { children || title }
-                <div className={"page-subtitle " + (subTitleClassName || '')}>
-                    { subtitle }
-                </div>
-            </h1>
-        );
-    }
+    const { children, subtitle, title, className, subTitleClassName, ...passProps } = props;
+
+    return (
+        <h1 className={"page-title top-of-page " + (className || '')} {...passProps}>
+            {children || title}
+            <div className={"page-subtitle " + (subTitleClassName || '')}>
+                {subtitle}
+            </div>
+        </h1>
+    );
 });
 
 export const TitleAndSubtitleBeside = React.memo(function TitleAndSubtitleNextTo(props){
@@ -171,8 +156,8 @@ const StaticPageTitle = React.memo(function StaticPageTitle(props){
 
 /** Based on 4DN content views & metadata, to be updated re: CGAP */
 const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
-    const { context, schemas, alerts, href, session } = props;
-    const itemTitle = object.itemUtil.getTitleStringFromContext(context);
+    const { context, schemas, alerts, href, session, className } = props;
+    let itemTitle = object.itemUtil.getTitleStringFromContext(context);
     const itemTypeTitle = schemaTransforms.getItemTypeTitle(context, schemas);
     const isTitleAnAccession = itemTitle && object.itemUtil.isDisplayTitleAccession(context, itemTitle, true);
 
@@ -223,6 +208,15 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
             // Item views will currently show accession &/or abstract type.
             // While this is case, we need to test for them here for layouting.
             // If itemTitle is < 20chars might as well show it beside itemTypeTitle, anyway.
+            if (context && (context['@type'].indexOf('HiglassViewConfig') > -1)){
+                itemTitle = (
+                    <FieldSet context={context}
+                        schemas={schemas} href={href}>
+                        <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText={'click here to add new title'} placeholder={'title'}>
+                        </EditableField>
+                    </FieldSet>
+                );
+            }
             return (
                 <PageTitleContainer alerts={alerts}>
                     <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
