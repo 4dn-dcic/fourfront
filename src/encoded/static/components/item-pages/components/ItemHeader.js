@@ -239,6 +239,10 @@ export class TopRow extends React.Component {
  */
 export class MiddleRow extends React.Component {
 
+    static defaultProps = {
+        'isInlineEditable': false
+    };
+
     shouldComponentUpdate(nextProps){
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
         if (nextProps.windowWidth !== this.props.windowWidth) return true;
@@ -246,10 +250,10 @@ export class MiddleRow extends React.Component {
     }
 
     render(){
-        const { showIsEditableField } = this.props;
+        const { isInlineEditable } = this.props;
         var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
 
-        if (!description && !showIsEditableField){
+        if (!description && !isInlineEditable){
             return <div className="item-page-heading no-description"/>;
         }
         let defaultExpanded;
@@ -257,19 +261,19 @@ export class MiddleRow extends React.Component {
         return (
             <FlexibleDescriptionBox
                 windowWidth={this.props.windowWidth}
-                description={ description || <em>No description provided.</em> }
+                description={description || <em>No description provided.</em>}
                 className="item-page-heading"
                 textClassName="text-medium"
                 defaultExpanded={defaultExpanded}
                 fitTo="grid"
                 lineHeight={22}
                 context={this.props.context}
-                showIsEditableField={showIsEditableField}
+                isInlineEditable={isInlineEditable}
                 dimensions={{
-                    'paddingWidth' : 0,
-                    'paddingHeight' : 22, // Padding-top + border-top
-                    'buttonWidth' : 30,
-                    'initialHeight' : 42
+                    'paddingWidth': 0,
+                    'paddingHeight': 22, // Padding-top + border-top
+                    'buttonWidth': 30,
+                    'initialHeight': 42
                 }}
             />
         );

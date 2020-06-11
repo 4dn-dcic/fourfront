@@ -55,15 +55,15 @@ import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/
 
 export default class HiGlassViewConfigView extends DefaultItemView {
 
-    itemHeader(){
+    itemHeader() {
         const itemActionsDescriptions = {
-            'edit' : 'Edit the properties of this Item.',
+            'edit': 'Edit the properties of this Item.',
         };
-        const showIsEditableField=true;
+
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
-                <MiddleRow showIsEditableField={showIsEditableField}/>
+                <MiddleRow isInlineEditable={true} />
                 <BottomRow />
             </ItemHeaderWrapper>
         );

@@ -284,7 +284,7 @@ export default class DefaultItemView extends React.PureComponent {
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow typeInfo={this.typeInfo()} />
-                <MiddleRow showIsEditableField={false}/>
+                <MiddleRow />
                 <BottomRow />
             </ItemHeaderWrapper>
         );
