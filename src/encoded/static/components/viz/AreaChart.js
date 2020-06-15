@@ -7,8 +7,8 @@ import memoize from 'memoize-one';
 import url from 'url';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
-
-import { DropdownItem, DropdownButton } from 'react-bootstrap';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
 import { console, layout, ajax, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
