@@ -229,7 +229,9 @@ export const commonParsingFxn = {
         // Notably, we do NOT sum up total here.
         const aggsList = trackingItems.map(function(trackingItem, index, allTrackingItems){
             const { google_analytics : {
-                reports : { [reportName] : currentReport }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value)
+                reports : {
+                    [reportName] : currentReport = []
+                }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value)
                 for_date
             } } = trackingItem;
 

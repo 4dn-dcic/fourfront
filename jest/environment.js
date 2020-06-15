@@ -1,7 +1,13 @@
 'use strict';
 
+/**
+ * @module Set up some global mocks and variables.
+ */
+
+import { jsdom } from 'jsdom';
+import MutationObserver from 'mutation-observer';
+
 //jest.mock('scriptjs');
-var jsdom = require('jsdom').jsdom;
 
 if (window.DOMParser === undefined) {
     // jsdom
@@ -14,7 +20,10 @@ if (window.DOMParser === undefined) {
         } else if (type.indexOf('html') >= 0) {
             parsingMode = 'html';
         }
-        var doc = jsdom(markup, {parsingMode: parsingMode});
+        var doc = jsdom(markup, { parsingMode: parsingMode });
         return doc;
     };
 }
+
+
+Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });

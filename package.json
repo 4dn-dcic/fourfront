@@ -35,15 +35,14 @@
       "jsdom"
     ],
     "transform": {
-      "^.+\\.jsx?$": "babel-jest",
-      ".+/node_modules/@hms-dbmi-bgm/shared-portal-components/.*": "babel-jest"
+      "^.+\\.jsx?$": "babel-jest"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!@hms-dbmi-bgm/shared-portal-components).+\\.js$"
+      "node_modules/(?!(@hms-dbmi-bgm/shared-portal-components|@babel|react-bootstrap)/).+\\.js$"
     ],
     "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/src/encoded/static/components/lib/"
+      "node_modules/",
+      "src/encoded/static/components/lib/"
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
@@ -69,7 +68,7 @@
     "babel-plugin-minify-dead-code-elimination": "^0.5.1",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.1.0",
-    "cypress": "^4.7.0",
+    "cypress": "^4.8.0",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
     "esdoc-external-nodejs-plugin": "^1.0.0",
@@ -86,6 +85,7 @@
     "gulp": "^4.0.2",
     "jest-cli": "^24.9.0",
     "jsdom": "^13.2.0",
+    "mutation-observer": "^1.0.3",
     "node-sass": "^4.14.1",
     "plugin-error": "^1.0.1",
     "sinon": "^1.17.6",
