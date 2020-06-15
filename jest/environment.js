@@ -26,4 +26,16 @@ if (window.DOMParser === undefined) {
 }
 
 
-Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
+if (window.MutationObserver === undefined) {
+    // See https://stackoverflow.com/questions/48809753/testing-mutationobserver-with-jest
+    Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
+} else {
+    console.log("MutationObserver DOES EXIST in Jest environment, we can now delete 'mutation-observer' depndency and disable in jest/environment.js");
+}
+
+
+if (window.BUILDTYPE === undefined) {
+    // Not used now, added to remove warning msg, but could be purposed for something later.
+    window.BUILDTYPE = "Jest";
+}
+
