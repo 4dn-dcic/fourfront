@@ -181,6 +181,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
+        this.handleUpdateAllTrack = _.throttle(this.handleUpdateAllTrack.bind(this), 3000);
+        this.handleUpdateSingleTrack = _.throttle(this.handleUpdateSingleTrack.bind(this), 3000);
         this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
@@ -212,6 +214,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'addFileLoading'        : false,
             'modal'                 : null,
             'filesTableSearchHref'  : null,
+            'changeItem'            : null,
+            'trackInfo'             : null,
             'tilesetUids'           : {},
             'instanceHeight'        :props.context && props.context.instance_height|| 600,
         };
@@ -223,10 +227,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
     }
-    higlassInstanceHeightCalc(value) {
+    higlassInstanceHeightCalc(instance) {
         const { context, isFullscreen, windowHeight } = this.props;
-
-        if (value === undefined) {
+        if (instance === undefined) {
             let hiGlassComponentHeight;
             if (isFullscreen) {
                 hiGlassComponentHeight = windowHeight - 120;
@@ -241,41 +244,113 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({ 'instanceHeight': hiGlassComponentHeight });
         }
         else {
-            this.setState({ 'instanceHeight': value.instance_height });
+            this.setState({ 'instanceHeight': instance.instance_height });
         }
     }
-    onChangeHiglassViewConfItems(changeItem, trackInfo) {
-        const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+    onChangeHiglassViewConfItems(changeItem,trackInfo) {
 
-        if (!currentViewConf) {
-            throw new Error('Could not get current view configuration.');
-        }
-        _.each(currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track], (trackItemData, idx) => {
-            if (trackItemData.uid === trackInfo.uid) {
-                if (Object.keys(changeItem)[0] === 'height') {
-                    currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].height = changeItem.height;
-                }
-                else if (Object.keys(changeItem)[0] === 'widht') {
-                    currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].widht = changeItem.widht;
-                }
-                else if (Object.keys(changeItem)[0] === 'name') {
-                    if (trackInfo.track === 'center') { currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].contents[0].options.name = changeItem.name; }
+        if (Object.keys(changeItem)[0] === 'name') {
+            const hgc = this.getHiGlassComponent();
+            const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+            const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+            const selectedTrack=currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+            _.each(selectedTrack, (trackItemData, idx) => {
+                if (trackItemData.uid === trackInfo.uid) {
+                    if (trackInfo.track === 'center') { selectedTrack[idx].contents[0].options.name = changeItem.name;}
                     else {
-                        currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track][idx].options.name = changeItem.name;
+                        selectedTrack[idx].options.name = changeItem.name;
+
                     }
                 }
-            }
-        });
-        const p = hgc.api.setViewConfig(currentViewConf, true);
-        return true;
+            });
+            const p = hgc.api.setViewConfig(currentViewConf, true);
+            return true;
+        }
+
+        else {
+            this.setState({
+                'modal': (
+                    <ConfirmModal handleConfirm={this.handleUpdateAllTrack} handleCancel={this.handleUpdateSingleTrack}
+                        confirmButtonText="Yes, Update All" cancelButtonText="No, Update Only This" modalTitle="Track Update">
+                        Do you want to update all similar tracks ?
+                        <br />
+                    </ConfirmModal>
+                ), 'changeItem': changeItem, 'trackInfo': trackInfo
+            });
+            return true;
+        }
+
     }
     havePermissionToEdit() {
         const { session, context: { actions = [] } } = this.props;
         return !!(session && _.findWhere(actions, { 'name': 'edit' }));
     }
+    handleUpdateSingleTrack(){
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const { changeItem, trackInfo } = this.state;
+        const selectedTrack=currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
 
+        if (!currentViewConf) {
+            throw new Error('Could not get current view configuration.');
+        }
+
+        _.each(selectedTrack, (trackItemData, idx) => {
+            if (trackItemData.uid === trackInfo.uid) {
+                if (Object.keys(changeItem)[0] === 'height') {
+                    selectedTrack[idx].height = changeItem.height;
+                }
+                else if (Object.keys(changeItem)[0] === 'width') {
+                    selectedTrack[idx].widht = changeItem.widht;
+                }
+            }
+        });
+        hgc.api.setViewConfig(currentViewConf, true);
+
+        this.setState({ 'modal': null });
+
+        return true;
+    }
+    handleUpdateAllTrack(evt) {
+        evt.preventDefault();
+        const hgc = this.getHiGlassComponent();
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const { changeItem, trackInfo } = this.state;
+
+        let selectedOrientation = null;
+        if (!currentViewConf) {
+            throw new Error('Could not get current view configuration.');
+        }
+        const selectedTrack = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+        _.each(selectedTrack, (trackItemData, idx) => {
+            if (trackItemData.uid === trackInfo.uid) {
+                if (Object.keys(changeItem)[0] === 'height') {
+                    selectedOrientation = selectedTrack[idx].orientation;
+                    _.each(selectedTrack, (item, i) => {
+                        if (selectedOrientation === selectedTrack[i].orientation) {
+                            selectedTrack[i].height = changeItem.height;
+                        }
+                    });
+
+                }
+                else if (Object.keys(changeItem)[0] === 'width') {
+                    selectedOrientation = selectedTrack[idx].orientation;
+                    _.each(selectedTrack, (item, i) => {
+                        if (selectedOrientation === selectedTrack[i].orientation) {
+                            selectedTrack[i].width = changeItem.width;
+                        }
+                    });
+                }
+            }
+        });
+        hgc.api.setViewConfig(currentViewConf, true);
+
+        this.setState({ 'modal': null });
+
+        return true;
+    }
     /**
      * Update the current higlass viewconfig for the user, based on the current data.
      * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
@@ -757,7 +832,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { tilesetUids } = this.state;
         const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
 
-        return <HiGlassFileDetailPane {...{ result, schemas, saveViewConf: this.onChangeHiglassViewConfItems, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
+        return <HiGlassFileDetailPane {...{ result, schemas, customSave: this.onChangeHiglassViewConfItems, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
     }
 
     render(){
@@ -781,8 +856,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         'buttonWidth': 30,
                         'initialHeight': 42
                     }}
+                    onSave={this.higlassInstanceHeightCalc}
                     className="profile-contact-fields" schemas={schemas} href={href}>
-                    <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" instanceHeightSave={this.higlassInstanceHeightCalc} dataType="int"  >
+                    <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" dataType="int"  >
                         <ProfileContactFieldsIcon icon="arrows-alt-v fas" />&nbsp; { instanceHeight }
                     </EditableField>
                 </FieldSet>);
@@ -841,7 +917,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 }
 
 function HiGlassFileDetailPane(props){
-    const { result,  windowWidth, href, viewConfigTracks = null, schemas, saveViewConf, editPermission } = props;
+    const { result,  windowWidth, href, viewConfigTracks = null, schemas, customSave, editPermission } = props;
     // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
     // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
     useEffect(function(){
@@ -851,28 +927,29 @@ function HiGlassFileDetailPane(props){
     const tracksBody = _.map(viewConfigTracks, (item, idx) =>{
         let width = null;
         let height = null;
+        item['name']=item['title'];
         if (!editPermission) {
             width = (item.width) ? (item.width || '-') : "-";
             height = (item.height) ? (item.height || '-') : "-";
             return <tr><td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td><td>{item.title}</td></tr>;
         }
         else {
-            if (item.track == 'top' || item.track == 'bottom') {
+            if (item.track === 'top' || item.track === 'bottom') {
 
                 width = (item.width) ? (item.width || '-') : "-";
                 height =
                     <FieldSet context={item}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" higlassViewConfigItem={item} saveViewConf={saveViewConf} dataType="int"   >
+                        <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} dataType="int"   >
                         </EditableField>
                     </FieldSet>;
             }
-            else if (item.track == 'left' || item.track == 'right') {
-                height = (item.width) ? (item.width || '-') : "-";
+            else if (item.track === 'left' || item.track === 'right') {
+                height = (item.height) ? (item.height || '-') : "-";
 
                 width =
                     <FieldSet context={item}>
-                        <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" higlassViewConfigItem={item} saveViewConf={saveViewConf} valueConvertType="int" >
+                        <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} valueConvertType="int" >
                         </EditableField>
                     </FieldSet>;
             }
@@ -892,7 +969,7 @@ function HiGlassFileDetailPane(props){
                             className="profile-contact-fields"
                             windowWidth={windowWidth}
                             schemas={schemas} href={href}>
-                            <EditableField labelID="title" fallbackText="no data" fieldType="text" higlassViewConfigItem={item} labelIdChangeName="name" saveViewConf={saveViewConf} >
+                            <EditableField labelID="name" fallbackText="no data" fieldType="text" customSave={customSave} >
                             </EditableField>
                         </FieldSet>
                     </td>
