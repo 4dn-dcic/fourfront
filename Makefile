@@ -59,7 +59,7 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	bin/test -vv --timeout=400
+	bin/test -vv --timeout=200
 
 update:  # updates dependencies
 	poetry update
