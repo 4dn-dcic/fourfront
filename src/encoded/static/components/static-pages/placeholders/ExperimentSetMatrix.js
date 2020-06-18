@@ -11,10 +11,10 @@ import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es
 import { StackedBlockVisual } from './../components';
 
 
-export class JtAnalysisMatrix extends React.PureComponent {
+export class ExperimentSetMatrix extends React.PureComponent {
 
     static defaultProps = {
-        "sectionKeys": ["4DN", "ENCODE", "ENCODE2"],
+        "sectionKeys": ["4DN", 'ENCODE'],
         "queries": {
             "4DN": {
                 "url": "/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all",
@@ -24,11 +24,7 @@ export class JtAnalysisMatrix extends React.PureComponent {
                     "experiments_in_set.accession"
                 ]
             },
-            'ENCODE': {
-                "url": "https://www.encodeproject.org/search/?type=Experiment&biosample_summary=H1-hESC&biosample_summary=HFFc6&status!=archived&status!=revoked&limit=all",
-                "url_fields": ["assay_slims", "biosample_summary", "assay_term_name", "description", "lab", "status"],
-            },
-            'ENCODE2': {
+            "ENCODE": {
                 "url": "https://www.encodeproject.org/search/?type=Experiment&biosample_summary=H1-hESC&biosample_summary=HFFc6&status!=archived&status!=revoked&limit=all",
                 "url_fields": ["assay_slims", "biosample_summary", "assay_term_name", "description", "lab", "status"],
             }
@@ -63,14 +59,6 @@ export class JtAnalysisMatrix extends React.PureComponent {
                 "state" : {
                     "released" : "Submitted"
                 }
-            },
-            "ENCODE2" : {
-                "cell_type" : {
-                    "H1" : "H1-hESC"
-                },
-                "state" : {
-                    "released" : "Submitted"
-                }
             }
         },
         "fieldChangeMap" : {
@@ -92,25 +80,14 @@ export class JtAnalysisMatrix extends React.PureComponent {
                 "short_description"         : "description",
                 "state"                     : "status"
             }
-            ,
-            "ENCODE2"                    : {
-                "experiment_category"       : "assay_slims",
-                "experiment_type"           : "assay_term_name",
-                "cell_type"                 : "biosample_summary",
-                "lab_name"                  : "lab.title",
-                "short_description"         : "description",
-                "state"                     : "status"
-            }
         },
         "groupingProperties": {
             "4DN": ["experiment_type", "sub_cat"],
-            "ENCODE": ["experiment_category", "experiment_type"],
-            "ENCODE2": ["experiment_category", "experiment_type"],
+            "ENCODE": ["experiment_category", "experiment_type"]
         },
         "columnGrouping": {
             "4DN": "cell_type",
-            "ENCODE": "cell_type",
-            "ENCODE2": "cell_type",
+            "ENCODE": "cell_type"
         },
         "headerFor": {
             "4DN": (
@@ -123,10 +100,11 @@ export class JtAnalysisMatrix extends React.PureComponent {
             ),
             "ENCODE": (
                 <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
-            ),
-            "ENCODE2": (
-                <h3 className="mt-2 mb-0 text-300">ENCODE Imputation</h3>
             )
+        },
+        "sectionClassName":{
+            "4DN": "col-md-6",
+            "ENCODE": "col-md-6"
         },
         "fallbackNameForBlankField" : "None",
         //"statusStateTitleMap"       : {
@@ -158,6 +136,23 @@ export class JtAnalysisMatrix extends React.PureComponent {
         },
         "columnSubGroupingOrder"    : ["Submitted", "In Submission", "Planned", "Not Planned"]
     };
+
+    static propTypes = {
+        'sectionKeys': PropTypes.arrayOf(PropTypes.string).isRequired,
+        'queries': PropTypes.object.isRequired,
+        'valueChangeMap': PropTypes.object,
+        'fieldChangeMap': PropTypes.object,
+        'groupingProperties': PropTypes.object,
+        'columnGrouping': PropTypes.object,
+        'headerFor': PropTypes.object,
+        'sectionClassName': PropTypes.object,
+        'fallbackNameForBlankField': PropTypes.string,
+        'statePrioritizationForGroups': PropTypes.arrayOf(PropTypes.string),
+        'headerPadding': PropTypes.number,
+        'headerColumnsOrder': PropTypes.arrayOf(PropTypes.string),
+        'titleMap': PropTypes.object,
+        'columnSubGroupingOrder': PropTypes.arrayOf(PropTypes.string)
+    }
 
     static convertResult(result, dataSource, fieldChangeMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField){
 
@@ -198,16 +193,26 @@ export class JtAnalysisMatrix extends React.PureComponent {
         return convertedResult;
     }
 
-    constructor(props){
+    constructor(props) {
         super(props);
         this.standardizeResult = this.standardizeResult.bind(this);
         this.loadSearchQueryResults = this.loadSearchQueryResults.bind(this);
         const { sectionKeys } = props;
-        //initialize results for each section
-        if (sectionKeys && Array.isArray(sectionKeys) && sectionKeys.length > 0) {
-            this.state = _.extend({ "mounted": false }, _.object(_.map(sectionKeys, (key) => [key + '_results', null])));
+        if (sectionKeys && Array.isArray(sectionKeys) && sectionKeys.length !== _.uniq(sectionKeys)) {
+            //validate prop keys with respect to sectionKeys, log if any missing.
+            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionClassName'];
+            _.each(propKeys, (key) => {
+                const diff = _.difference(sectionKeys, _.keys(props[key]));
+                if (diff.length > 0) {
+                    console.warn('prop.' + key + ' has missing keys with respect to keys defined in sectionKey(s):', diff);
+                }
+            });
+            //initialize results for each section
+            if (sectionKeys.length > 0) {
+                this.state = _.extend({ "mounted": false }, _.object(_.map(sectionKeys, (key) => [key + '_results', null])));
+            }
         } else {
-            throw Error('sections not defined properly, should be a string array');
+            throw Error('sections not defined properly: should be a string array and unique');
         }
     }
 
@@ -215,7 +220,7 @@ export class JtAnalysisMatrix extends React.PureComponent {
         const { fallbackNameForBlankField, statusStateTitleMap, fieldChangeMap : propFieldChangeMap, valueChangeMap, groupingPropertiesSearchParamMap } = this.props;
         const fieldChangeMap = propFieldChangeMap || groupingPropertiesSearchParamMap; // prop name `groupingPropertiesSearchParamMap` has been deprecated.
 
-        const fullResult = JtAnalysisMatrix.convertResult(
+        const fullResult = ExperimentSetMatrix.convertResult(
             result, sectionKey, fieldChangeMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField
         );
 
@@ -302,13 +307,15 @@ export class JtAnalysisMatrix extends React.PureComponent {
 
     render() {
         const {
-            sectionKeys, queries, groupingProperties, columnGrouping, headerFor,
+            sectionKeys, queries, groupingProperties, columnGrouping, headerFor, sectionClassName,
             fieldChangeMap, valueChangeMap
         } = this.props;
 
         const isLoading = _.any(
-            // eslint-disable-next-line react/destructuring-assignment
-            _.map(sectionKeys, (key) => this.state[key + '_results'] === null && queries[key].url !== null)
+            _.map(sectionKeys, (key) =>
+                // eslint-disable-next-line react/destructuring-assignment
+                this.state[key + '_results'] === null && queries[key] &&
+                queries[key].url !== null && typeof queries[key].url !== 'undefined')
         );
 
         if (isLoading){
@@ -325,33 +332,40 @@ export class JtAnalysisMatrix extends React.PureComponent {
 
         // const valueChangeMap = propValueChangeMap || { "4DN" : {}, "ENCODE" : {} };
 
-        return (
+        return (sectionKeys.length > 0) ? (
             <React.Fragment>
                 <div className="static-section joint-analysis-matrix">
                     <div className="row">
-                        {_.map(sectionKeys, (key) =>
-                            <div className={'col-12 col-md-4'}>
-                                {headerFor[key]}
-                                <VisualBody
-                                    {..._.pick(this.props, 'headerColumnsOrder',
-                                        'titleMap', 'statePrioritizationForGroups', 'fallbackNameForBlankField', 'headerPadding')}
-                                    queryUrl={queries[key].url}
-                                    groupingProperties={groupingProperties[key]}
-                                    fieldChangeMap={fieldChangeMap[key]}
-                                    valueChangeMap={valueChangeMap[key]}
-                                    columnGrouping={columnGrouping[key]}
-                                    duplicateHeaders={false}
-                                    columnSubGrouping="state"
-                                    results={this.state[key + '_results']}
-                                //defaultDepthsOpen={[true, false, false]}
-                                //keysToInclude={[]}
-                                />
-                            </div>
+                        {_.map(sectionKeys, (key) => {
+                            const resultKey = key + "_results";
+                            const url = queries[key] && queries[key].url;
+                            const className = (sectionClassName && sectionClassName[key]) || "col-md-4";
+                            return (
+                                <div className={'col-12 ' + className}>
+                                    {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
+                                    <VisualBody
+                                        {..._.pick(this.props, 'headerColumnsOrder',
+                                            'titleMap', 'statePrioritizationForGroups', 'fallbackNameForBlankField', 'headerPadding')}
+                                        queryUrl={url}
+                                        groupingProperties={groupingProperties[key]}
+                                        fieldChangeMap={fieldChangeMap[key]}
+                                        valueChangeMap={valueChangeMap[key]}
+                                        columnGrouping={columnGrouping[key]}
+                                        duplicateHeaders={false}
+                                        columnSubGrouping="state"
+                                        // eslint-disable-next-line react/destructuring-assignment
+                                        results={this.state[resultKey]}
+                                        //defaultDepthsOpen={[true, false, false]}
+                                        //keysToInclude={[]}
+                                    />
+                                </div>
+                            );
+                        }
                         )}
                     </div>
                 </div>
             </React.Fragment>
-        );
+        ) : (<em>Not Available</em>);
     }
 
 }

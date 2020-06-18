@@ -8,18 +8,18 @@ import _ from 'underscore';
 import { SlideCarousel } from './SlideCarousel';
 import { BasicCarousel } from './BasicCarousel';
 import { JointAnalysisMatrix } from './JointAnalysisMatrix';
-import { JtAnalysisMatrix } from './JtAnalysisMatrix';
+import { ExperimentSetMatrix } from './ExperimentSetMatrix';
 import { EmbeddedItemSearchTable } from './../../item-pages/components/tables/ItemPageTable';
 import { MdSortableTable } from './MdSortableTable';
 
-export { SlideCarousel, BasicCarousel, JointAnalysisMatrix, JtAnalysisMatrix, MdSortableTable };
+export { SlideCarousel, BasicCarousel, JointAnalysisMatrix, ExperimentSetMatrix, MdSortableTable };
 
 
 /**
  * Any placeholder(s) used in a StaticSection _must_ get imported here
  * and be available here.
  */
-const placeholders = { SlideCarousel, BasicCarousel, JointAnalysisMatrix, JtAnalysisMatrix, EmbeddedItemSearchTable, MdSortableTable };
+const placeholders = { SlideCarousel, BasicCarousel, JointAnalysisMatrix, ExperimentSetMatrix, EmbeddedItemSearchTable, MdSortableTable };
 
 export const replaceString = memoize(function(placeholderString, props){
 
