@@ -102,9 +102,15 @@ export class ExperimentSetMatrix extends React.PureComponent {
                 <h3 className="mt-2 mb-0 text-300">ENCODE</h3>
             )
         },
-        "sectionClassName":{
-            "4DN": "col-md-6",
-            "ENCODE": "col-md-6"
+        "sectionStyle": {
+            "4DN": {
+                "sectionClassName": "col-md-6",
+                "rowLabelListingProportion": "balanced"
+            },
+            "ENCODE": {
+                "sectionClassName": "col-md-6",
+                "rowLabelListingProportion": "balanced"
+            }
         },
         "fallbackNameForBlankField" : "None",
         //"statusStateTitleMap"       : {
@@ -145,7 +151,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
         'groupingProperties': PropTypes.object,
         'columnGrouping': PropTypes.object,
         'headerFor': PropTypes.object,
-        'sectionClassName': PropTypes.object,
+        'sectionStyle': PropTypes.object,
         'fallbackNameForBlankField': PropTypes.string,
         'statePrioritizationForGroups': PropTypes.arrayOf(PropTypes.string),
         'headerPadding': PropTypes.number,
@@ -200,7 +206,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
         const { sectionKeys } = props;
         if (sectionKeys && Array.isArray(sectionKeys) && sectionKeys.length !== _.uniq(sectionKeys)) {
             //validate prop keys with respect to sectionKeys, log if any missing.
-            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionClassName'];
+            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionStyle'];
             _.each(propKeys, (key) => {
                 const diff = _.difference(sectionKeys, _.keys(props[key]));
                 if (diff.length > 0) {
@@ -307,7 +313,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
 
     render() {
         const {
-            sectionKeys, queries, groupingProperties, columnGrouping, headerFor, sectionClassName,
+            sectionKeys, queries, groupingProperties, columnGrouping, headerFor, sectionStyle,
             fieldChangeMap, valueChangeMap
         } = this.props;
 
@@ -339,7 +345,8 @@ export class ExperimentSetMatrix extends React.PureComponent {
                         {_.map(sectionKeys, (key) => {
                             const resultKey = key + "_results";
                             const url = queries[key] && queries[key].url;
-                            const className = (sectionClassName && sectionClassName[key]) || "col-md-4";
+                            const className =  (sectionStyle && sectionStyle[key] && sectionStyle[key]['sectionClassName']) || "col-md-4";
+                            const rowLabelListingProportion = (sectionStyle && sectionStyle[key] && sectionStyle[key]['rowLabelListingProportion']) || "balanced";
                             return (
                                 <div className={'col-12 ' + className}>
                                     {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
@@ -353,6 +360,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                                         columnGrouping={columnGrouping[key]}
                                         duplicateHeaders={false}
                                         columnSubGrouping="state"
+                                        rowLabelListingProportion={rowLabelListingProportion}
                                         // eslint-disable-next-line react/destructuring-assignment
                                         results={this.state[resultKey]}
                                         //defaultDepthsOpen={[true, false, false]}
@@ -581,7 +589,7 @@ class VisualBody extends React.PureComponent {
         return (
             <StackedBlockVisual data={results} checkCollapsibility
                 {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding',
-                    'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder')}
+                    'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder', 'rowLabelListingProportion')}
                 blockPopover={this.blockPopover}
                 blockClassName={this.blockClassName}
                 blockRenderedContents={VisualBody.blockRenderedContents}
