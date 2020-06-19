@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "encoded"
-version = "1.7.1"
+version = "1.7.7"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -44,7 +44,7 @@ chardet = "3.0.4"
 "collective.recipe.modwsgi" = "2.1"
 "collective.recipe.template" = "1.13"
 colorama = "0.3.3"
-dcicsnovault = ">=3.0.3,<4"
+dcicsnovault = ">=3.0.7,<4"
 dcicutils = ">=0.31.1,<1"
 docutils = "0.12"
 elasticsearch = "5.5.3"
