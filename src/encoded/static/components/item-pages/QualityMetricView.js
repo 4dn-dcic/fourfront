@@ -190,8 +190,8 @@ class QCMetricFromEmbed extends React.PureComponent {
         const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = this.props;
         const { open, closing } = this.state;
 
-        const { qc_order = null, title = null, description: tip = null } = schemaItem;
-        if (typeof qc_order !== 'number') return null;
+        const { qc_order = null, title = null, description: tip = null } = schemaItem || {};
+        if (schemaItem && typeof qc_order !== 'number') return null;
         let value = metric[qcProperty];
         if (typeof value === "undefined") return null;
 
