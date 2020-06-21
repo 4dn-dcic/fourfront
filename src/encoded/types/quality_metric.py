@@ -12,7 +12,7 @@ from .base import (
     lab_award_attribution_embed_list
 )
 
-""" Schema for QCs' quality_metric_summary calculated property """ 
+"""Schema for QCs' quality_metric_summary calculated property"""
 QC_SUMMARY_SCHEMA = {
     "type": "array",
     "title": "Quality Metric Summary",
