@@ -12,6 +12,7 @@ from .base import (
     lab_award_attribution_embed_list
 )
 
+""" Schema for QCs' quality_metric_summary calculated property """ 
 QC_SUMMARY_SCHEMA = {
     "type": "array",
     "title": "Quality Metric Summary",
@@ -103,10 +104,6 @@ class QualityMetricFastqc(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
     embedded_list = QualityMetric.embedded_list
 
-    @calculated_property(schema=QC_SUMMARY_SCHEMA)
-    def quality_metric_summary(self, request):
-        return
-
 
 @collection(
     name='quality-metrics-bamcheck',
@@ -133,10 +130,6 @@ class QualityMetricBamcheck(QualityMetric):
         # set name based on what is entered into title
         properties['overall_quality_status'] = overall
         super(QualityMetricBamcheck, self)._update(properties, sheets)
-    
-    @calculated_property(schema=QC_SUMMARY_SCHEMA)
-    def quality_metric_summary(self, request):
-        return
 
 
 @collection(
@@ -281,10 +274,6 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
     embedded_list = QualityMetric.embedded_list
 
-    @calculated_property(schema=QC_SUMMARY_SCHEMA)
-    def quality_metric_summary(self, request):
-        return
-
 
 @collection(
     name='quality-metrics-chipseq',
@@ -376,10 +365,6 @@ class QualityMetricRnaseqMadqc(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_rnaseq_madqc.json')
     embedded_list = QualityMetric.embedded_list
 
-    @calculated_property(schema=QC_SUMMARY_SCHEMA)
-    def quality_metric_summary(self, request):
-        return
-
 
 @collection(
     name='quality-metrics-margi',
@@ -444,10 +429,6 @@ class QualityMetricWorkflowrun(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_workflowrun.json')
     embedded_list = QualityMetric.embedded_list
 
-    @calculated_property(schema=QC_SUMMARY_SCHEMA)
-    def quality_metric_summary(self, request):
-        return
-
 
 @collection(
     name='quality-metrics-qclist',
@@ -478,6 +459,10 @@ class QualityMetricQclist(QualityMetric):
 
 
 def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
+    """ 
+        Chipseq and Atacseq QCs both have common QC Summary metrics. This method 
+        calculates the metrics within quality_metric_summary calculated property
+    """    
     
     def round2(numVal):
         return round(numVal * 100) / 100

@@ -22,10 +22,6 @@ export default class QualityMetricView extends DefaultItemView {
 
 class QualityMetricViewOverview extends React.PureComponent {
 
-    constructor(props) {
-        super(props);
-    }
-
     static getTabObject({ context, schemas }) {
         return {
             'tab': <span><i className="icon far icon-file-alt icon-fw" /> Overview</span>,
@@ -43,31 +39,28 @@ class QualityMetricViewOverview extends React.PureComponent {
             )
         };
     }
-
-    static getSchemaQCFieldsAsOrderedPairs = memoize(function (schemaProp, context, schemas) {
+    /**
+     * Utility method to get schema field-value pairs as an array
+     * @param {object} schemaProp - schema property
+     * @param {object} context - Current QC Item being shown
+     * @param {object} schemas - all schema definitions
+     */
+    static getSchemaQCFieldsAsOrderedPairs(schemaProp, context, schemas) {
 
         if (!schemaProp && !context && !schemas) { return []; }
 
-        let propObj = null;
-        if (schemaProp) {
-            if (schemaProp.type === 'object' && schemaProp.properties) {
-                propObj = schemaProp.properties;
-            } else if (schemaProp.type === 'array' && schemaProp.items && schemaProp.items.type === 'object' && schemaProp.items.properties) {
-                propObj = schemaProp.items.properties;
-            }
+        let properties = schemaProp && schemaProp.type === 'object' && schemaProp.properties;
+        if (!properties) {
+            properties = schemaProp && schemaProp.type === 'array' && schemaProp.items && schemaProp.items.type === 'object' && schemaProp.items.properties;
         }
-        
-        if (!propObj && context && schemas) {
-            const typeSchema = schemaTransforms.getSchemaForItemType(
-                schemaTransforms.getItemType(context), schemas || null
-            );
-            if (typeSchema && typeSchema.properties) {
-                propObj = typeSchema.properties;
-            }
+        //try to get properties from schemas using @type of context
+        if (!properties && context && schemas) {
+            const typeSchema = schemaTransforms.getSchemaForItemType(schemaTransforms.getItemType(context), schemas || null);
+            properties = typeSchema && typeSchema.properties;
         }
 
-        if (propObj) {
-            return _.chain(propObj)
+        if (properties) {
+            return _.chain(properties)
                 .pick(function (value, key) { return typeof value.qc_order === 'number'; })
                 .pairs()
                 .sortBy(function (pair) { return pair[1].qc_order; })
@@ -75,7 +68,15 @@ class QualityMetricViewOverview extends React.PureComponent {
         }
 
         return [];
-    });
+    }
+
+    constructor(props) {
+        super(props);
+
+        this.memoized = {
+            getSchemaQCFieldsAsOrderedPairs: memoize(QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs)
+        };
+    }
 
     render() {
         const { schemas, context } = this.props;
@@ -98,7 +99,7 @@ class QualityMetricViewOverview extends React.PureComponent {
                 </div>
             ) : null;
         //QC Metrics
-        const schemaQCFieldsAsOrderedPairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(null, context, schemas);
+        const schemaQCFieldsAsOrderedPairs = this.memoized.getSchemaQCFieldsAsOrderedPairs(null, context, schemas);
         const firstObjectOrArrayIdx =
             _.findIndex(
                 schemaQCFieldsAsOrderedPairs,
@@ -107,8 +108,7 @@ class QualityMetricViewOverview extends React.PureComponent {
             (
                 <div className="overview-list-elements-container">
                     {_.map(schemaQCFieldsAsOrderedPairs, (pair, idx) => {
-                        const qcSchemaFieldKey = pair[0];
-                        const qcSchemaFieldValue = pair[1];
+                        const [qcSchemaFieldKey, qcSchemaFieldValue] = pair;
                         const defaultOpen = (firstObjectOrArrayIdx === idx);
                         return <QCMetricFromEmbed {...{ 'metric': context, schemas, tips, 'schemaItem': qcSchemaFieldValue, 'qcProperty': qcSchemaFieldKey, defaultOpen }} />;
                     })}
@@ -140,7 +140,7 @@ class QualityMetricViewOverview extends React.PureComponent {
 }
 
 class QCMetricFromEmbed extends React.PureComponent {
-    
+
     static percentOfTotalReads(quality_metric, field){
         var numVal = object.getNestedProperty(quality_metric, field);
         if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
@@ -151,8 +151,8 @@ class QCMetricFromEmbed extends React.PureComponent {
             );
         }
         return '-';
-    };
-    
+    }
+
     constructor(props) {
         super(props);
 
@@ -161,6 +161,9 @@ class QCMetricFromEmbed extends React.PureComponent {
         this.state = {
             'open': defaultOpen || false,
             'closing': false
+        };
+        this.memoized = {
+            getSchemaQCFieldsAsOrderedPairs: memoize(QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs)
         };
     }
 
@@ -187,18 +190,16 @@ class QCMetricFromEmbed extends React.PureComponent {
         const { metric, qcProperty, schemaItem, schemas, fallbackTitle, tips, percent } = this.props;
         const { open, closing } = this.state;
 
-        if (schemaItem && typeof schemaItem.qc_order !== 'number') return null;
-        if (typeof metric[qcProperty] === 'undefined') return null;
-
-        const title = (schemaItem && schemaItem.title) || null;
-        const tip = (schemaItem && schemaItem.description) || null;
-
+        const { qc_order = null, title = null, description: tip = null } = schemaItem;
+        if (typeof qc_order !== 'number') return null;
         let value = metric[qcProperty];
+        if (typeof value === "undefined") return null;
 
         let subQCRows = null;
-        if (qcProperty !== 'qc_list' && schemaItem && typeof schemaItem === 'object') {            
-            const pairs = QualityMetricViewOverview.getSchemaQCFieldsAsOrderedPairs(schemaItem, null, null);
+        if (qcProperty !== 'qc_list' && schemaItem && typeof schemaItem === 'object') {
+            const pairs = this.memoized.getSchemaQCFieldsAsOrderedPairs(schemaItem, null, null);
             if (pairs.length > 0) {
+                //if child qc item also has 1 child then combine them and display as a single line
                 if (pairs.length === 1 && pairs[0][1].type !== 'object' && typeof value[pairs[0][0]] !== 'undefined') {
                     value = pairs[0][0] + ': ' + value[pairs[0][0]];
                 }
@@ -217,42 +218,48 @@ class QCMetricFromEmbed extends React.PureComponent {
                     }
                 }
             }
-        } else if (qcProperty === 'qc_list') { //qc_list workaround
+        //qc_list is a special case. we do workaround to just display links to listed QCs.
+        } else if (qcProperty === 'qc_list') {
             subQCRows = _.map(value, function (qcItem, index) {
-                return (<div className="overview-list-element">
-                    <div className="row">
-                        <div className="col-4 text-right">
-                            <object.TooltipInfoIconContainerAuto
-                                elementType="h5" fallbackTitle={index + 1}
-                                className="mb-0 mt-02 text-break" />
-                        </div>
-                        <div className="col-8">
-                            <div className="inner value">
-                                <a href={object.atIdFromObject(qcItem.value)}>{qcItem.value.display_title}</a>
+                const text = qcItem.value.display_title || qcItem.value.error || '';
+                return (
+                    <div className="overview-list-element">
+                        <div className="row">
+                            <div className="col-4 text-right">
+                                <object.TooltipInfoIconContainerAuto
+                                    elementType="h5" fallbackTitle={index + 1}
+                                    className="mb-0 mt-02 text-break" />
+                            </div>
+                            <div className="col-8">
+                                <div className="inner value">
+                                    <a href={object.atIdFromObject(qcItem.value)}>{text}</a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>)
+                );
             });
         }
 
         return (
             <React.Fragment>
                 {!subQCRows ?
-                    (<div className="overview-list-element">
-                        <div className="row">
-                            <div className="col-4 text-right">
-                                <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
-                                    elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
-                                    className="mb-0 mt-02 text-break" />
-                            </div>
-                            <div className="col-8">
-                                <div className="inner value">
-                                    {percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, value, true)}
+                    (
+                        <div className="overview-list-element">
+                            <div className="row">
+                                <div className="col-4 text-right">
+                                    <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} title={title} tips={tip || tips}
+                                        elementType="h5" fallbackTitle={fallbackTitle || qcProperty} schemas={schemas}
+                                        className="mb-0 mt-02 text-break" />
+                                </div>
+                                <div className="col-8">
+                                    <div className="inner value">
+                                        {percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, value, true)}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>) : (<h5 className="qc-grouping-title" onClick={this.toggleOpen}><i className={"icon icon-fw fas mr-5 icon-" + (open ? 'minus' : 'plus')}/><span>{title || qcProperty}</span></h5>)}
+                    ) : (<h5 className="qc-grouping-title" onClick={this.toggleOpen}><i className={"icon icon-fw fas mr-5 icon-" + (open ? 'minus' : 'plus')} /><span>{title || qcProperty}</span></h5>)}
                 {subQCRows ?
                     (
                         <Collapse in={open}>
@@ -327,7 +334,7 @@ export class QualityControlResults extends React.PureComponent {
     }
 
     metricsFromSummary(){
-        const { file, schemas } = this.props;
+        const { file } = this.props;
         const metric = file && file.quality_metric;
         const metricURL = metric && metric.url;
         return (
