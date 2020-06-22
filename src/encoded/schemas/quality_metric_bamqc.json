@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -26,11 +26,90 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "Total Reads": {
+            "type": "number",
+            "qc_order": 1
+        },
+        "Minor Contigs": {
+            "type": "number",
+            "qc_order": 2
+        },
+        "Filtered Reads": {
+            "type": "number",
+            "qc_order": 3
+        },
+        "% of duplicates": {
+            "type": "number",
+            "qc_order": 4
+        },
+        "% of reads mapped": {
+            "type": "number",
+            "qc_order": 5
+        },
+        "% of reads filtered": {
+            "type": "number",
+            "qc_order": 6
+        },
+        "% of rescued chimeras": {
+            "type": "number",
+            "qc_order": 7
+        },
+        "overall_quality_status": {
+            "qc_order": 8
+        },
+        "DD": {
+            "type": "number",
+            "qc_order": 9
+        },
+        "MM": {
+            "type": "number",
+            "qc_order": 10
+        },
+        "MR": {
+            "type": "number",
+            "qc_order": 11
+        },
+        "MU": {
+            "type": "number",
+            "qc_order": 12
+        },
+        "NM": {
+            "type": "number",
+            "qc_order": 13
+        },
+        "NN": {
+            "type": "number",
+            "qc_order": 14
+        },
+        "NR": {
+            "type": "number",
+            "qc_order": 15
+        },
+        "NU": {
+            "type": "number",
+            "qc_order": 16
+        },
+        "RU": {
+            "type": "number",
+            "qc_order": 17
+        },
+        "UR": {
+            "type": "number",
+            "qc_order": 18
+        },
+        "UU": {
+            "type": "number",
+            "qc_order": 19
+        },
+        "WW": {
+            "type": "number",
+            "qc_order": 20
         }
     },
     "facets": {
         "overall_quality_status": {
-            "title" : "Overall Quality"
+            "title": "Overall Quality"
         }
     },
     "columns": {
@@ -38,5 +117,6 @@
             "title" : "Overall Quality",
             "default_hidden": true
         }
-    }
+    },
+    "qc_order": 1
 }

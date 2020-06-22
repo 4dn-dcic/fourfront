@@ -6,7 +6,8 @@ import _ from 'underscore';
 import { stringify } from 'query-string';
 import * as d3 from 'd3';
 import moment from 'moment';
-import { DropdownItem, DropdownButton } from 'react-bootstrap';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { console, ajax, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -228,7 +229,9 @@ export const commonParsingFxn = {
         // Notably, we do NOT sum up total here.
         const aggsList = trackingItems.map(function(trackingItem, index, allTrackingItems){
             const { google_analytics : {
-                reports : { [reportName] : currentReport }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value)
+                reports : {
+                    [reportName] : currentReport = []
+                }, // `currentReport` => List of JSON objects (report entries, 1 per unique dimension value)
                 for_date
             } } = trackingItem;
 

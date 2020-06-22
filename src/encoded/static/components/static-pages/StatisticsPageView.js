@@ -61,6 +61,8 @@ export default class StatisticsPageView extends React.PureComponent {
             setTimeout(()=>{
                 // Load in stats page components/code separately (code-splitting)
 
+                // FOR DEVELOPMENT:
+                // include `/* webpackMode: "eager" */`, since `npm run dev-quick` won't re-compile dynamic imports correctly.
                 import(
                     /* webpackChunkName: "statistics-page-components" */
                     './components/StatisticsPageViewBody'

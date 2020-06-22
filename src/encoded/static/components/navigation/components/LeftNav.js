@@ -1,7 +1,7 @@
 'use strict';
 
 import React, { useMemo } from 'react';
-import { Nav } from 'react-bootstrap';
+import Nav from 'react-bootstrap/esm/Nav';
 import url from 'url';
 import { console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util'; // Extended w. browseBaseHref & related fxns.

@@ -3,10 +3,11 @@
 import React from 'react';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
-import Matrix from './../lib/matrix-viz';
-import { Fade } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
+import Fade from 'react-bootstrap/esm/Fade';
+
 import { style as styleFxn } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { layout, console, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import Matrix from './../lib/matrix-viz';
 
 /**
  * This file and components are deprecated.

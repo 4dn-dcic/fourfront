@@ -249,6 +249,7 @@ class File(Item):
         'quality_metric.qc_list.qc_type',
         'quality_metric.qc_list.value.display_title',
         'quality_metric.qc_list.value.@type',
+        'quality_metric.quality_metric_summary.*'
     ]
     name_key = 'accession'
     rev = {

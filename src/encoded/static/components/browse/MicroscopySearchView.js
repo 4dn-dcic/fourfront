@@ -3,8 +3,10 @@
 import React from 'react';
 import memoize from 'memoize-one';
 import _ from 'underscore';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import Modal from 'react-bootstrap/esm/Modal';
 
-import { DropdownItem, DropdownButton, Modal } from 'react-bootstrap';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 import { console, ajax, navigate, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
