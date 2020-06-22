@@ -16,7 +16,7 @@ import { AdjustableDividerRow } from './components/AdjustableDividerRow';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { QCMetricFromSummary } from './FileView';
+import { QCMetricFromSummary } from './QualityMetricView';
 
 import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, renderFileQCDetailLinkButton } from './../browse/components/file-tables';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
@@ -411,7 +411,7 @@ class QCMetricsTable extends React.PureComponent {
             const columnHeaders = [ // Static / present-for-each-table headers
                 { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
                 { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
-            ].concat(fileGroup[0].quality_metric_summary.map(function(qmsObj, qmsIndex){ // Dynamic Headers
+            ].concat(fileGroup[0].quality_metric.quality_metric_summary.map(function(qmsObj, qmsIndex){ // Dynamic Headers
                 const { title, title_tooltip } = qmsObj;
                 // title tooltip: if missing in the first item then try to get it from the first valid one in array
                 return {
@@ -420,7 +420,7 @@ class QCMetricsTable extends React.PureComponent {
                     title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
                     initialWidth: 80,
                     render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
-                        const qmsItem = file.quality_metric_summary[qmsIndex];
+                        const qmsItem = file.quality_metric.quality_metric_summary[qmsIndex];
                         const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
                         return <span className="inline-block" data-tip={tooltip}>{value}</span>;
                     }
@@ -460,13 +460,13 @@ class QCMetricsTable extends React.PureComponent {
     }
 
     render() {
-        const { width, files, windowWidth, href, heading } = this.props;
+        const { width, files, windowWidth, href, heading, schemas } = this.props;
         const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
         const filesWithMetricsLen = filesWithMetrics.length;
 
         if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
-        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics, schemas);
         const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
         const commonTableProps = {
             width, windowWidth, href,
