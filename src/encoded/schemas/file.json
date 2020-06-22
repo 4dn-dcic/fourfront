@@ -409,7 +409,7 @@
             "title" : "File Size"
         },
         "source_experiment_sets.@id" : {
-            "title" : "Source"
+            "title" : "Experiment Set"
         },
         "date_created": {
             "default_hidden" : true
