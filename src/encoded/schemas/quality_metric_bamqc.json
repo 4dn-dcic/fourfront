@@ -1,5 +1,5 @@
 {
-    "title" : "Quality Metric for BAM",
+    "title": "Quality Metric for BAM",
     "description": "Schema for reporting the specific calculation of an quality metrics",
     "id": "/profiles/quality_metric_bamqc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "quality_metric.json#/properties" }
     ],
-    "mixinFacets" : [
+    "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
@@ -63,7 +63,7 @@
             "qc_order": 9
         },
         "MM": {
-            "title" : "Multimapped Reads",
+            "title": "Multimapped Reads",
             "type": "number",
             "qc_order": 10
         },
@@ -72,7 +72,7 @@
             "qc_order": 11
         },
         "MU": {
-            "title" : "Mapped Unique Reads",
+            "title": "Mapped Unique Reads",
             "type": "number",
             "qc_order": 12
         },
@@ -116,7 +116,7 @@
     },
     "columns": {
         "overall_quality_status": {
-            "title" : "Overall Quality",
+            "title": "Overall Quality",
             "default_hidden": true
         }
     },
