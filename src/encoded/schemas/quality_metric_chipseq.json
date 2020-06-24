@@ -1,5 +1,5 @@
 {
-    "title" : "Quality Metric for ChIP-Seq",
+    "title": "Quality Metric for ChIP-Seq",
     "description": "Schema for reporting the specific calculation of an quality metrics",
     "id": "/profiles/quality_metric_chipseq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "quality_metric.json#/properties" }
     ],
-    "mixinFacets" : [
+    "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
@@ -1041,12 +1041,12 @@
     },
     "facets": {
         "overall_quality_status": {
-            "title" : "Overall Quality"
+            "title": "Overall Quality"
         }
     },
     "columns": {
         "overall_quality_status": {
-            "title" : "Overall Quality"
+            "title": "Overall Quality"
         }
     },
     "qc_order": 1

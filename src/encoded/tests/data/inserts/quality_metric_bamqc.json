@@ -5,7 +5,7 @@
         "lab": "4dn-dcic-lab",
         "Total Reads": 40000000,
         "MR": 38000000,
-        "NM" : 200000,
+        "NM": 200000,
         "MU": 30000000,
         "% of reads mapped": 95,
         "% of reads filtered": 75,
