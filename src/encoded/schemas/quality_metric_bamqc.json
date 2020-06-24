@@ -59,52 +59,62 @@
             "qc_order": 8
         },
         "DD": {
+            "title": "Duplicate Read",
             "type": "number",
             "qc_order": 9
         },
         "MM": {
-            "title" : "Multimapped Reads",
+            "title" : "Multimapped-Multimapped Read",
             "type": "number",
             "qc_order": 10
         },
         "MR": {
+            "title": "Multimapped-Rescued Read",
             "type": "number",
             "qc_order": 11
         },
         "MU": {
-            "title" : "Mapped Unique Reads",
+            "title" : "Multimapped-Unique Read",
             "type": "number",
             "qc_order": 12
         },
         "NM": {
+            "title": "Null-Multimapped Read",
             "type": "number",
             "qc_order": 13
         },
         "NN": {
+            "title": "Null-Null Read",
             "type": "number",
             "qc_order": 14
         },
         "NR": {
+            "title": "Null-Rescued Read",
             "type": "number",
             "qc_order": 15
         },
         "NU": {
+            "title": "Null-Unique Read",
             "type": "number",
             "qc_order": 16
         },
         "RU": {
+            "title": "Rescued-Unique Read",
             "type": "number",
             "qc_order": 17
         },
         "UR": {
+            "title": "Unique-Rescued Read",
             "type": "number",
             "qc_order": 18
         },
         "UU": {
+            "title": "Unique-Unique Read",
             "type": "number",
             "qc_order": 19
         },
         "WW": {
+            "title": "Walk-Walk",
             "type": "number",
             "qc_order": 20
         }
