@@ -32,6 +32,10 @@
         },
         "url": {
             "qc_order": 2
+        },
+        "Max CPU utilization" : {
+            "type": "number",
+            "qc_order": 3
         }
     },
     "facets": {
