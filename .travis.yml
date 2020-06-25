@@ -72,7 +72,6 @@ before_script:
 - configure-kibana-index --es-endpoint search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
 script:
 - if test -n "$NPM"; then npm test; fi
-# setone is essentially all tests that are not indexing; change here for clarity
 - if test -n "$NPM"; then make travis-test-npm;
   fi
 - if test -n "$UNIT"; then travis_wait 30 make travis-test-unit;
