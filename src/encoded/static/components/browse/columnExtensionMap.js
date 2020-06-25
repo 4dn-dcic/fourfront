@@ -14,24 +14,18 @@ const { Item, ColumnDefinition } = typedefs;
 export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120, 'xs' : 120 };
 
 /** Is reused in a couple of places */
-function labDisplayTitleRenderFxn(result, columnDefinition, props, width, popLink = false){
-    var labItem = result.lab;
-    if (!labItem) return null;
-    var labLink;
-    if (popLink){
-        labLink = <a href={object.atIdFromObject(labItem)} target="_blank" rel="noopener noreferrer">{ labItem.display_title }</a>;
-    }else{
-        labLink = <a href={object.atIdFromObject(labItem)}>{ labItem.display_title }</a>;
+function labDisplayTitleRenderFxn(result, props){
+    const { lab, submitted_by : { display_title : submitterTitle } = {} } = result;
+    if (!lab) return null;
+    const labLink = <a href={object.atIdFromObject(lab)}>{ lab.display_title }</a>;
+    if (!submitterTitle){
+        return <span className="value">{ labLink }</span>;
     }
-
-    if (!result.submitted_by || !result.submitted_by.display_title){
-        return labLink;
-    }
-    return ( // Is wrapped by div.inner which is flexbox
-        <React.Fragment>
-            <i className="icon icon-fw icon-user user-icon fas" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
+    return (
+        <span>
+            <i className="icon icon-fw icon-user far user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
             { labLink }
-        </React.Fragment>
+        </span>
     );
 }
 
@@ -44,7 +38,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     },
     'date_published' : {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function(result, props){
             if (!result.date_published) return null;
             return formatPublicationDate(result.date_published);
         },
@@ -53,7 +47,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     'google_analytics.for_date' : {
         'title' : 'Analytics Date',
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
-        'render' : function googleAnalyticsDate(result, columnDefinition, props, width){
+        'render' : function googleAnalyticsDate(result, props){
             if (!result.google_analytics || !result.google_analytics.for_date) return null;
             return (
                 <span className="value">
@@ -66,7 +60,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'title' : 'Status',
         'widthMap' : { 'lg' : 120, 'md' : 120, 'sm' : 100 },
         'order' : 501,
-        'render' : function statusIndicator(result, columnDefinition, props, width){
+        'render' : function statusIndicator(result, props){
             const statusFormatted = Schemas.Term.toName('status', result.status);
             return (
                 <span className="value">
@@ -78,7 +72,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     },
     'workflow.title' : {
         'title' : "Workflow",
-        'render' : function(result, columnDefinition, props, width){
+        'render' : function(result, props){
             if (!result.workflow || !result.workflow.title) return null;
             const { title }  = result.workflow;
             const link = object.itemUtil.atId(result.workflow);
@@ -94,20 +88,25 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         }
     },
     'track_and_facet_info.lab_name' : {
-        'render' : function(result, columnDefinition, props, width, popLink = false){
-            if ( // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
-                result.track_and_facet_info && result.track_and_facet_info.lab_name && result.track_and_facet_info.lab_name
-                && result.lab && result.lab.display_title && result.lab.display_title === result.track_and_facet_info.lab_name
-            ){
+        'render' : function(result, props){
+            const {
+                track_and_facet_info: { lab_name } = {},
+                lab : { display_title: labTitle } = {}
+            } = result;
+            if (!lab_name) return null;
+            if (lab_name && labTitle && lab_name === labTitle){
+                // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
                 return labDisplayTitleRenderFxn(...arguments);
             } else {
-                return (result.track_and_facet_info && result.track_and_facet_info.lab_name) || null;
+                return (
+                    <span className="value">{ lab_name }</span>
+                );
             }
         }
     },
     'public_release' : {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
-        'render' : function publicRelease(result, columnDefinition, props, width){
+        'render' : function publicRelease(result, props){
             if (!result.public_release) return null;
             return (
                 <span className="value">
@@ -120,7 +119,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     'number_of_experiments' : {
         'title' : '# of Experiments',
         'widthMap' : { 'lg' : 68, 'md' : 68, 'sm' : 50 },
-        'render' : function numberOfExperiments(expSet, columnDefinition, props, width){
+        'render' : function numberOfExperiments(expSet, props){
             let number_of_experiments = parseInt(expSet.number_of_experiments); // Should exist in DB. Fallback below.
             if (isNaN(number_of_experiments) || !number_of_experiments){
                 number_of_experiments = (Array.isArray(expSet.experiments_in_set) && expSet.experiments_in_set.length) || null;
@@ -135,7 +134,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'title' : '# of Files',
         'noSort' : true,
         'widthMap' : { 'lg' : 60, 'md' : 50, 'sm' : 50 },
-        'render' : function numberOfFiles(expSet, columnDefinition, props, width){
+        'render' : function numberOfFiles(expSet, props){
             let number_of_files = parseInt(expSet.number_of_files); // Doesn't exist yet at time of writing
             if (isNaN(number_of_files) || !number_of_files){
                 number_of_files = expFxn.fileCountFromExperimentSet(expSet, true, false);
@@ -149,7 +148,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     },
     'experiments_in_set.experiment_categorizer.combined' : {
         'title' : "Assay Details",
-        'render' : function experimentCategorizer(result, columnDefinition, props, width){
+        'render' : function experimentCategorizer(result, props){
             // We have arrays here because experiments_in_set is array.
             const cat_value = _.uniq(object.getNestedProperty(result, 'experiments_in_set.experiment_categorizer.value', true)).join('; ');
             // Use first value for name (should be same for all)

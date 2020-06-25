@@ -1,15 +1,19 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
+import boto3
+from mimetypes import guess_type
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
 from snovault.validation import ValidationFailure
+from snovault.util import debug_log
 from snovault import (
     calculated_property,
     collection,
     load_schema,
     CONNECTION,
-    COLLECTIONS
+    COLLECTIONS,
+    BLOBS
 )
 # from pyramid.traversal import find_root
 from .base import (
@@ -21,7 +25,15 @@ from .base import (
     ONLY_ADMIN_VIEW,
     ALLOW_LAB_SUBMITTER_EDIT
 )
-
+from pyramid.view import view_config
+from pyramid.response import Response
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+    HTTPTemporaryRedirect,
+    HTTPFound,
+    HTTPNotFound,
+    HTTPBadRequest
+)
 
 def includeme(config):
     """include me method."""
@@ -91,6 +103,64 @@ class Document(ItemWithAttachment, Item):
             return attachment.get('download')
         return Item.display_title(self)
 
+@view_config(name='download', context=ItemWithAttachment, request_method='GET',
+             permission='view', subpath_segments=2)
+@debug_log
+def download(context, request):
+    """Implementation mostly cloned from snovault/attachment.py/download function.
+    We customized it since default implementation renames filename w/ s3 blob id.
+    """
+
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        raise HTTPForbidden('This is a restricted file not available for download')
+
+    prop_name, filename = request.subpath
+    try:
+        downloads = context.propsheets['downloads']
+    except KeyError:
+        raise HTTPNotFound("Cannot find downloads propsheet. Update item.")
+    try:
+        download_meta = downloads[prop_name]
+    except KeyError:
+        raise HTTPNotFound(prop_name)
+
+    if download_meta['download'] != filename:
+        raise HTTPNotFound(filename)
+
+    mimetype, content_encoding = guess_type(filename, strict=False)
+    if mimetype is None:
+        mimetype = 'application/octet-stream'
+
+    # If blob is on s3, redirect us there
+    blob_storage = request.registry[BLOBS]
+    if 'bucket' in download_meta:
+        location = get_s3_presigned_url(download_meta, filename)
+        raise HTTPFound(location=location)
+    elif hasattr(blob_storage, 'get_blob_url'): #default fallback - filename is s3 blob id
+        blob_url = blob_storage.get_blob_url(download_meta)
+        raise HTTPFound(location=str(blob_url))
+
+    # Otherwise serve the blob data ourselves
+    blob = blob_storage.get_blob(download_meta)
+    headers = {
+        'Content-Type': mimetype,
+    }
+    return Response(body=blob, headers=headers)
+
+def get_s3_presigned_url(download_meta, filename):
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': download_meta['bucket'],
+            'Key': download_meta['key'],
+            'ResponseContentDisposition': "inline; filename=" + filename
+        }
+        location = conn.generate_presigned_url(
+            ClientMethod = 'get_object',
+            Params = param_get_object,
+            ExpiresIn = 36*60*60
+        )
+        return location
 
 @collection(
     name='enzymes',
@@ -195,27 +265,6 @@ class GenomicRegion(Item):
             if start_coordinate and end_coordinate:
                 value += ':' + str(start_coordinate) + '-' + str(end_coordinate)
         return value
-
-
-@collection(
-    name='microscope-configurations',
-    properties={
-        'title': 'Microscope Configurations',
-        'description': 'Collection of Metadata for microscope configurations of various Tiers',
-    })
-class MicroscopeConfiguration(Item):
-    """The MicroscopeConfiguration class that holds configuration of a microscope."""
-
-    item_type = 'microscope_configuration'
-    schema = load_schema('encoded:schemas/microscope_configuration.json')
-
-    @calculated_property(schema={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string"
-    })
-    def display_title(self, microscope, title = None):
-        return microscope.get("Name") or title
 
 
 @collection(

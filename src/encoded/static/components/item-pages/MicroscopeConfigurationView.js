@@ -2,7 +2,9 @@
 
 import React from 'react';
 import _ from 'underscore';
-import { DropdownButton, DropdownItem, Dropdown } from 'react-bootstrap';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import Dropdown from 'react-bootstrap/esm/Dropdown';
 
 import { JWT, console, object, layout, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
@@ -268,6 +270,7 @@ export class MicroMetaTabView extends React.PureComponent {
         };
 
         microscope.Name = microConfTitle;
+        microscope.ID = ''; //remove old microscope's ID to be re-set in backend
 
         const payload = {
             'title': microConfTitle,

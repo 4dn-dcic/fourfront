@@ -6,12 +6,13 @@ clean:  # clear node modules, eggs, npm build stuff
 	rm -f src/encoded/static/build/*.js
 	rm -f src/encoded/static/build/*.html
 	rm -rf develop
+	rm -rf develop-eggs
 
 aws-ip-ranges:
 	curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json
 
 npm-setup:  # runs all front-end setup
-	npm install
+	npm ci
 	npm run build | grep -v "node_modules\|\[built\]"
 	npm run build-scss
 
@@ -21,17 +22,20 @@ moto-setup:  # optional moto setup that must be done separately
 macpoetry-install:  # install for OSX Catalina
 	bin/macpoetry-install
 
-macbuild:
-	make clean
-	make macpoetry-install
-	make moto-setup
-
 configure:  # does any pre-requisite installs
 	pip install poetry
+
+macbuild:
+	make configure
+	make macpoetry-install
+	make build-after-poetry
 
 build:  # builds
 	make configure
 	poetry install
+	make build-after-poetry
+
+build-after-poetry:
 	make moto-setup
 	make npm-setup
 	python setup_eb.py develop
@@ -57,6 +61,12 @@ clean-python:
 test:
 	bin/test -vv --timeout=400
 
+update:  # updates dependencies
+	poetry update
+
+help:
+	@make info
+
 info:
 	@: $(info Printing some info on how to use make)
 	   $(info - Use 'make aws-ip-ranges' to download latest ip range information. You should never have to do this yourself.)
@@ -72,3 +82,4 @@ info:
 	   $(info - Use 'make moto-setup' to install moto, for less flaky tests)
 	   $(info - Use 'make npm-setup' to build the front-end)
 	   $(info - Use 'make test' to run tests with the normal options we use on travis)
+	   $(info - Use 'make update' to update dependencies (and the lock file))

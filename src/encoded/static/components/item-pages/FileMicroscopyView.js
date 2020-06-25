@@ -7,8 +7,8 @@ import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-compo
 import { expFxn } from './../util';
 import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
-import FileView, { RelatedFilesOverViewBlock, QualityControlResults } from './FileView';
-
+import FileView, { RelatedFilesOverViewBlock } from './FileView';
+import { QualityControlResults } from './QualityMetricView';
 
 export default class FileMicroscopyView extends FileView {
 

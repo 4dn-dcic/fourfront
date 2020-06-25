@@ -5,9 +5,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
-import { DropdownButton, DropdownItem } from 'react-bootstrap';
 
 import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
@@ -313,7 +314,8 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     static builtInHeaders(expSetType = 'replicate'){
         switch (expSetType){
-            case 'replicate' :
+            case 'replicate':
+            case 'custom':
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
@@ -428,7 +430,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
         this.memoized = {
             groupedData: memoize(function(experimentSet){
-                const { experiments_in_set, replicate_exps } = experimentSet;
+                const { experiments_in_set, replicate_exps = [] } = experimentSet;
                 const experimentsGroupedByBiosample = expFxn.groupExperimentsByBiosampleRepNo(
                     expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set)
                 );

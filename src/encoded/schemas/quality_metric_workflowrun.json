@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -26,6 +26,16 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "url": {
+            "qc_order": 2
+        },
+        "Max CPU utilization" : {
+            "type": "number",
+            "qc_order": 3
         }
     },
     "facets": {
@@ -37,5 +47,6 @@
         "overall_quality_status": {
             "title" : "Overall Quality"
         }
-    }
+    },
+    "qc_order": 1
 }

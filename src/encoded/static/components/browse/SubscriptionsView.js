@@ -7,7 +7,9 @@ import memoize from 'memoize-one';
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
-import { DropdownButton, DropdownItem, ButtonToolbar, ButtonGroup } from 'react-bootstrap';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+
 import { EmbeddedItemSearchTable } from '../item-pages/components/tables';
 import { Schemas } from '../util';
 
