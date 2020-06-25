@@ -1460,6 +1460,22 @@ $badge-item-min-height: 90px;
 					font-weight: 500;
 				}
 
+				h4.qc-section-title {
+					font-weight: 400;
+				}
+				
+				h5.qc-grouping-title {
+					border-top: 1px solid #f4f4f4;
+					border-bottom: 1px solid #f4f4f4;
+					margin-top: 10px;
+					margin-bottom: 10px;
+					font-weight: 500;
+					padding-top: 15px;
+					padding-bottom: 15px;
+					cursor: pointer;
+					transition: border-color .5s, background-color .5s, padding-left .5s;
+				}
+
 				ol.overview-list-elements-container,
 				ul.overview-list-elements-container {
 					margin-bottom: 0;
@@ -1576,7 +1592,7 @@ $badge-item-min-height: 90px;
 				> div.overview-list-elements-container {
 					margin-top: 10px;
 
-					> div.overview-list-element {
+					div.overview-list-element {
 						@include overview-block-value-block;
 						margin-bottom: 5px;
 						&:last-child {

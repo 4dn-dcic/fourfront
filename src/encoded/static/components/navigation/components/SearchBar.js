@@ -5,8 +5,9 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import { DropdownItem, DropdownButton } from 'react-bootstrap';
-import Fade from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Fade';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+
 import { console, searchFilters, isSelectAction, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util';
 

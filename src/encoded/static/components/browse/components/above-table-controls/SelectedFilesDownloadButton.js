@@ -6,7 +6,7 @@ import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import moment from 'moment';
-import { Modal } from 'react-bootstrap';
+import Modal from 'react-bootstrap/esm/Modal';
 
 import { console, ajax, JWT, typedefs, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
@@ -219,8 +219,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                 { isSignedIn ?
                                     <li className="mb-05">
                                         To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
-                                    <br/>Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
-                                </li>
+                                        <br/>
+                                        Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
+                                    </li>
                                     : null }
                                 {/* <li className="mb-05">
                                 {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
@@ -228,9 +229,9 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                 { foundUnpublishedFiles ?
                                     <li>
                                         For unpublished data sets, we ask that you please contact the data generating lab to discuss possible coordinated publication.
-                                    In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
-                                    Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
-                                </li>
+                                        In your manuscript, please cite the 4DN White Paper (<a href="https://doi.org/10.1038/nature23884" target="_blank" rel="noopener noreferrer">doi:10.1038/nature23884</a>), and please acknowledge the 4DN lab which generated the data.
+                                        Please direct any questions to the <a href="mailto:support@4dnucleome.org">Data Coordination and Integration Center</a>.
+                                    </li>
                                     : null }
                             </ul>
                         </div> : null }
