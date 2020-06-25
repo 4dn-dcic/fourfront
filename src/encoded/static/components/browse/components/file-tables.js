@@ -5,9 +5,10 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import url from 'url';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
-import { DropdownButton, DropdownItem } from 'react-bootstrap';
 
 import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 

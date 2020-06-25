@@ -27,29 +27,32 @@
         "schema_version": {
             "default": "1"
         },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
         "Total reads": {
             "type": "number",
-            "description": "PairsQC Summary metric"
+            "qc_order": 2
         },
         "Short cis reads (<20kb)": {
             "type": "number",
-            "description": "PairsQC Summary metric"
+            "qc_order": 3
         },
         "Cis reads (>20kb)": {
             "type": "number",
-            "description": "PairsQC Summary metric"
+            "qc_order": 4
         },
         "Trans reads": {
             "type": "number",
-            "description": "PairsQC Summary metric"
-        },
-        "Cis/Trans ratio": {
-            "type": "number",
-            "description": "PairsQC Summary metric"
+            "qc_order": 5
         },
         "% Long-range intrachromosomal reads": {
             "type": "number",
-            "description": "PairsQC Summary metric"
+            "qc_order": 6
+        },
+        "Cis/Trans ratio": {
+            "type": "number",
+            "qc_order": 7
         },
         "convergence": {
             "type": "string",
@@ -58,11 +61,14 @@
                 "Good",
                 "Not converged"
             ],
-            "description": "PairsQC Summary metric"
+            "qc_order": 8
         },
         "slope": {
             "type": "number",
-            "description": "PairsQC Summary metric"
+            "qc_order": 9
+        },
+        "url": {
+            "qc_order": 10
         }
     },
     "facets": {
@@ -78,5 +84,6 @@
             "title" : "Overall Quality",
             "default_hidden": true
         }
-    }
+    },
+    "qc_order": 2
 }
