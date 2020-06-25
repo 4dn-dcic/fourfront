@@ -176,7 +176,7 @@ class QualityMetricBamqc(QualityMetric):
 
         def percent_of_reads(numVal):
             '''convert to percentage of Total reads in bam file'''
-            return round((int(numVal) / int(qc.get('Total Reads'))) * 100 * 1000) / 1000
+            return round((int(numVal) / int(qc.get('Total Reads', 0))) * 100 * 1000) / 1000
 
         def million(numVal):
             return str(round(int(numVal) / 10000) / 100) + "m"
@@ -204,8 +204,8 @@ class QualityMetricBamqc(QualityMetric):
                            "tooltip": tooltip(walks),
                            "numberType": "percent"})
         qc_summary.append({"title": "Minor Contigs",
-                           "value": str(percent_of_reads(qc.get("Minor Contigs"))),
-                           "tooltip": tooltip(qc.get("Minor Contigs")),
+                           "value": str(percent_of_reads(qc.get("Minor Contigs", 0))),
+                           "tooltip": tooltip(qc.get("Minor Contigs", 0)),
                            "numberType": "percent"})
 
         return qc_summary
