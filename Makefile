@@ -47,7 +47,7 @@ build-dev:  # same as build, but sets up locust as well
 
 macbuild-dev:  # same as macbuild, but sets up locust as well
 	make macbuild
-	pip install locust
+	make build-locust
 
 build-locust:  # just pip installs locust - may cause instability
 	pip install locust
