@@ -841,13 +841,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas, href } = this.props;
         const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, instanceHeight } = this.state;
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
-        let instanceHeightField=null;
+        let instanceHeightField = null;
         // If the user isn't logged in, add a tooltip reminding them to log in.
         let tooltip = null;
         if (!session) {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
-        if(this.havePermissionToEdit()){
+        if (this.havePermissionToEdit()) {
             instanceHeightField = (
                 <FieldSet
                     context={context}
@@ -859,9 +859,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         'initialHeight': 42
                     }}
                     onSave={this.higlassInstanceHeightCalc}
-                    className="profile-contact-fields" schemas={schemas} href={href}>
-                    <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" dataType="int"  >
-                        <ProfileContactFieldsIcon icon="arrows-alt-v fas" />&nbsp; { instanceHeight }
+                    className="mt-1" schemas={schemas} href={href}>
+                    <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" dataType="int" buttonAlwaysVisible={true}>
+                        <ProfileContactFieldsIcon icon="arrows-alt-v fas" />&nbsp; {instanceHeight}
                     </EditableField>
                 </FieldSet>);
         }
