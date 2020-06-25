@@ -322,6 +322,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { changeItem, trackInfo } = this.state;
 
         let selectedOrientation = null;
+        let selectedType=null;
         if (!currentViewConf) {
             throw new Error('Could not get current view configuration.');
         }
@@ -330,8 +331,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             if (trackItemData.uid === trackInfo.uid) {
                 if (Object.keys(changeItem)[0] === 'height') {
                     selectedOrientation = selectedTrack[idx].orientation;
+                    selectedType=selectedTrack[idx].type;
                     _.each(selectedTrack, (item, i) => {
-                        if (selectedOrientation === selectedTrack[i].orientation) {
+                        if (selectedOrientation === selectedTrack[i].orientation && selectedType===selectedTrack[i].type) {
                             selectedTrack[i].height = changeItem.height;
                         }
                     });
@@ -340,7 +342,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 else if (Object.keys(changeItem)[0] === 'width') {
                     selectedOrientation = selectedTrack[idx].orientation;
                     _.each(selectedTrack, (item, i) => {
-                        if (selectedOrientation === selectedTrack[i].orientation) {
+                        if (selectedOrientation === selectedTrack[i].orientation && selectedType===selectedTrack[i].type) {
                             selectedTrack[i].width = changeItem.width;
                         }
                     });
