@@ -2,7 +2,12 @@ do_npm_setup=no
 do_moto_setup=no
 
 while true; do
-    if [ "$1" = "--setup-npm" ]; then
+    if [ "$1" = "--help" ]; then
+       echo "Syntax: $0 [ --setup-npm | --setup-moto | --help ]*"
+       echo ""
+       echo "Runs testing, optionally setting up npm and/or moto first."
+       exit 1
+    elif [ "$1" = "--setup-npm" ]; then
        do_npm_setup=yes
        shift 1
     elif [ "$1" = "--setup-moto" ]; then
