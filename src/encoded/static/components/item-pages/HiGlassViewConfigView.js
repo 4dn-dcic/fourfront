@@ -907,7 +907,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             <div className="raw-files-table-section">
                                 {instanceHeightField}
                                 <h3 className="tab-section-title">
-                                    <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
+                                    <span><span className="text-400">{_.keys(tilesetUids).length}</span> File(s)</span>
                                 </h3>
                                 <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
                             </div>
@@ -944,7 +944,7 @@ function HiGlassFileDetailPane(props){
                 height =
                     <FieldSet context={item}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} dataType="int"   >
+                        <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} dataType="int" buttonAlwaysVisible={true}>
                         </EditableField>
                     </FieldSet>;
             }
@@ -953,7 +953,7 @@ function HiGlassFileDetailPane(props){
 
                 width =
                     <FieldSet context={item}>
-                        <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} valueConvertType="int" >
+                        <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} valueConvertType="int" buttonAlwaysVisible={true}>
                         </EditableField>
                     </FieldSet>;
             }
@@ -973,7 +973,7 @@ function HiGlassFileDetailPane(props){
                             className="profile-contact-fields"
                             windowWidth={windowWidth}
                             schemas={schemas} href={href}>
-                            <EditableField labelID="name" fallbackText="no data" fieldType="text" customSave={customSave} >
+                            <EditableField labelID="name" fallbackText="no data" fieldType="text" customSave={customSave} buttonAlwaysVisible={true}>
                             </EditableField>
                         </FieldSet>
                     </td>
