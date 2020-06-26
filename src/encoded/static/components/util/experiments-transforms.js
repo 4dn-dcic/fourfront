@@ -331,28 +331,35 @@ export function reduceProcessedFilesWithExperimentsAndSets(processed_files){
 
 
 export function combineWithReplicateNumbers(experimentsWithReplicateNums, experimentsInSet){
-    if (!Array.isArray(experimentsWithReplicateNums)) return false;
 
-    return _.map(
-        _.zip(
-            _.map(experimentsWithReplicateNums, function(r){
-                return {
-                    'tec_rep_no' : r.tec_rep_no || null,
-                    'bio_rep_no' : r.bio_rep_no || null,
-                    '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
-                };
-            }),
-            experimentsInSet
-        ),
-        function([replicateInfo, expSet]){
-            return _.extend({}, replicateInfo, expSet, {
-                'biosample' : (
-                    expSet.biosample && _.extend(
-                        {}, expSet.biosample, { 'bio_rep_no' : replicateInfo.bio_rep_no || '?' }
-                    )
-                ) || { 'bio_rep_no' : replicateInfo.bio_rep_no || '?' }
-            });
-        }
+    if (!Array.isArray(experimentsWithReplicateNums) || !Array.isArray(experimentsInSet)){
+        throw new Error("Array expected for `experimentsWithReplicateNums` & `experimentsInSet`");
+    }
+
+    // We migh† not have a populated `replicate_exps`, in which case we
+    // fill this up with dummy ones.
+    const replicateExps = [];
+
+    const expSetsLen = experimentsInSet.length;
+    for (let i = 0; i < expSetsLen; i++) {
+        const {
+            tec_rep_no = null,
+            bio_rep_no = null,
+            replicate_exp : { '@id' : id = null } = {}
+        } = experimentsWithReplicateNums[i] || {};
+        replicateExps.push({ tec_rep_no, bio_rep_no, '@id' : id });
+    }
+
+    return _.zip(replicateExps, experimentsInSet).map(function([ replicateInfo, expSet ]){
+        const { bio_rep_no = "?" } = replicateInfo;
+        return _.extend({}, replicateInfo, expSet, {
+            'biosample' : (
+                expSet.biosample && _.extend(
+                    {}, expSet.biosample, { bio_rep_no }
+                )
+            ) || { bio_rep_no }
+        });
+    }
     );
 }
 

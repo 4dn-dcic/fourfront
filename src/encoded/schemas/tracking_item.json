@@ -426,7 +426,7 @@
                                 "properties": {
                                     "ga:productVariant" : {
                                         "type" : "string",
-                                        "title" : "Country"
+                                        "title" : "File Type"
                                     },
                                     "ga:productDetailViews" : {
                                         "type" : "integer",

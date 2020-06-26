@@ -73,7 +73,7 @@ TSV_MAPPING = OrderedDict([
    #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
     ('Related File',                (FILE,      ['related_files.file.accession'])),
-    ('Paired End',                  (FILE,      ['paired_end'])),    
+    ('Paired End',                  (FILE,      ['paired_end'])),
     ('Set Status',                  (EXP_SET,   ['status'])),
     ('File Status',                 (FILE,      ['status'])),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
@@ -86,9 +86,9 @@ TSV_MAPPING = OrderedDict([
     ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
     ('Project',                     (EXP_SET,   ['award.project'])),
     ('Generating Lab',              (FILE,      ['lab.display_title'])),
-    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])), 
-        
-    
+    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])),
+
+
 
     #('UUID',                        (FILE,      ['uuid'])),
     #('Biosample life stage', ['replicates.library.biosample.life_stage']),
@@ -373,7 +373,7 @@ def metadata_tsv(context, request):
         '''Ensure row's ExpSet, Exp, and File accession are in list of accession triples sent in URL params.'''
         if accession_triples is None:
             return True
-        
+
         for set_accession, exp_accession, file_accession in accession_triples:
             if (
                 (('Experiment Set Accession' in column_vals_dict and set_accession  == column_vals_dict['Experiment Set Accession']) or set_accession  == 'NONE') and
@@ -395,11 +395,11 @@ def metadata_tsv(context, request):
 
         def sort_files_from_expset_by_replicate_numbers(file_dict):
             try:
-                bio_rep_no = int(f['Bio Rep No'])
+                bio_rep_no = int(file_dict['Bio Rep No'])
             except Exception:
                 bio_rep_no = 999
             try:
-                tec_rep_no = int(f['Tech Rep No'])
+                tec_rep_no = int(file_dict['Tech Rep No'])
             except Exception:
                 tec_rep_no = 999
             return bio_rep_no * 100000 + tec_rep_no
@@ -597,7 +597,7 @@ def metadata_tsv(context, request):
     if not endpoints_initialized['metadata']: # For some reason first result after bootup returns empty, so we do once extra for first request.
         initial_path = '{}?{}'.format(search_path, urlencode(dict(search_params, limit=10), True))
         endpoints_initialized['metadata'] = True
-        request.invoke_subrequest(make_search_subreq(request, initial_path), False).json
+        request.invoke_subrequest(make_search_subreq(request, initial_path), False)
 
     # Prep - use dif functions if different type requested.
     if search_params['type'][0:13] == 'ExperimentSet':
@@ -708,12 +708,13 @@ def report_download(context, request):
     if len(types) != 1:
         msg = 'Report view requires specifying a single type.'
         raise HTTPBadRequest(explanation=msg)
+    the_type = types[0]
 
     # Make sure we get all results
     request.GET['limit'] = 'all'
 
-    schemas = [request.registry[TYPES][types[0]].schema]
-    columns = build_table_columns(request, schemas)
+    the_schema = [request.registry[TYPES][the_type.schema]]
+    columns = build_table_columns(request, the_schema, [the_type])
     header = [column.get('title') or field for field, column in columns.items()]
 
     def generate_rows():
