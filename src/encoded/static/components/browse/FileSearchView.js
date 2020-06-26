@@ -38,7 +38,7 @@ export default class FileSearchView extends React.PureComponent {
     render() {
         const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
-        
+
         return (
             <div className="search-page-container container" id="content">
                 <SelectedFilesController {...{ href, context }}>

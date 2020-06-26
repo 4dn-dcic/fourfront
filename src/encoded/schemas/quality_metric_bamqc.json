@@ -1,11 +1,11 @@
 {
-    "title" : "Quality Metric for BAM",
+    "title": "Quality Metric for BAM",
     "description": "Schema for reporting the specific calculation of an quality metrics",
     "id": "/profiles/quality_metric_bamqc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -20,23 +20,115 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "quality_metric.json#/properties" }
     ],
-    "mixinFacets" : [
+    "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "Total Reads": {
+            "type": "number",
+            "qc_order": 1
+        },
+        "Minor Contigs": {
+            "type": "number",
+            "qc_order": 2
+        },
+        "Filtered Reads": {
+            "type": "number",
+            "qc_order": 3
+        },
+        "% of duplicates": {
+            "type": "number",
+            "qc_order": 4
+        },
+        "% of reads mapped": {
+            "type": "number",
+            "qc_order": 5
+        },
+        "% of reads filtered": {
+            "type": "number",
+            "qc_order": 6
+        },
+        "% of rescued chimeras": {
+            "type": "number",
+            "qc_order": 7
+        },
+        "overall_quality_status": {
+            "qc_order": 8
+        },
+        "DD": {
+            "title": "Duplicate Read",
+            "type": "number",
+            "qc_order": 9
+        },
+        "MM": {
+            "title" : "Multimapped-Multimapped Read",
+            "type": "number",
+            "qc_order": 10
+        },
+        "MR": {
+            "title": "Multimapped-Rescued Read",
+            "type": "number",
+            "qc_order": 11
+        },
+        "MU": {
+            "title" : "Multimapped-Unique Read",
+            "type": "number",
+            "qc_order": 12
+        },
+        "NM": {
+            "title": "Null-Multimapped Read",
+            "type": "number",
+            "qc_order": 13
+        },
+        "NN": {
+            "title": "Null-Null Read",
+            "type": "number",
+            "qc_order": 14
+        },
+        "NR": {
+            "title": "Null-Rescued Read",
+            "type": "number",
+            "qc_order": 15
+        },
+        "NU": {
+            "title": "Null-Unique Read",
+            "type": "number",
+            "qc_order": 16
+        },
+        "RU": {
+            "title": "Rescued-Unique Read",
+            "type": "number",
+            "qc_order": 17
+        },
+        "UR": {
+            "title": "Unique-Rescued Read",
+            "type": "number",
+            "qc_order": 18
+        },
+        "UU": {
+            "title": "Unique-Unique Read",
+            "type": "number",
+            "qc_order": 19
+        },
+        "WW": {
+            "title": "Walk-Walk",
+            "type": "number",
+            "qc_order": 20
         }
     },
     "facets": {
         "overall_quality_status": {
-            "title" : "Overall Quality"
+            "title": "Overall Quality"
         }
     },
     "columns": {
         "overall_quality_status": {
-            "title" : "Overall Quality",
+            "title": "Overall Quality",
             "default_hidden": true
         }
-    }
+    },
+    "qc_order": 1
 }

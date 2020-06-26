@@ -1,11 +1,11 @@
 {
-    "title" : "Quality Metric for RNA-Seq MAD QC (reproducibility QC)",
+    "title": "Quality Metric for RNA-Seq MAD QC (reproducibility QC)",
     "description": "Schema for reporting the specific calculation of an quality metrics",
     "id": "/profiles/quality_metric_rnaseq_madqc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -20,22 +20,63 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "quality_metric.json#/properties" }
     ],
-    "mixinFacets" : [
+    "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "MAD QC": {
+            "type": "array",
+            "qc_order": 2,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "File 1": {
+                        "type": "string",
+                        "qc_order": 1
+                    },
+                    "File 2": {
+                        "type": "string",
+                        "qc_order": 2
+                    },
+                    "MAD of log ratios": {
+                        "type": "number",
+                        "qc_order": 3
+                    },
+                    "Pearson correlation": {
+                        "type": "number",
+                        "qc_order": 4
+                    },
+                    "SD of log ratios": {
+                        "type": "number",
+                        "qc_order": 5
+                    },
+                    "Spearman correlation": {
+                        "type": "number",
+                        "qc_order": 6
+                    }
+                }
+            }
+        },
+        "url": {
+            "qc_order": 3
         }
     },
     "facets": {
         "overall_quality_status": {
-            "title" : "Overall Quality"
+            "title": "Overall Quality"
         }
     },
     "columns": {
         "overall_quality_status": {
-            "title" : "Overall Quality"
+            "title": "Overall Quality"
         }
-    }
+    },
+    "qc_order": 2
 }
