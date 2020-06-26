@@ -246,6 +246,7 @@ export class MiddleRow extends React.Component {
     shouldComponentUpdate(nextProps){
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
         if (nextProps.windowWidth !== this.props.windowWidth) return true;
+        if(nextProps.context.actions!==this.props.context.actions) return true;
         return false;
     }
 
