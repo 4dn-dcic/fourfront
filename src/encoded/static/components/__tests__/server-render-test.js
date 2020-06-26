@@ -5,7 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactDOMServer from 'react-dom/server';
 import _ from 'underscore';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 
 jest.autoMockOff();
 
@@ -14,14 +14,13 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe("Server rendering", function () {
-    var App;
-    var document;
-    var store;
-    var fetch;
-    var sinon;
-    var server;
-    var home_url = "http://localhost/";
-    var home = {
+    let App;
+    let document;
+    let store;
+    let sinon;
+    let server;
+    const home_url = "http://localhost/";
+    const home = {
         "@id": "/",
         "@type": ["HomePage", "StaticPage", "Portal"],
         "portal_title": "4DN Data Portal",
@@ -50,10 +49,8 @@ describe("Server rendering", function () {
     
 
     beforeAll(function(){
-        
         sinon = require('sinon');
         server = sinon.fakeServer.create();
-
         server.respondWith(
             "GET",
             '/profiles/',
@@ -73,19 +70,21 @@ describe("Server rendering", function () {
         App = require('..').default;
         store = require('../../store').store;
         // test dispatching some values to store
-        var dispatch_vals = {
-            'href':home_url,
-            'context':home,
-            'contextRequest':{},
-            'slow':false
+        const dispatch_vals = {
+            'href': home_url,
+            'context': home,
+            'contextRequest': {},
+            'slow': false
         };
-        store.dispatch({
-            type: dispatch_vals
+        act(()=>{
+            store.dispatch({
+                type: dispatch_vals
+            });
         });
-        var props = store.getState();
-        var server_app = <App {...props} />;
-        var markup = '<!DOCTYPE html>\n' + ReactDOMServer.renderToString(server_app);
-        var parser = new DOMParser();
+        const props = store.getState();
+        const server_app = <App {...props} />;
+        const markup = '<!DOCTYPE html>\n' + ReactDOMServer.renderToString(server_app);
+        const parser = new DOMParser();
         document = parser.parseFromString(markup, 'text/html');
         window.location.href = props['href'];
     });
@@ -95,14 +94,17 @@ describe("Server rendering", function () {
     });
 
     it("react render http-equiv correctly", function () {
-        var meta_http_equiv = document.querySelectorAll('meta[http-equiv]');
+        const meta_http_equiv = document.querySelectorAll('meta[http-equiv]');
         expect(meta_http_equiv.length).not.toBe(0);
     });
 
     it("mounts the application over the rendered html", function () {
-        var props = store.getState();
-        var app = ReactDOM.render(<App {...props} />, document);
-        app.loadSchemas = jest.fn(); // Mock func which launches XHR request
+        const props = store.getState();
+        let app;
+        act(()=>{
+            app = ReactDOM.render(<App {...props} />, document);
+            app.loadSchemas = jest.fn(); // Mock func which would otherwise launch a XHR request
+        });
         expect(ReactDOM.findDOMNode(app)).toBe(document.documentElement);
     });
 });

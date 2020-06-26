@@ -12,7 +12,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 
 jest.autoMockOff();
 
@@ -46,9 +46,11 @@ describe('Testing about.js', function() {
             ]
         );
 
-        page = TestUtils.renderIntoDocument(
-            <App href="http://data.4dnucleome.org/about" alerts={[]} context={data} />
-        );
+        act(()=>{
+            page = TestUtils.renderIntoDocument(
+                <App href="http://data.4dnucleome.org/about" alerts={[]} context={data} />
+            );
+        });
         //jest.runAllTimers();
     });
 
@@ -74,16 +76,20 @@ describe('Testing about.js', function() {
         //expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
         // Make sure 'in' is not in className, as it controls section visibility @ mobile sizes.
         expect(menuCollapsibleSection.className.search('show')).toBe(-1);
-        //act(()=>{
+        act(()=>{
             TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
-        //});
-        jest.runOnlyPendingTimers();
+        });
+        act(()=>{
+            jest.runOnlyPendingTimers();
+        });
         //expect(menuToggleButton.className.search('collapsed')).toBe(-1);
         expect(menuCollapsibleSection.className.search('show')).toBeGreaterThan(-1);
-        //act(()=>{
+        act(()=>{
             TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
-        //});
-        jest.runOnlyPendingTimers();
+        });
+        act(()=>{
+            jest.runOnlyPendingTimers();
+        });
 
         //expect(menuToggleButton.className.search('collapsed')).toBeGreaterThan(-1);
         expect(menuCollapsibleSection.className.search('show')).toBe(-1);
