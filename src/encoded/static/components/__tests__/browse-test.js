@@ -5,7 +5,7 @@ Made for 1st round browse (without file selectors).*/
 
 import React from 'react';
 import _ from 'underscore';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 
 /**
  * Some test portions currently disabled re: edits. Will need to rewrite some eventually after another round of Browse page edits.
@@ -55,11 +55,14 @@ describe('Testing browse.js for experiment set browser', function() {
         };
 
         var UseBrowse = connect(mapStateToProps)(Browse);
-        page = TestUtils.renderIntoDocument(
-            <Provider store={store}>
-                <UseBrowse {...searchViewCommonProps} />
-            </Provider>
-        );
+        act(()=>{
+            page = TestUtils.renderIntoDocument(
+                <Provider store={store}>
+                    <UseBrowse {...searchViewCommonProps} />
+                </Provider>
+            );
+        });
+        
     });
 
     it('has 3 passing entries (experiment sets)', function() {

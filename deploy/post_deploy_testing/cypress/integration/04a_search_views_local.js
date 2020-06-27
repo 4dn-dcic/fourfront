@@ -42,6 +42,55 @@ describe('Deployment/CI Search View Tests', function () {
 
     });
 
+    context('Publications, Files, Microscope Configurations Collections', function(){
+        // These are similarly implemently to the BrowseView, we should have specific tests for these
+
+        it('/publications/ should redirect to /search/?type=Publication', function(){
+            cy.visit('/publications/').location('search').should('include', 'type=Publication').end()
+                .location('pathname').should('include', '/search/');
+        });
+
+        it('Should have at least 3 Publications.', function(){
+            cy.get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+                expect($searchResultElems.length).to.be.greaterThan(2);
+            });
+            cy.get('.search-results-container .search-result-row .toggle-detail-button-container').then(($searchResultToggleBtnElems)=>{
+                expect($searchResultToggleBtnElems.length).to.be.greaterThan(2);
+            });
+        });
+
+        it('/files/ should redirect to /search/?type=File', function(){
+            cy.visit('/files/').location('search').should('include', 'type=File').end()
+                .location('pathname').should('include', '/search/');
+        });
+
+        it('Should have at least 20 File row selection checkboxes', function(){
+            cy.get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+                expect($searchResultElems.length).to.be.greaterThan(20);
+            });
+            cy.get('.search-results-container .search-result-row .checkbox-with-label.expset-checkbox input').then(($checkboxes)=>{
+                expect($checkboxes.length).to.be.greaterThan(20);
+            });
+        });
+
+        it('Should have columns for file type, format', function(){
+            cy.get('.headers-columns-overflow-container .columns .search-headers-column-block[data-field="file_type"]').contains("File Type");
+            cy.get('.headers-columns-overflow-container .columns .search-headers-column-block[data-field="file_format.file_format"]').contains("File Format");
+        });
+
+        // TODO test facets
+
+        it('Can add new Microsope Configurations', function(){
+
+            cy.login4DN({ 'email' : '4dndcic@gmail.com', 'useEnvToken' : false }).end()
+                .visit('/search/?type=MicroscopeConfiguration').end()
+                .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
+                    expect($searchResultElems.length).to.be.greaterThan(0);
+                }).end()
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration");
+        });
+
+    });
 
     context('Search Box in Navigation', function(){
 

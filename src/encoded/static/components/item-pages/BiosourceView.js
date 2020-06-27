@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import Collapse from 'react-bootstrap/esm/Collapse';
 import { console, object, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView, { OverViewBodyItem } from './DefaultItemView';

@@ -135,7 +135,7 @@
         }
     },
     "columns": {
-        "pi" : {
+        "pi.display_title" : {
             "title" : "P.I."
         },
         "institute_name" : {

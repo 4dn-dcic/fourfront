@@ -214,3 +214,18 @@ def test_download_create_w_wrong_md5sum(testapp):
         'md5sum': 'deadbeef',
     }}
     testapp.post_json(url, item, status=422)
+
+def test_download_item_with_attachment(testapp, award, lab, mocker):
+    item = {
+        'attachment': {
+            'download': 'red-dot.png',
+            'href': RED_DOT,
+            'blob_id': 'fa4558df-c38f-4d72-a1ea-c1a58133a4b0',
+        },
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    res = testapp.post_json('/document', item).json['@graph'][0]
+
+    with mocker.patch('encoded.types.get_s3_presigned_url', return_value=''):
+        res = testapp.get(res['@id'] + res['attachment']['href'], status=200)

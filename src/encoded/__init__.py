@@ -6,7 +6,6 @@ import base64
 import codecs
 import hashlib
 import json
-import logging
 import mimetypes
 import netaddr
 import os
@@ -17,10 +16,14 @@ import structlog
 # except ImportError:
 #     import subprocess
 import subprocess
+import sys
 import webtest
 
+from dcicutils.beanstalk_utils import source_beanstalk_env_vars
+# from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
+from dcicutils.env_utils import get_mirror_env_from_context
+from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
 from .commands.create_mapping_on_deploy import (
     ENV_WEBPROD,
     ENV_WEBPROD2,
@@ -35,47 +38,24 @@ from pyramid.path import (
     caller_package,
 )
 from pyramid.session import SignedCookieSessionFactory
-from pyramid.settings import (
-    aslist,
-    asbool,
-)
-from snovault.app import (
-    STATIC_MAX_AGE,
-    session,
-    json_from_path,
-    configure_dbsession,
-    changelogs,
-    json_asset,
-)
+from pyramid.settings import asbool
+from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
 from snovault.elasticsearch import APP_FACTORY
 from snovault.json_renderer import json_renderer
 from sqlalchemy import engine_from_config
 from webob.cookies import JSONSerializer
-from .commands.create_mapping_on_deploy import (
-    ENV_WEBPROD,
-    ENV_WEBPROD2,
-    BEANSTALK_PROD_ENVS,
-)
+from .commands.create_mapping_on_deploy import ENV_WEBPROD, ENV_WEBPROD2, BEANSTALK_PROD_ENVS
 
 from .loadxl import load_all
 from .utils import find_other_in_pair
 
 
+if sys.version_info.major < 3:
+    raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
+
+
 # location of environment variables on elasticbeanstalk
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
-
-
-def get_mirror_env(settings):
-    """
-        Figures out who the mirror beanstalk Env is if applicable
-        This is important in our production environment because in our
-        blue-green deployment we maintain two elasticsearch intances that
-        must be up to date with each other.
-    """
-    who_i_am = settings.get('env.name', '')
-    if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
-        return None
-    return find_other_in_pair(who_i_am, BEANSTALK_PROD_ENVS)
 
 
 def static_resources(config):
@@ -128,26 +108,14 @@ def load_workbook(app, workbook_filename, docsdir):
     load_all(testapp, workbook_filename, docsdir)
 
 
-def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
-    """
-    set environment variables if we are on Elastic Beanstalk
-    AWS_ACCESS_KEY_ID is indicative of whether or not env vars are sourced
-
-    Args:
-        config_file (str): filepath to load env vars from
-    """
-    if os.path.exists(config_file) and not os.environ.get("AWS_ACCESS_KEY_ID"):
-        command = ['bash', '-c', 'source ' + config_file + ' && env']
-        proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
-        for line in proc.stdout:
-            key, _, value = line.partition("=")
-            os.environ[key] = value[:-1]
-        proc.communicate()
-
+# This key is best interpreted not as the 'snovault version' but rather the 'version of the app built on snovault'.
+# As such, it should be left this way, even though it may appear redundant with the 'eb_app_version' registry key
+# that we also have, which tries to be the value eb uses. -kmp 28-Apr-2020
+APP_VERSION_REGISTRY_KEY = 'snovault.app_version'
 
 
 def app_version(config):
-    if not config.registry.settings.get('snovault.app_version'):
+    if not config.registry.settings.get(APP_VERSION_REGISTRY_KEY):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
         version = os.environ.get("ENCODED_VERSION")
@@ -159,10 +127,10 @@ def app_version(config):
                     ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
                 if diff:
                     version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-            except:
+            except Exception:
                 version = "test"
 
-        config.registry.settings['snovault.app_version'] = version
+        config.registry.settings[APP_VERSION_REGISTRY_KEY] = version
 
     # GA Config
     ga_conf_file = config.registry.settings.get('ga_config_location')
@@ -170,8 +138,8 @@ def app_version(config):
     if ga_conf_file and not ga_conf_existing:
         ga_conf_file = os.path.normpath(
             os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), # Absolute loc. of this file
-                "../../",                                   # Go back up to repo dir
+                os.path.dirname(os.path.abspath(__file__)),  # Absolute loc. of this file
+                "../../",                                    # Go back up to repo dir
                 ga_conf_file
             )
         )
@@ -204,8 +172,13 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
-    # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = get_mirror_env(settings)
+
+    # set mirrored Elasticsearch location (for staging and production servers)
+    mirror = get_mirror_env_from_context(settings)
+    if mirror is not None:
+        settings['mirror.env.name'] = mirror
+        settings['mirror_health'] = get_health_page(ff_env=mirror)
+
     config = Configurator(settings=settings)
 
     config.registry[APP_FACTORY] = main  # used by mp_indexer
@@ -224,7 +197,7 @@ def main(global_config, **local_config):
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
-    #config.include(add_schemas_to_html_responses)
+    # config.include(add_schemas_to_html_responses)
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')
@@ -265,6 +238,5 @@ def main(global_config, **local_config):
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
     if workbook_filename:
         load_workbook(app, workbook_filename, docsdir)
-
 
     return app

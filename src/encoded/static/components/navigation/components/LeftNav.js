@@ -1,7 +1,7 @@
 'use strict';
 
 import React, { useMemo } from 'react';
-import { Nav } from 'react-bootstrap';
+import Nav from 'react-bootstrap/esm/Nav';
 import url from 'url';
 import { console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util'; // Extended w. browseBaseHref & related fxns.
@@ -81,7 +81,7 @@ function DataNavItem(props){
         const browseHref = navigate.getBrowseBaseHref(browseBaseState);
         const sequencingDataHref = browseHref + "&experiments_in_set.experiment_type.experiment_category=Sequencing";
         const microscopyDataHref = "/microscopy-data-overview";
-        const publicationsHref = "/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets";
+        const publicationsHref = "/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1";
         const isSearchActive = pathname === "/search/";
         const isMicroscopyActive = pathname === microscopyDataHref;
         const isPublicationsActive = isSearchActive && query.type === "Publication";

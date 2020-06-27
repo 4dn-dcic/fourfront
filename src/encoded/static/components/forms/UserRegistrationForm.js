@@ -8,7 +8,7 @@ import memoize from 'memoize-one';
 
 import { console, object, ajax, JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/LinkToSelector';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import Collapse from 'react-bootstrap/esm/Collapse';
 
 
 export default class UserRegistrationForm extends React.PureComponent {

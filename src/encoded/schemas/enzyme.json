@@ -63,18 +63,32 @@
             "pattern": "^[ATGCYRWSKMDVHBN]+$"
         },
         "site_length": {
-          "title": "Site Length",
-          "description": "The length of the enzyme recognition sequence.",
-          "type": "integer",
-          "lookup": 70,
-          "internal_comment": "this can be calculated if a recognition sequence is provided but can be set even without recognition sequence"
+            "title": "Site Length",
+            "description": "The length of the enzyme recognition sequence.",
+            "type": "integer",
+            "lookup": 70,
+            "internal_comment": "this can be calculated if a recognition sequence is provided but can be set even without recognition sequence"
         },
         "cut_position": {
-          "title": "Cut position",
-          "description": "The position in the provided recognition sequence at which the enzyme cuts AFTER - relative to base 1 of site.",
-          "type": "integer",
-          "lookup": 80,
-          "internal_comment": "has a dependency on either cut_sequence or site_length"
+            "title": "Cut Position",
+            "description": "The position in the provided recognition sequence at which the enzyme cuts AFTER - relative to base 1 of site.",
+            "type": "integer",
+            "lookup": 80,
+            "internal_comment": "has a dependency on either cut_sequence or site_length"
+        },
+        "mixed_enzymes": {
+            "title": "Mixed Enzymes",
+            "description": "The enzymes that are combined",
+            "comment": "If this is a multi-enzyme item, list here each single Enzyme item",
+            "type": "array",
+            "lookup": 90,
+            "uniqueItems": true,
+            "items": {
+                "title": "Enzyme",
+                "description": "The DNA digestion enzyme",
+                "type": "string",
+                "linkTo": "Enzyme"
+            }
         },
         "url": {
             "title": "URL",
@@ -90,7 +104,7 @@
         }
     },
     "columns": {
-        "enzyme_source": {
+        "enzyme_source.title": {
             "title": "Source"
         },
         "recognition_sequence": {

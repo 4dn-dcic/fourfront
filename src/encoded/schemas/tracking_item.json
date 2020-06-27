@@ -208,6 +208,22 @@
                                         "type" : "string",
                                         "title" : "Type of File"
                                     },
+
+                                    "ga:uniquePurchases" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads and Range Queries",
+                                        "description": "Combined sum of all download and range query requests."
+                                    },
+                                    "ga:metric2" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads",
+                                        "description": "All file download requests which are not range queries."
+                                    },
+                                    "ga:metric1" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads and Range Queries",
+                                        "description": "Cumalitive sum of all files' filesize that was authorized for egress."
+                                    },
                                     "ga:productDetailViews" : {
                                         "type" : "integer",
                                         "title" : "Detail Views",
@@ -357,7 +373,134 @@
                                     }
                                 }
                             }
+                        },
+
+                        "file_downloads_by_country" : {
+                            "type" : "array",
+                            "title" : "File Downloads",
+                           "description": "File Downloads segmented by country",
+                           "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:country" : {
+                                        "type" : "string",
+                                        "title" : "Country"
+                                    },
+                                    "ga:productDetailViews" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this ExperimentSet has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this ExperimentSet has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this ExperimentSet has been seen present in a Browse or Search results page."
+                                    },
+                                    "ga:metric2" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads"
+                                    },
+                                    "ga:metric1" : {
+                                        "type" : "integer",
+                                        "title" : "Cumalative Filesize"
+                                    },
+                                    "ga:calcMetric_PercentRangeQueries" : {
+                                        "type" : "integer",
+                                        "title" : "Range Query Count"
+                                    }
+                                }
+                            }
+                        },
+
+                        "file_downloads_by_filetype" : {
+                            "type" : "array",
+                            "title" : "File Downloads",
+                           "description": "File Downloads segmented by country",
+                           "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:productVariant" : {
+                                        "type" : "string",
+                                        "title" : "File Type"
+                                    },
+                                    "ga:productDetailViews" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this ExperimentSet has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this ExperimentSet has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this ExperimentSet has been seen present in a Browse or Search results page."
+                                    },
+                                    "ga:metric2" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads"
+                                    },
+                                    "ga:metric1" : {
+                                        "type" : "integer",
+                                        "title" : "Cumalative Filesize"
+                                    },
+                                    "ga:calcMetric_PercentRangeQueries" : {
+                                        "type" : "integer",
+                                        "title" : "Range Query Count"
+                                    }
+                                }
+                            }
+                        },
+
+                        "file_downloads_by_experiment_type" : {
+                            "type" : "array",
+                            "title" : "File Downloads",
+                           "description": "File Downloads segmented by country",
+                           "items" : {
+                                "type" : "object",
+                                "properties": {
+                                    "ga:dimension5" : {
+                                        "type" : "string",
+                                        "title" : "Experiment Type"
+                                    },
+                                    "ga:productVariant" : {
+                                        "type" : "integer",
+                                        "title" : "Detail Views",
+                                        "description": "Number of times this ExperimentSet has been viewed via its Item page."
+                                    },
+                                    "ga:productListClicks" : {
+                                        "type" : "integer",
+                                        "title" : "Clicks from Browse",
+                                        "description": "Number of times this ExperimentSet has been clicked on from the Browse page."
+                                    },
+                                    "ga:productListViews" : {
+                                        "type" : "integer",
+                                        "title" : "List Views",
+                                        "description": "Number of times this ExperimentSet has been seen present in a Browse or Search results page."
+                                    },
+                                    "ga:metric2" : {
+                                        "type" : "integer",
+                                        "title" : "Downloads"
+                                    },
+                                    "ga:metric1" : {
+                                        "type" : "integer",
+                                        "title" : "Cumalative Filesize"
+                                    },
+                                    "ga:calcMetric_PercentRangeQueries" : {
+                                        "type" : "integer",
+                                        "title" : "Range Query Count"
+                                    }
+                                }
+                            }
                         }
+
 
                     }
                 }
