@@ -1,20 +1,13 @@
-from future.standard_library import install_aliases
+# from future.standard_library import install_aliases
 # TODO: Once things are working, remove this as probably 2.7 compatibility. --kent&will 4-Feb-2020
-install_aliases()  # NOQA
+# install_aliases()  # NOQA
 
-import base64
-import codecs
 import hashlib
 import json
 import mimetypes
 import netaddr
 import os
-import structlog
-# try:
-#     # TODO: Once things are working, remove this 2.7 compatibility. --kent&will 4-Feb-2020
-#     import subprocess32 as subprocess  # Closes pipes on failure
-# except ImportError:
-#     import subprocess
+# import structlog
 import subprocess
 import sys
 import webtest
@@ -25,20 +18,17 @@ from dcicutils.env_utils import get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from pkg_resources import resource_filename
-from pyramid.authorization import ACLAuthorizationPolicy
+# from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid_localroles import LocalRolesAuthorizationPolicy
-from pyramid.path import (
-    AssetResolver,
-    caller_package,
-)
-from pyramid.session import SignedCookieSessionFactory
+# from pyramid.path import AssetResolver, caller_package
+# from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
 from snovault.elasticsearch import APP_FACTORY
-from snovault.json_renderer import json_renderer
-from sqlalchemy import engine_from_config
-from webob.cookies import JSONSerializer
+# from snovault.json_renderer import json_renderer
+# from sqlalchemy import engine_from_config
+# from webob.cookies import JSONSerializer
 
 from .loadxl import load_all
 from .utils import find_other_in_pair
@@ -226,7 +216,8 @@ def main(global_config, **local_config):
     app = config.make_wsgi_app()
 
     workbook_filename = settings.get('load_workbook', '')
-    load_test_only = asbool(settings.get('load_test_only', False))
+    # This option never gets used. Is that bad? -kmp 27-Jun-2020
+    # load_test_only = asbool(settings.get('load_test_only', False))
     docsdir = settings.get('load_docsdir', None)
     if docsdir is not None:
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
