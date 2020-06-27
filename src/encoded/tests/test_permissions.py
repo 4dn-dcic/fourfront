@@ -2,12 +2,16 @@ import pytest
 import webtest
 
 from datetime import date
+from ..types.lab import Lab
 from urllib.parse import urlencode
 from ..types.lab import Lab
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
+
+
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture

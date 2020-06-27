@@ -1,14 +1,18 @@
 import pytest
 
 from dcicutils.deployment_utils import CreateMappingOnDeployManager
-from snovault import COLLECTIONS
+from snovault import COLLECTIONS, TYPES
+from snovault.elasticsearch.create_mapping import type_mapping
+from snovault.util import add_default_embeds
 from unittest.mock import patch, MagicMock
+from .datafixtures import ORDER
 from ..commands import create_mapping_on_deploy
 from ..commands.create_mapping_on_deploy import (
     ITEM_INDEX_ORDER,
     _run_create_mapping  # noqa - yeah, it's internal but we want to test it
 )
-from .datafixtures import ORDER
+# TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
+from ..types.experiment import *
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
@@ -20,9 +24,6 @@ def test_create_mapping(registry, item_type):
     This test does not actually use elasticsearch
     Only tests the mappings generated from schemas
     """
-    from snovault.elasticsearch.create_mapping import type_mapping
-    from snovault.util import add_default_embeds
-    from snovault import TYPES
     mapping = type_mapping(registry[TYPES], item_type)
     assert mapping
     type_info = registry[TYPES].by_item_type[item_type]
