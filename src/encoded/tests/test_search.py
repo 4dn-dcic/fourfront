@@ -544,7 +544,8 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 @Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
 def check_item_type(client, item_type):
     # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
-    client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+    return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+
 
 @pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
