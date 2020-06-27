@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 /* Basing off of browse.js to test user.js */
@@ -22,11 +22,11 @@ function mapStateToProps(store) {
 describe('Testing user.js', function() {
     var  User, user, testItem, page, store, context, filters, Wrapper, sinon, props;
     beforeAll(function() {
-        var { Provider, connect } = require('react-redux');
+        const { Provider, connect } = require('react-redux');
         User = require('./../item-pages/UserView').default;
         context = require('../testdata/submitter');
         store = require('../../store').store;
-        var dispatch_vals = {
+        const dispatch_vals = {
             'context' : context
         };
         store.dispatch({
