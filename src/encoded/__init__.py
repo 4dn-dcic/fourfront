@@ -24,11 +24,6 @@ from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.env_utils import get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
-from .commands.create_mapping_on_deploy import (
-    ENV_WEBPROD,
-    ENV_WEBPROD2,
-    BEANSTALK_PROD_ENVS,
-)
 from pkg_resources import resource_filename
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -44,7 +39,6 @@ from snovault.elasticsearch import APP_FACTORY
 from snovault.json_renderer import json_renderer
 from sqlalchemy import engine_from_config
 from webob.cookies import JSONSerializer
-from .commands.create_mapping_on_deploy import ENV_WEBPROD, ENV_WEBPROD2, BEANSTALK_PROD_ENVS
 
 from .loadxl import load_all
 from .utils import find_other_in_pair
