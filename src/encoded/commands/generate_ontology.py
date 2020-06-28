@@ -821,7 +821,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         to_patch += 1
 
     if set_obsoletes:
-
+        prefixes = [o.get('ontology_prefix', '') for o in ontologies]
         if simple:
             use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
         else:
