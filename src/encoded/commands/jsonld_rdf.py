@@ -4,9 +4,13 @@ Example.
 
     %(prog)s "https://www.encodeproject.org/search/?type=organism&frame=object"
 """
-EPILOG = __doc__
 
+import argparse
 import rdflib
+import sys
+
+
+EPILOG = __doc__
 
 
 def run(sources, output, parser='json-ld', serializer='xml', base=None):
@@ -17,8 +21,6 @@ def run(sources, output, parser='json-ld', serializer='xml', base=None):
 
 
 def main():
-    import argparse
-    import sys
     stdout = sys.stdout
     if sys.version_info.major > 2:
         stdout = stdout.buffer

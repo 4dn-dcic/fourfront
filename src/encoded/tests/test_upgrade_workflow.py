@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -539,7 +543,6 @@ def workflow_4():
 
 def test_workflow_upgrade_4_5(
         workflow_4, registry, file_formats):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow', workflow_4, registry=registry,
                              current_version='4', target_version='5')
@@ -580,7 +583,6 @@ def workflow_5(software, award, lab):
 
 def test_workflow_upgrade_5_6(
         workflow_5, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow', workflow_5, registry=registry,
                              current_version='5', target_version='6')
@@ -606,7 +608,6 @@ def workflow_6(software, award, lab, workflow_bam):
 
 def test_workflow_upgrade_6_7(
         workflow_6, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow', workflow_6, registry=registry,
                              current_version='6', target_version='7')
@@ -629,7 +630,6 @@ def test_workflow_upgrade_6_7(
 #
 # def test_workflow_upgrade_7_8(workflow_7, registry, exp_types):
 #     types2upg = {'Repli-seq': None, 'in situ Hi-C': 'hic', 'Capture Hi-C': 'capc', 'DNA FISH': 'fish', 'dilution Hi-C': 'dilution'}
-#     from snovault import UPGRADER
 #     upgrader = registry[UPGRADER]
 #     for etype, lookup in types2upg.items():
 #         workflow_7['experiment_types'] = [etype]

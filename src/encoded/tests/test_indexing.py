@@ -330,7 +330,6 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
 def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
     """ Tests that anontestapp gets view denied when using datastore=database """
-    from time import sleep
     file_item_body = {
         'award': award['uuid'],
         'lab': lab['uuid'],
@@ -341,7 +340,7 @@ def test_permissions_database_applies_permissions(award, lab, file_formats, wran
     res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
     item_id = res['@graph'][0]['@id']
     indexer_testapp.post_json('/index', {'record': True})
-    sleep(1)  # let es catch up
+    time.sleep(1)  # let es catch up
     res = anontestapp.get('/' + item_id).json
     assert res['file_format'] == {'error': 'no view permissions'}
     res = anontestapp.get('/' + item_id + '?datastore=database').json

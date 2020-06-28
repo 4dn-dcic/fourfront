@@ -12,9 +12,15 @@ For the development.ini you must supply the paster app name:
     %(prog)s development.ini --app-name app "/experiments/ENCSR000ADI/?format=json&datastore=database"
 
 """
-import logging
+
+import argparse
 import cProfile
+import logging
 import pstats
+
+from pyramid import paster
+from webtest import TestApp
+
 
 EPILOG = __doc__
 
@@ -22,8 +28,6 @@ logger = logging.getLogger(__name__)
 
 
 def internal_app(configfile, app_name=None, username=None, accept_json=True):
-    from webtest import TestApp
-    from pyramid import paster
     app = paster.get_app(configfile, app_name)
     if not username:
         username = 'IMPORT'
@@ -76,8 +80,7 @@ def run(testapp, method, path, data, warm_ups, filename, sortby, stats, callers,
 
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is invalid
         description="Update links and keys", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

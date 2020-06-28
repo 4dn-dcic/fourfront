@@ -1,22 +1,19 @@
-import boto3
-import datetime
-import os
-import json
-import sys
 import argparse
+import ast
+# import boto3
+# import datetime
+import json
+# import os
+import pkg_resources
 import re
 import requests
+import sys
 
 from collections import Counter
-from dateutil.relativedelta import relativedelta
-from dcicutils.ff_utils import (
-    get_authentication_with_server,
-    get_metadata,
-    search_metadata,
-    unified_authentication
-)
-from dcicutils.s3_utils import s3Utils
-from pyramid.paster import get_app
+# from dateutil.relativedelta import relativedelta
+from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata, unified_authentication
+# from dcicutils.s3_utils import s3Utils
+# from pyramid.paster import get_app
 from rdflib.collection import Collection
 from uuid import uuid4
 from ..commands.owltools import (
@@ -430,7 +427,6 @@ def get_ontologies(connection, ont_list):
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
         print("we must not have got ontologies... bailing")
-        import sys
         sys.exit()
     for i, ontology in enumerate(ontologies):
         if 'Ontology' not in ontology['@type']:
@@ -448,7 +444,6 @@ def connect2server(env=None, key=None):
         key = unified_authentication(None, env)
 
     if all([v in key for v in ['key', 'secret', 'server']]):
-        import ast
         key = ast.literal_eval(key)
     try:
         auth = get_authentication_with_server(key, env)
@@ -1003,8 +998,7 @@ def main():
     if not postfile:
         postfile = 'ontology_term.json'
     if '/' not in postfile:  # assume just a filename given
-        from pkg_resources import resource_filename
-        postfile = resource_filename('encoded', postfile)
+        postfile = pkg_resources.resource_filename('encoded', postfile)
 
     print('Writing to %s' % postfile)
 

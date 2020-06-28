@@ -1,6 +1,8 @@
 """init.py lists all the collections that do not have a dedicated types file."""
 
 import boto3
+import transaction
+
 from mimetypes import guess_type
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
@@ -11,7 +13,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
-    CONNECTION,
+    # CONNECTION,
     COLLECTIONS,
     BLOBS
 )
@@ -29,11 +31,12 @@ from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import (
     HTTPForbidden,
-    HTTPTemporaryRedirect,
+    # HTTPTemporaryRedirect,
     HTTPFound,
     HTTPNotFound,
-    HTTPBadRequest
+    # HTTPBadRequest
 )
+
 
 def includeme(config):
     """include me method."""
@@ -103,6 +106,7 @@ class Document(ItemWithAttachment, Item):
             return attachment.get('download')
         return Item.display_title(self)
 
+
 @view_config(name='download', context=ItemWithAttachment, request_method='GET',
              permission='view', subpath_segments=2)
 @debug_log
@@ -137,7 +141,7 @@ def download(context, request):
     if 'bucket' in download_meta:
         location = get_s3_presigned_url(download_meta, filename)
         raise HTTPFound(location=location)
-    elif hasattr(blob_storage, 'get_blob_url'): #default fallback - filename is s3 blob id
+    elif hasattr(blob_storage, 'get_blob_url'):  # default fallback - filename is s3 blob id
         blob_url = blob_storage.get_blob_url(download_meta)
         raise HTTPFound(location=str(blob_url))
 
@@ -148,19 +152,21 @@ def download(context, request):
     }
     return Response(body=blob, headers=headers)
 
+
 def get_s3_presigned_url(download_meta, filename):
-        conn = boto3.client('s3')
-        param_get_object = {
-            'Bucket': download_meta['bucket'],
-            'Key': download_meta['key'],
-            'ResponseContentDisposition': "inline; filename=" + filename
-        }
-        location = conn.generate_presigned_url(
-            ClientMethod = 'get_object',
-            Params = param_get_object,
-            ExpiresIn = 36*60*60
-        )
-        return location
+    conn = boto3.client('s3')
+    param_get_object = {
+        'Bucket': download_meta['bucket'],
+        'Key': download_meta['key'],
+        'ResponseContentDisposition': "inline; filename=" + filename
+    }
+    location = conn.generate_presigned_url(
+        ClientMethod='get_object',
+        Params=param_get_object,
+        ExpiresIn=36 * 60 * 60  # 36 hours
+    )
+    return location
+
 
 @collection(
     name='enzymes',
@@ -251,11 +257,10 @@ class GenomicRegion(Item):
     })
     def display_title(self, genome_assembly, location_description=None,
                       start_coordinate=None, end_coordinate=None, chromosome=None):
-        ''' If you have full genome coordinates use those, otherwise use a
+        """ If you have full genome coordinates use those, otherwise use a
             location description (which should be provided if not coordinates)
             with default just being genome assembly (required)
-        '''
-        value = None
+        """
         if location_description and not (start_coordinate or end_coordinate):
             value = location_description
         else:
@@ -338,7 +343,6 @@ class TrackingItem(Item):
         Raises:
             ValidationFailure if TrackingItem cannot be validated
         """
-        import transaction
         collection = request.registry[COLLECTIONS]['TrackingItem']
         # set remote_user to standarize permissions
         prior_remote = request.remote_user
