@@ -79,7 +79,9 @@ def config():
     # This is the approximate equivalent in pyTest:
 
     # TODO: Reonsider whether this setup/teardown is being done correctly
-    raise Exception("fixture config used")
+    #  Then again, this fixture might not be used at all. I inserted this here and it didn't fail the tests:
+    #     raise Exception("fixture config used")
+    #  -kmp 28-Jun-2020
     the_config = setUp()
     yield the_config
     tearDown()
