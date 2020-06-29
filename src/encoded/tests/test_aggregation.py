@@ -1,12 +1,24 @@
 import pytest
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from ..utils import delay_rerun
 from .workbook_fixtures import app_settings, app, workbook
 
 
+# NOTE WELL: Even though app_settings and app are not autouse fixtures, they must be imported.
+#  Removing these will not cause fixtures by those names not to be found, but my guess is that
+#  it will find different versions of those fixtures, which is what will cause the tests to fail
+#  with: 404  "The resource could not be found."
+#  -kmp 28-Jun-2020
+notice_pytest_fixtures(app_settings, app, workbook)
+
+
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
+
 def test_aggregation_facet(workbook, testapp):
+    notice_pytest_fixtures(workbook, testapp)
+
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
     badge_facets = [facet for facet in res['facets'] if facet['title'] in
                    ['Commendations', 'Warnings']]
@@ -18,6 +30,8 @@ def test_aggregation_facet(workbook, testapp):
 
 
 def test_aggregation_itemview(workbook, testapp):
+    notice_pytest_fixtures(workbook, testapp)
+
     res = testapp.get('/experiment-set-replicates/4DNESAAAAAA1/').json
     assert 'aggregated-items' in res.keys()
     parents = ''.join([badge['parent'] for badge in res['aggregated-items']['badges']])
@@ -28,6 +42,8 @@ def test_aggregation_itemview(workbook, testapp):
 
 
 def test_aggregation_view(workbook, testapp):
+    notice_pytest_fixtures(workbook, testapp)
+
     res = testapp.get('/experiment-set-replicates/4DNESAAAAAA1/@@aggregated-items').json
     agg = res['aggregated_items']
     assert 'badges' in agg.keys()

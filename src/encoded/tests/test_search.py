@@ -1,8 +1,8 @@
 import json
 import pytest
-import time
 
 from dcicutils.misc_utils import Retry
+from dcicutils.qa_utils import notice_pytest_fixtures
 from datetime import datetime, timedelta
 from snovault import TYPES, COLLECTIONS
 from snovault.elasticsearch import create_mapping
@@ -11,7 +11,7 @@ from snovault.util import add_default_embeds
 from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-from ..utils import customized_delay_rerun
+# from ..utils import customized_delay_rerun
 
 
 pytestmark = [
@@ -25,6 +25,7 @@ pytestmark = [
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
+notice_pytest_fixtures(app_settings, app, workbook)
 
 
 # just a little helper function

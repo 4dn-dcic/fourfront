@@ -12,7 +12,8 @@ from ..commands.create_mapping_on_deploy import (
     _run_create_mapping  # noqa - yeah, it's internal but we want to test it
 )
 # TODO: We should not be importing *. Even stranger, PyCharm says we don't use anything from there. -kmp 14-Feb-2020
-from ..types.experiment import *
+# Experimentally commenting this out. -kmp 28-Jun-2020
+# from ..types.experiment import *
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]

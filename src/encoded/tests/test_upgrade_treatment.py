@@ -14,9 +14,8 @@ def treatment_1(targ_w_alias):
     }
 
 
-def test_treatment_rna1_1_2(
-        registry, targ_w_alias, biofeat_w_alias, treatment_1):
-    ''' need to use registry to check items '''
+def test_treatment_rna1_1_2(registry, targ_w_alias, biofeat_w_alias, treatment_1):
+    """need to use registry to check items """
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('treatment_rnai', treatment_1, registry=registry,
                              current_version='1', target_version='2')

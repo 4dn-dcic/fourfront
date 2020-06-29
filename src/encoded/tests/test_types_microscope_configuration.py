@@ -1,7 +1,9 @@
 import pytest
 from ..schema_formats import is_uuid
 
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+
 
 @pytest.fixture
 def tier1_microscope_configuration(testapp):
@@ -14,6 +16,7 @@ def tier1_microscope_configuration(testapp):
         }
     }
     return testapp.post_json('/microscope-configurations', item).json['@graph'][0]
+
 
 def test_get_tier1_microscope(testapp, tier1_microscope_configuration):
     assert tier1_microscope_configuration['microscope']['Tier'] == 1

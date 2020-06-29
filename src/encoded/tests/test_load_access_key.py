@@ -8,6 +8,7 @@ pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 # TODO: test load_access_keys.get_existing_key_ids, which would use ES
 
+
 def test_gen_access_keys(testapp, admin):
     with mock.patch('encoded.commands.load_access_keys.get_beanstalk_real_url') as mocked_url:
         mocked_url.return_value = 'http://fourfront-hotseat'

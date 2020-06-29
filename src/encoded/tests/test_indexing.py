@@ -13,6 +13,7 @@ import time
 import transaction
 import uuid
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from elasticsearch.exceptions import NotFoundError
 from snovault import DBSESSION, TYPES
 from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
@@ -33,6 +34,9 @@ from ..utils import delay_rerun
 from ..verifier import verify_item
 from .workbook_fixtures import app_settings
 from .test_permissions import wrangler, wrangler_testapp
+
+
+notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
