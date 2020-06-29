@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 
 jest.autoMockOff();
 
@@ -39,14 +39,16 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
             ]
         );
 
-        page = TestUtils.renderIntoDocument(
-            <FacetCharts
-                href={href} // We need to be on '/' or '/browse/' for Chart to be visible.
-                updateStats={function(stats){ console.log("CHARTS-TEST: props.updateStats called by FacetCharts (good) with: ", stats); }}
-                schemas={null}
-                initialFields={propInitialFields}
-            />
-        );
+        act(()=>{
+            page = TestUtils.renderIntoDocument(
+                <FacetCharts
+                    href={href} // We need to be on '/' or '/browse/' for Chart to be visible.
+                    updateStats={function(stats){ console.log("CHARTS-TEST: props.updateStats called by FacetCharts (good) with: ", stats); }}
+                    schemas={null}
+                    initialFields={propInitialFields}
+                />
+            );
+        });
 
     });
 
@@ -64,7 +66,9 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
     it('Has bars, divided into bar parts, with labels', function() {
         server.respond();
-        jest.runAllTimers();
+        act(()=>{
+            jest.runAllTimers();
+        });
         var bars = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-bar');
         var barParts = TestUtils.scryRenderedDOMComponentsWithClass(page, 'bar-part');
         console.log('CHARTS-TEST: Found ' + bars.length + ' bars divided into ' + barParts.length + ' bar parts.');
@@ -77,7 +81,9 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
 
     it('Has correct counts', function() {
         server.respond();
-        jest.runAllTimers();
+        act(()=>{
+            jest.runAllTimers();
+        });
         var bar_labels = TestUtils.scryRenderedDOMComponentsWithClass(page, 'bar-top-label');
         var bar_counts = _.map(_.pluck(bar_labels, 'innerHTML'), function(str){ return parseInt(str); }).sort().reverse();
 
