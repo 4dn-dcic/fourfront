@@ -70,6 +70,7 @@ kibana-stop:
 kill:  # kills back-end processes associated with the application. Use with care.
 	pkill -f postgres &
 	pkill -f elasticsearch &
+	pkill -f moto_server &
 
 clean-python:
 	@echo -n "Are you sure? This will wipe all libraries installed on this virtualenv [y/N] " && read ans && [ $${ans:-N} = y ]
