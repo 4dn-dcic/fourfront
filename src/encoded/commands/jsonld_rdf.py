@@ -31,7 +31,7 @@ def main():
     rdflib_serializers = sorted(
         p.name for p in rdflib.plugin.plugins(kind=rdflib.serializer.Serializer)
         if '/' not in p.name)
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Convert JSON-LD from source URLs to RDF", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

@@ -58,7 +58,7 @@ deploy1:  # starts postgres/ES locally and loads inserts
 deploy2:  # spins up waittress to serve the application
 	pserve development.ini
 
-psql-dev:
+psql-dev:  # starts psql with the url after 'sqlalchemy.url =' in development.ini
 	@psql `grep 'sqlalchemy[.]url =' development.ini | sed -E 's/^.* = (.*)/\1/'`
 
 kibana-start:

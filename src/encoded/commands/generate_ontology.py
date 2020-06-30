@@ -1,19 +1,13 @@
 import argparse
 import ast
-# import boto3
-# import datetime
 import json
-# import os
 import pkg_resources
 import re
 import requests
 import sys
 
 from collections import Counter
-# from dateutil.relativedelta import relativedelta
 from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata, unified_authentication
-# from dcicutils.s3_utils import s3Utils
-# from pyramid.paster import get_app
 from rdflib.collection import Collection
 from uuid import uuid4
 from ..commands.owltools import (
@@ -43,10 +37,10 @@ ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
 
 
 def iterative_parents(nodes, terms, data):
-    '''returns all the parents traversing the term graph structure
+    """returns all the parents traversing the term graph structure
         - (not the direct RDF graph) by iteratively following parents
         until there are no more parents
-    '''
+    """
     results = []
     while 1:
         newNodes = []
@@ -65,9 +59,9 @@ def iterative_parents(nodes, terms, data):
 
 
 def get_all_ancestors(term, terms, field):
-    '''Adds a list of all the term's ancestors to a term up to the root
+    """Adds a list of all the term's ancestors to a term up to the root
         of the ontology and adds to closure fields - used in adding slims
-    '''
+    """
     closure = 'closure'
     if field == 'development':
         closure = 'closure_with_develops_from'
@@ -81,13 +75,13 @@ def get_all_ancestors(term, terms, field):
 
 
 def _combine_all_parents(term):
-    '''internal method to combine the directly related terms into 2 uniqued lists
+    """internal method to combine the directly related terms into 2 uniqued lists
         of all_parents or development terms that will be used as starting terms
         to generate closures of all ancestors
 
         the development terms have those with has_part_inverse filtered out to
         prevent over expansion of the ancestors to incorrect associations
-    '''
+    """
     parents = set()
     relations = set()
     develops = set()
@@ -106,7 +100,7 @@ def _combine_all_parents(term):
 
 
 def _has_human(cols):
-    '''True if human taxon is part of the collection'''
+    """True if human taxon is part of the collection"""
     ans = False
     human = HUMAN_TAXON
     if cols:
@@ -118,14 +112,14 @@ def _has_human(cols):
 
 
 def get_termid_from_uri(uri):
-    '''Given a uri - takes the last part (name) and converts _ to :
+    """Given a uri - takes the last part (name) and converts _ to :
         eg. http://www.ebi.ac.uk/efo/EFO_0002784 => EFO:0002784
-    '''
+    """
     return splitNameFromNamespace(uri)[0].replace('_', ':')
 
 
 def get_term_name_from_rdf(class_, data):
-    '''Looks for label for class in the rdf graph'''
+    """Looks for label for class in the rdf graph"""
     name = None
     try:
         unique = data.rdfGraph.value(class_, OBO['IAO_0000589'])
@@ -139,8 +133,8 @@ def get_term_name_from_rdf(class_, data):
 
 
 def create_term_dict(class_, termid, data, ontology_id=None):
-    '''Adds basic term info to the dictionary of all terms
-    '''
+    """Adds basic term info to the dictionary of all terms
+    """
     term = {
         'term_id': termid,
         'term_url': class_.__str__(),
@@ -156,9 +150,9 @@ def create_term_dict(class_, termid, data, ontology_id=None):
 
 
 def _add_term_and_info(class_, parent_uri, relationship, data, terms):
-    '''Internal function to add new terms that are part of an IntersectionOf
+    """Internal function to add new terms that are part of an IntersectionOf
         along with the appropriate relationships
-    '''
+    """
     if not terms:
         terms = {}
     for subclass in data.rdfGraph.objects(class_, subClassOf):
@@ -174,11 +168,11 @@ def _add_term_and_info(class_, parent_uri, relationship, data, terms):
 
 
 def process_intersection_of(class_, intersection, data, terms):
-    '''Given a class with IntersectionOf predicate determine if the
+    """Given a class with IntersectionOf predicate determine if the
         intersected class is part of human or if our term develops_from
         the class and if so make ontology_term json for it if it doesn't
         already exist
-    '''
+    """
     # the intersectionOf rdf consists of a collection of 2 members
     # the first (collection[0]) is the resource uri (term)
     # the second (collection[1]) is a restriction
@@ -196,9 +190,9 @@ def process_intersection_of(class_, intersection, data, terms):
 
 
 def process_blank_node(class_, data, terms, simple=False):
-    '''Given a blank node determine if there are any parent resources
+    """Given a blank node determine if there are any parent resources
         of relevant types and if so process them appropriately
-    '''
+    """
     for object_ in data.rdfGraph.objects(class_, subClassOf):
         # direct parents of blank nodes
         if not isBlankNode(object_):
@@ -213,13 +207,13 @@ def process_blank_node(class_, data, terms, simple=False):
 
 
 def _find_and_add_parent_of(parent, child, data, terms, has_part=False, relation=None):
-    '''Add parent terms with the provided relationship to the 'relationships'
+    """Add parent terms with the provided relationship to the 'relationships'
         field of the term - treating has_part specially
 
         NOTE: encode had added fields for each relationship type to the dict
         our default is a  'relationships' field - but can pass in a specific
         relation string eg. develops_from and that will get added as field
-    '''
+    """
     child_id = get_termid_from_uri(child)
     for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
         if _is_deprecated(obj, data):
@@ -243,9 +237,9 @@ def _find_and_add_parent_of(parent, child, data, terms, has_part=False, relation
 
 
 def process_parents(class_, data, terms):
-    '''Gets the parents of the class - direct and those linked via
+    """Gets the parents of the class - direct and those linked via
         specified relationship types
-    '''
+    """
     termid = get_termid_from_uri(class_)
     for parent in data.get_classDirectSupers(class_, excludeBnodes=False):
         rtypes = {PART_OF: 'part_of',
@@ -274,23 +268,23 @@ def process_parents(class_, data, terms):
 
 
 def get_synonyms(class_, data, synonym_terms):
-    '''Gets synonyms for the class as strings
-    '''
+    """Gets synonyms for the class as strings
+    """
     if not synonym_terms:
         return
     return getObjectLiteralsOfType(class_, data, synonym_terms)
 
 
 def get_definitions(class_, data, definition_terms):
-    '''Gets definitions for the class as strings
-    '''
+    """Gets definitions for the class as strings
+    """
     if not definition_terms:
         return
     return getObjectLiteralsOfType(class_, data, definition_terms)
 
 
 def _cleanup_non_fields(terms):
-    '''Removes unwanted fields and empty terms from final json'''
+    """Removes unwanted fields and empty terms from final json"""
     to_delete = ['relationships', 'all_parents', 'development',
                  'has_part_inverse', 'develops_from',
                  'closure', 'closure_with_develops_from',
@@ -310,12 +304,12 @@ def _cleanup_non_fields(terms):
 
 
 def add_slim_to_term(term, slim_terms):
-    '''Checks the list of ancestor terms to see if any are slim_terms
+    """Checks the list of ancestor terms to see if any are slim_terms
         and if so adds the slim_term to the term in slim_term slot
 
         for now checking both closure and closure_with_develops_from
         but consider having only single 'ancestor' list
-    '''
+    """
     slimterms2add = {}
     for slimterm in slim_terms:
         if term.get('closure') and slimterm['term_id'] in term['closure']:
@@ -352,11 +346,11 @@ def convert2namespace(uri):
 
 
 def get_syndef_terms_as_uri(ontology, termtype, as_rdf=True):
-    '''Checks an ontology item for ontology_terms that are used
+    """Checks an ontology item for ontology_terms that are used
         to designate synonyms or definitions in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
-    '''
+    """
     sdterms = ontology.get(termtype)
     uris = [term['term_url'] for term in sdterms if term is not None]
     if as_rdf:
@@ -365,27 +359,27 @@ def get_syndef_terms_as_uri(ontology, termtype, as_rdf=True):
 
 
 def get_synonym_term_uris(ontology, as_rdf=True):
-    '''Checks an ontology item for ontology_terms that are used
+    """Checks an ontology item for ontology_terms that are used
         to designate synonyms in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
-    '''
+    """
     return get_syndef_terms_as_uri(ontology, 'synonym_terms', as_rdf)
 
 
 def get_definition_term_uris(ontology, as_rdf=True):
-    '''Checks an ontology item for ontology_terms that are used
+    """Checks an ontology item for ontology_terms that are used
         to designate definitions in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
-    '''
+    """
     return get_syndef_terms_as_uri(ontology, 'definition_terms', as_rdf)
 
 
 def get_slim_terms(connection):
-    '''Retrieves ontology_term jsons for those terms that have 'is_slim_for'
+    """Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
-    '''
+    """
     # currently need to hard code the categories of slims but once the ability
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
@@ -403,8 +397,8 @@ def get_slim_terms(connection):
 
 
 def get_existing_ontology_terms(connection):  # , ontologies=None):
-    '''Retrieves all existing ontology terms from the db
-    '''
+    """Retrieves all existing ontology terms from the db
+    """
     search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
     db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
     ignore = [
@@ -416,9 +410,9 @@ def get_existing_ontology_terms(connection):  # , ontologies=None):
 
 
 def get_ontologies(connection, ont_list):
-    '''return list of ontology jsons retrieved from server
+    """return list of ontology jsons retrieved from server
         ontology jsons are now fully embedded
-    '''
+    """
     ontologies = []
     if ont_list == 'all':
         ontologies = search_metadata('search/?type=Ontology', connection)
@@ -435,10 +429,10 @@ def get_ontologies(connection, ont_list):
 
 
 def connect2server(env=None, key=None):
-    '''Sets up credentials for accessing the server.  Generates a key using info
+    """Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
        reached with that key.
-       Also handles keyfiles stored in s3'''
+       Also handles keyfiles stored in s3"""
     if key == 's3':
         assert env
         key = unified_authentication(None, env)
@@ -540,9 +534,9 @@ def _get_t_id(val):
 
 
 def _terms_match(t1, t2):
-    '''check that all the fields in the first term t1 are in t2 and
+    """check that all the fields in the first term t1 are in t2 and
         have the same values
-    '''
+    """
     for k, val in t1.items():
         if k not in t2:
             if val:
@@ -575,9 +569,9 @@ def _terms_match(t1, t2):
 
 
 def check_for_fields_to_keep(term, dbterm):
-    ''' see if is_slim_for present and check if preferred_name is different from
+    """ see if is_slim_for present and check if preferred_name is different from
         term_name in dbterm if so add to term
-    '''
+    """
     if 'is_slim_for' in dbterm:
         term['is_slim_for'] = dbterm['is_slim_for']
     if 'preferred_name' in dbterm:  # should alwawys be true
@@ -607,9 +601,9 @@ def _format_as_raw(val):
 
 
 def get_raw_form(term):
-    ''' takes a term dict that could be in embedded or object format
+    """ takes a term dict that could be in embedded or object format
         and transforms to raw (so uuids) are used for linked items
-    '''
+    """
     raw_term = {}
     for field, val in term.items():
         if isinstance(val, str):
@@ -623,12 +617,12 @@ def get_raw_form(term):
 
 
 def update_parents(termid, ontid, tparents, dparents, simple, connection):
-    ''' tricky bit is when to remove terms from existing term
+    """ tricky bit is when to remove terms from existing term
         single ontology processing only remove parents that
         are not in term parents that are in dbterm parents from that ontology
         but if simple have additional restriction that term prefixes of
         parent and child _terms_match
-    '''
+    """
     parents2keep = [p.get('uuid') for p in dparents]
     if not tparents or Counter(parents2keep) == Counter(tparents):
         return None
@@ -660,16 +654,17 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
 def _parse_def(defstr):
     pass
 
+
 def update_definition(tdef, dbdef, ont):
     # pass
-    '''
+    """
     for the term because it is only a single ont if got here then def ends with ontpre in parens
     need to check the def in the db to see if any of the defs in the string come from db being
     processed - if the ontprefix is in the trailing string and the 2 defs don't match need to
     remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
     string
-    '''
-    ontregex = re.compile(' +\(([A-Z]+,* *[A-Z]*)\)\s*')
+    """
+    ontregex = re.compile(r' +\(([A-Z]+,* *[A-Z]*)\)\s*')
     tmatch = ontregex.split(tdef)
     tstr = tmatch[0]
     dbmatch = ontregex.split(dbdef)
@@ -693,9 +688,9 @@ def update_definition(tdef, dbdef, ont):
 
 
 def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None):
-    ''' Looks at 2 terms and depending on the type of processing - all or single ontology
+    """ Looks at 2 terms and depending on the type of processing - all or single ontology
         and simple or not determines what fields might need to be patched
-    '''
+    """
     rawdbterm = get_raw_form(dbterm)
     if ont == 'all':  # just need a simple comparison
         if rm_unch and _terms_match(term, rawdbterm):
@@ -762,11 +757,12 @@ def id_fields2patch(term, dbterm, ont, ontids, simple, rm_unch, connection=None)
         return patch_term
 
 
-def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True, ontarg='all', simple=False, connection=None):
-    '''compares terms to terms that are already in db - if no change
+def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsoletes=True, ontarg='all',
+                      simple=False, connection=None):
+    """compares terms to terms that are already in db - if no change
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
-    '''
+    """
     to_update = []
     to_post = []
     to_patch = 0
@@ -920,7 +916,7 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
             # deal with parents
             if ontology.get('ontology_name') != 'Sequence Ontology':
                 terms = process_parents(class_, data, terms)
-# add synonyms and definitions
+    # add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms, ont_prefix)
     if ontology.get('ontology_name') == 'Sequence Ontology':
         terms = {k: v for k, v in terms.items() if k in ['SO:0000001', 'SO:0000104', 'SO:0000673', 'SO:0000704']}
@@ -928,10 +924,10 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
 
 
 def write_outfile(to_write, filename, pretty=False):
-    '''terms is a list of dicts
+    """terms is a list of dicts
         write to file by default as a json list or if pretty
         then same with indents and newlines
-    '''
+    """
     with open(filename, 'w') as outfile:
         if pretty:
             json.dump(to_write, outfile, indent=4)
@@ -940,7 +936,7 @@ def write_outfile(to_write, filename, pretty=False):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Process specified Ontologies and create OntologyTerm inserts for updates",
         epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -948,12 +944,14 @@ def parse_args(args):
     parser.add_argument('--ontology',
                         default='all',
                         help="Prefix of ontology to process - eg. UBERON, OBI, EFO; \
-                        default will process all the ontologies in db or can specify a single ontology (with --simple if desired)")
+                        default will process all the ontologies in db"
+                             " or can specify a single ontology (with --simple if desired)")
     parser.add_argument('--simple',
                         default=False,
                         action='store_true',
                         help="Default false - WARNING can only be used if processing a single ontology!!! \
-                        - will process only terms that share the prefix ontology and skip terms imported from other ontologies")
+                        - will process only terms that share the prefix ontology"
+                             " and skip terms imported from other ontologies")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -963,7 +961,8 @@ def parse_args(args):
     parser.add_argument('--full',
                         default=False,
                         action='store_true',
-                        help="Default False - set True to generate full file to load - do not filter out existing unchanged terms")
+                        help="Default False - set True to generate full file to load"
+                             " - do not filter out existing unchanged terms")
     parser.add_argument('--env',
                         default='data',
                         help="The environment to use i.e. data, webdev, mastertest.\
@@ -990,9 +989,9 @@ def owl_runner(value):
 
 
 def main():
-    ''' Downloads latest Ontology OWL files for Ontologies in the database
+    """ Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
-    '''
+    """
     args = parse_args(sys.argv[1:])
     postfile = args.outfile
     if not postfile:
@@ -1048,7 +1047,6 @@ def main():
                 ontology['ontology_versions'] = prev
                 new_versions.append(ontology)
 
-
     # at this point we've processed the rdf of all the ontologies
     if terms:
         print("Post-processing")
@@ -1062,15 +1060,16 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology, simple=args.simple, connection=connection)
+        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology,
+                                    simple=args.simple, connection=connection)
         print("DONE FINDING UPDATES")
 
         pretty = False
         if args.pretty:
             pretty = True
         out_dict = {
-            'ontologies': {o['uuid']:
-                {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
+            'ontologies': {
+                o['uuid']: {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
                 for o in new_versions
             },
             'terms': updates

@@ -48,7 +48,7 @@ def run(app):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Move attachment blobs to S3", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

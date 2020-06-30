@@ -100,6 +100,7 @@ def test_fixtures2(minitestdata2, testapp):
 
 
 def test_order_complete(app, conn):
+    # TODO: This could use a doc string or comment. -kent & eric 29-Jun-2020
     print("original datafixtures.ORDER =", datafixtures.ORDER)
     print("original len(datafixtures.ORDER) =", len(datafixtures.ORDER))
     assert "access_key" not in datafixtures.ORDER

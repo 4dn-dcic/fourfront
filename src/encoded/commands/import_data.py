@@ -74,7 +74,7 @@ def main():
     if 'PATCH' not in ALLOWED_METHODS:
         ALLOWED_METHODS.append('PATCH')
 
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Import data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
