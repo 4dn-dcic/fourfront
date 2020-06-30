@@ -30,6 +30,7 @@ const { TabObject, Item } = typedefs;
  * Item page template associated with them.
  *
  * @module {Component} item-pages/DefaultItemView
+ * @todo Refactor how ItemViews in general to not extend this and instead use composition (React better/best practice).
  */
 
 
@@ -281,8 +282,9 @@ export default class DefaultItemView extends React.PureComponent {
      * @todo Maybe simplify CSS styling around these. Or get rid of these components and use plain HTML elements.
      */
     itemHeader(){
+        const { context, href, schemas, windoWidth } = this.props;
         return (
-            <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
+            <ItemHeaderWrapper {...{ context, href, schemas, windoWidth }}>
                 <TopRow typeInfo={this.typeInfo()} />
                 <MiddleRow />
                 <BottomRow />
@@ -300,10 +302,12 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element[]} By default, `Publications.PublicationBelowHeaderRow` and `StaticHeaderArea` component instances.
      */
     itemMidSection(){
+        const { context } = this.props;
+        const { produced_in_pub } = context;
         return (
             <React.Fragment>
-                <Publications.PublicationBelowHeaderRow {...this.props} publication={this.props.context.produced_in_pub} key="publication-info" />
-                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
+                <Publications.PublicationBelowHeaderRow {...this.props} publication={produced_in_pub} key="publication-info" />
+                <StaticHeadersArea context={context} key="static-headers-area" />
             </React.Fragment>
         );
     }

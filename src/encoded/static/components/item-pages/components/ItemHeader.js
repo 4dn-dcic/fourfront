@@ -236,40 +236,49 @@ export class TopRow extends React.Component {
  * @type {Component}
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
-export class MiddleRow extends React.Component {
 
-    shouldComponentUpdate(nextProps){
-        if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
-        if (nextProps.windowWidth !== this.props.windowWidth) return true;
-        return false;
+export const MiddleRow = React.memo(function MiddleRow(props){
+
+    const {
+        children = null,
+        text: propText = null, // if present, takes priority over context description.
+        context: { description = null } = {},
+        windowWidth
+    } = props;
+
+    if (children) {
+        return <div className="item-page-heading">{ children }</div>;
     }
 
-    render(){
-        var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
+    const textDescription = (
+        (typeof propText === "string" && propText) ||
+        (typeof description === "string" && description) ||
+        null
+    );
 
-        if (!description){
-            return <div className="item-page-heading no-description"/>;
-        }
-
-        return (
-            <FlexibleDescriptionBox
-                windowWidth={this.props.windowWidth}
-                description={ description || <em>No description provided.</em> }
-                className="item-page-heading"
-                textClassName="text-medium"
-                defaultExpanded={description.length < 600}
-                fitTo="grid"
-                lineHeight={22}
-                dimensions={{
-                    'paddingWidth' : 0,
-                    'paddingHeight' : 22, // Padding-top + border-top
-                    'buttonWidth' : 30,
-                    'initialHeight' : 42
-                }}
-            />
-        );
+    if (!textDescription){
+        return <div className="item-page-heading no-description"/>;
     }
-}
+
+    return (
+        <FlexibleDescriptionBox
+            windowWidth={windowWidth}
+            description={textDescription}
+            className="item-page-heading"
+            textClassName="text-medium"
+            defaultExpanded={textDescription.length < 600}
+            fitTo="grid"
+            lineHeight={22}
+            dimensions={{
+                'paddingWidth' : 0,
+                'paddingHeight' : 22, // Padding-top + border-top
+                'buttonWidth' : 30,
+                'initialHeight' : 42
+            }}
+        />
+    );
+});
+
 
 /**
  * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.
