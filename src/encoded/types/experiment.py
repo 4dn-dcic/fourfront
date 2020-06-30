@@ -1,5 +1,7 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
+import itertools
+
 from snovault import (
     abstract_collection,
     calculated_property,
@@ -333,7 +335,6 @@ class Experiment(Item):
     def publications_of_exp(self, request):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
                  self.experiment_sets(request)]
-        import itertools
         pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
                                                       for eset in esets])))
         return pubs

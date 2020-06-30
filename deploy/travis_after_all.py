@@ -3,16 +3,10 @@ import sys
 import json
 import time
 import logging
+import urllib.request as urllib2
 
-try:
-    from functools import reduce
-except ImportError:
-    pass
+from functools import reduce
 
-try:
-    import urllib.request as urllib2
-except ImportError:
-    import urllib2
 
 log = logging.getLogger("travis.leader")
 log.addHandler(logging.StreamHandler())
@@ -36,6 +30,7 @@ gh_token = os.getenv(GITHUB_TOKEN)
 
 def is_leader(job_number):
     return job_number.endswith('.1')
+
 
 job_number = os.getenv(TRAVIS_JOB_NUMBER)
 
@@ -121,7 +116,7 @@ try:
         log.error("Others Failed")
         os.environ[BUILD_AGGREGATE_STATUS] = "others_failed"
     else:
-        log.warn("Others Unknown")
+        log.warning("Others Unknown")
         os.environ[BUILD_AGGREGATE_STATUS] = "unknown"
     # since python is subprocess, env variables are exported back via file
     with open(".to_export_back", "w") as export_var:

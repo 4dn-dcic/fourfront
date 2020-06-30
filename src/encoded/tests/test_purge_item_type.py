@@ -1,7 +1,11 @@
 import pytest
 import time
+from dcicutils.qa_utils import notice_pytest_fixtures
 from .workbook_fixtures import app_settings, app, workbook
 from encoded.commands.purge_item_type import purge_item_type_from_storage
+
+
+notice_pytest_fixtures(app_settings, app, workbook)
 
 
 pytestmark = [pytest.mark.working]

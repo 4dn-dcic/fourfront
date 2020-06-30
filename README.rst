@@ -146,6 +146,9 @@ Browse to the interface at http://localhost:8000/.
 Running tests
 =============
 
+Python Testing
+--------------
+
 To run specific tests locally::
 
     $ bin/test -k test_name
@@ -166,6 +169,10 @@ Run the Pyramid tests with::
 Note: to run against chrome you should first::
 
     $ brew install chromedriver
+
+
+Javascript Testing
+------------------
 
 Run the Javascript tests with::
 

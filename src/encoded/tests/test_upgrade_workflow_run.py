@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -31,7 +35,6 @@ def workflow_run_1():
 
 
 def test_workflow_run_upgrade_1_2(workflow_run_1, registry, file_formats):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow_run', workflow_run_1, registry=registry,
                              current_version='1', target_version='2')
@@ -41,7 +44,6 @@ def test_workflow_run_upgrade_1_2(workflow_run_1, registry, file_formats):
 
 
 def test_workflow_run_upgrade_1_2_bad_file_format(workflow_run_1, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow_run', workflow_run_1, registry=registry,
                              current_version='1', target_version='2')
@@ -51,7 +53,6 @@ def test_workflow_run_upgrade_1_2_bad_file_format(workflow_run_1, registry):
 
 
 def test_workflow_run_upgrade_1_2_missing_file_format(workflow_run_1, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     del workflow_run_1['input_files'][0]['format_if_extra']
     value = upgrader.upgrade('workflow_run', workflow_run_1, registry=registry,
@@ -96,7 +97,6 @@ def workflow_run_2(quality_metric_fastqc, file_fastq):
 
 
 def test_workflow_run_upgrade_2_3(workflow_run_2, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow_run', workflow_run_2, registry=registry,
                              current_version='2', target_version='3')
@@ -104,7 +104,6 @@ def test_workflow_run_upgrade_2_3(workflow_run_2, registry):
 
 
 def test_workflow_run_awsem_upgrade_2_3(workflow_run_2, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow_run_awsem', workflow_run_2, registry=registry,
                              current_version='2', target_version='3')

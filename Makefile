@@ -58,6 +58,15 @@ deploy1:  # starts postgres/ES locally and loads inserts
 deploy2:  # spins up waittress to serve the application
 	pserve development.ini
 
+psql-dev:  # starts psql with the url after 'sqlalchemy.url =' in development.ini
+	@psql `grep 'sqlalchemy[.]url =' development.ini | sed -E 's/^.* = (.*)/\1/'`
+
+kibana-start:
+	scripts/kibana-start
+
+kibana-stop:
+	scripts/kibana-stop
+
 kill:  # kills back-end processes associated with the application. Use with care.
 	pkill -f postgres &
 	pkill -f elasticsearch &
@@ -96,6 +105,8 @@ info:
 	   $(info - Use 'make configure' to install poetry. You should not have to do this directly.)
 	   $(info - Use 'make deploy1' to spin up postgres/elasticsearch and load inserts.)
 	   $(info - Use 'make deploy2' to spin up the application server.)
+	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
+	   $(info - Use 'make kibana-start' to start kibana, and 'make kibana-stop' to stop it.)
 	   $(info - Use 'make kill' to kill postgres and elasticsearch proccesses. Please use with care.)
 	   $(info - Use 'make moto-setup' to install moto, for less flaky tests. Implied by 'make build'.)
 	   $(info - Use 'make npm-setup' to build the front-end. Implied by 'make build'.)

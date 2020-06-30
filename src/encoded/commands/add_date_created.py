@@ -12,10 +12,16 @@ For the development.ini you must supply the paster app name:
     %(prog)s development.ini --app-name app
 
 """
-from future.utils import iteritems
-from pyramid.traversal import resource_path
+
+import argparse
 import logging
 import pytz
+
+from future.utils import iteritems
+from pyramid import paster
+from pyramid.traversal import resource_path
+from webtest import TestApp
+
 
 pacific = pytz.timezone('US/Pacific')
 
@@ -25,8 +31,6 @@ logger = logging.getLogger(__name__)
 
 
 def internal_app(configfile, app_name=None, username=None):
-    from webtest import TestApp
-    from pyramid import paster
     app = paster.get_app(configfile, app_name)
     if not username:
         username = 'IMPORT'
@@ -86,8 +90,7 @@ def run(testapp, collections=None, exclude=None, dry_run=False):
 
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is invalid
         description="Fix date_created", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
