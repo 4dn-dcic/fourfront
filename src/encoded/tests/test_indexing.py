@@ -9,6 +9,7 @@ import json
 import os
 import pkg_resources
 import pytest
+import re
 import time
 import transaction
 import uuid
@@ -25,7 +26,7 @@ from snovault.elasticsearch.create_mapping import (
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, func
 from timeit import default_timer as timer
 from unittest import mock
 from zope.sqlalchemy import mark_changed
@@ -40,6 +41,18 @@ notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
+
+
+POSTGRES_MAJOR_VERSION_EXPECTED = 11
+
+
+def test_postgres_version(session):
+
+    (version_info,) = session.query(func.version()).one()
+    print("version_info=", version_info)
+    assert isinstance(version_info, str)
+    assert re.match("PostgreSQL %s([.][0-9]+)? " % POSTGRES_MAJOR_VERSION_EXPECTED, version_info)
+
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
