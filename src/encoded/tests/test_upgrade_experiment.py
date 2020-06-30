@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -102,7 +106,6 @@ def experiment_capc_w2targs(targ_w_alias, targ_gr_w_alias, file_fastq):
 def test_experiment_convert_targeted_factor_to_biofeat(
         registry, targ_w_alias, biofeat_w_alias, experiment_n):
     ''' need to use registry to check items '''
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     upgrade_info = [
         ('experiment_seq', '4', '5'),
@@ -125,7 +128,6 @@ def test_experiment_capture_c_target_to_biofeat(
         gr_biofeat_w_alias, experiment_capc_w2targs
 ):
     ''' need to use registry to check items '''
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('experiment_capture_c', experiment_capc_w2targs, registry=registry,
                              current_version='2', target_version='3')

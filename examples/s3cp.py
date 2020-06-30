@@ -19,8 +19,8 @@ encode_url = urlparse.urljoin(SERVER,f_obj.get('href'))
 #stream=True avoids actually downloading the file, but it evaluates the redirection
 r = requests.get(encode_url, auth=(AUTHID,AUTHPW), headers=HEADERS, allow_redirects=True, stream=True)
 try:
-    r.raise_for_status
-except:
+    r.raise_for_status()
+except Exception:
     print '%s href does not resolve' %(f_obj.get('accession'))
     sys.exit()
 

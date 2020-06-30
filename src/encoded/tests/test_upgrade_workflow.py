@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -11,7 +15,13 @@ def workflow_2(software, award, lab):
         "title": "some workflow",
         "name": "some workflow",
         "workflow_type": "Other",
-        "steps": [{ "meta": { "software_used" : software['@id'] } }]
+        "steps": [
+            {
+                "meta": {
+                    "software_used": software['@id']
+                }
+            }
+        ]
     }
 
 
@@ -21,6 +31,7 @@ def test_workflow_convert_software_used_to_list_2(
     value = migrator.upgrade('workflow', workflow_2, current_version='2', target_version='3')
     assert value['schema_version'] == '3'
     assert value['steps'][0]['meta']['software_used'] == [software['@id']]
+
 
 @pytest.fixture
 def workflow_3(software, award, lab):
@@ -91,7 +102,7 @@ def workflow_3(software, award, lab):
         "award": award['@id'],
         "lab": lab['@id'],
         "name": "hi-c-processing-partb/15",
-        "schema_version" : "3",
+        "schema_version": "3",
         "steps": [
             {
                 "inputs": [
@@ -354,13 +365,14 @@ def workflow_3(software, award, lab):
         "workflow_type": "Hi-C data analysis"
     }
 
+
 def test_workflow_upgrade_3_4(
         app, workflow_3, software):
     migrator = app.registry['upgrader']
     value = migrator.upgrade('workflow', workflow_3, current_version='3', target_version='4')
     assert value['schema_version'] == '4'
-    assert value['steps'][0]['inputs'][0]['source'][0].get('type') == None
-    assert value['steps'][0]['outputs'][0]['target'][0].get('type') == None
+    assert value['steps'][0]['inputs'][0]['source'][0].get('type') is None
+    assert value['steps'][0]['outputs'][0]['target'][0].get('type') is None
 
     assert value['steps'][0]['inputs'][0]['meta'].get('file_format') == 'pairs'
     assert value['steps'][0]['inputs'][1]['meta'].get('file_format') == 'pairs'
@@ -369,14 +381,14 @@ def test_workflow_upgrade_3_4(
     assert value['steps'][0]['inputs'][0]['meta'].get('type') == 'data file'
     assert value['steps'][0]['inputs'][1]['meta'].get('type') == 'reference file' # 'input_pairs_index' has 'index' in name ==> 'reference file' upgrade.
 
-    assert value['steps'][0]['inputs'][0]['meta'].get('global') == True
-    assert value['steps'][0]['inputs'][1]['meta'].get('global') == True
+    assert value['steps'][0]['inputs'][0]['meta'].get('global') is True
+    assert value['steps'][0]['inputs'][1]['meta'].get('global') is True
 
     assert value['steps'][0]['outputs'][0]['meta'].get('file_format') == 'pairs_px2'
     assert value['steps'][0]['outputs'][1]['meta'].get('file_format') == 'pairs'
 
-    assert value['steps'][0]['outputs'][0]['meta'].get('global') == True
-    assert value['steps'][0]['outputs'][1]['meta'].get('global') == True
+    assert value['steps'][0]['outputs'][0]['meta'].get('global') is True
+    assert value['steps'][0]['outputs'][1]['meta'].get('global') is True
 
     assert value['steps'][0]['outputs'][0]['meta'].get('type') == 'data file' # We don't transform outputs to reference files
     assert value['steps'][0]['outputs'][1]['meta'].get('type') == 'data file'
@@ -395,13 +407,20 @@ def workflow_4():
                 'name': 'merge_pairs',
                 'outputs': [
                     {
-                        'meta': {'cardinality': 'single', 'type': 'data file', 'global': True, 'file_format': 'pairs_px2'},
+                        'meta': {
+                            'cardinality': 'single',
+                            'type': 'data file',
+                            'global': True,
+                            'file_format': 'pairs_px2'
+                        },
                         'target': [{'name': 'output_pairs_index'}, {'name': 'pairs_index', 'step': 'cooler'}],
                         'name': 'output_pairs_index'
                     },
                     {
                         'meta': {'cardinality': 'single', 'type': 'data file', 'global': True, 'file_format': 'pairs'},
-                        'target': [{'name': 'output_pairs'}, {'name': 'input_pairs', 'step': 'pairs2hic'}, {'name': 'pairs', 'step': 'cooler'}],
+                        'target': [{'name': 'output_pairs'},
+                                   {'name': 'input_pairs', 'step': 'pairs2hic'},
+                                   {'name': 'pairs', 'step': 'cooler'}],
                         'name': 'output_pairs'
                     }
                 ],
@@ -412,7 +431,12 @@ def workflow_4():
                         'source': [{'name': 'input_pairs'}]
                     },
                     {
-                        'meta': {'type': 'reference file', 'global': True, 'file_format': 'pairs', 'cardinality': 'array'},
+                        'meta': {
+                            'type': 'reference file',
+                            'global': True,
+                            'file_format': 'pairs',
+                            'cardinality': 'array'
+                        },
                         'name': 'input_pairs_index',
                         'source': [{'name': 'input_pairs_index'}]
                     }
@@ -443,7 +467,12 @@ def workflow_4():
                         'source': [{'name': 'binsize'}]
                     },
                     {
-                        'meta': {'type': 'reference file', 'global': False, 'file_format': 'pairs', 'cardinality': 'single'},
+                        'meta': {
+                            'type': 'reference file',
+                            'global': False,
+                            'file_format': 'pairs',
+                            'cardinality': 'single'
+                        },
                         'name': 'pairs_index',
                         'source': [{'name': 'output_pairs_index', 'step': 'merge_pairs'}]
                     },
@@ -539,7 +568,6 @@ def workflow_4():
 
 def test_workflow_upgrade_4_5(
         workflow_4, registry, file_formats):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow', workflow_4, registry=registry,
                              current_version='4', target_version='5')
@@ -580,7 +608,6 @@ def workflow_5(software, award, lab):
 
 def test_workflow_upgrade_5_6(
         workflow_5, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow', workflow_5, registry=registry,
                              current_version='5', target_version='6')
@@ -606,7 +633,6 @@ def workflow_6(software, award, lab, workflow_bam):
 
 def test_workflow_upgrade_6_7(
         workflow_6, registry):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('workflow', workflow_6, registry=registry,
                              current_version='6', target_version='7')
@@ -629,7 +655,6 @@ def test_workflow_upgrade_6_7(
 #
 # def test_workflow_upgrade_7_8(workflow_7, registry, exp_types):
 #     types2upg = {'Repli-seq': None, 'in situ Hi-C': 'hic', 'Capture Hi-C': 'capc', 'DNA FISH': 'fish', 'dilution Hi-C': 'dilution'}
-#     from snovault import UPGRADER
 #     upgrader = registry[UPGRADER]
 #     for etype, lookup in types2upg.items():
 #         workflow_7['experiment_types'] = [etype]

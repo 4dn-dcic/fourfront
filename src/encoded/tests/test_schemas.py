@@ -1,8 +1,11 @@
 import pytest
+import re
+
 from pkg_resources import resource_listdir
+from snovault import COLLECTIONS, TYPES
 from snovault.schema_utils import load_schema
 from snovault.util import crawl_schema
-import re
+
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
@@ -63,8 +66,6 @@ def pluralize(name):
 
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
 def test_load_schema(schema, master_mixins, registry):
-    from snovault import TYPES
-    from snovault import COLLECTIONS
 
     abstract = [
         'microscope_setting.json',
@@ -168,7 +169,6 @@ def test_linkTo_saves_uuid(root, submitter, lab):
 
 
 def test_mixinProperties():
-    from snovault.schema_utils import load_schema
     schema = load_schema('encoded:schemas/access_key.json')
     assert schema['properties']['uuid']['type'] == 'string'
 
@@ -182,7 +182,6 @@ def test_dependencies(testapp):
 
 
 def test_changelogs(testapp, registry):
-    from snovault import TYPES
     for typeinfo in registry[TYPES].by_item_type.values():
         changelog = typeinfo.schema.get('changelog')
         if changelog is not None:
@@ -192,8 +191,6 @@ def test_changelogs(testapp, registry):
 
 
 def test_fourfront_crawl_schemas(testapp, registry):
-    from snovault import TYPES
-    from snovault.schema_utils import load_schema
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
     field_path = 'files.extra_files.file_size'
     field_schema = crawl_schema(registry[TYPES], field_path, schema)

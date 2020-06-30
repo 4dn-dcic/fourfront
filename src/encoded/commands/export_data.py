@@ -97,7 +97,7 @@ def run(search_url, username='', password=''):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Export Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

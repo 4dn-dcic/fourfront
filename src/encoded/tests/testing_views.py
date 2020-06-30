@@ -1,14 +1,10 @@
-from pyramid.security import (
-    Allow,
-)
+from pyramid.security import Allow, principals_allowed_by_permission
 from pyramid.view import view_config
-from snovault import (
-    Item,
-    calculated_property,
-    collection,
-)
+from snovault import Item, calculated_property, collection
 from snovault.attachment import ItemWithAttachment
 from snovault.interfaces import CONNECTION
+from sqlalchemy import inspect
+from transaction.interfaces import TransientError
 
 
 def includeme(config):
@@ -25,7 +21,6 @@ def user(request):
 
 @view_config(name='testing-allowed', request_method='GET')
 def allowed(context, request):
-    from pyramid.security import principals_allowed_by_permission
     permission = request.params.get('permission', 'view')
     return {
         'has_permission': bool(request.has_permission(permission, context)),
@@ -276,8 +271,6 @@ class TestingDependencies(Item):
 
 @view_config(context=TestingPostPutPatch, name='testing-retry')
 def testing_retry(context, request):
-    from sqlalchemy import inspect
-    from transaction.interfaces import TransientError
 
     model = context.model
     request.environ['_attempt'] = request.environ.get('_attempt', 0) + 1
