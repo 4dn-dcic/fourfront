@@ -243,16 +243,16 @@ export class MiddleRow extends React.Component {
         'isInlineEditable': false
     };
 
-    shouldComponentUpdate(nextProps){
+    shouldComponentUpdate(nextProps) {
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
         if (nextProps.windowWidth !== this.props.windowWidth) return true;
-        if(nextProps.context.actions!==this.props.context.actions) return true;
+        if (nextProps.context.actions !== this.props.context.actions) return true;
         return false;
     }
 
     render(){
-        const { isInlineEditable } = this.props;
-        var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
+        const { isInlineEditable, context, windowWidth } = this.props;
+        var description = (context && typeof context.description === 'string' && context.description) || null;
 
         if (!description && !isInlineEditable){
             return <div className="item-page-heading no-description"/>;
@@ -261,14 +261,14 @@ export class MiddleRow extends React.Component {
         if (description !== null) { if (description.length < 600){defaultExpanded=true;}}
         return (
             <FlexibleDescriptionBox
-                windowWidth={this.props.windowWidth}
+                windowWidth={windowWidth}
                 description={description || <em>No description provided.</em>}
                 className="item-page-heading"
                 textClassName="text-medium"
                 defaultExpanded={defaultExpanded}
                 fitTo="grid"
                 lineHeight={22}
-                context={this.props.context}
+                context={context}
                 isInlineEditable={isInlineEditable}
                 dimensions={{
                     'paddingWidth': 0,

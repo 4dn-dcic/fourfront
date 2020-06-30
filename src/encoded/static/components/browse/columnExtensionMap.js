@@ -30,9 +30,9 @@ function labDisplayTitleRenderFxn(result, props){
 }
 function sourceDisplayTitleRenderFxn(result) {
     const { source_experiment_sets } = result;
-    if (!source_experiment_sets || !Array.isArray(source_experiment_sets)) return null;
+    if (!source_experiment_sets || !Array.isArray(source_experiment_sets) || source_experiment_sets.length === 0) return null;
     if (source_experiment_sets.length == 1) {
-        const exp_set = source_experiment_sets[0];
+        const [exp_set] = source_experiment_sets;
         return (
             <span>
                 <a href={object.atIdFromObject(exp_set)}>{exp_set.display_title}</a>
@@ -40,13 +40,14 @@ function sourceDisplayTitleRenderFxn(result) {
         );
     } else {
         const expSetLinks = source_experiment_sets.map((exp_set) => {
+            const atId = object.atIdFromObject(exp_set);
             return (
-                <li>
-                    <a href={object.atIdFromObject(exp_set)}>{exp_set.display_title}</a>
+                <li key={atId}>
+                    <a href={atId}>{exp_set.display_title}</a>
                 </li>
             );
-        })
-        return (<ol style={{ marginTop: 'auto' }}>{expSetLinks}</ol>);
+        });
+        return (<ol style={{ marginTop: '15px', paddingLeft: '14px' }}>{expSetLinks}</ol>);
     }
 }
 export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {

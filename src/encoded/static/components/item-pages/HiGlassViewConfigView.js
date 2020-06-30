@@ -183,7 +183,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
-        this.handleUpdateAllTrack = _.throttle(this.handleUpdateAllTrack.bind(this), 3000);
+        this.handleUpdateAllTracks = _.throttle(this.handleUpdateAllTracks.bind(this), 3000);
         this.handleUpdateSingleTrack = _.throttle(this.handleUpdateSingleTrack.bind(this), 3000);
         this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
@@ -194,7 +194,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
         this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
         this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
-        this.onChangeHiglassViewConfItems = this.onChangeHiglassViewConfItems.bind(this);
+        this.updateHiglassViewConf = this.updateHiglassViewConf.bind(this);
         this.higlassInstanceHeightCalc = this.higlassInstanceHeightCalc.bind(this);
 
         /**
@@ -229,6 +229,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
     }
+
     higlassInstanceHeightCalc(instance) {
         const { context, isFullscreen, windowHeight } = this.props;
         if (instance === undefined) {
@@ -249,31 +250,30 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             this.setState({ 'instanceHeight': instance.instance_height });
         }
     }
-    onChangeHiglassViewConfItems(changeItem,trackInfo) {
 
+    updateHiglassViewConf(changeItem, trackInfo) {
         if (Object.keys(changeItem)[0] === 'name') {
             const hgc = this.getHiGlassComponent();
             const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
             const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-            const selectedTrack=currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+            const selectedTrack = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
             _.each(selectedTrack, (trackItemData, idx) => {
                 if (trackItemData.uid === trackInfo.uid) {
-                    if (trackInfo.track === 'center') { selectedTrack[idx].contents[0].options.name = changeItem.name;}
+                    if (trackInfo.track === 'center') {
+                        selectedTrack[idx].contents[0].options.name = changeItem.name;
+                    }
                     else {
                         selectedTrack[idx].options.name = changeItem.name;
-
                     }
                 }
             });
-            const p = hgc.api.setViewConfig(currentViewConf, true);
+            hgc.api.setViewConfig(currentViewConf, true);
             return true;
-        }
-
-        else {
+        } else {
             this.setState({
                 'modal': (
-                    <ConfirmModal handleConfirm={this.handleUpdateAllTrack} handleCancel={this.handleUpdateSingleTrack}
-                        confirmButtonText="Yes, Update All" cancelButtonText="No, Update Only This" modalTitle="Track Update">
+                    <ConfirmModal handleConfirm={this.handleUpdateAllTracks} handleCancel={this.handleUpdateSingleTrack}
+                        confirmButtonText="Yes, Update All" cancelButtonText="No, Update Only This" modalTitle="Tracks Update">
                         Do you want to update all similar tracks ?
                         <br />
                     </ConfirmModal>
@@ -281,12 +281,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             });
             return true;
         }
-
     }
+
     havePermissionToEdit() {
         const { session, context: { actions = [] } } = this.props;
         return !!(session && _.findWhere(actions, { 'name': 'edit' }));
     }
+
     handleUpdateSingleTrack(){
         const hgc = this.getHiGlassComponent();
         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
@@ -314,7 +315,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         return true;
     }
-    handleUpdateAllTrack(evt) {
+
+    handleUpdateAllTracks(evt) {
         evt.preventDefault();
         const hgc = this.getHiGlassComponent();
         const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
@@ -656,7 +658,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         evt.preventDefault();
 
         const { context, href } = this.props;
-        const hgc = this.getHiGlassComponent();
         const viewConfTitle = context.title || context.display_title;
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
@@ -712,7 +713,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     statusChangeButton(){
         const { session, context } = this.props;
-        const { saveLoading, cloneLoading, releaseLoading } = this.state;
+        const { releaseLoading } = this.state;
         const editPermission = this.havePermissionToEdit();
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
@@ -749,7 +750,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     saveButton(){
-        const { session, context } = this.props;
         const { saveLoading } = this.state;
         const tooltip = "Save the current view shown below to this display";
 
@@ -826,7 +826,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (!_.isEqual(oldData, newData)) {
             const newDataKeys = _.keys(newData);
-            const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null;
+            const searchHref = (newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null) + "&sort=-tags&sort=-date_created";
             this.setState({ 'tilesetUids': newData, 'filesTableSearchHref': searchHref });
         }
     }
@@ -836,7 +836,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { tilesetUids } = this.state;
         const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
 
-        return <HiGlassFileDetailPane {...{ result, schemas, customSave: this.onChangeHiglassViewConfItems, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
+        return <HiGlassFileDetailPane {...{ result, schemas, handleCustomSave: this.updateHiglassViewConf, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
+    }
+
+    sortFileSearchResults(results) {
+        console.log('xxx nothing');
+        return results;
     }
 
     render(){
@@ -874,7 +879,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             renderDetailPane: this.renderFilesDetailPane,
             maxHeight: 800,
             defaultOpenIndices: [0],
-            facets: null
+            facets: null,
+            customSortResults: this.sortFileSearchResults
         };
         function ProfileContactFieldsIcon({ icon }){
             return <i className={"visible-lg-inline icon icon-fw icon-" + icon }/>;
@@ -920,73 +926,62 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 }
 
-function HiGlassFileDetailPane(props){
-    const { result,  windowWidth, href, viewConfigTracks = null, schemas, customSave, editPermission } = props;
+function HiGlassFileDetailPane(props) {
+    const { /*result, */windowWidth, href, viewConfigTracks = null, schemas, handleCustomSave } = props;
     // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
     // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
-    useEffect(function(){
+    useEffect(function () {
         ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
     }, []);
 
-    const tracksBody = _.map(viewConfigTracks, (item, idx) =>{
+    const tracksBody = _.map(viewConfigTracks, (item, idx) => {
         let width = null;
         let height = null;
-        item['name']=item['title'];
-        if (!editPermission) {
+        item['name'] = item['title'];
+        if (item.track === 'top' || item.track === 'bottom') {
             width = (item.width) ? (item.width || '-') : "-";
+            height =
+                <FieldSet context={item}
+                    schemas={schemas} href={href}>
+                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible={true}>
+                    </EditableField>
+                </FieldSet>;
+        }
+        else if (item.track === 'left' || item.track === 'right') {
             height = (item.height) ? (item.height || '-') : "-";
-            return <tr><td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td><td>{item.title}</td></tr>;
+            width =
+                <FieldSet context={item}>
+                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible={true}>
+                    </EditableField>
+                </FieldSet>;
         }
-        else {
-            if (item.track === 'top' || item.track === 'bottom') {
-
-                width = (item.width) ? (item.width || '-') : "-";
-                height =
+        return (
+            <tr>
+                <td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td>
+                <td>
                     <FieldSet context={item}
+                        lineHeight={22}
+                        dimensions={{
+                            'paddingWidth': 0,
+                            'paddingHeight': 22,
+                            'buttonWidth': 30,
+                            'initialHeight': 42
+                        }}
+                        className="profile-contact-fields"
+                        windowWidth={windowWidth}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} dataType="int" buttonAlwaysVisible={true}>
+                        <EditableField labelID="name" fallbackText="no data" fieldType="text" handleCustomSave={handleCustomSave} buttonAlwaysVisible={true}>
                         </EditableField>
-                    </FieldSet>;
-            }
-            else if (item.track === 'left' || item.track === 'right') {
-                height = (item.height) ? (item.height || '-') : "-";
-
-                width =
-                    <FieldSet context={item}>
-                        <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" customSave={customSave} valueConvertType="int" buttonAlwaysVisible={true}>
-                        </EditableField>
-                    </FieldSet>;
-            }
-            // const wh = (item.width || item.height) ? (item.width || '-') + '/' + (item.height || '-') : "-";
-            return (
-                <tr>
-                    <td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td>
-                    <td>
-                        <FieldSet context={item}
-                            lineHeight={22}
-                            dimensions={{
-                                'paddingWidth': 0,
-                                'paddingHeight': 22,
-                                'buttonWidth': 30,
-                                'initialHeight': 42
-                            }}
-                            className="profile-contact-fields"
-                            windowWidth={windowWidth}
-                            schemas={schemas} href={href}>
-                            <EditableField labelID="name" fallbackText="no data" fieldType="text" customSave={customSave} buttonAlwaysVisible={true}>
-                            </EditableField>
-                        </FieldSet>
-                    </td>
-                </tr>);
-        }
+                    </FieldSet>
+                </td>
+            </tr>);
     });
 
     return (
         <div className="mr-1">
-            { !viewConfigTracks ? null : (
+            {!viewConfigTracks ? null : (
                 <div className="flex-description-container">
                     <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
-                    {/* <p className="text-normal ml-27 mt-1">{ viewConfigTracks.length }</p> */}
                     <div className="row ml-27 mr-0">
                         <table style={{ minWidth: '100%' }}>
                             <thead>
