@@ -16,7 +16,7 @@ def main():
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.INFO)
 
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Configure Kibana Index", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

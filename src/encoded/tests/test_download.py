@@ -1,5 +1,8 @@
-from base64 import b64decode
 import pytest
+
+from base64 import b64decode
+
+
 pytestmark = [pytest.mark.working, pytest.mark.setone]
 
 
@@ -59,7 +62,6 @@ def test_download_create(testapp, testing_download):
 
 
 def test_download_update(testapp, testing_download):
-    from base64 import b64decode
     item = {
         'attachment': {
             'download': 'blue-dot.png',

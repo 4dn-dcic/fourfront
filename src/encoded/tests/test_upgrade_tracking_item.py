@@ -1,4 +1,6 @@
 import pytest
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -17,7 +19,9 @@ def tracking_item_1():
             "file_format": "hic",
             "geo_country": "GB",
             "geo_city": "Summertown, Oxfordshire",
-            "user_agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/72.0.3626.121 Chrome/72.0.3626.121 Safari/537.36",
+            "user_agent":
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/72.0.3626.121"
+                " Chrome/72.0.3626.121 Safari/537.36",
             "is_visualization": False
         },
         "status": "released",

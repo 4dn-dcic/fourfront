@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 import _ from 'underscore';
 
 jest.autoMockOff();
@@ -45,15 +45,15 @@ describe('Testing ExperimentSetView', function() {
         context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
 
-        testView = TestUtils.renderIntoDocument(
-            <ExperimentSetView
-                context={context} schemas={schemas} windowWidth={1200}
-                href="https://data.4dnucleome.org/experiment-set-replicates/4DNESH4MYRID/"
-            />
-        );
+        act(()=>{
+            testView = TestUtils.renderIntoDocument(
+                <ExperimentSetView
+                    context={context} schemas={schemas} windowWidth={1200}
+                    href="https://data.4dnucleome.org/experiment-set-replicates/4DNESH4MYRID/"
+                />
+            );
+        });
 
-
-        //jest.runAllTimers();
     });
 
     afterAll(function(){
@@ -106,7 +106,9 @@ describe('Testing ExperimentSetView', function() {
         expect(getActiveTabIndex(tabButtons)).toBe(0);
 
         // Click on 2nd (index 1) tab and see if active tab changes.
-        TestUtils.Simulate.click(tabButtons[1]);
+        act(()=>{
+            TestUtils.Simulate.click(tabButtons[1]);
+        });
         expect(getActiveTabIndex(tabButtons)).toBe(1);
 
     });

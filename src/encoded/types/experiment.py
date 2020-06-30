@@ -1,5 +1,7 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
+import itertools
+
 from snovault import (
     abstract_collection,
     calculated_property,
@@ -148,7 +150,8 @@ class Experiment(Item):
         "files.quality_metric.Sequence length",
         "files.quality_metric.url",
         "files.quality_metric.overall_quality_status",
-        "files.quality_metric_summary.*",
+        #"files.quality_metric_summary.*",#todo - delete soon
+        "files.quality_metric.quality_metric_summary.*",
 
         "processed_files.href",
         "processed_files.accession",
@@ -160,7 +163,8 @@ class Experiment(Item):
         "processed_files.file_type_detailed",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
-        "processed_files.quality_metric_summary.*",
+        #"processed_files.quality_metric_summary.*",#todo - delete soon
+        "processed_files.quality_metric.quality_metric_summary.*",
 
         "other_processed_files.files.href",
         "other_processed_files.title",
@@ -175,7 +179,8 @@ class Experiment(Item):
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
-        "other_processed_files.files.quality_metric_summary.*",
+        #"other_processed_files.files.quality_metric_summary.*",#todo - delete soon
+        "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
 
         "reference_files.accession",
@@ -330,7 +335,6 @@ class Experiment(Item):
     def publications_of_exp(self, request):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
                  self.experiment_sets(request)]
-        import itertools
         pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
                                                       for eset in esets])))
         return pubs

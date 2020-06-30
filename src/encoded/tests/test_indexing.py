@@ -13,6 +13,7 @@ import time
 import transaction
 import uuid
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from elasticsearch.exceptions import NotFoundError
 from snovault import DBSESSION, TYPES
 from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
@@ -33,6 +34,9 @@ from ..utils import delay_rerun
 from ..verifier import verify_item
 from .workbook_fixtures import app_settings
 from .test_permissions import wrangler, wrangler_testapp
+
+
+notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
@@ -140,7 +144,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         try:
             namespaced_index = get_namespaced_index(app, item_type)
             item_index = es.indices.get(index=namespaced_index)
-        except:
+        except Exception:
             assert False
         found_index_mapping_emb = item_index[namespaced_index]['mappings'][item_type]['properties']['embedded']
         found_index_settings = item_index[namespaced_index]['settings']
@@ -330,7 +334,6 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
 def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
     """ Tests that anontestapp gets view denied when using datastore=database """
-    from time import sleep
     file_item_body = {
         'award': award['uuid'],
         'lab': lab['uuid'],
@@ -341,7 +344,7 @@ def test_permissions_database_applies_permissions(award, lab, file_formats, wran
     res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
     item_id = res['@graph'][0]['@id']
     indexer_testapp.post_json('/index', {'record': True})
-    sleep(1)  # let es catch up
+    time.sleep(1)  # let es catch up
     res = anontestapp.get('/' + item_id).json
     assert res['file_format'] == {'error': 'no view permissions'}
     res = anontestapp.get('/' + item_id + '?datastore=database').json

@@ -46,7 +46,7 @@ def convert(filename, sheetname=None, outputdir=None, skip_blanks=False):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Convert spreadsheet to json list", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
