@@ -59,7 +59,8 @@ install:
 - pip install poetry
 - pip install coveralls
 - pip install codacy-coverage
-- make build
+- poetry install
+- make npm-setup
 before_script:
 - configure-kibana-index --es-endpoint search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
 script:
