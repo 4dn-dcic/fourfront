@@ -4,7 +4,6 @@ Tests for both experiment.py and experiment_set.py
 
 """
 
-import datetime
 import pytest
 from snovault import TYPES
 # from snovault.storage import UUID

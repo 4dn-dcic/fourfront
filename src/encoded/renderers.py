@@ -1,38 +1,31 @@
-from pkg_resources import resource_filename
-from urllib.parse import urlencode
-from functools import lru_cache
-from pyramid.events import (
-    BeforeRender,
-    subscriber,
-)
-from pyramid.httpexceptions import (
-    HTTPMovedPermanently,
-    HTTPPreconditionFailed,
-    HTTPUnauthorized,
-    HTTPForbidden,
-    HTTPUnsupportedMediaType,
-    HTTPNotAcceptable,
-    HTTPServerError
-)
-from pyramid.security import forget
-from pyramid.settings import asbool
-from pyramid.threadlocal import (
-    manager,
-)
-from pyramid.response import Response
-from pyramid.traversal import (
-    split_path_info,
-    _join_path_tuple,
-)
-
-from snovault.validation import CSRFTokenError
-from subprocess_middleware.tween import SubprocessTween
-from subprocess_middleware.worker import TransformWorker
+import json
 import logging
 import os
 import psutil
 import time
-import json
+
+from pkg_resources import resource_filename
+from urllib.parse import urlencode
+from functools import lru_cache
+from pyramid.events import BeforeRender, subscriber
+from pyramid.httpexceptions import (
+    HTTPMovedPermanently,
+    HTTPPreconditionFailed,
+    HTTPUnauthorized,
+    # HTTPForbidden,
+    HTTPUnsupportedMediaType,
+    HTTPNotAcceptable,
+    HTTPServerError
+)
+# from pyramid.security import forget
+from pyramid.settings import asbool
+from pyramid.threadlocal import manager
+from pyramid.response import Response
+from pyramid.traversal import split_path_info, _join_path_tuple
+# from snovault.validation import CSRFTokenError
+# from subprocess_middleware.tween import SubprocessTween
+from subprocess_middleware.worker import TransformWorker
+from webob.cookies import Cookie
 
 
 log = logging.getLogger(__name__)
@@ -222,7 +215,6 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
     their removal in security_tween_factory & authentication.py as well as client-side
     (upon "Logout" action). If needed for some reason, can re-enable.
     '''
-    from webob.cookies import Cookie
 
     ignore = {
         '/favicon.ico',

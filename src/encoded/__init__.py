@@ -1,17 +1,37 @@
+# from future.standard_library import install_aliases
+# TODO: Once things are working, remove this as probably 2.7 compatibility. --kent&will 4-Feb-2020
+# install_aliases()  # NOQA
+
+import hashlib
 import json
-# import logging  # unused?
+import mimetypes
 import netaddr
 import os
+# import structlog
 import subprocess
 import sys
+import webtest
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-from dcicutils.log_utils import set_logging
+# from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
 from dcicutils.env_utils import get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
+from dcicutils.log_utils import set_logging
+from pkg_resources import resource_filename
+# from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
+from pyramid_localroles import LocalRolesAuthorizationPolicy
+# from pyramid.path import AssetResolver, caller_package
+# from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
+from snovault.elasticsearch import APP_FACTORY
+# from snovault.json_renderer import json_renderer
+# from sqlalchemy import engine_from_config
+# from webob.cookies import JSONSerializer
+
+from .loadxl import load_all
+from .utils import find_other_in_pair
 
 
 if sys.version_info.major < 3:
@@ -23,8 +43,6 @@ BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
 def static_resources(config):
-    from pkg_resources import resource_filename
-    import mimetypes
     mimetypes.init()
     mimetypes.init([resource_filename('encoded', 'static/mime.types')])
     config.add_static_view('static', 'static', cache_max_age=STATIC_MAX_AGE)
@@ -66,13 +84,11 @@ def static_resources(config):
 
 
 def load_workbook(app, workbook_filename, docsdir):
-    from .loadxl import load_all
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'IMPORT',
     }
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
     load_all(testapp, workbook_filename, docsdir)
 
 
@@ -83,7 +99,6 @@ APP_VERSION_REGISTRY_KEY = 'snovault.app_version'
 
 
 def app_version(config):
-    import hashlib
     if not config.registry.settings.get(APP_VERSION_REGISTRY_KEY):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
@@ -150,12 +165,10 @@ def main(global_config, **local_config):
 
     config = Configurator(settings=settings)
 
-    from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
     config.include(app_version)
 
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
-    from pyramid_localroles import LocalRolesAuthorizationPolicy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
@@ -203,7 +216,8 @@ def main(global_config, **local_config):
     app = config.make_wsgi_app()
 
     workbook_filename = settings.get('load_workbook', '')
-    load_test_only = asbool(settings.get('load_test_only', False))
+    # This option never gets used. Is that bad? -kmp 27-Jun-2020
+    # load_test_only = asbool(settings.get('load_test_only', False))
     docsdir = settings.get('load_docsdir', None)
     if docsdir is not None:
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]

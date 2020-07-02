@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -23,7 +27,6 @@ def biosource_2(biosource_1):
 
 def test_biosource_convert_cell_line_to_link_to_ontology_term(
         registry, biosource_1, gm12878_oterm):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('biosource', biosource_1, registry=registry,
                              current_version='1', target_version='2')
@@ -34,7 +37,6 @@ def test_biosource_convert_cell_line_to_link_to_ontology_term(
 
 def test_biosource_convert_cell_line_w_no_ontology_term(
         registry, biosource_2):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('biosource', biosource_2, registry=registry,
                              current_version='1', target_version='2')

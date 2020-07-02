@@ -1,5 +1,5 @@
 {
-    "title" : "Quality Metric for BAM",
+    "title": "Quality Metric for BAM",
     "description": "Schema for reporting the specific calculation of an quality metrics",
     "id": "/profiles/quality_metric_bamqc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/static_embeds" },
         { "$ref": "quality_metric.json#/properties" }
     ],
-    "mixinFacets" : [
+    "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
@@ -59,50 +59,62 @@
             "qc_order": 8
         },
         "DD": {
+            "title": "Duplicate Read",
             "type": "number",
             "qc_order": 9
         },
         "MM": {
+            "title" : "Multimapped-Multimapped Read",
             "type": "number",
             "qc_order": 10
         },
         "MR": {
+            "title": "Multimapped-Rescued Read",
             "type": "number",
             "qc_order": 11
         },
         "MU": {
+            "title" : "Multimapped-Unique Read",
             "type": "number",
             "qc_order": 12
         },
         "NM": {
+            "title": "Null-Multimapped Read",
             "type": "number",
             "qc_order": 13
         },
         "NN": {
+            "title": "Null-Null Read",
             "type": "number",
             "qc_order": 14
         },
         "NR": {
+            "title": "Null-Rescued Read",
             "type": "number",
             "qc_order": 15
         },
         "NU": {
+            "title": "Null-Unique Read",
             "type": "number",
             "qc_order": 16
         },
         "RU": {
+            "title": "Rescued-Unique Read",
             "type": "number",
             "qc_order": 17
         },
         "UR": {
+            "title": "Unique-Rescued Read",
             "type": "number",
             "qc_order": 18
         },
         "UU": {
+            "title": "Unique-Unique Read",
             "type": "number",
             "qc_order": 19
         },
         "WW": {
+            "title": "Walk-Walk",
             "type": "number",
             "qc_order": 20
         }
@@ -114,7 +126,7 @@
     },
     "columns": {
         "overall_quality_status": {
-            "title" : "Overall Quality",
+            "title": "Overall Quality",
             "default_hidden": true
         }
     },

@@ -8,5 +8,5 @@ def publication_1_2(value, system):
             author_list = value['authors'].split(',')
             author_list = [a.strip() for a in author_list]
             value['authors'] = author_list
-        except:
+        except Exception:
             pass

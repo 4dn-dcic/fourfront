@@ -1,7 +1,9 @@
 import pytest
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
-'''
+"""
 FF-701
 Multiple ontologies get imported to form each of the three ontologies that we are currently using
 (and I can foresee us wanting to add additional ontology sources).  The same name can be used for
@@ -22,7 +24,8 @@ This can be determined by info that will be stored with the term in the system.
 So basically what I’m looking for is validation that can get the  json from the request and also get
 info on existing terms that are in the system and do some checks prior to post or patch of the item
 and also change the json to use uuid rather than the info included in the post (eg. preferred_name)
-as an identifying property if the term validates.'''
+as an identifying property if the term validates.
+"""
 
 
 def test_store_ontology_term_by_uuid(testapp, oterm):

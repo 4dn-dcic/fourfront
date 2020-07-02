@@ -85,6 +85,7 @@ export class StackedBlockVisual extends React.PureComponent {
         'showGroupingPropertyTitles' : false,
         'checkCollapsibility' : false,
         'headerPadding' : 80,
+        'rowLabelListingProportion': 'wide-listing', //possible values: wide-label/wide-listing/balanced
         'blockClassName' : function(data, blockProps){
 
             var isMultipleClass = 'single-set';
@@ -113,6 +114,10 @@ export class StackedBlockVisual extends React.PureComponent {
 
         }
     };
+
+    static propTypes = {
+        rowLabelListingProportion: PropTypes.oneOf(['wide-label', 'wide-listing', 'balanced']),
+    }
 
     static generatePopoverRowsFromJSON(d, props){
         const { groupingProperties, columnGrouping, titleMap } = props;
@@ -514,7 +519,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     render(){
         const {
             groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, headerColumnsOrder,
-            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding
+            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding, rowLabelListingProportion
         } = this.props;
         const { open } = this.state;
 
@@ -572,10 +577,18 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             listSectionStyle = { 'paddingTop' : headerPadding };
         }
 
+        //label-listing class
+        let labelClassName = "col-4", listingClassName = "col-8"; //default + wide-listing
+        if (rowLabelListingProportion === 'wide-label') {
+            labelClassName = "col-8", listingClassName = "col-4";
+        } else if (rowLabelListingProportion === 'balanced') {
+            labelClassName = "col-6", listingClassName = "col-6";
+        }
+
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
                 <div className="row grouping-row">
-                    <div className="col col-4 label-section" style={labelSectionStyle}>
+                    <div className={"col label-section " + labelClassName} style={labelSectionStyle}>
                         <div className="label-container" style={{ 'minHeight' : rowHeight }}>
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
@@ -587,9 +600,9 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         </div>
                         {/* this.childLabels() */}
                     </div>
-                    <div className={"col col-8 list-section" + (header ? ' has-header' : '')} style={listSectionStyle}>
-                        { header }
-                        { childBlocks }
+                    <div className={"col list-section " + listingClassName + (header ? ' has-header' : '')} style={listSectionStyle}>
+                        {header}
+                        {childBlocks}
                     </div>
                 </div>
 

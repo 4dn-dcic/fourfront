@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import TestUtils from 'react-dom/test-utils';
+import TestUtils, { act } from 'react-dom/test-utils';
 
 /* Written by Carl, used to test the IPannel of item.js. Statically uses a library
 and a json of all schemas (such as is called by <fetched.Param name="schemas" url="/profiles/")>*/
@@ -45,10 +45,12 @@ describe('Testing DefaultItemView.js', function() {
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
 
-        testItem = TestUtils.renderIntoDocument(
-            <DefaultItemView schemas={schemas} context={context} windowWidth={1200}
-            href="https://data.4dnucleome.org/libraries/ENCLB055ZZZ/" />
-        );
+        act(()=>{
+            testItem = TestUtils.renderIntoDocument(
+                <DefaultItemView schemas={schemas} context={context} windowWidth={1200}
+                href="https://data.4dnucleome.org/libraries/ENCLB055ZZZ/" />
+            );
+        });
 
         //jest.runAllTimers();
 
@@ -70,7 +72,9 @@ describe('Testing DefaultItemView.js', function() {
 
     /** TODO: FIX TEST */
     it('expands object views properly', function() {
-        server.respond();
+        act(()=>{
+            server.respond();
+        });
         var objToggles = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'item-page-detail-toggle-button');
         var detailPanel = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'item-page-detail-panel');
         //jest.runAllTimers();
@@ -85,7 +89,9 @@ describe('Testing DefaultItemView.js', function() {
         expect(collapse[0].className.indexOf('in') > -1).toBe(false);
         var objDefDesc = objToggles[0];
         // this is the biosamples link
-        TestUtils.Simulate.click(objDefDesc);
+        act(()=>{
+            TestUtils.Simulate.click(objDefDesc);
+        });
         //jest.runAllTimers();
 
         expect(collapse[0].className.indexOf('in') > -1).toBe(true);

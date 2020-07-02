@@ -1,6 +1,11 @@
 """The user collection."""
 # -*- coding: utf-8 -*-
 
+import logging
+import requests
+import structlog
+import transaction
+
 from pyramid.view import (
     view_config,
 )
@@ -21,14 +26,11 @@ from snovault import (
 from snovault.storage import User as AuthUser
 from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
-from snovault.calculated import calculate_properties
+# from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_page
 from snovault.util import debug_log
 from dcicutils.env_utils import is_fourfront_env, is_stg_or_prd_env
 from dcicutils.s3_utils import s3Utils
-import requests
-import structlog
-import logging
 
 
 logging.getLogger('boto3').setLevel(logging.WARNING)
@@ -211,7 +213,6 @@ def user_add(context, request):
             db = request.registry['dbsession']
             db.add(auth_user)
 
-            import transaction
             transaction.commit()
     return result
 
