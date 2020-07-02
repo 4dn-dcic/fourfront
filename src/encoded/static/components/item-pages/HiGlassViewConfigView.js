@@ -119,7 +119,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                     if (!tilesetUids[trackItem.tilesetUid]) {
                                         tilesetUids[trackItem.tilesetUid] = [];
                                     }
-                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name, uid: trackItem.uid });
+                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name, uid: trackItem.uid, tilesetUid: trackItem.tilesetUid });
                                 }
                                 //center
                                 else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
@@ -127,7 +127,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                         if (!tilesetUids[subTrackItem.tilesetUid]) {
                                             tilesetUids[subTrackItem.tilesetUid] = [];
                                         }
-                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name, uid: trackItem.uid });
+                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name, uid: trackItem.uid, tilesetUid: subTrackItem.tilesetUid });
                                     });
                                 }
                             });
@@ -240,10 +240,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
             const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
             if (tileset) {
-                console.log('xxx trackInfo:', trackInfo);
-                console.log('xxx tileset:', tileset);
                 if (trackInfo.track === 'center') {
-                    tileset.contents[0].options.name = updatedTableItem.name;
+                    const content = _.find(tileset.contents, function (content) { return content.tilesetUid === trackInfo.tilesetUid; });
+                    if (content) {
+                        content.options.name = updatedTableItem.name;
+                    }
                 }
                 else {
                     tileset.options.name = updatedTableItem.name;
