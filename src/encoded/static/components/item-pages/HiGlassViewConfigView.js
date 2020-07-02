@@ -191,6 +191,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'trackInfo'             : null,
             'tilesetUids'           : {},
             'instanceHeight'        : props.context && props.context.instance_height|| 600,
+            'viewConfigModified'    : false
         };
         this.higlassRef = React.createRef();
     }
@@ -251,6 +252,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 }
             }
             hgc.api.setViewConfig(currentViewConf, true);
+            this.setState({ 'viewConfigModified': true });
         } else {
             this.setState({
                 'modal': (
@@ -287,7 +289,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
         hgc.api.setViewConfig(currentViewConf, true);
 
-        this.setState({ 'modal': null });
+        this.setState({ 'modal': null, 'viewConfigModified': true });
 
         return true;
     }
@@ -327,7 +329,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
         hgc.api.setViewConfig(currentViewConf, true);
 
-        this.setState({ 'modal': null });
+        this.setState({ 'modal': null, 'viewConfigModified': true });
 
         return true;
     }
@@ -392,7 +394,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
-                    this.setState({ 'saveLoading' : false });
+                    this.setState({ 'saveLoading' : false, 'viewConfigModified': false });
                 },
                 'PATCH',
                 ()=>{
@@ -815,7 +817,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         const { context, isFullscreen, windowWidth, width, session, schemas, href } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, instanceHeight } = this.state;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, instanceHeight, viewConfigModified } = this.state;
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
         let instanceHeightField = null;
         // If the user isn't logged in, add a tooltip reminding them to log in.
@@ -881,7 +883,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 (
                                     <div className="raw-files-table-section">
                                         <h3 className="tab-section-title">
-                                            <span><span className="text-400">{_.keys(tilesetUids).length}</span> File(s)</span>
+                                            <span><span className="text-400">{_.keys(tilesetUids).length}</span> File(s) {viewConfigModified ? (<span className="text-300" style={{ animation: 'fadein 2s ease-out 0s none 1' }}> - <mark>Your change(s) are not persistent yet. Click Save or Clone to save.</mark></span>) : null}</span>
                                         </h3>
                                         <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
                                     </div>
