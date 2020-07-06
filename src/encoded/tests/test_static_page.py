@@ -131,7 +131,10 @@ def test_page_unique_name(testapp, help_page, help_page_deleted):
     new_page = {'name': help_page['name']}
     res = testapp.post_json('/page', new_page, status=422)
     expected_val_err = "%s already exists with name '%s'" % (help_page['uuid'], new_page['name'])
-    assert expected_val_err in res.json['errors'][0]['description']
+    actual_error_description = res.json['errors'][0]['description']
+    print("expected:", expected_val_err)
+    print("actual:", actual_error_description)
+    assert expected_val_err in actual_error_description
 
     # also test PATCH of an existing page with another name
     res = testapp.patch_json(help_page_deleted['@id'], {'name': new_page['name']}, status=422)

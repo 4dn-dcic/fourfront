@@ -1,6 +1,7 @@
 import pytest
 
 from base64 import b64decode
+from unittest import mock
 
 
 pytestmark = [pytest.mark.working, pytest.mark.setone]
@@ -154,7 +155,7 @@ def test_download_remove_one(testapp, testing_download):
     assert 'attachment2' not in res.json
 
     url = testing_download + '/@@download/attachment2/red-dot.png'
-    res = testapp.get(url, status=404)
+    testapp.get(url, status=404)
 
 
 @pytest.mark.parametrize(
@@ -215,7 +216,8 @@ def test_download_create_w_wrong_md5sum(testapp):
     }}
     testapp.post_json(url, item, status=422)
 
-def test_download_item_with_attachment(testapp, award, lab, mocker):
+
+def test_download_item_with_attachment(testapp, award, lab):
     item = {
         'attachment': {
             'download': 'red-dot.png',
@@ -227,5 +229,5 @@ def test_download_item_with_attachment(testapp, award, lab, mocker):
     }
     res = testapp.post_json('/document', item).json['@graph'][0]
 
-    with mocker.patch('encoded.types.get_s3_presigned_url', return_value=''):
-        res = testapp.get(res['@id'] + res['attachment']['href'], status=200)
+    with mock.patch('encoded.types.get_s3_presigned_url', return_value=''):
+        testapp.get(res['@id'] + res['attachment']['href'], status=200)
