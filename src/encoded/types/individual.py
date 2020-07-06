@@ -9,7 +9,7 @@ from snovault import (
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
-    get_item_if_you_can,
+    get_item_or_none,
     lab_award_attribution_embed_list
 )
 
@@ -158,7 +158,7 @@ def validate_individual_relations(context, request):
         data = request.json
         individual_uuid = data.get('uuid')
     organism_id = data.get('organism')
-    organism = get_item_if_you_can(request, organism_id, 'organisms')
+    organism = get_item_or_none(request, organism_id, 'organisms')
 
     # Max 2 parents per individual
     if len(related_individuals) > 2:
@@ -174,8 +174,8 @@ def validate_individual_relations(context, request):
         if len(a_related_individual.keys()) < 2:
             continue
         parent = a_related_individual.get('individual')
-        parent_props = get_item_if_you_can(request, parent, 'individuals')
-        parent_organism = get_item_if_you_can(request, parent_props.get('organism'), 'organisms')
+        parent_props = get_item_or_none(request, parent, 'individuals')
+        parent_organism = get_item_or_none(request, parent_props.get('organism'), 'organisms')
         parent_uuid = parent_props.get('uuid')
 
         # Same species

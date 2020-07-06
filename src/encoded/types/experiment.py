@@ -27,7 +27,7 @@ from snovault.util import debug_log
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
-    get_item_if_you_can,
+    get_item_or_none,
     lab_award_attribution_embed_list
 )
 
@@ -839,7 +839,7 @@ def validate_exp_type_validity_for_experiment(context, request):
     """
     data = request.json
     if 'experiment_type' in data:
-        exp_type_item = get_item_if_you_can(request, data['experiment_type'], 'experiment-types')
+        exp_type_item = get_item_or_none(request, data['experiment_type'], 'experiment-types')
         if not exp_type_item:  # pragma: no cover
             # item level validation will take care of generating the error
             return
