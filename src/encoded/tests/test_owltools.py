@@ -8,9 +8,10 @@ from ..commands import owltools as ot
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
-@pytest.fixture
+@pytest.yield_fixture
 def owler():
-    return mock.patch.object(ot, 'Owler')
+    with mock.patch.object(ot, 'Owler') as mocked:
+        yield mocked
 
 
 # def emptygen(*args, **kwargs):
