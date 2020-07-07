@@ -445,9 +445,8 @@ def connect2server(env=None, key=None):
        Also handles keyfiles stored in s3'''
     if key == 's3':
         assert env
-        key = unified_authentication(None, env)
-
-    if all([v in key for v in ['key', 'secret', 'server']]):
+        key = None
+    elif all([v in key for v in ['key', 'secret', 'server']]):
         import ast
         key = ast.literal_eval(key)
     try:
