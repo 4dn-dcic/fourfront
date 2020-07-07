@@ -14,7 +14,7 @@ def test_parse_args_defaults():
     args = []
     args = go.parse_args(args)
     assert args.ontology == 'all'
-    assert args.key == 's3'
+    assert args.key is None
     assert args.env == 'data'
 
 
