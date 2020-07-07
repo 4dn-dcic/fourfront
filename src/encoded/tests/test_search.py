@@ -1,7 +1,8 @@
 import json
 import pytest
-import time
 
+from dcicutils.misc_utils import Retry
+from dcicutils.qa_utils import notice_pytest_fixtures
 from datetime import datetime, timedelta
 from snovault import TYPES, COLLECTIONS
 from snovault.elasticsearch import create_mapping
@@ -10,7 +11,7 @@ from snovault.util import add_default_embeds
 from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-from ..utils import customized_delay_rerun
+# from ..utils import customized_delay_rerun
 
 
 pytestmark = [
@@ -24,6 +25,7 @@ pytestmark = [
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
+notice_pytest_fixtures(app_settings, app, workbook)
 
 
 # just a little helper function
@@ -539,6 +541,13 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     res = anontestapp.get('/biosamples/', status=404)
     assert len(res.json['@graph']) == 0
 
+
+@Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
+def check_item_type(client, item_type):
+    # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
+    return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+
+
 @pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     es = app.registry['elasticsearch']
@@ -566,7 +575,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if es_item_count == 0:
             continue
         # check items in search result individually
-        res = testapp.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+        res = check_item_type(client=testapp, item_type=item_type)
         for item_res in res.json.get('@graph', []):
             index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                     id=item_res['uuid'])['_source']

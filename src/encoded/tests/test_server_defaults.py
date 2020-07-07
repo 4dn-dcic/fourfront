@@ -1,6 +1,7 @@
 import pytest
 import webtest
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from .. import main
 
 
@@ -8,6 +9,8 @@ pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_server_defaults(admin, anontestapp):
+    notice_pytest_fixtures(admin, anontestapp)
+
     email = admin['email']
     extra_environ = {'REMOTE_USER': str(email)}
     res = anontestapp.post_json(
@@ -27,6 +30,8 @@ def test_server_defaults(admin, anontestapp):
 
 @pytest.fixture(scope='session')
 def test_accession_app(request, check_constraints, zsa_savepoints, app_settings):
+    notice_pytest_fixtures(request, check_constraints, zsa_savepoints, app_settings)
+
     app_settings = app_settings.copy()
     app_settings['accession_factory'] = 'encoded.server_defaults.test_accession'
     return main({}, **app_settings)
@@ -34,8 +39,8 @@ def test_accession_app(request, check_constraints, zsa_savepoints, app_settings)
 
 @pytest.fixture
 def test_accession_anontestapp(request, test_accession_app, external_tx, zsa_savepoints):
-    '''TestApp with JSON accept header.
-    '''
+    """ TestApp with JSON accept header. """
+    notice_pytest_fixtures(request, test_accession_app, external_tx, zsa_savepoints)
     environ = {
         'HTTP_ACCEPT': 'application/json',
     }
@@ -43,6 +48,7 @@ def test_accession_anontestapp(request, test_accession_app, external_tx, zsa_sav
 
 
 def test_test_accession_server_defaults(admin, test_accession_anontestapp):
+    notice_pytest_fixtures(admin, test_accession_anontestapp)
     email = admin['email']
     extra_environ = {'REMOTE_USER': str(email)}
     res = test_accession_anontestapp.post_json(

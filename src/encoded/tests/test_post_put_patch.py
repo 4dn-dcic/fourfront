@@ -1,4 +1,6 @@
 import pytest
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 targets = [
@@ -147,6 +149,7 @@ def test_patch_new_schema_version(content, root, testapp, monkeypatch):
     assert res.json['@graph'][0]['schema_version'] == '2'
     assert res.json['@graph'][0]['new_property'] == 'new'
 
+
 def test_admin_put_protected_link(link_targets, testapp):
     res = testapp.post_json(COLLECTION_URL, item_with_link[0], status=201)
     url = res.location
@@ -186,7 +189,7 @@ def test_put_object_editing_child_does_not_work(content_with_child, testapp):
     }
     # cannot submit 'reverse' calc property
     res = testapp.put_json(content_with_child['@id'], edit, status=422).json
-    assert len(res['errors']) ==1
+    assert len(res['errors']) == 1
     assert res['errors'][0]['description'] == 'submission of calculatedProperty disallowed'
     assert res['errors'][0]['name'] == 'Schema: reverse'
 
@@ -219,10 +222,10 @@ def test_retry(testapp):
 
 
 def test_post_check_only(testapp, human_data, human):
-    '''
+    """
     organism should validate fine but not post
-    '''
-    #if we post this data it will fail with uuid conflict, as calling the human fixture posts it
+    """
+    # if we post this data it will fail with uuid conflict, as calling the human fixture posts it
     testapp.post_json('/organism/', human_data, status=409)
 
     # so this one won't post, but schema validation is ok,

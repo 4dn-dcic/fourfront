@@ -1,7 +1,11 @@
+import argparse
 import csv
 import loremipsum
 import random
 import re
+import sys
+import traceback
+
 from ..loadxl import *
 
 
@@ -128,7 +132,6 @@ def run(pipeline, inpath, outpath):
 
 
 def main():
-    import argparse
     parser = argparse.ArgumentParser(description='Extract test data set.')
     parser.add_argument('--anonymize', '-a', action="store_true",
         help="anonymize the data.")
@@ -138,15 +141,13 @@ def main():
         help="directory to write filtered tsv files to.")
     args = parser.parse_args()
     pipeline = anon_pipeline() if args.anonymize else extract_pipeline()
-    import pdb
-    import sys
-    import traceback
     try:
         run(pipeline, args.inpath, args.outpath)
-    except:
+    except Exception:
         type, value, tb = sys.exc_info()
         traceback.print_exc()
-        pdb.post_mortem(tb)
+        # import pdb; pdb.post_mortem(tb)
+
 
 if __name__ == '__main__':
     main()

@@ -1,6 +1,11 @@
 import pytest
 
-from rdflib import RDFS, BNode, URIRef, Literal
+from rdflib import (
+    # RDFS,
+    BNode,
+    # URIRef,
+    Literal
+)
 from ..commands import owltools as ot
 
 

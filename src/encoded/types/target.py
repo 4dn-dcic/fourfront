@@ -39,7 +39,7 @@ class Target(Item):
                     value += " & "
                 if add:
                     value += add
-            except:
+            except Exception:
                 pass
         if targeted_structure:
             if value:

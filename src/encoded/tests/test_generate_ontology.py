@@ -7,7 +7,6 @@ from rdflib import URIRef
 from ..commands import generate_ontology as go
 from ..commands.owltools import Owler
 
-
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -895,7 +894,6 @@ def test_write_outfile_pretty(simple_terms):
 
 
 def test_write_outfile_notpretty(simple_terms):
-    # import pdb; pdb.set_trace()
     print(simple_terms)
     filename = 'tmp_test_file'
     go.write_outfile(list(simple_terms.values()), filename)

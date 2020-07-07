@@ -1,4 +1,6 @@
 import pytest
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
@@ -43,7 +45,8 @@ def test_validate_individual_relation_species(testapp, award, lab, mouse_child, 
     assert errors[0]['name'] == 'Individual relation: different species'
 
 
-def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_child, mouse_individual, mouse_individual_2):
+def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_child,
+                                                  mouse_individual, mouse_individual_2):
     res = testapp.post_json('/individual_mouse', mouse_child, status=201)
     assert not res.json.get('errors')
     patch_body = {
@@ -56,7 +59,8 @@ def test_validate_individual_relation_valid_patch(testapp, award, lab, mouse_chi
     assert not res2.json.get('errors')
 
 
-def test_validate_individual_relation_valid_patch_contains_uuid(testapp, award, lab, mouse_child, mouse_individual, mouse_individual_2):
+def test_validate_individual_relation_valid_patch_contains_uuid(testapp, award, lab, mouse_child,
+                                                                mouse_individual, mouse_individual_2):
     child_mouse = testapp.post_json('/individual_mouse', mouse_child, status=201).json['@graph'][0]
     patch_body = {
         'uuid': child_mouse.get('uuid'),
