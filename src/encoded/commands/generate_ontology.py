@@ -433,12 +433,13 @@ def connect2server(env=None, key=None):
        from the named keyname in the keyfile and checks that the server can be
        reached with that key.
        Also handles keyfiles stored in s3"""
+
     if key == 's3':
         assert env
-        key = unified_authentication(None, env)
-
-    if all([v in key for v in ['key', 'secret', 'server']]):
+        key = None
+    elif all([v in key for v in ['key', 'secret', 'server']]):
         key = ast.literal_eval(key)
+
     try:
         auth = get_authentication_with_server(key, env)
     except Exception:
@@ -812,7 +813,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         to_patch += 1
 
     if set_obsoletes:
-
+        prefixes = [o.get('ontology_prefix', '') for o in ontologies]
         if simple:
             use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
         else:
