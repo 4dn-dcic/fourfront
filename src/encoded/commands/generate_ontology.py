@@ -968,7 +968,7 @@ def parse_args(args):
     parser.add_argument('--key',
                         default=None,
                         help="An access key dictionary including key, secret and server.\
-                        {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
+                        \"{'key': 'ABCDEF', 'secret': 'supersecret', 'server': 'https://data.4dnucleome.org'}\" ")
     parser.add_argument('--keyfile',
                         default='',
                         help="A file where access keys are stored.")
