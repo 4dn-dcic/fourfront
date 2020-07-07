@@ -10,10 +10,15 @@ For the development.ini you must supply the paster app name:
     %(prog)s development.ini --app-name app
 
 """
+import argparse
 import json
 import logging
+
 from future.utils import itervalues
+from pyramid import paster
 from pyramid.traversal import resource_path
+from webtest import TestApp
+
 
 EPILOG = __doc__
 
@@ -62,8 +67,6 @@ def run(testapp, collections=None):
 
 
 def internal_app(configfile, app_name=None, username='TEST', accept='text/html'):
-    from pyramid import paster
-    from webtest import TestApp
     app = paster.get_app(configfile, app_name)
     environ = {
         'HTTP_ACCEPT': accept,
@@ -73,8 +76,7 @@ def internal_app(configfile, app_name=None, username='TEST', accept='text/html')
 
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is invalid
         description="Check rendering of items", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

@@ -1,39 +1,48 @@
-# Are these still needed? -kmp 28-Mar-2020
 # from future.standard_library import install_aliases
+# TODO: Once things are working, remove this as probably 2.7 compatibility. --kent&will 4-Feb-2020
 # install_aliases()  # NOQA
 
-# import base64  # unused?
-# import codecs  # unused?
+import hashlib
 import json
-# import logging  # unused?
+import mimetypes
 import netaddr
 import os
 # import structlog
 import subprocess
 import sys
+import webtest
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-from dcicutils.log_utils import set_logging
+# from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
 from dcicutils.env_utils import get_mirror_env_from_context
+from dcicutils.ff_utils import get_health_page
+from dcicutils.log_utils import set_logging
+from pkg_resources import resource_filename
 # from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
+from pyramid_localroles import LocalRolesAuthorizationPolicy
 # from pyramid.path import AssetResolver, caller_package
 # from pyramid.session import SignedCookieSessionFactory
-from pyramid.settings import asbool  # , aslist
+from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
+from snovault.elasticsearch import APP_FACTORY
 # from snovault.json_renderer import json_renderer
 # from sqlalchemy import engine_from_config
 # from webob.cookies import JSONSerializer
-# from .utils import find_other_in_pair
+
+from .loadxl import load_all
+from .utils import find_other_in_pair
 
 
 if sys.version_info.major < 3:
     raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
 
 
+# location of environment variables on elasticbeanstalk
+BEANSTALK_ENV_PATH = "/opt/python/current/env"
+
+
 def static_resources(config):
-    from pkg_resources import resource_filename
-    import mimetypes
     mimetypes.init()
     mimetypes.init([resource_filename('encoded', 'static/mime.types')])
     config.add_static_view('static', 'static', cache_max_age=STATIC_MAX_AGE)
@@ -75,19 +84,22 @@ def static_resources(config):
 
 
 def load_workbook(app, workbook_filename, docsdir):
-    from .loadxl import load_all
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'IMPORT',
     }
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
     load_all(testapp, workbook_filename, docsdir)
 
 
+# This key is best interpreted not as the 'snovault version' but rather the 'version of the app built on snovault'.
+# As such, it should be left this way, even though it may appear redundant with the 'eb_app_version' registry key
+# that we also have, which tries to be the value eb uses. -kmp 28-Apr-2020
+APP_VERSION_REGISTRY_KEY = 'snovault.app_version'
+
+
 def app_version(config):
-    import hashlib
-    if not config.registry.settings.get('snovault.app_version'):
+    if not config.registry.settings.get(APP_VERSION_REGISTRY_KEY):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
         version = os.environ.get("ENCODED_VERSION")
@@ -102,7 +114,7 @@ def app_version(config):
             except Exception:
                 version = "test"
 
-        config.registry.settings['snovault.app_version'] = version
+        config.registry.settings[APP_VERSION_REGISTRY_KEY] = version
 
     # GA Config
     ga_conf_file = config.registry.settings.get('ga_config_location')
@@ -144,16 +156,19 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
-    # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = get_mirror_env_from_context(settings)
+
+    # set mirrored Elasticsearch location (for staging and production servers)
+    mirror = get_mirror_env_from_context(settings)
+    if mirror is not None:
+        settings['mirror.env.name'] = mirror
+        settings['mirror_health'] = get_health_page(ff_env=mirror)
+
     config = Configurator(settings=settings)
 
-    from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
     config.include(app_version)
 
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
-    from pyramid_localroles import LocalRolesAuthorizationPolicy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
@@ -201,7 +216,8 @@ def main(global_config, **local_config):
     app = config.make_wsgi_app()
 
     workbook_filename = settings.get('load_workbook', '')
-    load_test_only = asbool(settings.get('load_test_only', False))
+    # This option never gets used. Is that bad? -kmp 27-Jun-2020
+    # load_test_only = asbool(settings.get('load_test_only', False))
     docsdir = settings.get('load_docsdir', None)
     if docsdir is not None:
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]

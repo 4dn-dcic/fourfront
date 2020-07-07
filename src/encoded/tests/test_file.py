@@ -5,8 +5,7 @@ import tempfile
 
 from pyramid.httpexceptions import HTTPForbidden
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-from ..types.file import FileFastq, post_upload
-from ..types.file import external_creds
+from ..types.file import external_creds, FileFastq, post_upload
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
@@ -1250,3 +1249,15 @@ def test_notes_to_tsv_field(testapp, test_file_tsv_notes_field):
         test_file_tsv_notes_field['notes_to_tsv'] = test_value
         pfile = testapp.post_json('/file_fastq', test_file_tsv_notes_field).json
         assert pfile['@graph'][0]['tsv_notes'] == result
+
+
+@pytest.fixture
+def file_dbxrefs(testapp, fastq_json):
+    item = fastq_json.copy()
+    item['dbxrefs'] = ['ENA:SRR10002120']
+    res = testapp.post_json('/file_fastq', item)
+    return res.json['@graph'][0]
+
+
+def test_external_references(file_dbxrefs):
+    assert file_dbxrefs['external_references'][0]['uri'] == 'https://www.ebi.ac.uk/ena/browser/view/SRR10002120'

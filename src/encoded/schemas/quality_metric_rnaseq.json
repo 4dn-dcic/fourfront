@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -26,6 +26,645 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "samtools_genome_flagstat": {
+            "type": "object",
+            "qc_order": 2,
+            "additionalProperties": false,
+            "properties": {
+                "total": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "total_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "duplicates": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "duplicates_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "mapped": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "mapped_pct": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "mapped_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_properly": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_properly_pct": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_properly_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read1": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read1_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read2": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read2_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "with_itself": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "with_itself_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "singletons": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "singletons_pct": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "singletons_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "diff_chroms": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "diff_chroms_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                }
+            }
+        },
+        "samtools_anno_flagstat": {
+            "type": "object",
+            "qc_order": 3,
+            "additionalProperties": false,
+            "properties": {
+                "total": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "total_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "duplicates": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "duplicates_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "mapped": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "mapped_pct": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "mapped_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_properly": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_properly_pct": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "paired_properly_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read1": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read1_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read2": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "read2_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "with_itself": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "with_itself_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "singletons": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "singletons_pct": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "singletons_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "diff_chroms": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "diff_chroms_qc_failed": {
+                    "type": "number",
+                    "qc_order": 1
+                }
+            }
+        },
+        "star_log_qc": {
+            "type": "object",
+            "qc_order": 4,
+            "additionalProperties": false,
+            "properties": {
+                "Started job on": {
+                    "type": "string",
+                    "qc_order": 1
+                },
+                "Started mapping on": {
+                    "type": "string",
+                    "qc_order": 2
+                },
+                "Finished on": {
+                    "type": "string",
+                    "qc_order": 3
+                },
+                "Mapping speed, Million of reads per hour": {
+                    "type": "string",
+                    "qc_order": 4
+                },
+                "Number of input reads": {
+                    "type": "string",
+                    "qc_order": 5
+                },
+                "Average input read length": {
+                    "type": "string",
+                    "qc_order": 6
+                },
+                "Uniquely mapped reads number": {
+                    "type": "string",
+                    "qc_order": 7
+                },
+                "Uniquely mapped reads %": {
+                    "type": "string",
+                    "qc_order": 8
+                },
+                "Average mapped length": {
+                    "type": "string",
+                    "qc_order": 9
+                },
+                "Number of splices: Total": {
+                    "type": "string",
+                    "qc_order": 10
+                },
+                "Number of splices: Annotated (sjdb)": {
+                    "type": "string",
+                    "qc_order": 11
+                },
+                "Number of splices: GT/AG": {
+                    "type": "string",
+                    "qc_order": 12
+                },
+                "Number of splices: GC/AG": {
+                    "type": "string",
+                    "qc_order": 13
+                },
+                "Number of splices: AT/AC": {
+                    "type": "string",
+                    "qc_order": 14
+                },
+                "Number of splices: Non-canonical": {
+                    "type": "string",
+                    "qc_order": 15
+                },
+                "Mismatch rate per base, %": {
+                    "type": "string",
+                    "qc_order": 16
+                },
+                "Deletion rate per base": {
+                    "type": "string",
+                    "qc_order": 17
+                },
+                "Deletion average length": {
+                    "type": "string",
+                    "qc_order": 18
+                },
+                "Insertion rate per base": {
+                    "type": "string",
+                    "qc_order": 19
+                },
+                "Insertion average length": {
+                    "type": "string",
+                    "qc_order": 20
+                },
+                "Number of reads mapped to multiple loci": {
+                    "type": "string",
+                    "qc_order": 21
+                },
+                "% of reads mapped to multiple loci": {
+                    "type": "string",
+                    "qc_order": 22
+                },
+                "Number of reads mapped to too many loci": {
+                    "type": "string",
+                    "qc_order": 23
+                },
+                "% of reads mapped to too many loci": {
+                    "type": "string",
+                    "qc_order": 24
+                },
+                "% of reads unmapped: too many mismatches": {
+                    "type": "string",
+                    "qc_order": 25
+                },
+                "% of reads unmapped: too short": {
+                    "type": "string",
+                    "qc_order": 26
+                },
+                "% of reads unmapped: other": {
+                    "type": "string",
+                    "qc_order": 27
+                },
+                "Number of chimeric reads": {
+                    "type": "string",
+                    "qc_order": 28
+                },
+                "% of chimeric reads": {
+                    "type": "string",
+                    "qc_order": 29
+                }
+            }
+        },
+        "gene_type_count": {
+            "type": "object",
+            "qc_order": 5,
+            "additionalProperties": false,
+            "properties": {
+                "protein_coding": {
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "non_coding": {
+                    "type": "number",
+                    "qc_order": 2
+                },
+                "lincRNA": {
+                    "type": "number",
+                    "qc_order": 3
+                },
+                "macro_lncRNA": {
+                    "type": "number",
+                    "qc_order": 4
+                },
+                "bidirectional_promoter_lncRNA": {
+                    "type": "number",
+                    "qc_order": 5
+                },
+                "miRNA": {
+                    "type": "number",
+                    "qc_order": 6
+                },
+                "rRNA": {
+                    "type": "number",
+                    "qc_order": 7
+                },
+                "snRNA": {
+                    "type": "number",
+                    "qc_order": 8
+                },
+                "snoRNA": {
+                    "type": "number",
+                    "qc_order": 9
+                },
+                "sRNA": {
+                    "type": "number",
+                    "qc_order": 10
+                },
+                "scRNA": {
+                    "type": "number",
+                    "qc_order": 11
+                },
+                "scaRNA": {
+                    "type": "number",
+                    "qc_order": 12
+                },
+                "ribozyme": {
+                    "type": "number",
+                    "qc_order": 13
+                },
+                "misc_RNA": {
+                    "type": "number",
+                    "qc_order": 14
+                },
+                "Ala_tRNA": {
+                    "type": "number",
+                    "qc_order": 15
+                },
+                "Arg_tRNA": {
+                    "type": "number",
+                    "qc_order": 16
+                },
+                "Asn_tRNA": {
+                    "type": "number",
+                    "qc_order": 17
+                },
+                "Asp_tRNA": {
+                    "type": "number",
+                    "qc_order": 18
+                },
+                "Cys_tRNA": {
+                    "type": "number",
+                    "qc_order": 19
+                },
+                "Gln_tRNA": {
+                    "type": "number",
+                    "qc_order": 20
+                },
+                "Glu_tRNA": {
+                    "type": "number",
+                    "qc_order": 21
+                },
+                "Gly_tRNA": {
+                    "type": "number",
+                    "qc_order": 22
+                },
+                "His_tRNA": {
+                    "type": "number",
+                    "qc_order": 23
+                },
+                "Ile_tRNA": {
+                    "type": "number",
+                    "qc_order": 24
+                },
+                "Leu_tRNA": {
+                    "type": "number",
+                    "qc_order": 25
+                },
+                "Lys_tRNA": {
+                    "type": "number",
+                    "qc_order": 26
+                },
+                "Met_tRNA": {
+                    "type": "number",
+                    "qc_order": 27
+                },
+                "Phe_tRNA": {
+                    "type": "number",
+                    "qc_order": 28
+                },
+                "Pro_tRNA": {
+                    "type": "number",
+                    "qc_order": 29
+                },
+                "SeC(e)_tRNA": {
+                    "type": "number",
+                    "qc_order": 30
+                },
+                "SeC_tRNA": {
+                    "type": "number",
+                    "qc_order": 31
+                },
+                "Ser_tRNA": {
+                    "type": "number",
+                    "qc_order": 32
+                },
+                "Sup_tRNA": {
+                    "type": "number",
+                    "qc_order": 33
+                },
+                "Thr_tRNA": {
+                    "type": "number",
+                    "qc_order": 34
+                },
+                "Trp_tRNA": {
+                    "type": "number",
+                    "qc_order": 35
+                },
+                "Tyr_tRNA": {
+                    "type": "number",
+                    "qc_order": 36
+                },
+                "Val_tRNA": {
+                    "type": "number",
+                    "qc_order": 37
+                },
+                "Undet_tRNA": {
+                    "type": "number",
+                    "qc_order": 38
+                },
+                "Mt_tRNA": {
+                    "type": "number",
+                    "qc_order": 39
+                },
+                "Mt_rRNA": {
+                    "type": "number",
+                    "qc_order": 40
+                },
+                "3prime_overlapping_ncRNA": {
+                    "type": "number",
+                    "qc_order": 41
+                },
+                "vaultRNA": {
+                    "type": "number",
+                    "qc_order": 42
+                },
+                "sense_intronic": {
+                    "type": "number",
+                    "qc_order": 43
+                },
+                "sense_overlapping": {
+                    "type": "number",
+                    "qc_order": 44
+                },
+                "antisense": {
+                    "type": "number",
+                    "qc_order": 45
+                },
+                "pseudogene": {
+                    "type": "number",
+                    "qc_order": 46
+                },
+                "processed_pseudogene": {
+                    "type": "number",
+                    "qc_order": 47
+                },
+                "processed_transcript": {
+                    "type": "number",
+                    "qc_order": 48
+                },
+                "polymorphic_pseudogene": {
+                    "type": "number",
+                    "qc_order": 49
+                },
+                "transcribed_processed_pseudogene": {
+                    "type": "number",
+                    "qc_order": 50
+                },
+                "unprocessed_pseudogene": {
+                    "type": "number",
+                    "qc_order": 51
+                },
+                "transcribed_unprocessed_pseudogene": {
+                    "type": "number",
+                    "qc_order": 52
+                },
+                "translated_processed_pseudogene": {
+                    "type": "number",
+                    "qc_order": 53
+                },
+                "translated_unprocessed_pseudogene": {
+                    "type": "number",
+                    "qc_order": 54
+                },
+                "unitary_pseudogene": {
+                    "type": "number",
+                    "qc_order": 55
+                },
+                "transcribed_unitary_pseudogene": {
+                    "type": "number",
+                    "qc_order": 56
+                },
+                "IG_C_gene": {
+                    "type": "number",
+                    "qc_order": 57
+                },
+                "IG_C_pseudogene": {
+                    "type": "number",
+                    "qc_order": 58
+                },
+                "IG_D_gene": {
+                    "type": "number",
+                    "qc_order": 59
+                },
+                "IG_D_pseudogene": {
+                    "type": "number",
+                    "qc_order": 60
+                },
+                "IG_J_gene": {
+                    "type": "number",
+                    "qc_order": 61
+                },
+                "IG_J_pseudogene": {
+                    "type": "number",
+                    "qc_order": 62
+                },
+                "IG_LV_gene": {
+                    "type": "number",
+                    "qc_order": 63
+                },
+                "IG_V_gene": {
+                    "type": "number",
+                    "qc_order": 64
+                },
+                "IG_V_pseudogene": {
+                    "type": "number",
+                    "qc_order": 65
+                },
+                "IG_pseudogene": {
+                    "type": "number",
+                    "qc_order": 66
+                },
+                "TR_C_gene": {
+                    "type": "number",
+                    "qc_order": 67
+                },
+                "TR_D_gene": {
+                    "type": "number",
+                    "qc_order": 68
+                },
+                "TR_J_gene": {
+                    "type": "number",
+                    "qc_order": 69
+                },
+                "TR_J_pseudogene": {
+                    "type": "number",
+                    "qc_order": 70
+                },
+                "TR_V_gene": {
+                    "type": "number",
+                    "qc_order": 71
+                },
+                "TR_V_pseudogene": {
+                    "type": "number",
+                    "qc_order": 72
+                },
+                "Pseudo_tRNA": {
+                    "type": "number",
+                    "qc_order": 73
+                },
+                "rRNA_pseudogene": {
+                    "type": "number",
+                    "qc_order": 74
+                },
+                "TEC": {
+                    "type": "number",
+                    "qc_order": 75
+                },
+                "transcript_id_not_found": {
+                    "type": "number",
+                    "qc_order": 76
+                },
+                "spikein": {
+                    "type": "number",
+                    "qc_order": 77
+                }
+            }
         }
     },
     "facets": {
@@ -37,5 +676,6 @@
         "overall_quality_status": {
             "title" : "Overall Quality"
         }
-    }
+    },
+    "qc_order": 1
 }

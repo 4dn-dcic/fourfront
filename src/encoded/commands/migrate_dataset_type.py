@@ -37,7 +37,7 @@ def run(app):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Migrate dataset type", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -54,7 +54,7 @@ def main():
     raised = False
     try:
         run(app)
-    except:
+    except Exception:
         raised = True
         raise
     finally:

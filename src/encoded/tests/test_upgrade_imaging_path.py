@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = pytest.mark.working
 
 
@@ -19,7 +23,6 @@ def test_imaging_path_1_2(
         gr_biofeat_w_alias, targ_agr_w_alias, imaging_path_1_w_3targs
 ):
     ''' need to use registry to check items '''
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('imaging_path', imaging_path_1_w_3targs, registry=registry,
                              current_version='1', target_version='2')

@@ -11,7 +11,7 @@ describe('Joint Analysis Page', function () {
     context("Expandable Matrix Section", function(){
 
         const yAxisTerms = ['DNA Binding', 'Open Chromatin', 'DNA FISH', 'Proximity-seq'];
-        const xAxisTerms = ['H1-hESC', 'H1-DE', 'HFFc6'];
+        const xAxisTerms = ['H1-hESC', 'HFF'];//['H1-hESC', 'H1-DE', 'HFFc6'];
 
         it('Have at least one of each term - ' + yAxisTerms.join(', ') + ' + ' + xAxisTerms.join(', '), function(){
             const seenY = new Set();

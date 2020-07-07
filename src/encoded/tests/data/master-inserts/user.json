@@ -156,6 +156,17 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
+        "email": "alexander_veit@hms.harvard.edu",
+        "first_name": "Alexander",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Veit",
+        "uuid": "e820dc86-0ed5-4c42-98dc-501f91036419",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "timezone": "US/Eastern",
         "email": "ud4dntest@gmail.com",
         "status": "current",
@@ -224,6 +235,28 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Cosolo",
         "uuid": "e4a22298-1da4-4e59-8a65-9e661f47fb48",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "ozturkutku@gmail.com",
+        "first_name": "Serkan Utku",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Öztürk",
+        "uuid": "ac02c6e9-caba-4eea-a849-1ebfe69a0251",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "ugurcamoglu@gmail.com",
+        "first_name": "Uğur",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Çamoğlu",
+        "uuid": "37947162-919f-42c4-8875-50dbf798a459",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]

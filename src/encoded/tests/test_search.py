@@ -1,7 +1,8 @@
 import json
 import pytest
-import time
 
+from dcicutils.misc_utils import Retry
+from dcicutils.qa_utils import notice_pytest_fixtures
 from datetime import datetime, timedelta
 from snovault import TYPES, COLLECTIONS
 from snovault.elasticsearch import create_mapping
@@ -10,20 +11,21 @@ from snovault.util import add_default_embeds
 from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-from ..utils import customized_delay_rerun
+# from ..utils import customized_delay_rerun
 
 
 pytestmark = [
     pytest.mark.working,
     pytest.mark.schema,
     pytest.mark.indexing,
-    pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+    #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
 ]
 
 
 ### IMPORTANT
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
+notice_pytest_fixtures(app_settings, app, workbook)
 
 
 # just a little helper function
@@ -76,7 +78,7 @@ def test_collections_redirect_to_search(workbook, testapp):
     # we removed the collections page and redirect to search of that type
     # redirected_from is not used for search
     res = testapp.get('/biosamples/', status=301).follow(status=200)
-    assert res.json['@type'] == ['BiosampleSearchResults', 'Search']
+    assert res.json['@type'] == ['BiosampleSearchResults', 'ItemSearchResults', 'Search']
     assert res.json['@id'] == '/search/?type=Biosample'
     assert 'redirected_from' not in res.json['@id']
     assert res.json['@context'] == '/terms/'
@@ -109,10 +111,40 @@ def test_search_with_embedding(workbook, testapp):
     assert test_json['lab'].get('awards') is None
 
 
+def test_file_search_type(workbook, testapp):
+    """ Tests that searching on a type that inherits from File adds a FileSearchResults
+        identifier in the @type field
+    """
+    res = testapp.get('/search/?type=FileProcessed').json
+    assert 'FileSearchResults' in res['@type']
+    res = testapp.get('/search/?type=Biosample').json
+    assert 'FileSearchResults' not in res['@type']
+    assert res['@type'][0] == 'BiosampleSearchResults'
+    assert res['@type'][1] == 'ItemSearchResults'
+    res = testapp.get('/search/?type=FileProcessed&type=Biosample').json
+    assert 'FileSearchResults' not in res['@type']
+    res = testapp.get('/search/?type=FileProcessed&type=FileReference').json
+    assert 'FileSearchResults' in res['@type']
+    res = testapp.get('/search').follow().json
+    assert 'FileSearchResults' not in res['@type']
+    res = testapp.get('/search/?type=File').json
+    assert 'FileSearchResults' in res['@type']
+    assert res['@type'].count('FileSearchResults') == 1
+    res = testapp.get('/search/?type=FileFastq').json
+    assert res['@type'][0] == 'FileFastqSearchResults'
+    assert res['@type'][1] == 'FileSearchResults'
+    assert res['@type'][2] == 'ItemSearchResults'
+    assert res['@type'][3] == 'Search'
+    res = testapp.get('/search/?type=FileFastq&type=Biosample').json
+    assert res['@type'][0] == 'ItemSearchResults'
+    res = testapp.get('/search/?type=FileFastq&type=File').json
+    assert res['@type'][0] == 'FileSearchResults'
+
+
 def test_search_with_simple_query(workbook, testapp):
     # run a simple query with type=Organism and q=mouse
     res = testapp.get('/search/?type=Organism&q=mouse').json
-    assert res['@type'] == ['OrganismSearchResults', 'Search']
+    assert res['@type'] == ['OrganismSearchResults', 'ItemSearchResults', 'Search']
     assert len(res['@graph']) > 0
     # get the uuids from the results
     mouse_uuids = [org['uuid'] for org in res['@graph'] if 'uuid' in org]
@@ -287,7 +319,7 @@ def test_search_multiple_types(workbook, testapp):
     # multiple types work with @type in response
     search = '/search/?type=Biosample&type=ExperimentHiC'
     res = testapp.get(search).json
-    assert res['@type'] == ['BiosampleSearchResults', 'ExperimentHiCSearchResults', 'Search']
+    assert res['@type'] == ['ItemSearchResults', 'Search']
 
 
 def test_search_query_string_with_booleans(workbook, testapp):
@@ -509,6 +541,13 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     res = anontestapp.get('/biosamples/', status=404)
     assert len(res.json['@graph']) == 0
 
+
+@Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
+def check_item_type(client, item_type):
+    # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
+    return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+
+
 @pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     es = app.registry['elasticsearch']
@@ -536,7 +575,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if es_item_count == 0:
             continue
         # check items in search result individually
-        res = testapp.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+        res = check_item_type(client=testapp, item_type=item_type)
         for item_res in res.json.get('@graph', []):
             index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                     id=item_res['uuid'])['_source']

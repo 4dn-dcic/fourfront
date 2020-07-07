@@ -1,4 +1,6 @@
 import pytest
+
+
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
@@ -46,17 +48,20 @@ def component_term(testapp, so_ont):
 
 @pytest.fixture
 def gene_item(testapp, lab, award, human):
-    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
+    gene_item = {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}
+    return testapp.post_json('/gene', gene_item).json['@graph'][0]
 
 
 @pytest.fixture
 def mouse_gene_item(testapp, lab, award, mouse):
-    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '16825'}).json['@graph'][0]
+    gene_item = {'lab': lab['@id'], 'award': award['@id'], 'geneid': '16825'}
+    return testapp.post_json('/gene', gene_item).json['@graph'][0]
 
 
 @pytest.fixture
 def armadillo_gene_item(testapp, lab, award):
-    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '101428042'}).json['@graph'][0]
+    gene_item = {'lab': lab['@id'], 'award': award['@id'], 'geneid': '101428042'}
+    return testapp.post_json('/gene', gene_item).json['@graph'][0]
 
 
 @pytest.fixture

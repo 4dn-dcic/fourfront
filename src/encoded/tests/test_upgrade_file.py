@@ -1,4 +1,8 @@
 import pytest
+
+from snovault import UPGRADER
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
@@ -54,7 +58,6 @@ def test_upgrade_vistrack_meta_one_repid(registry, file_wo_underscore_fields, fi
     file_w_underscore_fields['schema_version'] = '2'
     del file_wo_underscore_fields['experiment_bucket']
     del file_w_underscore_fields['override_experiment_bucket']
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_vistrack', file_wo_underscore_fields, registry=registry,
                              current_version='1', target_version='2')
@@ -68,7 +71,6 @@ def test_upgrade_vistrack_meta_multi_repids(registry, file_wo_underscore_fields,
     file_w_underscore_fields['schema_version'] = '2'
     file_wo_underscore_fields['replicate_identifiers'] = ['Biorep 1, Techrep 1', 'Biorep 2, Techrep 1']
     file_w_underscore_fields['override_replicate_info'] = 'merged replicates'
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_vistrack', file_wo_underscore_fields, registry=registry,
                              current_version='1', target_version='2')
@@ -82,7 +84,6 @@ def test_upgrade_file_processed_meta_multi_repids(registry, file_wo_underscore_f
     file_w_underscore_fields['schema_version'] = '3'
     file_wo_underscore_fields['replicate_identifiers'] = ['Biorep 1, Techrep 1', 'Biorep 2, Techrep 1']
     file_w_underscore_fields['override_replicate_info'] = 'merged replicates'
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_processed', file_wo_underscore_fields, registry=registry,
                              current_version='2', target_version='3')
@@ -100,7 +101,6 @@ def test_upgrade_file_format_known(
         'file_microscopy': 'tiff',
         'file_calibration': 'zip'
     }
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     for ftype, ff in type2format.items():
         file_1['file_format'] = ff
@@ -112,7 +112,6 @@ def test_upgrade_file_format_known(
 
 def test_upgrade_file_format_w_unknown_format(
         registry, file_1, file_formats):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     file_1['file_format'] = 'hic'
     value = upgrader.upgrade('file_processed', file_1, registry=registry,
@@ -124,7 +123,6 @@ def test_upgrade_file_format_w_unknown_format(
 
 def test_upgrade_extrafile_formats_good_formats(
         registry, file_w_extra_1, file_formats):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     value = upgrader.upgrade('file_processed', file_w_extra_1, registry=registry,
                              current_version='1', target_version='2')
@@ -134,7 +132,6 @@ def test_upgrade_extrafile_formats_good_formats(
 
 def test_upgrade_extrafile_format_w_unknown_format(
         registry, file_w_extra_1, file_formats):
-    from snovault import UPGRADER
     upgrader = registry[UPGRADER]
     file_w_extra_1['extra_files'] = [{'file_format': 'hic'}]
     value = upgrader.upgrade('file_processed', file_w_extra_1, registry=registry,

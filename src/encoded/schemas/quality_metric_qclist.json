@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [ "lab", "award"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -30,6 +30,7 @@
             "title": "QC List",
             "description": "List of QC metric objects",
             "type": "array",
+            "qc_order": 1,
             "items": {
                 "title": "Output file mapping",
                 "description": "Info on file output by the workflow and how it is mapped to CWL arguments.",
@@ -60,5 +61,6 @@
         "overall_quality_status": {
             "title" : "Overall Quality"
         }
-    }
+    },
+    "qc_order": 1
 }

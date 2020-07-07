@@ -1,5 +1,8 @@
 import pytest
+
 from .test_file import mcool_file_json, bedGraph_file_json, bigwig_file_json, bigbed_file_json, bed_beddb_file_json, beddb_file_json, chromsizes_file_json
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 # Test Higlass display endpoints.
@@ -1692,11 +1695,15 @@ def test_add_beddb(testapp, higlass_mcool_viewconf, beddb_file_json):
     # The top track should contain a bed-like track in the first spot
     track = tracks["top"][0]
     assert_true(track["tilesetUid"] == beddb_file_json['higlass_uid'])
+    assert_true(track["height"] == 55)
+    assert_true(track["options"]["geneAnnotationHeight"] == 12)
     assert_true(track["type"] == "horizontal-gene-annotations")
 
     # The left track should contain a bed-like track in the first spot
     left_track = tracks["left"][0]
     assert_true(left_track["tilesetUid"] == beddb_file_json['higlass_uid'])
+    assert_true(left_track["width"] == 55)
+    assert_true(left_track["options"]["geneAnnotationHeight"] == 12)
     assert_true(left_track["type"] == "vertical-gene-annotations")
 
     # uids should be different
