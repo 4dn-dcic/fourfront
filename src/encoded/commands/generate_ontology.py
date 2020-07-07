@@ -444,7 +444,6 @@ def connect2server(env=None, key=None):
         sys.exit(1)
 
     print("Running on: {server}".format(server=auth.get('server')))
-    print(auth)
     return auth
 
 
