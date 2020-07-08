@@ -14,7 +14,7 @@ def test_parse_args_defaults():
     args = []
     args = go.parse_args(args)
     assert args.ontology == 'all'
-    assert args.key == 's3'
+    assert args.key is None
     assert args.env == 'data'
 
 
@@ -906,8 +906,19 @@ def test_write_outfile_notpretty(simple_terms):
 
 
 @pytest.fixture
-def matches():
-    return [{'term_id': 't1', 'a': 1, 'b': 2, 'c': 3}, {'term_id': 't1', 'a': 1, 'b': 2, 'c': 3}]
+def ontology_list():
+    return [
+        {'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'},
+        {'uuid': '2', 'ontology_name': 'ont2', 'ontology_prefix': 'NN'}
+    ]
+
+
+@pytest.fixture
+def matches(ontology_list):
+    return [
+        {'term_id': 'TO:t1', 'a': 1, 'b': 2, 'c': 3, 'source_ontologies': [ontology_list[0].get('uuid')]},
+        {'term_id': 'TO:t1', 'a': 1, 'b': 2, 'c': 3, 'source_ontologies': [ontology_list[0].get('uuid')]}
+    ]
 
 
 def test_terms_match_identical(matches):
@@ -957,39 +968,33 @@ def test_terms_match_w_ontology(matches):
 
 
 @pytest.fixture
-def ont_terms(matches):
+def ont_terms(matches, ontology_list):
     t2 = matches[1]
-    t2['term_id'] = 't2'
+    t2['term_id'] = 'TO:t2'
     t2['parents'] = ['OBI:01', 'EFO:01']
     return {
-        't1': matches[0],
-        't2': t2,
-        't3': {'term_id': 't3', 'x': 7, 'y': 8, 'z': 9}
+        'TO:t1': matches[0],
+        'TO:t2': t2,
+        'NN:t3': {'term_id': 'NN:t3', 'x': 7, 'y': 8, 'z': 9, 'source_ontologies': [ontology_list[1]]}
     }
-
-
-@pytest.fixture
-def ontology_list():
-    return [
-        {'uuid': '1', 'ontology_name': 'ont1'},
-        {'uuid': '2', 'ontology_name': 'ont2'}
-    ]
 
 
 @pytest.fixture
 def db_terms(ont_terms):
     db_terms = ont_terms.copy()
-    db_terms['t1']['uuid'] = '1234'
-    db_terms['t2']['uuid'] = '5678'
-    del db_terms['t2']['parents']
-    del db_terms['t3']
+    db_terms['TO:t1']['uuid'] = '1234'
+    db_terms['TO:t2']['uuid'] = '5678'
+    del db_terms['TO:t2']['parents']
+    del db_terms['NN:t3']
+    for v in db_terms.values():
+        v.update({'status': 'released'})
     return db_terms
 
 
 def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     assert len(result) == 1
-    assert 't3' == result[0].get('term_id')
+    assert 'NN:t3' == result[0].get('term_id')
     # assert len(idmap) == 3
     # for k, v in idmap.items():
     #     assert k in ['t1', 't2', 't3']
@@ -998,7 +1003,7 @@ def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
 
 
 def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
-    tids = ['t1', 't2', 't3']
+    tids = ['TO:t1', 'TO:t2', 'NN:t3']
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
     assert len(result) == 3
     for t in result:
@@ -1006,12 +1011,27 @@ def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
         assert t.get('term_id') in tids
 
 
-# def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
-#     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
-#     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-#     assert len(result) == 2
-#     assert '7890' in [t.get('uuid') for t in result]
-#     # assert 't4' in idmap
+def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
+    db_terms['TO:t4'] = {
+        'term_id': 'TO:t4',
+        'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'}],
+        'uuid': '7890',
+        'status': 'released'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    assert len(result) == 2
+    assert '7890' in [t.get('uuid') for t in result]
+    # assert 't4' in idmap
+
+
+def test_id_post_and_patch_id_obs_simple(ont_terms, db_terms, ontology_list):
+    db_terms['TO:t4'] = {
+        'term_id': 'TO:t4',
+        'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'}],
+        'uuid': '7890',
+        'status': 'released'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, ontarg='1', simple=True)
+    assert len(result) == 2
+    assert '7890' in [t.get('uuid') for t in result]
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
