@@ -22,8 +22,8 @@ import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, render
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
-import { columnsToColumnDefinitions } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { combineExpsWithReplicateNumbersForExpSet } from './../util/experiments-transforms';
+import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
@@ -523,7 +523,10 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderExpsLacksRawOrProcessedFiles', 'renderProcessedFilesTableAsRightPanel');
+        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderExperimentsNotAssociatedWithAnyFiles', 'renderProcessedFilesTableAsRightPanel');
+        this.memoized = {
+            renderExperimentsNotAssociatedWithAnyFiles: memoize(this.renderExperimentsNotAssociatedWithAnyFiles)
+        };
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
@@ -566,15 +569,73 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
             </h3>
         );
     }
+    /**
+     * Mostly clonned from ProcessedFilesStackedTable.defaultProps to render the table
+     * compatible w/ processed file table
+     */
+    static expsNotAssociatedWithFileColumnHeaders = [
+        {
+            columnClass: 'experiment', className: 'text-left', title: 'Experiment', initialWidth: 180,
+            render: function (exp) {
+                const nameTitle = (exp && typeof exp.display_title === 'string' && exp.display_title.replace(' - ' + exp.accession, '')) || exp.accession;
+                const experimentAtId = object.atIdFromObject(exp);
+                const replicateNumbersExists = exp && exp.bio_rep_no && exp.tec_rep_no;
 
-    renderExpsLacksRawOrProcessedFiles() {
+                return (
+                    <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
+                        {replicateNumbersExists ? <div>Bio Rep <b>{exp.bio_rep_no}</b>, Tec Rep <b>{exp.tec_rep_no}</b></div> : <div />}
+                        {experimentAtId ? <a href={experimentAtId} className="name-title text-500">{nameTitle}</a> : <div className="name-title">{nameTitle}</div>}
+                    </StackedBlockName>
+                );
+            }
+        },
+        { columnClass: 'file', className: 'has-checkbox', title: 'File', initialWidth: 165 },
+        { columnClass: 'file-detail', className: '', title: 'File Type', initialWidth: 135 },
+        { columnClass: 'file-detail', className: '', title: 'File Size', initialWidth: 70 }
+    ];
+    /**
+     * memoized in constructor
+     */
+    renderExperimentsNotAssociatedWithAnyFiles() {
         const { context } = this.props;
-        const expsLacksRawOrProcessedFiles = _.filter(context.experiments_in_set, function (exp) {
+        const expsNotAssociatedWithAnyFiles = _.filter(context.experiments_in_set, function (exp) {
             return !((exp.files && Array.isArray(exp.files) && exp.files.length > 0) || (exp.processed_files && Array.isArray(exp.processed_files) && exp.processed_files.length > 0));
         });
-        if (expsLacksRawOrProcessedFiles.length > 0) {
-            return (<strong>Hello World!</strong>);
+
+        if (expsNotAssociatedWithAnyFiles.length === 0) {
+            return;
         }
+
+        const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
+        const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps, expsNotAssociatedWithAnyFiles);
+        const experimentBlock = expsWithReplicateExps.map((exp) => {
+            const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
+                if (col.render && typeof col.render === 'function') { return col.render(exp); }
+                else {
+                    return <div className={"col-" + col.columnClass + " item detail-col" + idx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>;
+                }
+            });
+            return (
+                <StackedBlock columnClass="experiment" hideNameOnHover={false}
+                    key={exp.accession} label={
+                        <StackedBlockNameLabel title={'Experiment'}
+                            accession={exp.accession} subtitleVisible />
+                    }>
+                    {content}
+                </StackedBlock>
+            );
+        });
+        return (
+            <div className="experiments-not-having-files">
+                <div className="stacked-block-table-outer-container overflow-auto">
+                    <StackedBlockTable {..._.omit(this.props, 'children', 'files')} {...tableProps} className="expset-processed-files">
+                        <StackedBlockList className="sets" collapseLongLists={false}>
+                            {experimentBlock}
+                        </StackedBlockList>
+                    </StackedBlockTable>
+                </div>
+            </div>
+        );
     }
 
     render(){
@@ -582,7 +643,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
             <div className="processed-files-table-section exp-table-section">
                 {this.renderHeader()}
                 {this.renderTopRow()}
-                {this.renderExpsLacksRawOrProcessedFiles()}
+                {this.memoized.renderExperimentsNotAssociatedWithAnyFiles()}
                 <QCMetricsTable {...this.props} />
             </div>
         );
