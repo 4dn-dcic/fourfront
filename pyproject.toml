@@ -117,7 +117,7 @@ xlwt = "1.2.0"
 "zope.sqlalchemy" = "^1.2"
 
 [tool.poetry.dev-dependencies]
-coverage = "5.1"
+coverage = ">=5.1"
 # flake8 = "3.7.8"
 flaky = "3.6.1"
 # flask only for moto[server]
