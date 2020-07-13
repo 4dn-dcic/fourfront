@@ -78,10 +78,10 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	bin/test -vv --timeout=200 -m "working and not performance"
+	bin/test -vv --timeout=240 -m "working and not performance"
 
 test-any:
-	bin/test -vv --timeout=200
+	bin/test -vv --timeout=240
 
 travis-test-npm:  # Note this only does the 'not indexing' tests
 	bin/test -vv --timeout=200 -m "working and not performance and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
