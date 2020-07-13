@@ -47,6 +47,7 @@ def test_find_other_in_pair():
 
 DELAY_FUZZ_SECONDS = 0.1
 
+
 def test_delay_rerun():
     expected_delay = 1.0
     t0 = datetime.datetime.now()

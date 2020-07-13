@@ -254,7 +254,7 @@ def metadata_tsv(context, request):
         try:
             post_body['accession_triples'] = json.loads(request.POST.get('accession_triples'))
             post_body['download_file_name'] = json.loads(request.POST.get('download_file_name')) # Note: Even though text string is requested, POST req should wrap it in JSON.stringify() else this fails.
-        except:
+        except Exception:
             pass
     if isinstance(post_body['accession_triples'], list) and len(post_body['accession_triples']) > 0:
         if isinstance(post_body['accession_triples'][0], list): # List of arrays

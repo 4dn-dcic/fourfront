@@ -17,11 +17,11 @@ addons:
     - make
     - graphviz
     - nginx
-  postgresql: '9.4'
 env:
   global:
+  - PGPORT=5433
   - BOTO_CONFIG=/bogus
-  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.4/bin:$PATH"
+  - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/11/bin:$PATH"
   - ELASTIC_BEANSTALK_LABEL=$TRAVIS_COMMIT
   - USER="4dn-dcic"
   - SNO_REPO="snovault"
@@ -35,23 +35,32 @@ notifications:
   slack:
     secure: DQyUTk6evwPpO0P5+OPhBSgl+fGEerOjBlBwQliXAkDaMKH3Cpi4cTQ3ETR/+3g6bGqPGK+QJ1R+6Ht+hJD7dNomyVIoQmvF0P5afJtpk/A3cDILe90t76ET9jc/iBjWeUFQdokFUJ7Gt1GGYtI6e5XcVu/Qc/xqCvFMtsBN6mnBFuvcQki+WkoIIPPawyhfryCNOLo5vvbi4SZ5dZI+M0MGq9HQjOyF1sdIgKuXhxjupmL+kVPVXAq9kiOANYFkwbNsP9j0BTYW5wFHpAztBqz3NT6EchgCdue8tgV4hC4rRFvM/bsA4qz/TJ5wRRLBRXtnNtPcyhAqTiU+wC6qWt++fjSEMGe4KYqtRRV1YuxQiTVHN84t77DILLNfMh/6uSs0KijwOT+Oazwd/UsN1zYOH93AM4FZ0h92yyb6j6JQ+DUk4WFel1Zr4kZzhtHSPGw+K4fxY0zIt1qpaDPXjtZHQ0+LwIIMtwMp5bBcwDn9d1ADnUhUAuuIN2hHaXrVy4vP2hIcd0LzezBqvc7JXimyd5yRgUeOCTrKGkAeSo8VA7XIj0ZmlpQRYKNTJP+gz4Y6C/RCxISnFDF/vcX+IsDdvreZXJMplE1Aqxf0uR6Zj8Sr8q+QWGKydv6ettlLZuqDuv0l/l/9qpzYfRqLSZcetGRVFHHcR9wuQiDyums=
 before_install:
+- ls -dal /usr/lib/postgresql/*/bin/postgres
+- find /usr/lib/postgresql -name 'postgres' -print
+- ps auxww | grep postgres
+- sudo apt-get install -yq --no-install-suggests --no-install-recommends postgresql-common
+- sudo service postgresql stop
+- sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-11 postgresql-client-11
+- sudo service postgresql status
+- sudo service postgresql start 11
+- sudo service postgresql status
 - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
 - echo $tibanna_deploy
 - postgres --version
 - initdb --version
+- ls -dal /usr/lib/postgresql/*/bin/postgres
+- find /usr/lib/postgresql -name 'postgres' -print
+- ps auxww | grep postgres
 - nvm install 10 || (echo "Retrying nvm install" && sleep 5 && nvm install 10)
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
-# need to manually change the version of six used by Travis for some reason
-- pip install --upgrade pip==19.0.3
-- pip uninstall -y six
-- pip install six==1.11.0
-- pip install --upgrade pip==19.0.3
+- pip install --upgrade pip
 - pip install poetry
 - pip install coveralls
 - pip install codacy-coverage
-- make build
+- poetry install
+- make npm-setup
 before_script:
 - configure-kibana-index --es-endpoint search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
 script:

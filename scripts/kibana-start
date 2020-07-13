@@ -1,0 +1,35 @@
+#!/bin/bash
+
+docker --version
+
+if [ $? -ne 0 ]; then
+    echo "Docker is not installed."
+    open "https://docs.docker.com/docker-for-mac/install/" &
+    exit 1
+fi
+
+existing_network=`docker network ls | grep localnet`
+
+if [ -z "${existing_network}" ]; then
+    docker network create localnet --driver=bridge
+else
+    echo "docker localnet is already set up. From 'docker network':"
+    echo " ${existing_network}"
+fi
+
+existing_kibana=`docker ps | egrep 'kibana:[0-9]*.[0-9]+.*[ ].*'`
+
+if [ -z "${existing_kibana}" ]; then
+
+    docker run -d --network localnet -p 5601:5601 -e ELASTICSEARCH_URL=http://host.docker.internal:9200 kibana:5.6.16
+
+else
+    echo "Kibana is already running. From 'docker ps':"
+    echo " ${existing_kibana}"
+fi
+
+local_kibana_url="http://localhost:5601/app/kibana#/dev_tools/console?_g=()"
+
+echo "Opening kibana in browser at '${local_kibana_url}'..."
+open "${local_kibana_url}" &
+

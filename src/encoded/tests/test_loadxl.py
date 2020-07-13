@@ -1,5 +1,4 @@
 import pytest
-import json
 
 from past.builtins import basestring
 from pkg_resources import resource_filename
