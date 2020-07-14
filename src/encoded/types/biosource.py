@@ -21,7 +21,7 @@ from snovault.util import debug_log
 from pyramid.view import view_config
 from .base import (
     Item,
-    get_item_if_you_can,
+    get_item_or_none,
     lab_award_attribution_embed_list
 )
 
@@ -86,20 +86,20 @@ class Biosource(Item):
         ]
         mod_str = ''
         if modifications:
-            mod_str = ' with ' + ', '.join([get_item_if_you_can(request, mod, 'modifications').get('modification_name_short', '')
+            mod_str = ' with ' + ', '.join([get_item_or_none(request, mod, 'modifications').get('modification_name_short', '')
                                             for mod in modifications])
         # elif modifications and len(modifications) > 1:
         #     mod_str = ' with genetic modifications'
         if biosource_type == "tissue":
             if tissue:
-                tissue_props = get_item_if_you_can(request, tissue, 'ontology_terms')
+                tissue_props = get_item_or_none(request, tissue, 'ontology_terms')
                 if tissue_props:
                     return tissue_props.get('preferred_name') + mod_str
                 else:
                     return biosource_type + mod_str
         elif biosource_type in cell_line_types:
             if cell_line:
-                cell_line_props = get_item_if_you_can(request, cell_line, 'ontology_terms')
+                cell_line_props = get_item_or_none(request, cell_line, 'ontology_terms')
                 if cell_line_props:
                     cell_line_name = cell_line_props.get('preferred_name')
                     if cell_line_tier:
@@ -110,10 +110,10 @@ class Biosource(Item):
         elif biosource_type == "multicellular organism":
             if individual:
                 organism_name = 'Unknown'
-                individual_props = get_item_if_you_can(request, individual, 'individuals')
+                individual_props = get_item_or_none(request, individual, 'individuals')
                 if individual_props:
                     organism = individual_props.get('organism')
-                    organism_props = get_item_if_you_can(request, organism, 'organisms')
+                    organism_props = get_item_or_none(request, organism, 'organisms')
                     if organism_props:
                         organism_name = organism_props['name']
                 return "whole " + organism_name + mod_str
@@ -163,13 +163,13 @@ class Biosource(Item):
                 tiered_line_cat[str(oterm.uuid)] = cat
         # import pdb; pdb.set_trace()
         if cell_line:
-            cl_term = get_item_if_you_can(request, cell_line, 'ontology-terms')
+            cl_term = get_item_or_none(request, cell_line, 'ontology-terms')
             cluid = cl_term.get('uuid')
             if cluid and cluid in tiered_line_cat:
                 category.append(tiered_line_cat[cluid])
         if biosource_type in ['stem cell', 'induced pluripotent stem cell',
                               'stem cell derived cell line']:
-            ind = get_item_if_you_can(request, individual, 'individuals')
+            ind = get_item_or_none(request, individual, 'individuals')
             try:
                 ind_at_type = ind.get('@type', [])
             except AttributeError:
@@ -184,7 +184,7 @@ class Biosource(Item):
         elif biosource_type in ['tissue', 'multicellular organism']:
             category.append('Multicellular Tissue')
         if tissue:
-            tis_term = get_item_if_you_can(request, tissue, 'ontology-terms')
+            tis_term = get_item_or_none(request, tissue, 'ontology-terms')
             # case for 1000 genomes/Hap Map
             if tis_term.get('preferred_name') == 'B-lymphocyte':
                 if cl_term:
@@ -218,7 +218,7 @@ def validate_biosource_tissue(context, request):
     tissue = data['tissue']
     ontology_name = None
     try:
-        termuid = get_item_if_you_can(request, tissue, 'ontology-terms').get('uuid')
+        termuid = get_item_or_none(request, tissue, 'ontology-terms').get('uuid')
         try:
             # checking to see if our context is a collection or an item to set get
             context.get('blah')
@@ -231,7 +231,7 @@ def validate_biosource_tissue(context, request):
         pass
     request.validated.update({})
     for o in ontologies:
-        oname = get_item_if_you_can(request, o, 'ontologys').get('ontology_name')
+        oname = get_item_or_none(request, o, 'ontologys').get('ontology_name')
         if oname in ['Uberon', '4DN Controlled Vocabulary']:
             term_ok = True
             break
@@ -260,7 +260,7 @@ def validate_biosource_cell_line(context, request):
         getter = context.collection
     slimfor = None
     try:
-        termuid = get_item_if_you_can(request, cell_line, 'ontology-terms').get('uuid')
+        termuid = get_item_or_none(request, cell_line, 'ontology-terms').get('uuid')
         term = getter.get(termuid)
         slims = term.upgrade_properties().get('slim_terms', [])
         for slim in slims:
