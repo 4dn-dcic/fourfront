@@ -3,9 +3,10 @@ import os
 import pytest
 import tempfile
 
-from pyramid.httpexceptions import HTTPForbidden
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-from ..types.file import external_creds, FileFastq, post_upload
+from pyramid.httpexceptions import HTTPForbidden
+from unittest import mock
+from ..types.file import FileFastq, post_upload, external_creds
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
@@ -441,29 +442,29 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
     assert fastq_related_files[0]['file']['@id'] == fastq_related_res.json['@graph'][0]['@id']
 
 
-def test_external_creds(mocker):
-    mocker.patch('encoded.types.file.boto3', autospec=True)
+def test_external_creds():
 
-    ret = external_creds('test-wfout-bucket', 'test-key', 'name')
-    assert ret['key'] == 'test-key'
-    assert ret['bucket'] == 'test-wfout-bucket'
-    assert ret['service'] == 's3'
-    assert 'upload_credentials' in ret.keys()
+    with mock.patch('encoded.types.file.boto3', autospec=True):
+
+        ret = external_creds('test-wfout-bucket', 'test-key', 'name')
+        assert ret['key'] == 'test-key'
+        assert ret['bucket'] == 'test-wfout-bucket'
+        assert ret['service'] == 's3'
+        assert 'upload_credentials' in ret.keys()
 
 
-def test_create_file_request_proper_s3_resource(registry, fastq_json, mocker):
-    # note mocker is pytest-mock functionality
+def test_create_file_request_proper_s3_resource(registry, fastq_json):
     # ensure status uploading so create tries to upload
     fastq_json['status'] = "uploading"
     # don't actually call aws
-    external_creds = mocker.patch('encoded.types.file.external_creds')
-    # don't actually create this bad boy
-    mocker.patch('encoded.types.base.Item.create')
-    FileFastq.create(registry, '1234567', fastq_json)
-    # check that we would have called aws
-    expected_s3_key = "1234567/%s.fastq.gz" % (fastq_json['accession'])
-    external_creds.assert_called_once_with('test-wfout-bucket', expected_s3_key,
-                                           fastq_json['filename'], 'test-profile')
+    with mock.patch('encoded.types.file.external_creds') as external_creds:
+        # don't actually create this bad boy
+        with mock.patch('encoded.types.base.Item.create'):
+            FileFastq.create(registry, '1234567', fastq_json)
+            # check that we would have called aws
+            expected_s3_key = "1234567/%s.fastq.gz" % (fastq_json['accession'])
+            external_creds.assert_called_once_with('test-wfout-bucket', expected_s3_key,
+                                                   fastq_json['filename'], 'test-profile')
 
 
 def test_name_for_replaced_file_is_uuid(registry, fastq_json):
@@ -615,7 +616,7 @@ def test_no_experiment_set_rev_link_on_raw_file(testapp, fastq_json, experiment_
     assert 'experiment_sets' not in new_file
 
 
-def test_force_beanstalk_env(mocker):
+def test_force_beanstalk_env():
     """
     This test is a bit outdated, since env variable loading has moved to
     application __init__ from file.py. But let's keep the test...
@@ -632,19 +633,19 @@ def test_force_beanstalk_env(mocker):
     test_cfg.close()
 
     # mock_boto
-    mock_boto = mocker.patch('encoded.tests.test_file.boto3', autospec=True)
+    with mock.patch('encoded.tests.test_file.boto3', autospec=True) as mock_boto:
 
-    source_beanstalk_env_vars(test_cfg_name)
-    boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                 aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
-    # reset
-    os.environ["AWS_SECRET_ACCESS_KEY"] = secret
-    os.environ["AWS_ACCESS_KEY_ID"] = key
-    # os.remove(test_cfg.delete)
+        source_beanstalk_env_vars(test_cfg_name)
+        boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                     aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
+        # reset
+        os.environ["AWS_SECRET_ACCESS_KEY"] = secret
+        os.environ["AWS_ACCESS_KEY_ID"] = key
+        # os.remove(test_cfg.delete)
 
-    # ensure boto called with correct arguments
-    mock_boto.client.assert_called_once_with('sts', aws_access_key_id='its a secret id',
-                                             aws_secret_access_key='its a secret')
+        # ensure boto called with correct arguments
+        mock_boto.client.assert_called_once_with('sts', aws_access_key_id='its a secret id',
+                                                 aws_secret_access_key='its a secret')
 
 
 @pytest.fixture
