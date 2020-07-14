@@ -8,20 +8,9 @@ from ..commands import owltools as ot
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def owler():
-    with mock.patch.object(ot, 'Owler') as mocked:
-        yield mocked
-
-
-# def emptygen(*args, **kwargs):
-#    return
-#    yield  # necessary to produce generator
-
-
-# def rdfobject_generator(rdfobj_list):
-#    for rdfobj in rdfobj_list:
-#        yield rdfobj
+    return mock.patch.object(ot, 'Owler')
 
 
 @pytest.fixture
