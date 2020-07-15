@@ -254,6 +254,15 @@ export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryB
     return summary;
 }
 
+export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockProps) {
+    const { notes_to_tsv } = file;
+    if (notes_to_tsv) {
+        return (<span data-tip={notes_to_tsv}><i className="icon icon-fw icon-exclamation-triangle fas" style={{ color: '#e29302' }}></i></span>);
+    } else {
+        return "-";
+    }
+}
+
 export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
     if (!file || !file.quality_metric || !file.quality_metric.url){
         return '-';
@@ -355,7 +364,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /**
-     * Adds Total Sequences matric column if any raw files in expSet have a `quality_metric`.
+     * Adds Total Sequences metric column if any raw files in expSet have a `quality_metric`.
      * Or if param `showMetricColumns` is set to true;
      *
      * @see fileUtil.filterFilesWithEmbeddedMetricItem
@@ -375,11 +384,31 @@ export class RawFilesStackedTable extends React.PureComponent {
             { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" }
         ];
     }
+    /**
+     * Adds Notes column if any raw files in expSet have a `notes_to_tsv`.
+     * Or if param `showNotesColumns` is set to true;
+     *
+     * @param {*} showNotesColumns - Skips check for notes_to_tsv and returns column if true.
+     * @param {*} experimentSet - ExperimentSet Item.
+     */
+    static notesColumnHeaders(showNotesColumns, experimentSet) {
+        // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
+        showNotesColumns =
+            (typeof showNotesColumns === 'boolean' && showNotesColumns) ||
+                _.any(expFxn.allFilesFromExperimentSet(experimentSet, false), (f) => f.notes_to_tsv) ? true : false;
+
+        if (!showNotesColumns) return null;
+
+        return [
+            { columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }
+        ];
+    }
 
     static columnHeaders = memoize(function(columnHeaders, showMetricColumns, experimentSet){
         return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSet) || [])
             .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSet) || [])
-            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || []);
+            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || [])
+            .concat(RawFilesStackedTable.notesColumnHeaders(false, experimentSet) || []);
     });
 
     static propTypes = {
@@ -670,7 +699,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
             { columnClass: 'file',        title: 'File',        className: 'has-checkbox',  initialWidth: 165,  render: renderFileTitleColumn,          visibleTitle: renderFileHeaderWithCheckbox },
             { columnClass: 'file-detail', title: 'File Type',                               initialWidth: 135,  render: renderFileTypeSummaryColumn     },
-            { columnClass: 'file-detail', title: 'File Size',                               initialWidth: 70,   field : "file_size" }
+            { columnClass: 'file-detail', title: 'File Size',                               initialWidth: 70,   field : "file_size" },
+            { columnClass: 'file-detail', title: 'Notes',                                   initialWidth: 20,   render: renderFileNotesColumn, },
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],

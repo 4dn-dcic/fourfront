@@ -87,6 +87,7 @@ TSV_MAPPING = OrderedDict([
     ('Project',                     (EXP_SET,   ['award.project'])),
     ('Generating Lab',              (FILE,      ['lab.display_title'])),
     ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])),
+    ('Notes',                       (FILE,      ['notes_to_tsv'])),
 
 
 

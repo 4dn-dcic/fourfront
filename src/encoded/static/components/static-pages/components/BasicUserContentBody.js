@@ -57,8 +57,7 @@ export class BasicUserContentBody extends React.PureComponent {
         }
 
         var itemType = this.itemType();
-
-        if (itemType === 'StaticSection') {
+        if (itemType === 'StaticSection' || itemType === 'NotesToTsv') {
             return <BasicStaticSectionBody {...{ content, filetype, markdownCompilerOptions, windowWidth, placeholderReplacementFxn }} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (
@@ -124,17 +123,18 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
             if (!props.titleIcon) return null;
             return <i className={"expand-icon icon icon-fw icon-" + props.titleIcon} />;
         },
-        'prependTitleIcon' : true
+        'prependTitleIcon' : true,
+        'itemType': null,
     });
 
     renderInnerBody() {
-        const { context, href, windowWidth } = this.props;
+        const { context, itemType, href, windowWidth } = this.props;
         const { open } = this.state;
         const isHiGlass = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
-                <BasicUserContentBody {...{ context, href, windowWidth }} parentComponentType={ExpandableStaticHeader} />
+                <BasicUserContentBody {...{ context, itemType, href, windowWidth }} parentComponentType={ExpandableStaticHeader} />
             </div>
         );
     }

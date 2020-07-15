@@ -373,7 +373,7 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
         context.static_content || [],
         function(s){ return s.location === 'header'; }
     ), 'content');
-    const headersToShow = _.uniq(_.filter(
+    let headersToShow = _.uniq(_.filter(
         headersFromStaticContent.concat(context.static_headers || []),
         function(s){
             if (!s || s.error) return false; // No view permission(s)
@@ -382,16 +382,33 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
         }
     ), false, object.itemUtil.atId);
 
+    //add notes_to_tsv into the page's static headers area
+    let itemType = null;
+    if (Array.isArray(context.notes_to_tsv) && context.notes_to_tsv.length > 0) {
+        let content = null;
+        if (context.notes_to_tsv.length === 1) {
+            [content] = context.notes_to_tsv;
+        } else {
+            content = (
+                <ol>
+                    {_.map(context.notes_to_tsv, (n) => <li>{n}</li>)}
+                </ol>
+            );
+        }
+        headersToShow = headersToShow.concat({ 'content': content, 'options': { 'default_open': true, 'title_icon': 'info' }, 'title': 'Note(s)' });
+        itemType = 'NotesToTsv';
+    }
+
     if (!headersToShow || headersToShow.length === 0) return null;
 
     return (
         <div className="static-headers-area">
-            { _.map(headersToShow, function(section, i){
+            {_.map(headersToShow, function (section, i) {
                 const { title, options = {}, name } = section;
                 return (
                     <ExpandableStaticHeader
                         title={title || 'Informational Notice ' + (i + 1)}
-                        context={section}
+                        context={section} itemType={itemType}
                         defaultOpen={options.default_open || false} key={name || i} index={i}
                         titleIcon={standardizeUserIconString(options.title_icon)} />
                 );
