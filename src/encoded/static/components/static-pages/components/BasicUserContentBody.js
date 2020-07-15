@@ -57,7 +57,7 @@ export class BasicUserContentBody extends React.PureComponent {
         }
 
         var itemType = this.itemType();
-        if (itemType === 'StaticSection' || itemType === 'NotesToTsv') {
+        if (itemType === 'StaticSection' || itemType === 'CustomSection') {
             return <BasicStaticSectionBody {...{ content, filetype, markdownCompilerOptions, windowWidth, placeholderReplacementFxn }} />;
         } else if (itemType === 'HiglassViewConfig') {
             return (

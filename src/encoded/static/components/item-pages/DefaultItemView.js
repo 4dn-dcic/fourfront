@@ -396,7 +396,7 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
             );
         }
         headersToShow = headersToShow.concat({ 'content': content, 'options': { 'default_open': true, 'title_icon': 'info' }, 'title': 'Note(s)' });
-        itemType = 'NotesToTsv';
+        itemType = 'CustomSection';
     }
 
     if (!headersToShow || headersToShow.length === 0) return null;
