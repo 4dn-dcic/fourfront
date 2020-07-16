@@ -731,7 +731,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             //{ columnClass: 'file-group',  title: 'File Group',initialWidth: 40, visibleTitle : <i className="icon icon-download fas"></i> },
             { columnClass: 'file',        title: 'File',        className: 'has-checkbox',  initialWidth: 165,  render: renderFileTitleColumn,          visibleTitle: renderFileHeaderWithCheckbox },
             { columnClass: 'file-detail', title: 'File Type',                               initialWidth: 135,  render: renderFileTypeSummaryColumn     },
-            { columnClass: 'file-detail', title: 'File Size',                               initialWidth: 70,   field : "file_size" },
+            { columnClass: 'file-detail', title: 'File Size',                               initialWidth: 70,   field : "file_size" }
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
