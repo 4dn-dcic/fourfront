@@ -40,7 +40,7 @@ ORDER = [
     'biosample',
     'organism',  # allow the 'default' linkTo in individuals work
     'workflow',
-    'vendor'
+    'vendor',
 ]
 
 IS_ATTACHMENT = [

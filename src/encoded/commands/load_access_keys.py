@@ -122,7 +122,6 @@ def main():
             except AppError:
                 log.error('load_access_keys: key_id: %s does not exist in database but exists in ES' % key_id)
 
-
         key = generate_access_key(testapp, env, user_props['uuid'], key_name)
         s3.put_object(Bucket=s3_bucket,
                       Key=key_name,

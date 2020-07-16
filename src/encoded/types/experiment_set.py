@@ -27,7 +27,7 @@ from snovault.util import debug_log
 from .base import (
     Item,
     lab_award_attribution_embed_list,
-    get_item_if_you_can
+    get_item_or_none
 )
 import datetime
 
@@ -394,7 +394,7 @@ class ExperimentSetReplicate(ExperimentSet):
             # We only need to check Microscopy Experiments
             return None
 
-        first_experiment_obj = get_item_if_you_can(request, first_experiment_id, frame='raw')
+        first_experiment_obj = get_item_or_none(request, first_experiment_id, frame='raw')
         if not first_experiment_obj:  # Not yet in DB?
             return None
 

@@ -31,7 +31,8 @@ def clear_db_tables(app):
     """
     success = False
     session = app.registry[DBSESSION]
-    meta = MetaData(bind=session.connection(), reflect=True)
+    meta = MetaData(bind=session.connection())
+    meta.reflect()
     connection = session.connection().connect()
     try:
         # truncate tables by only deleting contents
