@@ -252,15 +252,15 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.6,<3.7"
-version = "3.1.4"
+version = "3.1.7.1b0"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
-Pillow = ">=3.1.1,<4.0.0"
+Pillow = "3.1.1"
 PyBrowserID = ">=0.10.0,<0.11.0"
 PyYAML = ">=5.1,<5.3"
 SPARQLWrapper = ">=1.7.6,<2.0.0"
-SQLAlchemy = ">=1.2.16,<2.0.0"
+SQLAlchemy = "1.3.16"
 WSGIProxy2 = "0.4.2"
 WebOb = ">=1.8.5,<2.0.0"
 WebTest = ">=2.0.21,<3.0.0"
@@ -268,7 +268,7 @@ aws_requests_auth = ">=0.4.1,<0.5.0"
 awscli = ">=1.15.42,<2.0.0"
 "backports.statistics" = "0.1.0"
 boto3 = ">=1.7.42,<2.0.0"
-dcicutils = ">=0.25.0,<1"
+dcicutils = "0.33.2.1b1"
 elasticsearch_dsl = ">=5.3.0,<6.0.0"
 future = ">=0.15.2,<0.16.0"
 futures = ">=3.1.1,<4.0.0"
@@ -303,7 +303,7 @@ venusian = ">=1.2.0,<2.0.0"
 xlrd = ">=1.0.0,<2.0.0"
 "zope.deprecation" = ">=4.4.0,<5.0.0"
 "zope.interface" = ">=4.6.0,<5.0.0"
-"zope.sqlalchemy" = ">=1.2,<2.0"
+"zope.sqlalchemy" = "1.3"
 
 [[package]]
 category = "main"
@@ -311,7 +311,7 @@ description = "Utility package for interacting with the 4DN Data Portal and othe
 name = "dcicutils"
 optional = false
 python-versions = ">=3.4,<3.8"
-version = "0.31.1"
+version = "0.33.2.1b1"
 
 [package.dependencies]
 aws-requests-auth = ">=0.4.2,<1"
@@ -471,7 +471,7 @@ description = "Python Git Library"
 name = "gitpython"
 optional = false
 python-versions = ">=3.4"
-version = "3.1.3"
+version = "3.1.7"
 
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
@@ -1270,10 +1270,11 @@ category = "main"
 description = "Database Abstraction Library"
 name = "sqlalchemy"
 optional = false
-python-versions = "*"
-version = "1.2.16"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "1.3.16"
 
 [package.extras]
+mssql = ["pyodbc"]
 mssql_pymssql = ["pymssql"]
 mssql_pyodbc = ["pyodbc"]
 mysql = ["mysqlclient"]
@@ -1619,7 +1620,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "5b08b19f2ba993cc9dd4badcaa0177ab04c46063225107c28531d20ec24a2a64"
+content-hash = "b535f306d7b0fd9b20f566f8e39d8785e2d67bfec06438256d2fca4f019f027e"
 python-versions = ">=3.6,<3.7"
 
 [metadata.files]
@@ -1777,12 +1778,12 @@ cryptography = [
     {file = "cryptography-2.9.2.tar.gz", hash = "sha256:a0c30272fb4ddda5f5ffc1089d7405b7a71b0b0f51993cb4e5dbb4590b2fc229"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-3.1.4-py3-none-any.whl", hash = "sha256:3ad78b95255f4a409fb7e29d1933fee113b03c2a6abf65e62b821a0e6ac1666e"},
-    {file = "dcicsnovault-3.1.4.tar.gz", hash = "sha256:5efc2ea37d0fc78411817925d63c383e322680f264629c2060533a50721a9bd4"},
+    {file = "dcicsnovault-3.1.7.1b0-py3-none-any.whl", hash = "sha256:4f50128abae08ba117751bd0b49f5fc68a50e6ea193a203fc537c3acc3ba1a7e"},
+    {file = "dcicsnovault-3.1.7.1b0.tar.gz", hash = "sha256:e9f770beb51c569a2aa9edc3b9ebfff4cf65b3f5fc00bce8b7ceaa3fee7bad68"},
 ]
 dcicutils = [
-    {file = "dcicutils-0.31.1-py3-none-any.whl", hash = "sha256:9f2728d6ce4fe9b7a0cabdf5a46a20e34039147192854622881c9a46c3707fd1"},
-    {file = "dcicutils-0.31.1.tar.gz", hash = "sha256:d64569962ef43d3091f9d3cb0e81312ee1fc9e529e23d699fd2874429b043686"},
+    {file = "dcicutils-0.33.2.1b1-py3-none-any.whl", hash = "sha256:f133a351880944199c380a484c0aa811c6e0a22472ce6d76c9c71192fa10e346"},
+    {file = "dcicutils-0.33.2.1b1.tar.gz", hash = "sha256:15d2d7a4cb855f5de2d7fa999a12d88c85b8eadddb06a787ba8608ffe2aa3ff3"},
 ]
 docker = [
     {file = "docker-4.2.2-py2.py3-none-any.whl", hash = "sha256:03a46400c4080cb6f7aa997f881ddd84fef855499ece219d75fbdb53289c17ab"},
@@ -1829,8 +1830,8 @@ gitdb = [
     {file = "gitdb-4.0.5.tar.gz", hash = "sha256:c9e1f2d0db7ddb9a704c2a0217be31214e91a4fe1dea1efad19ae42ba0c285c9"},
 ]
 gitpython = [
-    {file = "GitPython-3.1.3-py3-none-any.whl", hash = "sha256:ef1d60b01b5ce0040ad3ec20bc64f783362d41fa0822a2742d3586e1f49bb8ac"},
-    {file = "GitPython-3.1.3.tar.gz", hash = "sha256:e107af4d873daed64648b4f4beb89f89f0cfbe3ef558fc7821ed2331c2f8da1a"},
+    {file = "GitPython-3.1.7-py3-none-any.whl", hash = "sha256:fa3b92da728a457dd75d62bb5f3eb2816d99a7fe6c67398e260637a40e3fafb5"},
+    {file = "GitPython-3.1.7.tar.gz", hash = "sha256:2db287d71a284e22e5c2846042d0602465c7434d910406990d5b74df4afb0858"},
 ]
 html5lib = [
     {file = "html5lib-0.9999999.tar.gz", hash = "sha256:2612a191a8d5842bfa057e41ba50bbb9dcb722419d2408c78cff4758d0754868"},
@@ -2284,7 +2285,25 @@ sparqlwrapper = [
     {file = "SPARQLWrapper-1.7.6.zip", hash = "sha256:052c5b99ede756e227ff2db61a6664633a135d99fa4a8d728459480f5bc9a540"},
 ]
 sqlalchemy = [
-    {file = "SQLAlchemy-1.2.16.tar.gz", hash = "sha256:6af3ca2f7f00844465ab4fa78337d487b39e53f516c51328aed4ed3a719d4264"},
+    {file = "SQLAlchemy-1.3.16-cp27-cp27m-macosx_10_13_x86_64.whl", hash = "sha256:8d8c21e9d4efef01351bf28513648ceb988031be4159745a7ad1b3e28c8ff68a"},
+    {file = "SQLAlchemy-1.3.16-cp27-cp27m-win32.whl", hash = "sha256:083e383a1dca8384d0ea6378bd182d83c600ed4ff4ec8247d3b2442cf70db1ad"},
+    {file = "SQLAlchemy-1.3.16-cp27-cp27m-win_amd64.whl", hash = "sha256:128f6179325f7597a46403dde0bf148478f868df44841348dfc8d158e00db1f9"},
+    {file = "SQLAlchemy-1.3.16-cp36-cp36m-macosx_10_13_x86_64.whl", hash = "sha256:6056b671aeda3fc451382e52ab8a753c0d5f66ef2a5ccc8fa5ba7abd20988b4d"},
+    {file = "SQLAlchemy-1.3.16-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:7025c639ce7e170db845e94006cf5f404e243e6fc00d6c86fa19e8ad8d411880"},
+    {file = "SQLAlchemy-1.3.16-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:e18752cecaef61031252ca72031d4d6247b3212ebb84748fc5d1a0d2029c23ea"},
+    {file = "SQLAlchemy-1.3.16-cp36-cp36m-win32.whl", hash = "sha256:0a690a6486658d03cc6a73536d46e796b6570ac1f8a7ec133f9e28c448b69828"},
+    {file = "SQLAlchemy-1.3.16-cp36-cp36m-win_amd64.whl", hash = "sha256:d00b393f05dbd4ecd65c989b7f5a81110eae4baea7a6a4cdd94c20a908d1456e"},
+    {file = "SQLAlchemy-1.3.16-cp37-cp37m-macosx_10_13_x86_64.whl", hash = "sha256:114b6ace30001f056e944cebd46daef38fdb41ebb98f5e5940241a03ed6cad43"},
+    {file = "SQLAlchemy-1.3.16-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:13d48cd8b925b6893a4e59b2dfb3e59a5204fd8c98289aad353af78bd214db49"},
+    {file = "SQLAlchemy-1.3.16-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:211a1ce7e825f7142121144bac76f53ac28b12172716a710f4bf3eab477e730b"},
+    {file = "SQLAlchemy-1.3.16-cp37-cp37m-win32.whl", hash = "sha256:68d78cf4a9dfade2e6cf57c4be19f7b82ed66e67dacf93b32bb390c9bed12749"},
+    {file = "SQLAlchemy-1.3.16-cp37-cp37m-win_amd64.whl", hash = "sha256:2dc57ee80b76813759cccd1a7affedf9c4dbe5b065a91fb6092c9d8151d66078"},
+    {file = "SQLAlchemy-1.3.16-cp38-cp38-macosx_10_13_x86_64.whl", hash = "sha256:43078c7ec0457387c79b8d52fff90a7ad352ca4c7aa841c366238c3e2cf52fdf"},
+    {file = "SQLAlchemy-1.3.16-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:bbb545da054e6297242a1bb1ba88e7a8ffb679f518258d66798ec712b82e4e07"},
+    {file = "SQLAlchemy-1.3.16-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:5b1bf3c2c2dca738235ce08079783ef04f1a7fc5b21cf24adaae77f2da4e73c3"},
+    {file = "SQLAlchemy-1.3.16-cp38-cp38-win32.whl", hash = "sha256:3e625e283eecc15aee5b1ef77203bfb542563fa4a9aa622c7643c7b55438ff49"},
+    {file = "SQLAlchemy-1.3.16-cp38-cp38-win_amd64.whl", hash = "sha256:7d98e0785c4cd7ae30b4a451416db71f5724a1839025544b4edbd92e00b91f0f"},
+    {file = "SQLAlchemy-1.3.16.tar.gz", hash = "sha256:7224e126c00b8178dfd227bc337ba5e754b197a3867d33b9f30dc0208f773d70"},
 ]
 strict-rfc3339 = [
     {file = "strict-rfc3339-0.7.tar.gz", hash = "sha256:5cad17bedfc3af57b399db0fed32771f18fc54bbd917e85546088607ac5e1277"},
