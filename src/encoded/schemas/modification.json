@@ -44,8 +44,7 @@
               "Crispr",
               "Stable Transfection",
               "Viral Transduction",
-              "RMCE",
-              "Other"
+              "RMCE"
             ]
         },
         "genomic_change": {
