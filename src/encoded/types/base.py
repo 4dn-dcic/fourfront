@@ -105,7 +105,7 @@ ALLOW_ANY_USER_ADD = [
 ] + ALLOW_EVERYONE_VIEW
 
 
-def get_item_if_you_can(request, value, itype=None, frame='object'):
+def get_item_or_none(request, value, itype=None, frame='object'):
     """
     Return the view of an item with given frame. Can specify different types
     of `value` for item lookup

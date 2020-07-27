@@ -146,7 +146,7 @@ def main():
     except Exception:
         type, value, tb = sys.exc_info()
         traceback.print_exc()
-        import pdb; pdb.post_mortem(tb)
+        # import pdb; pdb.post_mortem(tb)
 
 
 if __name__ == '__main__':

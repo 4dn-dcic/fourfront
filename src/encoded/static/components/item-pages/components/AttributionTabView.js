@@ -65,73 +65,73 @@ export function generateContactPersonListItem(contactPerson, idx){
 
 
 
+export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas }){
+    const {
+        produced_in_pub = null,
+        publications_of_set = [],
+        lab,
+        award = null,
+        submitted_by,
+        contributing_labs = []
+    } = context;
+    // `error` usually present when no view permission.
+    const awardExists = (award && !award.error);
+    const labsExist = (lab && !lab.error) || contributing_labs.length > 0;
+    const submittedByExists = submitted_by && !submitted_by.error;
+    return (
+        <div className="info-area">
 
-export class AttributionTabView extends React.PureComponent {
-
-    static getTabObject(props){
-        var context = props.context;
-        return {
-            tab : <span><i className="icon icon-users fas icon-fw"/> Attribution</span>,
-            key : "attribution",
-            disabled : (!context.lab && !context.award && !context.submitted_by),
-            content : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>Attribution</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider mb-1"/>
-                    <AttributionTabView {...props} />
+            { produced_in_pub || publications_of_set.length > 0 ?
+                <div>
+                    <Publications context={context} />
+                    <hr className="mt-1 mb-2"/>
                 </div>
-            )
-        };
-    }
+                : null }
 
-    render(){
-        var { context } = this.props,
-            { produced_in_pub, publications_of_set, lab, award, submitted_by, contributing_labs } = context,
-            labsExist           = lab || (Array.isArray(contributing_labs) && contributing_labs.length > 0),
-            awardExists         = award && typeof award !== 'string', // At one point we hard properties that if not embedded were returned as strings (@id) which could be AJAXed.
-            submittedByExists   = submitted_by && typeof submitted_by !== 'string' && !submitted_by.error;
+            <div className="row">
 
-        return (
-            <div className="info-area">
-
-                { produced_in_pub || (Array.isArray(publications_of_set) && publications_of_set.length > 0) ?
-                    <div>
-                        <Publications context={context} />
-                        <hr className="mt-1 mb-2"/>
+                { labsExist ?
+                    <div className={"col-12 col-md-" + (submittedByExists ? '7' : '12')}>
+                        <LabsSection context={context} />
+                        { awardExists ? FormattedInfoBlock.Award(award) : null }
                     </div>
                     : null }
 
-                <div className="row">
+                { submittedByExists ?
+                    <div className={"col-12 col-md-" + (labsExist ? '5' : '12')}>
+                        { FormattedInfoBlock.User(submitted_by) }
+                    </div>
+                    : null }
 
-                    { labsExist ?
-                        <div className={"col-12 col-md-" + (submittedByExists ? '7' : '12')}>
-                            <LabsSection context={context} />
-                            { awardExists ? FormattedInfoBlock.Award(award) : null }
-                        </div>
-                        : null }
-
-                    { submittedByExists ?
-                        <div className={"col-12 col-md-" + (labsExist ? '5' : '12')}>
-                            { FormattedInfoBlock.User(submitted_by) }
-                        </div>
-                        : null }
-
-                </div>
-
-                <ItemFooterRow context={context} schemas={this.props.schemas} />
             </div>
-        );
-    }
 
-}
+            <ItemFooterRow {...{ context, schemas }} />
+        </div>
+    );
+});
+AttributionTabView.getTabObject = function(props){
+    const { context: { lab, award, submitted_by } } = props;
+    return {
+        tab : <span><i className="icon icon-users fas icon-fw"/> Attribution</span>,
+        key : "attribution",
+        disabled : (!lab && !award && !submitted_by),
+        content : (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title">
+                    <span>Attribution</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider mb-1"/>
+                <AttributionTabView {...props} />
+            </div>
+        )
+    };
+};
 
 class LabsSection extends React.PureComponent {
 
     static defaultProps = {
         'className' : null
-    }
+    };
 
     constructor(props){
         super(props);
@@ -144,11 +144,11 @@ class LabsSection extends React.PureComponent {
     }
 
     contributingLabRenderFxn(lab, idx, all){
-        var isMounted       = this.state.mounted,
-            atId            = object.itemUtil.atId(lab),
-            contactPersons  = isMounted && Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
-                return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
-            });
+        const { mounted } = this.state;
+        const atId = object.itemUtil.atId(lab);
+        const contactPersons  = mounted && Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
+            return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
+        });
 
         return (
             <div className={"lab" + (all.length === 1 && (!contactPersons || contactPersons.length === 0)  ? ' mt-1' : '')} key={atId || idx}>
@@ -163,20 +163,26 @@ class LabsSection extends React.PureComponent {
     }
 
     render(){
-        var { context, className } = this.props,
-            isMounted           = this.state.mounted,
-            primaryLab          = (typeof context.lab !== 'string' && context.lab) || null,
-            contributingLabs    = ((Array.isArray(context.contributing_labs) && context.contributing_labs.length > 0) && context.contributing_labs) || null;
+        const {
+            context : {
+                lab: primaryLab = null,
+                contributing_labs: contributingLabs = []
+            },
+            className = null
+        } = this.props;
+        const contribLabLen = contributingLabs.length;
+        const { mounted } = this.state;
 
-        if (!primaryLab && !contributingLabs) return null;
+        if (!primaryLab && contribLabLen === 0) return null;
+
         return (
             <div className={className}>
-                { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, isMounted) : null }
-                { contributingLabs ?
+                { primaryLab ? FormattedInfoBlock.Lab(primaryLab, true, true, mounted) : null }
+                { contribLabLen > 0 ?
                     <WrappedCollapsibleList wrapperElement="div" items={contributingLabs} singularTitle="Contributing Lab"
                         iconClass="user-plus fas" itemRenderFxn={this.contributingLabRenderFxn} />
                     : null }
-                { primaryLab && contributingLabs ? <hr className="mt-1 mb-2"/> : null }
+                { primaryLab && contribLabLen > 0 ? <hr className="mt-1 mb-2"/> : null }
             </div>
         );
 

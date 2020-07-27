@@ -26,7 +26,7 @@ from .types.workflow import (
     WorkflowRunTracingException,
     item_model_to_object
 )
-from .types.base import get_item_if_you_can
+from .types.base import get_item_or_none
 
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
@@ -452,7 +452,7 @@ def add_files_to_higlass_viewconf(context, request):
     if not higlass_viewconfig:
         
         # @todo: this block will be removed when a workaround to run tests correctly.
-        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
+        default_higlass_viewconf = get_item_or_none(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
         # Add a view section if the default higlass_viewconfig lacks one
         if "views" not in higlass_viewconfig:
@@ -555,7 +555,7 @@ def get_file_higlass_information(request, file_uuids):
     for file_uuid in file_uuids:
         data = {
             "uuid" : file_uuid,
-            "data" : get_item_if_you_can(request, file_uuid),
+            "data" : get_item_or_none(request, file_uuid),
         }
 
         if data["data"] == None:

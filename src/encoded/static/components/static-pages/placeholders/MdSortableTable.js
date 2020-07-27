@@ -135,7 +135,7 @@ const Utils = {
                 return obj = {};
             }
 
-            obj[headers[i % (headers.length + 1)]] = Number.isNaN(parseFloat(val)) ? val : parseFloat(val);
+            obj[headers[i % (headers.length + 1)]] = !Utils.parseFloatable(val) ? val : Utils.parseIfFloat(val);
         });
         //push the last item
         if (!_.isEmpty(obj)) {
