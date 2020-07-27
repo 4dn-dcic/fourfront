@@ -40,11 +40,11 @@
             "description": "The method used to make the genomic modification.",
             "type": "string",
             "lookup": 30,
-            "enum" : [
+            "suggested_enum" : [
               "Crispr",
               "Stable Transfection",
               "Viral Transduction",
-              "Other"
+              "RMCE"
             ]
         },
         "genomic_change": {
