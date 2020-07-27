@@ -12,13 +12,14 @@ import { Publications } from './Publications';
 
 
 
-export function generateAddressString(lab){
-    return (
-        (lab.city ? lab.city + ', ' : '') +
-        (lab.state ? lab.state : '') +
-        (lab.postal_code ? ' ' + lab.postal_code : '' ) +
-        (lab.country ? ', ' + lab.country : '')
-    );
+export function generateAddressString(lab) {
+    const { city, state, postal_code, country } = lab;
+    const address = [];
+    if (city) { address.push(city); }
+    if (state || postal_code) { address.push(((state || '') + ' ' + (postal_code || '')).trim()); }
+    if (country) { address.push(country); }
+
+    return address.join(', ');
 }
 
 /**
