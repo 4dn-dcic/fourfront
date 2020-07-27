@@ -1,6 +1,6 @@
 'use strict';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import ReactTooltip from 'react-tooltip';
@@ -18,21 +18,17 @@ import { FormattedInfoWrapper, WrappedCollapsibleList } from './FormattedInfoBlo
  * @prop {Element|Element[]} children   - React Element(s) to display in detail area under title.
  */
 const DetailBlock = React.memo(function DetailBlock(props){
-    const { publication, singularTitle, children } = props;
-    if (!publication || !object.itemUtil.atId(publication)) return null;
+    const { publication = null, singularTitle, children } = props;
+    const publicationHref = object.itemUtil.atId(publication);
+    if (!publication || !publicationHref) return null; // Is case if no view permission for Publiation, as well.
 
-    let title = publication.display_title;
-    const url = object.itemUtil.atId(publication);
-
-    if (publication.short_attribution && title.indexOf(publication.short_attribution + ' ') > -1){
-        // Short Attribution is added to display_title on back-end; clear it off here since we craft our own attribution string manually.
-        title = title.replace(publication.short_attribution + ' ', '');
-    }
+    // TODO maybe remove ellipsis on this and show full/longer `title`.
+    const { display_title } = publication;
 
     return (
         <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
             <h5 className="block-title">
-                <a href={url}>{ title }</a>
+                <a href={publicationHref}>{ display_title }</a>
             </h5>
             <div className="details">{ children }</div>
         </FormattedInfoWrapper>
@@ -114,149 +110,115 @@ PublicationBelowHeaderRow.defaultProps = {
 };
 
 /**
- * Shows publications for current Item.
- * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView .
- *
- * @class Publications
- *
- * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
+ * Shows publications for current Item. Rendered by AttributionTabView.js.
+ * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/ExperimentSetView.
  */
-export class Publications extends React.PureComponent {
+export const Publications = React.memo(function Publications({ context }){
 
-    static DetailBlock = DetailBlock;
-    static ShortAttribution = ShortAttribution;
-    static PublicationBelowHeaderRow = PublicationBelowHeaderRow;
-
-    constructor(props){
-        super(props);
-        this.shortAbstract = this.shortAbstract.bind(this);
-        this.toggleAbstractIcon = this.toggleAbstractIcon.bind(this);
-        this.detailRows = this.detailRows.bind(this);
-        this.onToggleAbstractIconClick = this.onToggleAbstractIconClick.bind(this);
-        this.state = {
-            'abstractCollapsed' : true
-        };
-    }
-
-    /**
-     * @memberof Publications
-     */
-    componentDidMount(){
+    // See https://css-tricks.com/run-useeffect-only-once/
+    useEffect(function(){
         ReactTooltip.rebuild();
-    }
+    }, [ context ]);
 
-    /**
-     * @memberof module:item-pages/components.Publications
-     */
-    shortAbstract(){
-        var abstract = this.props.context.produced_in_pub.abstract;
-        if (!abstract || typeof abstract !== 'string') return null;
-        if (!this.state.abstractCollapsed) return abstract;
-        if (abstract.length > 240){
-            return abstract.slice(0, 238) + '...';
-        } else {
-            return abstract;
-        }
-    }
+    const { produced_in_pub = null, publications_of_set = [] } = context || {};
+    const producedInPubID = (produced_in_pub && object.itemUtil.atId(produced_in_pub)) || null;
+    let usedInPublications;
 
-    onToggleAbstractIconClick(e){
-        this.setState(function({ abstractCollapsed }){
-            return { 'abstractCollapsed' : !abstractCollapsed };
+    if (publications_of_set.length === 0){
+        usedInPublications = [];
+    } else if (!producedInPubID){
+        usedInPublications = publications_of_set;
+    } else {
+        usedInPublications = _.filter(publications_of_set, function(pub){
+            const pubID = object.itemUtil.atId(pub);
+            if (!pubID || (pubID && pubID === producedInPubID)){
+                return false;
+            }
+            return true;
         });
     }
 
-    toggleAbstractIcon(publication = this.props.context.produced_in_pub){
-        if (!publication || !publication.abstract) return null;
-        if (publication && publication.abstract && publication.abstract.length <= 240){
-            return null;
+    return (
+        <div className="publications-section">
+            <DetailBlock publication={produced_in_pub} singularTitle="Publication Details">
+                <PublicationDetailRows publication={produced_in_pub} />
+            </DetailBlock>
+            <WrappedCollapsibleList items={usedInPublications} singularTitle="Used in Publication" itemClassName="publication" />
+        </div>
+    );
+});
+Publications.DetailBlock = DetailBlock;
+Publications.ShortAttribution = ShortAttribution;
+Publications.PublicationBelowHeaderRow = PublicationBelowHeaderRow;
+
+
+const PublicationDetailRows = React.memo(function PublicationDetailRows({ publication }){
+
+    const [ abstractCollapsed, setAbstractCollapsed ] = useState(true);
+
+    if (!publication || !object.itemUtil.atId(publication)){
+        return [];
+    }
+
+    const {
+        authors,
+        abstract = null,
+        date_published
+    } = publication;
+
+
+    const details = [];
+
+    if (typeof authors === 'string'){
+        // Deprecated?
+        details.push({
+            'label' : 'Authors',
+            'content' : publication.authors
+        });
+    } else if (Array.isArray(authors) && authors.length > 0){
+        details.push({
+            'label' : 'Author' + (authors.length > 1 ? 's' : ''),
+            'content' : authors.join(', ')
+        });
+    }
+
+    if (abstract && typeof abstract === 'string') {
+        let toggleAbstractIcon = null;
+        let showAbstract = abstract;
+
+        if (abstract.length > 240) {
+            toggleAbstractIcon = (
+                <i className={"icon abstract-toggle icon-fw fas icon-" + (abstractCollapsed ? 'plus' : 'minus')}
+                    data-tip={abstractCollapsed ? 'See More' : 'Collapse'} onClick={function(){ setAbstractCollapsed(!abstractCollapsed); }} />
+            );
+            showAbstract = !abstractCollapsed ? abstract : abstract.slice(0, 238) + '...';
         }
-        return (
-            <i className={"icon abstract-toggle icon-fw fas icon-" + (this.state.abstractCollapsed ? 'plus' : 'minus')}
-                data-tip={this.state.abstractCollapsed ? 'See More' : 'Collapse'} onClick={this.onToggleAbstractIconClick} />
+
+        details.push({
+            'key' : 'abstract',
+            'label' : <span>{ toggleAbstractIcon } Abstract</span>,
+            'content' : showAbstract
+        });
+
+        toggleAbstractIcon = (
+            <i className={"icon abstract-toggle icon-fw fas icon-" + (abstractCollapsed ? 'plus' : 'minus')}
+                data-tip={abstractCollapsed ? 'See More' : 'Collapse'} onClick={function(){ setAbstractCollapsed(!abstractCollapsed); }} />
         );
     }
 
-    detailRows(){
-        const { context : { produced_in_pub : publication } } = this.props;
-        if (!publication || !object.itemUtil.atId(publication)){
-            return [];
-        }
-
-        var details = [];
-
-        if (typeof publication.authors === 'string'){
-            details.push({
-                'label' : 'Authors',
-                'content' : publication.authors
-            });
-        } else if (Array.isArray(publication.authors) && publication.authors.length > 0){
-            details.push({
-                'label' : 'Author' + (publication.authors.length > 1 ? 's' : ''),
-                'content' : publication.authors.join(', ')
-            });
-        }
-
-        if (typeof publication.abstract === 'string'){
-            //var inclProps = {};
-            //var shortAbstract = this.shortAbstract();
-            //if (shortAbstract !== publication.abstract){
-            //    inclProps['data-tip'] = '...' + publication.abstract.slice(238);
-            //    inclProps['data-place'] = 'bottom';
-            //}
-            details.push({
-                'key' : 'abstract',
-                'label' : <span>{ this.toggleAbstractIcon() } Abstract</span>,
-                'content' : this.shortAbstract()
-            });
-        }
-
-        if (typeof publication.date_published === 'string'){
-            details.push({
-                'label' : 'Published',
-                'content' : formatPublicationDate(publication.date_published)
-            });
-        }
-
-        return details;
+    if (typeof date_published === 'string'){
+        details.push({
+            'label' : 'Published',
+            'content' : formatPublicationDate(date_published)
+        });
     }
 
-    render(){
-        const { context } = this.props;
-        const { produced_in_pub = null, publications_of_set = [] } = context || {};
-        const producedInPubID = (produced_in_pub && object.itemUtil.atId(produced_in_pub)) || null;
-        let usedInPublications;
-
-        if (publications_of_set.length === 0){
-            usedInPublications = [];
-        } else if (!producedInPubID){
-            usedInPublications = publications_of_set;
-        } else {
-            usedInPublications = _.filter(publications_of_set, function(pub){
-                const pubID = object.itemUtil.atId(pub);
-                if (!pubID || (pubID && pubID === producedInPubID)){
-                    return false;
-                }
-                return true;
-            });
-        }
-
+    return details.map(function({ key, label, content }, idx){
         return (
-            <div className="publications-section">
-                <Publications.DetailBlock publication={produced_in_pub} singularTitle="Publication Details">
-                    {
-                        _.map(this.detailRows(produced_in_pub), function({ key, label, content }, i){
-                            return (
-                                <div className="row details-row" key={ key || label || i }>
-                                    <div className="col-2 text-600 text-right label-col">{ label }</div>
-                                    <div className="col-10">{ content }</div>
-                                </div>
-                            );
-                        })
-                    }
-                </Publications.DetailBlock>
-                <WrappedCollapsibleList items={usedInPublications} singularTitle="Used in Publication" itemClassName="publication" />
+            <div className="row details-row" key={ key || label || idx }>
+                <div className="col-2 text-600 text-right label-col">{ label }</div>
+                <div className="col-10">{ content }</div>
             </div>
         );
-    }
-
-}
+    });
+});
