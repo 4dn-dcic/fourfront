@@ -23,12 +23,12 @@ const DetailBlock = React.memo(function DetailBlock(props){
     if (!publication || !publicationHref) return null; // Is case if no view permission for Publiation, as well.
 
     // TODO maybe remove ellipsis on this and show full/longer `title`.
-    const { display_title } = publication;
+    const { title: origTitle, display_title: shortAttribTitle } = publication;
 
     return (
         <FormattedInfoWrapper singularTitle={singularTitle} isSingleItem>
             <h5 className="block-title">
-                <a href={publicationHref}>{ display_title }</a>
+                <a href={publicationHref}>{ origTitle || shortAttribTitle }</a>
             </h5>
             <div className="details">{ children }</div>
         </FormattedInfoWrapper>
@@ -161,9 +161,12 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
     }
 
     const {
+        title = null,
         authors,
         abstract = null,
-        date_published
+        date_published,
+        ID: externalID = null,
+        url: externalURL = null
     } = publication;
 
 
@@ -204,6 +207,19 @@ const PublicationDetailRows = React.memo(function PublicationDetailRows({ public
             <i className={"icon abstract-toggle icon-fw fas icon-" + (abstractCollapsed ? 'plus' : 'minus')}
                 data-tip={abstractCollapsed ? 'See More' : 'Collapse'} onClick={function(){ setAbstractCollapsed(!abstractCollapsed); }} />
         );
+    }
+
+    if (externalID && typeof externalID === 'string' && title){
+        // Exclude if no `title`, since ID is present in `display_title` already.
+        details.push({
+            'label' : 'External ID',
+            'content' : !externalURL ? externalID : (
+                <React.Fragment>
+                    <a href={externalURL} target="_blank" rel="noopener noreferrer">{ externalID }</a>
+                    <i className="ml-07 icon icon-external-link-alt fas text-small"/>
+                </React.Fragment>
+            )
+        });
     }
 
     if (typeof date_published === 'string'){
