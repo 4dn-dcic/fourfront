@@ -170,7 +170,8 @@
                             "is superceded by",
                             "derived from",
                             "parent of",
-                            "paired with"
+                            "paired with",
+                            "grouped with"
                         ]
                     },
                     "file": {

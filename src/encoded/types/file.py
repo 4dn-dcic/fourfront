@@ -571,7 +571,8 @@ class File(Item):
             "parent of": "derived from",
             "supercedes": "is superceded by",
             "is superceded by": "supercedes",
-            "paired with": "paired with"
+            "paired with": "paired with",
+            "grouped with": "grouped with"
         }
 
         if 'related_files' in properties:
