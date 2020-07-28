@@ -57,6 +57,7 @@ describe('Each PUBLIC ItemView Works (most public recent only) - PRIMARY TYPES',
             }
 
             gatherTheData(itemTypeHierarchy);
+            typesToCheck.sort();
         });
     });
 
