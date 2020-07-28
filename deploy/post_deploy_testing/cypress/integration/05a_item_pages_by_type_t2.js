@@ -1,19 +1,20 @@
+import { schemasToItemTypeHierarchy } from '../support/macros';
+import { primaryItemTypes } from '../support/variables';
 
-//import { itemTypeHierarchy } from './../../../../src/encoded/static/components/util/itemTypeHierarchy';
-//import { schemasToItemTypeHierarchy } from '@hms-dbmi-bgm/shared-portal-components/src/components/util/schema-transforms';
-//import { itemTypeHierarchy } from './../../../../src/encoded/static/components/util/itemTypeHierarchy';
-import { schemasToItemTypeHierarchy } from './../support/macros';
+
+
 
 /**
  * Test each Item view to ensure that there is no page rendering error.
  *
  * We will visit one of each Item type directly via browser as an initial page request,
  * instead of navigating to it via UI, as this would make testing 500 render error simpler.
+ * @module
  */
 
-// Config
-const itemsPerTypeToCheck = 3;
 
+// Configuration (Hardcoded)
+const itemsPerTypeToCheck = 3;
 
 
 // Gather up all Item types we have.
@@ -29,7 +30,7 @@ const uniqueIDSet = new Set();
 const currIDs = [];
 
 
-describe('Each Item View Works (most public recent only)', function () {
+describe('Each PUBLIC ItemView Works (most public recent only) - PRIMARY TYPES', function () {
 
     before(function(){
         cy.visit('/'); // Start at home page
@@ -39,20 +40,34 @@ describe('Each Item View Works (most public recent only)', function () {
             'followRedirect' : true
         }).then(function(res){
             itemTypeHierarchy = schemasToItemTypeHierarchy(res.body);
-            Cypress.log({ 'name' : "Item Type Hierarchy", "message" : itemTypeHierarchy });
-            typesToCheck = Cypress._.reduce(Cypress._.toPairs(itemTypeHierarchy), function(res, [ abstractType, leafTypes ]){
-                return res.concat(Cypress._.keys(leafTypes));
-            }, []);
+            console.log({ 'name' : "Item Type Hierarchy", "message" : itemTypeHierarchy });
+            // Iterate over /profiles/ response and collect up any which are leaftypes.
+
+            typesToCheck = [];
+
+            function gatherTheData(hier){ // Quick DFS
+                Cypress._.toPairs(hier).forEach(function([ maybeAbstractType, leafTypesObj ]){
+                    const leafTypes = Cypress._.keys(leafTypesObj);
+                    if (leafTypes.length === 0) {
+                        typesToCheck.push(maybeAbstractType); // Not abstract you see. Well, maybe, but probably not.
+                    } else {
+                        gatherTheData(leafTypesObj); // Recurse!
+                    }
+                });
+            }
+
+            gatherTheData(itemTypeHierarchy);
         });
     });
 
-    it("Have an itemTypeHierarchy from /profiles/", function(){
-        expect(Cypress._.keys(itemTypeHierarchy).length).to.be.at.least(2);
-        Cypress.log({ 'name' : "Item Type Hierarchy", "message" : JSON.stringify(itemTypeHierarchy) });
-    });
+    it("Can load up list of @ids to check per item type (backend) - PRIMARY TYPES", function(){
+        const allTypesLen = typesToCheck.length;
+        const currTypesToTest = typesToCheck.slice(
+            Math.floor(allTypesLen / 3),
+            Math.floor((allTypesLen / 3 * 2))
+        ); // SPECIFIC TO THIS FILE
 
-    it("Can load up list of @ids to check per item type (backend)", function(){
-        Cypress._.forEach(typesToCheck, function(itemType, idx){
+        currTypesToTest.forEach(function(itemType, idx){
             cy.request({
                 url : "/search/?type=" + itemType + "&limit=" + itemsPerTypeToCheck,
                 method: "GET",
@@ -77,11 +92,7 @@ describe('Each Item View Works (most public recent only)', function () {
         });
     });
 
-    it("Have loaded list of @ids to check", function(){
-        Cypress.log({ 'name' : "# Items to Check", "message" : currIDs.length });
-    });
-
-    it("Each most-recent item can be navigated w.o. errors", function(){
+    it("Each most-recent item can be navigated w.o. errors - PRIMARY TYPES", function(){
 
         let currPagePath = "/";
 
