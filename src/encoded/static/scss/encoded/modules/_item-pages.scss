@@ -1399,6 +1399,14 @@ $badge-item-min-height: 90px;
 			}
 		}
 
+		> .inner > .static-section-header ol {
+			padding-left: 15px;
+
+			> li {
+				padding-left: 5px;
+				margin-top: 8px;
+			}
+		}
 	}
 
 	.supplementary-files-section-part {
