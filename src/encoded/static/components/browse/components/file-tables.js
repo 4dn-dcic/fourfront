@@ -254,6 +254,15 @@ export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryB
     return summary;
 }
 
+export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockProps) {
+    const { notes_to_tsv } = file;
+    if (notes_to_tsv) {
+        return (<span data-tip={notes_to_tsv}><i className="icon icon-fw icon-exclamation-triangle fas" style={{ color: '#e29302' }}></i></span>);
+    } else {
+        return "-";
+    }
+}
+
 export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
     if (!file || !file.quality_metric || !file.quality_metric.url){
         return '-';
@@ -355,7 +364,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /**
-     * Adds Total Sequences matric column if any raw files in expSet have a `quality_metric`.
+     * Adds Total Sequences metric column if any raw files in expSet have a `quality_metric`.
      * Or if param `showMetricColumns` is set to true;
      *
      * @see fileUtil.filterFilesWithEmbeddedMetricItem
@@ -375,11 +384,31 @@ export class RawFilesStackedTable extends React.PureComponent {
             { columnClass: 'file-detail', title: 'Total Sequences', initialWidth: 110, field : "quality_metric.Total Sequences" }
         ];
     }
+    /**
+     * Adds Notes column if any raw files in expSet have a `notes_to_tsv`.
+     * Or if param `showNotesColumns` is set to true;
+     *
+     * @param {*} showNotesColumns - Skips check for notes_to_tsv and returns column if true.
+     * @param {*} experimentSet - ExperimentSet Item.
+     */
+    static notesColumnHeaders(showNotesColumns, experimentSet) {
+        // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
+        showNotesColumns =
+            (typeof showNotesColumns === 'boolean' && showNotesColumns) ||
+                _.any(expFxn.allFilesFromExperimentSet(experimentSet, false), (f) => f.notes_to_tsv) ? true : false;
 
-    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, experimentSet){
+        if (!showNotesColumns) return null;
+
+        return [
+            { columnClass: 'file-detail', title: 'Notes', initialWidth: 40, render: renderFileNotesColumn }
+        ];
+    }
+
+    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, showNotesColumns, experimentSet){
         return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSet) || [])
             .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSet) || [])
-            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || []);
+            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || [])
+            .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, experimentSet) || []);
     });
 
     static propTypes = {
@@ -411,6 +440,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         ],
         'collapseLongLists' : true,
         'showMetricColumns' : null,
+        'showNotesColumns'  : null,
         'preventExpand'     : false
     };
 
@@ -474,7 +504,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, href, preventExpand } = this.props;
+        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showNotesColumns, href, preventExpand } = this.props;
 
         const allRawFiles = exp.files || [];
 
@@ -484,7 +514,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
-        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, experimentSet),
+        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, showNotesColumns, experimentSet),
             contentsClassName   = 'files',
             contents            = [];
 
@@ -623,7 +653,7 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Much of styling/layouting is defined in CSS.
      */
     render(){
-        const { experimentSet, columnHeaders: propColHeaders, showMetricsColumns, collapseLongLists, width, preventExpand } = this.props;
+        const { experimentSet, columnHeaders: propColHeaders, showMetricsColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
         const { experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet);
 
         const appendCountStr = experimentsGroupedByBiosample.length > 5 ?
@@ -638,7 +668,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             </React.Fragment>
         );
 
-        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, experimentSet);
+        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, showNotesColumns, experimentSet);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
@@ -658,10 +688,41 @@ export class RawFilesStackedTable extends React.PureComponent {
 
 export class ProcessedFilesStackedTable extends React.PureComponent {
 
+    /**
+     * Adds Notes column if any raw files in expSet have a `notes_to_tsv`.
+     * Or if param `showNotesColumns` is set to true;
+     *
+     * @param {*} showNotesColumns - show/hide notes column accoording to one of 'never', 'always', 'conditional' cases
+     * @param {*} processedFiles - all processed files.
+     */
+    static notesColumnHeaders(showNotesColumns, processedFiles) {
+
+        switch (showNotesColumns) {
+
+            case 'always':
+                return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
+            case 'conditional':
+                if (_.any(processedFiles || [], (f) => f.notes_to_tsv)) {
+                    return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
+                }
+                return null;
+            case 'never':
+            default:
+                return null;
+        }
+    }
+
+    static columnHeaders = memoize(function (columnHeaders, showNotesColumns, processedFiles) {
+        let clonedColumnHeaders = columnHeaders.slice(0);
+        clonedColumnHeaders = clonedColumnHeaders.concat(ProcessedFilesStackedTable.notesColumnHeaders(showNotesColumns, processedFiles) || []);
+        return clonedColumnHeaders;
+    });
+
     static propTypes = {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
         'files' : PropTypes.array.isRequired,
-        'analyticsImpressionOnMount' : PropTypes.bool
+        'analyticsImpressionOnMount' : PropTypes.bool,
+        'showNotesColumns': PropTypes.oneOf(['always', 'never', 'conditional'])
     };
 
     static defaultProps = {
@@ -674,7 +735,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         ],
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
-        'titleForFiles'     : 'Processed Files'
+        'titleForFiles'     : 'Processed Files',
+        'showNotesColumns'  : 'conditional'
     };
 
     /**
@@ -827,14 +889,15 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     render(){
-        const { files, collapseLongLists } = this.props;
+        const { files, columnHeaders: propColHeaders, showNotesColumns, collapseLongLists } = this.props;
         const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
+        const columnHeaders = ProcessedFilesStackedTable.columnHeaders(propColHeaders, showNotesColumns, files);
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
-                <StackedBlockTable {..._.omit(this.props, 'children', 'files')} className="expset-processed-files" fadeIn allFiles={files}
-                    handleFileCheckboxChange={this.handleFileCheckboxChange}>
-                    <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{ experimentBlocks }</StackedBlockList>
+                <StackedBlockTable {..._.omit(this.props, 'children', 'files', 'columnHeaders')} columnHeaders={columnHeaders}
+                    className="expset-processed-files" fadeIn allFiles={files} handleFileCheckboxChange={this.handleFileCheckboxChange}>
+                    <StackedBlockList className="sets" collapseLongLists={collapseLongLists}>{experimentBlocks}</StackedBlockList>
                 </StackedBlockTable>
             </div>
         );
