@@ -71,6 +71,8 @@ class ExperimentSet(Item):
         "badges.messages",
 
         "produced_in_pub.title",
+        "produced_in_pub.ID",
+        "produced_in_pub.url",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",

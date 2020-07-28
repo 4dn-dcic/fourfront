@@ -383,15 +383,20 @@ export class StaticPageBreadcrumbs extends React.PureComponent {
     }
 
     render(){
-        const { context = null, hasToc, className } = this.props;
+        const { children = null, context = null, hasToc, className } = this.props;
+        let cls = (
+            "static-page-breadcrumbs clearfix" +
+            (className ? " " + className : "") +
+            (hasToc ? ' page-has-toc' : '')
+        );
+
+        if (children) {
+            return  <div className={cls}>{ children }</div>;
+        }
+
         const ancestors = context && this.memoized.getAncestors(context);
         const crumbs = Array.isArray(ancestors) && ancestors.length > 0 && ancestors.map(this.renderCrumb);
-        const cls = (
-            "static-page-breadcrumbs clearfix" +
-            (!crumbs ? ' empty' : '') +
-            (hasToc ? ' page-has-toc' : '') +
-            (className ? " " + className : "")
-        );
+        cls += (!crumbs ? ' empty' : '');
 
         return  (
             <div className={cls}>
