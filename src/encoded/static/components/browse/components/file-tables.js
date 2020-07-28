@@ -955,6 +955,22 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
                 }
             ]);
         }
+        else { //if files do not have qc metric columns, then display default file format and type columns
+            extendedPropColHeaders = columnHeaders.slice().concat([
+                {
+                    columnClass: 'file-detail',
+                    title: 'File Format',
+                    initialWidth: 110,
+                    field : "file_format.display_title"
+                },
+                {
+                    columnClass: 'file-detail',
+                    title: 'File Type',
+                    initialWidth: 110,
+                    field : "file_type"
+                }
+            ]);
+        }
 
         return <RawFilesStackedTable {...this.props} columnHeaders={extendedPropColHeaders} />;
     }
