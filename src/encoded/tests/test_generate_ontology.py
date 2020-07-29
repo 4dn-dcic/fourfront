@@ -4,8 +4,10 @@ import pytest
 
 from collections import OrderedDict
 from rdflib import URIRef
+from unittest import mock
 from ..commands import generate_ontology as go
 from ..commands.owltools import Owler
+
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
@@ -14,7 +16,7 @@ def test_parse_args_defaults():
     args = []
     args = go.parse_args(args)
     assert args.ontology == 'all'
-    assert args.key == 's3'
+    assert args.key is None
     assert args.env == 'data'
 
 
@@ -46,10 +48,10 @@ def slim_terms():
     ]
 
 
-def test_connect2server(mocker, connection):
+def test_connect2server(connection):
     # parameters we pass in don't really matter
     key = "{'server': 'https://data.4dnucleome.org/', 'key': 'testkey', 'secret': 'testsecret'}"
-    with mocker.patch('encoded.commands.generate_ontology.get_authentication_with_server', return_value=connection):
+    with mock.patch('encoded.commands.generate_ontology.get_authentication_with_server', return_value=connection):
         retval = go.connect2server(None, key)
         assert retval == connection
 
@@ -123,9 +125,9 @@ def get_fdn_ontology_side_effect(*args, **kwargs):
         return all_ontology
 
 
-def test_get_ontologies_all(mocker, connection):
+def test_get_ontologies_all(connection):
     prefixes = ['EFO', 'UBERON', 'OBI']
-    with mocker.patch('encoded.commands.generate_ontology.search_metadata', return_value=all_ontology):
+    with mock.patch('encoded.commands.generate_ontology.search_metadata', return_value=all_ontology):
         ont_list = 'all'
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 3
@@ -133,20 +135,20 @@ def test_get_ontologies_all(mocker, connection):
             assert ont['ontology_prefix'] in prefixes
 
 
-def test_get_ontologies_one(mocker, connection):
+def test_get_ontologies_one(connection):
     prefix = 'EFO'
-    with mocker.patch('encoded.commands.generate_ontology.get_metadata', side_effect=get_fdn_ontology_side_effect):
+    with mock.patch('encoded.commands.generate_ontology.get_metadata', side_effect=get_fdn_ontology_side_effect):
         ont_list = 'EFO'
         ontologies = go.get_ontologies(connection, ont_list)
         assert len(ontologies) == 1
         assert ontologies[0]['ontology_prefix'] == prefix
 
 
-def test_get_ontologies_not_in_db(mocker, connection):
+def test_get_ontologies_not_in_db(connection):
     prefix = 'EFO'
     all_ontology.append({'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'})
-    with mocker.patch('encoded.commands.generate_ontology.get_metadata',
-                      return_value={'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}):
+    with mock.patch('encoded.commands.generate_ontology.get_metadata',
+                    return_value={'@type': ['Error', 'Item'], 'ontology_prefix': 'FAKE'}):
         ont_list = 'FAKE'
         ontologies = go.get_ontologies(connection, ont_list)
         assert not ontologies
@@ -280,12 +282,12 @@ def syn_uris_as_URIRef(syn_uris):
     return [go.convert2namespace(uri) for uri in syn_uris]
 
 
-def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
+def test_get_slim_terms(connection, slim_terms_by_ont):
     present = ['developmental', 'assay']
     absent = ['organ', 'system', 'cell']
     test_slim_terms = slim_terms_by_ont
-    with mocker.patch('encoded.commands.generate_ontology.search_metadata',
-                      side_effect=test_slim_terms):
+    with mock.patch('encoded.commands.generate_ontology.search_metadata',
+                    side_effect=test_slim_terms):
         terms = go.get_slim_terms(connection)
         assert len(terms) == 3
         for term in terms:
@@ -352,7 +354,7 @@ def test_convert2namespace(syn_uris):
         assert str(ns) == uri
 
 
-def test_get_syndef_terms_as_uri(mocker, syn_uris):
+def test_get_syndef_terms_as_uri(syn_uris):
     asrdf = [True, False]
     for rdf in asrdf:
         uris = go.get_syndef_terms_as_uri(all_ontology[2], 'synonym_terms', rdf)
@@ -364,24 +366,24 @@ def test_get_syndef_terms_as_uri(mocker, syn_uris):
             assert str(uri) in syn_uris
 
 
-def test_get_synonym_term_uris_no_ontology(mocker):
-    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
-                      return_value=[]):
+def test_get_synonym_term_uris_no_ontology():
+    with mock.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                    return_value=[]):
         synterms = go.get_synonym_term_uris('ontologys/FAKE')
         assert not synterms
 
 
-def test_get_definition_term_uris_no_ontology(mocker):
-    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
-                      return_value=[]):
+def test_get_definition_term_uris_no_ontology():
+    with mock.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                    return_value=[]):
         synterms = go.get_definition_term_uris('ontologys/FAKE')
         assert not synterms
 
 
-def test_get_synonym_term_uris(mocker, syn_uris, syn_uris_as_URIRef):
+def test_get_synonym_term_uris(syn_uris, syn_uris_as_URIRef):
     asrdf = [True, False]
-    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
-                      return_value=syn_uris_as_URIRef):
+    with mock.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                    return_value=syn_uris_as_URIRef):
         for rdf in asrdf:
             uris = go.get_synonym_term_uris('ontid', rdf)
             if rdf:
@@ -392,10 +394,10 @@ def test_get_synonym_term_uris(mocker, syn_uris, syn_uris_as_URIRef):
                 assert str(uri) in syn_uris
 
 
-def test_get_definition_term_uris(mocker, syn_uris, syn_uris_as_URIRef):
+def test_get_definition_term_uris(syn_uris, syn_uris_as_URIRef):
     asrdf = [True, False]
-    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
-                      return_value=syn_uris_as_URIRef):
+    with mock.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                    return_value=syn_uris_as_URIRef):
         for rdf in asrdf:
             uris = go.get_synonym_term_uris('ontid', rdf)
             if rdf:
@@ -406,9 +408,10 @@ def test_get_definition_term_uris(mocker, syn_uris, syn_uris_as_URIRef):
                 assert str(uri) in syn_uris
 
 
-@pytest.fixture
-def owler(mocker):
-    return mocker.patch.object(go, 'Owler')
+@pytest.yield_fixture
+def owler():
+    with mock.patch.object(go, 'Owler') as mocked:
+        yield mocked
 
 
 @pytest.fixture
@@ -420,10 +423,10 @@ def returned_synonyms():
     ]
 
 
-def test_get_synonyms_and_definitions(mocker, owler, returned_synonyms):
+def test_get_synonyms_and_definitions(owler, returned_synonyms):
     checks = ['testsyn1', 'testsyn2']
-    with mocker.patch('encoded.commands.generate_ontology.getObjectLiteralsOfType',
-                      side_effect=returned_synonyms):
+    with mock.patch('encoded.commands.generate_ontology.getObjectLiteralsOfType',
+                    side_effect=returned_synonyms):
         class_ = 'test_class'
         synonym_terms = ['1']
         definition_terms = ['1']
@@ -702,9 +705,9 @@ def test_get_term_name_from_rdf_no_term(uberon_owler):
     assert not name
 
 
-def test_create_term_dict(mocker, ll_class, uberon_owler):
-    with mocker.patch('encoded.commands.generate_ontology.get_term_name_from_rdf',
-                      return_value='lung lobe'):
+def test_create_term_dict(ll_class, uberon_owler):
+    with mock.patch('encoded.commands.generate_ontology.get_term_name_from_rdf',
+                    return_value='lung lobe'):
         term = go.create_term_dict(ll_class, 'termid', uberon_owler, 'ontid')
         assert term['term_name'] == 'lung lobe'
         assert term['term_id'] == 'termid'
@@ -833,16 +836,18 @@ def test_cleanup_non_fields(terms_w_stuff):
         assert k in terms['term1']
 
 
-@pytest.fixture
-def mock_get_synonyms(mocker):
+@pytest.yield_fixture
+def mock_get_synonyms():
     syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
-    return mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists)
+    with mock.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists) as mocked:
+        yield mocked
 
 
-@pytest.fixture
-def mock_get_definitions(mocker):
+@pytest.yield_fixture
+def mock_get_definitions():
     def_lists = [[], ['def1'], ['def1', 'def2']]
-    return mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=def_lists)
+    with mock.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=def_lists) as mocked:
+        yield mocked
 
 
 @pytest.fixture
@@ -853,16 +858,16 @@ def simple_terms():
     return OrderedDict(sorted(terms.items(), key=lambda t: t[0]))
 
 
-def test_add_additional_term_info(mocker, simple_terms):
+def test_add_additional_term_info(simple_terms):
     syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
     def_lists = [[], ['def1'], ['def1', 'def2']]
     # terms = {'t1': {'term_id': 't1', 'term_url': 'term1'},
     #         't2': {'term_id': 't2', 'term_url': 'term2'},
     #         't3': {'term_id': 't3', 'term_url': 'term3'}}
     # terms = OrderedDict(sorted(terms.items(), key=lambda t: t[0]))
-    with mocker.patch('encoded.commands.generate_ontology.convert2URIRef', return_value='blah'):
-        with mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists):
-            with mocker.patch('encoded.commands.generate_ontology.get_definitions', side_effect=def_lists):
+    with mock.patch('encoded.commands.generate_ontology.convert2URIRef', return_value='blah'):
+        with mock.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists):
+            with mock.patch('encoded.commands.generate_ontology.get_definitions', side_effect=def_lists):
                 result = go.add_additional_term_info(simple_terms, 'data', 'synterms', 'defterms')
                 for tid, term in result.items():
                     if tid == 't3':
@@ -906,8 +911,19 @@ def test_write_outfile_notpretty(simple_terms):
 
 
 @pytest.fixture
-def matches():
-    return [{'term_id': 't1', 'a': 1, 'b': 2, 'c': 3}, {'term_id': 't1', 'a': 1, 'b': 2, 'c': 3}]
+def ontology_list():
+    return [
+        {'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'},
+        {'uuid': '2', 'ontology_name': 'ont2', 'ontology_prefix': 'NN'}
+    ]
+
+
+@pytest.fixture
+def matches(ontology_list):
+    return [
+        {'term_id': 'TO:t1', 'a': 1, 'b': 2, 'c': 3, 'source_ontologies': [ontology_list[0].get('uuid')]},
+        {'term_id': 'TO:t1', 'a': 1, 'b': 2, 'c': 3, 'source_ontologies': [ontology_list[0].get('uuid')]}
+    ]
 
 
 def test_terms_match_identical(matches):
@@ -957,39 +973,33 @@ def test_terms_match_w_ontology(matches):
 
 
 @pytest.fixture
-def ont_terms(matches):
+def ont_terms(matches, ontology_list):
     t2 = matches[1]
-    t2['term_id'] = 't2'
+    t2['term_id'] = 'TO:t2'
     t2['parents'] = ['OBI:01', 'EFO:01']
     return {
-        't1': matches[0],
-        't2': t2,
-        't3': {'term_id': 't3', 'x': 7, 'y': 8, 'z': 9}
+        'TO:t1': matches[0],
+        'TO:t2': t2,
+        'NN:t3': {'term_id': 'NN:t3', 'x': 7, 'y': 8, 'z': 9, 'source_ontologies': [ontology_list[1]]}
     }
-
-
-@pytest.fixture
-def ontology_list():
-    return [
-        {'uuid': '1', 'ontology_name': 'ont1'},
-        {'uuid': '2', 'ontology_name': 'ont2'}
-    ]
 
 
 @pytest.fixture
 def db_terms(ont_terms):
     db_terms = ont_terms.copy()
-    db_terms['t1']['uuid'] = '1234'
-    db_terms['t2']['uuid'] = '5678'
-    del db_terms['t2']['parents']
-    del db_terms['t3']
+    db_terms['TO:t1']['uuid'] = '1234'
+    db_terms['TO:t2']['uuid'] = '5678'
+    del db_terms['TO:t2']['parents']
+    del db_terms['NN:t3']
+    for v in db_terms.values():
+        v.update({'status': 'released'})
     return db_terms
 
 
 def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
     assert len(result) == 1
-    assert 't3' == result[0].get('term_id')
+    assert 'NN:t3' == result[0].get('term_id')
     # assert len(idmap) == 3
     # for k, v in idmap.items():
     #     assert k in ['t1', 't2', 't3']
@@ -998,7 +1008,7 @@ def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
 
 
 def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
-    tids = ['t1', 't2', 't3']
+    tids = ['TO:t1', 'TO:t2', 'NN:t3']
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
     assert len(result) == 3
     for t in result:
@@ -1006,12 +1016,27 @@ def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
         assert t.get('term_id') in tids
 
 
-# def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
-#     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
-#     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-#     assert len(result) == 2
-#     assert '7890' in [t.get('uuid') for t in result]
-#     # assert 't4' in idmap
+def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
+    db_terms['TO:t4'] = {
+        'term_id': 'TO:t4',
+        'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'}],
+        'uuid': '7890',
+        'status': 'released'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
+    assert len(result) == 2
+    assert '7890' in [t.get('uuid') for t in result]
+    # assert 't4' in idmap
+
+
+def test_id_post_and_patch_id_obs_simple(ont_terms, db_terms, ontology_list):
+    db_terms['TO:t4'] = {
+        'term_id': 'TO:t4',
+        'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'}],
+        'uuid': '7890',
+        'status': 'released'}
+    result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, ontarg='1', simple=True)
+    assert len(result) == 2
+    assert '7890' in [t.get('uuid') for t in result]
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):

@@ -246,29 +246,43 @@ export class MiddleRow extends React.Component {
     shouldComponentUpdate(nextProps) {
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
         if (nextProps.windowWidth !== this.props.windowWidth) return true;
+        if (nextProps.children !== this.props.children) return true;
         if (nextProps.context.actions !== this.props.context.actions) return true;
         return false;
     }
 
-    render(){
-        const { isInlineEditable, context, windowWidth } = this.props;
-        var description = (context && typeof context.description === 'string' && context.description) || null;
+    render() {
+        const {
+            isInlineEditable,
+            children = null,
+            text: propText = null, // if present, takes priority over context description.
+            context: { description = null } = {},
+            windowWidth
+        } = this.props;
 
-        if (!description && !isInlineEditable){
+        if (children) {
+            return <div className="item-page-heading">{ children }</div>;
+        }
+
+        const textDescription = (
+            (typeof propText === "string" && propText) ||
+            (typeof description === "string" && description) ||
+            null
+        );
+
+        if (!textDescription && !isInlineEditable){
             return <div className="item-page-heading no-description"/>;
         }
-        let defaultExpanded;
-        if (description !== null) { if (description.length < 600){defaultExpanded=true;}}
+
         return (
             <FlexibleDescriptionBox
                 windowWidth={windowWidth}
-                description={description || <em>No description provided.</em>}
+                description={textDescription || <em>No description provided.</em>}
                 className="item-page-heading"
                 textClassName="text-medium"
-                defaultExpanded={defaultExpanded}
+                defaultExpanded={(textDescription || '').length < 600}
                 fitTo="grid"
                 lineHeight={22}
-                context={context}
                 isInlineEditable={isInlineEditable}
                 dimensions={{
                     'paddingWidth': 0,
@@ -280,6 +294,7 @@ export class MiddleRow extends React.Component {
         );
     }
 }
+
 
 /**
  * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.

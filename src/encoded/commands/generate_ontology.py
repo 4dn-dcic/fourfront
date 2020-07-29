@@ -433,12 +433,10 @@ def connect2server(env=None, key=None):
        from the named keyname in the keyfile and checks that the server can be
        reached with that key.
        Also handles keyfiles stored in s3"""
-    if key == 's3':
-        assert env
-        key = unified_authentication(None, env)
 
-    if all([v in key for v in ['key', 'secret', 'server']]):
+    if key and all([v in key for v in ['key', 'secret', 'server']]):
         key = ast.literal_eval(key)
+
     try:
         auth = get_authentication_with_server(key, env)
     except Exception:
@@ -812,7 +810,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         to_patch += 1
 
     if set_obsoletes:
-
+        prefixes = [o.get('ontology_prefix', '') for o in ontologies]
         if simple:
             use_terms = {tid: term for tid, term in dbterms.items() if tid.startswith(prefixes[0])}
         else:
@@ -968,9 +966,9 @@ def parse_args(args):
                         help="The environment to use i.e. data, webdev, mastertest.\
                         Default is 'data')")
     parser.add_argument('--key',
-                        default='s3',
+                        default=None,
                         help="An access key dictionary including key, secret and server.\
-                        {'key'='ABCDEF', 'secret'='supersecret', 'server'='https://data.4dnucleome.org'}")
+                        \"{'key': 'ABCDEF', 'secret': 'supersecret', 'server': 'https://data.4dnucleome.org'}\" ")
     parser.add_argument('--keyfile',
                         default='',
                         help="A file where access keys are stored.")
@@ -1002,12 +1000,12 @@ def main():
     print('Writing to %s' % postfile)
 
     # fourfront connection
-    if args.key == 's3' and args.keyfile:
+    if args.keyfile:
         with open(args.keyfile, 'r') as keyfile:
             keys = json.load(keyfile)
         key = str(keys[args.keyname])
     else:
-        key = str(args.key)
+        key = args.key
     connection = connect2server(args.env, key)
     print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontology)
