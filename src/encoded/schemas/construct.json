@@ -48,12 +48,13 @@
             "description": "The categorization of the construct.",
             "type": "string",
             "lookup": 40,
-            "enum" : [
+            "suggested_enum" : [
               "crispr construct",
               "rnai construct",
               "tagging construct",
               "retroviral construct",
-              "expression construct"
+              "expression construct",
+              "RMCE construct"
             ]
           },
           "protein_tags": {

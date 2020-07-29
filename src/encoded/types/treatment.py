@@ -10,7 +10,7 @@ from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
     lab_award_attribution_embed_list,
-    get_item_if_you_can
+    get_item_or_none
 )
 
 
@@ -70,7 +70,7 @@ class TreatmentAgent(Treatment):
             disp_title = chemical + " " + action + conditions
         elif treatment_type == "Transient Transfection" and constructs:
             plasmids = ", ".join(
-                [get_item_if_you_can(request, construct).get('name') for construct in constructs]
+                [get_item_or_none(request, construct).get('name') for construct in constructs]
             )
             disp_title = "Transient transfection of " + plasmids + conditions
         elif treatment_type == "Biological" and biological_agent:

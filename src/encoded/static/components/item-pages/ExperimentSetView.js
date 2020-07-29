@@ -472,7 +472,8 @@ class QCMetricsTable extends React.PureComponent {
         const commonTableProps = {
             width, windowWidth, href,
             collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
-            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics"
+            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics",
+            showNotesColumns: 'never'
         };
 
         return (

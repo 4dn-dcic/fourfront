@@ -1,5 +1,5 @@
 
-import { testGraphTabClick } from './../support/macros';
+import { testGraphTabClick } from '../support/macros';
 
 const countRecentItemsToVisit = 5;
 

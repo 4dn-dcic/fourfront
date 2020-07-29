@@ -1,5 +1,6 @@
 import pytest
 
+from unittest import mock
 from ..types.gene import (
     fetch_gene_info_from_ncbi,
     get_gene_info_from_response_text,
@@ -109,18 +110,18 @@ class MockedResponse(object):
         self.text = text
 
 
-def test_fetch_gene_info_from_ncbi_429_response(mocker):
-    ''' mocking a bad ncbi response - because this sleeps it's slow'''
+def test_fetch_gene_info_from_ncbi_429_response():
+    """ mocking a bad ncbi response - because this sleeps it's slow"""
     geneid = '5885'  # human rad21
-    with mocker.patch('encoded.types.gene.requests.get', side_effect=[MockedResponse(429, 'response')] * 5):
+    with mock.patch('encoded.types.gene.requests.get', side_effect=[MockedResponse(429, 'response')] * 5):
         result = fetch_gene_info_from_ncbi(geneid)
         assert not result
 
 
-def test_fetch_gene_info_from_ncbi_200_bogus_response(mocker):
-    ''' mocking a bad but 200 ncbi response'''
+def test_fetch_gene_info_from_ncbi_200_bogus_response():
+    """ mocking a bad but 200 ncbi response"""
     geneid = '5885'  # human rad21
-    with mocker.patch('encoded.types.gene.requests.get', return_value=MockedResponse(200, 'response')):
+    with mock.patch('encoded.types.gene.requests.get', return_value=MockedResponse(200, 'response')):
         result = fetch_gene_info_from_ncbi(geneid)
         assert not result
 
