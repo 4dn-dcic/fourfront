@@ -245,9 +245,8 @@ export class MiddleRow extends React.Component {
 
     shouldComponentUpdate(nextProps) {
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
+        if ((nextProps.context) && (!this.props.context || this.props.context.actions !== nextProps.context.actions)) return true;
         if (nextProps.windowWidth !== this.props.windowWidth) return true;
-        if (nextProps.children !== this.props.children) return true;
-        if (nextProps.context.actions !== this.props.context.actions) return true;
         return false;
     }
 
@@ -256,13 +255,15 @@ export class MiddleRow extends React.Component {
             isInlineEditable,
             children = null,
             text: propText = null, // if present, takes priority over context description.
-            context: { description = null } = {},
+            context = {},
             windowWidth
         } = this.props;
 
         if (children) {
             return <div className="item-page-heading">{ children }</div>;
         }
+
+        const description = (context && typeof context.description === 'string' && context.description) || null;
 
         const textDescription = (
             (typeof propText === "string" && propText) ||
@@ -276,6 +277,7 @@ export class MiddleRow extends React.Component {
 
         return (
             <FlexibleDescriptionBox
+                context={context}
                 windowWidth={windowWidth}
                 description={textDescription || <em>No description provided.</em>}
                 className="item-page-heading"
