@@ -22,7 +22,7 @@ export function createItemPageTestsForItemTypeRange(startFraction, endFraction, 
     // So we try to avoid visiting same item twice.
     const uniqueIDSet = new Set();
 
-    // Temp holder of @ids to visit from search.
+    // Temp holder of @ids + typeName to visit from search.
     const currIDs = [];
 
     describe(`Each PUBLIC ItemView Works (most public recent only); range ${startFraction} to ${endFraction}`, function () {
@@ -77,7 +77,7 @@ export function createItemPageTestsForItemTypeRange(startFraction, endFraction, 
                                 cy.log('Re-encountered', id);
                             } else {
                                 uniqueIDSet.add(id);
-                                currIDs.push(id);
+                                currIDs.push([ id, itemType ]);
                             }
                         }
                     );
@@ -93,14 +93,16 @@ export function createItemPageTestsForItemTypeRange(startFraction, endFraction, 
 
             let currPagePath = "/";
 
-            cy.wrap(currIDs).each(function(currentAtID, currentAtIDIndex){
-                cy.log("Visiting", currentAtID, currentAtIDIndex + " of " + currIDs.length);
+            cy.wrap(currIDs).each(function([ currentAtID, currentItemType ], currentAtIDIndex){
+                cy.log("Visiting " + currentAtID + " -- " + (currentAtIDIndex + 1) + " of " + currIDs.length);
 
                 cy.window().then(function(w){
 
                     return new Promise(function(resolve){
 
                         //cy.visit(currentAtID).wait(1000).end()
+                        // Use internal app navigation instead since is faster (no loading for HTML response, CSS, etc.)
+                        // Also is neat thing to test I guess. idk. Maybe could do both, 1 w visit and 1 w navigate.
                         w.fourfront.navigate(currentAtID, {}, function(){
                             cy.location('pathname').should('not.equal', currPagePath)
                                 .then(function(pathName){
@@ -109,18 +111,29 @@ export function createItemPageTestsForItemTypeRange(startFraction, endFraction, 
                                 }).wait(150).end()
                                 .get('h1.page-title').should('not.be.empty').end()
                                 .get('div.rc-tabs span[data-tab-key="details"]').should('contain', 'Details').end()
-                                .get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function($tab){
-                                    var tabKey = $tab.children('span.tab').attr('data-tab-key');
-                                    return cy.wrap($tab).click({ 'force' : true }).end()
-                                        .wait(50)
-                                        .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                                        .should('have.id', "tab:" + tabKey).end()
-                                        .root().should('not.contain', "client-side error")
-                                        .end().then(function(){
-                                            Cypress.log({ 'name' : "Successfully Visited", "message" : currentAtID });
-                                        });
-                                }).end();
-                            resolve();
+                                .get('div.rc-tabs div.rc-tabs-tab[role="tab"]').then(($tabList)=>{
+                                    const nonDisabledTabs = $tabList.filter(":not(.rc-tabs-tab-disabled)");
+                                    const nonDisabledTabsLen = nonDisabledTabs.length;
+                                    expect(nonDisabledTabsLen).to.be.greaterThan(0); // We might have only 1 single 'Details' tab or similar, but it shouldn't be disabled if so.
+                                    if (nonDisabledTabsLen < 2) {
+                                        // Not multiple (clickable) tabs - skip clicking them.
+                                        cy.root().should('not.contain', "client-side error").end();
+                                    } else {
+                                        cy.get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function($tab){
+                                            var tabKey = $tab.children('span.tab').attr('data-tab-key');
+                                            return cy.wrap($tab).click({ 'force' : true }).end()
+                                                .wait(50)
+                                                .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                                                .should('have.id', "tab:" + tabKey).end()
+                                                .root().should('not.contain', "client-side error")
+                                                .end().then(function(){
+                                                    Cypress.log({ 'name' : "Successfully Visited", "message" : currentAtID });
+                                                });
+                                        }).end();
+
+                                    }
+                                });
+                            resolve(); // Upon navigation complete.
                         });
 
                     });
