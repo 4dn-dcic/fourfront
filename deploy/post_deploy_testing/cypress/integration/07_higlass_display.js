@@ -11,6 +11,7 @@ const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 describe("HiGlass Display pages", function(){
 
     context('Higlass Display summary page', function(){
+
         it('Can visit HiGlass Display collection page without login', function(){
 
             // Visit the page and confirm you can see the table and facet properties.
@@ -61,19 +62,31 @@ describe("HiGlass Display pages", function(){
             cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
         });
 
-        afterEach(function(){
-            if (testItemsToDelete.length === 0) return;
+        after(function(){
+
+            // Maybe we could just delete ALL higlass displays owned by 'ud4dntest@gmail.com'
+            // as a more complete cleanup (except like hardcoded 00000000-1111-0000-1111-000000000002)
+            // In case some tests fail and terminate before getting to this point of cleanup.
+
+            const testItemsToDeleteIDs = testItemsToDelete.map(function({ '@id' : id }){ return id; });
+
+            Cypress.log({
+                'name' : "Deleting Newly-Created HiGlass View Configs Items",
+                'message' : "Count: " + testItemsToDelete.length + ", Item IDs: " + testItemsToDeleteIDs.join(", ")
+            });
+
+            if (testItemsToDeleteIDs.length === 0) return;
 
             // Log in _as admin_.
             cy.visit('/higlass-view-configs/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken' : true }).wait(500);
 
             // Delete all newly created higlass views.
-            cy.wrap(testItemsToDelete).each(function(testItem){ // Synchronously process async stuff.
+            cy.wrap(testItemsToDeleteIDs).each(function(testItemID){ // Synchronously process async stuff.
                 cy.window().then(function(w){
                     const token = w.fourfront.JWT.get();
                     cy.request({
                         method: "DELETE",
-                        url: testItem['@id'],
+                        url: testItemID,
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             "Content-Type" : "application/json",
@@ -81,7 +94,7 @@ describe("HiGlass Display pages", function(){
                         }
                     }).end().request({
                         method: "PATCH",
-                        url: testItem['@id'],
+                        url: testItemID,
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             "Content-Type" : "application/json",
@@ -199,6 +212,7 @@ describe("HiGlass Display pages", function(){
         });
     });
 
+
     context('Sharing on the Individual Higlass display page', function() {
 
         after(function(){
@@ -240,6 +254,8 @@ describe("HiGlass Display pages", function(){
                     return cy.contains("Visible by Everyone").click().wait(1000).end();
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()
+                // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                .get('.higlass-view-container > .higlass-wrapper > .higlass-instance > .higlass > .higlass-scroll-container .react-grid-layout .react-grid-item .tiled-plot-div').wait(500).end()
 
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{

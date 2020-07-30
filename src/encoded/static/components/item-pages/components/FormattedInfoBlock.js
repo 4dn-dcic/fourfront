@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { ajax, console, isServerSide, object, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { PartialList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/PartialList';
-import { generateAddressString, generateContactPersonListItem } from './AttributionTabView';
+import { generateAddressString, ContactPersonListItem } from './AttributionTabView';
 
 
 
@@ -399,13 +399,15 @@ export class FormattedInfoBlock extends React.Component {
             //return FormattedInfoBlock.Error.apply(this, arguments);
         }
 
-        var innerContent = null,
-            contactPersons = null;
+        let innerContent = null;
+        let contactPersons = null;
 
         if (includeDetail && details_lab){
-
-            contactPersons = Array.isArray(details_lab.correspondence) && _.filter(details_lab.correspondence, function(contact_person){
-                return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
+            const { correspondence = [] } = details_lab;
+            contactPersons = correspondence.filter(function({ '@id': cpID, display_title, contact_email }){
+                return cpID && display_title && contact_email;
+            }).map(function(contactPerson, idx){
+                return <ContactPersonListItem contactPerson={contactPerson} key={contactPerson['@id'] || idx} />;
             });
 
             if (contactPersons && contactPersons.length > 0){
@@ -415,7 +417,7 @@ export class FormattedInfoBlock extends React.Component {
                         <div className="address">{ generateAddressString(details_lab) }</div>
                         <div className="correspondence">
                             <h6 className="mt-08 mb-03 text-500">Correspondence:</h6>
-                            <ul>{ _.map(contactPersons, generateContactPersonListItem) }</ul>
+                            <ul>{ contactPersons }</ul>
                         </div>
                     </div>
                 );
