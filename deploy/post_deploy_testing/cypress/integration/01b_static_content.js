@@ -40,7 +40,7 @@ describe('Static Page & Content Tests', function () {
                     let count = 0;
                     let haveWeSeenPageWithTableOfContents = false;
 
-                    function testVisit(listItem){
+                    function testVisit(){
 
                         function finish(titleText){
                             count++;
@@ -53,7 +53,7 @@ describe('Static Page & Content Tests', function () {
                                     cy.get('div.big-dropdown-menu a#' + allLinkElementIDs[count]).click().then(($nextListItem)=>{
                                         const linkHref = $nextListItem.attr('href');
                                         cy.location('pathname').should('equal', linkHref);
-                                        testVisit($nextListItem);
+                                        testVisit();
                                     });
                                 });
                             }
@@ -85,8 +85,11 @@ describe('Static Page & Content Tests', function () {
 
                         });
                     }
-                    $listItems[0].click();
-                    testVisit($listItems[count]);
+                    cy.wrap($listItems.eq(0)).click().then(function($linkElem){
+                        const linkHref = $linkElem.attr('href');
+                        cy.location('pathname').should('equal', linkHref);
+                        testVisit();
+                    });
 
                 });
             });
