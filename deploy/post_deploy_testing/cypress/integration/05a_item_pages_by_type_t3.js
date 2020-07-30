@@ -1,3 +1,3 @@
 import { createItemPageTestsForItemTypeRange } from '../support/item_pages_by_type_test';
 
-createItemPageTestsForItemTypeRange(0.2, 0.3);
+createItemPageTestsForItemTypeRange(0.2, 0.25);
