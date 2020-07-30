@@ -11,7 +11,7 @@ import { schemasToItemTypeHierarchy } from './macros';
 
 
 
-export function createItemPageTestsForItemTypeRange(start, end, itemsPerTypeToCheck = 3){
+export function createItemPageTestsForItemTypeRange(startFraction, endFraction, itemsPerTypeToCheck = 3){
 
     // Gather up all Item types we have.
     let itemTypeHierarchy = null;
@@ -25,7 +25,7 @@ export function createItemPageTestsForItemTypeRange(start, end, itemsPerTypeToCh
     // Temp holder of @ids to visit from search.
     const currIDs = [];
 
-    describe(`Each PUBLIC ItemView Works (most public recent only); range ${start} to ${end}`, function () {
+    describe(`Each PUBLIC ItemView Works (most public recent only); range ${startFraction} to ${endFraction}`, function () {
 
         before(function(){
             cy.visit('/'); // Start at home page
@@ -36,23 +36,12 @@ export function createItemPageTestsForItemTypeRange(start, end, itemsPerTypeToCh
             }).then(function(res){
                 itemTypeHierarchy = schemasToItemTypeHierarchy(res.body);
                 console.log({ 'name' : "Item Type Hierarchy", "message" : itemTypeHierarchy });
+
                 // Iterate over /profiles/ response and collect up any which are leaftypes.
+                typesToCheck = Cypress._.keys(res.body).sort().filter(function(typeName){
+                    return !res.body[typeName].isAbstract;
+                });
 
-                typesToCheck = [];
-
-                function gatherTheData(hier){ // Quick DFS
-                    Cypress._.toPairs(hier).forEach(function([ maybeAbstractType, leafTypesObj ]){
-                        const leafTypes = Cypress._.keys(leafTypesObj);
-                        if (leafTypes.length === 0) {
-                            typesToCheck.push(maybeAbstractType); // Not abstract you see. Well, maybe, but probably not.
-                        } else {
-                            gatherTheData(leafTypesObj); // Recurse!
-                        }
-                    });
-                }
-
-                gatherTheData(itemTypeHierarchy);
-                typesToCheck.sort();
             });
         });
 
@@ -63,7 +52,13 @@ export function createItemPageTestsForItemTypeRange(start, end, itemsPerTypeToCh
 
         it("Can load up list of @ids to check per item type (backend)", function(){
             const allTypesLen = typesToCheck.length;
-            const currTypesToTest = typesToCheck.slice(Math.floor(allTypesLen * start), Math.floor(allTypesLen * end));
+            const currTypesToTest = typesToCheck.slice(
+                // Attempt to correct issues with inaccurate floating point multiplication.
+                Math.floor(Math.round((allTypesLen * startFraction) * 100) / 100),
+                Math.floor(Math.round((allTypesLen * endFraction) * 100) / 100)
+            );
+
+            Cypress.log({ 'name' : "Item Types Being Tested", "message" : currTypesToTest.length + "\n : " + currTypesToTest.join('\n') });
 
             currTypesToTest.forEach(function(itemType, idx){
                 cy.request({
