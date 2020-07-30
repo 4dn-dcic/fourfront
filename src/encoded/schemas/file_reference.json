@@ -40,7 +40,8 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "enum": [
+            "suggested_enum": [
+                "chromosome sizes",
                 "genome reference",
                 "genome index",
                 "index",
