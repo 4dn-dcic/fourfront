@@ -153,6 +153,7 @@
             "title": "Related Files",
             "description": "Files related to this one",
             "ff_flag": "second round",
+            "uniqueItems": true,
             "type": "array",
             "items": {
                 "title": "Related File",
