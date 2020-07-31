@@ -572,7 +572,7 @@ class File(Item):
             "supercedes": "is superceded by",
             "is superceded by": "supercedes",
             "paired with": "paired with",
-            "grouped with": "grouped with"
+            # "grouped with": "grouped with"
         }
 
         if 'related_files' in properties:
@@ -581,6 +581,9 @@ class File(Item):
             curr_txn = None
             curr_request = None
             for relation in properties["related_files"]:
+                # skip "grouped with" type from update
+                if relation["relationship_type"] == "grouped with":
+                    continue
                 try:
                     switch = relation["relationship_type"]
                     rev_switch = DicRefRelation[switch]
