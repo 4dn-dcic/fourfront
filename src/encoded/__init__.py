@@ -7,6 +7,7 @@ import json
 import mimetypes
 import netaddr
 import os
+import sentry_sdk
 # import structlog
 import subprocess
 import sys
@@ -17,6 +18,7 @@ from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.env_utils import get_mirror_env_from_context
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
+from sentry_sdk.integrations.pyramid import PyramidIntegration
 from pkg_resources import resource_filename
 # from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -212,6 +214,11 @@ def main(global_config, **local_config):
     # Load upgrades last so that all views (including testing views) are
     # registered.
     config.include('.upgrade')
+
+    # initialize sentry reporting
+    sentry_sdk.init("https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642",
+                    integrations=[PyramidIntegration()
+    )
 
     app = config.make_wsgi_app()
 
