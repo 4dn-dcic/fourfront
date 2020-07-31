@@ -217,8 +217,7 @@ def main(global_config, **local_config):
 
     # initialize sentry reporting
     sentry_sdk.init("https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642",
-                    integrations=[PyramidIntegration()
-    )
+                    integrations=[PyramidIntegration()])
 
     app = config.make_wsgi_app()
 
