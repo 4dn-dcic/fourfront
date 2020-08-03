@@ -164,7 +164,7 @@ export class ItemPageTable extends React.Component {
                             );
                         }
                     }
-    
+
                     return (
                         <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
                             <DisplayTitleColumnDefault />

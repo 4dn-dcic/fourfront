@@ -1,6 +1,6 @@
 'use strict';
 
-
+import { higlassItemViewVizSelector } from '../support/variables';
 
 const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 
@@ -139,10 +139,18 @@ describe("HiGlass Display pages", function(){
 
                     // Add the test Item so we can delete it later.
                     testItemsToDelete.push(xhr.responseBody["@graph"][0]);
-                });
+                })
+                .end()
+                // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                .get(higlassItemViewVizSelector).wait(500).end();
         });
 
         it('Can edit the title and description', function() {
+
+            // Change the title and description, then save.
+            const newTitle = "Cypress Cool Display";
+            const newDescription = "Look at the description";
+
             // Verify logged in users can save higlass displays.
 
             // Go to the display for the draft display.
@@ -179,34 +187,30 @@ describe("HiGlass Display pages", function(){
                     expect(newID).to.be.ok;
 
                     // Clicking the SaveAs button should redirect us to the new page
-                    cy.location('pathname').should('eq', newID);
+                    cy.location('pathname')
+                        .should('eq', newID).end()
+                        // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                        .get(higlassItemViewVizSelector).wait(500).end()
 
-                    // Click on the edit button and wait for the page load.
-                    cy.get(".action-button[data-action='edit'] a").click();
-
-                    // Change the title and description, then save.
-                    const newTitle = "Cypress Cool Display";
-                    const newDescription = "Look at the description";
-
-                    cy.get("input#field_for_title").clear().type(newTitle).then(() => {
-                        cy.get('#field_for_description').clear().type(newDescription).then(() => {
-                            // Click validate then click submit
-                            cy.get(".action-buttons-container button.btn-info").click().then(() => {
-                                cy.get(".action-buttons-container button.btn-success").click().wait(1000).then(() => {
-                                    // Once the page reloads, look for the updated title/description
-                                    cy.request({
-                                        'url' : newID + "?format=json&datastore=database",
-                                        'method' : "GET",
-                                        'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
-                                        'followRedirect' : true
-                                    }).then((resp)=>{
-                                        expect(resp.body.title).to.equal(newTitle);
-                                        expect(resp.body.description).to.equal(newDescription);
-                                    });
-                                });
-                            });
-                        });
-                    });
+                        // Click on the edit button and wait for the page load.
+                        .get(".action-button[data-action='edit'] a").click({ force: true }).end()
+                        .get("input#field_for_title").clear().type(newTitle).end()
+                        .get('#field_for_description').clear().type(newDescription).end()
+                        // Click validate then click submit
+                        .get(".action-buttons-container button.btn-info").click().end()
+                        .get(".action-buttons-container button.btn-success").click().end()
+                        // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                        .get(higlassItemViewVizSelector).wait(500).end()
+                        // Once the page reloads, look for the updated title/description
+                        .request({
+                            'url' : newID + "?format=json&datastore=database",
+                            'method' : "GET",
+                            'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
+                            'followRedirect' : true
+                        }).then((resp)=>{
+                            expect(resp.body.title).to.equal(newTitle);
+                            expect(resp.body.description).to.equal(newDescription);
+                        }).end();
 
                 });
         });
@@ -255,7 +259,7 @@ describe("HiGlass Display pages", function(){
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()
                 // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                .get('.higlass-view-container > .higlass-wrapper > .higlass-instance > .higlass > .higlass-scroll-container .react-grid-layout .react-grid-item .tiled-plot-div').wait(500).end()
+                .get(higlassItemViewVizSelector).wait(500).end()
 
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
