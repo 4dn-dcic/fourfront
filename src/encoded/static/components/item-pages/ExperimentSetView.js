@@ -524,10 +524,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderExperimentsNotAssociatedWithAnyFiles', 'renderProcessedFilesTableAsRightPanel');
-        this.memoized = {
-            renderExperimentsNotAssociatedWithAnyFiles: memoize(this.renderExperimentsNotAssociatedWithAnyFiles)
-        };
+        _.bindAll(this, 'renderTopRow', 'renderProcessedFilesTableAsRightPanel');
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
@@ -547,29 +544,6 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         }
     }
 
-    renderHeader(){
-        const { files, selectedFiles, context } = this.props;
-        const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
-        const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
-        return (
-            <h3 className="tab-section-title">
-                <span>
-                    <span className="text-400">{ files.length }</span> Processed Files
-                </span>
-                { selectedFiles ? // Make sure data structure is present (even if empty)
-                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
-                            id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
-                            <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
-                            <span className="d-none d-sm-inline">Download </span>
-                            <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-                            <span className="d-none d-sm-inline text-400"> Processed Files</span>
-                        </SelectedFilesDownloadButton>
-                    </div>
-                    : null }
-            </h3>
-        );
-    }
     /**
      * Mostly clonned from ProcessedFilesStackedTable.defaultProps to render the table
      * compatible w/ processed file table
@@ -594,63 +568,94 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         { columnClass: 'file-detail', className: '', title: 'File Type', initialWidth: 135 },
         { columnClass: 'file-detail', className: '', title: 'File Size', initialWidth: 70 }
     ];
-    /**
-     * memoized in constructor
-     */
-    renderExperimentsNotAssociatedWithAnyFiles() {
-        const { context } = this.props;
-        const expsNotAssociatedWithAnyFiles = _.filter(context.experiments_in_set, function (exp) {
-            return !((exp.files && Array.isArray(exp.files) && exp.files.length > 0) || (exp.processed_files && Array.isArray(exp.processed_files) && exp.processed_files.length > 0));
-        });
-
-        if (expsNotAssociatedWithAnyFiles.length === 0) {
-            return;
-        }
-
-        const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
-        const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps, expsNotAssociatedWithAnyFiles);
-        const experimentBlock = expsWithReplicateExps.map((exp) => {
-            const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
-                if (col.render && typeof col.render === 'function') { return col.render(exp); }
-                else {
-                    return <div className={"col-" + col.columnClass + " item detail-col" + idx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>;
-                }
-            });
-            return (
-                <StackedBlock columnClass="experiment" hideNameOnHover={false}
-                    key={exp.accession} label={
-                        <StackedBlockNameLabel title={'Experiment'}
-                            accession={exp.accession} subtitleVisible />
-                    }>
-                    {content}
-                </StackedBlock>
-            );
-        });
-        return (
-            <div className="experiments-not-having-files">
-                <div className="stacked-block-table-outer-container overflow-auto">
-                    <StackedBlockTable {..._.omit(this.props, 'children', 'files')} {...tableProps} className="expset-processed-files">
-                        <StackedBlockList className="sets" collapseLongLists={false}>
-                            {experimentBlock}
-                        </StackedBlockList>
-                    </StackedBlockTable>
-                </div>
-            </div>
-        );
-    }
 
     render(){
+        const { context, files, selectedFiles } = this.props;
         return (
             <div className="processed-files-table-section exp-table-section">
-                {this.renderHeader()}
+                <ProcessedFilesTableSectionHeader {...{ context, files, selectedFiles }} />
                 {this.renderTopRow()}
-                {this.memoized.renderExperimentsNotAssociatedWithAnyFiles()}
+                <ExperimentsWithoutFilesStackedTable {...this.props} />
                 <QCMetricsTable {...this.props} />
             </div>
         );
     }
 }
 
+const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context }){
+    const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
+    const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
+    return (
+        <h3 className="tab-section-title">
+            <span>
+                <span className="text-400">{ files.length }</span> Processed Files
+            </span>
+            { selectedFiles ? // Make sure data structure is present (even if empty)
+                <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                    <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                        id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
+                        <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
+                        <span className="d-none d-sm-inline">Download </span>
+                        <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
+                        <span className="d-none d-sm-inline text-400"> Processed Files</span>
+                    </SelectedFilesDownloadButton>
+                </div>
+                : null }
+        </h3>
+    );
+});
+
+const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWithoutFilesStackedTable(props) {
+    const { context } = props;
+    const expsNotAssociatedWithAnyFiles = _.filter(context.experiments_in_set, function (exp) {
+        return !((exp.files && Array.isArray(exp.files) && exp.files.length > 0) || (exp.processed_files && Array.isArray(exp.processed_files) && exp.processed_files.length > 0));
+    });
+
+    if (expsNotAssociatedWithAnyFiles.length === 0) {
+        return;
+    }
+
+    const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
+    const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps, expsNotAssociatedWithAnyFiles);
+    const experimentBlock = expsWithReplicateExps.map((exp) => {
+        const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
+            if (col.render && typeof col.render === 'function') { return col.render(exp); }
+            else {
+                /**
+                 * workaround: We surround div by React.Fragment to prevent 'Warning: React does not recognize the XX prop on a DOM element. If you intentionally want
+                 * it to appear in the DOM as a custom attribute, spell it as lowercase $isactive instead.' error,
+                 * since StackedBlockTable.js/StackedBlock component injects
+                 * some props from parent element into 'div' element assuming it is a React component, in case it is not.
+                 */
+                return (
+                    <React.Fragment>
+                        <div className={"col-" + col.columnClass + " item detail-col" + idx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>
+                    </React.Fragment>
+                );
+            }
+        });
+        return (
+            <StackedBlock columnClass="experiment" hideNameOnHover={false}
+                key={exp.accession} label={
+                    <StackedBlockNameLabel title={'Experiment'}
+                        accession={exp.accession} subtitleVisible />
+                }>
+                {content}
+            </StackedBlock>
+        );
+    });
+    return (
+        <div className="experiments-not-having-files">
+            <div className="stacked-block-table-outer-container overflow-auto">
+                <StackedBlockTable {..._.omit(props, 'children', 'files')} {...tableProps} className="expset-processed-files">
+                    <StackedBlockList className="sets" collapseLongLists={false}>
+                        {experimentBlock}
+                    </StackedBlockList>
+                </StackedBlockTable>
+            </div>
+        </div>
+    );
+});
 
 class SupplementaryFilesOPFCollection extends React.PureComponent {
 
