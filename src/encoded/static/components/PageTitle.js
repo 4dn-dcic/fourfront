@@ -16,7 +16,6 @@ import { typedefs } from './util';
 import QuickInfoBar from './viz/QuickInfoBar';
 import jsonScriptEscape from './../libs/jsonScriptEscape';
 import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
-import { HiGlassViewConfigTabView } from './../components/item-pages/HiGlassViewConfigView';
 // eslint-disable-next-line no-unused-vars
 const { Item, JSONContentResponse, SearchResponse } = typedefs;
 

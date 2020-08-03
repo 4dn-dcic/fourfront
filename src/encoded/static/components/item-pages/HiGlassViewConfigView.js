@@ -9,6 +9,7 @@ import Dropdown from 'react-bootstrap/esm/Dropdown';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Modal from 'react-bootstrap/esm/Modal';
+import Fade from 'react-bootstrap/esm/Fade';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
@@ -32,7 +33,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
-                <MiddleRow isInlineEditable={true} />
+                <MiddleRow isInlineEditable />
                 <BottomRow />
             </ItemHeaderWrapper>
         );
@@ -95,7 +96,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     /**
      * get tilesets and positions, width/height and view's position
-     * @param {Object} viewConf: even if viewConf.views modified in function, it has no side-effect since calling function always provides a fresh new argument
+     * @param {Object} viewConf: even if viewConf.views modified in function, it has no side-effect
+     * since calling function always provides a fresh new argument
      */
     static getTilesetUids(viewConf) {
         const tilesetUids = {};
@@ -190,7 +192,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'updatedTableItem'      : null, //object returned by editable field of files table
             'trackInfo'             : null,
             'tilesetUids'           : {},
-            'instanceHeight'        : props.context && props.context.instance_height|| 600,
+            'instanceHeight'        : props.context && props.context.instance_height || 600,
             'viewConfigModified'    : false
         };
         this.higlassRef = React.createRef();
@@ -215,11 +217,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 hiGlassComponentHeight = windowHeight - 120;
             }
             else {
-                if (this.state.instance_height > 0) {
-                    hiGlassComponentHeight = context.instance_height;
-                } else {
-                    hiGlassComponentHeight = 600;
-                }
+                hiGlassComponentHeight = context.instance_height;
             }
             this.setState({ 'instanceHeight': hiGlassComponentHeight });
         }
@@ -853,6 +851,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             facets: null
         };
 
+        const notPersistentMessage = (<Fade in appear timeout={700}><span className="text-200"> - <mark>Your change(s) are not persistent yet. Click Save or Clone to save.</mark></span></Fade>);
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -860,7 +860,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         className="btn-success mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
-                        {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
                         { this.statusChangeButton() }
@@ -883,7 +882,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                 (
                                     <div className="raw-files-table-section">
                                         <h3 className="tab-section-title">
-                                            <span><span className="text-400">{_.keys(tilesetUids).length}</span> File(s) {viewConfigModified ? (<span className="text-300" style={{ animation: 'fadein 2s ease-out 0s none 1' }}> - <mark>Your change(s) are not persistent yet. Click Save or Clone to save.</mark></span>) : null}</span>
+                                            <span>
+                                                <span className="text-400">{_.keys(tilesetUids).length}</span> File(s) {viewConfigModified ? notPersistentMessage : null}
+                                            </span>
                                         </h3>
                                         <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
                                     </div>
