@@ -168,7 +168,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
         this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
         this.updateHiglassViewConf = this.updateHiglassViewConf.bind(this);
-        this.setInstanceHeight = this.setInstanceHeight.bind(this);
+        this.updateHiGlassComponentHeight = this.updateHiGlassComponentHeight.bind(this);
 
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
@@ -177,7 +177,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
          * @property {boolean} saveLoading          True if AJAX request is en route to save Item.
          * @property {boolean} cloneLoading         True if AJAX request is en route to clone Item.
          * @property {boolean} releaseLoading       True if AJAX request is en route to change Item status.
-         * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
+         * @property {boolean} addFileLoading       True if AJAX request is en route to add file to `state.viewConfig`.
+         * @property {Object} modal                 Modal popup to confirm save/update ..etc HiGlass view conf updates
+         * @property {string} filesTableSearchHref  File search url for files table
+         * @property {Object} updatedTilesetField   Object having tileset field that was edited by EditableField
+         * @property {Object} trackInfo             ViewConfig track object
+         * @property {Object} tilesetUids           Object that all keys are tilesetUids
+         * @property {number} hgcHeight        HiGlass container height
+         * @property {boolean} viewConfigModified   ViewConfig is modified by one of Files table editable fields
          */
         this.state = {
             'viewConfig'            : props.context && props.context.viewconfig,
@@ -188,11 +195,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'releaseLoading'        : false,
             'addFileLoading'        : false,
             'modal'                 : null,
-            'filesTableSearchHref'  : null, //file search url for files table
-            'updatedTableItem'      : null, //object returned by editable field of files table
+            'filesTableSearchHref'  : null,
+            'updatedTilesetField'   : null,
             'trackInfo'             : null,
             'tilesetUids'           : {},
-            'instanceHeight'        : props.context && props.context.instance_height || 600,
+            'hgcHeight'             : props.context && props.context.instance_height || 600,
             'viewConfigModified'    : false
         };
         this.higlassRef = React.createRef();
@@ -209,9 +216,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return !!(session && _.findWhere(actions, { 'name': 'edit' }));
     }
 
-    setInstanceHeight(instance) {
+    /**
+     * Callback func called by editable field to persist instance height
+     * @param {*} hgc   HiGlass component instance
+     */
+    updateHiGlassComponentHeight(hgc) {
         const { context, isFullscreen, windowHeight } = this.props;
-        if (instance === undefined) {
+        if (hgc === undefined) {
             let hiGlassComponentHeight;
             if (isFullscreen) {
                 hiGlassComponentHeight = windowHeight - 120;
@@ -219,19 +230,22 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             else {
                 hiGlassComponentHeight = context.instance_height;
             }
-            this.setState({ 'instanceHeight': hiGlassComponentHeight });
+            this.setState({ 'hgcHeight': hiGlassComponentHeight });
         }
         else {
-            this.setState({ 'instanceHeight': instance.instance_height });
+            this.setState({ 'hgcHeight': hgc.instance_height });
         }
     }
 
-    updateHiglassViewConf(updatedTableItem, trackInfo) {
-        if (_.has(updatedTableItem, 'name')) {
-            const hgc = this.getHiGlassComponent();
-            const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-            const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+    /**
+     * Callback func called by editable fields of files table track width/height/name
+     * @param {*} hgc   HiGlass component instance
+     */
+    updateHiglassViewConf(updatedTilesetField, trackInfo) {
+        if (_.has(updatedTilesetField, 'name')) {
 
+            const hgc = this.getHiGlassComponent();
+            const currentViewConf = this.getHiGlassViewConfig(hgc);
             if (!currentViewConf) {
                 throw new Error('Could not get current view configuration.');
             }
@@ -242,15 +256,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 if (trackInfo.track === 'center') {
                     const content = _.find(tileset.contents, function (content) { return content.tilesetUid === trackInfo.tilesetUid; });
                     if (content) {
-                        content.options.name = updatedTableItem.name;
+                        content.options.name = updatedTilesetField.name;
                     }
+                } else {
+                    tileset.options.name = updatedTilesetField.name;
                 }
-                else {
-                    tileset.options.name = updatedTableItem.name;
-                }
+                hgc.api.setViewConfig(currentViewConf, true);
+                this.setState({ 'viewConfigModified': true });
             }
-            hgc.api.setViewConfig(currentViewConf, true);
-            this.setState({ 'viewConfigModified': true });
         } else {
             this.setState({
                 'modal': (
@@ -259,17 +272,19 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         Do you want to update all similar tilesets?
                         <br />
                     </ConfirmModal>
-                ), 'updatedTableItem': updatedTableItem, 'trackInfo': trackInfo
+                ), 'updatedTilesetField': updatedTilesetField, 'trackInfo': trackInfo
             });
         }
         return true; //currently not in use
     }
 
+    /**
+     * Func to update single tileset of Files table updates
+     */
     handleUpdateSingleTileset() {
+        const { updatedTilesetField, trackInfo } = this.state;
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-        const { updatedTableItem, trackInfo } = this.state;
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf) {
             throw new Error('Could not get current view configuration.');
@@ -278,16 +293,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
 
         if (tileset) {
-            if (_.has(updatedTableItem, 'height')) {
-                tileset.height = updatedTableItem.height;
+            if (_.has(updatedTilesetField, 'height')) {
+                tileset.height = updatedTilesetField.height;
             }
-            else if (_.has(updatedTableItem, 'width')) {
-                tileset.width = updatedTableItem.width;
+            else if (_.has(updatedTilesetField, 'width')) {
+                tileset.width = updatedTilesetField.width;
             }
-        }
-        hgc.api.setViewConfig(currentViewConf, true);
 
-        this.setState({ 'modal': null, 'viewConfigModified': true });
+            hgc.api.setViewConfig(currentViewConf, true);
+            this.setState({ 'modal': null, 'viewConfigModified': true });
+        }
 
         return true;
     }
@@ -297,10 +312,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      */
     handleUpdateAllTilesets(evt) {
         evt.preventDefault();
+        const { updatedTilesetField, trackInfo } = this.state;
+
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
-        const { updatedTableItem, trackInfo } = this.state;
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf) {
             throw new Error('Could not get current view configuration.');
@@ -310,24 +325,24 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (tileset) {
             const { orientation, type } = tileset;
-            if (_.has(updatedTableItem, 'height')) {
-                _.each(track, (item, i) => {
-                    if (orientation === track[i].orientation && type === track[i].type) {
-                        track[i].height = updatedTableItem.height;
+            if (_.has(updatedTilesetField, 'height')) {
+                _.each(track, (tilesetItem, idx) => {
+                    if (orientation === tilesetItem.orientation && type === tilesetItem.type) {
+                        tilesetItem.height = updatedTilesetField.height;
                     }
                 });
             }
-            else if (_.has(updatedTableItem, 'width')) {
-                _.each(track, (item, i) => {
-                    if (orientation === track[i].orientation && type === track[i].type) {
-                        track[i].width = updatedTableItem.width;
+            else if (_.has(updatedTilesetField, 'width')) {
+                _.each(track, (tilesetItem, i) => {
+                    if (orientation === tilesetItem.orientation && type === tilesetItem.type) {
+                        tilesetItem.width = updatedTilesetField.width;
                     }
                 });
             }
-        }
-        hgc.api.setViewConfig(currentViewConf, true);
 
-        this.setState({ 'modal': null, 'viewConfigModified': true });
+            hgc.api.setViewConfig(currentViewConf, true);
+            this.setState({ 'modal': null, 'viewConfigModified': true });
+        }
 
         return true;
     }
@@ -342,8 +357,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         evt.preventDefault();
 
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -418,16 +432,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         const { context } = this.props;
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
 
         // Generate a new title and description based on the current display.
-        const userDetails     = JWT.getUserDetails();
-        let userFirstName   = "Unknown";
+        const userDetails = JWT.getUserDetails();
+        let userFirstName = "Unknown";
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
@@ -529,8 +542,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     addFileToHiglass(files) {
         const { href } = this.props;
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -685,6 +697,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return (this.higlassRef && this.higlassRef.current && this.higlassRef.current.getHiGlassComponent()) || null;
     }
 
+    getHiGlassViewConfig(hgc){
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        return currentViewConf;
+    }
+
     statusChangeButton(){
         const { session, context } = this.props;
         const { releaseLoading } = this.state;
@@ -815,16 +834,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     render(){
         const { context, isFullscreen, windowWidth, width, session, schemas, href } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, instanceHeight, viewConfigModified } = this.state;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, hgcHeight, viewConfigModified } = this.state;
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
-        let instanceHeightField = null;
+        let hgcHeightField = null;
         // If the user isn't logged in, add a tooltip reminding them to log in.
         let tooltip = null;
         if (!session) {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
         if (this.havePermissionToEdit()) {
-            instanceHeightField = (
+            hgcHeightField = (
                 <FieldSet
                     context={context}
                     lineHeight={22}
@@ -834,10 +853,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         'buttonWidth': 30,
                         'initialHeight': 42
                     }}
-                    onSave={this.setInstanceHeight}
+                    onSave={this.updateHiGlassComponentHeight}
                     className="mt-1" schemas={schemas} href={href}>
                     <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" dataType="int" buttonAlwaysVisible={true} inputSize="md">
-                        <i className="visible-lg-inline icon icon-fw icon-arrows-alt-v fas" />&nbsp; {instanceHeight}
+                        <i className="visible-lg-inline icon icon-fw icon-arrows-alt-v fas" />&nbsp; {hgcHeight}
                     </EditableField>
                 </FieldSet>);
         }
@@ -869,15 +888,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth} height={instanceHeight} viewConfig={viewConfig}
+                            width={hiGlassComponentWidth} height={hgcHeight} viewConfig={viewConfig}
                             ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
                     </div>
                 </div>
-                {filesTableSearchHref || instanceHeightField ?
+                {filesTableSearchHref || hgcHeightField ?
                     (
                         <React.Fragment>
                             <hr className="tab-section-title-horiz-divider" />
-                            {instanceHeightField}
+                            {hgcHeightField}
                             {filesTableSearchHref ?
                                 (
                                     <div className="raw-files-table-section">
