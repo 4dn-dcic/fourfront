@@ -248,6 +248,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.notes_to_tsv",
         "experiments_in_set.processed_files.contributing_labs.display_title",
         "experiments_in_set.processed_files.lab.display_title",
+        "experiments_in_set.processed_files.quality_metric",
         # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
