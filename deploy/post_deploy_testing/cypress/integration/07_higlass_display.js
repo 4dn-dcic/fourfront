@@ -1,6 +1,6 @@
 'use strict';
 
-
+import { higlassItemViewVizSelector } from '../support/variables';
 
 const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 
@@ -11,6 +11,7 @@ const draftUrl = "/higlass-view-configs/00000000-1111-0000-1111-000000000002/";
 describe("HiGlass Display pages", function(){
 
     context('Higlass Display summary page', function(){
+
         it('Can visit HiGlass Display collection page without login', function(){
 
             // Visit the page and confirm you can see the table and facet properties.
@@ -61,19 +62,31 @@ describe("HiGlass Display pages", function(){
             cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
         });
 
-        afterEach(function(){
-            if (testItemsToDelete.length === 0) return;
+        after(function(){
+
+            // Maybe we could just delete ALL higlass displays owned by 'ud4dntest@gmail.com'
+            // as a more complete cleanup (except like hardcoded 00000000-1111-0000-1111-000000000002)
+            // In case some tests fail and terminate before getting to this point of cleanup.
+
+            const testItemsToDeleteIDs = testItemsToDelete.map(function({ '@id' : id }){ return id; });
+
+            Cypress.log({
+                'name' : "Deleting Newly-Created HiGlass View Configs Items",
+                'message' : "Count: " + testItemsToDelete.length + ", Item IDs: " + testItemsToDeleteIDs.join(", ")
+            });
+
+            if (testItemsToDeleteIDs.length === 0) return;
 
             // Log in _as admin_.
             cy.visit('/higlass-view-configs/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken' : true }).wait(500);
 
             // Delete all newly created higlass views.
-            cy.wrap(testItemsToDelete).each(function(testItem){ // Synchronously process async stuff.
+            cy.wrap(testItemsToDeleteIDs).each(function(testItemID){ // Synchronously process async stuff.
                 cy.window().then(function(w){
                     const token = w.fourfront.JWT.get();
                     cy.request({
                         method: "DELETE",
-                        url: testItem['@id'],
+                        url: testItemID,
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             "Content-Type" : "application/json",
@@ -81,7 +94,7 @@ describe("HiGlass Display pages", function(){
                         }
                     }).end().request({
                         method: "PATCH",
-                        url: testItem['@id'],
+                        url: testItemID,
                         headers: {
                             'Authorization': 'Bearer ' + token,
                             "Content-Type" : "application/json",
@@ -126,10 +139,18 @@ describe("HiGlass Display pages", function(){
 
                     // Add the test Item so we can delete it later.
                     testItemsToDelete.push(xhr.responseBody["@graph"][0]);
-                });
+                })
+                .end()
+                // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                .get(higlassItemViewVizSelector).wait(500).end();
         });
 
         it('Can edit the title and description', function() {
+
+            // Change the title and description, then save.
+            const newTitle = "Cypress Cool Display";
+            const newDescription = "Look at the description";
+
             // Verify logged in users can save higlass displays.
 
             // Go to the display for the draft display.
@@ -166,38 +187,35 @@ describe("HiGlass Display pages", function(){
                     expect(newID).to.be.ok;
 
                     // Clicking the SaveAs button should redirect us to the new page
-                    cy.location('pathname').should('eq', newID);
+                    cy.location('pathname')
+                        .should('eq', newID).end()
+                        // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                        .get(higlassItemViewVizSelector).wait(500).end()
 
-                    // Click on the edit button and wait for the page load.
-                    cy.get(".action-button[data-action='edit'] a").click();
-
-                    // Change the title and description, then save.
-                    const newTitle = "Cypress Cool Display";
-                    const newDescription = "Look at the description";
-
-                    cy.get("input#field_for_title").clear().type(newTitle).then(() => {
-                        cy.get('#field_for_description').clear().type(newDescription).then(() => {
-                            // Click validate then click submit
-                            cy.get(".action-buttons-container button.btn-info").click().then(() => {
-                                cy.get(".action-buttons-container button.btn-success").click().wait(1000).then(() => {
-                                    // Once the page reloads, look for the updated title/description
-                                    cy.request({
-                                        'url' : newID + "?format=json&datastore=database",
-                                        'method' : "GET",
-                                        'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
-                                        'followRedirect' : true
-                                    }).then((resp)=>{
-                                        expect(resp.body.title).to.equal(newTitle);
-                                        expect(resp.body.description).to.equal(newDescription);
-                                    });
-                                });
-                            });
-                        });
-                    });
+                        // Click on the edit button and wait for the page load.
+                        .get(".action-button[data-action='edit'] a").click({ force: true }).end()
+                        .get("input#field_for_title").clear().type(newTitle).end()
+                        .get('#field_for_description').clear().type(newDescription).end()
+                        // Click validate then click submit
+                        .get(".action-buttons-container button.btn-info").click().end()
+                        .get(".action-buttons-container button.btn-success").click().end()
+                        // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                        .get(higlassItemViewVizSelector).wait(500).end()
+                        // Once the page reloads, look for the updated title/description
+                        .request({
+                            'url' : newID + "?format=json&datastore=database",
+                            'method' : "GET",
+                            'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
+                            'followRedirect' : true
+                        }).then((resp)=>{
+                            expect(resp.body.title).to.equal(newTitle);
+                            expect(resp.body.description).to.equal(newDescription);
+                        }).end();
 
                 });
         });
     });
+
 
     context('Sharing on the Individual Higlass display page', function() {
 
@@ -240,6 +258,8 @@ describe("HiGlass Display pages", function(){
                     return cy.contains("Visible by Everyone").click().wait(1000).end();
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()
+                // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
+                .get(higlassItemViewVizSelector).wait(500).end()
 
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{

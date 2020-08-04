@@ -11,7 +11,7 @@ import { Publications } from './Publications';
 
 
 
-
+// TODO memoized component
 export function generateAddressString(lab) {
     const { city, state, postal_code, country } = lab;
     const address = [];
@@ -34,35 +34,36 @@ export function generateAddressString(lab) {
  * @param {number} [idx] - Index of person in correspondence list.
  * @returns {JSX.Element} A `li` JSX element.
  */
-export function generateContactPersonListItem(contactPerson, idx){
-    var decodedEmail        = typeof atob === 'function' && contactPerson.contact_email && atob(contactPerson.contact_email),
-        decodedEmailParts   = decodedEmail && decodedEmail.split('@'),
-        onClick             = (decodedEmail && function(e){
-            if (typeof window.location.assign !== 'function') return false;
-            window.location.assign('mailto:' + decodedEmail);
-            return false;
-        }) || null,
-        dataTip             = (decodedEmailParts && (
-            '<span class="text-300">Click to send e-mail message to</span><br/>' +
-            '<div class="text-center">' +
-                '<span class="text-500">' +
-                    decodedEmailParts[0] +
-                '</span> <span class="text-400 small">(at)</span> <span class="text-500">' +
-                    decodedEmailParts[1] +
-                '</span>' +
-            '</div>'
-        )) || null;
+export const ContactPersonListItem = React.memo(function ContactPersonListItem({ contactPerson }){
+    const { contact_email = null, display_title = "Unknown Person" } = contactPerson;
+    const decodedEmail = (typeof atob === 'function' && contact_email && atob(contact_email)) || null;
+    const decodedEmailParts = decodedEmail && decodedEmail.split('@');
+    const onClick = (decodedEmail && function(e){
+        if (typeof window.location.assign !== 'function') return false;
+        window.location.assign('mailto:' + decodedEmail);
+        return false;
+    }) || null;
+    const dataTip = (decodedEmailParts && (
+        '<span class="text-300">Click to send e-mail message to</span><br/>' +
+        '<div class="text-center">' +
+            '<span class="text-500">' +
+                decodedEmailParts[0] +
+            '</span> <span class="text-400 small">(at)</span> <span class="text-500">' +
+                decodedEmailParts[1] +
+            '</span>' +
+        '</div>'
+    )) || null;
 
     return (
-        <li className="contact-person" key={contactPerson.contact_email || idx}>
+        <li className="contact-person">
             <div className="inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
                 <i className="icon icon-fw icon-envelope far" />
                 &nbsp;&nbsp;
-                { contactPerson.display_title }
+                { display_title }
             </div>
         </li>
     );
-}
+});
 
 
 
@@ -146,10 +147,15 @@ class LabsSection extends React.PureComponent {
 
     contributingLabRenderFxn(lab, idx, all){
         const { mounted } = this.state;
-        const atId = object.itemUtil.atId(lab);
-        const contactPersons  = mounted && Array.isArray(lab.correspondence) && _.filter(lab.correspondence, function(contact_person){
-            return contact_person.display_title && object.itemUtil.atId(contact_person) && contact_person.contact_email;
-        });
+        const { '@id' : atId, correspondence = [] } = lab;
+        let contactPersons = null;
+        if (mounted) {
+            contactPersons = correspondence.filter(function({ '@id': cpID, display_title, contact_email }){
+                return cpID && display_title && contact_email;
+            }).map(function(contactPerson, idx){
+                return <ContactPersonListItem contactPerson={contactPerson} key={contactPerson['@id'] || idx} />;
+            });
+        }
 
         return (
             <div className={"lab" + (all.length === 1 && (!contactPersons || contactPersons.length === 0)  ? ' mt-1' : '')} key={atId || idx}>
@@ -157,7 +163,7 @@ class LabsSection extends React.PureComponent {
                     <a className="text-500" href={atId}>{ lab.display_title }</a>
                 </h5>
                 { contactPersons && contactPersons.length > 0 ?
-                    <ul className="mt-02">{ _.map(contactPersons, generateContactPersonListItem) }</ul>
+                    <ul className="mt-02">{ contactPersons }</ul>
                     : null }
             </div>
         );
