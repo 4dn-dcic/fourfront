@@ -36,7 +36,7 @@
                 "dm6",
                 "galGal5",
                 "chlSab2",
-                "GRCz10"
+                "GRCz11"
             ]
         },
         "viewconfig": {
@@ -172,8 +172,8 @@
                                     "static" : {
                                         "type" : "boolean",
                                         "default" : true
-                                    }                                   
-                                   
+                                    }
+
                                 }
                             },
                             "tracks" : {
@@ -197,7 +197,7 @@
                                                 },
                                                 "height" : {
                                                     "type" : "integer"
-                                                },                                               
+                                                },
                                                 "orientation" : {
                                                     "type" : "string",
                                                     "comment" : "This might be an ENUM, need to figure out.",
@@ -268,7 +268,7 @@
                                                                 "default": false,
                                                                 "description": "Applicable for BigWig and other 1D track files."
                                                                                                        }
-                                                       
+
                                                     }
                                                 }
                                             }
@@ -365,7 +365,7 @@
                                                             "type" : "boolean",
                                                             "default": false,
                                                             "description": "Applicable for BigWig and other 1D track files."
-                                                        }                                                    
+                                                        }
                                                     }
                                                 }
                                             }
@@ -389,7 +389,7 @@
                                                 },
                                                 "height" : {
                                                     "type" : "integer"
-                                                },                                                
+                                                },
                                                 "orientation" : {
                                                     "type" : "string",
                                                     "comment" : "This might be an ENUM, need to figure out.",
@@ -643,7 +643,7 @@
                     "https://higlass.4dnucleome.org/api/v1"
                 ],
                 "views": []
-            }     
+            }
         },
         "instance_height": {
             "title": "Instance Height",
