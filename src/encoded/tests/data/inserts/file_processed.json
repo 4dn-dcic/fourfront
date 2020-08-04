@@ -632,6 +632,48 @@
     "override_experiment_type": "Dataset",
     "override_assay_info": "Assay",
     "override_biosource_name" : "Biosource"
+},{
+    "lab": "4dn-dcic-lab",
+    "award": "1U01CA200059-01",
+    "file_format": "/file-formats/spt/",
+    "aliases": ["dcic:rel1"],
+    "accession": "4DNFILXXXO1R",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "2e9b9ed1-2e95-4a3b-9764-402ca31565d2",
+    "filename": "rel1.spt",
+    "file_classification": "processed file",
+    "related_files": [
+        {"relationship_type": "grouped with", "file": "dcic:rel2"},
+        {"relationship_type": "grouped with", "file": "dcic:rel3"}]
+},{
+    "lab": "4dn-dcic-lab",
+    "award": "1U01CA200059-01",
+    "file_format": "/file-formats/spt/",
+    "aliases": ["dcic:rel2"],
+    "accession": "4DNFILXXXO2R",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "7e225d2c-bacc-4a42-af72-041a085b5b67",
+    "filename": "rel2.spt",
+    "file_classification": "processed file",
+    "related_files": [
+        {"relationship_type": "grouped with", "file": "dcic:rel1"},
+        {"relationship_type": "grouped with", "file": "dcic:rel3"}]
+},{
+    "lab": "4dn-dcic-lab",
+    "award": "1U01CA200059-01",
+    "file_format": "/file-formats/spt/",
+    "aliases": ["dcic:rel3"],
+    "accession": "4DNFILXXXO3R",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "uuid": "65a02bbc-4f16-458a-a525-67eebed13e6f",
+    "filename": "rel3.spt",
+    "file_classification": "processed file",
+    "related_files": [
+        {"relationship_type": "grouped with", "file": "dcic:rel1"},
+        {"relationship_type": "grouped with", "file": "dcic:rel2"}]
 }
 
 ]
