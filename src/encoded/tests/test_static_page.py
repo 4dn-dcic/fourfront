@@ -66,8 +66,13 @@ def help_page_json_deleted():
 
 @pytest.fixture(scope='module')
 def posted_help_page_section(testapp, help_page_section_json):
-    res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
-    return res.json['@graph'][0]
+    try:
+        res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
+        val = res.json['@graph'][0]
+    except webtest.AppError:
+        res = testapp.get('/' + help_page_section_json['uuid'], status=301).follow()
+        val = res.json
+    return val
 
 
 @pytest.fixture(scope='module')
