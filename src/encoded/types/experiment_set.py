@@ -237,7 +237,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.extra_files.file_size",
         "experiments_in_set.processed_files.extra_files.md5sum",
         "experiments_in_set.processed_files.extra_files.use_for",
-        "experiments_in_set.processed_files.quality_metric.*",
+        "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
         # "experiments_in_set.processed_files.quality_metric.url",
         # "experiments_in_set.processed_files.quality_metric.overall_quality_status",
        # "experiments_in_set.processed_files.quality_metric_summary.*", #todo - delete soon
