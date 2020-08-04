@@ -19,6 +19,7 @@ def input_json(workflow):
       "output_bucket": "elasticbeanstalk-fourfront-webdev-wfoutput",
       "tag": "0.2.5",
       "config": {
+          "log_bucket": "tibanna-output"
       },
       "workflow_uuid": "023bfb3e-9a8b-42b9-a9d4-216079526f68",
       "input_files": [
