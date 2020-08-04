@@ -73,7 +73,7 @@ def test_pseudo_run(testapp, input_json):
     # cleanup
     output = json.loads(res.json['output'])
     patch_metadata({'status':'deleted'}, output['ff_meta']['uuid'], ff_env='fourfront-webdev')
-
+    purge_metadata(output['ff_meta']['uuid'], ff_env='fourfront-webdev')
 
 def test_workflow_for_env():
 
