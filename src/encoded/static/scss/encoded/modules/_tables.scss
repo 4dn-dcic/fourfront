@@ -193,7 +193,8 @@ table.matrix {
 		.s-block {
 
 			&.biosample.stack-depth-1,
-			&.experiment.stack-depth-1 {
+			&.experiment.stack-depth-1,
+			&.experiment-set.stack-depth-1 {
 				/** Decrease line height(s) to fit more lines in **/
 				> .name {
 					text-align: center;

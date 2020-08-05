@@ -6,8 +6,10 @@ import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemFooterRow } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemFooterRow';
+import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
+import { FileEntryBlock } from '../../browse/components/FileEntryBlock';
 
 
 
@@ -65,7 +67,136 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
     );
 });
 
+/**
+ * expSetId, expId, fileId, externalRefs
+ * @param {Object} context
+ */
+function combineExternalReferencesWithTitle(context) {
+    const externalRefs = [];
+    //add experiment set
+    if (context.external_references.length > 0) {
+        externalRefs.push(_.reduce(
+            context.external_references,
+            function (memo, extRef, idx) {
+                memo['extRef' + (idx + 1)] = extRef;
+                return memo;
+            },
+            { '@id': context['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': null, 'fileId': null })
+        );
+    }
+    //experiment set's processed files
+    if (context.processed_files && context.processed_files.length > 0) {
+        _.each(context.processed_files, function (file) {
+            if (file.external_references && file.external_references.length > 0) {
+                externalRefs.push(_.reduce(
+                    file.external_references,
+                    function (memo, extRef, idx) {
+                        memo['extRef' + (idx + 1)] = extRef;
+                        return memo;
+                    },
+                    { '@id': file['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': 'Multiple Experiments', 'url': null }, 'fileId': { 'title': file.display_title, 'url': file['@id'] } })
+                );
+            }
+        });
+    }
+    //add experiment
+    _.each(context.experiments_in_set, function (exp) {
+        if (exp.external_references.length > 0) {
+            externalRefs.push(_.reduce(
+                exp.external_references,
+                function (memo, extRef, idx) {
+                    memo['extRef' + (idx + 1)] = extRef;
+                    return memo;
+                },
+                { '@id': exp['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': null })
+            );
+        }
+        //experiment's processed files
+        if (exp.processed_files && exp.processed_files.length > 0) {
+            _.each(exp.processed_files, function (file) {
+                if (file.external_references.length > 0) {
+                    externalRefs.push(_.reduce(
+                        file.external_references,
+                        function (memo, extRef, idx) {
+                            memo['extRef' + (idx + 1)] = extRef;
+                            return memo;
+                        },
+                        { '@id': file['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { 'title': file.display_title, 'url': file['@id'] } })
+                    );
+                }
+            });
+        }
+        //experiment's raw files
+        if (exp.files && exp.files.length > 0) {
+            _.each(exp.files, function (file) {
+                if (file.external_references.length > 0) {
+                    externalRefs.push(_.reduce(
+                        file.external_references,
+                        function (memo, extRef, idx) {
+                            memo['extRef' + (idx + 1)] = extRef;
+                            return memo;
+                        },
+                        { '@id': file['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { 'title': file.display_title, 'url': file['@id'] } })
+                    );
+                }
+            });
+        }
+    });
+    console.log('xxx externalRefs:', externalRefs);
 
+    const columnHeaders = [
+        { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'experiment', field: "expSetId.title" },
+        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, field: "expId.title" },
+        { columnClass: 'file', title: 'File', initialWidth: 200, field: "fileId.title" },
+        { columnClass: 'file-detail', title: 'External Reference', initialWidth: 200, field: "extRef1.ref" },
+    ];
+
+    const extRefsGroupByExp = _.groupBy(externalRefs, function (item) { return (item.expId && item.expId.title) || '-'; });
+
+    const blocks = _.map(extRefsGroupByExp, function (item, idx) {
+        const fileBlocks = _.map(item, function (ref) {
+            return (<FileEntryBlock file={ref}></FileEntryBlock>);
+        });
+        return (
+            <StackedBlock columnClass="experiment" hideNameOnHover={false} key={"exp-" + idx}
+                label={<StackedBlockNameLabel title="Experiment" subtitle={'zzz'} accession={(item[0].expId && item[0].expId.accession) || '-'} subtitleVisible />}>
+                <StackedBlockName relativePosition={true}>
+                    <a href={(item[0].expId && item[0].expId.url) || '#'} className="name-title">{(item[0].expId && item[0].expId.accession) || '-'}</a>
+                </StackedBlockName>
+                <StackedBlockList className="experiments" title="Files">
+                    {fileBlocks}
+                </StackedBlockList>
+            </StackedBlock>
+        );
+    });
+
+    return (
+        <React.Fragment>
+            <hr className="mb-08 mt-1" />
+            <div className="row">
+                <div className="col">
+                    <h4 className="text-300">External References</h4>
+                    <div className="stacked-block-table-outer-container overflow-auto">
+                        <StackedBlockTable columnHeaders={columnHeaders}
+                            className="expset-processed-files" fadeIn handleFileCheckboxChange={null}>
+                            <StackedBlockList className="sets" collapseLongLists={false}>
+                                <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
+                                    label={<StackedBlockNameLabel title="Experiment Set" subtitle={'zzz'} accession={context.accession} subtitleVisible />}>
+                                    <StackedBlockName relativePosition={true}>
+                                        <a href={context['@id']} className="name-title">{context.accession}</a>
+                                    </StackedBlockName>
+                                    <StackedBlockList className="experiments" title="Experiments">
+                                        {blocks}
+                                    </StackedBlockList>
+                                </StackedBlock>
+                            </StackedBlockList>
+                        </StackedBlockTable>
+                    </div>
+                </div>
+            </div>
+        </React.Fragment>
+    );
+}
 
 export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas }){
     const {
@@ -80,6 +211,7 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
     const awardExists = (award && !award.error);
     const labsExist = (lab && !lab.error) || contributing_labs.length > 0;
     const submittedByExists = submitted_by && !submitted_by.error;
+
     return (
         <div className="info-area">
 
@@ -108,6 +240,8 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
             </div>
 
             <ItemFooterRow {...{ context, schemas }} />
+
+            {combineExternalReferencesWithTitle(context)}
         </div>
     );
 });
