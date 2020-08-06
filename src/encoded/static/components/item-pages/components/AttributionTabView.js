@@ -81,7 +81,7 @@ function combineExternalReferencesWithTitle(context) {
                 memo['extRef' + (idx + 1)] = extRef;
                 return memo;
             },
-            { '@id': context['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': null, 'fileId': null })
+            { 'expId': null, 'fileId': null })
         );
     }
     //experiment set's processed files
@@ -94,7 +94,7 @@ function combineExternalReferencesWithTitle(context) {
                         memo['extRef' + (idx + 1)] = extRef;
                         return memo;
                     },
-                    { '@id': file['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': 'Multiple Experiments', 'url': null }, 'fileId': { 'title': file.display_title, 'url': file['@id'] } })
+                    { 'expId': { 'title': 'Multiple Experiments', 'url': null }, 'fileId': { '@id': file['@id'],  'title': file.display_title, 'url': file['@id'] } })
                 );
             }
         });
@@ -108,7 +108,7 @@ function combineExternalReferencesWithTitle(context) {
                     memo['extRef' + (idx + 1)] = extRef;
                     return memo;
                 },
-                { '@id': exp['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': null })
+                { 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': null })
             );
         }
         //experiment's processed files
@@ -121,7 +121,7 @@ function combineExternalReferencesWithTitle(context) {
                             memo['extRef' + (idx + 1)] = extRef;
                             return memo;
                         },
-                        { '@id': file['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { 'title': file.display_title, 'url': file['@id'] } })
+                        { 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { '@id': file['@id'], 'title': file.display_title, 'url': file['@id'] } })
                     );
                 }
             });
@@ -136,7 +136,7 @@ function combineExternalReferencesWithTitle(context) {
                             memo['extRef' + (idx + 1)] = extRef;
                             return memo;
                         },
-                        { '@id': file['@id'], 'expSetId': { 'title': context.display_title, 'url': context['@id'] }, 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { 'title': file.display_title, 'url': file['@id'] } })
+                        { 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { '@id': file['@id'], 'title': file.display_title, 'url': file['@id'] } })
                     );
                 }
             });
@@ -145,17 +145,19 @@ function combineExternalReferencesWithTitle(context) {
     console.log('xxx externalRefs:', externalRefs);
 
     const columnHeaders = [
-        { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'experiment', field: "expSetId.title" },
-        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, field: "expId.title" },
+        { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left', field: "expSetId.title" },
+        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left', field: "expId.title" },
         { columnClass: 'file', title: 'File', initialWidth: 200, field: "fileId.title" },
-        { columnClass: 'file-detail', title: 'External Reference', initialWidth: 200, field: "extRef1.ref" },
+        { columnClass: 'file-detail', title: 'External Reference #1', initialWidth: 200, field: "extRef1.ref" },
+        { columnClass: 'file-detail', title: 'External Reference #2', initialWidth: 200, field: "extRef2.ref" },
     ];
 
     const extRefsGroupByExp = _.groupBy(externalRefs, function (item) { return (item.expId && item.expId.title) || '-'; });
 
     const blocks = _.map(extRefsGroupByExp, function (item, idx) {
         const fileBlocks = _.map(item, function (ref) {
-            return (<FileEntryBlock file={ref}></FileEntryBlock>);
+            const fileObj = _.extend(_.pick(ref, function (value, key, object) { return key.startsWith('extRef'); }), ref.fileId || { 'accession': '-', '@id': '-' });
+            return (<FileEntryBlock file={fileObj}></FileEntryBlock>);
         });
         return (
             <StackedBlock columnClass="experiment" hideNameOnHover={false} key={"exp-" + idx}
@@ -177,15 +179,14 @@ function combineExternalReferencesWithTitle(context) {
                 <div className="col">
                     <h4 className="text-300">External References</h4>
                     <div className="stacked-block-table-outer-container overflow-auto">
-                        <StackedBlockTable columnHeaders={columnHeaders}
-                            className="expset-processed-files" fadeIn handleFileCheckboxChange={null}>
+                        <StackedBlockTable columnHeaders={columnHeaders} className="expset-external-references" fadeIn>
                             <StackedBlockList className="sets" collapseLongLists={false}>
                                 <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
                                     label={<StackedBlockNameLabel title="Experiment Set" subtitle={'zzz'} accession={context.accession} subtitleVisible />}>
                                     <StackedBlockName relativePosition={true}>
                                         <a href={context['@id']} className="name-title">{context.accession}</a>
                                     </StackedBlockName>
-                                    <StackedBlockList className="experiments" title="Experiments">
+                                    <StackedBlockList className="experiments" title="Experiments" collapseLongLists={false}>
                                         {blocks}
                                     </StackedBlockList>
                                 </StackedBlock>
