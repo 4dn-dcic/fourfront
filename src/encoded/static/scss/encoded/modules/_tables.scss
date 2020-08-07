@@ -203,6 +203,14 @@ table.matrix {
 					/* padding-bottom: 27px !important; */
 					min-height: 70px;
 				}
+				> .name-empty {
+					min-height: 20px !important;
+				}
+			}
+			&.experiment.stack-depth-2 {
+				> .name-empty {
+					min-height: 20px !important;
+				}
 			}
 
 			&.biosample.stack-depth-1 {

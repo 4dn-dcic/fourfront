@@ -181,7 +181,7 @@ export default class DefaultItemView extends React.PureComponent {
 
         // Attribution Tab
         if (labTitle || submitterTitle || publications_of_set || produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(this.props));
+            returnArr.push(AttributionTabView.getTabObject({ ...this.props, width: this.getTabViewWidth() }));
         }
 
         returnArr.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Schemas.Term.toName }));
@@ -216,7 +216,7 @@ export default class DefaultItemView extends React.PureComponent {
         returnArr.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Schemas.Term.toName }));
 
         if (labTitle || submitterTitle || publications_of_set || produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(this.props));
+            returnArr.push(AttributionTabView.getTabObject({ ...this.props, width: this.getTabViewWidth() }));
         }
         return returnArr;
     }

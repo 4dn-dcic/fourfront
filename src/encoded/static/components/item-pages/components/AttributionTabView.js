@@ -5,11 +5,13 @@ import _ from 'underscore';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemFooterRow } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemFooterRow';
+import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
+import { ItemFooterRow, ExternalReferenceLink } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemFooterRow';
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
 import { FileEntryBlock } from '../../browse/components/FileEntryBlock';
+import { expFxn } from './../../util';
 
 
 
@@ -68,102 +70,120 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 });
 
 /**
- * expSetId, expId, fileId, externalRefs
+ *
  * @param {Object} context
  */
-function combineExternalReferencesWithTitle(context) {
-    const externalRefs = [];
-    //add experiment set
-    if (context.external_references.length > 0) {
-        externalRefs.push(_.reduce(
-            context.external_references,
-            function (memo, extRef, idx) {
-                memo['extRef' + (idx + 1)] = extRef;
-                return memo;
-            },
-            { 'expId': null, 'fileId': null })
-        );
-    }
-    //experiment set's processed files
-    if (context.processed_files && context.processed_files.length > 0) {
-        _.each(context.processed_files, function (file) {
-            if (file.external_references && file.external_references.length > 0) {
-                externalRefs.push(_.reduce(
-                    file.external_references,
-                    function (memo, extRef, idx) {
-                        memo['extRef' + (idx + 1)] = extRef;
-                        return memo;
-                    },
-                    { 'expId': { 'title': 'Multiple Experiments', 'url': null }, 'fileId': { '@id': file['@id'],  'title': file.display_title, 'url': file['@id'] } })
-                );
-            }
-        });
-    }
-    //add experiment
-    _.each(context.experiments_in_set, function (exp) {
-        if (exp.external_references.length > 0) {
-            externalRefs.push(_.reduce(
-                exp.external_references,
-                function (memo, extRef, idx) {
-                    memo['extRef' + (idx + 1)] = extRef;
-                    return memo;
-                },
-                { 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': null })
-            );
-        }
-        //experiment's processed files
-        if (exp.processed_files && exp.processed_files.length > 0) {
-            _.each(exp.processed_files, function (file) {
-                if (file.external_references.length > 0) {
-                    externalRefs.push(_.reduce(
-                        file.external_references,
-                        function (memo, extRef, idx) {
-                            memo['extRef' + (idx + 1)] = extRef;
-                            return memo;
-                        },
-                        { 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { '@id': file['@id'], 'title': file.display_title, 'url': file['@id'] } })
-                    );
-                }
-            });
-        }
-        //experiment's raw files
-        if (exp.files && exp.files.length > 0) {
-            _.each(exp.files, function (file) {
-                if (file.external_references.length > 0) {
-                    externalRefs.push(_.reduce(
-                        file.external_references,
-                        function (memo, extRef, idx) {
-                            memo['extRef' + (idx + 1)] = extRef;
-                            return memo;
-                        },
-                        { 'expId': { 'title': exp.display_title, 'url': exp['@id'], accession: exp.accession }, 'fileId': { '@id': file['@id'], 'title': file.display_title, 'url': file['@id'] } })
-                    );
-                }
-            });
-        }
-    });
-    console.log('xxx externalRefs:', externalRefs);
+export const ExternalReferencesStackedTable = React.memo(function ExternalReferencesStackedTable({ context, width }) {
+    const {
+        accession, experiments_in_set, replicate_exps = [],
+        processed_files: expset_processed_files,
+        external_references: expset_external_references
+    } = context;
 
+    const reducerFxn = function (memo, extRef, idx) {
+        memo['extRef' + (idx + 1)] = extRef;
+        return memo;
+    };
+    const fileIterateeFxn = function (extRefs, files, tmp) {
+        if (files && files.length > 0) {
+            _.each(files, function (file) {
+                if (file.external_references && file.external_references.length > 0) {
+                    const obj = _.extend({ file: file }, tmp);
+                    extRefs.push(_.reduce(file.external_references, reducerFxn, obj));
+                }
+            });
+        }
+    };
+    const renderFileFxn = function(file, field, detailIndex, fileEntryBlockProps){
+        const fileAtId = object.atIdFromObject(file);
+        if (!!fileAtId && fileAtId === '-') {
+            return (<span className="title-of-file mono-text name-title" >&nbsp;</span>);
+        }
+
+        let fileTitleString;
+        if (file.accession) {
+            fileTitleString = file.accession;
+        }
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0,5) === '4DNFI'){
+                fileTitleString = idParts[1];
+            }
+        }
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
+        }
+        return (
+            <a className="title-of-file mono-text name-title" href={fileAtId}>
+                {fileTitleString}
+            </a>);
+    };
+    const renderFileExtRefFxn = function (file, field, detailIndex, fileEntryBlockProps) {
+        if (!field || !file[field]) {
+            return <span className="mono-text">-</span>;
+        }
+        const extRef = file[field];
+        if (extRef && typeof extRef.ref === 'string') {
+            const innerText = (file.accession !== '-') ? extRef.ref : (<span className="font-weight-bold">{extRef.ref}</span>);
+            return <ExternalReferenceLink uri={extRef.uri || null}>{innerText}</ExternalReferenceLink>;
+        } else {
+            return extRef;
+        }
+    };
     const columnHeaders = [
-        { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left', field: "expSetId.title" },
-        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left', field: "expId.title" },
-        { columnClass: 'file', title: 'File', initialWidth: 200, field: "fileId.title" },
-        { columnClass: 'file-detail', title: 'External Reference #1', initialWidth: 200, field: "extRef1.ref" },
-        { columnClass: 'file-detail', title: 'External Reference #2', initialWidth: 200, field: "extRef2.ref" },
+        { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' },
+        { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left' },
+        { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileFxn },
+        { columnClass: 'file-detail', title: 'External Reference #1', initialWidth: 200, field: 'extRef1', render: renderFileExtRefFxn },
+        { columnClass: 'file-detail', title: 'External Reference #2', initialWidth: 200, field: 'extRef2', render: renderFileExtRefFxn },
     ];
 
-    const extRefsGroupByExp = _.groupBy(externalRefs, function (item) { return (item.expId && item.expId.title) || '-'; });
+    const externalRefs = [];
+    //experiment set's refs
+    if (expset_external_references && expset_external_references.length > 0) {
+        externalRefs.push(_.reduce(context.external_references, reducerFxn, {})
+        );
+    }
+    //experiment set's processed files' refs
+    fileIterateeFxn(externalRefs, expset_processed_files, {});
+    //experiments
+    const experimentsWithReplicateNumbers = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
+    console.log('xxx combineWithReplicateNumbers: ', experimentsWithReplicateNumbers);
+    _.each(experimentsWithReplicateNumbers, function (exp) {
+        //experiment's refs
+        if (exp.external_references && exp.external_references.length > 0) {
+            externalRefs.push(_.reduce(exp.external_references, reducerFxn, { exp: exp }));
+        }
+        //experiment's processed files' refs
+        fileIterateeFxn(externalRefs, exp.processed_files, { exp: exp });
+        //experiment's raw files' refs
+        fileIterateeFxn(externalRefs, exp.files, { exp: exp });
+    });
 
-    const blocks = _.map(extRefsGroupByExp, function (item, idx) {
-        const fileBlocks = _.map(item, function (ref) {
-            const fileObj = _.extend(_.pick(ref, function (value, key, object) { return key.startsWith('extRef'); }), ref.fileId || { 'accession': '-', '@id': '-' });
-            return (<FileEntryBlock file={fileObj}></FileEntryBlock>);
+    const extRefsGroupByExp = _.groupBy(externalRefs, function (item) { return (item.exp && item.exp.accession) || '-'; });
+
+    const experimentBlocks = _.map(extRefsGroupByExp, function (extRefs, idx) {
+        const fileBlocks = _.map(extRefs, function (extRef) {
+            const fileObj = _.extend(
+                _.pick(extRef,
+                    function (value, key, object) {
+                        return key.startsWith('extRef');
+                    }),
+                extRef.file || { 'accession': '-', '@id': '-' });
+            const renderFileLabel = !!extRef.file;
+            return (<FileEntryBlock file={fileObj} label={renderFileLabel ? <StackedBlockNameLabel title="File" /> : null}></FileEntryBlock>);
         });
+        const [extRef] = extRefs;
+        const { exp: experiment } = extRef;
+        const experimentAtId = object.itemUtil.atId(experiment);
+        const text = (experiment && experiment.display_title) || null;
+        const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
         return (
             <StackedBlock columnClass="experiment" hideNameOnHover={false} key={"exp-" + idx}
-                label={<StackedBlockNameLabel title="Experiment" subtitle={'zzz'} accession={(item[0].expId && item[0].expId.accession) || '-'} subtitleVisible />}>
-                <StackedBlockName relativePosition={true}>
-                    <a href={(item[0].expId && item[0].expId.url) || '#'} className="name-title">{(item[0].expId && item[0].expId.accession) || '-'}</a>
+                label={experimentAtId ? <StackedBlockNameLabel title="Experiment" subtitle={null} accession={(experiment && experiment.accession) || null} subtitleVisible /> : null}>
+                <StackedBlockName relativePosition={true} className={experimentAtId ? '' : 'name-empty'}>
+                    {replicateNumbersExists ? <div>Bio Rep <b>{experiment.bio_rep_no}</b>, Tec Rep <b>{experiment.tec_rep_no}</b></div> : <div />}
+                    {experimentAtId ? (<a href={experimentAtId} className="name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
                 </StackedBlockName>
                 <StackedBlockList className="experiments" title="Files">
                     {fileBlocks}
@@ -173,33 +193,25 @@ function combineExternalReferencesWithTitle(context) {
     });
 
     return (
-        <React.Fragment>
-            <hr className="mb-08 mt-1" />
-            <div className="row">
-                <div className="col">
-                    <h4 className="text-300">External References</h4>
-                    <div className="stacked-block-table-outer-container overflow-auto">
-                        <StackedBlockTable columnHeaders={columnHeaders} className="expset-external-references" fadeIn>
-                            <StackedBlockList className="sets" collapseLongLists={false}>
-                                <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
-                                    label={<StackedBlockNameLabel title="Experiment Set" subtitle={'zzz'} accession={context.accession} subtitleVisible />}>
-                                    <StackedBlockName relativePosition={true}>
-                                        <a href={context['@id']} className="name-title">{context.accession}</a>
-                                    </StackedBlockName>
-                                    <StackedBlockList className="experiments" title="Experiments" collapseLongLists={false}>
-                                        {blocks}
-                                    </StackedBlockList>
-                                </StackedBlock>
-                            </StackedBlockList>
-                        </StackedBlockTable>
-                    </div>
-                </div>
-            </div>
-        </React.Fragment>
+        <div className="stacked-block-table-outer-container overflow-auto">
+            <StackedBlockTable columnHeaders={columnHeaders} className="expset-external-references" fadeIn width={width}>
+                <StackedBlockList className="sets" collapseLongLists={false}>
+                    <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
+                        label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
+                        <StackedBlockName relativePosition={true}>
+                            <a href={context['@id']} className="name-title">{accession}</a>
+                        </StackedBlockName>
+                        <StackedBlockList className="experiments" title="Experiments" collapseLongLists={false} collapseLimit={50}>
+                            {experimentBlocks}
+                        </StackedBlockList>
+                    </StackedBlock>
+                </StackedBlockList>
+            </StackedBlockTable>
+        </div>
     );
-}
+});
 
-export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas }){
+export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas, width }){
     const {
         produced_in_pub = null,
         publications_of_set = [],
@@ -240,9 +252,16 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
 
             </div>
 
-            <ItemFooterRow {...{ context, schemas }} />
-
-            {combineExternalReferencesWithTitle(context)}
+            {context['@type'].indexOf('ExperimentSet') > -1 ?
+                <React.Fragment>
+                    <hr className="mb-08 mt-1" />
+                    <div className="row">
+                        <div className="col">
+                            <h4 className="text-300">External References</h4>
+                            <ExternalReferencesStackedTable {...{ context, width }} />
+                        </div>
+                    </div>
+                </React.Fragment> : <ItemFooterRow {...{ context, schemas }} />}
         </div>
     );
 });
