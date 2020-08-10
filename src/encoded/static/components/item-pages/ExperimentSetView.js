@@ -612,7 +612,7 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
     });
 
     if (expsNotAssociatedWithAnyFiles.length === 0) {
-        return;
+        return null;
     }
 
     const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
