@@ -11,7 +11,7 @@ import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, St
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
 import { FileEntryBlock } from '../../browse/components/FileEntryBlock';
-import { expFxn } from './../../util';
+import { expFxn, Schemas } from './../../util';
 
 
 
@@ -95,6 +95,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         }
     };
     const renderFileFxn = function(file, field, detailIndex, fileEntryBlockProps){
+        const { file_type_detailed } = file;
         const fileAtId = object.atIdFromObject(file);
         if (!!fileAtId && fileAtId === '-') {
             return (<span className="title-of-file mono-text name-title" >&nbsp;</span>);
@@ -114,9 +115,12 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
             fileTitleString = file.uuid || fileAtId || 'N/A';
         }
         return (
-            <a className="title-of-file mono-text name-title" href={fileAtId}>
-                {fileTitleString}
-            </a>);
+            <React.Fragment>
+                <div>{Schemas.Term.toName("file_type_detailed", file_type_detailed, true)}</div>
+                <a className="title-of-file mono-text name-title" href={fileAtId}>
+                    {fileTitleString}
+                </a>
+            </React.Fragment>);
     };
     const renderFileExtRefFxn = function (file, field, detailIndex, fileEntryBlockProps) {
         if (!field || !file[field]) {
@@ -134,8 +138,8 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' },
         { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left' },
         { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileFxn },
-        { columnClass: 'file-detail', title: 'External Reference #1', initialWidth: 200, field: 'extRef1', render: renderFileExtRefFxn },
-        { columnClass: 'file-detail', title: 'External Reference #2', initialWidth: 200, field: 'extRef2', render: renderFileExtRefFxn },
+        { columnClass: 'file-detail', title: 'External Reference', initialWidth: 200, field: 'extRef1', render: renderFileExtRefFxn },
+        // { columnClass: 'file-detail', title: 'External Reference #2', initialWidth: 200, field: 'extRef2', render: renderFileExtRefFxn },
     ];
 
     const externalRefs = [];
@@ -148,7 +152,6 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
     fileIterateeFxn(externalRefs, expset_processed_files, {});
     //experiments
     const experimentsWithReplicateNumbers = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
-    console.log('xxx combineWithReplicateNumbers: ', experimentsWithReplicateNumbers);
     _.each(experimentsWithReplicateNumbers, function (exp) {
         //experiment's refs
         if (exp.external_references && exp.external_references.length > 0) {
