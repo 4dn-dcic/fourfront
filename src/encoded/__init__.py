@@ -7,6 +7,7 @@ import json
 import mimetypes
 import netaddr
 import os
+import sentry_sdk
 # import structlog
 import subprocess
 import sys
@@ -14,9 +15,11 @@ import webtest
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 # from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from dcicutils.env_utils import get_mirror_env_from_context
+from dcicutils.env_utils import get_mirror_env_from_context, FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
+from sentry_sdk.integrations.pyramid import PyramidIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from pkg_resources import resource_filename
 # from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
@@ -212,6 +215,15 @@ def main(global_config, **local_config):
     # Load upgrades last so that all views (including testing views) are
     # registered.
     config.include('.upgrade')
+
+    # initialize sentry reporting, split into "production" and "mastertest", do nothing in local/testing
+    current_env = settings.get('env.name', None)
+    if current_env in [FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE]:
+        sentry_sdk.init("https://0d46fafce1d04ea2bfbe11ff15ca896e@o427308.ingest.sentry.io/5379985",
+                        integrations=[PyramidIntegration(), SqlalchemyIntegration()])
+    elif current_env is not None:
+        sentry_sdk.init("https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642",
+                        integrations=[PyramidIntegration(), SqlalchemyIntegration()])
 
     app = config.make_wsgi_app()
 
