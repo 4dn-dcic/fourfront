@@ -581,7 +581,8 @@ class File(Item):
             curr_txn = None
             curr_request = None
             for relation in properties["related_files"]:
-                # skip "grouped with" type from update
+                # skip "grouped with" type from update, to avoid circularity issues
+                # which are more likely to arise with larger groups
                 if relation["relationship_type"] == "grouped with":
                     continue
                 try:
