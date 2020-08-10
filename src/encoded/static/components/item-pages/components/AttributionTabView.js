@@ -84,7 +84,7 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
         external_references: expset_external_references
     } = context;
 
-    const getCombinedTriplesFromFileFxn = function (files, experiment) {
+    const getCombinedTriplesFromFileFunc = function (files, experiment) {
         const result = [];
         if (files && files.length > 0) {
             _.each(files, function (file) {
@@ -103,7 +103,7 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
         combinedTriples.push({ experiment: null, file: null, externalRefs: context.external_references });
     }
     //experiment set's processed files' refs
-    combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFxn(expset_processed_files, null));
+    combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(expset_processed_files, null));
     //experiments
     const experimentsWithReplicateNumbers = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
     _.each(experimentsWithReplicateNumbers, function (exp) {
@@ -112,12 +112,12 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
             combinedTriples.push({ experiment: exp, file: null, externalRefs: exp.external_references });
         }
         //experiment's processed files' refs
-        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFxn(exp.processed_files, exp));
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.processed_files, exp));
         //experiment's raw files' refs
-        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFxn(exp.files, exp));
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.files, exp));
     });
 
-    const renderFileFxn = function(file, field, detailIndex, fileEntryBlockProps){
+    const renderFileColFunc = function(file, field, detailIndex, fileEntryBlockProps){
         const { file_type_detailed } = file;
         const fileAtId = object.atIdFromObject(file);
         if (!!fileAtId && fileAtId === '-') {
@@ -145,7 +145,7 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
                 </a>
             </React.Fragment>);
     };
-    const renderFileExtRefFxn = function (file, field, detailIndex, fileEntryBlockProps) {
+    const renderExtRefColFunc = function (file, field, detailIndex, fileEntryBlockProps) {
         if (!file.external_references || !Array.isArray(file.external_references) || file.external_references.length === 0) {
             return <span className="mono-text">-</span>;
         }
@@ -173,8 +173,8 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
     const columnHeaders = [
         { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' },
         { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left' },
-        { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileFxn },
-        { columnClass: 'file-detail', title: 'External References', initialWidth: 200, render: renderFileExtRefFxn },
+        { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileColFunc },
+        { columnClass: 'file-detail', title: 'External References', initialWidth: 200, render: renderExtRefColFunc },
     ];
 
     const combinedTriplesGroupByExp = _.groupBy(combinedTriples, function (item) { return (item.experiment && item.experiment.accession) || '-'; });
