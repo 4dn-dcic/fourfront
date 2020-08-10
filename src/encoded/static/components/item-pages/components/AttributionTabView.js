@@ -196,6 +196,10 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
         combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.files, exp));
     });
 
+    if (combinedTriples.length == 0) {
+        return null;
+    }
+
     const combinedTriplesGroupByExp = _.groupBy(combinedTriples, function (item) { return (item.experiment && item.experiment.accession) || '-'; });
 
     const experimentBlocks = _.map(combinedTriplesGroupByExp, function (combinedTriples, idx) {
@@ -224,22 +228,46 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
     });
 
     return (
-        <div className="stacked-block-table-outer-container overflow-auto">
-            <StackedBlockTable columnHeaders={columnHeaders} className="external-references-stacked-table" fadeIn width={width}>
-                {context['@type'].indexOf('ExperimentSet') > -1 ? (
-                    <StackedBlockList collapseLongLists={false} collapseLimit={50}>
-                        <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
-                            label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
-                            <StackedBlockName relativePosition={true}>
-                                <a href={context['@id']} className="name-title">{accession}</a>
-                            </StackedBlockName>
-                            <StackedBlockList title="Experiments" collapseLongLists={false} collapseLimit={50}>
-                                {experimentBlocks}
-                            </StackedBlockList>
-                        </StackedBlock>
-                    </StackedBlockList>
-                ) : (<StackedBlockList collapseLongLists={false} collapseLimit={50}>{experimentBlocks}</StackedBlockList>)}
-            </StackedBlockTable>
+        <div className="col">
+            <h3 className="tab-section-title">External References</h3>
+            <div className="stacked-block-table-outer-container overflow-auto">
+                <StackedBlockTable columnHeaders={columnHeaders} className="external-references-stacked-table" fadeIn width={width}>
+                    {context['@type'].indexOf('ExperimentSet') > -1 ? (
+                        <StackedBlockList collapseLongLists={false} collapseLimit={50}>
+                            <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
+                                label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
+                                <StackedBlockName relativePosition={true}>
+                                    <a href={context['@id']} className="name-title">{accession}</a>
+                                </StackedBlockName>
+                                <StackedBlockList title="Experiments" collapseLongLists={false} collapseLimit={50}>
+                                    {experimentBlocks}
+                                </StackedBlockList>
+                            </StackedBlock>
+                        </StackedBlockList>
+                    ) : (<StackedBlockList collapseLongLists={false} collapseLimit={50}>{experimentBlocks}</StackedBlockList>)}
+                </StackedBlockTable>
+            </div>
+        </div>
+    );
+});
+const AlternateAccessionSection = React.memo(function AlternateAccessionSection({ context }) {
+    const { alternate_accessions = [] } = context || {};
+
+    if (alternate_accessions.length === 0){
+        return null;
+    }
+    return (
+        <div className="col">
+            <h3 className="tab-section-title">Alternate Accessions</h3>
+            <div>
+                <ul>
+                    { _.map(alternate_accessions, function(altAccession, i){
+                        return (
+                            <li key={i}>{ altAccession }</li>
+                        );
+                    }) }
+                </ul>
+            </div>
         </div>
     );
 });
@@ -287,12 +315,10 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
 
             {context['@type'].indexOf('ExperimentSet') > -1 || context['@type'].indexOf('Experiment') > -1 ?
                 <React.Fragment>
-                    <hr className="mb-08 mt-1" />
+                    {/* <hr className="mb-08 mt-1" /> */}
                     <div className="row">
-                        <div className="col">
-                            <h4 className="text-300">External References</h4>
-                            <ExternalReferencesStackedTable {...{ context, width }} />
-                        </div>
+                        <ExternalReferencesStackedTable {...{ context, width }} />
+                        <AlternateAccessionSection {...{ context }} />
                     </div>
                 </React.Fragment> : <ItemFooterRow {...{ context, schemas }} />}
         </div>
