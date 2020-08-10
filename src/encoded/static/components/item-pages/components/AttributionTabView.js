@@ -5,7 +5,6 @@ import _ from 'underscore';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 import { ItemFooterRow, ExternalReferenceLink } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemFooterRow';
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
@@ -70,30 +69,54 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 });
 
 /**
- *
- * @param {Object} context
+ * External references table to display all external_references of
+ * experiment set/experiment including experiments, raw and processed files. (if context['@type'] is Experiment Set, iterates through
+ * experiments_in_set)
  */
-export const ExternalReferencesStackedTable = React.memo(function ExternalReferencesStackedTable({ context, width }) {
+const ExternalReferencesStackedTable = React.memo(function ExternalReferencesStackedTable({ context, width }) {
+    if (context['@type'].indexOf('ExperimentSet') === -1 && context['@type'].indexOf('Experiment') === -1) {
+        throw new Error('Only types of Experiment Set and Experiment are supported');
+    }
+
     const {
         accession, experiments_in_set, replicate_exps = [],
         processed_files: expset_processed_files,
         external_references: expset_external_references
     } = context;
 
-    const reducerFxn = function (memo, extRef, idx) {
-        memo['extRef' + (idx + 1)] = extRef;
-        return memo;
-    };
-    const fileIterateeFxn = function (extRefs, files, tmp) {
+    const getCombinedTriplesFromFileFxn = function (files, experiment) {
+        const result = [];
         if (files && files.length > 0) {
             _.each(files, function (file) {
                 if (file.external_references && file.external_references.length > 0) {
-                    const obj = _.extend({ file: file }, tmp);
-                    extRefs.push(_.reduce(file.external_references, reducerFxn, obj));
+                    result.push({ experiment: experiment, file: file, externalRefs: file.external_references });
                 }
             });
         }
+        return result;
     };
+
+    // combined object for experiment - file - external references fields: {experiment, file, externalRefs}
+    let combinedTriples = [];
+    //experiment set's refs
+    if (expset_external_references && expset_external_references.length > 0) {
+        combinedTriples.push({ experiment: null, file: null, externalRefs: context.external_references });
+    }
+    //experiment set's processed files' refs
+    combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFxn(expset_processed_files, null));
+    //experiments
+    const experimentsWithReplicateNumbers = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
+    _.each(experimentsWithReplicateNumbers, function (exp) {
+        //experiment's refs
+        if (exp.external_references && exp.external_references.length > 0) {
+            combinedTriples.push({ experiment: exp, file: null, externalRefs: exp.external_references });
+        }
+        //experiment's processed files' refs
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFxn(exp.processed_files, exp));
+        //experiment's raw files' refs
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFxn(exp.files, exp));
+    });
+
     const renderFileFxn = function(file, field, detailIndex, fileEntryBlockProps){
         const { file_type_detailed } = file;
         const fileAtId = object.atIdFromObject(file);
@@ -123,61 +146,47 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
             </React.Fragment>);
     };
     const renderFileExtRefFxn = function (file, field, detailIndex, fileEntryBlockProps) {
-        if (!field || !file[field]) {
+        if (!file.external_references || !Array.isArray(file.external_references) || file.external_references.length === 0) {
             return <span className="mono-text">-</span>;
         }
-        const extRef = file[field];
-        if (extRef && typeof extRef.ref === 'string') {
-            const innerText = (file.accession !== '-') ? extRef.ref : (<span className="font-weight-bold">{extRef.ref}</span>);
-            return <ExternalReferenceLink uri={extRef.uri || null}>{innerText}</ExternalReferenceLink>;
-        } else {
-            return extRef;
-        }
+        const getExtRefLink = function (externalRef, file) {
+            if (externalRef && typeof externalRef.ref === 'string') {
+                const innerText = (file.accession !== '-') ? externalRef.ref : (<span className="font-weight-bold">{externalRef.ref}</span>);
+                return <ExternalReferenceLink uri={externalRef.uri || null}>{innerText}</ExternalReferenceLink>;
+            } else {
+                return { externalRef };
+            }
+        };
+
+        const { external_references } = file;
+        const [externalRef] = external_references;
+        return (
+            external_references.length > 1 ? (
+                <ul>
+                    {_.map(external_references, function (externalRef, i) {
+                        return <li>{getExtRefLink(externalRef, file)}</li>;
+                    })}
+                </ul>) : (<React.Fragment>{getExtRefLink(externalRef, file)}</React.Fragment>)
+        );
     };
+
     const columnHeaders = [
         { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' },
         { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left' },
         { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileFxn },
-        { columnClass: 'file-detail', title: 'External Reference', initialWidth: 200, field: 'extRef1', render: renderFileExtRefFxn },
-        // { columnClass: 'file-detail', title: 'External Reference #2', initialWidth: 200, field: 'extRef2', render: renderFileExtRefFxn },
+        { columnClass: 'file-detail', title: 'External References', initialWidth: 200, render: renderFileExtRefFxn },
     ];
 
-    const externalRefs = [];
-    //experiment set's refs
-    if (expset_external_references && expset_external_references.length > 0) {
-        externalRefs.push(_.reduce(context.external_references, reducerFxn, {})
-        );
-    }
-    //experiment set's processed files' refs
-    fileIterateeFxn(externalRefs, expset_processed_files, {});
-    //experiments
-    const experimentsWithReplicateNumbers = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
-    _.each(experimentsWithReplicateNumbers, function (exp) {
-        //experiment's refs
-        if (exp.external_references && exp.external_references.length > 0) {
-            externalRefs.push(_.reduce(exp.external_references, reducerFxn, { exp: exp }));
-        }
-        //experiment's processed files' refs
-        fileIterateeFxn(externalRefs, exp.processed_files, { exp: exp });
-        //experiment's raw files' refs
-        fileIterateeFxn(externalRefs, exp.files, { exp: exp });
-    });
+    const combinedTriplesGroupByExp = _.groupBy(combinedTriples, function (item) { return (item.experiment && item.experiment.accession) || '-'; });
 
-    const extRefsGroupByExp = _.groupBy(externalRefs, function (item) { return (item.exp && item.exp.accession) || '-'; });
-
-    const experimentBlocks = _.map(extRefsGroupByExp, function (extRefs, idx) {
-        const fileBlocks = _.map(extRefs, function (extRef) {
-            const fileObj = _.extend(
-                _.pick(extRef,
-                    function (value, key, object) {
-                        return key.startsWith('extRef');
-                    }),
-                extRef.file || { 'accession': '-', '@id': '-' });
-            const renderFileLabel = !!extRef.file;
-            return (<FileEntryBlock file={fileObj} label={renderFileLabel ? <StackedBlockNameLabel title="File" /> : null}></FileEntryBlock>);
+    const experimentBlocks = _.map(combinedTriplesGroupByExp, function (combinedTriples, idx) {
+        const fileBlocks = _.map(combinedTriples, function (combinedTriple) {
+            const file = combinedTriple.file || { accession: '-', '@id': '-', external_references: combinedTriple.externalRefs };
+            const renderFileLabel = !!combinedTriple.file;
+            return (<FileEntryBlock file={file} label={renderFileLabel ? <StackedBlockNameLabel title="File" /> : null}></FileEntryBlock>);
         });
-        const [extRef] = extRefs;
-        const { exp: experiment } = extRef;
+        const [combinedTriple] = combinedTriples;
+        const { experiment } = combinedTriple;
         const experimentAtId = object.itemUtil.atId(experiment);
         const text = (experiment && experiment.display_title) || null;
         const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
