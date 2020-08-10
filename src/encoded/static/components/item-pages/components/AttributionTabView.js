@@ -11,6 +11,7 @@ import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock
 import { Publications } from './Publications';
 import { FileEntryBlock } from '../../browse/components/FileEntryBlock';
 import { expFxn, Schemas } from './../../util';
+import { experimentsFromExperimentSet } from '../../util/experiments-transforms';
 
 
 
@@ -70,8 +71,18 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 
 /**
  * External references table to display all external_references of
- * experiment set/experiment including experiments, raw and processed files. (if context['@type'] is Experiment Set, iterates through
- * experiments_in_set)
+ * experiment set/experiment.
+ *
+ * If context['@type'] is ExperimentSet, collects
+ * 1. direct external_references of the experiment set
+ * 2. processed_files' external_references of the experiment set
+ * then iterates through experiments_in_set and collects each experiment's
+ * 3. direct external_references
+ * 4. raw and processed files' external_references.
+ *
+ * If context['@type'] is Experiment, collects
+ * 1. direct external_references of the experiment
+ * 2. raw and processed files' external_references of the experiment.
  */
 const ExternalReferencesStackedTable = React.memo(function ExternalReferencesStackedTable({ context, width }) {
     if (context['@type'].indexOf('ExperimentSet') === -1 && context['@type'].indexOf('Experiment') === -1) {
@@ -79,11 +90,10 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
     }
 
     const {
-        accession, experiments_in_set, replicate_exps = [],
-        processed_files: expset_processed_files,
-        external_references: expset_external_references
+        accession, experiments_in_set = [], replicate_exps = [],
     } = context;
 
+    //files iteratee function
     const getCombinedTriplesFromFileFunc = function (files, experiment) {
         const result = [];
         if (files && files.length > 0) {
@@ -95,29 +105,8 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
         }
         return result;
     };
-
-    // combined object for experiment - file - external references fields: {experiment, file, externalRefs}
-    let combinedTriples = [];
-    //experiment set's refs
-    if (expset_external_references && expset_external_references.length > 0) {
-        combinedTriples.push({ experiment: null, file: null, externalRefs: context.external_references });
-    }
-    //experiment set's processed files' refs
-    combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(expset_processed_files, null));
-    //experiments
-    const experimentsWithReplicateNumbers = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
-    _.each(experimentsWithReplicateNumbers, function (exp) {
-        //experiment's refs
-        if (exp.external_references && exp.external_references.length > 0) {
-            combinedTriples.push({ experiment: exp, file: null, externalRefs: exp.external_references });
-        }
-        //experiment's processed files' refs
-        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.processed_files, exp));
-        //experiment's raw files' refs
-        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.files, exp));
-    });
-
-    const renderFileColFunc = function(file, field, detailIndex, fileEntryBlockProps){
+    //rendering functions
+    const renderFileColFunc = function (file, field, detailIndex, fileEntryBlockProps) {
         const { file_type_detailed } = file;
         const fileAtId = object.atIdFromObject(file);
         if (!!fileAtId && fileAtId === '-') {
@@ -130,7 +119,7 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
         }
         if (!fileTitleString && fileAtId) {
             var idParts = _.filter(fileAtId.split('/'));
-            if (idParts[1].slice(0,5) === '4DNFI'){
+            if (idParts[1].slice(0, 5) === '4DNFI') {
                 fileTitleString = idParts[1];
             }
         }
@@ -171,11 +160,41 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
     };
 
     const columnHeaders = [
-        { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' },
         { columnClass: 'experiment', title: 'Experiment', initialWidth: 200, className: 'text-left' },
         { columnClass: 'file', title: 'File', initialWidth: 200, render: renderFileColFunc },
         { columnClass: 'file-detail', title: 'External References', initialWidth: 200, render: renderExtRefColFunc },
     ];
+
+    // combined object for experiment - file - external references fields: {experiment, file, externalRefs}
+    let combinedTriples = [];
+    let experiments = null;
+
+    if (context['@type'].indexOf('ExperimentSet') > -1) {
+        //add experiment set's refs
+        if (context.external_references && context.external_references.length > 0) {
+            combinedTriples.push({ experiment: null, file: null, externalRefs: context.external_references });
+        }
+        //add experiment set's processed files' refs
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(context.processed_files, null));
+        //combine experiment sets w/ bio/tech replicate numbers
+        experiments = expFxn.combineWithReplicateNumbers(replicate_exps, experiments_in_set);
+        //add Experiment Set column
+        columnHeaders.splice(0, 0 , { columnClass: 'experiment-set', title: 'Experiment Set', initialWidth: 200, className: 'text-left' });
+    } else {
+        experiments = [context];//Currently, we do not add the replicate numbers for type 'Experiment'
+    }
+
+    //itereate through the experiments
+    _.each(experiments, function (exp) {
+        //add experiment's refs
+        if (exp.external_references && exp.external_references.length > 0) {
+            combinedTriples.push({ experiment: exp, file: null, externalRefs: exp.external_references });
+        }
+        //add experiment's processed files' refs
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.processed_files, exp));
+        //add experiment's raw files' refs
+        combinedTriples = combinedTriples.concat(getCombinedTriplesFromFileFunc(exp.files, exp));
+    });
 
     const combinedTriplesGroupByExp = _.groupBy(combinedTriples, function (item) { return (item.experiment && item.experiment.accession) || '-'; });
 
@@ -197,7 +216,7 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
                     {replicateNumbersExists ? <div>Bio Rep <b>{experiment.bio_rep_no}</b>, Tec Rep <b>{experiment.tec_rep_no}</b></div> : <div />}
                     {experimentAtId ? (<a href={experimentAtId} className="name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
                 </StackedBlockName>
-                <StackedBlockList className="experiments" title="Files">
+                <StackedBlockList title="Files" collapseLongLists={false} collapseLimit={50}>
                     {fileBlocks}
                 </StackedBlockList>
             </StackedBlock>
@@ -206,18 +225,20 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
 
     return (
         <div className="stacked-block-table-outer-container overflow-auto">
-            <StackedBlockTable columnHeaders={columnHeaders} className="expset-external-references" fadeIn width={width}>
-                <StackedBlockList className="sets" collapseLongLists={false}>
-                    <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
-                        label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
-                        <StackedBlockName relativePosition={true}>
-                            <a href={context['@id']} className="name-title">{accession}</a>
-                        </StackedBlockName>
-                        <StackedBlockList className="experiments" title="Experiments" collapseLongLists={false} collapseLimit={50}>
-                            {experimentBlocks}
-                        </StackedBlockList>
-                    </StackedBlock>
-                </StackedBlockList>
+            <StackedBlockTable columnHeaders={columnHeaders} className="external-references-stacked-table" fadeIn width={width}>
+                {context['@type'].indexOf('ExperimentSet') > -1 ? (
+                    <StackedBlockList collapseLongLists={false} collapseLimit={50}>
+                        <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
+                            label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
+                            <StackedBlockName relativePosition={true}>
+                                <a href={context['@id']} className="name-title">{accession}</a>
+                            </StackedBlockName>
+                            <StackedBlockList title="Experiments" collapseLongLists={false} collapseLimit={50}>
+                                {experimentBlocks}
+                            </StackedBlockList>
+                        </StackedBlock>
+                    </StackedBlockList>
+                ) : (<StackedBlockList collapseLongLists={false} collapseLimit={50}>{experimentBlocks}</StackedBlockList>)}
             </StackedBlockTable>
         </div>
     );
@@ -264,7 +285,7 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
 
             </div>
 
-            {context['@type'].indexOf('ExperimentSet') > -1 ?
+            {context['@type'].indexOf('ExperimentSet') > -1 || context['@type'].indexOf('Experiment') > -1 ?
                 <React.Fragment>
                     <hr className="mb-08 mt-1" />
                     <div className="row">
