@@ -236,48 +236,65 @@ export class TopRow extends React.Component {
  * @type {Component}
  * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
  */
+export class MiddleRow extends React.Component {
 
-export const MiddleRow = React.memo(function MiddleRow(props){
+    static defaultProps = {
+        'isInlineEditable': false
+    };
 
-    const {
-        children = null,
-        text: propText = null, // if present, takes priority over context description.
-        context: { description = null } = {},
-        windowWidth
-    } = props;
-
-    if (children) {
-        return <div className="item-page-heading">{ children }</div>;
+    shouldComponentUpdate(nextProps) {
+        if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
+        if ((nextProps.context) && (!this.props.context || this.props.context.actions !== nextProps.context.actions)) return true;
+        if (nextProps.windowWidth !== this.props.windowWidth) return true;
+        return false;
     }
 
-    const textDescription = (
-        (typeof propText === "string" && propText) ||
-        (typeof description === "string" && description) ||
-        null
-    );
+    render() {
+        const {
+            isInlineEditable,
+            children = null,
+            text: propText = null, // if present, takes priority over context description.
+            context = {},
+            windowWidth
+        } = this.props;
 
-    if (!textDescription){
-        return <div className="item-page-heading no-description"/>;
+        if (children) {
+            return <div className="item-page-heading">{ children }</div>;
+        }
+
+        const description = (context && typeof context.description === 'string' && context.description) || null;
+
+        const textDescription = (
+            (typeof propText === "string" && propText) ||
+            (typeof description === "string" && description) ||
+            null
+        );
+
+        if (!textDescription && !isInlineEditable){
+            return <div className="item-page-heading no-description"/>;
+        }
+
+        return (
+            <FlexibleDescriptionBox
+                context={context}
+                windowWidth={windowWidth}
+                description={textDescription || <em>No description provided.</em>}
+                className="item-page-heading"
+                textClassName="text-medium"
+                defaultExpanded={(textDescription || '').length < 600}
+                fitTo="grid"
+                lineHeight={22}
+                isInlineEditable={isInlineEditable}
+                dimensions={{
+                    'paddingWidth': 0,
+                    'paddingHeight': 22, // Padding-top + border-top
+                    'buttonWidth': 30,
+                    'initialHeight': 42
+                }}
+            />
+        );
     }
-
-    return (
-        <FlexibleDescriptionBox
-            windowWidth={windowWidth}
-            description={textDescription}
-            className="item-page-heading"
-            textClassName="text-medium"
-            defaultExpanded={textDescription.length < 600}
-            fitTo="grid"
-            lineHeight={22}
-            dimensions={{
-                'paddingWidth' : 0,
-                'paddingHeight' : 22, // Padding-top + border-top
-                'buttonWidth' : 30,
-                'initialHeight' : 42
-            }}
-        />
-    );
-});
+}
 
 
 /**
