@@ -9,6 +9,7 @@ import Dropdown from 'react-bootstrap/esm/Dropdown';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Modal from 'react-bootstrap/esm/Modal';
+import Fade from 'react-bootstrap/esm/Fade';
 
 import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
@@ -20,20 +21,19 @@ import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemVi
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import DefaultItemView from './DefaultItemView';
-
-
+import { EditableField, FieldSet } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/EditableField';
 
 export default class HiGlassViewConfigView extends DefaultItemView {
 
-    itemHeader(){
+    itemHeader() {
         const itemActionsDescriptions = {
-            'edit' : 'Edit the properties of this Item.',
+            'edit': 'Edit the properties of this Item.',
         };
 
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
-                <MiddleRow />
+                <MiddleRow isInlineEditable />
                 <BottomRow />
             </ItemHeaderWrapper>
         );
@@ -59,6 +59,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         };
     }
 
+    /**
+     * get view's friendly names, i.e. left, right, top-left, bottom-middle ...
+     * if there are more than 3 rows or columns, name the view with its row x col index.
+     */
     static getGroupedLayouts = memoize(function (layouts) {
         let groupedLayouts = null;
         if (layouts.length > 1) {
@@ -81,8 +85,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
         return groupedLayouts;
     }, function (A, B) {
-        const arrA = A[0];
-        const arrB = B[0];
+        const [arrA] = A;
+        const [arrB] = B;
         if (arrA.length !== arrB.length) { return false; }
         for (let i = 0; i < arrA.length; i++) {
             if ((arrA[i].x !== arrB[i].x) || (arrA[i].y !== arrB[i].y)) { return false; }
@@ -92,11 +96,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
     /**
      * get tilesets and positions, width/height and view's position
-     * @param {Object} viewConf: even if viewConf.views modified in function, it has no side-effect since calling function always provides a fresh new argument
+     * @param {Object} viewConf: even if viewConf.views modified in function, it has no side-effect
+     * since calling function always provides a fresh new argument
      */
     static getTilesetUids(viewConf) {
         const tilesetUids = {};
         if (viewConf && viewConf.views && Array.isArray(viewConf.views) && viewConf.views.length > 0) {
+            _.each(viewConf.views, function (view, idx) { view.vIndex = idx ;});
             viewConf.views = _.chain(viewConf.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
             //very simple implementation of naming views - assumes views' top edge in a row is aligned
             const layouts = _.map(viewConf.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
@@ -115,7 +121,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                     if (!tilesetUids[trackItem.tilesetUid]) {
                                         tilesetUids[trackItem.tilesetUid] = [];
                                     }
-                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name });
+                                    tilesetUids[trackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: trackItem.width, height: trackItem.height, title: trackItem.options && trackItem.options.name, uid: trackItem.uid, tilesetUid: trackItem.tilesetUid });
                                 }
                                 //center
                                 else if (trackItem.contents && Array.isArray(trackItem.contents) && trackItem.contents.length > 0) {
@@ -123,7 +129,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                                         if (!tilesetUids[subTrackItem.tilesetUid]) {
                                             tilesetUids[subTrackItem.tilesetUid] = [];
                                         }
-                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name });
+                                        tilesetUids[subTrackItem.tilesetUid].push({ view: layout.displayText, vIndex: view.vIndex, track: trackName, width: subTrackItem.width, height: subTrackItem.height, title: subTrackItem.options && subTrackItem.options.name, uid: trackItem.uid, tilesetUid: subTrackItem.tilesetUid });
                                     });
                                 }
                             });
@@ -150,6 +156,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
+        this.handleUpdateAllTilesets = _.throttle(this.handleUpdateAllTilesets.bind(this), 3000);
+        this.handleUpdateSingleTileset = _.throttle(this.handleUpdateSingleTileset.bind(this), 3000);
         this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000, { 'trailing' : false });
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
@@ -159,6 +167,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
         this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
         this.renderFilesDetailPane = this.renderFilesDetailPane.bind(this);
+        this.updateHiglassViewConf = this.updateHiglassViewConf.bind(this);
+        this.updateHiGlassComponentHeight = this.updateHiGlassComponentHeight.bind(this);
 
         /**
          * @property {Object} viewConfig            The viewconf that is fed to HiGlassPlainContainer. (N.B.) HiGlassComponent may edit it in place during UI interactions.
@@ -167,7 +177,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
          * @property {boolean} saveLoading          True if AJAX request is en route to save Item.
          * @property {boolean} cloneLoading         True if AJAX request is en route to clone Item.
          * @property {boolean} releaseLoading       True if AJAX request is en route to change Item status.
-         * @property {boolean} addFileLoading          True if AJAX request is en route to add file to `state.viewConfig`.
+         * @property {boolean} addFileLoading       True if AJAX request is en route to add file to `state.viewConfig`.
+         * @property {Object} modal                 Modal popup to confirm save/update ..etc HiGlass view conf updates
+         * @property {string} filesTableSearchHref  File search url for files table
+         * @property {Object} updatedTilesetField   Object having tileset field that was edited by EditableField
+         * @property {Object} trackInfo             ViewConfig track object
+         * @property {Object} tilesetUids           Object that all keys are tilesetUids
+         * @property {number} hgcHeight        HiGlass container height
+         * @property {boolean} viewConfigModified   ViewConfig is modified by one of Files table editable fields
          */
         this.state = {
             'viewConfig'            : props.context && props.context.viewconfig,
@@ -179,33 +196,156 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             'addFileLoading'        : false,
             'modal'                 : null,
             'filesTableSearchHref'  : null,
+            'updatedTilesetField'   : null,
+            'trackInfo'             : null,
             'tilesetUids'           : {},
+            'hgcHeight'             : props.context && props.context.instance_height || 600,
+            'viewConfigModified'    : false
         };
         this.higlassRef = React.createRef();
     }
 
-    componentDidUpdate(pastProps, pastState){
-        if (this.props.isFullscreen !== pastProps.isFullscreen){
+    componentDidUpdate(pastProps, pastState) {
+        if (this.props.isFullscreen !== pastProps.isFullscreen) {
             // TODO: Trigger re-draw of HiGlassComponent somehow
         }
-
-        // The following is not yet needed; may be re-enabled when can compare originalViewConfig vs state.viewConfig
-        //
-        // if (this.state.originalViewConfig === null && pastState.originalViewConfig){
-        //    var hgc = this.getHiGlassComponent();
-        //    if (hgc){
-        //        this.setState({
-        //            'originalViewConfigString' : hgc.api.exportAsViewConfString()
-        //        });
-        //    }
-        // }
     }
 
-    havePermissionToEdit(){
-        const { session, context : { actions = [] } } = this.props;
-        return !!(session && _.findWhere(actions, { 'name' : 'edit' }));
+    havePermissionToEdit() {
+        const { session, context: { actions = [] } } = this.props;
+        return !!(session && _.findWhere(actions, { 'name': 'edit' }));
     }
 
+    /**
+     * Callback func called by editable field to persist instance height
+     * @param {*} hgc   HiGlass component instance
+     */
+    updateHiGlassComponentHeight(hgc) {
+        const { context, isFullscreen, windowHeight } = this.props;
+        if (hgc === undefined) {
+            let hiGlassComponentHeight;
+            if (isFullscreen) {
+                hiGlassComponentHeight = windowHeight - 120;
+            }
+            else {
+                hiGlassComponentHeight = context.instance_height;
+            }
+            this.setState({ 'hgcHeight': hiGlassComponentHeight });
+        }
+        else {
+            this.setState({ 'hgcHeight': hgc.instance_height });
+        }
+    }
+
+    /**
+     * Callback func called by editable fields of files table track width/height/name
+     * @param {*} hgc   HiGlass component instance
+     */
+    updateHiglassViewConf(updatedTilesetField, trackInfo) {
+        if (_.has(updatedTilesetField, 'name')) {
+
+            const hgc = this.getHiGlassComponent();
+            const currentViewConf = this.getHiGlassViewConfig(hgc);
+            if (!currentViewConf) {
+                throw new Error('Could not get current view configuration.');
+            }
+
+            const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+            const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
+            if (tileset) {
+                if (trackInfo.track === 'center') {
+                    const content = _.find(tileset.contents, function (content) { return content.tilesetUid === trackInfo.tilesetUid; });
+                    if (content) {
+                        content.options.name = updatedTilesetField.name;
+                    }
+                } else {
+                    tileset.options.name = updatedTilesetField.name;
+                }
+                hgc.api.setViewConfig(currentViewConf, true);
+                this.setState({ 'viewConfigModified': true });
+            }
+        } else {
+            this.setState({
+                'modal': (
+                    <ConfirmModal handleConfirm={this.handleUpdateAllTilesets} handleCancel={this.handleUpdateSingleTileset}
+                        confirmButtonText="Yes, Update All" cancelButtonText="No, Update Only This" modalTitle="Update">
+                        Do you want to update all similar tilesets?
+                        <br />
+                    </ConfirmModal>
+                ), 'updatedTilesetField': updatedTilesetField, 'trackInfo': trackInfo
+            });
+        }
+        return true; //currently not in use
+    }
+
+    /**
+     * Func to update single tileset of Files table updates
+     */
+    handleUpdateSingleTileset() {
+        const { updatedTilesetField, trackInfo } = this.state;
+        const hgc = this.getHiGlassComponent();
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
+
+        if (!currentViewConf) {
+            throw new Error('Could not get current view configuration.');
+        }
+        const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+        const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
+
+        if (tileset) {
+            if (_.has(updatedTilesetField, 'height')) {
+                tileset.height = updatedTilesetField.height;
+            }
+            else if (_.has(updatedTilesetField, 'width')) {
+                tileset.width = updatedTilesetField.width;
+            }
+
+            hgc.api.setViewConfig(currentViewConf, true);
+            this.setState({ 'modal': null, 'viewConfigModified': true });
+        }
+
+        return true;
+    }
+    /**
+     * updates similar (within the same view and track, having same orientation and type) tilesets
+     * @param {*} evt
+     */
+    handleUpdateAllTilesets(evt) {
+        evt.preventDefault();
+        const { updatedTilesetField, trackInfo } = this.state;
+
+        const hgc = this.getHiGlassComponent();
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
+
+        if (!currentViewConf) {
+            throw new Error('Could not get current view configuration.');
+        }
+        const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+        const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
+
+        if (tileset) {
+            const { orientation, type } = tileset;
+            if (_.has(updatedTilesetField, 'height')) {
+                _.each(track, (tilesetItem, idx) => {
+                    if (orientation === tilesetItem.orientation && type === tilesetItem.type) {
+                        tilesetItem.height = updatedTilesetField.height;
+                    }
+                });
+            }
+            else if (_.has(updatedTilesetField, 'width')) {
+                _.each(track, (tilesetItem, i) => {
+                    if (orientation === tilesetItem.orientation && type === tilesetItem.type) {
+                        tilesetItem.width = updatedTilesetField.width;
+                    }
+                });
+            }
+
+            hgc.api.setViewConfig(currentViewConf, true);
+            this.setState({ 'modal': null, 'viewConfigModified': true });
+        }
+
+        return true;
+    }
     /**
      * Update the current higlass viewconfig for the user, based on the current data.
      * Note that this function is throttled in constructor() to prevent someone clicking it like, 100 times within 3 seconds.
@@ -217,8 +357,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         evt.preventDefault();
 
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -267,7 +406,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         'message' : "This HiGlass Display Item has been updated with the current viewport. This may take a few minutes to take effect.",
                         'style' : 'success'
                     });
-                    this.setState({ 'saveLoading' : false });
+                    this.setState({ 'saveLoading' : false, 'viewConfigModified': false });
                 },
                 'PATCH',
                 ()=>{
@@ -293,16 +432,15 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         const { context } = this.props;
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
         }
 
         // Generate a new title and description based on the current display.
-        const userDetails     = JWT.getUserDetails();
-        let userFirstName   = "Unknown";
+        const userDetails = JWT.getUserDetails();
+        let userFirstName = "Unknown";
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
@@ -360,7 +498,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (this.state.genome_assembly){
             payload.genome_assembly = this.state.genome_assembly;
         }
-
         // Try to POST/PUT a new viewconf.
         this.setState(
             { 'cloneLoading' : true },
@@ -403,10 +540,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     * @returns {void}
     */
     addFileToHiglass(files) {
-        const { context, href } = this.props;
+        const { href } = this.props;
         const hgc = this.getHiGlassComponent();
-        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
-        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
             throw new Error('Could not get current view configuration.');
@@ -508,7 +644,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         evt.preventDefault();
 
         const { context, href } = this.props;
-        const hgc = this.getHiGlassComponent();
         const viewConfTitle = context.title || context.display_title;
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
@@ -562,9 +697,16 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return (this.higlassRef && this.higlassRef.current && this.higlassRef.current.getHiGlassComponent()) || null;
     }
 
+    getHiGlassViewConfig(hgc){
+        const currentViewConfStr = hgc && hgc.api.exportAsViewConfString();
+        const currentViewConf = currentViewConfStr && JSON.parse(currentViewConfStr);
+
+        return currentViewConf;
+    }
+
     statusChangeButton(){
         const { session, context } = this.props;
-        const { saveLoading, cloneLoading, releaseLoading } = this.state;
+        const { releaseLoading } = this.state;
         const editPermission = this.havePermissionToEdit();
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
@@ -601,11 +743,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 
     saveButton(){
-        const { session, context } = this.props;
         const { saveLoading } = this.state;
         const tooltip = "Save the current view shown below to this display";
 
-        const editPermission  = this.havePermissionToEdit();
+        const editPermission = this.havePermissionToEdit();
 
         return (
             <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
@@ -678,7 +819,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (!_.isEqual(oldData, newData)) {
             const newDataKeys = _.keys(newData);
-            const searchHref = newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null;
+            const searchHref = (newDataKeys.length > 0 ? "/search/?type=File&higlass_uid=" + newDataKeys.sort().join('&higlass_uid=') : null) + "&sort=-tags&sort=-date_created";
             this.setState({ 'tilesetUids': newData, 'filesTableSearchHref': searchHref });
         }
     }
@@ -688,35 +829,37 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { tilesetUids } = this.state;
         const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
 
-        return <HiGlassFileDetailPane {...{ result, schemas, viewConfigTracks: tracks }} />;
+        return <HiGlassFileDetailPane {...{ result, schemas, handleCustomSave: this.updateHiglassViewConf, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
     }
 
     render(){
-        const { context, isFullscreen, windowWidth, windowHeight, width, session, schemas } = this.props;
-        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref } = this.state;
-
+        const { context, isFullscreen, windowWidth, width, session, schemas, href } = this.props;
+        const { addFileLoading, genome_assembly, viewConfig, modal, tilesetUids, filesTableSearchHref, hgcHeight, viewConfigModified } = this.state;
         const hiGlassComponentWidth = isFullscreen ? windowWidth : width + 20;
-        // Setting the height of the HiGlass Component follows one of these rules:
-        // - If it's Fullscreen it should almost take up the entire window.
-        // - Set to a fixed height.
-        let hiGlassComponentHeight;
-        if (isFullscreen) {
-            hiGlassComponentHeight = windowHeight - 120;
-        }
-        else {
-            if (context && context.instance_height && context.instance_height > 0) {
-                hiGlassComponentHeight = context.instance_height;
-            } else {
-                hiGlassComponentHeight = 600;
-            }
-        }
-
+        let hgcHeightField = null;
         // If the user isn't logged in, add a tooltip reminding them to log in.
         let tooltip = null;
         if (!session) {
             tooltip = "Log in to be able to clone, save, and share HiGlass Displays";
         }
-
+        if (this.havePermissionToEdit()) {
+            hgcHeightField = (
+                <FieldSet
+                    context={context}
+                    lineHeight={22}
+                    dimensions={{
+                        'paddingWidth': 0,
+                        'paddingHeight': 22,
+                        'buttonWidth': 30,
+                        'initialHeight': 42
+                    }}
+                    onSave={this.updateHiGlassComponentHeight}
+                    className="mt-1" schemas={schemas} href={href}>
+                    <EditableField label="Instance Height" labelID="instance_height" style="row-without-label" fallbackText="No intance data" fieldType="numeric" dataType="int" buttonAlwaysVisible={true} inputSize="md">
+                        <i className="visible-lg-inline icon icon-fw icon-arrows-alt-v fas" />&nbsp; {hgcHeight}
+                    </EditableField>
+                </FieldSet>);
+        }
         const filesTableProps = {
             schemas, width,
             searchHref: filesTableSearchHref,
@@ -727,6 +870,8 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             facets: null
         };
 
+        const notPersistentMessage = (<Fade in appear timeout={700}><span className="text-200"> - <mark>Your change(s) are not persistent yet. Click Save or Clone to save.</mark></span></Fade>);
+
         return (
             <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
                 <h3 className="tab-section-title">
@@ -734,7 +879,6 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         className="btn-success mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
-                        {/* <AddFileButton onClick={this.addFileToHiglass} loading={addFileLoading} genome_assembly={genome_assembly}/> */}
                         { this.saveButton() }
                         { this.cloneButton() }
                         { this.statusChangeButton() }
@@ -744,20 +888,26 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 <div className="higlass-tab-view-contents">
                     <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
-                            width={hiGlassComponentWidth} height={hiGlassComponentHeight} viewConfig={viewConfig}
+                            width={hiGlassComponentWidth} height={hgcHeight} viewConfig={viewConfig}
                             ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
                     </div>
                 </div>
-                {filesTableSearchHref ?
+                {filesTableSearchHref || hgcHeightField ?
                     (
                         <React.Fragment>
                             <hr className="tab-section-title-horiz-divider" />
-                            <div className="raw-files-table-section">
-                                <h3 className="tab-section-title">
-                                    <span><span className="text-400">{_.keys(tilesetUids).length}</span> HiGlass File(s)</span>
-                                </h3>
-                                <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
-                            </div>
+                            {hgcHeightField}
+                            {filesTableSearchHref ?
+                                (
+                                    <div className="raw-files-table-section">
+                                        <h3 className="tab-section-title">
+                                            <span>
+                                                <span className="text-400">{_.keys(tilesetUids).length}</span> File(s) {viewConfigModified ? notPersistentMessage : null}
+                                            </span>
+                                        </h3>
+                                        <EmbeddedItemSearchTable {...filesTableProps} facets={null} />
+                                    </div>
+                                ) : null}
                         </React.Fragment>
                     ) : null
                 }
@@ -767,33 +917,69 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     }
 }
 
-function HiGlassFileDetailPane(props){
-    const { result, viewConfigTracks = null, schemas } = props;
-
+function HiGlassFileDetailPane(props) {
+    const { /*result, */windowWidth, href, viewConfigTracks = null, schemas, handleCustomSave } = props;
     // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
     // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
-    useEffect(function(){
+    useEffect(function () {
         ReactTooltip.rebuild(); // Rebuild tooltips, many of which are present on `Detail` list.
     }, []);
 
     const tracksBody = _.map(viewConfigTracks, (item, idx) => {
-        const wh = (item.width || item.height) ? (item.width || '-') + '/' + (item.height || '-') : "-";
-        return <tr><td>{item.view}</td><td>{item.track}</td><td>{wh}</td><td>{item.title}</td></tr>;
+        let width = null;
+        let height = null;
+        item['name'] = item['title'];
+        if (item.track === 'top' || item.track === 'bottom') {
+            width = (item.width) ? (item.width || '-') : "-";
+            height =
+                <FieldSet context={item}
+                    schemas={schemas} href={href}>
+                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible={true}>
+                    </EditableField>
+                </FieldSet>;
+        }
+        else if (item.track === 'left' || item.track === 'right') {
+            height = (item.height) ? (item.height || '-') : "-";
+            width =
+                <FieldSet context={item}>
+                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible={true}>
+                    </EditableField>
+                </FieldSet>;
+        }
+        return (
+            <tr>
+                <td>{item.view}</td><td>{item.track}</td><td>{width}</td><td>{height}</td>
+                <td>
+                    <FieldSet context={item}
+                        lineHeight={22}
+                        dimensions={{
+                            'paddingWidth': 0,
+                            'paddingHeight': 22,
+                            'buttonWidth': 30,
+                            'initialHeight': 42
+                        }}
+                        windowWidth={windowWidth}
+                        schemas={schemas} href={href}>
+                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible={true}>
+                        </EditableField>
+                    </FieldSet>
+                </td>
+            </tr>);
     });
 
     return (
         <div className="mr-1">
-            { !viewConfigTracks ? null : (
+            {!viewConfigTracks ? null : (
                 <div className="flex-description-container">
                     <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
-                    {/* <p className="text-normal ml-27 mt-1">{ viewConfigTracks.length }</p> */}
                     <div className="row ml-27 mr-0">
                         <table style={{ minWidth: '100%' }}>
                             <thead>
                                 <tr>
                                     <th><div className="tooltip-info-container"><span>In View</span></div></th>
                                     <th><div className="tooltip-info-container"><span>Track Position&nbsp;<i data-tip="Position of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
-                                    <th><div className="tooltip-info-container"><span>W/H&nbsp;<i data-tip="Width/Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Width&nbsp;<i data-tip="Width of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
+                                    <th><div className="tooltip-info-container"><span>Height&nbsp;<i data-tip="Height of track" className="icon fas icon-info-circle" currentitem="false"></i></span></div></th>
                                     <th><div className="tooltip-info-container"><span>Title</span></div></th>
                                 </tr>
                             </thead>
@@ -806,21 +992,21 @@ function HiGlassFileDetailPane(props){
                     <hr className="desc-separator" />
                 </div>
             )}
-            <h5 className="text-500 mb-0 mt-16">
-                <i className="icon icon-fw icon-list fas mr-08"/>Details
+            {/* <h5 className="text-500 mb-0 mt-16">
+                <i className="icon icon-fw icon-list fas mr-08" />Details
             </h5>
             <div className="item-page-detail ml-27">
                 <Detail context={result} open={false} schemas={schemas} excludedKeys={HiGlassFileDetailPane.excludedKeys} />
-            </div>
+            </div> */}
         </div>
     );
 }
-HiGlassFileDetailPane.excludedKeys = [
-    ...Detail.defaultProps.excludedKeys,
-    "title", "genome_assembly", "md5sum", "content_md5sum", "source_experiments", "upload_key", "tsv_notes",
-    "track_and_facet_info", "static_content", "filename", "file_format", "file_size", "file_type", "file_type_detailed",
-    "aliases", "tags", "alternate_accessions", "public_release", "contributing_labs", "href", "produced_from"
-];
+// HiGlassFileDetailPane.excludedKeys = [
+//     ...Detail.defaultProps.excludedKeys,
+//     "title", "genome_assembly", "md5sum", "content_md5sum", "source_experiments", "upload_key", "tsv_notes",
+//     "track_and_facet_info", "static_content", "filename", "file_format", "file_size", "file_type", "file_type_detailed",
+//     "aliases", "tags", "alternate_accessions", "public_release", "contributing_labs", "href", "produced_from"
+// ];
 
 /**
  * This Component has a button and a text input and a button.

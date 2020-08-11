@@ -26,12 +26,12 @@ describe('Static Page & Content Tests', function () {
         // Wait until help menu has loaded via AJAX and is a dropdown.
         // todo: Ensure we're selecting right 1 incase later add more -- test for `a.id-help-menu-item` once in place upstream.
         cy.get(helpNavBarItemSelectorStr).should('have.class', 'dropdown-toggle').wait(100).click().wait(500).then(()=>{
-            cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then((listItems)=>{
-                console.log(listItems);
+            cy.get('div.big-dropdown-menu div.level-1-title-container a, div.big-dropdown-menu a.level-2-title').then(($listItems)=>{
+                console.log($listItems);
 
-                expect(listItems).to.have.length.above(2); // At least 3 help pages in dropdown.
-                var allLinkElementIDs = Cypress._.map(listItems, function(liEl){
-                    return Cypress.$(liEl).attr('id');
+                expect($listItems).to.have.length.above(2); // At least 3 help pages in dropdown.
+                const allLinkElementIDs = Cypress._.map($listItems, function(liEl){
+                    return liEl.id;
                 });
 
                 cy.get('#page-title-container .page-title').should('contain', '4D Nucleome Data Portal').then((title)=>{
@@ -40,18 +40,20 @@ describe('Static Page & Content Tests', function () {
                     let count = 0;
                     let haveWeSeenPageWithTableOfContents = false;
 
-                    function doVisit(listItem){
+                    function testVisit(){
 
                         function finish(titleText){
                             count++;
                             Cypress.log({
-                                'name' : "Help Page " + count + '/' + listItems.length,
+                                'name' : "Help Page " + count + '/' + $listItems.length,
                                 'message' : 'Visited page with title "' + titleText + '".'
                             });
-                            if (count < listItems.length){
+                            if (count < $listItems.length){
                                 cy.get(helpNavBarItemSelectorStr).click().wait(500).then(()=>{
-                                    cy.get('div.big-dropdown-menu #' + allLinkElementIDs[count]).click().wait(300).then((nextListItem)=>{
-                                        doVisit(nextListItem);
+                                    cy.get('div.big-dropdown-menu a#' + allLinkElementIDs[count]).click().then(($nextListItem)=>{
+                                        const linkHref = $nextListItem.attr('href');
+                                        cy.location('pathname').should('equal', linkHref);
+                                        testVisit();
                                     });
                                 });
                             }
@@ -83,8 +85,11 @@ describe('Static Page & Content Tests', function () {
 
                         });
                     }
-                    listItems[0].click();
-                    doVisit(listItems[count]);
+                    cy.wrap($listItems.eq(0)).click().then(function($linkElem){
+                        const linkHref = $linkElem.attr('href');
+                        cy.location('pathname').should('equal', linkHref);
+                        testVisit();
+                    });
 
                 });
             });
@@ -98,10 +103,10 @@ describe('Static Page & Content Tests', function () {
         cy.get(helpNavBarItemSelectorStr).click().then(()=>{
 
             // Get all links to _level 2_ static pages. Exclude directory pages for now. Do directory pages in later test.
-            cy.get('.big-dropdown-menu.is-open a.level-2-title').then((listItems)=>{
+            cy.get('.big-dropdown-menu.is-open a.level-2-title').then(($listItems)=>{
 
-                console.log(listItems);
-                const listItemsTotalCount = listItems.length;
+                console.log($listItems);
+                const listItemsTotalCount = $listItems.length;
 
                 expect(listItemsTotalCount).to.be.above(2); // At least 3 help pages in dropdown.
 
@@ -112,46 +117,43 @@ describe('Static Page & Content Tests', function () {
                 let prevTitle = null;
                 let count = 0;
 
-                function doVisit(){
+                function testVisit(){
 
-                    function finish(titleText){
-                        count++;
-                        Cypress.log({
-                            'name' : "Help Page " + count + '/5/' + listItemsTotalCount,
-                            'message' : 'Visited page with title "' + titleText + '".'
-                        });
-
-                        if (itemIndicesToVisit.length > 0){
-                            var nextIndexToVisit = itemIndicesToVisit.shift();
-                            cy.get(helpNavBarItemSelectorStr).click().wait(100).then(()=>{
-                                cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(doVisit);
-                            });
-                        }
-                    }
                     cy.get('#page-title-container .page-title').should('not.have.text', prevTitle).then((t)=>{
                         var titleText = t.text();
                         expect(titleText).to.have.length.above(0);
                         prevTitle = titleText;
 
-                        cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"]):not([href*=".gov"])').each(($linkElem)=>{
-                            const linkHref = $linkElem.attr('href');
-                            console.log($linkElem.attr('href'));
-                            return cy.request({
-                                'url' : linkHref,
-                                'method' : 'GET',
-                                'headers' : { 'Content-Type' : "application/json; charset=UTF-8" },
-                                'followRedirect' : true
+                        cy.get('.help-entry.static-section-entry a:not([href^="#"]):not([href^="mailto:"]):not([href*=".gov"])').then(()=>{
+
+                            count++;
+
+                            Cypress.log({
+                                'name' : "Help Page " + count + '/5/' + listItemsTotalCount,
+                                'message' : 'Visited page with title "' + titleText + '".'
                             });
-                        }).then(()=>{
-                            finish(titleText);
+
+                            if (itemIndicesToVisit.length > 0){
+                                const nextIndexToVisit = itemIndicesToVisit.shift();
+                                cy.get(helpNavBarItemSelectorStr).click().wait(100).then(()=>{
+                                    cy.get('.big-dropdown-menu.is-open a.level-2-title').eq(nextIndexToVisit).click().then(function($linkElem){
+                                        const linkHref = $linkElem.attr('href');
+                                        cy.location('pathname').should('equal', linkHref);
+                                        testVisit();
+                                    });
+                                });
+                            }
                         });
 
                     });
                 }
 
                 const firstItemIndexToVisit = itemIndicesToVisit.shift();
-                listItems[firstItemIndexToVisit].click();
-                doVisit();
+                cy.wrap($listItems.eq(firstItemIndexToVisit)).click().then(function($linkElem){
+                    const linkHref = $linkElem.attr('href');
+                    cy.location('pathname').should('equal', linkHref);
+                    testVisit();
+                });
 
             });
         });

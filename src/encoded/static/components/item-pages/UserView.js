@@ -414,14 +414,14 @@ export default class UserView extends React.Component {
                                         </div>
                                         <div className="col-md-9 user-title-col">
                                             <h1 className="user-title">
-                                                <FieldSet context={user} parent={this} style="inline"
-                                                    inputSize="lg" absoluteBox objectType="User" onSave={UserView.onEditableFieldSave}
+                                                <FieldSet context={user} parent={this}
+                                                    inputSize="lg" absoluteBox={false} objectType="User" onSave={UserView.onEditableFieldSave}
                                                     schemas={schemas} disabled={!mayEdit} href={href} windowWidth={windowWidth}>
                                                     <EditableField labelID="first_name" fallbackText="No first name set"
-                                                        placeholder="First name" />
+                                                        placeholder="First name" style="inline" />
                                                     {' '}
                                                     <EditableField labelID="last_name" fallbackText="No last name set"
-                                                        placeholder="Last name" />
+                                                        placeholder="Last name" style="inline" />
                                                 </FieldSet>
                                             </h1>
                                         </div>

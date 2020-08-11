@@ -153,6 +153,7 @@
             "title": "Related Files",
             "description": "Files related to this one",
             "ff_flag": "second round",
+            "uniqueItems": true,
             "type": "array",
             "items": {
                 "title": "Related File",
@@ -170,7 +171,8 @@
                             "is superceded by",
                             "derived from",
                             "parent of",
-                            "paired with"
+                            "paired with",
+                            "grouped with"
                         ]
                     },
                     "file": {
@@ -408,10 +410,19 @@
         "file_size" : {
             "title" : "File Size"
         },
+        "source_experiment_sets.@id" : {
+            "title" : "Experiment Set"
+        },
         "date_created": {
             "default_hidden" : true
         },
         "last_modified.date_modified": {
+            "default_hidden" : true
+        },
+        "tags": {
+            "default_hidden" : true
+        },
+        "genome_assembly": {
             "default_hidden" : true
         }
     }
