@@ -92,59 +92,53 @@ export default class FileView extends WorkflowRunTracingView {
 }
 
 
-class FileViewOverview extends React.PureComponent {
 
-    static getTabObject({ context, schemas, windowWidth, href }, width){
-        return {
-            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
-            'key' : 'file-overview',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>More Information</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview {...{ context, width, windowWidth, schemas, href }} />
-                </div>
-            )
-        };
-    }
-
-    static propTypes = {
-        'context' : PropTypes.shape({
-            'experiments' : PropTypes.arrayOf(PropTypes.shape({
-                'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                    '@id' : PropTypes.string.isRequired
-                }))
-            })),
-            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
-                    '@id' : PropTypes.string.isRequired
-                }))
-            }))
-        }).isRequired
-    };
-
-    render(){
-        const { context, windowWidth, width, schemas, href } = this.props;
-        const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
-
-        return (
-            <div>
-                <div className="row overview-blocks">
-                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-12" />
-                    <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
-                    <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
-                </div>
-                { experimentSetUrls && experimentSetUrls.length > 0 ?
-                    <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                    : null }
+function FileViewOverview (props) {
+    const { context, windowWidth, width, schemas, href } = props;
+    const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
+    return (
+        <div>
+            <div className="row overview-blocks">
+                <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-12" />
+                <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
+                <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
             </div>
-        );
-    }
-
+            { experimentSetUrls && experimentSetUrls.length > 0 ?
+                <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
+                : null }
+        </div>
+    );
 }
+FileViewOverview.propTypes = {
+    'context' : PropTypes.shape({
+        'experiments' : PropTypes.arrayOf(PropTypes.shape({
+            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+                '@id' : PropTypes.string.isRequired
+            }))
+        })),
+        'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+            'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
+                '@id' : PropTypes.string.isRequired
+            }))
+        }))
+    }).isRequired
+};
+FileViewOverview.getTabObject = function({ context, schemas, windowWidth, href }, width){
+    return {
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
+        'key' : 'file-overview',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title">
+                    <span>More Information</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                <FileViewOverview {...{ context, width, windowWidth, schemas, href }} />
+            </div>
+        )
+    };
+};
 
 
 export class FileOverviewHeading extends React.PureComponent {
