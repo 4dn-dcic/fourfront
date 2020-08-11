@@ -28,13 +28,39 @@ function labDisplayTitleRenderFxn(result, props){
         </span>
     );
 }
-
+function sourceDisplayTitleRenderFxn(result) {
+    const { source_experiment_sets } = result;
+    if (!source_experiment_sets || !Array.isArray(source_experiment_sets) || source_experiment_sets.length === 0) return null;
+    if (source_experiment_sets.length == 1) {
+        const [exp_set] = source_experiment_sets;
+        return (
+            <span>
+                <a href={object.atIdFromObject(exp_set)}>{exp_set.display_title}</a>
+            </span>
+        );
+    } else {
+        const expSetLinks = source_experiment_sets.map((exp_set) => {
+            const atId = object.atIdFromObject(exp_set);
+            return (
+                <li key={atId}>
+                    <a href={atId}>{exp_set.display_title}</a>
+                </li>
+            );
+        });
+        return (<ol style={{ marginTop: '15px', paddingLeft: '14px' }}>{expSetLinks}</ol>);
+    }
+}
 export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     // TODO: change to organization
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 160 },
         'render' : labDisplayTitleRenderFxn
+    },
+    'source_experiment_sets.@id' : {
+        'title' : "Source",
+        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
+        'render' : sourceDisplayTitleRenderFxn
     },
     'date_published' : {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
