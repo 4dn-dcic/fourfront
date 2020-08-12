@@ -24,11 +24,12 @@ export const ItemFooterRow = React.memo(function ItemFooterRow({ context, schema
     const renderAsTable = (types.indexOf('ExperimentSet') > -1 || types.indexOf('Experiment') > -1);
 
     if (renderAsTable) {
+        const altAccessionTitle = (<h3 className="tab-section-title">Alternate Accessions</h3>);
         return (
             <div className="row">
                 <ExternalReferencesStackedTable {...{ context, width }} />
                 {/* <AliasesSection context={context} aliases={aliases} actions={actions} /> */}
-                <AlternateAccessionSection context={context} alternateAccessions={alternate_accessions} />
+                <AlternateAccessionSection context={context} alternateAccessions={alternate_accessions} title={altAccessionTitle} />
             </div>
         );
     } else {
@@ -49,86 +50,37 @@ export const ItemFooterRow = React.memo(function ItemFooterRow({ context, schema
 });
 
 
-function ExternalReferencesSection({ externalReferences }) {
-    if (externalReferences.length === 0) {
+function ExternalReferencesSection({ externalReferences }){
+    if (externalReferences.length === 0){
         return null;
-    }
-
-    let content = null;
-
-    const anyTitleFound = _.any(externalReferences, (ef) => ef.title);
-    if (!anyTitleFound) {
-        content = (
-            <ul>
-                {_.map(externalReferences, function (extRef, i) {
-                    return (
-                        <React.Fragment>
-                            <li key={i}>
-                                {typeof extRef.ref === 'string' ?
-                                    <ExternalReferenceLink uri={extRef.uri || null}>{extRef.ref}</ExternalReferenceLink> : extRef
-                                }
-                            </li>
-                        </React.Fragment>
-                    );
-                })}
-            </ul>);
-    }
-    else {
-        const externalReferencesGroupedByTitle = _.groupBy(externalReferences, (ef) => ef.title || null);
-        const titles = _.keys(externalReferencesGroupedByTitle);
-
-        content = _.map(titles, (title) => {
-            const subContent = (
-                <ul>
-                    {_.map(externalReferencesGroupedByTitle[title], function (extRef, i) {
-                        return (
-
-                            <li key={i}>
-                                {typeof extRef.ref === 'string' ?
-                                    <ExternalReferenceLink uri={extRef.uri || null}>{extRef.ref}</ExternalReferenceLink> : extRef
-                                }
-                            </li>
-
-                        );
-                    })}
-                </ul>
-            );
-            return (
-                <React.Fragment>
-                    <h6 className="info-panel-label">{title}</h6>
-                    {subContent}
-                </React.Fragment>
-            );
-        });
-        // <ul>
-        //     {_.map(externalReferences, function (extRef, i) {
-        //         return (
-        //             <React.Fragment>
-        //                 <li key={i}>
-        //                     {typeof extRef.ref === 'string' ?
-        //                         <ExternalReferenceLink uri={extRef.uri || null}>{extRef.ref}</ExternalReferenceLink> : extRef
-        //                     }
-        //                 </li>
-        //             </React.Fragment>
-        //         );
-        //     })}
-        // </ul>);
     }
     return (
         <div className="col col-12 col-md-6">
             <h4 className="text-300">External References</h4>
-            <div className={anyTitleFound ? 'formatted-info-panel' : null}>{content}</div>
+            <div>
+                <ul>
+                    { _.map(externalReferences, function(extRef, i){
+                        return (
+                            <li key={i}>
+                                { typeof extRef.ref === 'string' ?
+                                    <ExternalReferenceLink uri={extRef.uri || null}>{ extRef.ref }</ExternalReferenceLink> : extRef
+                                }
+                            </li>
+                        );
+                    }) }
+                </ul>
+            </div>
         </div>
     );
 }
 
-function AlternateAccessionSection({ alternateAccessions }){
+function AlternateAccessionSection({ alternateAccessions, title }){
     if (alternateAccessions.length === 0){
         return null;
     }
     return (
         <div className="col col-12 col-md-6">
-            <h3 className="tab-section-title">Alternate Accessions</h3>
+            {title || (<h4 className="text-300">Alternate Accessions</h4>)}
             <div>
                 <ul>
                     { _.map(alternateAccessions, function(altAccession, i){
