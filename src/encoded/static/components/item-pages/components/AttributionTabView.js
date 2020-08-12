@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
-import { ItemFooterRow, ExternalReferencesStackedTable } from './ItemFooterRow';
+import { ItemFooterRow } from './ItemFooterRow';
 
 
 // TODO memoized component
