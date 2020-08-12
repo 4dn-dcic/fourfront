@@ -354,8 +354,15 @@ table.matrix {
 		}
 
 		.external-references-stacked-table {
-			.s-block.experiment.stack-depth-1 {
-				background-image: initial !important;
+			.s-block {
+				&.experiment.stack-depth-1 {
+					background-image: initial !important;
+				}
+				&.file ul {
+					list-style-type: none;
+					padding: 0;
+					margin: 0;
+				}
 			}
 		}
 	}

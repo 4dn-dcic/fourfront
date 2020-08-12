@@ -220,7 +220,7 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
                     {replicateNumbersExists ? <div>Bio Rep <b>{experiment.bio_rep_no}</b>, Tec Rep <b>{experiment.tec_rep_no}</b></div> : <div />}
                     {experimentAtId ? (<a href={experimentAtId} className="name-title">{text}</a>) : (text ? (<div className="name-title">{text}</div>) : null)}
                 </StackedBlockName>
-                <StackedBlockList title="Files" collapseLongLists={false} collapseLimit={50}>
+                <StackedBlockList title="Files" collapseLongLists={false} collapseLimit={10}>
                     {fileBlocks}
                 </StackedBlockList>
             </StackedBlock>
@@ -233,18 +233,18 @@ const ExternalReferencesStackedTable = React.memo(function ExternalReferencesSta
             <div className="stacked-block-table-outer-container overflow-auto">
                 <StackedBlockTable columnHeaders={columnHeaders} className="external-references-stacked-table" fadeIn width={width}>
                     {context['@type'].indexOf('ExperimentSet') > -1 ? (
-                        <StackedBlockList collapseLongLists={false} collapseLimit={50}>
+                        <StackedBlockList collapseLongLists={false}>
                             <StackedBlock columnClass="experiment-set" hideNameOnHover={false} key="expset"
                                 label={<StackedBlockNameLabel title="Experiment Set" subtitle={null} accession={accession} subtitleVisible />}>
                                 <StackedBlockName relativePosition={true}>
                                     <a href={context['@id']} className="name-title">{accession}</a>
                                 </StackedBlockName>
-                                <StackedBlockList title="Experiments" collapseLongLists={false} collapseLimit={50}>
+                                <StackedBlockList title="Experiments" collapseLongLists={true} collapseLimit={10}>
                                     {experimentBlocks}
                                 </StackedBlockList>
                             </StackedBlock>
                         </StackedBlockList>
-                    ) : (<StackedBlockList collapseLongLists={false} collapseLimit={50}>{experimentBlocks}</StackedBlockList>)}
+                    ) : (<StackedBlockList collapseLongLists={false} collapseLimit={10}>{experimentBlocks}</StackedBlockList>)}
                 </StackedBlockTable>
             </div>
         </div>
