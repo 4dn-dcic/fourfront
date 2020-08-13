@@ -4,11 +4,9 @@ import React from 'react';
 import _ from 'underscore';
 import PropTypes from 'prop-types';
 import ReactTooltip from 'react-tooltip';
-import { object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemFooterRow } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemFooterRow';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
-
+import { ItemFooterRow } from './ItemFooterRow';
 
 
 // TODO memoized component
@@ -65,9 +63,7 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
     );
 });
 
-
-
-export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas }){
+export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas, width }){
     const {
         produced_in_pub = null,
         publications_of_set = [],
@@ -80,6 +76,7 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
     const awardExists = (award && !award.error);
     const labsExist = (lab && !lab.error) || contributing_labs.length > 0;
     const submittedByExists = submitted_by && !submitted_by.error;
+
     return (
         <div className="info-area">
 
@@ -107,7 +104,7 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
 
             </div>
 
-            <ItemFooterRow {...{ context, schemas }} />
+            <ItemFooterRow {...{ context, schemas, width }} />
         </div>
     );
 });
