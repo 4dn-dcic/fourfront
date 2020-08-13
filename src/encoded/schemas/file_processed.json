@@ -62,6 +62,7 @@
                 "image mask-cell",
                 "image mask-cytoplasm",
                 "image mask-nucleus",
+                "insulation score",
                 "insulation score-diamond",
                 "insulation score-potential",
                 "intensity values",
