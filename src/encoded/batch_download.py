@@ -270,6 +270,7 @@ def metadata_tsv(context, request):
         search_path = '/search/'
     search_params['field'] = []
     search_params['sort'] = ['accession']
+    search_params['type'] = search_params.get('type', 'ExperimentSetReplicate')
     header = []
 
     def add_field_to_search_params(itemType, field):
