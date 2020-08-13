@@ -7,7 +7,7 @@ import memoize from 'memoize-one';
 
 import Collapse from 'react-bootstrap/esm/Collapse';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
-import { console, object, isServerSide, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, isServerSide, layout, commonFileUtil, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas, typedefs } from './../util';
 
 import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
@@ -443,6 +443,57 @@ class QCMetricsTable extends React.PureComponent {
         });
     }
 
+    /**
+     * commonFileUtil.groupFilesByQCSummaryTitles function is wrapped to allow
+     * custom sorting by QC schema's qc_order and @type Atacseq or Chipseq specific QCS items
+     */
+    static groupFilesByQCSummaryTitles(filesWithMetrics, schemas) {
+        let filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+
+        const comparerFunc = (filesA, filesB) => {
+            const [fileA] = filesA; //assumption: 1st file's QC is adequate to define order
+            const [fileB] = filesB; //assumption: 1st file's QC is adequate to define order
+
+            let orderA, orderB;
+            if (schemas) {
+                const itemTypeA = schemaTransforms.getItemType(fileA.quality_metric);
+                if (itemTypeA && schemas[itemTypeA]) {
+                    const { qc_order } = schemas[itemTypeA];
+                    if (typeof qc_order === 'number') {
+                        orderA = qc_order;
+                    }
+                }
+                const itemTypeB = schemaTransforms.getItemType(fileB.quality_metric);
+                if (itemTypeB && schemas[itemTypeB]) {
+                    const { qc_order } = schemas[itemTypeB];
+                    if (typeof qc_order === 'number') {
+                        orderB = qc_order;
+                    }
+                }
+            }
+
+            if (orderA && orderB && orderA !== orderB) {
+                return orderA - orderB;
+            }
+
+            //custom comparison for @type Atacseq or Chipseq specific QCS items
+            if (_.any(fileA.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return -1;
+            } else if (_.any(fileB.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return 1;
+            }
+
+            return 0;
+        };
+
+        if (filesByTitles) {
+            filesByTitles = filesByTitles.slice();
+            filesByTitles.sort(comparerFunc);
+        }
+
+        return filesByTitles;
+    }
+
     static defaultProps = {
         heading: (
             <h3 className="tab-section-title mt-12">
@@ -455,7 +506,7 @@ class QCMetricsTable extends React.PureComponent {
         super(props);
         this.memoized = {
             filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
-            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles),
+            groupFilesByQCSummaryTitles: memoize(QCMetricsTable.groupFilesByQCSummaryTitles),
             generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
         };
     }

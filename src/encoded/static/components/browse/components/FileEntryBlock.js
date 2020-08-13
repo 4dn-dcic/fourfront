@@ -177,7 +177,7 @@ export class FileEntryBlock extends React.PureComponent {
             return <div key="name-title" className="name-title inline-block"><em>No file(s) or view permissions.</em></div>;
         }
 
-        if (typeof colForFile.render === 'function') {
+        if (colForFile && typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, colForFile.field || null, 0, this.props);
             if (renderedName) return (
                 <div key="name-title" className="name-title inline-block" onClick={this.onNameClick}>
