@@ -46,17 +46,17 @@
             "lookup": 60,
             "enum": [
                 "Widefield",
-                "SIM",
-                "CLSM",
+                "Structured Illumination",
+                "Confocal Laser Scanning",
                 "PALM",
-                "SDCM",
-                "SFC",
+                "Spinning-Disk Confocal",
+                "Swept-Field Confocal",
                 "STED",
                 "STORM",
-                "Light sheet",
-                "EM",
+                "Light-Sheet",
+                "Electron Microscopy",
                 "TIRF",
-                "HILO"
+                "HiLo"
             ]
         },
         "microscope_qc":{
