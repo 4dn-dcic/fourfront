@@ -193,7 +193,8 @@ table.matrix {
 		.s-block {
 
 			&.biosample.stack-depth-1,
-			&.experiment.stack-depth-1 {
+			&.experiment.stack-depth-1,
+			&.experiment-set.stack-depth-1 {
 				/** Decrease line height(s) to fit more lines in **/
 				> .name {
 					text-align: center;
@@ -201,6 +202,14 @@ table.matrix {
 					/* padding-top: 27px !important; */
 					/* padding-bottom: 27px !important; */
 					min-height: 70px;
+				}
+				> .name-empty {
+					min-height: 20px !important;
+				}
+			}
+			&.experiment.stack-depth-2 {
+				> .name-empty {
+					min-height: 20px !important;
 				}
 			}
 
@@ -344,6 +353,18 @@ table.matrix {
 
 		}
 
+		.external-references-stacked-table {
+			.s-block {
+				&.experiment.stack-depth-1 {
+					background-image: initial !important;
+				}
+				&.file ul {
+					list-style-type: none;
+					padding: 0;
+					margin: 0;
+				}
+			}
+		}
 	}
 
 }

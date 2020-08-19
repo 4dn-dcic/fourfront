@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "1.8.2"
+version = "1.8.12"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -115,6 +115,7 @@ xlwt = "1.2.0"
 "zope.deprecation" = "4.4.0"
 "zope.interface" = "4.6.0"
 "zope.sqlalchemy" = "^1.2"
+sentry-sdk = "^0.16.2"
 
 [tool.poetry.dev-dependencies]
 coverage = ">=5.1"

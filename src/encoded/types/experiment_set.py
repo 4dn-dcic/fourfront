@@ -93,6 +93,7 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_type.other_tags",
         "experiments_in_set.accession",
         "experiments_in_set.status",
+        "experiments_in_set.external_references.*",
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
@@ -154,6 +155,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.file_classification",
         "experiments_in_set.files.paired_end",
         "experiments_in_set.files.status",
+        "experiments_in_set.files.external_references.*",
         "experiments_in_set.files.extra_files",
         "experiments_in_set.files.extra_files.href",
         "experiments_in_set.files.extra_files.file_format",
@@ -165,7 +167,6 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        #"experiments_in_set.files.quality_metric_summary.*", #todo - delete soon  # This may not yet be enabled on raw files.
         "experiments_in_set.files.quality_metric.quality_metric_summary.*", # This may not yet be enabled on raw files.
         "experiments_in_set.files.badges.badge.title",
         "experiments_in_set.files.badges.badge.commendation",
@@ -193,6 +194,7 @@ class ExperimentSet(Item):
         "processed_files.file_type",
         "processed_files.file_type_detailed",
         "processed_files.status",
+        "processed_files.external_references.*",
         "processed_files.md5sum",
         "processed_files.extra_files",
         "processed_files.extra_files.href",
@@ -214,7 +216,6 @@ class ExperimentSet(Item):
         # "processed_files.quality_metric.Sequence length",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
-        #"processed_files.quality_metric_summary.*", #todo - delete soon
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.notes_to_tsv",
 
@@ -228,6 +229,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.file_type",
         "experiments_in_set.processed_files.file_type_detailed",
         "experiments_in_set.processed_files.status",
+        "experiments_in_set.processed_files.external_references.*",
         "experiments_in_set.processed_files.md5sum",
         "experiments_in_set.processed_files.higlass_uid",
         "experiments_in_set.processed_files.genome_assembly",
@@ -265,7 +267,6 @@ class ExperimentSet(Item):
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
-        #"other_processed_files.files.quality_metric_summary.*", #todo - delete soon
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
         "other_processed_files.higlass_view_config.description",

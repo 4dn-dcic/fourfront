@@ -56,7 +56,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             columns, columnExtensionMap,
             searchHref,
             filterFacetFxn, hideFacets,
-            filterColumnFxn, hideColumns,
+            filterColumnFxn, hideColumns
         } = this.props;
         const { totalCount } = this.state;
 

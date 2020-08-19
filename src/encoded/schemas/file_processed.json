@@ -62,6 +62,7 @@
                 "image mask-cell",
                 "image mask-cytoplasm",
                 "image mask-nucleus",
+                "insulation score",
                 "insulation score-diamond",
                 "insulation score-potential",
                 "intensity values",
@@ -118,7 +119,8 @@
                 "GRCh38",
                 "GRCm38",
                 "dm6",
-                "galGal5"
+                "galGal5",
+                "GRCz11"
             ]
         },
         "produced_from": {

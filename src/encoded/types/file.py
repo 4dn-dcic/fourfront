@@ -583,7 +583,8 @@ class File(Item):
             curr_txn = None
             curr_request = None
             for relation in properties["related_files"]:
-                # skip "grouped with" type from update
+                # skip "grouped with" type from update, to avoid circularity issues
+                # which are more likely to arise with larger groups
                 if relation["relationship_type"] == "grouped with":
                     continue
                 try:
@@ -919,6 +920,28 @@ class FileProcessed(File):
         if keys.get('alias'):
             keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
         return keys
+
+    @calculated_property(schema={
+        "title": "Source",
+        "description": "Gets all experiments (if experiment is found, find its experiment) associated w/ this file",
+        "type": "array",
+        "items": {
+            "title": "Experiment Set",
+            "type": "string",
+            "linkTo": "ExperimentSet"
+        }
+    })
+    def source_experiment_sets(self, request):
+        exp_sets = set(self.rev_link_atids(request, "experiment_sets") +
+                       self.rev_link_atids(request, "other_experiment_sets"))
+        exps = set(self.rev_link_atids(request, "experiments") +
+                   self.rev_link_atids(request, "other_experiments"))
+        if not exps == []:
+            for exp in exps:
+                expData = request.embed(exp, '@@object')
+                if not expData['experiment_sets'] == []:
+                    exp_sets.update(expData['experiment_sets'])
+        return list(exp_sets)
 
 
 @collection(
