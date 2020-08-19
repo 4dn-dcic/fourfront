@@ -253,7 +253,8 @@ class File(Item):
         'quality_metric.qc_list.value.@type',
         'quality_metric.quality_metric_summary.*',
         'quality_metric.Total reads',
-        'quality_metric.qc_list.value.Total reads'
+        'quality_metric.qc_list.value.Total reads',
+        'quality_metric.qc_list.value.MAD QC.MAD of log ratios'
     ]
     name_key = 'accession'
     rev = {

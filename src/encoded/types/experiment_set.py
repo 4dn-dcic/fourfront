@@ -245,6 +245,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.processed_files.quality_metric.Total reads",
         "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
+        "experiments_in_set.processed_files.quality_metric.qc_list.value.MAD QC.MAD of log ratios",
 
 
         "experiments_in_set.processed_files.static_content.location",
