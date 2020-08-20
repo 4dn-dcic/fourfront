@@ -77,6 +77,9 @@ ExperimentSetsTableTabView.getTabObject = function(props){
 };
 
 export function ExperimentSetsTableTabViewTitle({ totalCount, searchHref }) {
+    const linkText =
+        searchHref && typeof searchHref === 'string' && searchHref.indexOf('/browse/') > -1 ?
+            'Open In Browse View' : 'Open In Search View';
     return (
         <h3 className="tab-section-title">
             <span>
@@ -86,7 +89,7 @@ export function ExperimentSetsTableTabViewTitle({ totalCount, searchHref }) {
             {searchHref ?
                 <a href={searchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
                     <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
-                    Open In Search View
+                    {linkText}
                 </a>
                 : null
             }
