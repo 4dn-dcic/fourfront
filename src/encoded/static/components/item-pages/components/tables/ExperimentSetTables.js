@@ -16,7 +16,8 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
     static defaultProps = {
         ...EmbeddedItemSearchTable.defaultProps,
         columns: undefined, //get columns from columnExtensionMap that having values of columnExtensionMap4DN,
-        externalSearchLinkVisible: true
+        externalSearchLinkVisible: true,
+        maxHeight: 600
         // columns : {
         //     "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
         //     "number_of_experiments" : { "title" : "Exps" },
