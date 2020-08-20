@@ -82,7 +82,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
         const showTitle = !title ? null
             : React.isValidElement(title) ? (
                 typeof title.type === "string" ? title
-                    : React.cloneElement(title, { totalCount, searchHref: externalLinkVisible ? searchHref : null })
+                    : React.cloneElement(title, { totalCount, searchHref: totalCount && externalLinkVisible ? searchHref : null })
             ) : title;
 
         const showChildren = React.isValidElement(children) && typeof children.type !== "string" ?
