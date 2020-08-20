@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
-import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { EmbeddedExperimentSetSearchTable, ExperimentSetsTableTabViewTitle } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock } from './FileView';
 import { QualityControlResults } from './QualityMetricView';
@@ -57,14 +57,27 @@ class FileMicroscopyViewOverview extends React.Component {
 
     render(){
         const { context, schemas, width, windowWidth } = this.props;
-        const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
+        const experimentSets = expFxn.experimentSetsFromFile(context, 'list');
+        const searchHref =
+            experimentSets && experimentSets.length > 0 ?
+                '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
+                : null;
+        const expSetTableProps = {
+            searchHref: searchHref,
+            facets: null,
+            defaultOpenIndices: [0],
+            title: <ExperimentSetsTableTabViewTitle />,
+            ...this.props
+        };
 
         return (
             <div>
                 <FileMicOverViewBody {...{ context, schemas, windowWidth }} />
-                { experimentSetUrls && experimentSetUrls.length > 0 ?
-                    <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                    : null }
+                {searchHref ?
+                    <React.Fragment>
+                        <EmbeddedExperimentSetSearchTable {...expSetTableProps} externalSearchLinkVisible />
+                    </React.Fragment>
+                    : null}
             </div>
         );
 

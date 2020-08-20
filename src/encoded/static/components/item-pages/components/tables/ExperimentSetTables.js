@@ -15,14 +15,16 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
 
     static defaultProps = {
         ...EmbeddedItemSearchTable.defaultProps,
-        columns : {
-            "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
-            "number_of_experiments" : { "title" : "Exps" },
-            "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
-            "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
-            "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-            "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap4DN["experiments_in_set.experiment_categorizer.combined"]
-        }
+        columns: undefined, //get columns from columnExtensionMap that having values of columnExtensionMap4DN,
+        externalSearchLinkVisible: true
+        // columns : {
+        //     "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
+        //     "number_of_experiments" : { "title" : "Exps" },
+        //     "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
+        //     "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
+        //     "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
+        //     "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap4DN["experiments_in_set.experiment_categorizer.combined"]
+        // }
     }
 
     constructor(props){
@@ -73,11 +75,20 @@ ExperimentSetsTableTabView.getTabObject = function(props){
     };
 };
 
-export function ExperimentSetsTableTabViewTitle({ totalCount }){
+export function ExperimentSetsTableTabViewTitle({ totalCount, searchHref }) {
     return (
         <h3 className="tab-section-title">
-            { typeof totalCount === "number" ? <span className="text-500">{ totalCount + " " }</span> : null }
-            { "Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "") }
+            <span>
+                {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
+                {"Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
+            </span>
+            {searchHref ?
+                <a href={searchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
+                    <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
+                    Open In Search View
+                </a>
+                : null
+            }
         </h3>
     );
 }

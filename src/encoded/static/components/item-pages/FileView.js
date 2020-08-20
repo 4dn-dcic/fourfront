@@ -11,7 +11,7 @@ import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/component
 import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
 
-import { ExperimentSetTablesLoaded, ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
+import { ExperimentSetsTableTabView, EmbeddedExperimentSetSearchTable, ExperimentSetsTableTabViewTitle } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -95,7 +95,18 @@ export default class FileView extends WorkflowRunTracingView {
 
 function FileViewOverview (props) {
     const { context, windowWidth, width, schemas, href } = props;
-    const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
+    const experimentSets = expFxn.experimentSetsFromFile(context, 'list');
+    const searchHref =
+        experimentSets && experimentSets.length > 0 ?
+            '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
+            : null;
+    const expSetTableProps = {
+        searchHref: searchHref,
+        facets: null,
+        defaultOpenIndices: [0],
+        title: <ExperimentSetsTableTabViewTitle />,
+        ...props
+    };
     return (
         <div>
             <div className="row overview-blocks">
@@ -103,9 +114,11 @@ function FileViewOverview (props) {
                 <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                 <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
             </div>
-            { experimentSetUrls && experimentSetUrls.length > 0 ?
-                <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                : null }
+            {searchHref ?
+                <React.Fragment>
+                    <EmbeddedExperimentSetSearchTable {...expSetTableProps} externalSearchLinkVisible />
+                </React.Fragment>
+                : null}
         </div>
     );
 }
