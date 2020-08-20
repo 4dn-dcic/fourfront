@@ -139,7 +139,8 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 width,
                 'facets' : null,
                 'searchHref' : "/search/?type=ExperimentSet&experiments_in_set.accession=" + encodeURIComponent(accession),
-                'defaultOpenIndices': ExperimentView.defaultOpenIndices
+                'defaultOpenIndices': ExperimentView.defaultOpenIndices,
+                'externalSearchLinkVisible': false
             }));
 
         }

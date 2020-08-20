@@ -20,7 +20,7 @@ export default class BiosourceView extends DefaultItemView {
 
         initTabs.push(ExperimentSetsTableTabView.getTabObject(_.extend({}, this.props, {
             'searchHref' : (
-                "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                 "experiments_in_set.biosample.biosource.display_title=" + encodeURIComponent(context.display_title)
             ),

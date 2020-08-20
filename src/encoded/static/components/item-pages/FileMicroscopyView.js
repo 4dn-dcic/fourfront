@@ -67,6 +67,7 @@ class FileMicroscopyViewOverview extends React.Component {
             facets: null,
             defaultOpenIndices: [0],
             title: <ExperimentSetsTableTabViewTitle />,
+            externalSearchLinkVisible: false,
             ...this.props
         };
 
@@ -75,7 +76,7 @@ class FileMicroscopyViewOverview extends React.Component {
                 <FileMicOverViewBody {...{ context, schemas, windowWidth }} />
                 {searchHref ?
                     <React.Fragment>
-                        <EmbeddedExperimentSetSearchTable {...expSetTableProps} externalSearchLinkVisible />
+                        <EmbeddedExperimentSetSearchTable {...expSetTableProps} />
                     </React.Fragment>
                     : null}
             </div>

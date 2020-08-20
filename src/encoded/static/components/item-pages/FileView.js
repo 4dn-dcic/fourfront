@@ -105,6 +105,7 @@ function FileViewOverview (props) {
         facets: null,
         defaultOpenIndices: [0],
         title: <ExperimentSetsTableTabViewTitle />,
+        externalSearchLinkVisible: false,
         ...props
     };
     return (
@@ -116,7 +117,7 @@ function FileViewOverview (props) {
             </div>
             {searchHref ?
                 <React.Fragment>
-                    <EmbeddedExperimentSetSearchTable {...expSetTableProps} externalSearchLinkVisible />
+                    <EmbeddedExperimentSetSearchTable {...expSetTableProps} />
                 </React.Fragment>
                 : null}
         </div>

@@ -21,7 +21,7 @@ export default class ExperimentTypeView extends DefaultItemView {
         const width = this.getTabViewWidth();
         const expSetTableProps = _.extend({}, this.props, {
             'searchHref' : (
-                "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 "experiments_in_set.experiment_type.display_title=" + encodeURIComponent(context.display_title)
             ),
             'facets' : null
