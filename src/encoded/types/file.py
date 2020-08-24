@@ -253,8 +253,7 @@ class File(Item):
         'quality_metric.qc_list.value.@type',
         'quality_metric.quality_metric_summary.*',
         'quality_metric.Total reads',
-        'quality_metric.qc_list.value.Total reads',
-        'quality_metric.qc_list.value.gene_type_count.TEC'
+        'quality_metric.qc_list.value.Total reads'
     ]
     name_key = 'accession'
     rev = {

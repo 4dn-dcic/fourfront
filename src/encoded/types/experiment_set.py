@@ -245,8 +245,6 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.processed_files.quality_metric.Total reads",
         "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
-        "experiments_in_set.processed_files.quality_metric.qc_list.value.gene_type_count.TEC",
-
 
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",

@@ -167,8 +167,7 @@ class Experiment(Item):
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.quality_metric.Total reads",
-        'processed_files.quality_metric.qc_list.value.Total reads',
-        'processed_files.quality_metric.qc_list.value.gene_type_count.TEC',
+        "processed_files.quality_metric.qc_list.value.Total reads",
 
         # "processed_files.quality_metric_summary.*",#todo - delete soon
 
