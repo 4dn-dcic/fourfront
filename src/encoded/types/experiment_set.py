@@ -218,6 +218,8 @@ class ExperimentSet(Item):
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.notes_to_tsv",
+        "processed_files.quality_metric.Total reads",
+        "processed_files.quality_metric.qc_list.value.Total reads",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
