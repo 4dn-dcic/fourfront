@@ -102,7 +102,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     static getTilesetUids(viewConf) {
         const tilesetUids = {};
         if (viewConf && viewConf.views && Array.isArray(viewConf.views) && viewConf.views.length > 0) {
-            _.each(viewConf.views, function (view, idx) { view.vIndex = idx ;});
+            _.each(viewConf.views, function (view, idx) { view.vIndex = idx; });
             viewConf.views = _.chain(viewConf.views).sortBy((view) => view.layout.x).sortBy((view) => view.layout.y).value();
             //very simple implementation of naming views - assumes views' top edge in a row is aligned
             const layouts = _.map(viewConf.views, (view) => { return { x: view.layout.x, y: view.layout.y, displayText: 'Main' }; });
@@ -163,6 +163,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         this.handleStatusChangeToRelease = this.handleStatusChange.bind(this, 'released');
         this.handleStatusChange = this.handleStatusChange.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
+        this.hasSimilarTilesets = this.hasSimilarTilesets.bind(this);
         this.addFileToHiglass = this.addFileToHiglass.bind(this);
         this.collapseButtonTitle = this.collapseButtonTitle.bind(this);
         this.onViewConfigUpdated = _.debounce(this.onViewConfigUpdated.bind(this), 750);
@@ -265,15 +266,20 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                 this.setState({ 'viewConfigModified': true });
             }
         } else {
-            this.setState({
-                'modal': (
-                    <ConfirmModal handleConfirm={this.handleUpdateAllTilesets} handleCancel={this.handleUpdateSingleTileset}
-                        confirmButtonText="Yes, Update All" cancelButtonText="No, Update Only This" modalTitle="Update">
-                        Do you want to update all similar tilesets?
-                        <br />
-                    </ConfirmModal>
-                ), 'updatedTilesetField': updatedTilesetField, 'trackInfo': trackInfo
-            });
+            if (!this.hasSimilarTilesets(updatedTilesetField, trackInfo)) {
+                this.setState({ 'updatedTilesetField': updatedTilesetField, 'trackInfo': trackInfo }, this.handleUpdateSingleTileset);
+            }
+            else {
+                this.setState({
+                    'modal': (
+                        <ConfirmModal handleConfirm={this.handleUpdateAllTilesets} handleCancel={this.handleUpdateSingleTileset}
+                            confirmButtonText="Yes, Update All" cancelButtonText="No, Update Only This" modalTitle="Update">
+                            Do you want to update all similar tilesets?
+                            <br />
+                        </ConfirmModal>
+                    ), 'updatedTilesetField': updatedTilesetField, 'trackInfo': trackInfo
+                });
+            }
         }
         return true; //currently not in use
     }
@@ -345,6 +351,28 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         return true;
+    }
+    /**
+     * checks whether multiple similar (within the same view and track, having same orientation and type) tilesets exist
+     * @param {Object} updatedTilesetField edited field object
+     * @param {Object} trackInfo track info object that holds detail view and track info
+     */
+    hasSimilarTilesets(updatedTilesetField, trackInfo) {
+        const hgc = this.getHiGlassComponent();
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
+
+        if (!currentViewConf) {
+            throw new Error('Could not get current view configuration.');
+        }
+        const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+        const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
+
+        if (tileset) {
+            const { orientation, type } = tileset;
+            const similarTilesets = _.filter(track, (tilesetItem) => orientation === tilesetItem.orientation && type === tilesetItem.type);
+            return similarTilesets && similarTilesets.length > 1;
+        }
+        return false;
     }
     /**
      * Update the current higlass viewconfig for the user, based on the current data.
@@ -444,7 +472,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
 
-        const viewConfTitleAppendStr  = " - " + userFirstName + "'s copy";
+        const viewConfTitleAppendStr = " - " + userFirstName + "'s copy";
         const viewConfDesc = context.description;
         let viewConfTitle = context.display_title + viewConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
 
@@ -561,8 +589,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         // Get the x and y scales of the first view.
         let firstViewLocationAndZoom = [null, null, null];
-        if (currentViewConf.views && currentViewConf.views.length > 0)
-        {
+        if (currentViewConf.views && currentViewConf.views.length > 0) {
             const firstViewUid = currentViewConf.views[0].uid;
 
             const xScale = hgc.xScales[firstViewUid];
@@ -577,10 +604,10 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         const payload = {
-            'higlass_viewconfig': currentViewConf,
-            'genome_assembly': this.state.genome_assembly,
-            'files' : files,
-            'firstViewLocationAndZoom': firstViewLocationAndZoom
+            'higlass_viewconfig'        : currentViewConf,
+            'genome_assembly'           : this.state.genome_assembly,
+            'files'                     : files,
+            'firstViewLocationAndZoom'  : firstViewLocationAndZoom
         };
 
         // If it failed, show the error in the popup window.
@@ -640,7 +667,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
     *
     * @returns {void}
     */
-    handleStatusChange(statusToSet = 'released', evt){
+    handleStatusChange(statusToSet = 'released', evt) {
         evt.preventDefault();
 
         const { context, href } = this.props;
@@ -711,7 +738,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
 
-        const btnProps  = {
+        const btnProps = {
             'onSelect'      : this.handleStatusChange,
             //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
             'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
@@ -774,11 +801,11 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return (
             <object.CopyWrapper data-tip="Copy view URL to clipboard to share with others." includeIcon={false} wrapperElement="button" value={href}>
                 <i className="icon icon-fw icon-copy far"/>
-                { isMobile ?
+                {isMobile ?
                     <React.Fragment>
                         &nbsp;&nbsp; Copy URL
                     </React.Fragment>
-                    : null }
+                    : null}
             </object.CopyWrapper>
         );
     }
@@ -863,7 +890,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const filesTableProps = {
             schemas, width,
             searchHref: filesTableSearchHref,
-            hideColumns : ['@type'],
+            hideColumns: ['@type'],
             renderDetailPane: this.renderFilesDetailPane,
             maxHeight: 800,
             defaultOpenIndices: [0],
@@ -879,14 +906,14 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         className="btn-success mt-17" style={{ 'paddingLeft' : 30, 'paddingRight' : 30 }} />
                     <CollapsibleItemViewButtonToolbar tooltip={tooltip} windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
-                        { this.saveButton() }
-                        { this.cloneButton() }
-                        { this.statusChangeButton() }
+                        {this.saveButton()}
+                        {this.cloneButton()}
+                        {this.statusChangeButton()}
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
-                <hr className="tab-section-title-horiz-divider"/>
+                <hr className="tab-section-title-horiz-divider" />
                 <div className="higlass-tab-view-contents">
-                    <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft' : 10, 'paddingRight' : 10 } : null }>
+                    <div className="higlass-container-container" style={isFullscreen ? { 'paddingLeft': 10, 'paddingRight': 10 } : null}>
                         <HiGlassPlainContainer {..._.omit(this.props, 'context', 'viewConfig')}
                             width={hiGlassComponentWidth} height={hgcHeight} viewConfig={viewConfig}
                             ref={this.higlassRef} onViewConfigUpdated={this.onViewConfigUpdated} />
@@ -911,7 +938,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                         </React.Fragment>
                     ) : null
                 }
-                { modal }
+                {modal}
             </div>
         );
     }
@@ -1031,7 +1058,7 @@ class AddFileButton extends React.PureComponent {
         this.unsetIsSelecting       = this.toggleIsSelecting.bind(this, false);
         this.toggleIsSelecting      = this.toggleIsSelecting.bind(this);
         this.state = {
-            'isSelecting' : false
+            'isSelecting': false
         };
     }
 
@@ -1061,7 +1088,7 @@ class AddFileButton extends React.PureComponent {
         const dropMessage     = "Drop a File here.";
         const searchURL       = (
             '/search/?currentAction=multiselect&type=File&track_and_facet_info.track_title!=No+value&higlass_uid!=No+value'
-            + (genome_assembly? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '' )
+            + (genome_assembly ? '&genome_assembly=' + encodeURIComponent(genome_assembly) : '')
         );
         const cls = "btn" + (className ? " " + className : "");
 
@@ -1082,7 +1109,7 @@ function StatusMenuItem(props){
     return (
         <DropdownItem {..._.omit(props, 'context')} active={active}>
             <span className={active ? "text-500" : null}>
-                <i className="item-status-indicator-dot" data-status={eventKey} />&nbsp;  { children }
+                <i className="item-status-indicator-dot" data-status={eventKey} />&nbsp;  {children}
             </span>
         </DropdownItem>
     );
@@ -1105,16 +1132,16 @@ export const ConfirmModal = React.memo(function (props) {
             </Modal.Body>
             <Modal.Footer>
                 <button type="button" onClick={handleConfirm} className="btn btn-success">
-                    <i className="icon icon-fw icon-check mr-05 fas" />{ confirmButtonText || 'OK' }
+                    <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
                 </button>
                 <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
-                    <i className="icon icon-fw icon-times mr-05 fas" />{ cancelButtonText || 'Cancel' }
+                    <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
                 </button>
             </Modal.Footer>
         </Modal>);
 });
 ConfirmModal.PropTypes = {
-    'handleConfirm' : PropTypes.func.isRequired,
+    'handleConfirm': PropTypes.func.isRequired,
     'handleCancel': PropTypes.func.isRequired,
     'modalTitle': PropTypes.string,
     'confirmButtonText': PropTypes.string,
