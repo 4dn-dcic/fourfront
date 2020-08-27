@@ -32,7 +32,7 @@ export default class HiGlassViewConfigView extends DefaultItemView {
 
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
-                <TopRow typeInfo={this.typeInfo()} itemActionsDescriptions={itemActionsDescriptions} />
+                <TopRow itemActionsDescriptions={itemActionsDescriptions} typeInfoVisible={false} />
                 <MiddleRow isInlineEditable />
                 <BottomRow />
             </ItemHeaderWrapper>
