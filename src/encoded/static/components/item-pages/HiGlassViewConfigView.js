@@ -318,7 +318,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      */
     handleUpdateAllTilesets(evt) {
         evt.preventDefault();
-        const { updatedTilesetField, trackInfo } = this.state;
+        const { updatedTilesetField, trackInfo, filesTableSearchHref } = this.state;
 
         const hgc = this.getHiGlassComponent();
         const currentViewConf = this.getHiGlassViewConfig(hgc);
@@ -347,7 +347,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
 
             hgc.api.setViewConfig(currentViewConf, true);
-            this.setState({ 'modal': null, 'viewConfigModified': true });
+            // //workaround: force update of files table by re-setting filesTableSearchHref
+            // const url = new URL(filesTableSearchHref, window.location.href);
+            // const search_params = url.searchParams;
+            // search_params.set('hg_update_token', new Date().getTime());//assumption: hg_update_token is not a valid ES search field
+            // url.search = search_params.toString();
+            // const newFilesTableSearchHref = url.pathname + url.search.toString();
+            this.setState({ 'modal': null, 'viewConfigModified': true/*, 'filesTableSearchHref': newFilesTableSearchHref*/ });
         }
 
         return true;
