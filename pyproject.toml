@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "1.8.12"
+version = "1.9.0"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -45,7 +45,7 @@ chardet = "3.0.4"
 "collective.recipe.modwsgi" = "2.1"
 "collective.recipe.template" = "1.13"
 colorama = "0.3.3"
-dcicsnovault = ">=3.1.4,<4"
+dcicsnovault = "3.2.0b0"
 dcicutils = ">=0.31.1,<1"
 docutils = "0.12"
 elasticsearch = "5.5.3"
@@ -94,7 +94,7 @@ rutter = ">=0.2,<1"
 s3transfer = "^0.2.0"
 simplejson = "^3.17.0"
 SPARQLWrapper = "1.7.6"
-SQLAlchemy = "1.2.16"
+SQLAlchemy = "1.3.16"  # Pinned because >=1.3.17 is a broken for us (circular constraints prevent deletes)
 structlog = ">=18.1.0,<20"
 submit4dn = "0.9.7"
 subprocess-middleware = ">=0.3,<1"
@@ -114,7 +114,7 @@ xlrd = "^1.0.0"
 xlwt = "1.2.0"
 "zope.deprecation" = "4.4.0"
 "zope.interface" = "4.6.0"
-"zope.sqlalchemy" = "^1.2"
+"zope.sqlalchemy" = "^1.3"
 sentry-sdk = "^0.16.2"
 
 [tool.poetry.dev-dependencies]
