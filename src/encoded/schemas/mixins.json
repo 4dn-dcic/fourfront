@@ -489,7 +489,7 @@
                         "items": {
                             "title": "File",
                             "type": "string",
-                            "linkTo": "FileProcessed"
+                            "linkTo": "File"
                         }
                     },
                     "higlass_view_config": {
