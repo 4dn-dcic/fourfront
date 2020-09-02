@@ -51,6 +51,7 @@
                 "blacklisted regions",
                 "repeats",
                 "spike-in",
+                "darkmap",
                 "other"
             ]
         },
