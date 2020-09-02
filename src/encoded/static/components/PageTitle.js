@@ -202,22 +202,31 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
         );
     }
 
+    //Custom Higlass editable title display
+    const editAction = _.findWhere(context.actions, { 'name': 'edit' });
+    const isEditableHiglassTitle = context && (context['@type'].indexOf('HiglassViewConfig') > -1) && editAction;
+    if (isEditableHiglassTitle) {
+        itemTitle = (
+            <FieldSet context={context}
+                schemas={schemas} href={href}>
+                <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText="click to add new title" placeholder={'title'} buttonAlwaysVisible={true}>
+                </EditableField>
+            </FieldSet>
+        );
+        return (
+            <PageTitleContainer alerts={alerts}>
+                <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
+                <TitleAndSubtitleUnder context={context} subtitle={itemTitle}>{itemTypeTitle}</TitleAndSubtitleUnder>
+            </PageTitleContainer>
+        );
+    }
+
     if (itemTitle){
         const itemTypeHierarchy = schemaTransforms.schemasToItemTypeHierarchy(schemas);
         if (!context.accession && !itemTypeHierarchy[context['@type'][0]] && typeof itemTitle === 'string' && itemTitle.length > 20) {
             // Item views will currently show accession &/or abstract type.
             // While this is case, we need to test for them here for layouting.
             // If itemTitle is < 20chars might as well show it beside itemTypeTitle, anyway.
-            var editAction = _.findWhere(context.actions, { 'name' : 'edit' });
-            if (context && (context['@type'].indexOf('HiglassViewConfig') > -1) && (editAction)) {
-                itemTitle = (
-                    <FieldSet context={context}
-                        schemas={schemas} href={href}>
-                        <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText={'click here to add new title'} placeholder={'title'} buttonAlwaysVisible={true}>
-                        </EditableField>
-                    </FieldSet>
-                );
-            }
             return (
                 <PageTitleContainer alerts={alerts}>
                     <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
