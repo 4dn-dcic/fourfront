@@ -347,13 +347,13 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             }
 
             hgc.api.setViewConfig(currentViewConf, true);
-            // //workaround: force update of files table by re-setting filesTableSearchHref
-            // const url = new URL(filesTableSearchHref, window.location.href);
-            // const search_params = url.searchParams;
-            // search_params.set('hg_update_token', new Date().getTime());//assumption: hg_update_token is not a valid ES search field
-            // url.search = search_params.toString();
-            // const newFilesTableSearchHref = url.pathname + url.search.toString();
-            this.setState({ 'modal': null, 'viewConfigModified': true/*, 'filesTableSearchHref': newFilesTableSearchHref*/ });
+            //workaround: force update of files table by re-setting filesTableSearchHref
+            const url = new URL(filesTableSearchHref, window.location.href);
+            const search_params = url.searchParams;
+            search_params.set('hg_files_search_token', new Date().getTime());//assumption: hg_files_search_token is not a valid ES search field
+            url.search = search_params.toString();
+            const newFilesTableSearchHref = url.pathname + url.search.toString();
+            this.setState({ 'modal': null, 'viewConfigModified': true, 'filesTableSearchHref': newFilesTableSearchHref });
         }
 
         return true;
@@ -862,7 +862,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const { tilesetUids } = this.state;
         const tracks = tilesetUids && result.higlass_uid && tilesetUids[result.higlass_uid] ? tilesetUids[result.higlass_uid] : [];
 
-        return <HiGlassFileDetailPane {...{ result, schemas, handleCustomSave: this.updateHiglassViewConf, viewConfigTracks: tracks, editPermission: this.havePermissionToEdit() }} />;
+        return <HiGlassFileDetailPane {...{ result, schemas, handleCustomSave: this.updateHiglassViewConf, viewConfigTracks: tracks }} />;
     }
 
     render(){
@@ -951,7 +951,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
 }
 
 function HiGlassFileDetailPane(props) {
-    const { /*result, */windowWidth, href, viewConfigTracks = null, schemas, handleCustomSave } = props;
+    const { windowWidth, href, viewConfigTracks = null, schemas, handleCustomSave } = props;
     // If we pass empty array as 2nd arg, the `useEffect` hook should act exactly like componentDidMount
     // See last "Note" under https://reactjs.org/docs/hooks-effect.html as well as this article - https://medium.com/@felippenardi/how-to-do-componentdidmount-with-react-hooks-553ba39d1571
     useEffect(function () {
