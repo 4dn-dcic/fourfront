@@ -218,6 +218,8 @@ class ExperimentSet(Item):
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.notes_to_tsv",
+        "processed_files.quality_metric.Total reads",
+        "processed_files.quality_metric.qc_list.value.Total reads",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
@@ -239,9 +241,13 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.extra_files.file_size",
         "experiments_in_set.processed_files.extra_files.md5sum",
         "experiments_in_set.processed_files.extra_files.use_for",
+
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
         "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
+        "experiments_in_set.processed_files.quality_metric.Total reads",
+        "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
+
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
