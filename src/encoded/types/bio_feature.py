@@ -53,13 +53,6 @@ class BioFeature(Item):
                 cellular_structure = 'unspecified cellular component'
             return cellular_structure
 
-        featstr = ''
-        modstr = ''
-        orgstr = ''
-        # see if there is an organism_name
-        if organism_name and organism_name != 'human':
-            orgstr = organism_name
-
         # gene trumps location
         for g in relevant_genes:
             gene = get_item_or_none(request, g)
