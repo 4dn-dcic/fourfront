@@ -1128,6 +1128,10 @@ function StatusMenuItem(props){
  */
 export const ConfirmModal = React.memo(function (props) {
     const { handleConfirm, handleCancel, modalTitle, confirmButtonText = "OK", cancelButtonText = "Cancel" } = props;
+    let confirmButton = null;
+    useEffect(() => {
+        confirmButton.focus();
+    });
     return (
         <Modal show onHide={handleCancel}>
             <Modal.Header closeButton>
@@ -1137,7 +1141,7 @@ export const ConfirmModal = React.memo(function (props) {
                 {props.children || ''}
             </Modal.Body>
             <Modal.Footer>
-                <button type="button" onClick={handleConfirm} className="btn btn-success">
+                <button type="button" onClick={handleConfirm} className="btn btn-success" ref={(button) => { confirmButton = button; }}>
                     <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
                 </button>
                 <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
