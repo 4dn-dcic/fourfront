@@ -34,8 +34,16 @@ class BioFeature(Item):
     })
     def display_title(self, request, feature_type, preferred_label=None, cellular_structure=None,
                       organism_name=None, relevant_genes=[], feature_mods=[], genome_location=[]):
+
+        featstr = ''
+        modstr = ''
+        orgstr = ''
+        if organism_name and organism_name != 'human':
+            orgstr = organism_name
         if preferred_label:
-            return preferred_label
+            if orgstr:
+                orgstr = ' (' + orgstr + ')'
+            return preferred_label + orgstr
         ftype = get_item_or_none(request, feature_type)
         ftype = ftype.get('preferred_name', '') if ftype is not None else ''
 
