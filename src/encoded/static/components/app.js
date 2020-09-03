@@ -713,6 +713,8 @@ export default class App extends React.PureComponent {
                 Alerts.queue(Alerts.LoggedOut);
                 // Clear out remaining auth/JWT stuff from localStorage if any
                 JWT.remove();
+            } else if (session === true && existingSession === false){
+                Alerts.deQueue(Alerts.LoggedOut);
             }
             return { session };
         }, () => {
