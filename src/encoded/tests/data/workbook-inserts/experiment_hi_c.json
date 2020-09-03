@@ -72,6 +72,7 @@
         "lab": "test-4dn-lab",
         "aliases": ["labsample:alias3"],
         "files": ["4DNFIO67APZ1", "4DNFIO67AZZ1"],
+        "other_processed_files": ["/files-fastq/4DNFIO67AZB1/"],
         "description": "Biorep 2 Techrep 1 dilution Hi-C on GM12878 batch 2",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
