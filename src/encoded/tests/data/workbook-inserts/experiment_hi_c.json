@@ -75,7 +75,7 @@
         "other_processed_files": [{
             "title": "Test FileFastq as opf",
             "files": ["/files-fastq/4DNFIO67AZB1/"]
-            }],
+        }],
         "description": "Biorep 2 Techrep 1 dilution Hi-C on GM12878 batch 2",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
