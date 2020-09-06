@@ -84,10 +84,10 @@ test-any:
 	bin/test -vv --timeout=200
 
 travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --timeout=200 -m "working and not performance and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
+	bin/test -vv --timeout=200 -m "working and not performance and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-hjozudm7pq5wwlssx2pjlsyz7y.us-east-1.es.amazonaws.com:80
 
 travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --timeout=200 -m "working and not performance and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-builds-uhevxdzfcv7mkm5pj5svcri3aq.us-east-1.es.amazonaws.com:80
+	bin/test -vv --timeout=200 -m "working and not performance and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-hjozudm7pq5wwlssx2pjlsyz7y.us-east-1.es.amazonaws.com:80
 
 update:  # updates dependencies
 	poetry update

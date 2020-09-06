@@ -142,7 +142,7 @@ describe("HiGlass Display pages", function(){
                 })
                 .end()
                 // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                .get(higlassItemViewVizSelector).wait(500).end();
+                .get(higlassItemViewVizSelector).wait(3000).end();
         });
 
         it('Can edit the title and description', function() {
@@ -190,7 +190,7 @@ describe("HiGlass Display pages", function(){
                     cy.location('pathname')
                         .should('eq', newID).end()
                         // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                        .get(higlassItemViewVizSelector).wait(500).end()
+                        .get(higlassItemViewVizSelector).wait(3000).end()
 
                         // Click on the edit button and wait for the page load.
                         .get(".action-button[data-action='edit'] a").click({ force: true }).end()
@@ -200,7 +200,7 @@ describe("HiGlass Display pages", function(){
                         .get(".action-buttons-container button.btn-info").click().end()
                         .get(".action-buttons-container button.btn-success").click().end()
                         // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                        .get(higlassItemViewVizSelector).wait(500).end()
+                        .get(higlassItemViewVizSelector).wait(3000).end()
                         // Once the page reloads, look for the updated title/description
                         .request({
                             'url' : newID + "?format=json&datastore=database",
@@ -259,7 +259,7 @@ describe("HiGlass Display pages", function(){
                 }).end()
                 .get('.alert div').should('contain', 'Changed Display status to released.').end()
                 // Wait for HiGlass to fully be initialized as well, to avoid __zoom error perhaps.
-                .get(higlassItemViewVizSelector).wait(500).end()
+                .get(higlassItemViewVizSelector).wait(3000).end()
 
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
