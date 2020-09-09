@@ -2,6 +2,7 @@ import argparse
 import logging
 import structlog
 from dcicutils.es_utils import create_es_client
+from dcicutils.ff_utils import get_health_page
 
 log = structlog.getLogger(__name__)
 EPILOG = __doc__
@@ -39,7 +40,8 @@ def main():
         use_es = get_health_page(ff_env=args.env)['elasticsearch']
 
     # create client and ensure kibana index exists
-    client = create_es_client(use_es, use_aws_auth=True)
+    es_options = {'use_ssl': True}
+    client = create_es_client(use_es, use_aws_auth=True, **es_options)
     if not client.indices.exists(index='.kibana'):
         log.error('configure_kibana_index: .kibana index does not exist for'
                   'endpoints %s' % use_es)
