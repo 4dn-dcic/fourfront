@@ -183,3 +183,9 @@ def test_bio_feature_display_title_multi_species_gene(
 def test_bio_feature_display_title_unknown_organism_gene(
         armadillo_gene_bio_feature, armadillo_gene_item):
     assert armadillo_gene_bio_feature.get('display_title') == armadillo_gene_item.get('display_title') + ' gene'
+
+
+def test_bio_feature_display_title_preferred_name_w_org(
+        testapp, mouse_gene_bio_feature):
+    mfeat = testapp.patch_json(mouse_gene_bio_feature['@id'], {'preferred_label': 'Cool gene'}, status=200).json['@graph'][0]
+    assert mfeat.get('display_title') == 'Cool gene (mouse)'
