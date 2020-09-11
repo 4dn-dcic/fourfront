@@ -252,7 +252,7 @@ description = "Storage support for 4DN Data Portals."
 name = "dcicsnovault"
 optional = false
 python-versions = ">=3.6,<3.7"
-version = "4.0.0"
+version = "4.0.1"
 
 [package.dependencies]
 MarkupSafe = ">=0.23,<1"
@@ -268,7 +268,7 @@ aws_requests_auth = ">=0.4.1,<0.5.0"
 awscli = ">=1.15.42,<2.0.0"
 "backports.statistics" = "0.1.0"
 boto3 = ">=1.7.42,<2.0.0"
-dcicutils = "1.0.0b0"
+dcicutils = "1.0.0b1"
 elasticsearch_dsl = "6.4.0"
 future = ">=0.15.2,<0.16.0"
 futures = ">=3.1.1,<4.0.0"
@@ -311,7 +311,7 @@ description = "Utility package for interacting with the 4DN Data Portal and othe
 name = "dcicutils"
 optional = false
 python-versions = ">=3.4,<3.8"
-version = "1.0.0b0"
+version = "1.0.0b1"
 
 [package.dependencies]
 aws-requests-auth = ">=0.4.2,<1"
@@ -1634,7 +1634,7 @@ transaction = ">=1.6.0"
 test = ["zope.testing"]
 
 [metadata]
-content-hash = "2d764b64482ab4f4d10716b01d16d47ee665b6589ef7a1e790796bc81a41dace"
+content-hash = "03d65a50e9111bcde2c5b44a737ed4b5609974216f2573f404a97ed9ef72b033"
 python-versions = ">=3.6,<3.7"
 
 [metadata.files]
@@ -1795,12 +1795,12 @@ cryptography = [
     {file = "cryptography-3.1.tar.gz", hash = "sha256:26409a473cc6278e4c90f782cd5968ebad04d3911ed1c402fc86908c17633e08"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-4.0.0-py3-none-any.whl", hash = "sha256:d3a5cf584d347961cee57c4fe2dbfb30e83318fa0f59e1d037293efdb2dd639c"},
-    {file = "dcicsnovault-4.0.0.tar.gz", hash = "sha256:3ca73c3313a3db780ff43b1ef8ca9f4c4c601458922ca42cc707846b04393f7c"},
+    {file = "dcicsnovault-4.0.1-py3-none-any.whl", hash = "sha256:e039ebef8139cc5e86a6fabb5760dbbb04acaf833d32a7f0772bd964fef729c2"},
+    {file = "dcicsnovault-4.0.1.tar.gz", hash = "sha256:35106757e7dcefe747609dc55490deab44fdfd153a37ace6188e68a1b97af320"},
 ]
 dcicutils = [
-    {file = "dcicutils-1.0.0b0-py3-none-any.whl", hash = "sha256:6404b7023fad247c654a8fbc2ccbc96145e724ff106bb721e174c8af31e87351"},
-    {file = "dcicutils-1.0.0b0.tar.gz", hash = "sha256:a7bd8fb7206a70af27f66d415d8f002999b7aa48a18c50d855f26a61115ab4aa"},
+    {file = "dcicutils-1.0.0b1-py3-none-any.whl", hash = "sha256:bb86f19e5e6ff114b4690a5317d6c7c1919085324f81021840588b3d9c58b965"},
+    {file = "dcicutils-1.0.0b1.tar.gz", hash = "sha256:94f2e5550f40e523cec61c5b5a82605fdd5104b2881d5acd6193af6351a946aa"},
 ]
 docker = [
     {file = "docker-4.3.1-py2.py3-none-any.whl", hash = "sha256:13966471e8bc23b36bfb3a6fb4ab75043a5ef1dac86516274777576bed3b9828"},
