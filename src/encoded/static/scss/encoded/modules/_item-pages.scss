@@ -715,6 +715,7 @@ i.item-status-indicator-dot {
 		}
 		.detail-embedded-table-container {
 			overflow-x: auto;
+			max-height: 50vh;
 			table.detail-embedded-table {
 				min-width: 100%;
 				tr th {
