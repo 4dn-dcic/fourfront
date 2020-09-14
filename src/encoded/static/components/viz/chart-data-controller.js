@@ -304,6 +304,7 @@ export const ChartDataController = {
 
         isInitialized = true;
 
+        // Maybe TODO: Skip if `state.barplot_data_unfiltered` is present, context.filters are blank (since existing data is cached), and fields are the same as `state.barplot_data_fields`.
         ChartDataController.sync(function(){
             isInitialLoadComplete = true;
             callback(state);
