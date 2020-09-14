@@ -16,6 +16,10 @@ import { navigate } from './../util';
  * @module {Object} viz/chart-data-controller
  */
 
+const defaultInitialFields = [
+    'experiments_in_set.experiment_type.display_title',
+    'experiments_in_set.biosample.biosource.individual.organism.name'
+];
 
 /**
  * These are cached values or references.
@@ -222,10 +226,7 @@ export const ChartDataController = {
      * @returns {void} Undefined
      */
     initialize : function(
-        fields = [ // We need some global default else endpoint will throw exception.
-            'experiments_in_set.experiment_type.display_title',
-            'experiments_in_set.biosample.biosource.individual.organism.name'
-        ],
+        fields = null,
         callback = function(currState){ console.info("Initialized ChartDataController", currState); }
     ){
 
@@ -246,6 +247,10 @@ export const ChartDataController = {
 
         if (Array.isArray(fields) && fields.length > 0){
             state.barplot_data_fields = fields;
+        } else if (fields === null) {
+            // We need some global default like `defaultInitialFields` else endpoint will throw exception.
+            // If re-initializing and no explicit initialFields from Provider, try to use existing ones in state.
+            state.barplot_data_fields = state.barplot_data_fields || defaultInitialFields;
         }
 
         if (reduxSubscription !== null) {
@@ -367,6 +372,11 @@ export const ChartDataController = {
             // De-initialize self & current listener, allow for another Provider's initialFields to take effect if needed.
             if (reduxSubscription !== null) {
                 reduxSubscription(); // Unsubscribe current listener.
+                state.barplot_data_filtered = null;
+                // Allow to remain as sort of cache (some things that rely on these values after init may error also)
+                // state.barplot_data_unfiltered = null;
+                // state.barplot_data_fields = null;
+                state.isLoadingChartData = false;
                 isInitialized = false;
             }
         }
