@@ -123,7 +123,7 @@ export default class QuickInfoBar extends React.PureComponent {
      * @returns {boolean} True if counts are null or on a 'href' is not of a page for which searching or summary is applicable.
      */
     isInvisible(props = this.props, state = this.state){
-        var { total, current } = QuickInfoBar.getCountsFromProps(props);
+        const { total, current } = QuickInfoBar.getCountsFromProps(props);
         if (
             !state.mounted ||
             props.invisible ||
@@ -215,9 +215,6 @@ export default class QuickInfoBar extends React.PureComponent {
                     <ActiveFiltersBar {...{ filters, context, schemas }}
                         onTermClick={this.handleActiveFilterTermClick}
                         termTransformFxn={Schemas.Term.toName} fieldTransformFxn={Schemas.Field.toName} />
-                    <div className="graph-icon" onMouseEnter={null /*_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)*/}>
-                        <i className="icon icon-pie-chart fas" style={{ opacity : 0.05 }} />
-                    </div>
                 </div>
             );
         } else {
@@ -234,7 +231,6 @@ export default class QuickInfoBar extends React.PureComponent {
         let className = "inner container";
         if (show !== false) className += ' showing';
         if (show === 'activeFilters') className += ' showing-filters';
-        if (show === 'mosaicCharts') className += ' showing-charts';
 
         return (
             <div id={id} className={this.className()}>
