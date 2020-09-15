@@ -49,18 +49,20 @@ Install or update dependencies::
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install adoptopenjdk8
-    $ brew install elasticsearch@5.6 node@10
+    $ brew install elasticsearch node@10
 
 NOTES:
+
+* To migrate from ES5 to ES6 (might require elasticsearch@6.8)::
+
+    $ brew unlink elasticsearch@5.6
+    $ brew install elasticsearch
+    $ brew link elasticsearch
 
 * If installation of adtopopenjdk8 fails due to an ambiguity, it should work to do this instead::
 
     $ brew cask install homebrew/cask-versions/adoptopenjdk8
 
-* If you try to invoke elasticsearch and it is not found,
-  you may need to link the brew-installed elasticsearch::
-
-    $ brew link --force elasticsearch@5.6
 
 * If you need to update dependencies::
 
