@@ -53,7 +53,7 @@ Install or update dependencies::
 
 NOTES:
 
-* To migrate from ES5 to ES6::
+* To migrate from ES5 to ES6 (--force option may be needed)::
 
     $ brew unlink elasticsearch@5.6
     $ brew install elasticsearch@6.8
