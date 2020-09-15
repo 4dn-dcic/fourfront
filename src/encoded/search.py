@@ -606,7 +606,7 @@ def build_query(search, prepared_terms, source_fields):
             query_info['query'] = value
             query_info['lenient'] = True
             query_info['default_operator'] = 'AND'
-            query_info['fields'] = ['_all']
+            query_info['fields'] = ['full_text']
             break
     if query_info != {}:
         string_query = {'must': {'simple_query_string': query_info}}
@@ -1363,7 +1363,7 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
                     continue
 
             if len(aggregations[full_agg_name].keys()) > 2:
-                result_facet['extra_aggs'] = { k:v for k,v in aggregations[field_agg_name].items() if k not in ('doc_count', "primary_agg") }
+                result_facet['extra_aggs'] = { k:v for k,v in aggregations[full_agg_name].items() if k not in ('doc_count', "primary_agg") }
 
         result.append(result_facet)
 

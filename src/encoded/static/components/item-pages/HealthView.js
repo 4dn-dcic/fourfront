@@ -10,6 +10,7 @@ import _ from 'underscore';
 import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 import { Term } from './../util/Schemas';
+import { default as installedPackageLockJson } from './../../../../../package-lock.json';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -102,6 +103,10 @@ export default class HealthView extends React.PureComponent {
                 title : "Project Version",
                 description : "Software version for this portal's software."
             },
+            'spc_version': {
+                title : "Shared Portal Components Version",
+                description : "Software version of shared-portal-components package being used."
+            },
             'snovault_version': {
                 title : "Snovault Version",
                 description : "Software version of dcicsnovault being used."
@@ -167,16 +172,23 @@ export default class HealthView extends React.PureComponent {
     }
 
     render() {
-        const { context, schemas, session, windowWidth, href, keyTitleDescriptionMapConfig, keyTitleDescriptionMapCounts, excludedKeys } = this.props;
+        const { context: propContext, schemas, session, windowWidth, href, keyTitleDescriptionMapConfig, keyTitleDescriptionMapCounts, excludedKeys } = this.props;
         const {
             db_es_compare = null,
             db_es_total = null,
             mounted = false
         } = this.state;
-        const { title: ctxTitle, description } = context;
+        const { title: ctxTitle, description } = propContext;
         const notYetLoaded = (db_es_compare === null && db_es_total === null);
         const title = typeof ctxTitle === "string" ? ctxTitle : memoizedUrlParse(href).path;
         const width = layout.gridContainerWidth(windowWidth);
+        //extend context to include shared-portal-components version
+        const { dependencies: { '@hms-dbmi-bgm/shared-portal-components': { version: spcVersion, from: spcFrom } = {} } } = installedPackageLockJson;
+        let spcVersionUsed;
+        if (spcFrom && spcFrom.indexOf('#') > -1) { //e.g. github:4dn-dcic/shared-portal-components#0.0.2.70
+            [spcVersionUsed] = spcFrom.split('#').splice(-1);
+        }
+        const context = _.extend({ spc_version: spcVersionUsed || spcVersion || '-' }, propContext);
 
         return (
             <div className="view-item container" id="content">
