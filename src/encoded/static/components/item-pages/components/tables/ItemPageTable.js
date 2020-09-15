@@ -90,8 +90,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
 
         return (
             <div className="embedded-search-view-outer-container">
-                { showTitle }
-                <EmbeddedSearchView {...passProps}/>
+                <EmbeddedSearchView {...passProps} embeddedTableHeader={showTitle}/>
                 { showChildren }
             </div>
         );
