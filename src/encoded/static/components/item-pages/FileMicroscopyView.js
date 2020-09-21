@@ -89,7 +89,7 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
     let thumbnailLink = null;
 
     if (thumbnailSrc){
-        thumbnailSrc = thumbnailSrc.replace(/\/100\/(\?[ctz]=[\d]+)?$/g, "/360/$1")
+        thumbnailSrc = thumbnailSrc.replace(/\/100\/(\?[ctz]=[\d]+)?$/g, "/360/$1");
         if (file.omerolink){
             thumbnailLink = (
                 <a href={file.omerolink} className="image-wrapper inline-block img-thumbnail" target="_blank"
