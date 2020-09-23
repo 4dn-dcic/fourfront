@@ -59,6 +59,8 @@
                 "gene expression",
                 "image mask",
                 "insulation score",
+                "insulation score-diamond",
+                "insulation score-potential",
                 "intensity values",
                 "intermediate file",
                 "isoform expression",
@@ -88,8 +90,6 @@
                 "image mask-cell",
                 "image mask-cytoplasm",
                 "image mask-nucleus",
-                "insulation score-diamond",
-                "insulation score-potential",
                 "read counts (minus)",
                 "read counts (plus)",
                 "reads-combined"

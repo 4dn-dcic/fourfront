@@ -70,7 +70,8 @@
                "Ploidy Authentication",
                "Instrument Authentication",
                "Antibody Authentication",
-               "Tissue Preparation Methods"
+               "Tissue Preparation Methods",
+               "Differentiation Protocol"
             ]
         },
         "url": {
