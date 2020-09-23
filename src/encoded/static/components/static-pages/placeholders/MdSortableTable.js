@@ -388,13 +388,13 @@ class SortableTable extends React.PureComponent {
         let next;
         switch (state) {
             case "both":
-                next = "desc";
-                break;
-            case "desc":
                 next = "asc";
                 break;
-            case "asc":
+            case "desc":
                 next = "both";
+                break;
+            case "asc":
+                next = "desc";
                 break;
         }
         return next;
