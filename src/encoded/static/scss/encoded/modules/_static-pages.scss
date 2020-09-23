@@ -608,10 +608,11 @@ $markdown-table-result-row-height: 46px !default;
 
 	.markdown-table-container {
 		position: relative;
+		overflow: auto;
 
 		.inner-container {
 
-			overflow: auto;
+			// overflow: auto;
 
 			.scrollable-container {
 				overflow: hidden;
@@ -652,7 +653,7 @@ $markdown-table-result-row-height: 46px !default;
 	background-color: $brand-primary-dark;
 	z-index: 50;
 	transform: translate3d(0,0,0) !important;
-	overflow-x: hidden;
+	// overflow-x: hidden;
 
 	> .columns {
 		display: -webkit-box;

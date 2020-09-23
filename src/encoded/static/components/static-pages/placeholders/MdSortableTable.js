@@ -13,7 +13,8 @@ export class MdSortableTable extends React.PureComponent {
     static propTypes = {
         'mdFilePath' : PropTypes.string,
         'children': PropTypes.string,
-        'defaultColWidths': PropTypes.array
+        'defaultColWidths': PropTypes.array,
+        'maxContainerHeight': PropTypes.string,
     };
 
     constructor(props) {
@@ -53,7 +54,7 @@ export class MdSortableTable extends React.PureComponent {
     }
 
     render() {
-        const { defaultColWidths } = this.props;
+        const { defaultColWidths, maxContainerHeight } = this.props;
         const { data, loading } = this.state;
         if (!data || !Array.isArray(data) || data.length === 0) {
             if (loading) {
@@ -79,7 +80,7 @@ export class MdSortableTable extends React.PureComponent {
         });
 
         return (
-            <SortableTable {...{ data, columns, defaultColWidths }} />
+            <SortableTable {...{ data, columns, defaultColWidths, maxContainerHeight }} />
         );
     }
 }
@@ -212,6 +213,7 @@ const Utils = {
         }
         return output;
     },
+    collator: global.Intl && typeof Intl.Collator === 'function' ? new Intl.Collator('en', { numeric: true, sensitivity: 'base' }) : null,
     /**
      * @param {*} _val1 - value 1 to compare
      * @param {*} _val2 - value 2 to compare
@@ -227,6 +229,9 @@ const Utils = {
         } else {
             val1 = Utils.removeMarkdown(_val1);
             val2 = Utils.removeMarkdown(_val2);
+            if (Utils.collator) {
+                return Utils.collator.compare(val1, val2);
+            }
         }
         return val1 === val2 ? 0 : (val1 > val2 ? 1 : -1);
     },
@@ -256,6 +261,7 @@ class SortableTable extends React.PureComponent {
         data: PropTypes.array.isRequired,
         columns: PropTypes.array.isRequired,
         defaultColWidths: PropTypes.array,
+        maxContainerHeight: PropTypes.string,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
         iconBoth: PropTypes.node
@@ -367,6 +373,8 @@ class SortableTable extends React.PureComponent {
         const sortings = sortingsOld.map((sorting, i) => {
             if (i == index)
                 sorting = this.nextSortingState(sorting);
+            else
+                sorting = "both";
 
             return sorting;
         });
@@ -398,7 +406,7 @@ class SortableTable extends React.PureComponent {
     }
 
     render() {
-        const { data, columns, iconAsc, iconDesc, iconBoth } = this.props;
+        const { data, columns, maxContainerHeight, iconAsc, iconDesc, iconBoth } = this.props;
         const { sortings, widths } = this.state;
 
         const sortedData = this.sortData(data, sortings);
@@ -409,10 +417,10 @@ class SortableTable extends React.PureComponent {
                 <div className="markdown-table-container">
                     <SortableTableHeader
                         {...{
-                            columns, sortings, iconDesc, iconAsc, iconBoth,
+                            columns, sortings, iconDesc, iconAsc, iconBoth, fullRowWidth,
                             setHeaderWidths: this.setHeaderWidths, headerColumnWidths: widths, onStateChange: this.onStateChange
                         }} />
-                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths, fullRowWidth }} />
+                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths, maxContainerHeight, fullRowWidth }} />
                 </div>
             </div>
         );
@@ -501,6 +509,7 @@ class SortableTableHeader extends React.PureComponent {
     static propTypes = {
         columns: PropTypes.array.isRequired,
         sortings: PropTypes.array.isRequired,
+        fullRowWidth: PropTypes.number.isRequired,
         onStateChange: PropTypes.func,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
@@ -548,7 +557,7 @@ class SortableTableHeader extends React.PureComponent {
     }
 
     render() {
-        const { columns, sortings, iconAsc, iconDesc, iconBoth } = this.props;
+        const { columns, fullRowWidth, sortings, iconAsc, iconDesc, iconBoth } = this.props;
         const headers = columns.map((column, index) => {
             const sorting = sortings[index];
             return (
@@ -562,7 +571,7 @@ class SortableTableHeader extends React.PureComponent {
         });
 
         return (
-            <div className="markdown-table-headers-row">
+            <div className="markdown-table-headers-row" style={{ minWidth : fullRowWidth + 6 }}>
                 <div className="columns clearfix" style={{ left: 0 }}>
                     {headers}
                 </div>
@@ -596,14 +605,15 @@ function SortableTableRow(props) {
 }
 
 function SortableTableBody(props) {
-    const { data, columns, widths, fullRowWidth } = props;
+    const { data, columns, widths, fullRowWidth, maxContainerHeight } = props;
     const bodies = data.map((item, index) =>
         <SortableTableRow key={index} {...{ data: item, columns, widths }} />
     );
+    const containerStyle = maxContainerHeight ? { maxHeight: maxContainerHeight, overflowY: 'auto', minWidth : fullRowWidth + 6 } : { minWidth : fullRowWidth + 6 };
 
     return (
         <div className="inner-container">
-            <div className="scrollable-container" style={{ minWidth : fullRowWidth + 6 }}>
+            <div className="scrollable-container" style={containerStyle}>
                 <div>
                     {bodies}
                 </div>
