@@ -630,6 +630,9 @@ $markdown-table-result-row-height: 46px !default;
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);
 							}
+							> .inner > .value {
+								white-space: normal !important; //override default text-ellipsis-container mixin
+							}
 						}
 
 					}

@@ -581,7 +581,7 @@ function SortableTableRow(props) {
         const width = widths[index];
         return (
             <div className="markdown-table-column-block" style={{ width }} data-field={item.key} key={item.key}>
-                <div className="inner"><span className="value"><Markdown>{value.toString()}</Markdown></span></div>
+                <div className="inner"><span className="value"><Markdown>{(value || '').toString()}</Markdown></span></div>
             </div>
         );
     }.bind(this));
