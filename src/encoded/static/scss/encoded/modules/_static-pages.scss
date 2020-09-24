@@ -610,6 +610,13 @@ $markdown-table-result-row-height: 46px !default;
 		position: relative;
 		overflow: auto;
 
+		.markdown-table-row-subtitle {
+			padding-top: 10px;
+			padding-bottom: 10px;
+			padding-left: 5px;
+			border-bottom: 1px solid rgb(220,220,220);
+		}
+
 		.inner-container {
 
 			// overflow: auto;

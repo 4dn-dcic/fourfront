@@ -54,7 +54,7 @@ export class MdSortableTable extends React.PureComponent {
     }
 
     render() {
-        const { defaultColWidths, maxContainerHeight } = this.props;
+        const { subTitle, defaultColWidths, maxContainerHeight } = this.props;
         const { data, loading } = this.state;
         if (!data || !Array.isArray(data) || data.length === 0) {
             if (loading) {
@@ -80,7 +80,7 @@ export class MdSortableTable extends React.PureComponent {
         });
 
         return (
-            <SortableTable {...{ data, columns, defaultColWidths, maxContainerHeight }} />
+            <SortableTable {...{ data, columns, subTitle, defaultColWidths, maxContainerHeight }} />
         );
     }
 }
@@ -260,6 +260,7 @@ class SortableTable extends React.PureComponent {
     static propTypes = {
         data: PropTypes.array.isRequired,
         columns: PropTypes.array.isRequired,
+        subTitle: PropTypes.string,
         defaultColWidths: PropTypes.array,
         maxContainerHeight: PropTypes.string,
         iconDesc: PropTypes.node,
@@ -406,7 +407,7 @@ class SortableTable extends React.PureComponent {
     }
 
     render() {
-        const { data, columns, maxContainerHeight, iconAsc, iconDesc, iconBoth } = this.props;
+        const { data, columns, subTitle, maxContainerHeight, iconAsc, iconDesc, iconBoth } = this.props;
         const { sortings, widths } = this.state;
 
         const sortedData = this.sortData(data, sortings);
@@ -420,6 +421,7 @@ class SortableTable extends React.PureComponent {
                             columns, sortings, iconDesc, iconAsc, iconBoth, fullRowWidth,
                             setHeaderWidths: this.setHeaderWidths, headerColumnWidths: widths, onStateChange: this.onStateChange
                         }} />
+                    <SortableTableSubTitle {...{ subTitle, fullRowWidth }} />
                     <SortableTableBody {...{ columns, data: sortedData, sortings, widths, maxContainerHeight, fullRowWidth }} />
                 </div>
             </div>
@@ -571,12 +573,33 @@ class SortableTableHeader extends React.PureComponent {
         });
 
         return (
-            <div className="markdown-table-headers-row" style={{ minWidth : fullRowWidth + 6 }}>
+            <div className="markdown-table-headers-row" style={{ minWidth: fullRowWidth + 6 }}>
                 <div className="columns clearfix" style={{ left: 0 }}>
                     {headers}
                 </div>
             </div>
         );
+    }
+}
+
+function SortableTableSubTitle(props) {
+    const { subTitle, fullRowWidth } = props;
+
+    if (typeof subTitle === 'string' && subTitle.length > 0) {
+        return (
+            <div className="markdown-table-row markdown-table-row-subtitle" style={{ minWidth: fullRowWidth + 6 }}>
+                <div className="columns clearfix result-table-row">
+                    <div className="markdown-table-column-block">
+                        <div className="inner">
+                            <span className="value">
+                                {subTitle}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>);
+    } else {
+        return null;
     }
 }
 
