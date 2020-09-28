@@ -101,12 +101,10 @@ function FileViewOverview (props) {
             '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
             : null;
     const expSetTableProps = {
-        searchHref: searchHref,
+        searchHref,
         facets: null,
         defaultOpenIndices: [0],
-        title: <ExperimentSetsTableTabViewTitle />,
-        externalSearchLinkVisible: false,
-        ...props
+        title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible />
     };
     return (
         <div>
@@ -115,11 +113,7 @@ function FileViewOverview (props) {
                 <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
                 <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
             </div>
-            {searchHref ?
-                <React.Fragment>
-                    <EmbeddedExperimentSetSearchTable {...expSetTableProps} />
-                </React.Fragment>
-                : null}
+            {searchHref ? <EmbeddedExperimentSetSearchTable {...expSetTableProps} /> : null }
         </div>
     );
 }

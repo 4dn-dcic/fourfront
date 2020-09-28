@@ -63,22 +63,16 @@ class FileMicroscopyViewOverview extends React.Component {
                 '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
                 : null;
         const expSetTableProps = {
-            searchHref: searchHref,
+            searchHref,
             facets: null,
             defaultOpenIndices: [0],
-            title: <ExperimentSetsTableTabViewTitle />,
-            externalSearchLinkVisible: false,
-            ...this.props
+            title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible />
         };
 
         return (
             <div>
                 <FileMicOverViewBody {...{ context, schemas, windowWidth }} />
-                {searchHref ?
-                    <React.Fragment>
-                        <EmbeddedExperimentSetSearchTable {...expSetTableProps} />
-                    </React.Fragment>
-                    : null}
+                {searchHref ? <EmbeddedExperimentSetSearchTable {...expSetTableProps} /> : null}
             </div>
         );
 

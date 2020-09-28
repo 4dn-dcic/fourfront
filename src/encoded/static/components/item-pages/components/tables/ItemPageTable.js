@@ -28,7 +28,6 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
     static defaultProps = {
         "columnExtensionMap": columnExtensionMap4DN,
         "facets" : undefined, // Default to those from search response.
-        externalSearchLinkVisible: false
     };
 
     constructor(props){
@@ -57,8 +56,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             columns, columnExtensionMap,
             searchHref,
             filterFacetFxn, hideFacets,
-            filterColumnFxn, hideColumns,
-            externalSearchLinkVisible
+            filterColumnFxn, hideColumns
         } = this.props;
         const { totalCount } = this.state;
 
@@ -77,12 +75,9 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             termTransformFxn: Term.toName
         };
 
-        const externalLinkVisible = (typeof externalSearchLinkVisible === 'boolean' && externalSearchLinkVisible) || false;
-
         const showTitle = !title ? null
             : React.isValidElement(title) ? (
-                typeof title.type === "string" ? title
-                    : React.cloneElement(title, { totalCount, searchHref: totalCount && externalLinkVisible ? searchHref : null })
+                typeof title.type === "string" ? title : React.cloneElement(title, { totalCount })
             ) : title;
 
         const showChildren = React.isValidElement(children) && typeof children.type !== "string" ?

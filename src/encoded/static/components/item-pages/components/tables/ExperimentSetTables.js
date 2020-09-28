@@ -16,7 +16,6 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
     static defaultProps = {
         ...EmbeddedItemSearchTable.defaultProps,
         columns: undefined, //get columns from columnExtensionMap that having values of columnExtensionMap4DN,
-        externalSearchLinkVisible: true,
         maxHeight: 600
         // columns : {
         //     "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
@@ -60,13 +59,28 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
 }
 
 export function ExperimentSetsTableTabView(props){
-    // Eventually can consider getting rid of current title and using abovetablecontrols
-    // or similar to allow for column selection panel and such.
-    return <EmbeddedExperimentSetSearchTable {...props} />;
+    const {
+        title,
+        externalSearchLinkVisible,
+        searchHref,
+        session, schemas,
+        facets, columns,
+        defaultOpenIndices, maxHeight,
+        filterFacetFxn, hideFacets,
+        filterColumnFxn, hideColumns,
+        children,
+        // ...passProps
+        // `passProps` would contain remaining props that might be passed down like 'context', 'href', etc. which
+        // are irrelevant to EmbeddedExperimentSetSearchTable. Might be repurposed later if add more UI stuff
+        // to `ExperimentSetsTableTabView`.
+    } = props;
+    const tableProps = {
+        searchHref, facets, columns, defaultOpenIndices, schemas, session,
+        maxHeight, filterFacetFxn, filterColumnFxn, hideFacets, hideColumns,
+        title: typeof title === "undefined" ? <ExperimentSetsTableTabViewTitle {...{ externalSearchLinkVisible }} /> : title
+    };
+    return <EmbeddedExperimentSetSearchTable {...tableProps}>{ children }</EmbeddedExperimentSetSearchTable>;
 }
-ExperimentSetsTableTabView.defaultProps = {
-    "title" : <ExperimentSetsTableTabViewTitle/>
-};
 ExperimentSetsTableTabView.getTabObject = function(props){
     return {
         'tab' : <span><i className="icon icon-file-alt far icon-fw"/> Experiment Sets</span>,
@@ -76,23 +90,29 @@ ExperimentSetsTableTabView.getTabObject = function(props){
     };
 };
 
-export function ExperimentSetsTableTabViewTitle({ totalCount, searchHref }) {
-    const linkText =
-        searchHref && typeof searchHref === 'string' && searchHref.indexOf('/browse/') > -1 ?
-            'Open In Browse View' : 'Open In Search View';
+/**
+ * @todo Eventually maybe add UI controls for selecting columns and other things into here.
+ */
+export function ExperimentSetsTableTabViewTitle(props) {
+    const {
+        totalCount,
+        href: currentSearchHref,
+        externalSearchLinkVisible = false
+    } = props;
+    const linkText = currentSearchHref && typeof currentSearchHref === 'string' && currentSearchHref.indexOf('/browse/') > -1 ?
+        'Open In Browse View' : 'Open In Search View';
     return (
         <h3 className="tab-section-title">
             <span>
                 {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
                 {"Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
             </span>
-            {searchHref ?
-                <a href={searchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
+            { externalSearchLinkVisible && currentSearchHref ?
+                <a href={currentSearchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
                     <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
-                    {linkText}
+                    { linkText }
                 </a>
-                : null
-            }
+                : null }
         </h3>
     );
 }

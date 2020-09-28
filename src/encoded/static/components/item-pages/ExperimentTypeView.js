@@ -19,17 +19,19 @@ export default class ExperimentTypeView extends DefaultItemView {
         const { context, browseBaseState } = this.props;
         const tabs = [];
         const width = this.getTabViewWidth();
-        const expSetTableProps = _.extend({}, this.props, {
+        const expSetTableTabViewProps = {
             'searchHref' : (
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 "experiments_in_set.experiment_type.display_title=" + encodeURIComponent(context.display_title)
             ),
-            'facets' : null
-        });
+            'facets' : null,
+            // Gets passed down to `ExperimentSetsTableTabView` which passes it down to `ExperimentSetsTableTabViewTitle`
+            'externalSearchLinkVisible' : true
+        };
 
         tabs.push(ExperimentTypeViewOverview.getTabObject(this.props));
 
-        tabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps, width));
+        tabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableTabViewProps, width));
 
         return tabs.concat(this.getCommonTabs());
     }
