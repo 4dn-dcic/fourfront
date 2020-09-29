@@ -49,7 +49,7 @@ export class FileDetailBody extends React.PureComponent {
             }
         } else { // Single File
             fileTitle = object.itemUtil.getTitleStringFromContext(file);
-            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="inline-block">{ fileTitle }</a>;
+            fileTitleFormatted = <a href={object.atIdFromObject(file) || '/' + file.uuid} className="d-inline-block">{ fileTitle }</a>;
             statusIndicator = file.status && (
                 <i className="item-status-indicator-dot mr-07" data-status={ file.status && file.status.toLowerCase() }
                     data-tip={"Status - " + file.status} />
@@ -72,7 +72,7 @@ export class FileDetailBody extends React.PureComponent {
                             WorkflowNodeElement.isNodeQCMetric(node) ? 'Report' : 'File'
                     }
                 </div>
-                <h3 className="text-400 node-file-title text-ellipsis-container" data-tip={fileTitle}>
+                <h3 className="text-400 node-file-title text-truncate" data-tip={fileTitle}>
                     { statusIndicator } { fileTitleFormatted }
                 </h3>
             </div>

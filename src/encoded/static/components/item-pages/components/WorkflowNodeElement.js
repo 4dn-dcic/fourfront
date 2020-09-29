@@ -185,9 +185,9 @@ export class WorkflowNodeElement extends React.PureComponent {
                 output += '<hr class="mt-08 mb-05"/>';
             }
             if (argumentName === 'Input' || argumentName === 'Output'){
-                argumentName += ' Argument &nbsp; <span class="text-500 mono-text">' + name + '</span>';
+                argumentName += ' Argument &nbsp; <span class="text-500 text-monospace">' + name + '</span>';
             }
-            output += '<small class="mb-03 inline-block">' + argumentName + '</small>';
+            output += '<small class="mb-03 d-inline-block">' + argumentName + '</small>';
         }
 
         // If file, and has file-size, add it (idk, why not)
@@ -211,7 +211,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         );
         if (description){
             output += '<hr class="mt-05 mb-05"/>';
-            output += '<small class="mb-05 inline-block">' + description + '</small>';
+            output += '<small class="mb-05 d-inline-block">' + description + '</small>';
         }
 
         return output;
@@ -222,7 +222,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         const fileFormatAsString = WorkflowNodeElement.getFileFormatString(node);
         const elemProps = {
             'style'         : { 'maxWidth' : columnWidth },
-            'className'     : "text-ellipsis-container above-node-title",
+            'className'     : "text-truncate above-node-title",
             'key'           : 'above-node-title'
         };
 
@@ -236,14 +236,14 @@ export class WorkflowNodeElement extends React.PureComponent {
             && node.meta.workflow.steps.length > 0
             && typeof node.meta.workflow.steps[0].name === 'string'
         ){
-            //elemProps.className += ' mono-text';
+            //elemProps.className += ' text-monospace';
             return <div {...elemProps}>{ _.pluck(node.meta.workflow.steps, 'name').join(', ') }</div>;
         }
 
         // If Parameter
         if (WorkflowNodeElement.isNodeParameter(node)){
             if (WorkflowNodeElement.doesRunDataExist(node)){
-                elemProps.className += ' mono-text';
+                elemProps.className += ' text-monospace';
                 return <div {...elemProps}>{ node.name }</div>;
             }
             return <div {...elemProps}>Parameter</div>;
@@ -254,7 +254,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             if (fileFormatAsString) {
                 return <div {...elemProps}>{ fileFormatAsString }</div>;
             }
-            elemProps.className += ' mono-text';
+            elemProps.className += ' text-monospace';
             return <div {...elemProps}>{ title }</div>;
         }
 
@@ -296,7 +296,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         const { node, columnWidth } = this.props;
         const elemProps = {
             'style'     : { 'maxWidth' : columnWidth },
-            'className' : "text-ellipsis-container below-node-title",
+            'className' : "text-truncate below-node-title",
             'key'       : 'below-node-title'
         };
 
@@ -341,7 +341,7 @@ export class WorkflowNodeElement extends React.PureComponent {
             } else if (node.meta && node.meta.run_data && node.meta.run_data.file && typeof node.meta.run_data.file === 'object' && node.meta.run_data.file.file_type){
                 belowTitle = node.meta.run_data.file.file_type;
             } else {
-                belowTitle = <small className="mono-text" style={{ 'bottom' : -15, 'color' : '#888' }}>{ node.name }</small>;
+                belowTitle = <small className="text-monospace" style={{ 'bottom' : -15, 'color' : '#888' }}>{ node.name }</small>;
             }
             return <div {...elemProps}>{ belowTitle }</div>;
         }
@@ -382,7 +382,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         if (WorkflowNodeElement.isNodeFile(node) && WorkflowNodeElement.doesRunDataExist(node)){
             const { file : { accession, display_title } } = run_data;
             return (
-                <div className={"node-name" + (accession ? ' mono-text' : '')}>
+                <div className={"node-name" + (accession ? ' text-monospace' : '')}>
                     { this.icon() }
                     { typeof file === 'string' ? ioType : accession || display_title }
                 </div>
@@ -390,7 +390,7 @@ export class WorkflowNodeElement extends React.PureComponent {
         }
 
         if (WorkflowNodeElement.isNodeParameter(node) && WorkflowNodeElement.doesRunDataExist(node)){
-            return <div className="node-name mono-text">{ this.icon() }{ run_data.value }</div>;
+            return <div className="node-name text-monospace">{ this.icon() }{ run_data.value }</div>;
         }
 
         // Fallback / Default - use node.name

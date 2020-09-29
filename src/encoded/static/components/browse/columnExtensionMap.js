@@ -185,7 +185,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             return (
                 <div className="exp-categorizer-cell">
                     <small>{ cat_field }</small>
-                    <div className="text-ellipsis-container">{ cat_value }</div>
+                    <div className="text-truncate">{ cat_value }</div>
                 </div>
             );
         }

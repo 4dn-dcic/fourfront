@@ -272,7 +272,7 @@ class Publication(Item, ItemWithAttachment):
 
     @calculated_property(schema={
         "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
+        "description": "Publication short attribution, year, and ID (if available).",
         "type": "string"
     })
     def display_title(self, ID, authors=None, date_published=None):

@@ -70,7 +70,7 @@ CellCultureDetailsTable.defaultProps = {
                 const resultHref = object.itemUtil.atId(result);
                 const title = result.description || result.display_title;
                 return (
-                    <a href={resultHref} className="text-ellipsis-container" data-tip={title.length > 15 ? title : null}>{ title }</a>
+                    <a href={resultHref} className="text-truncate" data-tip={title.length > 15 ? title : null}>{ title }</a>
                 );
             }
         },

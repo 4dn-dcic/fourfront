@@ -65,7 +65,7 @@ const LabIcon = React.memo(function LabIcon(props){
         );
     }
     return (
-        <a href={atId} className="lab-icon inline-block" data-tip={lab.display_title}
+        <a href={atId} className="lab-icon d-inline-block" data-tip={lab.display_title}
             onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
             <i className="icon icon-users fas"/>
         </a>

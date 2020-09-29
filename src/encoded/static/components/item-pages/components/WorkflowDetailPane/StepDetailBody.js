@@ -23,7 +23,7 @@ const SoftwareUsedBox = React.memo(function SoftwareUsedBox({ software: soft }){
     return (
         <div className="col col-sm-12 box">
             <span className="text-600">Software Used</span>
-            <h4 className="text-400 text-ellipsis-container">
+            <h4 className="text-400 text-truncate">
                 { inner }
             </h4>
         </div>
@@ -61,7 +61,7 @@ const SoftwareSourceLinkBox = React.memo(function SoftwareSourceLinkBox({ softwa
     return (
         <div className="col-sm-6 box">
             <span className="text-600">Software Source</span>
-            <h5 className="text-400 text-ellipsis-container">
+            <h5 className="text-400 text-truncate">
                 { inner }
             </h5>
         </div>
@@ -128,9 +128,9 @@ export const WorkflowStepTitleBox = React.memo(function WorkflowStepTitleBox({ s
         <div className={"box col col-sm-" + (shouldBeFullRow ? '12' : '6')}>
             <span className="text-600">{ label }</span>
             { stepHref ?
-                <h3 className="text-400 text-ellipsis-container"><a href={stepHref}>{ titleString }</a></h3>
+                <h3 className="text-400 text-truncate"><a href={stepHref}>{ titleString }</a></h3>
                 :
-                <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
+                <h3 className="text-300 text-truncate">{ titleString }</h3>
             }
         </div>
     );

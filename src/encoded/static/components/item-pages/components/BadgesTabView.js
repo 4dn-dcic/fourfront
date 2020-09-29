@@ -224,7 +224,7 @@ class SummaryIcon extends React.PureComponent {
                 const countCommendations = badgesByClassification.Commendation.length;
                 const tooltip = countCommendations + " Commendation" + (countCommendations > 1 ? "s" : "");
                 return (
-                    <div className="inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
+                    <div className="d-inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
                         <svg height={size} width={size} style={{ verticalAlign : 'middle' }}>
                             <EmbeddableSVGBadgeIcon badgeType="gold" size={size} />
                         </svg>
@@ -277,7 +277,7 @@ class SummaryIcon extends React.PureComponent {
         }).join(' + ');
 
         return (
-            <div className="inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
+            <div className="d-inline-block pie-chart-icon-container mr-08" data-tip={tooltip}>
                 <svg width={size} height={size} style={{ verticalAlign : 'middle' }}>
                     <g transform={"translate(" + outerRadius + "," + outerRadius + ")"}>{ this.generateArcs(classificationRatioPairs) }</g>
                 </svg>

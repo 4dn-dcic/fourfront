@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
-import { ExperimentSetTablesLoaded } from './components/tables/ExperimentSetTables';
+import { EmbeddedExperimentSetSearchTable, ExperimentSetsTableTabViewTitle } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock } from './FileView';
 import { QualityControlResults } from './QualityMetricView';
@@ -57,14 +57,22 @@ class FileMicroscopyViewOverview extends React.Component {
 
     render(){
         const { context, schemas, width, windowWidth } = this.props;
-        const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
+        const experimentSets = expFxn.experimentSetsFromFile(context, 'list');
+        const searchHref =
+            experimentSets && experimentSets.length > 0 ?
+                '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
+                : null;
+        const expSetTableProps = {
+            searchHref,
+            facets: null,
+            defaultOpenIndices: [0],
+            title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible />
+        };
 
         return (
             <div>
                 <FileMicOverViewBody {...{ context, schemas, windowWidth }} />
-                { experimentSetUrls && experimentSetUrls.length > 0 ?
-                    <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                    : null }
+                {searchHref ? <EmbeddedExperimentSetSearchTable {...expSetTableProps} /> : null}
             </div>
         );
 
@@ -92,14 +100,14 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         thumbnailSrc = thumbnailSrc.replace(/\/100\/(\?[ctz]=[\d]+)?$/g, "/360/$1");
         if (file.omerolink){
             thumbnailLink = (
-                <a href={file.omerolink} className="image-wrapper inline-block img-thumbnail" target="_blank"
+                <a href={file.omerolink} className="image-wrapper d-inline-block img-thumbnail" target="_blank"
                     data-tip="View in OMERO" rel="noopener noreferrer">
                     <img className="embedded-item-image" src={thumbnailSrc} alt="OMERO Thumbnail" />
                 </a>
             );
         } else {
             thumbnailLink = (
-                <img className="embedded-item-image image-wrapper inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
+                <img className="embedded-item-image image-wrapper d-inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
             );
         }
     } else if (file.omerolink){

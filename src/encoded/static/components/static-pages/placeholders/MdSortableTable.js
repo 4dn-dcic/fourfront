@@ -11,11 +11,18 @@ import { ajax, console } from '@hms-dbmi-bgm/shared-portal-components/es/compone
 export class MdSortableTable extends React.PureComponent {
 
     static propTypes = {
-        'mdFilePath' : PropTypes.string,
-        'children': PropTypes.string,
-        'defaultColWidths': PropTypes.array,
-        'maxContainerHeight': PropTypes.string,
+        mdFilePath: PropTypes.string,
+        children: PropTypes.string,
+        defaultColWidths: PropTypes.array,
+        defaultColAlignments: PropTypes.arrayOf(PropTypes.oneOf(['left', 'right', 'center'])),
+        maxContainerHeight: PropTypes.string,
+        subTitle: PropTypes.string,
+        subTitlePosition: PropTypes.oneOf(['inside', 'outside'])
     };
+
+    static defaultProps = {
+        subTitlePosition: 'inside'
+    }
 
     constructor(props) {
         super(props);
@@ -54,7 +61,7 @@ export class MdSortableTable extends React.PureComponent {
     }
 
     render() {
-        const { subTitle, defaultColWidths, maxContainerHeight } = this.props;
+        const { subTitle, subTitlePosition, defaultColWidths, defaultColAlignments, maxContainerHeight } = this.props;
         const { data, loading } = this.state;
         if (!data || !Array.isArray(data) || data.length === 0) {
             if (loading) {
@@ -80,7 +87,7 @@ export class MdSortableTable extends React.PureComponent {
         });
 
         return (
-            <SortableTable {...{ data, columns, subTitle, defaultColWidths, maxContainerHeight }} />
+            <SortableTable {...{ data, columns, subTitle, subTitlePosition, defaultColWidths, defaultColAlignments, maxContainerHeight }} />
         );
     }
 }
@@ -261,7 +268,9 @@ class SortableTable extends React.PureComponent {
         data: PropTypes.array.isRequired,
         columns: PropTypes.array.isRequired,
         subTitle: PropTypes.string,
+        subTitlePosition: PropTypes.string,
         defaultColWidths: PropTypes.array,
+        defaultColAlignments: PropTypes.array,
         maxContainerHeight: PropTypes.string,
         iconDesc: PropTypes.node,
         iconAsc: PropTypes.node,
@@ -275,7 +284,8 @@ class SortableTable extends React.PureComponent {
         this.onStateChange = this.onStateChange.bind(this);
         this.state = {
             sortings: this.getDefaultSortings(props),
-            widths: this.getDefaultWidths(props)
+            widths: this.getDefaultWidths(props),
+            alignments: this.getDefaultAlignments(props)
         };
     }
 
@@ -286,6 +296,16 @@ class SortableTable extends React.PureComponent {
             return _.map(defaultColWidths, (dcw) => dcw > 0 ? dcw : Utils.DEFAULT_COL_WIDTH);
         }
         return Array(columns.length).fill(Utils.DEFAULT_COL_WIDTH);
+    }
+
+    getDefaultAlignments(props) {
+        const { columns, defaultColAlignments } = props;
+        if (defaultColAlignments && Array.isArray(defaultColAlignments) && (defaultColAlignments.length === columns.length)) {
+            return _.map(defaultColAlignments, function (dca) {
+                return ['center', 'left', 'right'].indexOf(dca) >= 0 ? dca : 'center';
+            });
+        }
+        return Array(columns.length).fill('center');
     }
 
     getDefaultSortings(props) {
@@ -407,22 +427,24 @@ class SortableTable extends React.PureComponent {
     }
 
     render() {
-        const { data, columns, subTitle, maxContainerHeight, iconAsc, iconDesc, iconBoth } = this.props;
-        const { sortings, widths } = this.state;
+        const { data, columns, subTitle, subTitlePosition, maxContainerHeight, iconAsc, iconDesc, iconBoth } = this.props;
+        const { sortings, widths, alignments } = this.state;
 
         const sortedData = this.sortData(data, sortings);
         const fullRowWidth = widths.reduce((a, b) => a + b, 0);
+        const position = ['inside', 'outside'].indexOf(subTitlePosition) >= 0 ? subTitlePosition : 'inside';
 
         return (
             <div className="markdown-table-outer-container">
                 <div className="markdown-table-container">
+                    {position === 'outside' ? <SortableTableSubTitle {...{ subTitle, fullRowWidth }} /> : null}
                     <SortableTableHeader
                         {...{
                             columns, sortings, iconDesc, iconAsc, iconBoth, fullRowWidth,
                             setHeaderWidths: this.setHeaderWidths, headerColumnWidths: widths, onStateChange: this.onStateChange
                         }} />
-                    <SortableTableSubTitle {...{ subTitle, fullRowWidth }} />
-                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths, maxContainerHeight, fullRowWidth }} />
+                    {position === 'inside' ? <SortableTableSubTitle {...{ subTitle, fullRowWidth }} /> : null}
+                    <SortableTableBody {...{ columns, data: sortedData, sortings, widths, alignments, maxContainerHeight, fullRowWidth }} />
                 </div>
             </div>
         );
@@ -604,16 +626,17 @@ function SortableTableSubTitle(props) {
 }
 
 function SortableTableRow(props) {
-    const { data, columns, widths } = props;
+    const { data, columns, widths, alignments } = props;
     const tds = columns.map(function (item, index) {
         let value = data[item.key];
         if (item.render) {
             value = item.render(value);
         }
         const width = widths[index];
+        const innerStyle = alignments[index] !== 'center' ? { textAlign: alignments[index] } : null;
         return (
             <div className="markdown-table-column-block" style={{ width }} data-field={item.key} key={item.key}>
-                <div className="inner"><span className="value"><Markdown>{(value || '').toString()}</Markdown></span></div>
+                <div className="inner" style={innerStyle}><span className="value"><Markdown>{(value || '').toString()}</Markdown></span></div>
             </div>
         );
     }.bind(this));
@@ -628,9 +651,9 @@ function SortableTableRow(props) {
 }
 
 function SortableTableBody(props) {
-    const { data, columns, widths, fullRowWidth, maxContainerHeight } = props;
+    const { data, columns, widths, alignments, fullRowWidth, maxContainerHeight } = props;
     const bodies = data.map((item, index) =>
-        <SortableTableRow key={index} {...{ data: item, columns, widths }} />
+        <SortableTableRow key={index} {...{ data: item, columns, widths, alignments }} />
     );
     const containerStyle = maxContainerHeight ? { maxHeight: maxContainerHeight, overflowY: 'auto', minWidth : fullRowWidth + 6 } : { minWidth : fullRowWidth + 6 };
 
@@ -648,8 +671,10 @@ SortableTableBody.propTypes = {
     data: PropTypes.array.isRequired,
     columns: PropTypes.array.isRequired,
     widths: PropTypes.array.isRequired,
+    alignments: PropTypes.array.isRequired,
     sortings: PropTypes.array.isRequired,
     fullRowWidth: PropTypes.number.isRequired,
+    maxContainerHeight: PropTypes.string
 };
 
 function FaIcon(props) {

@@ -90,7 +90,7 @@ export const EmbeddedHiglassActions = React.memo(function EmbeddedHiglassActions
     return (
         // Styled as flexrow, which will keep btn-container aligned to right as long as the ".description" container is present.
         <div className="extra-info extra-info-for-higlass-display" {..._.omit(props, 'context', 'showDescription', 'parentComponentType', 'constrainDescription')}>
-            <div className={"description" + (constrainDescription ? ' text-ellipsis-container' : '')} >
+            <div className={"description" + (constrainDescription ? ' text-truncate' : '')} >
                 { showDescription ? context.description : null }
             </div>
             <div className="btn-container">

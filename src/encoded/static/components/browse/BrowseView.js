@@ -270,8 +270,8 @@ class ExternaDataExpSetsCount extends React.PureComponent {
             (browseBaseState === 'all' ? '' : ' available') + " in "
         );
         return (
-            <div className="above-results-table-row text-right text-ellipsis-container">
-                <span className="inline-block mt-08">
+            <div className="above-results-table-row text-right text-truncate">
+                <span className="d-inline-block mt-08">
                     <span className="text-600 text-large">{ countExternalSets }</span>
                     { midString }
                     <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
@@ -473,7 +473,7 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
                     }
                     { browseBaseState !== 'all' && countExternalSets > 0 ?
                         <div className="mb-10 mt-1">
-                            <button type="button" className="btn btn-primary text-400 inline-block clickable in-stacked-table-button"
+                            <button type="button" className="btn btn-primary text-400 d-inline-block clickable in-stacked-table-button"
                                 onClick={browseExternalData} data-tip="Keep current filters and browse External data">
                                 Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
                             </button>
