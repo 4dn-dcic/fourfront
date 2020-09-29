@@ -97,7 +97,7 @@ export function ExperimentSetsTableTabViewTitle(props) {
     const {
         totalCount,
         href: currentSearchHref,
-        externalSearchLinkVisible = false
+        externalSearchLinkVisible = true
     } = props;
     const linkText = currentSearchHref && typeof currentSearchHref === 'string' && currentSearchHref.indexOf('/browse/') > -1 ?
         'Open In Browse View' : 'Open In Search View';
