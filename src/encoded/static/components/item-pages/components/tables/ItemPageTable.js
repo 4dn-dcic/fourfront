@@ -155,7 +155,7 @@ export class ItemPageTable extends React.Component {
                             return (
                                 <div className="flex-wrap">
                                     <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
-                                        <div className="type-title text-ellipsis-container">{ typeTitle }</div>
+                                        <div className="type-title text-truncate">{ typeTitle }</div>
                                         <DisplayTitleColumnDefault />
                                     </DisplayTitleColumnWrapper>
                                 </div>

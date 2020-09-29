@@ -157,7 +157,7 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         }
 
         return {
-            'tab'       : <span data-tip={tooltip} className="inline-block"><i className={iconClass} /> Provenance</span>,
+            'tab'       : <span data-tip={tooltip} className="d-inline-block"><i className={iconClass} /> Provenance</span>,
             'key'       : 'graph-section',
             'disabled'  : !Array.isArray(steps) || steps.length === 0,
             'content'   : (

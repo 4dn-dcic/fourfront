@@ -104,7 +104,7 @@ function FileViewOverview (props) {
         searchHref,
         facets: null,
         defaultOpenIndices: [0],
-        title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible />
+        title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible /> // Remove `externalSearchLinkVisible` here if want to hide link/btn to /browse/ view.
     };
     return (
         <div>

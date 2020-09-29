@@ -203,7 +203,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
         }
     }
 
-    const className = 'title-of-file' + (file.accession ? ' mono-text' : '');
+    const className = 'title-of-file' + (file.accession ? ' text-monospace' : '');
 
     /**
      * Allow these file rows to be dragged to other places.

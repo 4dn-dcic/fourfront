@@ -170,17 +170,17 @@ export class FileEntryBlock extends React.PureComponent {
         let fileTitleString;
 
         if (fileError) {
-            return <div key="name-title" className="name-title inline-block"><em>{ fileError }</em></div>;
+            return <div key="name-title" className="name-title d-inline-block"><em>{ fileError }</em></div>;
         }
 
         if (!file || !fileAtId) {
-            return <div key="name-title" className="name-title inline-block"><em>No file(s) or view permissions.</em></div>;
+            return <div key="name-title" className="name-title d-inline-block"><em>No file(s) or view permissions.</em></div>;
         }
 
         if (colForFile && typeof colForFile.render === 'function') {
             var renderedName = colForFile.render(file, colForFile.field || null, 0, this.props);
             if (renderedName) return (
-                <div key="name-title" className="name-title inline-block" onClick={this.onNameClick}>
+                <div key="name-title" className="name-title d-inline-block" onClick={this.onNameClick}>
                     { renderedName }
                 </div>
             );
@@ -200,7 +200,7 @@ export class FileEntryBlock extends React.PureComponent {
         }
 
         return (
-            <a className="title-of-file mono-text name-title" href={fileAtId} onClick={this.onNameClick}>
+            <a className="title-of-file text-monospace name-title" href={fileAtId} onClick={this.onNameClick}>
                 { fileTitleString }
             </a>
         );
@@ -211,7 +211,7 @@ export class FileEntryBlock extends React.PureComponent {
         const { file,  columnHeaders, colWidthStyles, label, excludeCheckbox, selectedFiles } = this.props;
         const classList = ['name', 'col-file'];
         const colForFile = _.findWhere(columnHeaders || [], { 'columnClass' : 'file' }) || null;
-        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('mono-text');
+        if (file && file.accession && typeof colForFile.render !== 'function') classList.push('text-monospace');
         if (!excludeCheckbox && selectedFiles && SingleFileCheckbox.hasCheckbox(file)){
             classList.push('has-checkbox');
         }
@@ -298,7 +298,7 @@ class MultipleFileCheckbox extends React.PureComponent {
         const lineHeight = (filesCount * 35 - 14) + 'px';
 
         return (
-            <div className="multiple-files-checkbox-wrapper inline-block" data-files-count={filesCount} style={{ lineHeight }}>
+            <div className="multiple-files-checkbox-wrapper d-inline-block" data-files-count={filesCount} style={{ lineHeight }}>
                 <IndeterminateCheckbox {...{ indeterminate, checked }} id={'checkbox-for-' + accessionTriples.join('_')}
                     data-select-files={accessionTriples} {..._.omit(this.props, 'files', 'selectedFiles')} />
             </div>

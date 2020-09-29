@@ -69,14 +69,11 @@ class Term extends React.Component {
         }
     }
 
-    /**
-     * @returns {Element} A div element containing term name & color patch.
-     */
     render(){
-        var color = this.props.color;
-        if (!color) color = 'transparent';
+        const { color: propColor, term, name, field, aggregateType } = this.props;
+        const color = propColor || "transparent";
         return (
-            <div className="term text-ellipsis-container">
+            <div className="term text-truncate">
                 <span
                     onMouseEnter={this.onMouseEnter}
                     onMouseLeave={this.onMouseLeave}
@@ -84,11 +81,11 @@ class Term extends React.Component {
                 >
                     <div
                         className="color-patch no-highlight-color"
-                        data-term={this.props.term}
+                        data-term={term}
                         style={{ backgroundColor : color }}
                     />
-                    { this.props.name || Schemas.Term.toName(this.props.field, this.props.term) }
-                    { this.props.aggregateType && this.props[this.props.aggregateType] ? <span className="text-300"> &nbsp;({ this.props[this.props.aggregateType] })</span> : null }
+                    { name || Schemas.Term.toName(field, term) }
+                    { aggregateType && this.props[aggregateType] ? <span className="text-300"> &nbsp;({ this.props[aggregateType] })</span> : null }
                 </span>
             </div>
         );

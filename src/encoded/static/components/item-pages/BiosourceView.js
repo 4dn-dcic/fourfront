@@ -252,8 +252,8 @@ export class IndividualItemTitle extends React.PureComponent {
 
         return (
             <div className="individual-organism">
-                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? "mono-text" : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? "mono-text" : null}>{ title || null }</a> { this.toggleIcon() }
+                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? "text-monospace" : null)}> { organism } - </span> : null }
+                <a href={href} className={object.isAccessionRegex(title) ? "text-monospace" : null}>{ title || null }</a> { this.toggleIcon() }
                 { this.moreInfoExists() ? <Collapse in={this.state.open}>{ this.moreInfoPanel() }</Collapse> : null }
             </div>
         );

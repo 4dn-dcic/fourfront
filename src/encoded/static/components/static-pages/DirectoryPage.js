@@ -56,9 +56,9 @@ function DirectoryBodyGridItem(props){
     return (
         <div className={"grid-item col-12 col-md-" + (childrenHaveChildren ? '6' : '12') + " col-lg-" + (childrenHaveChildren ? '4' : '12')} key={childID || name}>
             <a href={childID} className="inner">
-                <h3 className="text-300 mb-05 mt-05 title-link text-ellipsis-container">{ display_title }</h3>
+                <h3 className="text-300 mb-05 mt-05 title-link text-truncate">{ display_title }</h3>
                 { description ?
-                    <div className={"page-description" + (childrenHaveChildren ? ' text-ellipsis-container' : '')}>{ description }</div> : null
+                    <div className={"page-description" + (childrenHaveChildren ? ' text-truncate' : '')}>{ description }</div> : null
                 }
                 { childrenHaveChildren && childPageCount ? <h6 className="section-page-count mt-07 mb-05 text-400 text-right">{ childPageCount }&nbsp; <i className={"icon icon-fw far icon-" + (childPageCount > 1 ? "copy" : "file")}/></h6> : null }
             </a>

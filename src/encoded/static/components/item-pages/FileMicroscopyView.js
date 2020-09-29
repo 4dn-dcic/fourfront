@@ -100,14 +100,14 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         thumbnailSrc = thumbnailSrc.replace(/\/100\/(\?[ctz]=[\d]+)?$/g, "/360/$1");
         if (file.omerolink){
             thumbnailLink = (
-                <a href={file.omerolink} className="image-wrapper inline-block img-thumbnail" target="_blank"
+                <a href={file.omerolink} className="image-wrapper d-inline-block img-thumbnail" target="_blank"
                     data-tip="View in OMERO" rel="noopener noreferrer">
                     <img className="embedded-item-image" src={thumbnailSrc} alt="OMERO Thumbnail" />
                 </a>
             );
         } else {
             thumbnailLink = (
-                <img className="embedded-item-image image-wrapper inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
+                <img className="embedded-item-image image-wrapper d-inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
             );
         }
     } else if (file.omerolink){

@@ -594,7 +594,7 @@ $markdown-table-result-row-height: 46px !default;
 
     > .inner > .value {
         // Default style -- can be overriden
-        @include text-ellipsis-container;
+        @include text-truncate();
 		flex-grow: 1;
 		font-size: 0.9rem;
 
@@ -688,7 +688,7 @@ $markdown-table-result-row-height: 46px !default;
                 > .column-title {
                     flex-grow: 1;
                     text-align: center;
-                    @include text-ellipsis-container;
+                    @include text-truncate();
                 }
 
 				> .column-sort-icon {

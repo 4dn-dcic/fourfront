@@ -29,7 +29,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         'produced_in_pub.display_title',
         'lab.display_title',
         'file_type_detailed',
-        
+
         'processed_files.accession',
         'processed_files.display_title',
         'processed_files.@id',
@@ -154,7 +154,7 @@ const FileTypeBucketCheckbox = React.memo(function FileTypeBucketCheckbox(props)
     const { fileType, onFileTypeClick, files, fileTypeFilters } = props;
     const selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
     const filesLength = files.length;
-    const cls = "text-ellipsis-container" + (selected ? ' is-active' : '');
+    const cls = "text-truncate" + (selected ? ' is-active' : '');
     function onChange(evt){ onFileTypeClick(fileType); }
 
     let title;

@@ -79,7 +79,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         };
         return (
             <React.Fragment>
-                <div className="inline-block ml-1">
+                <div className="d-inline-block ml-1">
                     <CreateNewConfigurationDropDownButton {...buttonProps} />
                 </div>
                 <CreateNewConfigurationModal {...modalProps} />
