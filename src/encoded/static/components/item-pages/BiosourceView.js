@@ -20,7 +20,7 @@ export default class BiosourceView extends DefaultItemView {
 
         initTabs.push(ExperimentSetsTableTabView.getTabObject(_.extend({}, this.props, {
             'searchHref' : (
-                "/search/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
                 //(browseBaseState === "only_4dn" ? "award.project=4DN&" : "") +
                 "experiments_in_set.biosample.biosource.display_title=" + encodeURIComponent(context.display_title)
             ),
@@ -252,8 +252,8 @@ export class IndividualItemTitle extends React.PureComponent {
 
         return (
             <div className="individual-organism">
-                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? "mono-text" : null)}> { organism } - </span> : null }
-                <a href={href} className={object.isAccessionRegex(title) ? "mono-text" : null}>{ title || null }</a> { this.toggleIcon() }
+                { sex } { organism ? <span className={(object.isAccessionRegex(organism) ? "text-monospace" : null)}> { organism } - </span> : null }
+                <a href={href} className={object.isAccessionRegex(title) ? "text-monospace" : null}>{ title || null }</a> { this.toggleIcon() }
                 { this.moreInfoExists() ? <Collapse in={this.state.open}>{ this.moreInfoPanel() }</Collapse> : null }
             </div>
         );

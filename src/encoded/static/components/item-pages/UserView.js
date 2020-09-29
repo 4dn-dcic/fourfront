@@ -210,7 +210,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                     'modal' : (
                         <Modal show onHide={this.hideModal}>
                             <Modal.Header closeButton>
-                                <Modal.Title className="text-400">Access key <span className="mono-text">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
+                                <Modal.Title className="text-400">Access key <span className="text-monospace">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
                             </Modal.Header>
                         </Modal>
                     )

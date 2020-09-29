@@ -701,7 +701,7 @@ class UsageChartsCountByDropdown extends React.PureComponent {
         const dropdownTitle = menuOptions.get(currCountBy);
 
         return (
-            <div className="inline-block mr-05">
+            <div className="d-inline-block mr-05">
                 <DropdownButton data-tip="Count By" size="sm" id={"select_count_for_" + chartID}
                     onSelect={this.handleSelection} title={dropdownTitle}>
                     {_.map([ ...menuOptions.entries() ], function([ k, title ]){
@@ -766,7 +766,7 @@ export function UsageStatsView(props){
 
             <GroupByDropdown {...{ groupByOptions, loadingStatus, handleGroupByChange, currentGroupBy }}
                 title="Show" outerClassName="dropdown-container mb-0">
-                <div className="inline-block ml-15">
+                <div className="d-inline-block ml-15">
                     <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                 </div>
             </GroupByDropdown>
@@ -948,7 +948,7 @@ export function SubmissionsStatsView(props) {
             <ColorScaleProvider width={width} resetScalesWhenChange={expsets_released}>
 
                 <GroupByDropdown {...{ currentGroupBy, groupByOptions, handleGroupByChange, loadingStatus }} title="Group Charts Below By">
-                    <div className="inline-block ml-15">
+                    <div className="d-inline-block ml-15">
                         <Checkbox checked={smoothEdges} onChange={onSmoothEdgeToggle}>Smooth Edges</Checkbox>
                     </div>
                 </GroupByDropdown>

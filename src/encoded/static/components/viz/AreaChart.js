@@ -459,7 +459,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
 
     renderColorItem([term, color], idx, all){
         return (
-            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-ellipsis-container" key={term}>
+            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-truncate" key={term}>
                 <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
                 { term }
             </div>

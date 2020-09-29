@@ -11,12 +11,12 @@ export const ParameterDetailBody = React.memo(function ParameterDetailBody({ nod
 
                     <div className="col col-sm-4 box">
                         <span className="text-600">Parameter Name</span>
-                        <h3 className="text-300 text-ellipsis-container">{ node.name || node.meta.name }</h3>
+                        <h3 className="text-300 text-truncate">{ node.name || node.meta.name }</h3>
                     </div>
 
                     <div className="col-sm-8 box">
                         <span className="text-600">Value Used</span>
-                        <h4 className="text-300 text-ellipsis-container">
+                        <h4 className="text-300 text-truncate">
                             <code>{ node.meta.run_data.value }</code>
                         </h4>
                     </div>

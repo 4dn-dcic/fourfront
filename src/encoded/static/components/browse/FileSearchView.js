@@ -199,14 +199,14 @@ class ControlsAndResults extends React.PureComponent {
         let totalResults = null;
         if (context && typeof context.total === 'number' && context.total > 0) {
             totalResults = (
-                <div className="inline-block mt-08">
+                <div className="d-inline-block mt-08">
                     <span id="results-count">
                         { context.total }
                     </span> Results
                 </div>
             );
         } else {
-            totalResults = <span className="inline-block mt-08">&nbsp;</span>;
+            totalResults = <span className="d-inline-block mt-08">&nbsp;</span>;
         }
 
         let addButton = null;
@@ -225,7 +225,7 @@ class ControlsAndResults extends React.PureComponent {
                 {facets && facets.length > 0 ?
                     <React.Fragment>
                         <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
-                            <div className="above-results-table-row text-right text-ellipsis-container">
+                            <div className="above-results-table-row text-right text-truncate">
                                 {totalResults}
                                 {addButton}
                             </div>

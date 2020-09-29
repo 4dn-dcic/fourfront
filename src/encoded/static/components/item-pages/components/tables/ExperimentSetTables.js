@@ -15,14 +15,16 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
 
     static defaultProps = {
         ...EmbeddedItemSearchTable.defaultProps,
-        columns : {
-            "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
-            "number_of_experiments" : { "title" : "Exps" },
-            "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
-            "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
-            "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
-            "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap4DN["experiments_in_set.experiment_categorizer.combined"]
-        }
+        columns: undefined, //get columns from columnExtensionMap that having values of columnExtensionMap4DN,
+        maxHeight: 600
+        // columns : {
+        //     "display_title" : { "title" : "Title", "widthMap": { 'lg' : 180, 'md' : 160, 'sm' : 160 }, },
+        //     "number_of_experiments" : { "title" : "Exps" },
+        //     "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
+        //     "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
+        //     "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
+        //     "experiments_in_set.experiment_categorizer.combined" : columnExtensionMap4DN["experiments_in_set.experiment_categorizer.combined"]
+        // }
     }
 
     constructor(props){
@@ -57,13 +59,28 @@ export class EmbeddedExperimentSetSearchTable extends React.PureComponent {
 }
 
 export function ExperimentSetsTableTabView(props){
-    // Eventually can consider getting rid of current title and using abovetablecontrols
-    // or similar to allow for column selection panel and such.
-    return <EmbeddedExperimentSetSearchTable {...props} />;
+    const {
+        title,
+        externalSearchLinkVisible,
+        searchHref,
+        session, schemas,
+        facets, columns,
+        defaultOpenIndices, maxHeight,
+        filterFacetFxn, hideFacets,
+        filterColumnFxn, hideColumns,
+        children,
+        // ...passProps
+        // `passProps` would contain remaining props that might be passed down like 'context', 'href', etc. which
+        // are irrelevant to EmbeddedExperimentSetSearchTable. Might be repurposed later if add more UI stuff
+        // to `ExperimentSetsTableTabView`.
+    } = props;
+    const tableProps = {
+        searchHref, facets, columns, defaultOpenIndices, schemas, session,
+        maxHeight, filterFacetFxn, filterColumnFxn, hideFacets, hideColumns,
+        title: typeof title === "undefined" ? <ExperimentSetsTableTabViewTitle {...{ externalSearchLinkVisible }} /> : title
+    };
+    return <EmbeddedExperimentSetSearchTable {...tableProps}>{ children }</EmbeddedExperimentSetSearchTable>;
 }
-ExperimentSetsTableTabView.defaultProps = {
-    "title" : <ExperimentSetsTableTabViewTitle/>
-};
 ExperimentSetsTableTabView.getTabObject = function(props){
     return {
         'tab' : <span><i className="icon icon-file-alt far icon-fw"/> Experiment Sets</span>,
@@ -73,11 +90,29 @@ ExperimentSetsTableTabView.getTabObject = function(props){
     };
 };
 
-export function ExperimentSetsTableTabViewTitle({ totalCount }){
+/**
+ * @todo Eventually maybe add UI controls for selecting columns and other things into here.
+ */
+export function ExperimentSetsTableTabViewTitle(props) {
+    const {
+        totalCount,
+        href: currentSearchHref,
+        externalSearchLinkVisible = true
+    } = props;
+    const linkText = currentSearchHref && typeof currentSearchHref === 'string' && currentSearchHref.indexOf('/browse/') > -1 ?
+        'Open In Browse View' : 'Open In Search View';
     return (
         <h3 className="tab-section-title">
-            { typeof totalCount === "number" ? <span className="text-500">{ totalCount + " " }</span> : null }
-            { "Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "") }
+            <span>
+                {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
+                {"Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
+            </span>
+            { externalSearchLinkVisible && currentSearchHref ?
+                <a href={currentSearchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
+                    <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
+                    { linkText }
+                </a>
+                : null }
         </h3>
     );
 }

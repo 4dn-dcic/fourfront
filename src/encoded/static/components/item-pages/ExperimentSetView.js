@@ -423,7 +423,7 @@ class QCMetricsTable extends React.PureComponent {
                     render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
                         const qmsItem = file.quality_metric.quality_metric_summary[qmsIndex];
                         const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
-                        return <span className="inline-block" data-tip={tooltip}>{value}</span>;
+                        return <span className="d-inline-block" data-tip={tooltip}>{value}</span>;
                     }
                 };
             }));
@@ -757,7 +757,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         const status = this.collectionStatus(files);
         if (!status) return null;
 
-        const outerClsName = "inline-block pull-right mr-12 ml-2 mt-1";
+        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
         if (typeof status === 'string'){
             const capitalizedStatus = Schemas.Term.toName("status", status);
             return (
@@ -770,7 +770,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
             return (
                 <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                    <span className="indicators-collection inline-block mr-05">
+                    <span className="indicators-collection d-inline-block mr-05">
                         { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
                     </span>
                     Multiple
@@ -793,7 +793,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
                 { this.renderStatusIndicator() }
                 <h4>
-                    <span className="inline-block clickable" onClick={this.toggleOpen}>
+                    <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                         { title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
@@ -855,7 +855,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
                 <h4 className="mb-15">
-                    <span className="inline-block clickable" onClick={this.toggleOpen}>
+                    <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                         { filesLen + " Reference File" + (filesLen > 1 ? "s" : "") }
                     </span>
