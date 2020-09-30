@@ -60,7 +60,7 @@ function onLoadSchema(complete) {
     window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
     window
         .fetch(
-            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaSVG.json"
+            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaV4.json"
         )
         .then(function(resp) {
             console.log(resp);
@@ -530,7 +530,7 @@ export class MicroMetaTabView extends React.PureComponent {
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
         const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
-        const height = Math.max(750, windowHeight /2);
+        const height = Math.max(800, windowHeight /2);
 
         if (!mounted){
             return (
@@ -540,20 +540,57 @@ export class MicroMetaTabView extends React.PureComponent {
             );
         }
 
-        //console.log("TTT", containerOffsetLeft, containerOffsetTop);
-
         const passProps = {
             width, height,
             containerOffsetLeft,
             containerOffsetTop,
             //onLoadMicroscopes,
-            onLoadSchema,
+            // onLoadSchema,
             onSaveMicroscope: this.onSaveMicroscope,
             //visualizeImmediately: true,
             //loadedMicroscopeConfiguration: { ... },
             imagesPathSVG,
             imagesPathPNG,
-            scalingFactor: 0.65
+            scalingFactor: 0.65,
+            key: "4dn-micrometa-app",
+            onLoadSchema: function (complete) {
+                // Maybe some UI to select something...
+                // Not all browsers have `window.fetch`, used for demoing purposes.
+                // Also, window.fetch requires HTTP so we getting this from GitHub... lol
+                window
+                    .fetch(
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaV4.json"
+                    )
+                    .then(function (resp) {
+                        console.log(resp);
+                        return resp.text();
+                    })
+                    .then(function (respText) {
+                        var schema = JSON.parse(respText);
+                        complete(schema);
+                    });
+            },
+            onLoadDimensions: function (complete) {
+                // Maybe some UI to select something...
+                // Not all browsers have `window.fetch`, used for demoing purposes.
+                // Also, window.fetch requires HTTP so we getting this from GitHub... lol
+                window
+                    .fetch(
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/dimensions/MicroscopeDimensions.json"
+                    )
+                    .then(function (resp) {
+                        console.log(resp);
+                        return resp.text();
+                    })
+                    .then(function (respText) {
+                        var dimensions = JSON.parse(respText);
+                        complete(dimensions);
+                    });
+            },
+            onLoadMicroscopes: function (complete) {
+                const microscopesDB = {};
+                complete(microscopesDB);
+            }
         };
 
         return (
@@ -570,7 +607,8 @@ export class MicroMetaTabView extends React.PureComponent {
                 <hr className="tab-section-title-horiz-divider" />
                 <div className="microscope-tab-view-contents">
                     <div className="micrometa-container" ref={this.containerElemRef} style={{ height : height + 20 }}>
-                        <link type="text/css" rel="stylesheet react-resizable" href="https://unpkg.com/react-resizable/css/styles.css" crossOrigin="true" />
+                        {/* <link type="text/css" rel="stylesheet react-resizable" href="https://unpkg.com/react-resizable/css/styles.css" crossOrigin="true" />
+                        <link type="text/css" rel="stylesheet" href="https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/css/style-new.css" crossOrigin="true" /> */}
                         <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>
