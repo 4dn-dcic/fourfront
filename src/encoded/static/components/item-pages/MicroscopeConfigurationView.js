@@ -540,8 +540,6 @@ export class MicroMetaTabView extends React.PureComponent {
             );
         }
 
-        console.log("containerOffset Left/Top", containerOffsetLeft, containerOffsetTop);
-
         const passProps = {
             width, height,
             containerOffsetLeft,
