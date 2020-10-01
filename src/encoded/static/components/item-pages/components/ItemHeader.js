@@ -53,6 +53,7 @@ export class TopRow extends React.Component {
             'create'    : 'Create a blank new Item of the same type.',
             'clone'     : 'Create and edit a copy of this Item.'
         },
+        'typeInfoVisible': true
     };
 
     constructor(props){
@@ -195,7 +196,7 @@ export class TopRow extends React.Component {
      * @returns {*} Div element with .row Bootstrap class and items in top-right section.
      */
     render(){
-        const { context, schemas } = this.props;
+        const { context, schemas, typeInfoVisible } = this.props;
 
         const typeSchema = schemaTransforms.getSchemaForItemType(
             schemaTransforms.getItemType(context), schemas || null
@@ -210,13 +211,13 @@ export class TopRow extends React.Component {
             <div className="row clearfix top-row">
                 <h5 className="col-12 col-md-5 item-label-title">
                     <div className="inner">
-                        { this.typeInfoLabel() }
-                        { context.accession ?
-                            <object.CopyWrapper value={context.accession} className="accession d-inline-block" data-tip={accessionTooltip}
-                                wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -3 } }}>
-                                { context.accession }
+                        {typeInfoVisible ? this.typeInfoLabel() : null}
+                        { typeInfoVisible && context.accession ?
+                            <object.CopyWrapper value={context.accession} className="accession inline-block" data-tip={accessionTooltip}
+                                wrapperElement="span" iconProps={{ 'style': { 'fontSize': '0.875rem', 'marginLeft': -3 } }}>
+                                {context.accession}
                             </object.CopyWrapper>
-                            : null }
+                            : null}
                     </div>
                 </h5>
                 <h5 className="col-12 col-md-7 text-300 text-capitalize item-header-indicators clearfix">
