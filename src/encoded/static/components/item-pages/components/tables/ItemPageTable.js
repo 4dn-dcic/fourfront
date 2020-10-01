@@ -27,7 +27,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
 
     static defaultProps = {
         "columnExtensionMap": columnExtensionMap4DN,
-        "facets" : undefined // Default to those from search response.
+        "facets" : undefined, // Default to those from search response.
     };
 
     constructor(props){
@@ -77,8 +77,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
 
         const showTitle = !title ? null
             : React.isValidElement(title) ? (
-                typeof title.type === "string" ? title
-                    : React.cloneElement(title, { totalCount })
+                typeof title.type === "string" ? title : React.cloneElement(title, { totalCount })
             ) : title;
 
         const showChildren = React.isValidElement(children) && typeof children.type !== "string" ?
@@ -86,8 +85,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
 
         return (
             <div className="embedded-search-view-outer-container">
-                { showTitle }
-                <EmbeddedSearchView {...passProps}/>
+                <EmbeddedSearchView {...passProps} embeddedTableHeader={showTitle}/>
                 { showChildren }
             </div>
         );
@@ -157,7 +155,7 @@ export class ItemPageTable extends React.Component {
                             return (
                                 <div className="flex-wrap">
                                     <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
-                                        <div className="type-title text-ellipsis-container">{ typeTitle }</div>
+                                        <div className="type-title text-truncate">{ typeTitle }</div>
                                         <DisplayTitleColumnDefault />
                                     </DisplayTitleColumnWrapper>
                                 </div>

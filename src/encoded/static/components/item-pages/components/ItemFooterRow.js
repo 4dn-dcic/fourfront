@@ -173,7 +173,7 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         const { file_type_detailed } = file;
         const fileAtId = object.atIdFromObject(file);
         if (!!fileAtId && fileAtId === '-') {
-            return (<span className="title-of-file mono-text name-title" >&nbsp;</span>);
+            return (<span className="title-of-file text-monospace name-title" >&nbsp;</span>);
         }
 
         let fileTitleString;
@@ -192,14 +192,14 @@ export const ExternalReferencesStackedTable = React.memo(function ExternalRefere
         return (
             <React.Fragment>
                 <div>{Schemas.Term.toName("file_type_detailed", file_type_detailed, true)}</div>
-                <a className="title-of-file mono-text name-title" href={fileAtId}>
+                <a className="title-of-file text-monospace name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
             </React.Fragment>);
     };
     const renderExtRefColFunc = function (file, field, detailIndex, fileEntryBlockProps) {
         if (!file.external_references || !Array.isArray(file.external_references) || file.external_references.length === 0) {
-            return <span className="mono-text">-</span>;
+            return <span className="text-monospace">-</span>;
         }
         const getExtRefLink = function (externalRef, file) {
             if (externalRef && typeof externalRef.ref === 'string') {

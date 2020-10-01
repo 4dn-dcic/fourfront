@@ -147,7 +147,7 @@ class QCMetricFromEmbed extends React.PureComponent {
             var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
             var numValRounded = valueTransforms.roundLargeNumber(numVal);
             return (
-                <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
+                <span className="d-inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
             );
         }
         return '-';

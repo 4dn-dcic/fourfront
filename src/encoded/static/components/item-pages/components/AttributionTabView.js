@@ -54,7 +54,7 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 
     return (
         <li className="contact-person">
-            <div className="inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
+            <div className="d-inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
                 <i className="icon icon-fw icon-envelope far" />
                 &nbsp;&nbsp;
                 { display_title }

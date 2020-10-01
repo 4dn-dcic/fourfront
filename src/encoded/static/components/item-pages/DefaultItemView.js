@@ -441,7 +441,7 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
     if (attachmentHref){
         viewAttachmentButton = (
             <ViewFileButton title="File" mimeType={attachmentType} filename={filename}
-                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-ellipsis-container btn-block btn-sm btn-primary" />
+                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-truncate btn-block btn-sm btn-primary" />
         );
     }
 
@@ -556,7 +556,7 @@ export class OverViewBodyItem extends React.PureComponent {
 
             return (
                 <div className="imaging-path-item-wrapper row">
-                    <div className="index-num col-2 mono-text text-500"><small>{ channel }</small></div>
+                    <div className="index-num col-2 text-monospace text-500"><small>{ channel }</small></div>
                     <div className={"imaging-path col-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
                     { matchingFile ? <div className="microscope-setting col-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>

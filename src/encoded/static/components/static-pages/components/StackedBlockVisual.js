@@ -593,7 +593,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
                                 : null }
-                            <h4 className="text-ellipsis-container"
+                            <h4 className="text-truncate"
                                 data-tip={group && typeof group === 'string' && group.length > 20 ? group : null}>
                                 { toggleIcon }{ group }
                             </h4>

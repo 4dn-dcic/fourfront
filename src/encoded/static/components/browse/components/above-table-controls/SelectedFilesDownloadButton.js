@@ -310,7 +310,7 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
     }, [ selectedFiles, context ]);
 
     return (
-        <form method="POST" action={action} className="inline-block">
+        <form method="POST" action={action} className="d-inline-block">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
             <button type="submit" name="Download" className="btn btn-primary" onClick={onClick}

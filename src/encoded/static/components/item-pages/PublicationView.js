@@ -96,7 +96,7 @@ class PublicationSummary extends React.PureComponent {
                             { _.map(authors, function(author, i){
                                 return (
                                     <React.Fragment>
-                                        <span className="no-wrap">
+                                        <span className="text-nowrap">
                                             { author }
                                         </span>
                                         { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }

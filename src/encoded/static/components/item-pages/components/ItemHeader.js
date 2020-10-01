@@ -20,7 +20,7 @@ import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/e
  * @example
  * <ItemHeader.Wrapper className="something-or-other" context={this.props.context} href={this.props.href}>
  *     <ItemHeader.TopRow>
- *         <span data-tip="Experiment Type" className="inline-block">
+ *         <span data-tip="Experiment Type" className="d-inline-block">
  *             { this.props.context.experimentset_type }
  *         </span>
  *     </ItemHeader.TopRow>
@@ -96,7 +96,7 @@ export class TopRow extends React.Component {
             <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code far"/>{' '}
                 <a href={viewUrl}
-                    className="inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
+                    className="d-inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
                         if (window && window.open){
                             e.preventDefault();
@@ -142,7 +142,7 @@ export class TopRow extends React.Component {
         const { typeInfo, context, schemas } = this.props;
         if (typeInfo && typeInfo.title){
             return (
-                <span className="type-info inline-block" data-tip={(typeInfo && typeInfo.description) || null}>
+                <span className="type-info d-inline-block" data-tip={(typeInfo && typeInfo.description) || null}>
                     { typeInfo && typeInfo.title }
                 </span>
             );
@@ -159,7 +159,7 @@ export class TopRow extends React.Component {
         const detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
 
         return (
-            <span className="type-info inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>
+            <span className="type-info d-inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>
                 { title }
             </span>
         );
@@ -212,7 +212,7 @@ export class TopRow extends React.Component {
                 <h5 className="col-12 col-md-5 item-label-title">
                     <div className="inner">
                         {typeInfoVisible ? this.typeInfoLabel() : null}
-                        {typeInfoVisible && context.accession ?
+                        { typeInfoVisible && context.accession ?
                             <object.CopyWrapper value={context.accession} className="accession inline-block" data-tip={accessionTooltip}
                                 wrapperElement="span" iconProps={{ 'style': { 'fontSize': '0.875rem', 'marginLeft': -3 } }}>
                                 {context.accession}
@@ -328,7 +328,7 @@ export const BottomRow = React.memo(function BottomRow(props){
             <div className="col text-300 set-type-indicators">{ children }</div>
             <h5 className="col-md-auto text-300 date-indicator">
                 { dateToUse?
-                    <span data-tip={tooltip} className="inline-block">
+                    <span data-tip={tooltip} className="d-inline-block">
                         <i className="icon icon-calendar far"></i>&nbsp; &nbsp;
                         <LocalizedTime timestamp={dateToUse} formatType="date-time-md" dateTimeSeparator=" at " />
                     </span>

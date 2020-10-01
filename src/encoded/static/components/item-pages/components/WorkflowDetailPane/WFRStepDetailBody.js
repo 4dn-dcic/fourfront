@@ -44,14 +44,14 @@ const WorkflowDetailsForWorkflowNodeRow = React.memo(function WorkflowDetailsFor
 
             <div className="col col-sm-6 box">
                 <span className="text-600">Workflow</span>
-                <h4 className="text-400 text-ellipsis-container" data-tip={tipIfLongString(title)}>
+                <h4 className="text-400 text-truncate" data-tip={tipIfLongString(title)}>
                     { innerContent }
                 </h4>
             </div>
 
             <div className="col col-sm-6 box steps-in-workflow">
                 <span className="text-600">Steps in Workflow</span>
-                <h5 className="text-400 text-ellipsis-container">
+                <h5 className="text-400 text-truncate">
                     { workflowSteps }
                 </h5>
             </div>
@@ -76,7 +76,7 @@ const SoftwareDetailsForWorkflowNodeRow = React.memo(function SoftwareDetailsFor
         <div className="row">
             <div className="col col-sm-12 box steps-in-workflow">
                 <span className="text-600">Software Used in Workflow</span>
-                <h5 className="text-400 text-ellipsis-container">
+                <h5 className="text-400 text-truncate">
                     { softwareElements }
                 </h5>
             </div>
@@ -137,9 +137,9 @@ export class WFRStepDetailBody extends React.PureComponent {
             <div className="col-sm-6 box">
                 <span className="text-600">Workflow Run</span>
                 { stepHref ?
-                    <h3 className="text-500 text-ellipsis-container" data-tip={tipIfLongString(titleString)}><a href={stepHref}>{ titleString }</a></h3>
+                    <h3 className="text-500 text-truncate" data-tip={tipIfLongString(titleString)}><a href={stepHref}>{ titleString }</a></h3>
                     :
-                    <h3 className="text-300 text-ellipsis-container">{ titleString }</h3>
+                    <h3 className="text-300 text-truncate">{ titleString }</h3>
                 }
             </div>
         );

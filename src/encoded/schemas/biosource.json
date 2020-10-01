@@ -85,7 +85,7 @@
         },
         "cell_line_tier": {
             "title": "Cell Line Tier",
-            "description": "DON'T SUBMIT - CALCULATED",
+            "comment": "DON'T SUBMIT - CALCULATED",
             "type": "string",
             "lookup": 70,
             "exclude_from" : ["submit4dn"],
