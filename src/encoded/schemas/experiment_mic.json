@@ -56,7 +56,8 @@
                 "Light-Sheet",
                 "Electron Microscopy",
                 "TIRF",
-                "HiLo"
+                "HiLo",
+                "4Pi-SMS"
             ]
         },
         "microscope_qc":{
