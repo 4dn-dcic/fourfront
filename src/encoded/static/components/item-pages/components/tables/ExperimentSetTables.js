@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ItemPageTable, ItemPageTableIndividualUrlLoader, ViewMoreResultsBtn, EmbeddedItemSearchTable } from './ItemPageTable';
+import { ItemPageTable, ItemPageTableIndividualUrlLoader, ViewMoreResultsBtn, EmbeddedItemSearchTable, SearchTableTitle } from './ItemPageTable';
 import { ExperimentSetDetailPane } from './../../../browse/components/ExperimentSetDetailPane';
 import { columnExtensionMap as columnExtensionMap4DN } from './../../../browse/columnExtensionMap';
 
@@ -77,7 +77,7 @@ export function ExperimentSetsTableTabView(props){
     const tableProps = {
         searchHref, facets, columns, defaultOpenIndices, schemas, session,
         maxHeight, filterFacetFxn, filterColumnFxn, hideFacets, hideColumns,
-        title: typeof title === "undefined" ? <ExperimentSetsTableTabViewTitle {...{ externalSearchLinkVisible }} /> : title
+        title: typeof title === "undefined" ? <SearchTableTitle {...{ title: "Experiment Set", externalSearchLinkVisible }} /> : title
     };
     return <EmbeddedExperimentSetSearchTable {...tableProps}>{ children }</EmbeddedExperimentSetSearchTable>;
 }
@@ -89,35 +89,6 @@ ExperimentSetsTableTabView.getTabObject = function(props){
         'content' : <ExperimentSetsTableTabView {...props} />
     };
 };
-
-/**
- * @todo Eventually maybe add UI controls for selecting columns and other things into here.
- */
-export function ExperimentSetsTableTabViewTitle(props) {
-    const {
-        totalCount,
-        href: currentSearchHref,
-        externalSearchLinkVisible = true
-    } = props;
-    const linkText = currentSearchHref && typeof currentSearchHref === 'string' && currentSearchHref.indexOf('/browse/') > -1 ?
-        'Open In Browse View' : 'Open In Search View';
-    return (
-        <h3 className="tab-section-title">
-            <span>
-                {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
-                {"Experiment Set" + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
-            </span>
-            { externalSearchLinkVisible && currentSearchHref ?
-                <a href={currentSearchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
-                    <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
-                    { linkText }
-                </a>
-                : null }
-        </h3>
-    );
-}
-
-
 
 /** @deprecated - Waiting until can use EmbeddedExperimentSetSearchTable everywhere */
 export class ExperimentSetTables extends React.PureComponent {
