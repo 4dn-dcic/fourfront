@@ -96,6 +96,29 @@
             "lookup": 20,
             "formInput": "textarea"
         },
+        "dataset_group": {
+            "title": "Dataset Group",
+            "description": "An optional property to group datasets in a single row in the datasets summary table",
+            "type": "string",
+            "lookup": 900
+        },
+        "study": {
+            "title": "Study",
+            "description": "Study title to be shown in the datasets summary table",
+            "type": "string",
+            "lookup": 901
+        },
+        "study_group": {
+            "title": "Study Group",
+            "description": "Static section in the summary table",
+            "type": "string",
+            "lookup": 902,
+            "enum": [
+                "Single Time Point and Condition",
+                "Time Course",
+                "Disrupted or Atypical Cells"
+            ]
+        },
         "processed_files": {
             "title": "Processed Files",
             "description": "Processed files that are derived from files in this experiment set.",
