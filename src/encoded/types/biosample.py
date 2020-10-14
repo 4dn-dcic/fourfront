@@ -61,6 +61,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'cell_culture_details.morphology_image.attachment.height',
         'cell_culture_details.tissue.term_name',
         'cell_culture_details.tissue.preferred_name',
+        'cell_culture_details.tissue.slim_terms',
         'modifications.modification_type',
         'modifications.description',
         'treatments.treatment_type',

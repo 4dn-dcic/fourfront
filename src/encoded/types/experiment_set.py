@@ -59,7 +59,8 @@ class ExperimentSet(Item):
             "badge.badge_icon",
             "badge.description"
         ],
-        "tissue": ["preferred_name"]
+        "tissue": ["preferred_name"],
+        "slim_terms": ["preferred_name"]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -121,6 +122,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.individual.organism.name",
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
+        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms",
         "experiments_in_set.biosample.modifications.modification_type",
         "experiments_in_set.biosample.modifications.display_title",
         "experiments_in_set.biosample.treatments.treatment_type",
@@ -167,7 +169,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        "experiments_in_set.files.quality_metric.quality_metric_summary.*", # This may not yet be enabled on raw files.
+        "experiments_in_set.files.quality_metric.quality_metric_summary.*",  # This may not yet be enabled on raw files.
         "experiments_in_set.files.badges.badge.title",
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
@@ -287,7 +289,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.last_modified.date_modified",
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
-        #"experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
+        # "experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
 

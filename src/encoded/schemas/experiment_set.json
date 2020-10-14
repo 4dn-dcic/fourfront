@@ -173,6 +173,9 @@
         "aggregated_items.tissue.item.preferred_name": {
             "title": "Tissue Source"
         },
+        "aggregated_items.slim_terms.item.preferred_name": {
+            "title": "Organ or System"
+        },
         "publications_of_set.display_title": {
             "title": "Publication"
         },
