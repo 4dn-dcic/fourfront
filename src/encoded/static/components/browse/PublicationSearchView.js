@@ -18,7 +18,8 @@ import { Schemas } from './../util';
 import { transformedFacets } from './SearchView';
 
 
-const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
+const publicationColExtensionMap = {
+    ...columnExtensionMap,
     // We override display_title for this view to be wider.
     // And awesomer.
     "display_title" : {
@@ -68,7 +69,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     "award.project" : {
         "widthMap" : { "sm" : 60, "md" : 70, "lg" : 80 }
     },
-});
+};
 
 /**
  * This is memoized into a couple of different functions - 1 per column (common colWidth between all cells in same col)
@@ -309,34 +310,20 @@ PublicationDetailPane.excludedKeys = [
 ];
 
 
-export default class PublicationSearchView extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.renderDetailPane = this.renderDetailPane.bind(this);
-        this.memoized = {
-            transformedFacets: memoize(transformedFacets)
-        };
-    }
-
-    renderDetailPane(result){
-        const { schemas } = this.props;
-        return (
-            <PublicationDetailPane {...{ result, schemas }} />
-        );
-    }
-
-    render(){
-        const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
-        const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
-        const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
-        return (
-            <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }} renderDetailPane={this.renderDetailPane}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
-            </div>
-        );
-    }
+export default function PublicationSearchView(props){
+    const { isFullscreen, href, context, currentAction, session, schemas } = props;
+    const facets = useMemo(function(){
+        return transformedFacets(href, context, currentAction, session, schemas);
+    }, [ context, currentAction, session, schemas ]);
+    const detailPane = useMemo(function(){
+        return <PublicationDetailPane schemas={schemas} />;
+    }, [ schemas ]);
+    const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
+    const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+    return (
+        <div className="container" id="content">
+            <CommonSearchView {...props} {...{ tableColumnClassName, facetColumnClassName, facets, detailPane }}
+                termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
+        </div>
+    );
 }
-
