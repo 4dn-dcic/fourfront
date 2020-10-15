@@ -34,79 +34,6 @@ export default function FileSearchView (props){
 }
 
 
-function AboveFacetList({ context, currentAction }){
-    const { total = 0, actions = [] } = context;
-    let totalResults = null;
-    if (total > 0) {
-        totalResults = (
-            <div>
-                <span id="results-count" className="text-500">
-                    { total }
-                </span> Results
-            </div>
-        );
-    }
-
-    let addButton = null;
-    if (!currentAction) {
-        const addAction = _.findWhere(actions, { 'name': 'add' });
-        if (addAction && typeof addAction.href === 'string') {
-            addButton = (
-                <a className="btn btn-primary btn-xs ml-1" href={addAction.href} data-skiprequest="true">
-                    <i className="icon icon-fw icon-plus fas mr-03 fas" />Create New&nbsp;
-                </a>
-            );
-        }
-    }
-
-    return (
-        <div className="above-results-table-row text-truncate d-flex align-items-center justify-content-end">
-            { totalResults }
-            { addButton }
-        </div>
-    );
-}
-
-
-class FileSearchViewCheckBox extends React.PureComponent {
-
-    static filesToObjectKeyedByAccessionTriples(file, isSelected) {
-        const allFileAccessionTriples = fileToAccessionTriple(file, false, true);
-        if (isSelected) {
-            return (_.zip([allFileAccessionTriples], [file]));
-        }
-        else { return allFileAccessionTriples; }
-    }
-
-    constructor(props) {
-        super(props);
-        this.onChange = this.onChange.bind(this);
-        this.memoized = {
-            filesToObjectKeyedByAccessionTriples: memoize(FileSearchViewCheckBox.filesToObjectKeyedByAccessionTriples),
-        };
-    }
-
-    onChange(e) {
-        const { file, selectFile, unselectFile } = this.props;
-        const isChecked = e.target.checked;
-        if (isChecked) {
-            const allFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file, true);
-            selectFile(allFilesKeyedByTriples);
-        }
-        else {
-            const unselectFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file, false);
-            unselectFile(unselectFilesKeyedByTriples);
-        }
-    }
-
-    render() {
-        const { file, selectedFiles } = this.props;
-        const accessionTriple = ['NONE', 'NONE', file.accession].join('~');
-        return <Checkbox checked={!!(selectedFiles[accessionTriple])} onChange={this.onChange} className="expset-checkbox" />;
-    }
-}
-
-
 function FileTableWithSelectedFilesCheckboxes(props){
     const {
         // Common high-level props from Redux, or App.js, or App.js > BodyElement:
@@ -195,3 +122,75 @@ FileTableWithSelectedFilesCheckboxes.defaultProps = {
     'navigate'  : navigate,
     'columnExtensionMap' : colExtensionMap4DN
 };
+
+function AboveFacetList({ context, currentAction }){
+    const { total = 0, actions = [] } = context;
+    let totalResults = null;
+    if (total > 0) {
+        totalResults = (
+            <div>
+                <span id="results-count" className="text-500">
+                    { total }
+                </span> Results
+            </div>
+        );
+    }
+
+    let addButton = null;
+    if (!currentAction) {
+        const addAction = _.findWhere(actions, { 'name': 'add' });
+        if (addAction && typeof addAction.href === 'string') {
+            addButton = (
+                <a className="btn btn-primary btn-xs ml-1" href={addAction.href} data-skiprequest="true">
+                    <i className="icon icon-fw icon-plus fas mr-03 fas" />Create New&nbsp;
+                </a>
+            );
+        }
+    }
+
+    return (
+        <div className="above-results-table-row text-truncate d-flex align-items-center justify-content-end">
+            { totalResults }
+            { addButton }
+        </div>
+    );
+}
+
+
+class FileSearchViewCheckBox extends React.PureComponent {
+
+    static filesToObjectKeyedByAccessionTriples(file, isSelected) {
+        const allFileAccessionTriples = fileToAccessionTriple(file, false, true);
+        if (isSelected) {
+            return (_.zip([allFileAccessionTriples], [file]));
+        }
+        else { return allFileAccessionTriples; }
+    }
+
+    constructor(props) {
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        this.memoized = {
+            filesToObjectKeyedByAccessionTriples: memoize(FileSearchViewCheckBox.filesToObjectKeyedByAccessionTriples),
+        };
+    }
+
+    onChange(e) {
+        const { file, selectFile, unselectFile } = this.props;
+        const isChecked = e.target.checked;
+        if (isChecked) {
+            const allFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file, true);
+            selectFile(allFilesKeyedByTriples);
+        }
+        else {
+            const unselectFilesKeyedByTriples = this.memoized.filesToObjectKeyedByAccessionTriples(file, false);
+            unselectFile(unselectFilesKeyedByTriples);
+        }
+    }
+
+    render() {
+        const { file, selectedFiles } = this.props;
+        const accessionTriple = ['NONE', 'NONE', file.accession].join('~');
+        return <Checkbox checked={!!(selectedFiles[accessionTriple])} onChange={this.onChange} className="expset-checkbox" />;
+    }
+}
