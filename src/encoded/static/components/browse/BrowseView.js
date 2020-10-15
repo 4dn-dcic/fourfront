@@ -398,7 +398,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
         );
         const showClearFiltersButton = Object.keys(currExpSetFilters || {}).length > 0;
 
-        const projectFacet = _.findWhere(contextFacets, { 'field' : 'award.project' });
+        const projectFacet = _.findWhere(contextFacets, { 'field' : 'award.project' }) || {};
         const projectFacetTerms = _.uniq(projectFacet.terms || [], 'key');
         const countExternalSets = projectFacetTerms.reduce(function(sum, projectTermObj){
             if (projectTermObj.key === '4DN') return sum; // continue.
