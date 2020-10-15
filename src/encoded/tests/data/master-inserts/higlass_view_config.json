@@ -70,7 +70,6 @@
                         "left": [
                             {
                                 "width": 55,
-                                "orientation": "1d-vertical",
                                 "uid": "left-annotation-track",
                                 "tilesetUid": "308f5404-694a-4c77-a8e8-3e6cc5f63079",
                                 "options": {
@@ -81,7 +80,6 @@
                                     "minusStrandColor": "black",
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
-                                    "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 10,
                                     "labelTopMargin": 0,
@@ -94,36 +92,23 @@
                                     "plusStrandColor": "black"
                                 },
                                 "type": "vertical-gene-annotations",
-                                "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Gene Annotations (hg38)",
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14"
+                                "server": "https://higlass.4dnucleome.org/api/v1"
                             },
                             {
                                 "width": 35,
-                                "orientation": "1d-vertical",
                                 "uid": "left-chromosome-track",
                                 "options": {
-                                    "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
                                     "color": "#777777",
                                     "stroke": "#FFFFFF",
-                                    "plusStrandColor": "blue",
-                                    "fontIsAligned": false,
                                     "mousePositionColor": "#999999",
-                                    "fontSize": 12,
-                                    "labelColor": "black",
-                                    "minusStrandColor": "red",
-                                    "labelPosition": "hidden"
+                                    "fontSize": 12
                                 },
-                                "minWidth": 20,
                                 "type": "vertical-chromosome-labels",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Chromosome Axis",
                                 "height": 158,
-                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "position": "left"
+                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg"
                             }
                         ],
                         "right": [],
@@ -138,24 +123,6 @@
                                     {
                                         "height": 158,
                                         "uid": "GjuZed1ySGW1IzZZqFB9BA",
-                                        "transforms": [
-                                            {
-                                                "name": "ICE",
-                                                "value": "weight"
-                                            },
-                                            {
-                                                "name": "VC_SQRT",
-                                                "value": "VC_SQRT"
-                                            },
-                                            {
-                                                "name": "KR",
-                                                "value": "KR"
-                                            },
-                                            {
-                                                "name": "VC",
-                                                "value": "VC"
-                                            }
-                                        ],
                                         "options": {
                                             "trackBorderColor": "black",
                                             "showMousePosition": false,
@@ -164,7 +131,6 @@
                                             "maxZoom": null,
                                             "scaleStartPercent": "0.00000",
                                             "labelRightMargin": 0,
-                                            "name": "H1-hESC Hi-C",
                                             "labelLeftMargin": 0,
                                             "labelBottomMargin": 0,
                                             "colorRange": [
@@ -181,24 +147,8 @@
                                             "backgroundColor": "#eeeeee",
                                             "trackBorderWidth": 0
                                         },
-                                        "resolutions": [
-                                            1000,
-                                            2000,
-                                            5000,
-                                            10000,
-                                            25000,
-                                            50000,
-                                            100000,
-                                            250000,
-                                            500000,
-                                            1000000,
-                                            2500000,
-                                            5000000,
-                                            10000000
-                                        ],
                                         "type": "heatmap",
                                         "server": "https://higlass.4dnucleome.org/api/v1",
-                                        "name": "4DNFI6HDY7WZ.mcool",
                                         "width": 465,
                                         "tilesetUid": "bJORvAOhSmCkED7QGB7FYA",
                                         "position": "center"
@@ -210,22 +160,14 @@
                         "top": [
                             {
                                 "height": 35,
-                                "thumbnail": null,
-                                "orientation": "1d-horizontal",
-                                "name": "Chromosome Axis",
                                 "options": {
-                                    "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
+                                    "color": "#777777",
+                                    "stroke": "#FFFFFF",
                                     "mousePositionColor": "#999999",
-                                    "fontSize": 12,
-                                    "labelColor": "#888",
-                                    "minusStrandColor": "red",
-                                    "labelPosition": "hidden"
+                                    "fontSize": 12
                                 },
-                                "local": true,
-                                "position": "top",
                                 "width": 465,
                                 "uid": "top-chromosome-track",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
@@ -243,12 +185,10 @@
                         583408504.4418085
                     ],
                     "layout": {
-                        "moved": false,
                         "y": 0,
                         "w": 6,
                         "x": 0,
-                        "h": 6,
-                        "static": false
+                        "h": 6
                     }
                 },
                 {
@@ -268,7 +208,6 @@
                         "left": [
                             {
                                 "width": 55,
-                                "orientation": "1d-vertical",
                                 "uid": "left-annotation-track",
                                 "tilesetUid": "308f5404-694a-4c77-a8e8-3e6cc5f63079",
                                 "options": {
@@ -279,7 +218,6 @@
                                     "minusStrandColor": "black",
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
-                                    "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 10,
                                     "labelTopMargin": 0,
@@ -293,36 +231,23 @@
                                 },
                                 "type": "vertical-gene-annotations",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Gene Annotations (hg38)",
-                                "height": 158,
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "left"
+                                "height": 158
                             },
                             {
                                 "width": 35,
-                                "orientation": "1d-vertical",
                                 "uid": "left-chromosome-track",
                                 "options": {
-                                    "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
                                     "color": "#777777",
                                     "stroke": "#FFFFFF",
-                                    "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
-                                    "fontSize": 12,
-                                    "labelColor": "black",
-                                    "minusStrandColor": "red",
-                                    "labelPosition": "hidden"
+                                    "fontSize": 12
                                 },
-                                "minWidth": 20,
                                 "type": "vertical-chromosome-labels",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Chromosome Axis",
                                 "height": 158,
-                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "position": "left"
+                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg"
                             }
                         ],
                         "right": [],
@@ -337,24 +262,6 @@
                                     {
                                         "height": 158,
                                         "uid": "GjuZed1ySGW1IzZZqFB9BA",
-                                        "transforms": [
-                                            {
-                                                "name": "ICE",
-                                                "value": "weight"
-                                            },
-                                            {
-                                                "name": "VC_SQRT",
-                                                "value": "VC_SQRT"
-                                            },
-                                            {
-                                                "name": "KR",
-                                                "value": "KR"
-                                            },
-                                            {
-                                                "name": "VC",
-                                                "value": "VC"
-                                            }
-                                        ],
                                         "options": {
                                             "trackBorderColor": "black",
                                             "showMousePosition": false,
@@ -363,7 +270,6 @@
                                             "maxZoom": null,
                                             "scaleStartPercent": "0.00000",
                                             "labelRightMargin": 0,
-                                            "name": "HFFc6 Hi-C",
                                             "labelLeftMargin": 0,
                                             "labelBottomMargin": 0,
                                             "colorRange": [
@@ -380,24 +286,8 @@
                                             "backgroundColor": "#eeeeee",
                                             "trackBorderWidth": 0
                                         },
-                                        "resolutions": [
-                                            1000,
-                                            2000,
-                                            5000,
-                                            10000,
-                                            25000,
-                                            50000,
-                                            100000,
-                                            250000,
-                                            500000,
-                                            1000000,
-                                            2500000,
-                                            5000000,
-                                            10000000
-                                        ],
                                         "type": "heatmap",
                                         "server": "https://higlass.4dnucleome.org/api/v1",
-                                        "name": "4DNFIB59T7NN.mcool",
                                         "width": 465,
                                         "tilesetUid": "OxZJjFLwRYq8PA_cRgipbQ",
                                         "position": "center"
@@ -409,25 +299,14 @@
                         "top": [
                             {
                                 "height": 35,
-                                "thumbnail": null,
-                                "orientation": "1d-horizontal",
-                                "name": "Chromosome Axis",
                                 "options": {
-                                    "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
                                     "color": "#777777",
                                     "stroke": "#FFFFFF",
-                                    "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
-                                    "fontSize": 12,
-                                    "labelColor": "#888",
-                                    "minusStrandColor": "red",
-                                    "labelPosition": "hidden"
+                                    "fontSize": 12
                                 },
-                                "local": true,
-                                "position": "top",
                                 "width": 465,
                                 "uid": "top-chromosome-track",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
@@ -445,12 +324,10 @@
                         583408504.4418085
                     ],
                     "layout": {
-                        "moved": false,
                         "y": 0,
                         "w": 6,
                         "x": 6,
-                        "h": 6,
-                        "static": false
+                        "h": 6
                     }
                 },
                 {
@@ -470,18 +347,15 @@
                         "left": [
                             {
                                 "width": 55,
-                                "orientation": "1d-vertical",
                                 "uid": "left-annotation-track",
                                 "tilesetUid": "308f5404-694a-4c77-a8e8-3e6cc5f63079",
                                 "options": {
                                     "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-
                                     "minusStrandColor": "black",
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
-                                    "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 10,
                                     "labelTopMargin": 0,
@@ -495,36 +369,23 @@
                                 },
                                 "type": "vertical-gene-annotations",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Gene Annotations (hg38)",
-                                "height": 158,
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "left"
+                                "height": 158
                             },
                             {
                                 "width": 35,
-                                "orientation": "1d-vertical",
                                 "uid": "left-chromosome-track",
                                 "options": {
-                                    "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
                                     "color": "#777777",
                                     "stroke": "#FFFFFF",
-                                    "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
-                                    "fontSize": 12,
-                                    "labelColor": "black",
-                                    "minusStrandColor": "red",
-                                    "labelPosition": "hidden"
+                                    "fontSize": 12
                                 },
-                                "minWidth": 20,
                                 "type": "vertical-chromosome-labels",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Chromosome Axis",
                                 "height": 158,
-                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "position": "left"
+                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg"
                             }
                         ],
                         "right": [],
@@ -539,24 +400,6 @@
                                     {
                                         "height": 158,
                                         "uid": "NAR1jmYWQSGoHaH6z0EouQ",
-                                        "transforms": [
-                                            {
-                                                "name": "ICE",
-                                                "value": "weight"
-                                            },
-                                            {
-                                                "name": "VC_SQRT",
-                                                "value": "VC_SQRT"
-                                            },
-                                            {
-                                                "name": "KR",
-                                                "value": "KR"
-                                            },
-                                            {
-                                                "name": "VC",
-                                                "value": "VC"
-                                            }
-                                        ],
                                         "options": {
                                             "trackBorderColor": "black",
                                             "showMousePosition": false,
@@ -565,7 +408,6 @@
                                             "maxZoom": null,
                                             "scaleStartPercent": "0.00000",
                                             "labelRightMargin": 0,
-                                            "name": "H1-hESC Micro-C",
                                             "labelLeftMargin": 0,
                                             "labelBottomMargin": 0,
                                             "colorRange": [
@@ -582,24 +424,8 @@
                                             "backgroundColor": "#eeeeee",
                                             "trackBorderWidth": 0
                                         },
-                                        "resolutions": [
-                                            1000,
-                                            2000,
-                                            5000,
-                                            10000,
-                                            25000,
-                                            50000,
-                                            100000,
-                                            250000,
-                                            500000,
-                                            1000000,
-                                            2500000,
-                                            5000000,
-                                            10000000
-                                        ],
                                         "type": "heatmap",
                                         "server": "https://higlass.4dnucleome.org/api/v1",
-                                        "name": "4DNFI9GMP2J8.mcool",
                                         "width": 465,
                                         "tilesetUid": "JfVtzAhFSCS-j6tNALioCQ",
                                         "position": "center"
@@ -611,8 +437,6 @@
                         "top": [
                             {
                                 "height": 55,
-                                "orientation": "1d-horizontal",
-                                "name": "Gene Annotations (hg38)",
                                 "options": {
                                     "trackBorderColor": "black",
                                     "showMousePosition": false,
@@ -621,7 +445,6 @@
                                     "geneAnnotationHeight": 12,
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
-                                    "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 10,
                                     "labelTopMargin": 0,
@@ -633,8 +456,6 @@
                                     "labelColor": "black",
                                     "plusStrandColor": "black"
                                 },
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "top",
                                 "width": 465,
                                 "uid": "top-annotation-track",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
@@ -652,12 +473,10 @@
                         570339928.1121173
                     ],
                     "layout": {
-                        "moved": false,
                         "y": 6,
                         "w": 6,
                         "x": 0,
-                        "h": 6,
-                        "static": false
+                        "h": 6
 
                     }
                 },
@@ -678,7 +497,6 @@
                         "left": [
                             {
                                 "width": 55,
-                                "orientation": "1d-vertical",
                                 "uid": "left-annotation-track",
                                 "tilesetUid": "308f5404-694a-4c77-a8e8-3e6cc5f63079",
                                 "options": {
@@ -689,7 +507,6 @@
                                     "minusStrandColor": "black",
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
-                                    "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 10,
                                     "labelTopMargin": 0,
@@ -703,36 +520,23 @@
                                 },
                                 "type": "vertical-gene-annotations",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Gene Annotations (hg38)",
-                                "height": 158,
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "left"
+                                "height": 158
                             },
                             {
                                 "width": 35,
-                                "orientation": "1d-vertical",
                                 "uid": "left-chromosome-track",
                                 "options": {
-                                    "trackBorderColor": "black",
                                     "showMousePosition": false,
                                     "showTooltip": false,
-                                    "trackBorderWidth": 0,
                                     "color": "#777777",
                                     "stroke": "#FFFFFF",
-                                    "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999",
-                                    "fontSize": 12,
-                                    "labelColor": "black",
-                                    "minusStrandColor": "red",
-                                    "labelPosition": "hidden"
+                                    "fontSize": 12
                                 },
-                                "minWidth": 20,
                                 "type": "vertical-chromosome-labels",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
-                                "name": "Chromosome Axis",
                                 "height": 158,
-                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "position": "left"
+                                "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg"
                             }
                         ],
                         "right": [],
@@ -747,24 +551,6 @@
                                     {
                                         "height": 158,
                                         "uid": "ZBgcj7jkTHSA9_jUbwQhIA",
-                                        "transforms": [
-                                            {
-                                                "name": "ICE",
-                                                "value": "weight"
-                                            },
-                                            {
-                                                "name": "VC_SQRT",
-                                                "value": "VC_SQRT"
-                                            },
-                                            {
-                                                "name": "KR",
-                                                "value": "KR"
-                                            },
-                                            {
-                                                "name": "VC",
-                                                "value": "VC"
-                                            }
-                                        ],
                                         "options": {
                                             "trackBorderColor": "black",
                                             "showMousePosition": false,
@@ -772,7 +558,6 @@
                                             "heatmapValueScaling": "log",
                                             "scaleStartPercent": "0.00000",
                                             "labelRightMargin": 0,
-                                            "name": "HFFc6 Micro-C",
                                             "labelLeftMargin": 0,
                                             "labelBottomMargin": 0,
                                             "colorRange": [
@@ -789,24 +574,8 @@
                                             "backgroundColor": "#eeeeee",
                                             "trackBorderWidth": 0
                                         },
-                                        "resolutions": [
-                                            1000,
-                                            2000,
-                                            5000,
-                                            10000,
-                                            25000,
-                                            50000,
-                                            100000,
-                                            250000,
-                                            500000,
-                                            1000000,
-                                            2500000,
-                                            5000000,
-                                            10000000
-                                        ],
                                         "type": "heatmap",
                                         "server": "https://higlass.4dnucleome.org/api/v1",
-                                        "name": "4DNFI643OYP9.mcool",
                                         "width": 465,
                                         "tilesetUid": "VIZiSC6uQ8actkvgIgzl-g",
                                         "position": "center"
@@ -818,8 +587,6 @@
                         "top": [
                             {
                                 "height": 55,
-                                "orientation": "1d-horizontal",
-                                "name": "Gene Annotations (hg38)",
                                 "options": {
                                     "trackBorderColor": "black",
                                     "showMousePosition": false,
@@ -828,7 +595,6 @@
                                     "geneAnnotationHeight": 12,
                                     "geneLabelPosition": "outside",
                                     "labelRightMargin": 0,
-                                    "name": "Gene Annotations (hg38)",
                                     "labelLeftMargin": 0,
                                     "fontSize": 10,
                                     "labelTopMargin": 0,
@@ -840,8 +606,6 @@
                                     "labelColor": "black",
                                     "plusStrandColor": "black"
                                 },
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "position": "top",
                                 "width": 465,
                                 "uid": "top-annotation-track",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
@@ -859,12 +623,10 @@
                         570339928.1121173
                     ],
                     "layout": {
-                        "moved": false,
                         "y": 6,
                         "w": 6,
                         "x": 6,
-                        "h": 6,
-                        "static": false
+                        "h": 6
                     }
                 }
             ],
@@ -931,41 +693,7 @@
                                 "contents": [
                                     {
                                         "uid": "GjuZed1ySGW1IzZZqFB9BA",
-                                        "transforms": [
-                                            {
-                                                "name": "KR",
-                                                "value": "KR"
-                                            },
-                                            {
-                                                "name": "ICE",
-                                                "value": "weight"
-                                            },
-                                            {
-                                                "name": "VC",
-                                                "value": "VC"
-                                            },
-                                            {
-                                                "name": "VC_SQRT",
-                                                "value": "VC_SQRT"
-                                            }
-                                        ],
                                         "position": "center",
-                                        "name": "4DNFI1TBYKV3.mcool",
-                                        "resolutions": [
-                                            1000,
-                                            2000,
-                                            5000,
-                                            10000,
-                                            25000,
-                                            50000,
-                                            100000,
-                                            250000,
-                                            500000,
-                                            1000000,
-                                            2500000,
-                                            5000000,
-                                            10000000
-                                        ],
                                         "server": "https://higlass.4dnucleome.org/api/v1",
                                         "tilesetUid": "LTiacew8TjCOaP9gpDZwZw",
                                         "type": "heatmap",
@@ -1003,9 +731,6 @@
                                 "uid": "left-annotation-track",
                                 "width": 55,
                                 "tilesetUid": "350f6449-5dbf-4754-a9eb-86040fe28354",
-                                "name": "Gene Annotations (GRCm38)",
-                                "orientation": "1d-vertical",
-                                "position": "left",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "type": "vertical-gene-annotations",
                                 "options": {
@@ -1019,27 +744,16 @@
                                     "showMousePosition": false,
                                     "trackBorderWidth": 0,
                                     "labelPosition": "hidden"
-                                },
-                                "header": ""
+                                }
                             },
                             {
                                 "uid": "left-chromosome-track",
                                 "width": 20,
-                                "minWidth": 20,
-                                "name": "Chromosome Axis",
-                                "orientation": "1d-vertical",
-                                "position": "left",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "type": "vertical-chromosome-labels",
                                 "options": {
-                                    "labelColor": "black",
-                                    "trackBorderColor": "black",
-                                    "minusStrandColor": "red",
                                     "showMousePosition": false,
-                                    "trackBorderWidth": 0,
                                     "showTooltip": false,
-                                    "labelPosition": "hidden",
-                                    "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999"
                                 },
                                 "tilesetUid": "EMo5uFThS5S263tNLbzeVw"
@@ -1050,10 +764,7 @@
                             {
                                 "uid": "top-annotation-track",
                                 "tilesetUid": "350f6449-5dbf-4754-a9eb-86040fe28354",
-                                "name": "Gene Annotations (GRCm38)",
-                                "orientation": "1d-horizontal",
                                 "height": 55,
-                                "position": "top",
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "type": "horizontal-gene-annotations",
                                 "options": {
@@ -1067,29 +778,21 @@
                                     "showMousePosition": false,
                                     "trackBorderWidth": 0,
                                     "labelPosition": "hidden"
-                                },
-                                "header": ""
+                                }
                             },
                             {
-                                "orientation": "1d-horizontal",
                                 "height": 30,
-                                "position": "top",
                                 "type": "horizontal-chromosome-labels",
                                 "uid": "top-chromosome-track",
-                                "local": true,
-                                "name": "Chromosome Axis",
-                                "thumbnail": null,
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "tilesetUid": "EMo5uFThS5S263tNLbzeVw",
                                 "options": {
                                     "labelColor": "#888",
                                     "trackBorderColor": "black",
-                                    "minusStrandColor": "red",
                                     "showMousePosition": false,
                                     "trackBorderWidth": 0,
                                     "showTooltip": false,
                                     "labelPosition": "hidden",
-                                    "plusStrandColor": "blue",
                                     "mousePositionColor": "#999999"
                                 }
                             }
@@ -1106,12 +809,9 @@
                         "autocompleteId": "IUcqX4GzTNWJIzE2-b_sZg"
                     },
                     "layout": {
-                        "moved": false,
                         "h": 12,
-                        "static": true,
                         "x": 0,
                         "y": 0,
-                        "i": "view-4dn-mcool-0",
                         "w": 12
                     }
                 }
@@ -1163,11 +863,9 @@
                     "uid": "aa",
                     "autocompleteSource": "",
                     "layout": {
-                        "static": false,
                         "w": 12,
                         "x": 0,
                         "h": 12,
-                        "moved": false,
                         "y": 0
                     },
                     "initialYDomain": [

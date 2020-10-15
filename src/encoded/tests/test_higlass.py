@@ -23,21 +23,14 @@ def higlass_mcool_viewconf(testapp, award, lab):
         'lab': lab['@id'],
         "title":
         "Test MCOOL Display",
-        "description":
-        "An MCOOL file track plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
-        "uuid":
-        "00000000-1111-0000-1111-000000000002",
-        "name":
-        "higlass-mcool-test-view",
-        "genome_assembly":
-        "GRCm38",
+        "description": "An MCOOL file track plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
+        "uuid": "00000000-1111-0000-1111-000000000002",
+        "name": "higlass-mcool-test-view",
+        "genome_assembly": "GRCm38",
         "viewconfig": {
-            "editable":
-            True,
-            "zoomFixed":
-            False,
-            "exportViewUrl":
-            "/api/v1/viewconfs",
+            "editable": True,
+            "zoomFixed": False,
+            "exportViewUrl": "/api/v1/viewconfs",
             "zoomLocks": {
                 "locksByViewUid": {},
                 "locksDict": {}
@@ -48,20 +41,16 @@ def higlass_mcool_viewconf(testapp, award, lab):
             },
             "trackSourceServers": ["https://higlass.4dnucleome.org/api/v1"],
             "views": [{
-                "uid":
-                "view-4dn-mcool-0",
+                "uid": "view-4dn-mcool-0",
                 "layout": {
                     "w": 12,
                     "h": 12,
                     "x": 0,
-                    "y": 0,
-                    "moved": False,
-                    "static": True
+                    "y": 0
                 },
                 "initialXDomain": [102391829.2052902, 2938891536.27695],
                 "initialYDomain": [129711724.73566854, 1810982460.1999617],
-                "autocompleteSource":
-                "/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
+                "autocompleteSource": "/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
                 "genomePositionSearchBox": {
                     "autocompleteServer":
                     "https://higlass.4dnucleome.org/api/v1",
@@ -72,7 +61,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                 },
                 "tracks": {
                     "top": [{
-                        "name": "Gene Annotations (GRCm38)",
                         "server": "https://higlass.4dnucleome.org/api/v1",
                         "tilesetUid": "IUcqX4GzTNWJIzE2-b_sZg",
                         "type": "horizontal-gene-annotations",
@@ -88,17 +76,11 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "mousePositionColor": "#999999"
                         },
                         "height": 55,
-                        "header": "",
-                        "position": "top",
-                        "orientation": "1d-horizontal",
                         "uid": "top-annotation-track"
                     }, {
-                        "name": "Chromosome Axis",
                         "server": "https://higlass.4dnucleome.org/api/v1",
                         "tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
                         "type": "horizontal-chromosome-labels",
-                        "local": True,
-                        "thumbnail": None,
                         "options": {
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
@@ -109,16 +91,10 @@ def higlass_mcool_viewconf(testapp, award, lab):
                         "uid": "top-chromosome-track"
                     }],
                     "left": [{
-                        "name":
-                        "Gene Annotations (GRCm38)",
-                        "server":
-                        "https://higlass.4dnucleome.org/api/v1",
-                        "tilesetUid":
-                        "IUcqX4GzTNWJIzE2-b_sZg",
-                        "uid":
-                        "left-annotation-track",
-                        "type":
-                        "vertical-gene-annotations",
+                        "server": "https://higlass.4dnucleome.org/api/v1",
+                        "tilesetUid": "IUcqX4GzTNWJIzE2-b_sZg",
+                        "uid": "left-annotation-track",
+                        "type": "vertical-gene-annotations",
                         "options": {
                             "labelColor": "black",
                             "labelPosition": "hidden",
@@ -130,109 +106,47 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
-                        "width":
-                        55,
-                        "header":
-                        "",
-                        "orientation":
-                        "1d-vertical",
-                        "position":
-                        "left"
+                        "width": 55
                     }, {
-                        "name":
-                        "Chromosome Axis",
-                        "server":
-                        "https://higlass.4dnucleome.org/api/v1",
-                        "tilesetUid":
-                        "JXbq7f-GTeq3FJy_ilIomQ",
-                        "uid":
-                        "left-chromosome-track",
-                        "type":
-                        "vertical-chromosome-labels",
+                        "server": "https://higlass.4dnucleome.org/api/v1",
+                        "tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
+                        "uid": "left-chromosome-track",
+                        "type": "vertical-chromosome-labels",
                         "options": {
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
-                        "width":
-                        20,
-                        "minWidth":
-                        20,
-                        "orientation":
-                        "1d-vertical",
-                        "position":
-                        "left"
+                        "width": 20
                     }],
                     "center": [{
-                        "uid":
-                        "center-mcool-track",
-                        "type":
-                        "combined",
-                        "height":
-                        250,
+                        "uid": "center-mcool-track",
+                        "type": "combined",
+                        "height": 250,
                         "contents": [{
-                            "server":
-                            "https://higlass.4dnucleome.org/api/v1",
-                            "tilesetUid":
-                            "LTiacew8TjCOaP9gpDZwZw",
-                            "type":
-                            "heatmap",
-                            "position":
-                            "center",
-                            "uid":
-                            "GjuZed1ySGW1IzZZqFB9BA",
-                            "name":
-                            "4DNFI1TBYKV3.mcool",
+                            "server": "https://higlass.4dnucleome.org/api/v1",
+                            "tilesetUid": "LTiacew8TjCOaP9gpDZwZw",
+                            "type": "heatmap",
+                            "position": "center",
+                            "uid": "GjuZed1ySGW1IzZZqFB9BA",
                             "options": {
-                                "backgroundColor":
-                                "#eeeeee",
-                                "labelPosition":
-                                "topLeft",
-
+                                "backgroundColor": "#eeeeee",
+                                "labelPosition": "topLeft",
                                 "colorRange": [
                                     "white", "rgba(245,166,35,1.0)",
                                     "rgba(208,2,27,1.0)", "black"
                                 ],
-                                "maxZoom":
-                                None,
-                                "colorbarPosition":
-                                "topRight",
-                                "trackBorderWidth":
-                                0,
-                                "trackBorderColor":
-                                "black",
-                                "heatmapValueScaling":
-                                "log",
-                                "showMousePosition":
-                                False,
-                                "mousePositionColor":
-                                "#999999",
-                                "showTooltip":
-                                False,
-                                "name":
-                                "4DNFI1TBYKV3.mcool",
-                                "scaleStartPercent":
-                                "0.00000",
-                                "scaleEndPercent":
-                                "1.00000"
-                            },
-                            "transforms": [{
-                                "name": "KR",
-                                "value": "KR"
-                            }, {
-                                "name": "ICE",
-                                "value": "weight"
-                            }, {
-                                "name": "VC",
-                                "value": "VC"
-                            }, {
-                                "name": "VC_SQRT",
-                                "value": "VC_SQRT"
-                            }],
-                            "resolutions": [
-                                1000, 2000, 5000, 10000, 25000, 50000, 100000,
-                                250000, 500000, 1000000, 2500000, 5000000,
-                                10000000
-                            ]
+                                "maxZoom": None,
+                                "colorbarPosition": "topRight",
+                                "trackBorderWidth": 0,
+                                "trackBorderColor": "black",
+                                "heatmapValueScaling": "log",
+                                "showMousePosition": False,
+                                "mousePositionColor": "#999999",
+                                "showTooltip": False,
+                                "name": "4DNFI1TBYKV3.mcool",
+                                "scaleStartPercent": "0.00000",
+                                "scaleEndPercent": "1.00000"
+                            }
                         }],
                         "position":
                         "center",
@@ -300,9 +214,7 @@ def higlass_blank_viewconf(testapp, lab, award):
                     "w": 12,
                     "h": 12,
                     "x": 0,
-                    "y": 0,
-                    "moved": False,
-                    "static": False
+                    "y": 0
                 },
                 "initialYDomain": [549528857.4793874, 2550471142.5206127]
             }],
