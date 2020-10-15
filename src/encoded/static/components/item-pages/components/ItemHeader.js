@@ -256,11 +256,14 @@ export class MiddleRow extends React.Component {
             children = null,
             text: propText = null, // if present, takes priority over context description.
             context = {},
-            windowWidth
+            windowWidth,
+            className,
         } = this.props;
 
+        const baseClass = (className ? className + " " : "") + "item-page-heading";
+
         if (children) {
-            return <div className="item-page-heading">{ children }</div>;
+            return <div className={baseClass}>{children}</div>;
         }
 
         const description = (context && typeof context.description === 'string' && context.description) || null;
@@ -272,7 +275,7 @@ export class MiddleRow extends React.Component {
         );
 
         if (!textDescription && !isInlineEditable){
-            return <div className="item-page-heading no-description"/>;
+            return <div className={baseClass + " no-description"} />;
         }
 
         return (
@@ -280,7 +283,7 @@ export class MiddleRow extends React.Component {
                 context={context}
                 windowWidth={windowWidth}
                 description={textDescription || <em>No description provided.</em>}
-                className="item-page-heading"
+                className={baseClass}
                 textClassName="text-medium"
                 defaultExpanded={(textDescription || '').length < 600}
                 fitTo="grid"
