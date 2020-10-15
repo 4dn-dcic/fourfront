@@ -1005,8 +1005,8 @@ function HiGlassFileDetailPane(props) {
             {!viewConfigTracks ? null : (
                 <div className="flex-description-container">
                     <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
-                    <div className="row ml-27 mr-0">
-                        <table style={{ minWidth: '100%' }}>
+                    <div className="row py-2 ml-27 mr-0">
+                        <table className="w-100">
                             <thead>
                                 <tr>
                                     <th><div className="tooltip-info-container"><span>In View</span></div></th>
@@ -1016,13 +1016,9 @@ function HiGlassFileDetailPane(props) {
                                     <th><div className="tooltip-info-container"><span>Title</span></div></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {tracksBody}
-                            </tbody>
+                            <tbody>{ tracksBody }</tbody>
                         </table>
                     </div>
-
-                    <hr className="desc-separator" />
                 </div>
             )}
             {/* <h5 className="text-500 mb-0 mt-16">
