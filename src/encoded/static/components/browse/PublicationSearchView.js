@@ -9,7 +9,6 @@ import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-comp
 import { console, analytics, object, navigate as spcNavigate, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { TableRowToggleOpenButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
 import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { columnExtensionMap } from './columnExtensionMap';

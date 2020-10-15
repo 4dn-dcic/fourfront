@@ -8,18 +8,12 @@ import memoize from 'memoize-one';
 
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
 import { searchFilters, object, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ColumnCombiner, DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
-import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
-import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
-import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
-import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SortController';
-import { WindowNavigationController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/WindowNavigationController';
-
+import { DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 
 // We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
 // We could probably also create different 'browseState' module for it, however.
-import { navigate as globalNavigate, typedefs, Schemas } from './../util';
+import { navigate as globalNavigate, typedefs } from './../util';
 import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
 
 import { store } from './../../store';

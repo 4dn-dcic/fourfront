@@ -6,20 +6,14 @@ import memoize from 'memoize-one';
 import _ from 'underscore';
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
-import { ColumnCombiner, DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
-import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
-import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SortController';
-import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
+import { DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { SelectedFilesController } from './../browse/components/SelectedFilesController';
-import { navigate, Schemas } from './../util';
-import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
+import { navigate } from './../util';
 import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';
-import { WindowNavigationController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/WindowNavigationController';
 import { transformedFacets } from './SearchView';
 import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';
 import { fileToAccessionTriple } from './../util/experiments-transforms';
-import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
 
 
 export default function FileSearchView (props){
