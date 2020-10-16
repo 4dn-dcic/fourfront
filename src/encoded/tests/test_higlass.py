@@ -419,7 +419,7 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf,
 
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # Only one new top track should have appeared.
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
@@ -1254,7 +1254,7 @@ def test_add_files_by_accession(testapp, mcool_file_json,
 
     # 1 central track should be in the new view.
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # 1 more track should be on top.
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
@@ -1378,7 +1378,7 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bigwig_file_json):
 
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # Only one new top track should have appeared.
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
@@ -1433,7 +1433,7 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # Make sure the view has an initialXDomain and initialYDomain.
     assert_true(len(new_higlass_json["views"][0]["initialXDomain"]) == 2)
@@ -1535,7 +1535,7 @@ def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf,
 
     # Central track is unchanged
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # The top track should be a bed-like track
     found_data_track = False
