@@ -31,27 +31,27 @@
             "qc_order": 1
         },
         "Total reads": {
-            "title": "Total reads",
+            "title": "Total Reads",
             "type": "number",
             "qc_order": 2
         },
         "Short cis reads (<20kb)": {
-            "title": "Short cis reads (<20kb)",
+            "title": "Short Cis Reads (<20kb)",
             "type": "number",
             "qc_order": 3
         },
         "Cis reads (>20kb)": {
-            "title": "Cis reads (>20kb)",
+            "title": "Cis Reads (>20kb)",
             "type": "number",
             "qc_order": 4
         },
         "Trans reads": {
-            "title": "Trans reads",
+            "title": "Trans Reads",
             "type": "number",
             "qc_order": 5
         },
         "% Long-range intrachromosomal reads": {
-            "title": "% Long-range intrachromosomal reads",
+            "title": "% Long-range Intrachromosomal Reads",
             "type": "number",
             "qc_order": 6
         },
