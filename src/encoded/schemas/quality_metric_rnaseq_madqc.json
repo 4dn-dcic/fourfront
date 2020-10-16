@@ -49,22 +49,22 @@
                         "qc_order": 2
                     },
                     "MAD of log ratios": {
-                        "title": "MAD of log ratios",
+                        "title": "MAD of Log Ratios",
                         "type": "number",
                         "qc_order": 3
                     },
                     "Pearson correlation": {
-                        "title": "Pearson correlation",
+                        "title": "Pearson Correlation",
                         "type": "number",
                         "qc_order": 4
                     },
                     "SD of log ratios": {
-                        "title": "SD of log ratios",
+                        "title": "SD of Log Ratios",
                         "type": "number",
                         "qc_order": 5
                     },
                     "Spearman correlation": {
-                        "title": "Spearman correlation",
+                        "title": "Spearman Correlation",
                         "type": "number",
                         "qc_order": 6
                     }

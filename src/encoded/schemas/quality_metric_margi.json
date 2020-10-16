@@ -31,6 +31,7 @@
             "qc_order": 1
         },
         "Sequence mapping QC": {
+            "title": "Sequence Mapping QC",
             "type": "string",
             "qc_order": 2
         },
@@ -55,34 +56,42 @@
             "qc_order": 6
         },
         "Total number of interactions": {
+            "title": "Total Number of Interactions",
             "type": "string",
             "qc_order": 7
         },
         "Inter-chromosome interactions": {
+            "title": "Inter-chromosome Interactions",
             "type": "string",
             "qc_order": 8
         },
         "Intra-chromosome interactions": {
+            "title": "Intra-chromosome Interactions",
             "type": "string",
             "qc_order": 9
         },
         "Type": {
+            "title": "Type",
             "type": "string",
             "qc_order": 10
         },
         "Distal": {
+            "title": "Distal",
             "type": "string",
             "qc_order": 11
         },
         "Proximal": {
+            "title": "Proximal",
             "type": "string",
             "qc_order": 12
         },
         "#total_valid_interactions/#nondup_unique_mapped_pairs": {
+            "title": "Total Valid Interactions Count / Nondup Unique Mapped Pairs Count",
             "type": "string",
             "qc_order": 13
         },
         "(#unique_mapped_pairs + #single_side_unique_mapped)/#total_read_pairs": {
+            "title": "Unique Mapped Pairs Count + Single Side Unique Mapped Count) / Total Read Pairs Count",
             "type": "string",
             "qc_order": 14
         }
