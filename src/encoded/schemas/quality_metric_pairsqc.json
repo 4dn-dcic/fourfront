@@ -31,30 +31,37 @@
             "qc_order": 1
         },
         "Total reads": {
+            "title": "Total reads",
             "type": "number",
             "qc_order": 2
         },
         "Short cis reads (<20kb)": {
+            "title": "Short cis reads (<20kb)",
             "type": "number",
             "qc_order": 3
         },
         "Cis reads (>20kb)": {
+            "title": "Cis reads (>20kb)",
             "type": "number",
             "qc_order": 4
         },
         "Trans reads": {
+            "title": "Trans reads",
             "type": "number",
             "qc_order": 5
         },
         "% Long-range intrachromosomal reads": {
+            "title": "% Long-range intrachromosomal reads",
             "type": "number",
             "qc_order": 6
         },
         "Cis/Trans ratio": {
+            "title": "Cis/Trans ratio",
             "type": "number",
             "qc_order": 7
         },
         "convergence": {
+            "title": "Convergence",
             "type": "string",
             "enum": [
                 "Very Good",
@@ -64,6 +71,7 @@
             "qc_order": 8
         },
         "slope": {
+            "title": "Slope",
             "type": "number",
             "qc_order": 9
         },
