@@ -9,11 +9,12 @@ import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-comp
 import { DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { SelectedFilesController } from './../browse/components/SelectedFilesController';
-import { navigate } from './../util';
+import { navigate, Schemas } from './../util';
 import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';
 import { transformedFacets } from './SearchView';
 import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';
 import { fileToAccessionTriple } from './../util/experiments-transforms';
+
 
 
 export default function FileSearchView (props){
@@ -93,7 +94,7 @@ function FileTableWithSelectedFilesCheckboxes(props){
         totalExpected: total // todo: remove, deprecated
     };
 
-    return <CommonSearchView {...passProps} />;
+    return <CommonSearchView {...passProps} termTransformFxn={Schemas.Term.toName} />;
 }
 FileTableWithSelectedFilesCheckboxes.propTypes = {
     // Props' type validation based on contents of this.props during render.

@@ -13,7 +13,7 @@ import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-comp
 
 // We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
 // We could probably also create different 'browseState' module for it, however.
-import { navigate as globalNavigate, typedefs } from './../util';
+import { navigate as globalNavigate, typedefs, Schemas } from './../util';
 import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
 
 import { store } from './../../store';
@@ -447,7 +447,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
         totalExpected: total // todo: remove, deprecated
     };
 
-    return <CommonSearchView {...passProps} />;
+    return <CommonSearchView {...passProps} termTransformFxn={Schemas.Term.toName} />;
 }
 BrowseTableWithSelectedFilesCheckboxes.propTypes = {
     // Props' type validation based on contents of this.props during render.
