@@ -690,7 +690,7 @@
             }
         },
         "ctl_flagstat_qc": {
-            "title": "Ctl Flagstat",
+            "title": "Flagstat",
             "type": "array",
             "qc_order": 2,
             "items": {
@@ -862,7 +862,7 @@
             }
         },
         "ctl_dup_qc": {
-            "title": "Ctl Duplicates",
+            "title": "Duplicates",
             "type": "array",
             "qc_order": 3,
             "items": {
@@ -1034,7 +1034,7 @@
             }
         },
         "ctl_nodup_flagstat_qc": {
-            "title": "Ctl Flagstat Duplicates Removed",
+            "title": "Flagstat Duplicates Removed",
             "type": "array",
             "qc_order": 4,
             "items": {
@@ -1160,7 +1160,7 @@
             }
         },
         "pbc_qc": {
-            "title": "PBC",
+            "title": "PCR Bottleneck Coefficient (PBC)",
             "type": "array",
             "qc_order": 5,
             "items": {
@@ -1206,7 +1206,7 @@
             }
         },
         "ctl_pbc_qc": {
-            "title": "Ctl PBC",
+            "title": "PCR Bottleneck Coefficient (PBC)",
             "type": "array",
             "qc_order": 5,
             "items": {

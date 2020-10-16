@@ -209,7 +209,7 @@
             }
         },
         "pbc_qc": {
-            "title": "PBC",
+            "title": "PCR Bottleneck Coefficient (PBC)",
             "type": "array",
             "qc_order": 4,
             "items": {
