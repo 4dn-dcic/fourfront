@@ -53,6 +53,7 @@ export const Term = {
             case 'date_created':
             case 'public_release':
             case 'project_release':
+            case 'date_approved':
                 if (allowJSXOutput) name = <LocalizedTime timestamp={term} />;
                 else name = dateFormat(term);
                 break;
