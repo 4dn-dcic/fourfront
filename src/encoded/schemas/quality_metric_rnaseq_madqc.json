@@ -31,6 +31,7 @@
             "qc_order": 1
         },
         "MAD QC": {
+            "title": "MAD QC",
             "type": "array",
             "qc_order": 2,
             "items": {
@@ -38,26 +39,32 @@
                 "additionalProperties": false,
                 "properties": {
                     "File 1": {
+                        "title": "File 1",
                         "type": "string",
                         "qc_order": 1
                     },
                     "File 2": {
+                        "title": "File 2",
                         "type": "string",
                         "qc_order": 2
                     },
                     "MAD of log ratios": {
+                        "title": "MAD of log ratios",
                         "type": "number",
                         "qc_order": 3
                     },
                     "Pearson correlation": {
+                        "title": "Pearson correlation",
                         "type": "number",
                         "qc_order": 4
                     },
                     "SD of log ratios": {
+                        "title": "SD of log ratios",
                         "type": "number",
                         "qc_order": 5
                     },
                     "Spearman correlation": {
+                        "title": "Spearman correlation",
                         "type": "number",
                         "qc_order": 6
                     }
