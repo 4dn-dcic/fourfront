@@ -56,7 +56,7 @@
             "qc_order": 6
         },
         "Cis/Trans ratio": {
-            "title": "Cis/Trans ratio",
+            "title": "Cis/Trans Ratio",
             "type": "number",
             "qc_order": 7
         },

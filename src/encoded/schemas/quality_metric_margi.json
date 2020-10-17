@@ -91,7 +91,7 @@
             "qc_order": 13
         },
         "(#unique_mapped_pairs + #single_side_unique_mapped)/#total_read_pairs": {
-            "title": "Unique Mapped Pairs Count + Single Side Unique Mapped Count) / Total Read Pairs Count",
+            "title": "(Unique Mapped Pairs Count + Single Side Unique Mapped Count) / Total Read Pairs Count",
             "type": "string",
             "qc_order": 14
         }
