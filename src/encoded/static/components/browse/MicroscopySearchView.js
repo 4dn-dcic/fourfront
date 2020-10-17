@@ -8,6 +8,7 @@ import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import Modal from 'react-bootstrap/esm/Modal';
 
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
+import { AboveSearchViewTableControls } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/above-table-controls/AboveSearchViewTableControls';
 import { console, ajax, navigate, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 
@@ -18,7 +19,8 @@ import { transformedFacets } from './SearchView';
 
 
 
-const microscopyColExtensionMap = _.extend({}, columnExtensionMap, {
+const microscopyColExtensionMap = {
+    ...columnExtensionMap,
     "microscope.Tier": {
         "widthMap": { "sm": 50, "md": 70, "lg": 80 }
     },
@@ -36,8 +38,8 @@ const microscopyColExtensionMap = _.extend({}, columnExtensionMap, {
     },
     "submitted_by.display_title": {
         "widthMap": { "sm": 100, "md": 100, "lg": 120 }
-    },
-});
+    }
+};
 
 export default class MicroscopySearchView extends React.PureComponent {
 
@@ -63,8 +65,24 @@ export default class MicroscopySearchView extends React.PureComponent {
         };
     }
 
+    /** @todo Possibly move into own component instead of method, especially if state can move along with it. */
     createNewMicroscopeConfiguration() {
+        const { context, currentAction } = this.props;
         const { show, tier/*, validationTier*/, microscopeName, confirmLoading } = this.state;
+
+        let createNewVisible = false;
+        // don't show during submission search "selecting existing"
+        if (context && Array.isArray(context.actions) && !currentAction) {
+            const addAction = _.findWhere(context.actions, { 'name': 'add' });
+            if (addAction && typeof addAction.href === 'string') {
+                createNewVisible = true;
+            }
+        }
+
+        if (!createNewVisible) {
+            return null;
+        }
+
         const buttonProps = {
             'handleChangeMicroscopeTier': this.handleChangeMicroscopeTier,
             'startTier': 1,
@@ -161,26 +179,25 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     render() {
-        const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
+        const { isFullscreen, toggleFullScreen, href, context, currentAction, session, schemas } = this.props;
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
         const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
-        let createNewVisible = false;
-        // don't show during submission search "selecting existing"
-        if (context && Array.isArray(context.actions) && !currentAction) {
-            const addAction = _.findWhere(context.actions, { 'name': 'add' });
-            if (addAction && typeof addAction.href === 'string') {
-                createNewVisible = true;
-            }
-        }
+        const aboveTableComponent = (
+            <AboveSearchViewTableControls {...{ isFullscreen, toggleFullScreen }}
+                topLeftChildren={this.createNewMicroscopeConfiguration()} />
+        );
+
         return (
+            // TODO (low-ish priority): Pass in props.aboveTableComponent =  instead of props.topLeftChildren
             <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} topLeftChildren={createNewVisible ? this.createNewMicroscopeConfiguration() : null} />
+                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets, aboveTableComponent }}
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} />
             </div>
         );
     }
 }
+
 
 const CreateNewConfigurationDropDownButton = React.memo(function (props) {
     const { handleChangeMicroscopeTier, startTier, endTier } = props;

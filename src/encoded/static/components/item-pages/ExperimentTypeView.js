@@ -25,7 +25,7 @@ export default class ExperimentTypeView extends DefaultItemView {
                 "experiments_in_set.experiment_type.display_title=" + encodeURIComponent(context.display_title)
             ),
             'facets' : null,
-            // Gets passed down to `ExperimentSetsTableTabView` which passes it down to `ExperimentSetsTableTabViewTitle`
+            // Gets passed down to `ExperimentSetsTableTabView` which passes it down to `SearchTableTitle`
             'externalSearchLinkVisible' : true
         };
 
