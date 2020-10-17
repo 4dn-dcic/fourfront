@@ -987,7 +987,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
                         is_numerical_field = field_schema['type'] in ("integer", "float", "number")
 
                         if is_date_field or is_numerical_field:
-                            title_field = field_schema.get("title", f_field)
+                            title_field = field_schema.get("title", split_field[-2])
                             use_field = f_field
                             aggregation_type = 'stats'
 

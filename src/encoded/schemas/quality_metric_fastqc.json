@@ -28,6 +28,7 @@
             "default": "1"
         },
         "Basic Statistics": {
+            "title": "Basic Statistics",
             "type": "string",
             "enum": [
                 "PASS",
@@ -37,22 +38,27 @@
             "qc_order": 1
         },
         "Total Sequences": {
+            "title": "Total Sequences",
             "type": "number",
             "qc_order": 2
         },
         "Sequences flagged as poor quality": {
+            "title": "Sequences Flagged as Poor Quality",
             "type": "number",
             "qc_order": 3
         },
         "Sequence length": {
+            "title": "Sequence Length",
             "type": "string",
             "qc_order": 4
         },
         "%GC": {
+            "title": "%GC",
             "type": "number",
             "qc_order": 5
         },
         "Per base sequence quality": {
+            "title": "Per Base Sequence Quality",
             "type": "string",
             "enum": [
                 "PASS",
@@ -62,6 +68,7 @@
             "qc_order": 6
         },
         "Per tile sequence quality": {
+            "title": "Per Tile Sequence Quality",
             "type": "string",
             "enum": [
                 "PASS",
@@ -71,6 +78,7 @@
             "qc_order": 7
         },
         "Per sequence quality scores": {
+            "title": "Per Sequence Quality Scores",
             "type": "string",
             "enum": [
                 "PASS",
@@ -80,6 +88,7 @@
             "qc_order": 8
         },
         "Per base sequence content": {
+            "title": "Per Base Sequence Content",
             "type": "string",
             "enum": [
                 "PASS",
@@ -89,6 +98,7 @@
             "qc_order": 9
         },
         "Per sequence GC content": {
+            "title": "Per Sequence GC Content",
             "type": "string",
             "enum": [
                 "PASS",
@@ -98,6 +108,7 @@
             "qc_order": 10
         },
         "Per base N content": {
+            "title": "Per Base N Content",
             "type": "string",
             "enum": [
                 "PASS",
@@ -107,6 +118,7 @@
             "qc_order": 11
         },
         "Sequence Length Distribution": {
+            "title": "Sequence Length Distribution",
             "type": "string",
             "enum": [
                 "PASS",
@@ -116,6 +128,7 @@
             "qc_order": 12
         },
         "Sequence Duplication Levels": {
+            "title": "Sequence Duplication Levels",
             "type": "string",
             "enum": [
                 "PASS",
@@ -125,6 +138,7 @@
             "qc_order": 13
         },
         "Overrepresented sequences": {
+            "title": "Overrepresented Sequences",
             "type": "string",
             "enum": [
                 "PASS",
@@ -134,6 +148,7 @@
             "qc_order": 14
         },
         "Adapter Content": {
+            "title": "Adapter Content",
             "type": "string",
             "enum": [
                 "PASS",
@@ -143,6 +158,7 @@
             "qc_order": 15
         },
         "Kmer Content": {
+            "title": "Kmer Content",
             "type": "string",
             "enum": [
                 "PASS",

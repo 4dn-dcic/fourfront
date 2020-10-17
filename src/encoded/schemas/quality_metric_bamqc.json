@@ -28,30 +28,37 @@
             "default": "1"
         },
         "Total Reads": {
+            "title": "Total Reads",
             "type": "number",
             "qc_order": 1
         },
         "Minor Contigs": {
+            "title": "Minor Contigs",
             "type": "number",
             "qc_order": 2
         },
         "Filtered Reads": {
+            "title": "Filtered Reads",
             "type": "number",
             "qc_order": 3
         },
         "% of duplicates": {
+            "title": "% of Duplicates",
             "type": "number",
             "qc_order": 4
         },
         "% of reads mapped": {
+            "title": "% of Reads Mapped",
             "type": "number",
             "qc_order": 5
         },
         "% of reads filtered": {
+            "title": "% of Reads Filtered",
             "type": "number",
             "qc_order": 6
         },
         "% of rescued chimeras": {
+            "title": "% of Rescued Chimeras",
             "type": "number",
             "qc_order": 7
         },
