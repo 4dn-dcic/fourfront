@@ -11,7 +11,8 @@ import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/component
 import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
 
-import { ExperimentSetsTableTabView, EmbeddedExperimentSetSearchTable, ExperimentSetsTableTabViewTitle } from './components/tables/ExperimentSetTables';
+import { SearchTableTitle } from './components/tables/ItemPageTable';
+import { ExperimentSetsTableTabView, EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -104,7 +105,7 @@ function FileViewOverview (props) {
         searchHref,
         facets: null,
         defaultOpenIndices: [0],
-        title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible={false} />
+        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />
     };
     return (
         <div>
