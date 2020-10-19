@@ -119,69 +119,14 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             return ' and '.join(sorted([t for t in treat_list if t]))
         return 'None'
 
-    def _get_biosource_summary(self, request, biosource, cell_culture_details=None):
-        summary = ''
-        for bios in biosource:
-            if bios.get('biosource_name'):
-                summary += (bios['biosource_name'] + ' and ')
-        if len(summary) > 0:
-            summary = summary[:-5]
-            if cell_culture_details and len(cell_culture_details) == 1:
-                if 'tissue' in cell_culture_detail:
-                    tissue_term = get_item_info(request, cell_culture_details.get('tissue'), 'ontology_terms')
-                    summary = summary + ' differentiated to ' + tissue_term.get('display_title')
-        return summary
-
-    def _get_biosample_type(self, biosource, cell_culture_details):
-        biosource_types = []
-        for bs in biosource:
-            biosource_types.append(bs.get('biosource_type'))
-        biosource_types = list(set(biosource_types))
-        if len(biosource_types) > 1:
-            # hopefully rare or never happen
-            return 'mixed sample'
-        elif len(biosource_types) < 1:  # pragma: no cover
-            # shouldn't happen so raise an exception
-            raise "Biosource always needs type - why can't we find it"
-
-        # we've got a single type of biosource
-        if cell_culture_details:  # this is now an array but just check the first
-            cell_culture = cell_culture_details[0]
-            if cell_culture.get('in_vitro_differentiated') == 'Yes':
-                return 'in vitro differentiated cells'
-
-        biosource_type = biosource_types[0]
-        if biosource_type == 'multicellular organism':
-            biosource_type = 'whole organism'
-        elif biosource_type == 'stem cell derived cell line':
-            biosource_type = 'stem cell'
-        elif biosource_type.endswith(' line'):
-            biosource_type = biosource_type[:-5]
-        if biosource_type == 'tissue':
-            return biosource_type
-        return biosource_type + 's'
-
-    def _get_biosample_category(self, biosource, cell_culture_details):
-        if not biosource:  # should not happen
-            return None
-        if len(biosource) > 1:
-            return ['Mixed samples']
-        categories = []
-        categories = biosource[0].get('biosource_category', [])
-        if cell_culture_details:  # this is now an array but just check the first
-            if cell_culture_details[0].get('in_vitro_differentiated') == 'Yes':
-                categories.append('In vitro Differentiation')
-                return [c for c in categories if 'stem cell' not in c]
-        return categories
-
     def _get_sample_tissue_organ(self, request, item_w_tissue):
         tissue = None
         organ_system = []
-        tissue_term = get_item_info(request, item_w_tissue.get('tissue'), 'ontology_terms')
+        tissue_term = self._get_item_info(request, item_w_tissue.get('tissue'), 'ontology_terms')
         if tissue_term is not None:
             tissue = tissue_term.get('display_title')
             if 'slim_terms' in tissue_term:
-                slim_terms = get_item_info(request, tissue_term.get('slim_terms'), 'ontology_terms')
+                slim_terms = self._get_item_info(request, tissue_term.get('slim_terms'), 'ontology_terms')
                 for st in slim_terms:
                     if st.get('is_slim_for') in ['developmental', 'system', 'organ']:
                         organ_system.append(st.get('display_title'))
@@ -190,7 +135,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     def _get_item_info(self, request, item, itype):
         """ Getting object representation of Items which may be passed as a list
             both of which may have more than one associated
-        """
+        """7
         items = []
         for it in item:
             items.append(get_item_or_none(request, it, itype))
@@ -198,22 +143,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         return [i for i in items if i]
 
     @calculated_property(schema={
-        "title": "Sample Info",
+        "title": "Tissue, Organ/System Info",
         "description": "Useful faceting info for biosample",
         "type": "object",
         "properties": {
-            "biosource_summary": {
-                "type": "string"
-            },
-            "biosample_category": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            },
-            "biosample_type": {
-                "type": "string"
-            },
             "tissue_source": {
                 "type": "string"
             },
@@ -225,21 +158,11 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             },
         }
     })
-    def sample_info(self, request, biosource, cell_culture_details=None):
+    def tissue_organ_info(self, request, biosource, cell_culture_details=None):
         sample_info = {}
         biosource = self._get_item_info(request, biosource, 'biosources')
         if cell_culture_details:
-            cell_culture_details = self.get_item_info(request, cell_culture_details, 'cell_culture_details')
-        sample_info = {}
-        biosrc_summary = self._get_biosource_summary(request, biosource, cell_culture_details)
-        if biosrc_summary:
-            sample_info['biosource_summary'] = biosrc_summary
-        categories = self._get_biosample_category(biosource, cell_culture_details)
-        if categories:
-            sample_info['biosample_category'] = categories
-        bstype = self._get_biosample_type(biosource, cell_culture_details)
-        if bstype:
-            sample_info['biosample_type'] = bstype
+            cell_culture_details = self._get_item_info(request, cell_culture_details, 'cell_culture_details')
         # getting tissue and organ/system info from cell culture info first (as it is differentiated)
         # then biosource second
         tissue = None
@@ -253,6 +176,86 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         if organ:
             sample_info['organ_system'] = organ
         return sample_info
+
+    @calculated_property(schema={
+        "title": "Biosource summary",
+        "description": "Summary of any biosources comprising the biosample.",
+        "type": "string",
+    })
+    def biosource_summary(self, request, biosource, cell_culture_details=None):
+        ret_str = ''
+        for bios in biosource:
+            bios_props = get_item_or_none(request, bios, 'biosources')
+            if bios_props and bios_props.get('biosource_name'):
+                ret_str += (bios_props['biosource_name'] + ' and ')
+        if len(ret_str) > 0:
+            ret_str = ret_str[:-5]
+            if cell_culture_details:  # will assume same differentiation if multiple bccs
+                cc_props = get_item_or_none(request, cell_culture_details[0], 'biosample_cell_cultures', frame='embedded')
+                if cc_props and 'tissue' in cc_props:
+                    ret_str = ret_str + ' differentiated to ' + cc_props['tissue'].get('display_title')
+            return ret_str
+        return 'None'  # pragma: no cover
+
+    @calculated_property(schema={
+        "title": "Sample type",
+        "description": "The type of biosample used in an experiment.",
+        "type": "string",
+    })
+    def biosample_type(self, request, biosource, cell_culture_details=None):
+        biosource_types = []
+        for bs in biosource:
+            # silliness in case we ever have multiple biosources
+            biosource = get_item_or_none(request, bs, 'biosources')
+            if biosource:
+                btype = biosource.get('biosource_type')
+                biosource_types.append(btype)
+        biosource_types = list(set(biosource_types))
+        if len(biosource_types) > 1:
+            # hopefully rare or never happen
+            return 'mixed sample'
+        elif len(biosource_types) < 1:  # pragma: no cover
+            # shouldn't happen so raise an exception
+            raise "Biosource always needs type - why can't we find it"
+
+        # we've got a single type of biosource
+        if cell_culture_details:  # this is now an array but just check the first
+            cell_culture = get_item_or_none(request, cell_culture_details[0], 'biosample_cell_cultures')
+            if cell_culture:
+                if cell_culture.get('in_vitro_differentiated') == 'Yes':
+                    return 'in vitro differentiated cells'
+
+        biosource_type = biosource_types[0]
+        if biosource_type == 'multicellular organism':
+            biosource_type = 'whole organism'
+        elif biosource_type == 'stem cell derived cell line':
+            biosource_type = 'stem cell'
+        elif biosource_type.endswith(' line'):
+            biosource_type = biosource_type[:-5]
+        if biosource_type == 'tissue':
+            return biosource_type
+        return biosource_type + 's'
+
+    @calculated_property(schema={
+        "title": "Sample Category",
+        "description": "The category of biosample used in an experiment.",
+        "type": "string",
+    })
+    def biosample_category(self, request, biosource, cell_culture_details=None):
+        if len(biosource) > 1:
+            return ['Mixed samples']
+        categories = []
+        biosource = get_item_or_none(request, biosource[0], 'biosources')
+        if biosource:
+            categories = biosource.get('biosource_category', [])
+        if cell_culture_details:  # this is now an array but just check the first
+            cell_culture = get_item_or_none(request, cell_culture_details[0], 'biosample_cell_cultures')
+            if cell_culture:
+                if cell_culture.get('in_vitro_differentiated') == 'Yes':
+                    categories.append('In vitro Differentiation')
+                    return [c for c in categories if 'stem cell' not in c]
+        if categories:
+            return categories
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties
