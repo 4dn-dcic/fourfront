@@ -69,11 +69,11 @@ def test_biosample_calculated_properties(testapp, biosample_1, ):
     assert 'modifications_summary' in res
     assert 'modifications_summary_short' in res
     assert 'treatments_summary' in res
-    assert 'biosource_summary' in res
+    assert 'sample_info' in res
 
 
 def test_biosample_biosource_summary_one_biosource(testapp, biosample_1, human_biosource):
-    assert biosample_1['biosource_summary'] == human_biosource['biosource_name']
+    assert biosample_1['sample_info']['biosource_summary'] == human_biosource['biosource_name']
 
 
 def test_biosample_biosource_summary_two_biosource(testapp, biosample_1, human_biosource, lung_biosource):
