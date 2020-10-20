@@ -119,11 +119,11 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             return ' and '.join(sorted([t for t in treat_list if t]))
         return 'None'
 
-    def _get_sample_tissue_organ(self, request, item_w_tissue):
+    def _get_sample_tissue_organ(self, request, tissue_id):
         tissue = None
         organ_system = []
-        tissue_term = self._get_item_info(request, item_w_tissue.get('tissue'), 'ontology_terms')
-        if tissue_term is not None:
+        tissue_term = self._get_item_info(request, [tissue_id], 'ontology_terms')[0]  # 1 item list
+        if tissue_term:
             tissue = tissue_term.get('display_title')
             if 'slim_terms' in tissue_term:
                 slim_terms = self._get_item_info(request, tissue_term.get('slim_terms'), 'ontology_terms')
@@ -134,8 +134,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
 
     def _get_item_info(self, request, item, itype):
         """ Getting object representation of Items which may be passed as a list
-            both of which may have more than one associated
-        """7
+            may have more than one associated Item
+        """
         items = []
         for it in item:
             items.append(get_item_or_none(request, it, itype))
@@ -159,23 +159,44 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         }
     })
     def tissue_organ_info(self, request, biosource, cell_culture_details=None):
+        """ For efficiency and practicality we first check to see if there are cell culture details
+            and if there are (only checking the first one as the differentiation state should be the same on all)
+            does it have 'tissue' term?  If so use it to populate property and if not then check the biosource(s)
+            and if there are more than one (rare) see if there is tissue and if so if they are not the same then punt
+        """
         sample_info = {}
-        biosource = self._get_item_info(request, biosource, 'biosources')
-        if cell_culture_details:
-            cell_culture_details = self._get_item_info(request, cell_culture_details, 'cell_culture_details')
-        # getting tissue and organ/system info from cell culture info first (as it is differentiated)
-        # then biosource second
         tissue = None
         organ = None
-        if cell_culture_details and 'tissue' in cell_culture_details:
-            tissue, organ = self._get_sample_tissue_organ(request, cell_culture_details)
-        elif 'tissue' in biosource:
-            tissue, organ = self._get_sample_tissue_organ(request, biosource)
+        if cell_culture_details:  # this is a list but for ccd only take first as all should be same tissue if there
+            cell_culture_details = self._get_item_info(request, [cell_culture_details[0]], 'cell_culture_details')[0]
+            if cell_culture_details and 'tissue' in cell_culture_details:
+                tissue, organ = self._get_sample_tissue_organ(request, cell_culture_details.get('tissue'))
+
+        if not tissue:  # ccd was absent or had no tissue info so check the biosource
+            biosource = self._get_item_info(request, biosource, 'biosources')
+            tissue_terms = set()
+            for bios in biosource:
+                # generally only one but account for edge case of multiple with different tissue
+                if 'tissue' in bios:
+                    tissue_terms.add(bios.get('tissue'))
+            if not tissue_terms:
+                return None  # no tissue found
+            elif len(tissue_terms) == 1:  # we have a single tissue (usual case)
+                (tterm, ) = tissue_terms
+                tissue, organ = self._get_sample_tissue_organ(request, tterm)
+            else:  # edge case of more than one tissue mark it as mixed but return all the relevant slims
+                for term in tissue_terms:
+                    _, organs = self._get_sample_tissue_organ(request, term)
+                    organ.append(organs)
+                tissue = 'mixed_tissue'
+        # put info in right place and return it
         if tissue:
             sample_info['tissue_source'] = tissue
         if organ:
             sample_info['organ_system'] = organ
-        return sample_info
+        if sample_info:
+            return sample_info
+        return None
 
     @calculated_property(schema={
         "title": "Biosource summary",
