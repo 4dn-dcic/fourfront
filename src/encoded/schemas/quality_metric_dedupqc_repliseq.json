@@ -28,16 +28,19 @@
             "default": "1"
         },
         "Total aligned": {
+            "title": "Total Aligned",
             "type": "number",
             "description": "Dedup QC Summary metric for Repli-seq",
             "qc_order": 1
         },
         "Number of removed duplicates": {
+            "title": "Number of Removed Duplicates",
             "type": "number",
             "description": "Dedup QC Summary metric for Repli-seq",
             "qc_order": 2
         },
         "Proportion of removed duplicates": {
+            "title": "Proportion of Removed Duplicates",
             "type": "number",
             "description": "Dedup QC Summary metric for Repli-seq",
             "qc_order": 3

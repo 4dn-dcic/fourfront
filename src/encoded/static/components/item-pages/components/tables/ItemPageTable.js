@@ -95,12 +95,35 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
     }
 }
 
+/**
+ * @todo Eventually maybe add UI controls for selecting columns and other things into here.
+ */
+export function SearchTableTitle(props) {
+    const {
+        totalCount,
+        href: currentSearchHref,
+        externalSearchLinkVisible = true,
+        title: propTitle
+    } = props;
 
-
-
-
-
-
+    const title = (propTitle && typeof propTitle === 'string') ? propTitle : 'Item';
+    const linkText = currentSearchHref && typeof currentSearchHref === 'string' && currentSearchHref.indexOf('/browse/') > -1 ?
+        'Open In Browse View' : 'Open In Search View';
+    return (
+        <h3 className="tab-section-title">
+            <span>
+                {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
+                {title + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
+            </span>
+            { externalSearchLinkVisible && currentSearchHref ?
+                <a href={currentSearchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
+                    <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
+                    { linkText }
+                </a>
+                : null }
+        </h3>
+    );
+}
 
 /** @deprecated */
 
@@ -310,8 +333,6 @@ class ItemPageTableRow extends React.PureComponent {
     }
 }
 
-
-
 export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
 
     static propTypes = {
@@ -398,7 +419,6 @@ export function ViewMoreResultsBtn(props){
         return (countTotalResults - visibleResultCount) + ' more ' + itemTypeTitle + 's';
     }
 }
-
 
 /**
  * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.
