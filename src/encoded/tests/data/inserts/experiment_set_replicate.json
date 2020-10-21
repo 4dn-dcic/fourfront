@@ -23,7 +23,8 @@
             "release-updates.TEST1",
             "resources.analysis.file-formats.hic",
             "00000000-1111-0000-1111-000000000001"
-        ]
+        ],
+        "date_created" : "2011-03-25"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b261",
@@ -41,7 +42,8 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released",
+        "date_created" : "2011-03-24"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b222",
@@ -68,7 +70,8 @@
                 "badge": "/badges/inconsistent-replicate-info/",
                 "messages": ["Lorem Ipsum Text"]
             }
-        ]
+        ],
+        "date_created" : "2011-02-01"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b292",
@@ -83,7 +86,8 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released",
+        "date_created" : "2011-01-01"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b112",
@@ -98,7 +102,8 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released",
+        "date_created" : "2012-01-01"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b113",
@@ -111,7 +116,8 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "released"
+        "status": "released",
+        "date_created" : "2016-08-07"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b223",
@@ -124,7 +130,8 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
-        "status": "released"
+        "status": "released",
+        "date_created" : "2014-05-07"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b114",
@@ -138,7 +145,8 @@
         ],
         "lab": "test-4dn-lab",
         "award": "1U01CA200059-02",
-        "status": "released"
+        "status": "released",
+        "date_created" : "2016-09-18"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b115",
