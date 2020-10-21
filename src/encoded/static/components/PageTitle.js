@@ -209,7 +209,7 @@ const GenericItemPageTitle = React.memo(function GenericItemPageTitle(props){
         itemTitle = (
             <FieldSet context={context}
                 schemas={schemas} href={href}>
-                <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText="click to add new title" placeholder={'title'} buttonAlwaysVisible={true}>
+                <EditableField labelID="title" fieldType="text" style="row-without-label" fallbackText="click to add new title" placeholder={'title'} buttonAlwaysVisible={true} outerClassName="higlass-editable-page-title">
                 </EditableField>
             </FieldSet>
         );

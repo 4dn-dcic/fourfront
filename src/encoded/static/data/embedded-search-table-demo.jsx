@@ -10,8 +10,9 @@
     <ul>
         <li key="0"><code>searchHref="/search/?type=Item..."</code> - This is the initial search URL, including URL query parameters, to search.</li>
         <li key="1"><code>{'schemas={schemas}'}</code> - This should always be <code>{'schemas={schemas}'}</code>, it means to use/pass-in in-code variable <code>schemas</code>, which contains definitions for facets, columns, property titles, and so forth by Item Type.</li>
-        <li key="1"><code>{'session={session}'}</code> - This should always be <code>{'session={session}'}</code>, it means to use/pass-in in-code variable <code>session</code>, which is a boolean informing whether end-user is logged in, change of which triggers results refresh.</li>
-        <li key="2"><code>{'key="anyRandomTextString"'}</code> - This should always be set to any random string value, it tells React to avoid completely initiating a new instance of this component on extraneous changes, e.g. browser window width. This may be excluded if your component is within a parent/root JSX element that has a <code>key</code> prop, such as this static section.</li>
+        <li key="2"><code>{'session={session}'}</code> - This should always be <code>{'session={session}'}</code>, it means to use/pass-in in-code variable <code>session</code>, which is a boolean informing whether end-user is logged in, change of which triggers results refresh.</li>
+        <li key="3"><code>{'key="anyRandomTextString"'}</code> - This should always be set to any random string value, it tells React to avoid completely initiating a new instance of this component on extraneous changes, e.g. browser window width. This may be excluded if your component is within a parent/root JSX element that has a <code>key</code> prop, such as this static section.</li>
+        <li key="4"><code>{'title="anyString or React component"'}</code> - Title is optional, you can completely exlude it by not defining <code>title</code> prop at all or you can supply a plain text or allowed React component. It is highly recommended to use the built-in <code>SearchTableTitle</code> component:  <pre className="border rounded px-3 py-2">{'<SearchTableTitle title="Experiment Set or File or ..etc" externalSearchLinkVisible />'}</pre></li>
     </ul>
 
     <hr className="mt-2"/>
@@ -119,6 +120,30 @@
         }
     }}
 />
+
+    <h3>Title Configuration</h3>
+
+    <h4 className="mt-2">No Title</h4>
+
+    <p>Set <code>{"title={null}"}</code> or do not define <code>title</code> at all.</p>
+
+    <h4 className="mt-2">Default Title</h4>
+
+    <p>
+        The built-in <code>SearchTableTitle</code> component renders the total count of type (you should also pass it as title prop into SearchTableTitle) and an optional Browse/Search button that redirects you to Browse or Search pages with respectively.
+    </p>
+
+    <pre className="border rounded px-3 py-2">{'<EmbeddedItemSearchTable\r\n        searchHref="\/search/?type=Biosource"\r\n        schemas={schemas}\r\n        session={session}\r\n        facets={null}\r\n        title={<SearchTableTitle title="Biosource" externalSearchLinkVisible={true} />}\r\n    />'}</pre>
+
+    <p>This generates the following table:</p>
+
+    <EmbeddedItemSearchTable
+        searchHref="/search/?type=Biosource"
+        schemas={schemas}
+        session={session}
+        facets={null}
+        title={<SearchTableTitle title="Biosource" externalSearchLinkVisible={true} />}
+    />
 
 </div>
 

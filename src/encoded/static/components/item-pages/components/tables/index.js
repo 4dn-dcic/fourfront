@@ -8,12 +8,11 @@
  * @module
  */
 
-export { ItemPageTable, ItemPageTableIndividualUrlLoader, ItemPageTableBatchLoader, EmbeddedItemSearchTable } from './ItemPageTable';
+export { ItemPageTable, SearchTableTitle, ItemPageTableIndividualUrlLoader, ItemPageTableBatchLoader, EmbeddedItemSearchTable } from './ItemPageTable';
 
 export {
     EmbeddedExperimentSetSearchTable,
     ExperimentSetsTableTabView,
-    ExperimentSetsTableTabViewTitle,
     /* Somewhat deprecated: */
     ExperimentSetTables,
     ExperimentSetTablesLoaded,
