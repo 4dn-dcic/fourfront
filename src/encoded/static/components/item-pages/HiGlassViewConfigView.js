@@ -326,22 +326,24 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         if (!currentViewConf) {
             throw new Error('Could not get current view configuration.');
         }
-        const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
-        const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
 
-        if (tileset) {
-            const { orientation, type } = tileset;
+        // tracks contains all track with the same orientation (e.g. top)
+        const tracks = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+        const currentTrack = _.find(tracks, function (t) { return t.uid === trackInfo.uid; });
+
+        if (currentTrack) {
+            const { type } = currentTrack;
             if (_.has(updatedTilesetField, 'height')) {
-                _.each(track, (tilesetItem, idx) => {
-                    if (orientation === tilesetItem.orientation && type === tilesetItem.type) {
-                        tilesetItem.height = updatedTilesetField.height;
+                _.each(tracks, (trackItem, idx) => {
+                    if (type === trackItem.type) {
+                        trackItem.height = updatedTilesetField.height;
                     }
                 });
             }
             else if (_.has(updatedTilesetField, 'width')) {
-                _.each(track, (tilesetItem, i) => {
-                    if (orientation === tilesetItem.orientation && type === tilesetItem.type) {
-                        tilesetItem.width = updatedTilesetField.width;
+                _.each(tracks, (trackItem, i) => {
+                    if (type === trackItem.type) {
+                        trackItem.width = updatedTilesetField.width;
                     }
                 });
             }
@@ -359,26 +361,32 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         return true;
     }
     /**
-     * checks whether multiple similar (within the same view and track, having same orientation and type) tilesets exist
+     * checks whether multiple similar (within the same view and track, having same type) tracks exist
      * @param {Object} updatedTilesetField edited field object
      * @param {Object} trackInfo track info object that holds detail view and track info
      */
     hasSimilarTilesets(updatedTilesetField, trackInfo) {
-        const hgc = this.getHiGlassComponent();
-        const currentViewConf = this.getHiGlassViewConfig(hgc);
+      const hgc = this.getHiGlassComponent();
+      const currentViewConf = this.getHiGlassViewConfig(hgc);
 
-        if (!currentViewConf) {
-            throw new Error('Could not get current view configuration.');
-        }
-        const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
-        const tileset = _.find(track, function (t) { return t.uid === trackInfo.uid; });
+      if (!currentViewConf) {
+        throw new Error("Could not get current view configuration.");
+      }
 
-        if (tileset) {
-            const { orientation, type } = tileset;
-            const similarTilesets = _.filter(track, (tilesetItem) => orientation === tilesetItem.orientation && type === tilesetItem.type);
-            return similarTilesets && similarTilesets.length > 1;
-        }
-        return false;
+      // Gets all tracks with the same orientaton (e.g. all top tracks)
+      const tracks = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+      const currentTrack = _.find(tracks, function (t) {
+        return t.uid === trackInfo.uid;
+      });
+
+      if (currentTrack) {
+        const similarTilesets = _.filter(
+          tracks,
+          (trackItem) => currentTrack.type === trackItem.type
+        );
+        return similarTilesets && similarTilesets.length > 1;
+      }
+      return false;
     }
     /**
      * Update the current higlass viewconfig for the user, based on the current data.
