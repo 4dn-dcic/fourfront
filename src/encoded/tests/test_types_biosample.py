@@ -266,13 +266,71 @@ def diff_cortical_neuron_bs(testapp, F123_biosource, bcc_diff_to_cortical, lab, 
     return testapp.post_json('/biosample', item).json['@graph'][0]
 
 
+@pytest.fixture
+def brain_biosource(testapp, brain_term, lab, award):
+    item = {
+        "description": "Brain tissue",
+        "biosource_type": "tissue",
+        "tissue": brain_term['@id'],
+        "lab": lab['@id'],
+        "award": award['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def brain_biosample(testapp, brain_biosource, lab, award):
+    item = {
+        "description": "Brain Tissue Biosample",
+        "biosource": [brain_biosource['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+@pytest.fixture
+def mixed_biosample(testapp, brain_biosource, lung_biosource, lab, award):
+    item = {
+        "description": "Mixed Tissue Biosample",
+        "biosource": [brain_biosource['@id'], lung_biosource['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
 def test_get_tissue_organ_info_none_present(biosample_1):
     assert 'tissue_organ_info' not in biosample_1
 
 
-def test_get_tissue_organ_info_tissue_in_cell_culture(testapp, diff_cortical_neuron_bs,
-                                                      cortical_neuron_term):
+def test_get_tissue_organ_info_tissue_in_cell_culture(diff_cortical_neuron_bs, cortical_neuron_term):
     org_sys = sorted(['brain', 'central nervous system', 'ectoderm'])
     assert 'tissue_organ_info' in diff_cortical_neuron_bs
     assert diff_cortical_neuron_bs['tissue_organ_info']['tissue_source'] == cortical_neuron_term.get('display_title')
     assert sorted(diff_cortical_neuron_bs['tissue_organ_info']['organ_system']) == org_sys
+
+
+def test_get_tissue_organ_info_tissue_in_biosource(brain_biosample, brain_term):
+    org_sys = sorted(['central nervous system', 'ectoderm'])
+    assert 'tissue_organ_info' in brain_biosample
+    assert brain_biosample['tissue_organ_info']['tissue_source'] == brain_term.get('display_title')
+    assert sorted(brain_biosample['tissue_organ_info']['organ_system']) == org_sys
+
+
+def test_get_tissue_organ_info_tissue_mixed_biosample(mixed_biosample):
+    org_sys = sorted(['central nervous system', 'ectoderm'])
+    assert 'tissue_organ_info' in mixed_biosample
+    assert mixed_biosample['tissue_organ_info']['tissue_source'] == 'mixed tissue'
+    assert sorted(mixed_biosample['tissue_organ_info']['organ_system']) == org_sys
+
+
+def test_get_tissue_organ_info_none_if_only_cell_slim_terms(testapp, F123_biosource, lab, award):
+    item = {
+        "description": "F123 Biosample",
+        "biosource": [F123_biosource['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    f123_biosample = testapp.post_json('/biosample', item).json['@graph'][0]
+    assert 'tissue_organ_info' not in f123_biosample

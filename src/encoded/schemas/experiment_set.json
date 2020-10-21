@@ -170,7 +170,10 @@
         "experiments_in_set.biosample.biosource_summary": {
             "title": "Sample"
         },
-        "aggregated_items.tissue.item.preferred_name": {
+        "experiments_in_set.biosample.tissue_organ_info.organ_system": {
+            "title": "Organ/System"
+        },
+        "experiments_in_set.biosample.tissue_organ_info.tissue_source": {
             "title": "Tissue Source"
         },
         "publications_of_set.display_title": {

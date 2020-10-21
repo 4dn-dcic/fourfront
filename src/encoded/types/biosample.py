@@ -162,11 +162,14 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         """ For efficiency and practicality we first check to see if there are cell culture details
             and if there are (only checking the first one as the differentiation state should be the same on all)
             does it have 'tissue' term?  If so use it to populate property and if not then check the biosource(s)
-            and if there are more than one (rare) see if there is tissue and if so if they are not the same then punt
+            and if there are more than one (no cases so far) see if there is tissue and if so if different call mixed
         """
+        # NOTE: 2020-10-20 although it is possible for there to be both multiple biosources and cell_culture_details
+        # in one biosample - there are no cases and are unlikely to be in the future but if there ever were there
+        # would potentially be some imprecision in the prop values for that case
         sample_info = {}
         tissue = None
-        organ = None
+        organ = []
         if cell_culture_details:  # this is a list but for ccd only take first as all should be same tissue if there
             cell_culture_details = self._get_item_info(request, [cell_culture_details[0]], 'cell_culture_details')[0]
             if cell_culture_details and 'tissue' in cell_culture_details:
@@ -187,8 +190,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             else:  # edge case of more than one tissue mark it as mixed but return all the relevant slims
                 for term in tissue_terms:
                     _, organs = self._get_sample_tissue_organ(request, term)
-                    organ.append(organs)
-                tissue = 'mixed_tissue'
+                    organ.extend(organs)
+                organ = list(set([o for o in organ if o]))
+                tissue = 'mixed tissue'
         # put info in right place and return it
         if tissue:
             sample_info['tissue_source'] = tissue
