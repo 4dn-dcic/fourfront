@@ -1,5 +1,4 @@
 import pytest
-from unittest import mock
 # from snovault.schema_utils import load_schema
 
 

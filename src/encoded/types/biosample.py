@@ -171,12 +171,12 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         tissue = None
         organ = []
         if cell_culture_details:  # this is a list but for ccd only take first as all should be same tissue if there
-            cell_culture_details = self._get_item_info(request, [cell_culture_details[0]], 'cell_culture_details')[0]
+            cell_culture_details = _get_item_info(request, [cell_culture_details[0]], 'cell_culture_details')[0]
             if cell_culture_details and 'tissue' in cell_culture_details:
-                tissue, organ = self._get_sample_tissue_organ(request, cell_culture_details.get('tissue'))
+                tissue, organ = _get_sample_tissue_organ(request, cell_culture_details.get('tissue'))
 
         if not tissue:  # ccd was absent or had no tissue info so check the biosource
-            biosource = self._get_item_info(request, biosource, 'biosources')
+            biosource = _get_item_info(request, biosource, 'biosources')
             tissue_terms = set()
             for bios in biosource:
                 # generally only one but account for edge case of multiple with different tissue
@@ -186,10 +186,10 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 return None  # no tissue found
             elif len(tissue_terms) == 1:  # we have a single tissue (usual case)
                 (tterm, ) = tissue_terms
-                tissue, organ = self._get_sample_tissue_organ(request, tterm)
+                tissue, organ = _get_sample_tissue_organ(request, tterm)
             else:  # edge case of more than one tissue mark it as mixed but return all the relevant slims
                 for term in tissue_terms:
-                    _, organs = self._get_sample_tissue_organ(request, term)
+                    _, organs = _get_sample_tissue_organ(request, term)
                     organ.extend(organs)
                 organ = list(set([o for o in organ if o]))
                 tissue = 'mixed tissue'
@@ -312,6 +312,35 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                         # make data for new biosample_relation
                         target_bs.properties['biosample_relation'].append(relationship_entry)
                         target_bs.update(target_bs.properties)
+
+
+def _get_sample_tissue_organ(request, tissue_id):
+    """ Helper function used in the tissue_organ_info calculated_property
+    """
+    tissue = None
+    organ_system = []
+    tissue_term = _get_item_info(request, [tissue_id], 'ontology_terms')[0]  # 1 item list
+    if tissue_term:
+        tissue = tissue_term.get('display_title')
+        if 'slim_terms' in tissue_term:
+            slim_terms = _get_item_info(request, tissue_term.get('slim_terms'), 'ontology_terms')
+            for st in slim_terms:
+                if st.get('is_slim_for') in ['developmental', 'system', 'organ']:
+                    organ_system.append(st.get('display_title'))
+    return tissue, organ_system
+
+
+def _get_item_info(request, item, itype):
+    """ Helper function used in the tissue_organ_info calculated_property
+
+        Getting object representation of Items which may be passed as a list
+        may have more than one associated Item
+    """
+    items = []
+    for it in item:
+        items.append(get_item_or_none(request, it, itype))
+    # don't want any None values
+    return [i for i in items if i]
 
 
 @calculated_property(context=Biosample, category='action')
