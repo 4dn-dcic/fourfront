@@ -69,6 +69,7 @@ def test_biosample_calculated_properties(testapp, biosample_1, ):
     assert 'modifications_summary' in res
     assert 'modifications_summary_short' in res
     assert 'treatments_summary' in res
+    assert 'biosource_summary' in res
 
 
 def test_biosample_biosource_summary_one_biosource(testapp, biosample_1, human_biosource):
