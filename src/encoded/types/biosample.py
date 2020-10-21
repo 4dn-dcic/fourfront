@@ -119,29 +119,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             return ' and '.join(sorted([t for t in treat_list if t]))
         return 'None'
 
-    def _get_sample_tissue_organ(self, request, tissue_id):
-        tissue = None
-        organ_system = []
-        tissue_term = self._get_item_info(request, [tissue_id], 'ontology_terms')[0]  # 1 item list
-        if tissue_term:
-            tissue = tissue_term.get('display_title')
-            if 'slim_terms' in tissue_term:
-                slim_terms = self._get_item_info(request, tissue_term.get('slim_terms'), 'ontology_terms')
-                for st in slim_terms:
-                    if st.get('is_slim_for') in ['developmental', 'system', 'organ']:
-                        organ_system.append(st.get('display_title'))
-        return tissue, organ_system
-
-    def _get_item_info(self, request, item, itype):
-        """ Getting object representation of Items which may be passed as a list
-            may have more than one associated Item
-        """
-        items = []
-        for it in item:
-            items.append(get_item_or_none(request, it, itype))
-        # don't want any None values
-        return [i for i in items if i]
-
     @calculated_property(schema={
         "title": "Tissue, Organ/System Info",
         "description": "Useful faceting info for biosample",
