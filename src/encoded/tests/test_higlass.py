@@ -1958,7 +1958,6 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json,
         if track["type"] in types_to_find:
             types_to_find[track["type"]] += 1
             
-
     assert_true(types_to_find["vertical-gene-annotations"] > 0)
     assert_true(types_to_find["vertical-chromosome-labels"] > 0)
     assert_true(vertical_tracks_found > 0)
