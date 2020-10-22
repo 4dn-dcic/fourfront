@@ -2,6 +2,7 @@
 
 import datetime
 import time
+from pyramid.httpexceptions import HTTPForbidden
 
 
 def compute_set_difference_one(s1, s2):
@@ -44,3 +45,12 @@ delay_rerun = customized_delay_rerun(sleep_seconds=1)
 
 def utc_today_str():
     return datetime.datetime.strftime(datetime.datetime.utcnow(), "%Y-%m-%d")
+
+
+def check_user_is_logged_in(request):
+    """ Raises HTTPForbidden if the request did not come from a logged in user. """
+    for principal in request.effective_principals:
+        if principal.startswith('userid.'):
+            break
+    else:
+        raise HTTPForbidden(title="Not logged in.")

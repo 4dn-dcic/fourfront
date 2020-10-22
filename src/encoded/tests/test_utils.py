@@ -1,8 +1,10 @@
 import datetime
 import pytest
 import re
+from pyramid.httpexceptions import HTTPForbidden
 
-from ..utils import compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str, customized_delay_rerun
+from ..utils import (compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str,
+                     customized_delay_rerun, check_user_is_logged_in)
 
 
 pytestmark = pytest.mark.working
@@ -71,3 +73,20 @@ def test_utc_today_str():
     pattern = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
     actual = utc_today_str()
     assert re.match(pattern, actual), "utc_today_str() result %s did not match format: %s" % (actual, pattern)
+
+
+@pytest.mark.parametrize('principals, allow', [
+    (['role1', 'role2'], False),
+    (['role1', 'userid.uuid'], True)
+])
+def test_check_user_is_logged_in(principals, allow):
+    """ Simple test that ensures the logged in check is working as expected """
+    class MockRequest:
+        def __init__(self, principals):
+            self.effective_principals = principals
+    req = MockRequest(principals)
+    if allow:
+        check_user_is_logged_in(req)
+    else:
+        with pytest.raises(HTTPForbidden):
+            check_user_is_logged_in(req)
