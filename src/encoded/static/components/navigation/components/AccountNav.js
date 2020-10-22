@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Nav } from 'react-bootstrap';
+import Nav from 'react-bootstrap/esm/Nav';
 
 import { JWT, isServerSide, object, console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
@@ -125,7 +125,7 @@ function UserActionsMenu(props){
 
     const introBlock = (
         <BigDropdownIntroductionWrapper titleIcon="user fas" className="mb-0 border-0" {...{ windowWidth, windowHeight }}>
-            <h4 className="mb-0 mt-0 text-ellipsis-container">
+            <h4 className="mb-0 mt-0 text-truncate">
                 <a href={viewProfileURL}>
                     { introTitle }
                 </a>

@@ -27,7 +27,7 @@ from snovault.util import debug_log
 from .base import (
     Item,
     lab_award_attribution_embed_list,
-    get_item_if_you_can
+    get_item_or_none
 )
 import datetime
 
@@ -58,8 +58,7 @@ class ExperimentSet(Item):
             "badge.@id",
             "badge.badge_icon",
             "badge.description"
-        ],
-        "tissue": ["preferred_name"]
+        ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         "badges.badge.title",
@@ -71,6 +70,8 @@ class ExperimentSet(Item):
         "badges.messages",
 
         "produced_in_pub.title",
+        "produced_in_pub.ID",
+        "produced_in_pub.url",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
@@ -91,6 +92,7 @@ class ExperimentSet(Item):
         "experiments_in_set.experiment_type.other_tags",
         "experiments_in_set.accession",
         "experiments_in_set.status",
+        "experiments_in_set.external_references.*",
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
@@ -108,6 +110,8 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource_summary",
         "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosample_category",
+        "experiments_in_set.biosample.tissue_organ_info.organ_system",
+        "experiments_in_set.biosample.tissue_organ_info.tissue_source",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
@@ -152,15 +156,19 @@ class ExperimentSet(Item):
         "experiments_in_set.files.file_classification",
         "experiments_in_set.files.paired_end",
         "experiments_in_set.files.status",
+        "experiments_in_set.files.external_references.*",
         "experiments_in_set.files.extra_files",
         "experiments_in_set.files.extra_files.href",
         "experiments_in_set.files.extra_files.file_format",
+        "experiments_in_set.files.extra_files.file_size",
+        "experiments_in_set.files.extra_files.md5sum",
+        "experiments_in_set.files.extra_files.use_for",
         "experiments_in_set.files.quality_metric.display_title",
         "experiments_in_set.files.quality_metric.Total Sequences",
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        "experiments_in_set.files.quality_metric_summary.*",  # This may not yet be enabled on raw files.
+        "experiments_in_set.files.quality_metric.quality_metric_summary.*", # This may not yet be enabled on raw files.
         "experiments_in_set.files.badges.badge.title",
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
@@ -169,6 +177,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.messages",
         "experiments_in_set.files.notes_to_tsv",
+        "experiments_in_set.files.contributing_labs.display_title",
+        "experiments_in_set.files.lab.display_title",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -185,24 +195,32 @@ class ExperimentSet(Item):
         "processed_files.file_type",
         "processed_files.file_type_detailed",
         "processed_files.status",
+        "processed_files.external_references.*",
         "processed_files.md5sum",
         "processed_files.extra_files",
         "processed_files.extra_files.href",
         "processed_files.extra_files.file_format",
+        "processed_files.extra_files.file_size",
+        "processed_files.extra_files.md5sum",
+        "processed_files.extra_files.use_for",
         "processed_files.higlass_uid",
         "processed_files.genome_assembly",
         "processed_files.last_modified.date_modified",
         "processed_files.static_content.location",
         "processed_files.static_content.description",
         "processed_files.static_content.content.@type",
+        "processed_files.contributing_labs.display_title",
+        "processed_files.lab.display_title",
 
         # "processed_files.quality_metric.Total reads",
         # "processed_files.quality_metric.Total Sequences",
         # "processed_files.quality_metric.Sequence length",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
-        "processed_files.quality_metric_summary.*",
+        "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.notes_to_tsv",
+        "processed_files.quality_metric.Total reads",
+        "processed_files.quality_metric.qc_list.value.Total reads",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
@@ -214,20 +232,30 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.file_type",
         "experiments_in_set.processed_files.file_type_detailed",
         "experiments_in_set.processed_files.status",
+        "experiments_in_set.processed_files.external_references.*",
         "experiments_in_set.processed_files.md5sum",
         "experiments_in_set.processed_files.higlass_uid",
         "experiments_in_set.processed_files.genome_assembly",
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
         "experiments_in_set.processed_files.extra_files.file_format",
+        "experiments_in_set.processed_files.extra_files.file_size",
+        "experiments_in_set.processed_files.extra_files.md5sum",
+        "experiments_in_set.processed_files.extra_files.use_for",
+
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
-        "experiments_in_set.processed_files.quality_metric_summary.*",
+        "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
+        "experiments_in_set.processed_files.quality_metric.Total reads",
+        "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
+
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
         "experiments_in_set.processed_files.last_modified.date_modified",
         "experiments_in_set.processed_files.notes_to_tsv",
+        "experiments_in_set.processed_files.contributing_labs.display_title",
+        "experiments_in_set.processed_files.lab.display_title",
         # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
@@ -241,7 +269,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
-        "other_processed_files.files.quality_metric_summary.*",
+        "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
@@ -260,7 +288,8 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.last_modified.date_modified",
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
-        "experiments_in_set.other_processed_files.files.quality_metric_summary.*",
+        #"experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
+        "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
 
         "experiments_in_set.reference_files.accession",
@@ -374,7 +403,7 @@ class ExperimentSetReplicate(ExperimentSet):
             # We only need to check Microscopy Experiments
             return None
 
-        first_experiment_obj = get_item_if_you_can(request, first_experiment_id, frame='raw')
+        first_experiment_obj = get_item_or_none(request, first_experiment_id, frame='raw')
         if not first_experiment_obj:  # Not yet in DB?
             return None
 

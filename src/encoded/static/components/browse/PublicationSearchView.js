@@ -9,7 +9,6 @@ import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-comp
 import { console, analytics, object, navigate as spcNavigate, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { TableRowToggleOpenButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
 import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { columnExtensionMap } from './columnExtensionMap';
@@ -18,23 +17,24 @@ import { Schemas } from './../util';
 import { transformedFacets } from './SearchView';
 
 
-const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
+const publicationColExtensionMap = {
+    ...columnExtensionMap,
     // We override display_title for this view to be wider.
     // And awesomer.
     "display_title" : {
         "widthMap" : { "sm" : 320, "md" : 520, "lg" : 640 },
         'minColumnWidth' : 200,
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             return <PublicationSearchResultTitle {...props} {...{ result }} />;
         }
     },
     "date_published" : {
         "widthMap" : { "sm" : 60, "md" : 60, "lg" : 60 },
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             const { date_published = null } = result;
             if (!date_published) return null;
             return (
-                <span className="value">
+                <span className="value text-center">
                     <LocalizedTime timestamp={date_published} formatType="date-year" />
                 </span>
             );
@@ -42,7 +42,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     },
     "journal" : {
         "widthMap" : { "sm" : 100, "md" : 120, "lg" : 150 },
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             const { journal = null } = result;
             if (!journal) return null;
             return (
@@ -55,11 +55,11 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     "number_of_experiment_sets" : {
         "colTitle" : "Exp Sets",
         "widthMap" : { "sm" : 50, "md" : 70, "lg" : 80 },
-        "render" : function(result, columnDefinition, props, termTransformFxn){
+        "render" : function(result, props){
             const { number_of_experiment_sets: numSets = null } = result;
             if (numSets === null) return null;
             return (
-                <span className="value">
+                <span className="value text-center">
                     { valueTransforms.decorateNumberWithCommas(numSets) }
                 </span>
             );
@@ -68,7 +68,7 @@ const publicationColExtensionMap = _.extend({}, columnExtensionMap, {
     "award.project" : {
         "widthMap" : { "sm" : 60, "md" : 70, "lg" : 80 }
     },
-});
+};
 
 /**
  * This is memoized into a couple of different functions - 1 per column (common colWidth between all cells in same col)
@@ -309,34 +309,20 @@ PublicationDetailPane.excludedKeys = [
 ];
 
 
-export default class PublicationSearchView extends React.PureComponent {
-
-    constructor(props){
-        super(props);
-        this.renderDetailPane = this.renderDetailPane.bind(this);
-        this.memoized = {
-            transformedFacets: memoize(transformedFacets)
-        };
-    }
-
-    renderDetailPane(result){
-        const { schemas } = this.props;
-        return (
-            <PublicationDetailPane {...{ result, schemas }} />
-        );
-    }
-
-    render(){
-        const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
-        const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
-        const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
-        return (
-            <div className="container" id="content">
-                <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets }} renderDetailPane={this.renderDetailPane}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
-            </div>
-        );
-    }
+export default function PublicationSearchView(props){
+    const { isFullscreen, href, context, currentAction, session, schemas } = props;
+    const facets = useMemo(function(){
+        return transformedFacets(href, context, currentAction, session, schemas);
+    }, [ context, currentAction, session, schemas ]);
+    const detailPane = useMemo(function(){
+        return <PublicationDetailPane schemas={schemas} />;
+    }, [ schemas ]);
+    const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
+    const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+    return (
+        <div className="container" id="content">
+            <CommonSearchView {...props} {...{ tableColumnClassName, facetColumnClassName, facets, detailPane }}
+                termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
+        </div>
+    );
 }
-

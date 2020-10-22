@@ -18,7 +18,7 @@ class Protocol(Item, ItemWithAttachment):
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
-    embedded_list = Item.embedded_list + ["award.project", "lab.title"]
+    embedded_list = Item.embedded_list + ["award.project", "lab.title", "experiment_type.display_title"]
     rev = {
         'exp_type': ('ExperimentType', 'other_protocols'),
         'sop_exp': ('ExperimentType', 'sop')

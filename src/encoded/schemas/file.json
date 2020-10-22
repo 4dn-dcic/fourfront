@@ -1,5 +1,5 @@
 {
-    "title": "Data File",
+    "title": "Data file",
     "description": "Schema for submitting metadata for a data file.",
     "id": "/profiles/file.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -137,6 +137,14 @@
                             "archived to project",
                             "to be uploaded by workflow"
                         ]
+                    },
+                    "use_for": {
+                        "title": "Use for",
+                        "description": "The use of the extra file.",
+                        "type": "string",
+                        "enum": [
+                            "visualization"
+                        ]
                     }
                 }
             }
@@ -145,6 +153,7 @@
             "title": "Related Files",
             "description": "Files related to this one",
             "ff_flag": "second round",
+            "uniqueItems": true,
             "type": "array",
             "items": {
                 "title": "Related File",
@@ -162,7 +171,8 @@
                             "is superceded by",
                             "derived from",
                             "parent of",
-                            "paired with"
+                            "paired with",
+                            "grouped with"
                         ]
                     },
                     "file": {
@@ -213,6 +223,7 @@
             "type": "array",
             "title": "Quality Metric Summary",
             "description": "Selected Quality Metrics for Summary",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Selected Quality Metric",
                 "type": "object",
@@ -223,6 +234,11 @@
                         "type": "string",
                         "description": "Title of the Quality Metric",
                         "title": "Title of the Quality Metric"
+                    },
+                    "title_tooltip":{
+                        "type": "string",
+                        "title": "Tooltip for the Quality Metric Title",
+                        "description": "tooltip for the quality metric title to be displayed upon mouseover"
                     },
                     "value": {
                         "type": "string",
@@ -394,10 +410,19 @@
         "file_size" : {
             "title" : "File Size"
         },
+        "source_experiment_sets.@id" : {
+            "title" : "Experiment Set"
+        },
         "date_created": {
             "default_hidden" : true
         },
         "last_modified.date_modified": {
+            "default_hidden" : true
+        },
+        "tags": {
+            "default_hidden" : true
+        },
+        "genome_assembly": {
             "default_hidden" : true
         }
     }

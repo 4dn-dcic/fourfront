@@ -84,7 +84,7 @@ $search-results-above-results-row-height: 40px;
 
 // Extensions to shared-portal-components searchview table(s):
 .search-result-row .result-table-row .search-result-column-block,
-.item-page-table-container .item-page-table-row-container .table-row > .column {
+.item-page-table-container .item-page-table-row-container .table-row > .column { // Carry/re-use table cell styles over to ItemPageTable (to be deprecated).
 	&[data-field="status"] {
 		> .inner {
 			i.item-status-indicator-dot {
@@ -106,9 +106,6 @@ $search-results-above-results-row-height: 40px;
 	&[data-field="display_title"]{
 		.expset-checkbox {
 			margin-right: 15px;
-			margin-top: -1px;
-			display: inline-block;
-			vertical-align: text-top;
 		}
 		.mono-text {
 			letter-spacing: 0.5px;
@@ -135,6 +132,7 @@ $search-results-above-results-row-height: 40px;
 			text-overflow: initial;
 			white-space: normal;
 			div.exp-categorizer-cell {
+				overflow: hidden;
 				text-align: left;
 
 				> small {
@@ -150,6 +148,83 @@ $search-results-above-results-row-height: 40px;
 		}
 	}
 }
+
+/**********************************************************
+			In Experiment Sets Table (Item Pages)
+			// Carry/re-use table cell styles over to ItemPageTable (to be deprecated).
+**********************************************************/
+
+
+.item-page-table-container {
+	
+	overflow-x: auto;
+
+	.item-page-table-row-container {
+		position: relative;
+		border-bottom: 1px solid #eee;
+
+		> .inner-wrapper {
+			padding-left: 0;
+			border-top: 1px solid #eee;
+			padding-left: 47px;
+			@include generic-results-flex-description-container;
+			@include generic-results-item-detail;
+			
+		}
+
+		.table-row {
+			.column {
+				@include search-result-column-block;
+				float: none;
+				display: inline-block;
+				vertical-align: middle;
+				&:first-child {
+
+					> .inner {
+						height: auto;
+						white-space: normal;
+
+						padding-right: 0;
+
+						.title-wrapper {
+							padding-left: 7px;
+							line-height: 1.25rem;
+							max-width: 100%;
+						}
+
+						@include search-result-toggle-open-button-container;
+						&.open {
+							@include search-result-toggle-open-button-container-open;
+							.toggle-detail-button-container {
+								bottom: 0px;
+							}
+							.icon-container {
+								top: 15px !important;
+							}
+						}
+					}
+				}
+
+			}
+
+			&.no-detail-pane {
+				.column {
+					&[data-first-visible-column] {
+						> .inner {
+							padding-left: 17px;
+							padding-right: 0;
+						}
+					}
+				}
+			}
+
+		}
+
+	}
+
+}
+
+
 
 /********************************/
 /***** Search Table Wrapper *****/

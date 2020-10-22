@@ -12,7 +12,7 @@ import { console, object, ajax, analytics, memoizedUrlParse } from '@hms-dbmi-bg
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';
-import { allFilesFromExperimentSet, filesToAccessionTriples } from './../../../util/experiments-transforms';
+import { allFilesFromExperimentSet, filesToAccessionTriples, fileToAccessionTriple } from './../../../util/experiments-transforms';
 import { BrowseViewSelectedFilesDownloadButton } from './SelectedFilesDownloadButton';
 import { uniqueFileCount, SelectedFilesController } from './../SelectedFilesController';
 
@@ -28,6 +28,7 @@ export class SelectAllFilesButton extends React.PureComponent {
         'accession',
         'produced_in_pub.display_title',
         'lab.display_title',
+        'file_type_detailed',
 
         'processed_files.accession',
         'processed_files.display_title',
@@ -85,6 +86,7 @@ export class SelectAllFilesButton extends React.PureComponent {
 
         this.setState({ 'selecting' : true }, () => {
             const extData = { list: analytics.hrefToListName(window && window.location.href) };
+
             if (!this.isAllSelected()){
                 const currentHrefParts = memoizedUrlParse(href);
                 const currentHrefQuery = _.extend({}, currentHrefParts.query);
@@ -92,9 +94,16 @@ export class SelectAllFilesButton extends React.PureComponent {
                 currentHrefQuery.limit = 'all';
                 const reqHref = currentHrefParts.pathname + '?' + queryString.stringify(currentHrefQuery);
                 ajax.load(reqHref, (resp)=>{
-                    const allExtendedFiles = _.reduce(resp['@graph'] || [], (m,v) => m.concat(allFilesFromExperimentSet(v, true)), []);
-                    const filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true), allExtendedFiles);
+                    let allExtendedFiles;
+                    let filesToSelect;
+                    if (extData.list === 'browse') {
 
+                        allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,true, true), allExtendedFiles);
+                    } else {
+                        allExtendedFiles =(resp['@graph'] || []);
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,false, true), resp['@graph'] );
+                    }
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
 
@@ -108,6 +117,7 @@ export class SelectAllFilesButton extends React.PureComponent {
                         }
                     );
                 });
+
             } else {
                 resetSelectedFiles();
                 this.setState({ 'selecting' : false });
@@ -144,7 +154,7 @@ const FileTypeBucketCheckbox = React.memo(function FileTypeBucketCheckbox(props)
     const { fileType, onFileTypeClick, files, fileTypeFilters } = props;
     const selected = Array.isArray(fileTypeFilters) && fileTypeFilters.indexOf(fileType) > -1;
     const filesLength = files.length;
-    const cls = "text-ellipsis-container" + (selected ? ' is-active' : '');
+    const cls = "text-truncate" + (selected ? ' is-active' : '');
     function onChange(evt){ onFileTypeClick(fileType); }
 
     let title;
@@ -269,14 +279,22 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
         currentOpenPanel
     } = props;
     const selectedFileProps = SelectedFilesController.pick(props);
-    const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
-    // This gets unique file count from ES aggs. In future we might be able to get total including
-    // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
-    // in SelectAllFilesButton & similar.
-    const totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+
+    let totalUniqueFilesCount;
+    if (Array.isArray(context['@type']) && context['@type'].indexOf('FileSearchResults') > -1) {
+        totalUniqueFilesCount = context.total || 0;
+    } else {
+        const barPlotData = (barplot_data_filtered || barplot_data_unfiltered);
+        // This gets unique file count from ES aggs. In future we might be able to get total including
+        // duplicates, in which case should change up logic downstream from this component for e.g. `isAllSelected`
+        // in SelectAllFilesButton & similar.
+        totalUniqueFilesCount = (barPlotData && barPlotData.total && barPlotData.total.files) || 0;
+    }
 
     return (
-        <div>
+        // This rendered within a row by AboveTableControlsBase.js
+        // TODO maybe refactor some of this stuff to be simpler.
+        <div className="col">
             <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">

@@ -7,9 +7,12 @@ import _ from 'underscore';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
+import { PageTitleContainer, TitleAndSubtitleUnder, OnlyTitle, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
+import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
 import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
+
 
 
 export default class PublicationView extends DefaultItemView {
@@ -93,7 +96,7 @@ class PublicationSummary extends React.PureComponent {
                             { _.map(authors, function(author, i){
                                 return (
                                     <React.Fragment>
-                                        <span className="no-wrap">
+                                        <span className="text-nowrap">
                                             { author }
                                         </span>
                                         { i !== authorsLastIdx ? <React.Fragment> &nbsp;&bull;&nbsp; </React.Fragment> : null }
@@ -250,3 +253,18 @@ class PublicationSummary extends React.PureComponent {
         );
     }
 }
+
+const PublicationViewTitle = React.memo(function PublicationViewTitle(props){
+    const { alerts, context } = props;
+    const { title = null } = context;
+    return (
+        <PageTitleContainer alerts={alerts}>
+            <StaticPageBreadcrumbs>
+                <h5 className="text-500 mt-0 mb-0">Publication</h5>
+            </StaticPageBreadcrumbs>
+            <OnlyTitle>{ title }</OnlyTitle>
+        </PageTitleContainer>
+    );
+});
+
+pageTitleViews.register(PublicationViewTitle, "Publication");

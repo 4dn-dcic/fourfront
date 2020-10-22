@@ -4,8 +4,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { ButtonToolbar } from 'react-bootstrap';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import Collapse from 'react-bootstrap/esm/Collapse';
+import ButtonToolbar from 'react-bootstrap/esm/ButtonToolbar'; // TODO: Use plain HTML w. bootstrap classNames in place of this.
 import { layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 export class CollapsibleItemViewButtonToolbar extends React.PureComponent {

@@ -10,14 +10,20 @@ For the development.ini you must supply the paster app name:
     %(prog)s development.ini --app-name app
 
 """
+import argparse
 import json
 import logging
+
 from future.utils import itervalues
+from pyramid import paster
 from pyramid.traversal import resource_path
+from webtest import TestApp
+
 
 EPILOG = __doc__
 
 logger = logging.getLogger(__name__)
+
 
 def check_path(testapp, path):
     try:
@@ -49,21 +55,18 @@ def run(testapp, collections=None):
         collection_path = resource_path(collection, '')
         check_path(testapp, collection_path)
         failed = 0
+        count = -1  # PyCharm worries the 'count' variable won't get set in the next loop if the collection is empty.
         for count, item in enumerate(itervalues(collection)):
             path = resource_path(item, '')
             if not check_path(testapp, path):
                 failed += 1
         if failed:
-            logger.info('Collection %s: %d of %d failed to render.',
-                collection_path, failed, count)
+            logger.info('Collection %s: %d of %d failed to render.', collection_path, failed, count)
         else:
-            logger.info('Collection %s: all %d rendered ok',
-                collection_path, count)
+            logger.info('Collection %s: all %d rendered ok', collection_path, count)
 
 
 def internal_app(configfile, app_name=None, username='TEST', accept='text/html'):
-    from pyramid import paster
-    from webtest import TestApp
     app = paster.get_app(configfile, app_name)
     environ = {
         'HTTP_ACCEPT': accept,
@@ -73,15 +76,13 @@ def internal_app(configfile, app_name=None, username='TEST', accept='text/html')
 
 
 def main():
-    import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is invalid
         description="Check rendering of items", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('--item-type', action='append', help="Item type")
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('--username', '-u', default='TEST',
-        help="User uuid/email")
+    parser.add_argument('--username', '-u', default='TEST', help="User uuid/email")
     parser.add_argument('config_uri', help="path to configfile")
     parser.add_argument('path', nargs='*', help="path to test")
     args = parser.parse_args()
@@ -97,8 +98,7 @@ def main():
             if not check_path(testapp, path):
                 failed += 1
         if failed:
-            logger.info('Paths: %d of %d failed to render.',
-                failed, len(args.path))
+            logger.info('Paths: %d of %d failed to render.', failed, len(args.path))
         else:
             logger.info('Paths: all %d rendered ok', len(args.path))
     else:

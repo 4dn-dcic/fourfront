@@ -20,7 +20,7 @@ import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/e
  * @example
  * <ItemHeader.Wrapper className="something-or-other" context={this.props.context} href={this.props.href}>
  *     <ItemHeader.TopRow>
- *         <span data-tip="Experiment Type" className="inline-block">
+ *         <span data-tip="Experiment Type" className="d-inline-block">
  *             { this.props.context.experimentset_type }
  *         </span>
  *     </ItemHeader.TopRow>
@@ -53,6 +53,7 @@ export class TopRow extends React.Component {
             'create'    : 'Create a blank new Item of the same type.',
             'clone'     : 'Create and edit a copy of this Item.'
         },
+        'typeInfoVisible': true
     };
 
     constructor(props){
@@ -95,7 +96,7 @@ export class TopRow extends React.Component {
             <div className="indicator-item view-ajax-button">
                 <i className="icon icon-fw icon-file-code far"/>{' '}
                 <a href={viewUrl}
-                    className="inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
+                    className="d-inline-block" target="_blank" rel="noreferrer noopener" tabIndex="3"
                     data-tip="Open raw JSON in new window" onClick={(e)=>{
                         if (window && window.open){
                             e.preventDefault();
@@ -141,7 +142,7 @@ export class TopRow extends React.Component {
         const { typeInfo, context, schemas } = this.props;
         if (typeInfo && typeInfo.title){
             return (
-                <span className="type-info inline-block" data-tip={(typeInfo && typeInfo.description) || null}>
+                <span className="type-info d-inline-block" data-tip={(typeInfo && typeInfo.description) || null}>
                     { typeInfo && typeInfo.title }
                 </span>
             );
@@ -158,7 +159,7 @@ export class TopRow extends React.Component {
         const detailTitle = (detailTypeInfo && detailTypeInfo.title && (detailTypeInfo.title + ' (\'' + itemType + '\')')) || itemType;
 
         return (
-            <span className="type-info inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>
+            <span className="type-info d-inline-block" data-tip={(baseTypeInfo ? 'Base' : 'Abstract') + " type of this " + detailTitle + " Item"}>
                 { title }
             </span>
         );
@@ -195,7 +196,7 @@ export class TopRow extends React.Component {
      * @returns {*} Div element with .row Bootstrap class and items in top-right section.
      */
     render(){
-        const { context, schemas } = this.props;
+        const { context, schemas, typeInfoVisible } = this.props;
 
         const typeSchema = schemaTransforms.getSchemaForItemType(
             schemaTransforms.getItemType(context), schemas || null
@@ -210,13 +211,13 @@ export class TopRow extends React.Component {
             <div className="row clearfix top-row">
                 <h5 className="col-12 col-md-5 item-label-title">
                     <div className="inner">
-                        { this.typeInfoLabel() }
-                        { context.accession ?
+                        {typeInfoVisible ? this.typeInfoLabel() : null}
+                        { typeInfoVisible && context.accession ?
                             <object.CopyWrapper value={context.accession} className="accession inline-block" data-tip={accessionTooltip}
-                                wrapperElement="span" iconProps={{ 'style' : { 'fontSize' : '0.875rem', 'marginLeft' : -3 } }}>
-                                { context.accession }
+                                wrapperElement="span" iconProps={{ 'style': { 'fontSize': '0.875rem', 'marginLeft': -3 } }}>
+                                {context.accession}
                             </object.CopyWrapper>
-                            : null }
+                            : null}
                     </div>
                 </h5>
                 <h5 className="col-12 col-md-7 text-300 text-capitalize item-header-indicators clearfix">
@@ -238,38 +239,67 @@ export class TopRow extends React.Component {
  */
 export class MiddleRow extends React.Component {
 
-    shouldComponentUpdate(nextProps){
+    static defaultProps = {
+        'isInlineEditable': false
+    };
+
+    shouldComponentUpdate(nextProps) {
         if ((nextProps.context) && (!this.props.context || this.props.context.description !== nextProps.context.description)) return true;
+        if ((nextProps.context) && (!this.props.context || this.props.context.actions !== nextProps.context.actions)) return true;
         if (nextProps.windowWidth !== this.props.windowWidth) return true;
         return false;
     }
 
-    render(){
-        var description = (this.props.context && typeof this.props.context.description === 'string' && this.props.context.description) || null;
+    render() {
+        const {
+            isInlineEditable,
+            children = null,
+            text: propText = null, // if present, takes priority over context description.
+            context = {},
+            windowWidth,
+            className,
+        } = this.props;
 
-        if (!description){
-            return <div className="item-page-heading no-description"/>;
+        const baseClass = (className ? className + " " : "") + "item-page-heading";
+
+        if (children) {
+            return <div className={baseClass}>{children}</div>;
+        }
+
+        const description = (context && typeof context.description === 'string' && context.description) || null;
+
+        const textDescription = (
+            (typeof propText === "string" && propText) ||
+            (typeof description === "string" && description) ||
+            null
+        );
+
+        if (!textDescription && !isInlineEditable){
+            return <div className={baseClass + " no-description"} />;
         }
 
         return (
             <FlexibleDescriptionBox
-                windowWidth={this.props.windowWidth}
-                description={ description || <em>No description provided.</em> }
-                className="item-page-heading"
+                context={context}
+                windowWidth={windowWidth}
+                description={textDescription || <em>No description provided.</em>}
+                className={baseClass}
                 textClassName="text-medium"
-                defaultExpanded={description.length < 600}
+                defaultExpanded={(textDescription || '').length < 600}
                 fitTo="grid"
                 lineHeight={22}
+                isInlineEditable={isInlineEditable}
                 dimensions={{
-                    'paddingWidth' : 0,
-                    'paddingHeight' : 22, // Padding-top + border-top
-                    'buttonWidth' : 30,
-                    'initialHeight' : 42
+                    'paddingWidth': 0,
+                    'paddingHeight': 22, // Padding-top + border-top
+                    'buttonWidth': 30,
+                    'initialHeight': 42
                 }}
             />
         );
     }
 }
+
 
 /**
  * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.
@@ -301,7 +331,7 @@ export const BottomRow = React.memo(function BottomRow(props){
             <div className="col text-300 set-type-indicators">{ children }</div>
             <h5 className="col-md-auto text-300 date-indicator">
                 { dateToUse?
-                    <span data-tip={tooltip} className="inline-block">
+                    <span data-tip={tooltip} className="d-inline-block">
                         <i className="icon icon-calendar far"></i>&nbsp; &nbsp;
                         <LocalizedTime timestamp={dateToUse} formatType="date-time-md" dateTimeSeparator=" at " />
                     </span>

@@ -44,7 +44,7 @@ export class SelectedFilesController extends React.PureComponent {
             // is shown (without checkbox).
             _.filter(selectedFilesList, object.itemUtil.atId),
             function(fileItem){
-                return [ expFxn.fileToAccessionTriple(fileItem, true), fileItem ];
+                return [ expFxn.fileToAccessionTriple(fileItem, true, true), fileItem ];
             }
         ));
     }

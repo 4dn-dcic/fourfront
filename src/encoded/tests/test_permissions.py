@@ -9,7 +9,6 @@ from ..types.lab import Lab
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
-
 @pytest.fixture
 def remc_lab(testapp):
     item = {

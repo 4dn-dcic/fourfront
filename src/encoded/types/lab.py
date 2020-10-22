@@ -107,7 +107,7 @@ class Lab(Item):
             '''Clear out some properties from person'''
             try:
                 person = request.embed(person_at_id, '@@object')
-            except:
+            except Exception:
                 return None
             encoded_email = b64encode(person['contact_email'].encode('utf-8')).decode('utf-8') if person.get('contact_email') else None
             return {

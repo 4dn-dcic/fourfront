@@ -9,7 +9,8 @@ import _ from 'underscore';
 
 import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
-
+import { Term } from './../util/Schemas';
+import { default as installedPackageLockJson } from './../../../../../package-lock.json';
 
 /**
  * Fallback content_view for pages which are not specifically 'Items.
@@ -25,6 +26,13 @@ export default class HealthView extends React.PureComponent {
         return db_es_total && (db_es_total.indexOf('< DB has') > -1 || db_es_total.indexOf('loading') > -1) ? true : false;
     }
 
+    static termTransformFxn(field, term){
+        if (field === "foursight" && term && term.slice(0,4) === "http") {
+            return <a href={term} target="_blank" rel="noopener noreferrer">{ term }</a>;
+        }
+        return Term.toName(field, term, true);
+    }
+
     static propTypes = {
         'href' : PropTypes.string
     };
@@ -32,13 +40,21 @@ export default class HealthView extends React.PureComponent {
     static defaultProps = {
         "excludedKeys" : [ ...ItemDetailList.Detail.defaultProps.excludedKeys, 'content' ],
         "keyTitleDescriptionMapConfig" : {
-            'blob_bucket' : {
-                title : "Blob Bucket",
-                description : "Name of blob storage bucket used for blob data."
+            'aggregations' : {
+                title : 'Aggregations',
+                description : "Aggregations of ES-indexed data."
+            },
+            'beanstalk_app_version': {
+                title : "Beanstalk App Version",
+                description : "Unique descriptive identifier for this app's ElasticBeanstalk source bundle."
             },
             'beanstalk_env' : {
                 title : "Beanstalk Environment",
                 description : "Which Elastic Beanstalk environment this instance running on."
+            },
+            'blob_bucket' : {
+                title : "Blob Bucket",
+                description : "Name of blob storage bucket used for blob data."
             },
             'content' : {
                 title : "Extra Information"
@@ -55,26 +71,58 @@ export default class HealthView extends React.PureComponent {
                 title : "File Upload Bucket",
                 description : "Where uploaded files are stored."
             },
+            'foursight' : {
+                title : "Foursight",
+                description : "URI of corresponding Foursight page."
+            },
+            'indexer' : {
+                title : "Indexer",
+                description : "Whether this server processes indexing requests at all."
+            },
+            'index_server' : {
+                title : "Index Server",
+                description : "Whether this server is only for indexing."
+            },
             'load_data' : {
-                title : "Data Loaded",
+                title : "Loaded Data",
                 description : "Data which was loaded into database on initialization or boot."
             },
-            'ontology_updated' : {
-                title : 'Last Ontology Update',
-                description : "Last time ontologies were updated."
+            'namespace': {
+                title : "Namespace",
+                description : "The ElasticSearch namespace to use. This is often the same as the Beanstalk Environment, but don't rely on that."
             },
-            'system_bucket' : {
-                title : 'System Bucket',
-                description : "Name of blob storage bucket used for system data."
+            'ontology_updated' : {
+                title : 'Ontology Last Updated',
+                description : "Last time ontologies were updated."
             },
             'processed_file_bucket' : {
                 title: "Processed File Bucket",
                 description : "Blob storage bucket name of processed files."
             },
-            'aggregations' : {
-                title : 'Aggregations',
-                description : "Aggregations of ES-indexed data."
-            }
+            'project_version': {
+                title : "Project Version",
+                description : "Software version for this portal's software."
+            },
+            'spc_version': {
+                title : "Shared Portal Components Version",
+                description : "Software version of shared-portal-components package being used."
+            },
+            'snovault_version': {
+                title : "Snovault Version",
+                description : "Software version of dcicsnovault being used."
+            },
+            'system_bucket' : {
+                title : 'System Bucket',
+                description : "Name of blob storage bucket used for system data."
+            },
+            'uptime': {
+                title : 'Uptime',
+                description : "How long this server has been running."
+            },
+            'utils_version': {
+                title : "Utils Version",
+                description : "Software version of dcicutils being used."
+            },
         },
         "keyTitleDescriptionMapCounts" : {
             'db_es_total' : {
@@ -124,16 +172,23 @@ export default class HealthView extends React.PureComponent {
     }
 
     render() {
-        const { context, schemas, session, windowWidth, href, keyTitleDescriptionMapConfig, keyTitleDescriptionMapCounts, excludedKeys } = this.props;
+        const { context: propContext, schemas, session, windowWidth, href, keyTitleDescriptionMapConfig, keyTitleDescriptionMapCounts, excludedKeys } = this.props;
         const {
             db_es_compare = null,
             db_es_total = null,
             mounted = false
         } = this.state;
-        const { title: ctxTitle, description } = context;
+        const { title: ctxTitle, description } = propContext;
         const notYetLoaded = (db_es_compare === null && db_es_total === null);
         const title = typeof ctxTitle === "string" ? ctxTitle : memoizedUrlParse(href).path;
         const width = layout.gridContainerWidth(windowWidth);
+        //extend context to include shared-portal-components version
+        const { dependencies: { '@hms-dbmi-bgm/shared-portal-components': { version: spcVersion, from: spcFrom } = {} } } = installedPackageLockJson;
+        let spcVersionUsed;
+        if (spcFrom && spcFrom.indexOf('#') > -1) { //e.g. github:4dn-dcic/shared-portal-components#0.0.2.70
+            [spcVersionUsed] = spcFrom.split('#').splice(-1);
+        }
+        const context = _.extend({ spc_version: spcVersionUsed || spcVersion || '-' }, propContext);
 
         return (
             <div className="view-item container" id="content">
@@ -142,7 +197,8 @@ export default class HealthView extends React.PureComponent {
 
                 { typeof description == "string" ? <p className="description">{ description }</p> : null }
 
-                <ItemDetailList {...{ excludedKeys, context }} hideButtons keyTitleDescriptionMap={keyTitleDescriptionMapConfig} />
+                <ItemDetailList {...{ excludedKeys, context }} hideButtons keyTitleDescriptionMap={keyTitleDescriptionMapConfig}
+                    termTransformFxn={HealthView.termTransformFxn} />
 
                 <DatabaseCountsInfo {...{ notYetLoaded, excludedKeys, schemas, db_es_compare, db_es_total, session, mounted, context, width, keyTitleDescriptionMapCounts }}
                     getCounts={this.getCounts} />

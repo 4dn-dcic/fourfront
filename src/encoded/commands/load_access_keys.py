@@ -5,7 +5,7 @@ import json
 import os
 import boto3
 from pyramid.paster import get_app
-from webtest import TestApp
+from webtest import TestApp, AppError
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
 
 log = structlog.getLogger(__name__)
@@ -77,7 +77,7 @@ def main():
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.INFO)
 
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Load Access Keys", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -117,7 +117,10 @@ def main():
 
         key_ids = get_existing_key_ids(testapp,  user_props['uuid'], key_name)
         for key_id in key_ids:
-            testapp.patch_json(key_id, {'status': 'deleted'})
+            try:
+                testapp.patch_json(key_id, {'status': 'deleted'})
+            except AppError:
+                log.error('load_access_keys: key_id: %s does not exist in database but exists in ES' % key_id)
 
         key = generate_access_key(testapp, env, user_props['uuid'], key_name)
         s3.put_object(Bucket=s3_bucket,

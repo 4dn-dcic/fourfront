@@ -594,7 +594,7 @@ $markdown-table-result-row-height: 46px !default;
 
     > .inner > .value {
         // Default style -- can be overriden
-        @include text-ellipsis-container;
+        @include text-truncate();
 		flex-grow: 1;
 		font-size: 0.9rem;
 
@@ -608,10 +608,18 @@ $markdown-table-result-row-height: 46px !default;
 
 	.markdown-table-container {
 		position: relative;
+		overflow: auto;
+
+		.markdown-table-row-subtitle {
+			padding-top: 10px;
+			padding-bottom: 10px;
+			padding-left: 5px;
+			border-bottom: 1px solid rgb(220,220,220);
+		}
 
 		.inner-container {
 
-			overflow: auto;
+			// overflow: auto;
 
 			.scrollable-container {
 				overflow: hidden;
@@ -629,6 +637,9 @@ $markdown-table-result-row-height: 46px !default;
 							@include markdown-table-column-block;
 							&:not(:last-child) {
 								border-right: 1px dotted rgba(0,0,0,0.075);
+							}
+							> .inner > .value {
+								white-space: normal !important; //override default text-ellipsis-container mixin
 							}
 						}
 
@@ -649,7 +660,7 @@ $markdown-table-result-row-height: 46px !default;
 	background-color: $brand-primary-dark;
 	z-index: 50;
 	transform: translate3d(0,0,0) !important;
-	overflow-x: hidden;
+	// overflow-x: hidden;
 
 	> .columns {
 		display: -webkit-box;
@@ -677,7 +688,7 @@ $markdown-table-result-row-height: 46px !default;
                 > .column-title {
                     flex-grow: 1;
                     text-align: center;
-                    @include text-ellipsis-container;
+                    @include text-truncate();
                 }
 
 				> .column-sort-icon {

@@ -5,9 +5,9 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
+import Collapse from 'react-bootstrap/esm/Collapse';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
-import { console, object, isServerSide, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, isServerSide, layout, commonFileUtil, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas, typedefs } from './../util';
 
 import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
@@ -16,12 +16,14 @@ import { AdjustableDividerRow } from './components/AdjustableDividerRow';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { QCMetricFromSummary } from './FileView';
+import { QCMetricFromSummary } from './QualityMetricView';
 
-import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton } from './../browse/components/file-tables';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, renderFileQCDetailLinkButton } from './../browse/components/file-tables';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { EmbeddedHiglassActions } from './../static-pages/components';
+import { combineExpsWithReplicateNumbersForExpSet } from './../util/experiments-transforms';
+import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 
 // eslint-disable-next-line no-unused-vars
 const { Item, File, ExperimentSet } = typedefs;
@@ -367,6 +369,131 @@ class HiGlassAdjustableWidthRow extends React.PureComponent {
 
 class QCMetricsTable extends React.PureComponent {
 
+    static qcSummaryItemTitleTooltipsByTitle(fileGroup) {
+        const tooltipsByTitle = {};
+        fileGroup.forEach(function({ title: qmsTitle, quality_metric_summary: { title_tooltip = null } = {} }){
+            if (typeof tooltipsByTitle[qmsTitle] === "string") {
+                return; // skip/continue; already found a tooltip_title for this qms title.
+            }
+            if (title_tooltip && typeof title_tooltip === "string"){
+                tooltipsByTitle[qmsTitle] = title_tooltip;
+            }
+        });
+        return tooltipsByTitle;
+    }
+
+    static renderForFileColValue(file) {
+        const fileAtId = file && object.atIdFromObject(file);
+        let fileTitleString;
+        if (file.accession) {
+            fileTitleString = file.accession;
+        }
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0, 5) === '4DNFI') {
+                fileTitleString = idParts[1];
+            }
+        }
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
+        }
+        return (
+            <React.Fragment>
+                <div>{ Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true) }</div>
+                <a className="text-500 name-title" href={fileAtId}>
+                    {fileTitleString}
+                </a>
+            </React.Fragment>);
+    }
+
+    static generateAlignedColumnHeaders(fileGroups){
+        return fileGroups.map(function(fileGroup){
+            const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
+            const columnHeaders = [ // Static / present-for-each-table headers
+                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
+            ].concat(fileGroup[0].quality_metric.quality_metric_summary.map(function(qmsObj, qmsIndex){ // Dynamic Headers
+                const { title, title_tooltip } = qmsObj;
+                // title tooltip: if missing in the first item then try to get it from the first valid one in array
+                return {
+                    columnClass: 'file-detail',
+                    title,
+                    title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
+                    initialWidth: 80,
+                    render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
+                        const qmsItem = file.quality_metric.quality_metric_summary[qmsIndex];
+                        const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                        return <span className="d-inline-block" data-tip={tooltip}>{value}</span>;
+                    }
+                };
+            }));
+
+            // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
+            const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
+                return f && f.quality_metric && f.quality_metric.url;
+            });
+
+            if (anyFilesWithMetricURL) {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
+            } else {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
+            }
+            return columnHeaders;
+        });
+    }
+
+    /**
+     * commonFileUtil.groupFilesByQCSummaryTitles function is wrapped to allow
+     * custom sorting by QC schema's qc_order and @type Atacseq or Chipseq specific QCS items
+     */
+    static groupFilesByQCSummaryTitles(filesWithMetrics, schemas) {
+        let filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+
+        const comparerFunc = (filesA, filesB) => {
+            const [fileA] = filesA; //assumption: 1st file's QC is adequate to define order
+            const [fileB] = filesB; //assumption: 1st file's QC is adequate to define order
+
+            let orderA, orderB;
+            if (schemas) {
+                const itemTypeA = schemaTransforms.getItemType(fileA.quality_metric);
+                if (itemTypeA && schemas[itemTypeA]) {
+                    const { qc_order } = schemas[itemTypeA];
+                    if (typeof qc_order === 'number') {
+                        orderA = qc_order;
+                    }
+                }
+                const itemTypeB = schemaTransforms.getItemType(fileB.quality_metric);
+                if (itemTypeB && schemas[itemTypeB]) {
+                    const { qc_order } = schemas[itemTypeB];
+                    if (typeof qc_order === 'number') {
+                        orderB = qc_order;
+                    }
+                }
+            }
+
+            if (orderA && orderB && orderA !== orderB) {
+                return orderA - orderB;
+            }
+
+            //custom comparison for @type Atacseq or Chipseq specific QCS items
+            if (_.any(fileA.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return -1;
+            } else if (_.any(fileB.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return 1;
+            }
+
+            return 0;
+        };
+
+        if (filesByTitles) {
+            filesByTitles = filesByTitles.slice();
+            filesByTitles.sort(comparerFunc);
+        }
+
+        return filesByTitles;
+    }
+
     static defaultProps = {
         heading: (
             <h3 className="tab-section-title mt-12">
@@ -379,50 +506,34 @@ class QCMetricsTable extends React.PureComponent {
         super(props);
         this.memoized = {
             filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
-            groupFilesByQCSummaryTitles: memoize(commonFileUtil.groupFilesByQCSummaryTitles)
+            groupFilesByQCSummaryTitles: memoize(QCMetricsTable.groupFilesByQCSummaryTitles),
+            generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
         };
     }
 
     render() {
-        const { width, files, windowWidth, href, heading } = this.props;
+        const { width, files, windowWidth, href, heading, schemas } = this.props;
         const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
         const filesWithMetricsLen = filesWithMetrics.length;
 
         if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
 
-        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics);
+        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics, schemas);
+        const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
+        const commonTableProps = {
+            width, windowWidth, href,
+            collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
+            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics",
+            showNotesColumns: 'never'
+        };
 
         return (
             <div className="row">
                 <div className="exp-table-container col-12">
-                    {heading}
-                    {_.map(filesByTitles, function (fileGroup, i) {
-                        const columnHeaders = [ // Static / present-for-each-table headers
-                            { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
-                            { columnClass: 'file', title: 'For File', initialWidth: 100 }
-                        ].concat(_.map(fileGroup[0].quality_metric_summary, function (sampleQMSItem, qmsIndex) { // Dynamic Headers
-                            function renderColValue(file, field, colIndex, fileEntryBlockProps) {
-                                const qmsItem = file.quality_metric_summary[qmsIndex];
-                                const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
-                                return <span className="inline-block" data-tip={tooltip}>{value}</span>;
-                            }
-                            return { columnClass: 'file-detail', title: sampleQMSItem.title, initialWidth: 80, render: renderColValue };
-                        }));
-
-                        // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
-                        const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
-                            return f && f.quality_metric && f.quality_metric.url;
-                        });
-
-                        if(anyFilesWithMetricURL) {
-                            columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 50, render: renderFileQCReportLinkButton });
-                        } else {
-                            columnHeaders.push({ columnClass: 'file-detail', title: ' ', initialWidth: 50, render: function () { return ''; } });
-                        }
-
+                    { heading }
+                    { filesByTitles.map(function(fileGroup, i){
                         return (
-                            <ProcessedFilesStackedTable {...{ width, windowWidth, href, columnHeaders }} key={i} analyticsImpressionOnMount={false}
-                                files={fileGroup} collapseLimit={10} collapseShow={7} collapseLongLists={true} titleForFiles="Processed File Metrics" />
+                            <ProcessedFilesStackedTable {...commonTableProps} key={i} files={fileGroup} columnHeaders={columnHeadersForFileGroups[i]} />
                         );
                     })}
                 </div>
@@ -464,7 +575,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 
     constructor(props){
         super(props);
-        _.bindAll(this, 'renderTopRow', 'renderHeader', 'renderProcessedFilesTableAsRightPanel');
+        _.bindAll(this, 'renderTopRow', 'renderProcessedFilesTableAsRightPanel');
     }
 
     renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
@@ -484,43 +595,118 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         }
     }
 
-    renderHeader(){
-        const { files, selectedFiles, context } = this.props;
-        const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
-        const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
-        return (
-            <h3 className="tab-section-title">
-                <span>
-                    <span className="text-400">{ files.length }</span> Processed Files
-                </span>
-                { selectedFiles ? // Make sure data structure is present (even if empty)
-                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
-                            id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
-                            <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
-                            <span className="d-none d-sm-inline">Download </span>
-                            <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
-                            <span className="d-none d-sm-inline text-400"> Processed Files</span>
-                        </SelectedFilesDownloadButton>
-                    </div>
-                    : null }
-            </h3>
-        );
-    }
+    /**
+     * Mostly clonned from ProcessedFilesStackedTable.defaultProps to render the table
+     * compatible w/ processed file table
+     */
+    static expsNotAssociatedWithFileColumnHeaders = [
+        {
+            columnClass: 'experiment', className: 'text-left', title: 'Experiment', initialWidth: 180,
+            render: function (exp) {
+                const nameTitle = (exp && typeof exp.display_title === 'string' && exp.display_title.replace(' - ' + exp.accession, '')) || exp.accession;
+                const experimentAtId = object.atIdFromObject(exp);
+                const replicateNumbersExists = exp && exp.bio_rep_no && exp.tec_rep_no;
 
-
+                return (
+                    <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
+                        {replicateNumbersExists ? <div>Bio Rep <b>{exp.bio_rep_no}</b>, Tec Rep <b>{exp.tec_rep_no}</b></div> : <div />}
+                        {experimentAtId ? <a href={experimentAtId} className="name-title text-500">{nameTitle}</a> : <div className="name-title">{nameTitle}</div>}
+                    </StackedBlockName>
+                );
+            }
+        },
+        { columnClass: 'file', className: 'has-checkbox', title: 'File', initialWidth: 165 },
+        { columnClass: 'file-detail', className: '', title: 'File Type', initialWidth: 135 },
+        { columnClass: 'file-detail', className: '', title: 'File Size', initialWidth: 70 }
+    ];
 
     render(){
+        const { context, files, selectedFiles } = this.props;
         return (
             <div className="processed-files-table-section exp-table-section">
-                {this.renderHeader()}
+                <ProcessedFilesTableSectionHeader {...{ context, files, selectedFiles }} />
                 {this.renderTopRow()}
+                <ExperimentsWithoutFilesStackedTable {...this.props} />
                 <QCMetricsTable {...this.props} />
             </div>
         );
     }
 }
 
+const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context }){
+    const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
+    const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
+    return (
+        <h3 className="tab-section-title">
+            <span>
+                <span className="text-400">{ files.length }</span> Processed Files
+            </span>
+            { selectedFiles ? // Make sure data structure is present (even if empty)
+                <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                    <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                        id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
+                        <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
+                        <span className="d-none d-sm-inline">Download </span>
+                        <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
+                        <span className="d-none d-sm-inline text-400"> Processed Files</span>
+                    </SelectedFilesDownloadButton>
+                </div>
+                : null }
+        </h3>
+    );
+});
+
+const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWithoutFilesStackedTable(props) {
+    const { context } = props;
+    const expsNotAssociatedWithAnyFiles = _.filter(context.experiments_in_set, function (exp) {
+        return !((exp.files && Array.isArray(exp.files) && exp.files.length > 0) || (exp.processed_files && Array.isArray(exp.processed_files) && exp.processed_files.length > 0));
+    });
+
+    if (expsNotAssociatedWithAnyFiles.length === 0) {
+        return null;
+    }
+
+    const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
+    const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps, expsNotAssociatedWithAnyFiles);
+    const experimentBlock = expsWithReplicateExps.map((exp) => {
+        const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
+            if (col.render && typeof col.render === 'function') { return col.render(exp); }
+            else {
+                /**
+                 * workaround: We surround div by React.Fragment to prevent 'Warning: React does not recognize the XX prop on a DOM element. If you intentionally want
+                 * it to appear in the DOM as a custom attribute, spell it as lowercase $isactive instead.' error,
+                 * since StackedBlockTable.js/StackedBlock component injects
+                 * some props from parent element into 'div' element assuming it is a React component, in case it is not.
+                 */
+                return (
+                    <React.Fragment>
+                        <div className={"col-" + col.columnClass + " item detail-col" + idx} style={{ flex: '1 0 ' + col.initialWidth + 'px' }}>{'-'}</div>
+                    </React.Fragment>
+                );
+            }
+        });
+        return (
+            <StackedBlock columnClass="experiment" hideNameOnHover={false}
+                key={exp.accession} label={
+                    <StackedBlockNameLabel title={'Experiment'}
+                        accession={exp.accession} subtitleVisible />
+                }>
+                {content}
+            </StackedBlock>
+        );
+    });
+    return (
+        <div className="experiments-not-having-files">
+            <div className="stacked-block-table-outer-container overflow-auto">
+                <StackedBlockTable {..._.omit(props, 'children', 'files')} {...tableProps} className="expset-processed-files">
+                    <StackedBlockList className="sets" collapseLongLists={false}>
+                        {experimentBlock}
+                    </StackedBlockList>
+                </StackedBlockTable>
+            </div>
+        </div>
+    );
+});
 
 class SupplementaryFilesOPFCollection extends React.PureComponent {
 
@@ -571,7 +757,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         const status = this.collectionStatus(files);
         if (!status) return null;
 
-        const outerClsName = "inline-block pull-right mr-12 ml-2 mt-1";
+        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
         if (typeof status === 'string'){
             const capitalizedStatus = Schemas.Term.toName("status", status);
             return (
@@ -584,7 +770,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
             return (
                 <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                    <span className="indicators-collection inline-block mr-05">
+                    <span className="indicators-collection d-inline-block mr-05">
                         { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
                     </span>
                     Multiple
@@ -607,7 +793,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
                 { this.renderStatusIndicator() }
                 <h4>
-                    <span className="inline-block clickable" onClick={this.toggleOpen}>
+                    <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                         { title || "Collection " + index } <span className="text-normal text-300">({ files.length } file{files.length === 1 ? '' : 's'})</span>
                     </span>
@@ -669,7 +855,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
                 <h4 className="mb-15">
-                    <span className="inline-block clickable" onClick={this.toggleOpen}>
+                    <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
                         { filesLen + " Reference File" + (filesLen > 1 ? "s" : "") }
                     </span>
@@ -706,12 +892,18 @@ class SupplementaryFilesTabView extends React.PureComponent {
      * @returns {{ files: File[], title: string, type: string, description: string }[]} List of uniqued-by-title viewable collections.
      */
     static combinedOtherProcessedFiles = memoize(function(context){
+        // Clone context
+        let experiment_set = _.extend({}, context);
+        // Add in Exp Bio & Tec Rep Nos, if available.
+        if (Array.isArray(context.replicate_exps) && Array.isArray(context.experiments_in_set)) {
+            experiment_set = combineExpsWithReplicateNumbersForExpSet(context);
+        }
 
         // Clone -- so we don't modify props.context in place
-        const collectionsFromExpSet = _.map(context.other_processed_files, function(collection){
+        const collectionsFromExpSet = _.map(experiment_set.other_processed_files, function(collection){
             const { files : origFiles } = collection;
             const files = _.map(origFiles || [], function(file){
-                return _.extend({ 'from_experiment_set' : context, 'from_experiment' : { 'from_experiment_set' : context, 'accession' : 'NONE' } }, file);
+                return _.extend({ 'from_experiment_set' : experiment_set, 'from_experiment' : { 'from_experiment_set' : experiment_set, 'accession' : 'NONE' } }, file);
             });
             return _.extend({}, collection, { files });
         });
@@ -724,11 +916,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
 
         // Add 'from_experiment' info to each collection file so it gets put into right 'experiment' row in StackedTable.
         // Also required for SelectedFilesController
-        const allCollectionsFromExperiments = _.reduce(context.experiments_in_set || [], function(memo, exp){
+        const allCollectionsFromExperiments = _.reduce(experiment_set.experiments_in_set || [], function(memo, exp){
             _.forEach(exp.other_processed_files || [], function(collection){
                 const { files : origFiles } = collection;
                 const files = _.map(origFiles || [], function(file){
-                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : context }, exp), 'from_experiment_set' : context }, file);
+                    return _.extend({ 'from_experiment' : _.extend({ 'from_experiment_set' : experiment_set }, exp), 'from_experiment_set' : experiment_set }, file);
                 });
                 memo.push(_.extend({}, collection, { files }));
             });

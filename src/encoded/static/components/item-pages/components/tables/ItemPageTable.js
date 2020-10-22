@@ -9,8 +9,8 @@ import queryString from 'querystring';
 import { get as getSchemas, Term } from './../../../util/Schemas';
 import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
-    ResultRowColumnBlockValue, columnsToColumnDefinitions, columnDefinitionsToScaledColumnDefinitions,
-    HeadersRow, TableRowToggleOpenButton
+    ResultRowColumnBlockValue, columnsToColumnDefinitions, HeadersRow, TableRowToggleOpenButton,
+    DisplayTitleColumnWrapper, DisplayTitleColumnDefault
 } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
 import { SearchResultDetailPane } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultDetailPane';
 import { columnExtensionMap as columnExtensionMap4DN } from './../../../browse/columnExtensionMap';
@@ -27,7 +27,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
 
     static defaultProps = {
         "columnExtensionMap": columnExtensionMap4DN,
-        "facets" : undefined // Default to those from search response.
+        "facets" : undefined, // Default to those from search response.
     };
 
     constructor(props){
@@ -55,7 +55,10 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             renderDetailPane, defaultOpenIndices, maxHeight,
             columns, columnExtensionMap,
             searchHref,
-            filterFacetFxn, hideFacets
+            aboveTableComponent,
+            aboveFacetListComponent,
+            filterFacetFxn, hideFacets,
+            filterColumnFxn, hideColumns
         } = this.props;
         const { totalCount } = this.state;
 
@@ -68,15 +71,16 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
         const passProps = {
             facets, columns, columnExtensionMap, searchHref, session,
             schemas, renderDetailPane, defaultOpenIndices, maxHeight,
+            aboveTableComponent, aboveFacetListComponent,
             filterFacetFxn, hideFacets,
+            filterColumnFxn, hideColumns,
             onLoad: this.getCountCallback,
             termTransformFxn: Term.toName
         };
 
         const showTitle = !title ? null
             : React.isValidElement(title) ? (
-                typeof title.type === "string" ? title
-                    : React.cloneElement(title, { totalCount })
+                typeof title.type === "string" ? title : React.cloneElement(title, { totalCount })
             ) : title;
 
         const showChildren = React.isValidElement(children) && typeof children.type !== "string" ?
@@ -84,20 +88,42 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
 
         return (
             <div className="embedded-search-view-outer-container">
-                { showTitle }
-                <EmbeddedSearchView {...passProps}/>
+                <EmbeddedSearchView {...passProps} embeddedTableHeader={showTitle}/>
                 { showChildren }
             </div>
         );
     }
 }
 
+/**
+ * @todo Eventually maybe add UI controls for selecting columns and other things into here.
+ */
+export function SearchTableTitle(props) {
+    const {
+        totalCount,
+        href: currentSearchHref,
+        externalSearchLinkVisible = true,
+        title: propTitle
+    } = props;
 
-
-
-
-
-
+    const title = (propTitle && typeof propTitle === 'string') ? propTitle : 'Item';
+    const linkText = currentSearchHref && typeof currentSearchHref === 'string' && currentSearchHref.indexOf('/browse/') > -1 ?
+        'Open In Browse View' : 'Open In Search View';
+    return (
+        <h3 className="tab-section-title">
+            <span>
+                {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
+                {title + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
+            </span>
+            { externalSearchLinkVisible && currentSearchHref ?
+                <a href={currentSearchHref} className="btn btn-primary pull-right" style={{ marginTop: '-10px' }} data-tip="Run embedded search query in Browse/Search View">
+                    <i className="icon icon-fw fas icon-external-link-alt mr-07 align-baseline"></i>
+                    { linkText }
+                </a>
+                : null }
+        </h3>
+    );
+}
 
 /** @deprecated */
 
@@ -111,6 +137,20 @@ export class ItemPageTable extends React.Component {
         const scale = realWidth / baseWidth;
         return _.map(columnDefinitions, function(c){
             return _.extend({}, c, { 'width' : Math.floor(scale * c.baseWidth) });
+        });
+    }
+
+    /**
+     * Adds a `baseWidth` property to each columnDefinition based off widthMap or default value (100).
+     */
+    static columnDefinitionsToScaledColumnDefinitions(columnDefinitions){
+        return columnDefinitions.map(function(colDef){
+            const colDef2 = _.clone(colDef);
+            colDef2.baseWidth = colDef.widthMap.sm || colDef.widthMap.md || colDef.widthMap.lg || 100;
+            if (typeof colDef.render !== 'function'){
+                colDef2.render = null;
+            }
+            return colDef2;
         });
     }
 
@@ -132,46 +172,27 @@ export class ItemPageTable extends React.Component {
         'constantColumnDefinitions' : null,
         'columnExtensionMap' : {
             'display_title' : {
-                'render' : function(result, columnDefinition, props, width){
-                    const { hideTypeTitle, renderDetailPane, detailOpen, toggleDetailOpen, schemas } = props;
-                    let title           = object.itemUtil.getTitleStringFromContext(result);
-                    const link          = object.itemUtil.atId(result);
-                    const isAnAccession = false;
-                    let tooltip;
+                'render' : function(result, parentProps){
+                    const { schemas, rowNumber, detailOpen, toggleDetailOpen, renderDetailPane, hideTypeTitle = false } = parentProps;
 
-                    if (title && (title.length > 20 || width < 100)) tooltip = title;
-
-                    if (link){ // Link instead of plaintext
-                        title = (
-                            <a href={link} className={"text-400" + (isAnAccession ? ' mono-text' : '')} data-tip={tooltip}>
-                                { title }
-                            </a>
-                        );
-                    }
-
-                    let typeTitle = null;
                     if (!hideTypeTitle){
-                        typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
-                    }
-
-                    let toggleButton = null;
-                    if (typeof renderDetailPane === 'function'){
-                        toggleButton = <TableRowToggleOpenButton open={detailOpen} onClick={toggleDetailOpen} />;
+                        const typeTitle = schemaTransforms.getItemTypeTitle(result, schemas || getSchemas());
+                        if (typeTitle) {
+                            return (
+                                <div className="flex-wrap">
+                                    <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
+                                        <div className="type-title text-truncate">{ typeTitle }</div>
+                                        <DisplayTitleColumnDefault />
+                                    </DisplayTitleColumnWrapper>
+                                </div>
+                            );
+                        }
                     }
 
                     return (
-                        <React.Fragment>
-                            { toggleButton }
-                            <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
-                                { typeTitle ? <div className="type-title text-ellipsis-container">{ typeTitle }</div> : null }
-                                { title }
-                            </span>
-                        </React.Fragment>
-                        // <span className={'title-wrapper' + (typeTitle ? " has-type-title" : '')}>
-                        //     { toggleButton }
-                        //     { typeTitle ? <div className="type-title">{ typeTitle }</div> : null }
-                        //     { title }
-                        // </span>
+                        <DisplayTitleColumnWrapper {...{ rowNumber, detailOpen, toggleDetailOpen }} result={result}>
+                            <DisplayTitleColumnDefault />
+                        </DisplayTitleColumnWrapper>
                     );
                 }
             }
@@ -191,7 +212,8 @@ export class ItemPageTable extends React.Component {
         super(props);
         this.state = { 'mounted' : false };
         this.memoized = {
-            scaleColumnDefinitionWidths : memoize(ItemPageTable.scaleColumnDefinitionWidths)
+            scaleColumnDefinitionWidths : memoize(ItemPageTable.scaleColumnDefinitionWidths),
+            columnDefinitionsToScaledColumnDefinitions : memoize(ItemPageTable.columnDefinitionsToScaledColumnDefinitions)
         };
     }
 
@@ -221,7 +243,8 @@ export class ItemPageTable extends React.Component {
         }
 
         columnDefinitions = this.memoized.scaleColumnDefinitionWidths(
-            useWidth, columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
+            useWidth,
+            this.memoized.columnDefinitionsToScaledColumnDefinitions(columnDefinitions)
         );
 
         const commonRowProps = { width: useWidth, columnDefinitions, responsiveGridState /* <- removable? */, renderDetailPane };
@@ -310,8 +333,6 @@ class ItemPageTableRow extends React.PureComponent {
     }
 }
 
-
-
 export class ItemPageTableIndividualUrlLoader extends React.PureComponent {
 
     static propTypes = {
@@ -398,7 +419,6 @@ export function ViewMoreResultsBtn(props){
         return (countTotalResults - visibleResultCount) + ' more ' + itemTypeTitle + 's';
     }
 }
-
 
 /**
  * TODO: Once/if /search/ accepts POST JSON requests, we can do one single request to get all Items by @id from /search/ instead of multiple AJAX requests.

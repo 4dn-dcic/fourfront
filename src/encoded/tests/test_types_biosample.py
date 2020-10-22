@@ -1,5 +1,7 @@
 import pytest
-from snovault.schema_utils import load_schema
+# from snovault.schema_utils import load_schema
+
+
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
@@ -61,6 +63,7 @@ def test_update_biosample_relation(testapp, human_biosample, biosample_1):
 def test_biosample_calculated_properties(testapp, biosample_1, ):
     """
     Test to ensure the calculated properties are in result returned from testapp
+    These have string 'None' returned if no value as they are used in Item page view
     """
     res = testapp.get(biosample_1['@id']).json
     assert 'modifications_summary' in res
@@ -177,3 +180,157 @@ def test_biosample_biosource_category_two_biosource(testapp, biosample_1, human_
     cat = res.get('biosample_category')
     assert len(cat) == 1
     assert cat[0] == 'Mixed samples'
+
+
+# setting up fixtures for testing tissue and organ calcprop
+@pytest.fixture
+def brain_term(testapp, uberon_ont, cns_term, ectoderm_term):
+    item = {
+        "is_slim_for": "organ",
+        "term_id": "brain_tid",
+        "term_name": "brain",
+        "source_ontologies": [uberon_ont['@id']],
+        "slim_terms": [cns_term['@id'], ectoderm_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def cns_term(testapp, uberon_ont, ectoderm_term):
+    item = {
+        "is_slim_for": "system",
+        "term_id": "cns_tid",
+        "term_name": "central nervous system",
+        "source_ontologies": [uberon_ont['@id']],
+        "slim_terms": [ectoderm_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def ectoderm_term(testapp, uberon_ont):
+    item = {
+        "is_slim_for": "developmental",
+        "term_id": "ectoderm_tid",
+        "term_name": "ectoderm",
+        "source_ontologies": [uberon_ont['@id']],
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def primary_cell_term(testapp, ontology):
+    item = {
+        "is_slim_for": "cell",
+        "term_id": "pcell_id",
+        "term_name": "primary cell",
+        "source_ontologies": [ontology['@id']],
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def cortical_neuron_term(testapp, uberon_ont, brain_term, cns_term,
+                         ectoderm_term, primary_cell_term):
+    item = {
+        "term_id": "cort_neuron_id",
+        "term_name": "cortical neuron",
+        "source_ontologies": [uberon_ont['@id']],
+        "slim_terms": [brain_term['@id'], cns_term['@id'], ectoderm_term['@id'], primary_cell_term['@id']]
+    }
+    return testapp.post_json('/ontology_term', item).json['@graph'][0]
+
+
+@pytest.fixture
+def bcc_diff_to_cortical(testapp, lab, award, cortical_neuron_term):
+    item = {
+        "culture_start_date": "2018-01-01",
+        "differentiation_state": "Stem cell differentiated to cortical neuron",
+        "tissue": cortical_neuron_term['@id'],
+        "in_vitro_differentiated": "Yes",
+        'award': award['@id'],
+        'lab': lab['@id']
+    }
+    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
+
+
+@pytest.fixture
+def diff_cortical_neuron_bs(testapp, F123_biosource, bcc_diff_to_cortical, lab, award):
+    item = {
+        "description": "Differentiated cortical neuron",
+        "biosource": [F123_biosource['@id']],
+        "cell_culture_details": [bcc_diff_to_cortical['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+@pytest.fixture
+def brain_biosource(testapp, brain_term, lab, award):
+    item = {
+        "description": "Brain tissue",
+        "biosource_type": "tissue",
+        "tissue": brain_term['@id'],
+        "lab": lab['@id'],
+        "award": award['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def brain_biosample(testapp, brain_biosource, lab, award):
+    item = {
+        "description": "Brain Tissue Biosample",
+        "biosource": [brain_biosource['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+@pytest.fixture
+def mixed_biosample(testapp, brain_biosource, lung_biosource, lab, award):
+    item = {
+        "description": "Mixed Tissue Biosample",
+        "biosource": [brain_biosource['@id'], lung_biosource['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+def test_get_tissue_organ_info_none_present(biosample_1):
+    assert 'tissue_organ_info' not in biosample_1
+
+
+def test_get_tissue_organ_info_tissue_in_cell_culture(diff_cortical_neuron_bs, cortical_neuron_term):
+    org_sys = sorted(['brain', 'central nervous system', 'ectoderm'])
+    assert 'tissue_organ_info' in diff_cortical_neuron_bs
+    assert diff_cortical_neuron_bs['tissue_organ_info']['tissue_source'] == cortical_neuron_term.get('display_title')
+    assert sorted(diff_cortical_neuron_bs['tissue_organ_info']['organ_system']) == org_sys
+
+
+def test_get_tissue_organ_info_tissue_in_biosource(brain_biosample, brain_term):
+    org_sys = sorted(['central nervous system', 'ectoderm'])
+    assert 'tissue_organ_info' in brain_biosample
+    assert brain_biosample['tissue_organ_info']['tissue_source'] == brain_term.get('display_title')
+    assert sorted(brain_biosample['tissue_organ_info']['organ_system']) == org_sys
+
+
+def test_get_tissue_organ_info_tissue_mixed_biosample(mixed_biosample):
+    org_sys = sorted(['central nervous system', 'ectoderm'])
+    assert 'tissue_organ_info' in mixed_biosample
+    assert mixed_biosample['tissue_organ_info']['tissue_source'] == 'mixed tissue'
+    assert sorted(mixed_biosample['tissue_organ_info']['organ_system']) == org_sys
+
+
+def test_get_tissue_organ_info_none_if_only_cell_slim_terms(testapp, F123_biosource, lab, award):
+    item = {
+        "description": "F123 Biosample",
+        "biosource": [F123_biosource['@id']],
+        "award": award['@id'],
+        "lab": lab['@id']
+    }
+    f123_biosample = testapp.post_json('/biosample', item).json['@graph'][0]
+    assert 'tissue_organ_info' not in f123_biosample

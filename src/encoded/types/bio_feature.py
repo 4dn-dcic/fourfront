@@ -8,7 +8,7 @@ from snovault import (
 from .base import (
     Item,
     lab_award_attribution_embed_list,
-    get_item_if_you_can
+    get_item_or_none
 )
 
 
@@ -34,9 +34,17 @@ class BioFeature(Item):
     })
     def display_title(self, request, feature_type, preferred_label=None, cellular_structure=None,
                       organism_name=None, relevant_genes=[], feature_mods=[], genome_location=[]):
+
+        featstr = ''
+        modstr = ''
+        orgstr = ''
+        if organism_name and organism_name != 'human':
+            orgstr = organism_name
         if preferred_label:
-            return preferred_label
-        ftype = get_item_if_you_can(request, feature_type)
+            if orgstr:
+                orgstr = ' (' + orgstr + ')'
+            return preferred_label + orgstr
+        ftype = get_item_or_none(request, feature_type)
         ftype = ftype.get('preferred_name', '') if ftype is not None else ''
 
         # first pass will not assume combined fields
@@ -45,16 +53,9 @@ class BioFeature(Item):
                 cellular_structure = 'unspecified cellular component'
             return cellular_structure
 
-        featstr = ''
-        modstr = ''
-        orgstr = ''
-        # see if there is an organism_name
-        if organism_name and organism_name != 'human':
-            orgstr = organism_name
-
         # gene trumps location
         for g in relevant_genes:
-            gene = get_item_if_you_can(request, g)
+            gene = get_item_or_none(request, g)
             if gene is not None:
                 symb = gene.get('display_title')
                 featstr = featstr + symb + ', '
@@ -71,7 +72,7 @@ class BioFeature(Item):
         if not relevant_genes:
             for loc in genome_location:
                 try:
-                    locstr = get_item_if_you_can(request, loc).get('display_title')
+                    locstr = get_item_or_none(request, loc).get('display_title')
                 except AttributeError:
                     pass
                 else:

@@ -193,14 +193,23 @@ table.matrix {
 		.s-block {
 
 			&.biosample.stack-depth-1,
-			&.experiment.stack-depth-1 {
+			&.experiment.stack-depth-1,
+			&.experiment-set.stack-depth-1 {
 				/** Decrease line height(s) to fit more lines in **/
 				> .name {
 					text-align: center;
 					line-height: 16px !important;
-					padding-top: 27px !important;
-					padding-bottom: 27px !important;
+					/* padding-top: 27px !important; */
+					/* padding-bottom: 27px !important; */
 					min-height: 70px;
+				}
+				> .name-empty {
+					min-height: 20px !important;
+				}
+			}
+			&.experiment.stack-depth-2 {
+				> .name-empty {
+					min-height: 20px !important;
 				}
 			}
 
@@ -219,13 +228,14 @@ table.matrix {
 
 			&.experiment {
 				@include stacked-block-table-multi-size-block(2);
-				> .name.col-experiment {
-
+				> .name.col-experiment,
+				> .name.col-experiment > a {
 					text-overflow: ellipsis;
 					white-space: nowrap;
 					overflow-x: hidden;
+				}
+				> .name.col-experiment {
 					font-weight: 500;
-
 					.mono-text {
 						text-shadow: 0 0 0;
 					}
@@ -236,10 +246,6 @@ table.matrix {
 				@include gradient-x(rgba(255, 255, 255, 0), #f7f8f9, 0%, 12%);
 				> .experiments > .view-more-button {
 					@include gradient-x(rgba(255, 255, 255, 0), rgba(255, 255, 255, 1), 0%, 25%);
-				}
-				> .name.double-line {
-					padding-top: 19px !important;
-    				padding-bottom: 19px !important;
 				}
 			}
 
@@ -267,10 +273,7 @@ table.matrix {
 						border-top-style: dotted;
 					}
 				}
-			}
-
-
-			
+			}			
 
 			// All/any file rows
 			.s-block.file {
@@ -350,6 +353,18 @@ table.matrix {
 
 		}
 
+		.external-references-stacked-table {
+			.s-block {
+				&.experiment.stack-depth-1 {
+					background-image: initial !important;
+				}
+				&.file ul {
+					list-style-type: none;
+					padding: 0;
+					margin: 0;
+				}
+			}
+		}
 	}
 
 }

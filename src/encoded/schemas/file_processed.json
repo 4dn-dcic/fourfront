@@ -1,6 +1,6 @@
 {
-    "title": "Processed file from workflow runs",
-    "description": "Files produced by 4DN pipelines.",
+    "title": "Processed file",
+    "description": "Files produced by raw or processed file processing.",
     "id": "/profiles/file_processed.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -47,10 +47,9 @@
                 "chromatin states",
                 "compartments",
                 "contact list",
-                "contact list-combined",
-                "contact list-replicate",
                 "contact matrix",
                 "normalized contact matrix",
+                "raw cosegregation matrix",
                 "coordinates",
                 "counts",
                 "normalized counts",
@@ -58,6 +57,8 @@
                 "domain calls",
                 "dot calls",
                 "gene expression",
+                "image mask",
+                "insulation score",
                 "insulation score-diamond",
                 "insulation score-potential",
                 "intensity values",
@@ -71,19 +72,27 @@
                 "long range chromatin interactions",
                 "microscopy summary",
                 "multi-contact read clusters",
+                "NADs",
                 "other",
                 "peaks",
                 "conservative peaks",
                 "read counts",
-                "read counts (minus)",
-                "read counts (plus)",
                 "read positions",
                 "reads",
-                "reads-combined",
                 "segregation table",
                 "signal fold change",
                 "spt results",
                 "stripe calls"
+            ],
+            "ignored_enum": [
+                "contact list-combined",
+                "contact list-replicate",
+                "image mask-cell",
+                "image mask-cytoplasm",
+                "image mask-nucleus",
+                "read counts (minus)",
+                "read counts (plus)",
+                "reads-combined"
             ]
         },
         "file_classification": {
@@ -113,7 +122,8 @@
                 "GRCh38",
                 "GRCm38",
                 "dm6",
-                "galGal5"
+                "galGal5",
+                "GRCz11"
             ]
         },
         "produced_from": {

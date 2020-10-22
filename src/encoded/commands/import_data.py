@@ -20,18 +20,23 @@ To make updates from a single tsv file
         --patch ../updates/ http://localhost:6543
 
 """
-from webtest import TestApp
-from urllib.parse import urlparse
-from .. import loadxl
+import argparse
 import logging
 import os.path
+
+from base64 import b64encode
+from pyramid.compat import ascii_native_
+from pyramid import paster
+from webtest import TestApp
+from wsgiproxy.proxies import ALLOWED_METHODS
+from urllib.parse import urlparse
+from .. import loadxl
+
 
 EPILOG = __doc__
 
 
 def basic_auth(username, password):
-    from base64 import b64encode
-    from pyramid.compat import ascii_native_
     return 'Basic ' + ascii_native_(b64encode(('%s:%s' % (username, password)).encode('utf-8')))
 
 
@@ -44,7 +49,6 @@ def remote_app(base, username='', password=''):
 
 
 def internal_app(configfile, app_name=None, username=''):
-    from pyramid import paster
     app = paster.get_app(configfile, app_name)
     if not username:
         username = 'IMPORT'
@@ -67,12 +71,10 @@ def run(testapp, filename, docsdir, method, item_type, test=False):
 
 def main():
     # https://github.com/gawel/WSGIProxy2/pull/3 (and change to WebTest)
-    from wsgiproxy.proxies import ALLOWED_METHODS
     if 'PATCH' not in ALLOWED_METHODS:
         ALLOWED_METHODS.append('PATCH')
 
-    import argparse
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Import data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

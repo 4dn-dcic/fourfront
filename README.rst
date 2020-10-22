@@ -49,18 +49,20 @@ Install or update dependencies::
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install adoptopenjdk8
-    $ brew install elasticsearch@5.6 node@10
+    $ brew install elasticsearch@6.8 node@10
 
 NOTES:
+
+* To migrate from ES5 to ES6 (--force option may be needed)::
+
+    $ brew unlink elasticsearch@5.6
+    $ brew install elasticsearch@6.8
+    $ brew link elasticsearch@6.8
 
 * If installation of adtopopenjdk8 fails due to an ambiguity, it should work to do this instead::
 
     $ brew cask install homebrew/cask-versions/adoptopenjdk8
 
-* If you try to invoke elasticsearch and it is not found,
-  you may need to link the brew-installed elasticsearch::
-
-    $ brew link --force elasticsearch@5.6
 
 * If you need to update dependencies::
 
@@ -75,14 +77,14 @@ NOTES:
     $ brew upgrade
     $ rm -rf encoded/eggs
 
-Step 3: Running Buildout
+Step 3: Running Make
 ------------------------
 
-Run buildout::
+Run make::
 
-    $ pip install -U zc.buildout setuptools
-    $ buildout bootstrap --buildout-version 2.9.5 --setuptools-version 36.6.0
-    $ bin/buildout
+    $ make build-dev  # for all dependencies
+    OR
+    $ make build      # for only application level dependencies
 
 NOTES:
 
@@ -119,7 +121,7 @@ Start the application locally
 
 In one terminal startup the database servers and nginx proxy with::
 
-    $ bin/dev-servers development.ini --app-name app --clear --init --load
+    $ make deploy1
 
 This will first clear any existing data in /tmp/encoded.
 Then postgres and elasticsearch servers will be initiated within /tmp/encoded.
@@ -128,7 +130,7 @@ The servers are started, and finally the test set will be loaded.
 
 In a second terminal, run the app with::
 
-    $ bin/pserve development.ini
+    $ make deploy2
 
 Indexing will then proceed in a background thread similar to the production setup.
 
@@ -145,6 +147,9 @@ Browse to the interface at http://localhost:8000/.
 
 Running tests
 =============
+
+Python Testing
+--------------
 
 To run specific tests locally::
 
@@ -166,6 +171,10 @@ Run the Pyramid tests with::
 Note: to run against chrome you should first::
 
     $ brew install chromedriver
+
+
+Javascript Testing
+------------------
 
 Run the Javascript tests with::
 
@@ -217,24 +226,3 @@ Force compiling
 ::
 
     $ npm run build-scss
-
-
-
-SublimeLinter
-=============
-
-To setup SublimeLinter with Sublime Text 3, first install the linters::
-
-    $ easy_install-2.7 flake8
-    $ npm install -g jshint
-    $ npm install -g jsxhint
-
-After first setting up `Package Control`_ (follow install and usage instructions on site), use it to install the following packages in Sublime Text 3:
-
-    * sublimelinter
-    * sublimelinter-flake8
-    * sublimelinter-jsxhint
-    * jsx
-    * sublimelinter-jshint
-
-.. _`Package Control`: https://sublime.wbond.net/

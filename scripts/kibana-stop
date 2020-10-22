@@ -1,0 +1,12 @@
+#!/bin/bash
+
+container=`docker ps | grep kibana | cut -f 1 -d ' '`
+
+if [ -z "${container}" ]; then
+    echo "kibana is not running."
+    exit 1
+else
+    echo "Stopping kibana..."
+    docker stop "${container}"
+    echo "Stopped."
+fi

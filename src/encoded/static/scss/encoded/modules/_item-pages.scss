@@ -1399,6 +1399,14 @@ $badge-item-min-height: 90px;
 			}
 		}
 
+		> .inner > .static-section-header ol {
+			padding-left: 15px;
+
+			> li {
+				padding-left: 5px;
+				margin-top: 8px;
+			}
+		}
 	}
 
 	.supplementary-files-section-part {
@@ -1458,6 +1466,22 @@ $badge-item-min-height: 90px;
 					margin-top: 0;
 					margin-bottom: 5px;
 					font-weight: 500;
+				}
+
+				h4.qc-section-title {
+					font-weight: 400;
+				}
+				
+				h5.qc-grouping-title {
+					border-top: 1px solid #f4f4f4;
+					border-bottom: 1px solid #f4f4f4;
+					margin-top: 10px;
+					margin-bottom: 10px;
+					font-weight: 500;
+					padding-top: 15px;
+					padding-bottom: 15px;
+					cursor: pointer;
+					transition: border-color .5s, background-color .5s, padding-left .5s;
 				}
 
 				ol.overview-list-elements-container,
@@ -1576,7 +1600,7 @@ $badge-item-min-height: 90px;
 				> div.overview-list-elements-container {
 					margin-top: 10px;
 
-					> div.overview-list-element {
+					div.overview-list-element {
 						@include overview-block-value-block;
 						margin-bottom: 5px;
 						&:last-child {
@@ -2033,6 +2057,14 @@ $badge-item-min-height: 90px;
 	}
 }
 
+/* override default editable field css for HiGlass Views */
+.higlass-editable-page-title.editable-field-entry.editing,
+.higlass-item-page-heading .editable-field-entry.editing {
+	.input-text {
+		width: 100% !important;
+	}
+}
+
 /** For when HiGlass track is being dragged **/
 /**
     All of this 'hide/override via CSS' is kinda hacky anyway, esp. with the PostCSS classNames;
@@ -2079,14 +2111,20 @@ $badge-item-min-height: 90px;
 		img { 
 			height: 100%;
 		}
+		> div > div:first-child {
+			top: -3px !important;
+		}
 	}
 	.rc-tabs-content {
 		margin-left: 0px !important;
 	}
 
-	.react-resizable-handle {
-		right: -7px !important;
-		bottom: -7px !important;
+	.rc-tabs-tab-btn {
+		outline: none;
+	}
+
+	#microscopy-app-overlays-container > div:first-child > div:first-child > div:first-child {
+		padding-bottom: 20px;
 	}
 }
 .microscopy-create-modal .modal-body .btn {width: 100% !important;}

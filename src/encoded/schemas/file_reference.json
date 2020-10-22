@@ -1,6 +1,6 @@
 {
     "title": "Reference file",
-    "description": "Files used in pipelines as references.",
+    "description": "Files used as references.",
     "id": "/profiles/file_reference.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -40,7 +40,8 @@
         "file_type": {
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
-            "enum": [
+            "suggested_enum": [
+                "chromosome sizes",
                 "genome reference",
                 "genome index",
                 "index",
@@ -50,6 +51,7 @@
                 "blacklisted regions",
                 "repeats",
                 "spike-in",
+                "darkmap",
                 "other"
             ]
         },
@@ -69,7 +71,8 @@
                 "GRCh38",
                 "GRCm38",
                 "dm6",
-                "galGal5"
+                "galGal5",
+                "GRCz11"
             ]
         }
     }

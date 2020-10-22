@@ -30,6 +30,7 @@ const { TabObject, Item } = typedefs;
  * Item page template associated with them.
  *
  * @module {Component} item-pages/DefaultItemView
+ * @todo Refactor how ItemViews in general to not extend this and instead use composition (React better/best practice).
  */
 
 
@@ -180,7 +181,7 @@ export default class DefaultItemView extends React.PureComponent {
 
         // Attribution Tab
         if (labTitle || submitterTitle || publications_of_set || produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(this.props));
+            returnArr.push(AttributionTabView.getTabObject({ ...this.props, width: this.getTabViewWidth() }));
         }
 
         returnArr.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Schemas.Term.toName }));
@@ -215,7 +216,7 @@ export default class DefaultItemView extends React.PureComponent {
         returnArr.push(ItemDetailList.getTabObject({ ...this.props, termTransformFxn: Schemas.Term.toName }));
 
         if (labTitle || submitterTitle || publications_of_set || produced_in_pub){
-            returnArr.push(AttributionTabView.getTabObject(this.props));
+            returnArr.push(AttributionTabView.getTabObject({ ...this.props, width: this.getTabViewWidth() }));
         }
         return returnArr;
     }
@@ -281,8 +282,9 @@ export default class DefaultItemView extends React.PureComponent {
      * @todo Maybe simplify CSS styling around these. Or get rid of these components and use plain HTML elements.
      */
     itemHeader(){
+        const { context, href, schemas, windoWidth } = this.props;
         return (
-            <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
+            <ItemHeaderWrapper {...{ context, href, schemas, windoWidth }}>
                 <TopRow typeInfo={this.typeInfo()} />
                 <MiddleRow />
                 <BottomRow />
@@ -300,10 +302,12 @@ export default class DefaultItemView extends React.PureComponent {
      * @returns {JSX.Element[]} By default, `Publications.PublicationBelowHeaderRow` and `StaticHeaderArea` component instances.
      */
     itemMidSection(){
+        const { context } = this.props;
+        const { produced_in_pub } = context;
         return (
             <React.Fragment>
-                <Publications.PublicationBelowHeaderRow {...this.props} publication={this.props.context.produced_in_pub} key="publication-info" />
-                <StaticHeadersArea context={this.props.context} key="static-headers-area" />
+                <Publications.PublicationBelowHeaderRow {...this.props} publication={produced_in_pub} key="publication-info" />
+                <StaticHeadersArea context={context} key="static-headers-area" />
             </React.Fragment>
         );
     }
@@ -373,7 +377,7 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
         context.static_content || [],
         function(s){ return s.location === 'header'; }
     ), 'content');
-    const headersToShow = _.uniq(_.filter(
+    let headersToShow = _.uniq(_.filter(
         headersFromStaticContent.concat(context.static_headers || []),
         function(s){
             if (!s || s.error) return false; // No view permission(s)
@@ -382,16 +386,33 @@ export const StaticHeadersArea = React.memo(function StaticHeaderArea({ context 
         }
     ), false, object.itemUtil.atId);
 
+    //add notes_to_tsv into the page's static headers area
+    let itemType = null;
+    if (Array.isArray(context.notes_to_tsv) && context.notes_to_tsv.length > 0) {
+        let content = null;
+        if (context.notes_to_tsv.length === 1) {
+            [content] = context.notes_to_tsv;
+        } else {
+            content = (
+                <ol>
+                    {_.map(context.notes_to_tsv, (n) => <li>{n}</li>)}
+                </ol>
+            );
+        }
+        headersToShow = headersToShow.concat({ 'content': content, 'options': { 'default_open': true, 'title_icon': 'info' }, 'title': 'Note(s)' });
+        itemType = 'CustomSection';
+    }
+
     if (!headersToShow || headersToShow.length === 0) return null;
 
     return (
         <div className="static-headers-area">
-            { _.map(headersToShow, function(section, i){
+            {_.map(headersToShow, function (section, i) {
                 const { title, options = {}, name } = section;
                 return (
                     <ExpandableStaticHeader
                         title={title || 'Informational Notice ' + (i + 1)}
-                        context={section}
+                        context={section} itemType={itemType}
                         defaultOpen={options.default_open || false} key={name || i} index={i}
                         titleIcon={standardizeUserIconString(options.title_icon)} />
                 );
@@ -420,7 +441,7 @@ const EmbeddedItemWithAttachment = React.memo(function EmbeddedItemWithAttachmen
     if (attachmentHref){
         viewAttachmentButton = (
             <ViewFileButton title="File" mimeType={attachmentType} filename={filename}
-                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-ellipsis-container btn-block btn-sm btn-primary" />
+                href={linkToItem + attachmentHref} disabled={!attachmentHref} className="text-truncate btn-block btn-sm btn-primary" />
         );
     }
 
@@ -535,7 +556,7 @@ export class OverViewBodyItem extends React.PureComponent {
 
             return (
                 <div className="imaging-path-item-wrapper row">
-                    <div className="index-num col-2 mono-text text-500"><small>{ channel }</small></div>
+                    <div className="index-num col-2 text-monospace text-500"><small>{ channel }</small></div>
                     <div className={"imaging-path col-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
                     { matchingFile ? <div className="microscope-setting col-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>

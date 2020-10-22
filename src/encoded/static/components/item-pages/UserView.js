@@ -6,7 +6,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { Modal, FormControl } from 'react-bootstrap';
+import Modal from 'react-bootstrap/esm/Modal';
+import FormControl from 'react-bootstrap/esm/FormControl';
 
 import { console, object, JWT, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
@@ -209,7 +210,7 @@ class SyncedAccessKeyTable extends React.PureComponent {
                     'modal' : (
                         <Modal show onHide={this.hideModal}>
                             <Modal.Header closeButton>
-                                <Modal.Title className="text-400">Access key <span className="mono-text">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
+                                <Modal.Title className="text-400">Access key <span className="text-monospace">{ foundItem.access_key_id }</span> has been deleted.</Modal.Title>
                             </Modal.Header>
                         </Modal>
                     )
@@ -413,14 +414,14 @@ export default class UserView extends React.Component {
                                         </div>
                                         <div className="col-md-9 user-title-col">
                                             <h1 className="user-title">
-                                                <FieldSet context={user} parent={this} style="inline"
-                                                    inputSize="lg" absoluteBox objectType="User" onSave={UserView.onEditableFieldSave}
+                                                <FieldSet context={user} parent={this}
+                                                    inputSize="lg" absoluteBox={false} objectType="User" onSave={UserView.onEditableFieldSave}
                                                     schemas={schemas} disabled={!mayEdit} href={href} windowWidth={windowWidth}>
                                                     <EditableField labelID="first_name" fallbackText="No first name set"
-                                                        placeholder="First name" />
+                                                        placeholder="First name" style="inline" />
                                                     {' '}
                                                     <EditableField labelID="last_name" fallbackText="No last name set"
-                                                        placeholder="Last name" />
+                                                        placeholder="Last name" style="inline" />
                                                 </FieldSet>
                                             </h1>
                                         </div>

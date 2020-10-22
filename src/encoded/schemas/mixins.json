@@ -200,6 +200,7 @@
             "title": "Contributing Labs",
             "description": "Other labs associated with the submitted data.",
             "type": "array",
+            "uniqueItems": true,
             "lookup": 1000,
             "exclude_from" : ["submit4dn"],
             "items": {
@@ -328,7 +329,7 @@
             "@type": "@id",
             "rdfs:subPropertyOf": "rdfs:seeAlso",
             "title": "External identifiers",
-            "comment": "Enter as a database name:identifier eg. HGNC:PARK2",
+            "comment": "Enter as a database name:identifier eg. GEO:GSM403896",
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "ff_flag": "clear clone",
@@ -488,7 +489,7 @@
                         "items": {
                             "title": "File",
                             "type": "string",
-                            "linkTo": "FileProcessed"
+                            "linkTo": "File"
                         }
                     },
                     "higlass_view_config": {
@@ -503,7 +504,7 @@
     },
     "sop_mapping": {
         "sop_mapping": {
-            "title": "SOP Mappping",
+            "title": "SOP Mapping",
             "permission": "import_items",
             "exclude_from" : ["submit4dn", "FFedit-create"],
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",

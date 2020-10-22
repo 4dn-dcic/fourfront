@@ -11,10 +11,12 @@ import { getItemType } from '@hms-dbmi-bgm/shared-portal-components/es/component
 import { expFxn, Schemas, fileUtil } from './../util';
 import { store } from './../../store';
 
-import { ExperimentSetTablesLoaded, ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
+import { SearchTableTitle } from './components/tables/ItemPageTable';
+import { ExperimentSetsTableTabView, EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem, WrapInColumn } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
+import { QualityControlResults } from './QualityMetricView';
 
 // UNCOMMENT FOR TESTING
 // import * as SAMPLE_VIEWCONFIGS from './../testdata/higlass_sample_viewconfigs';
@@ -92,60 +94,60 @@ export default class FileView extends WorkflowRunTracingView {
 
 
 
-
-class FileViewOverview extends React.PureComponent {
-
-    static getTabObject({ context, schemas, windowWidth, href }, width){
-        return {
-            'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
-            'key' : 'file-overview',
-            //'disabled' : !Array.isArray(context.experiments),
-            'content' : (
-                <div className="overflow-hidden">
-                    <h3 className="tab-section-title">
-                        <span>More Information</span>
-                    </h3>
-                    <hr className="tab-section-title-horiz-divider"/>
-                    <FileViewOverview {...{ context, width, windowWidth, schemas, href }} />
-                </div>
-            )
-        };
-    }
-
-    static propTypes = {
-        'context' : PropTypes.shape({
-            'experiments' : PropTypes.arrayOf(PropTypes.shape({
-                'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                    '@id' : PropTypes.string.isRequired
-                }))
-            })),
-            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
-                'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
-                    '@id' : PropTypes.string.isRequired
-                }))
-            }))
-        }).isRequired
+function FileViewOverview (props) {
+    const { context, windowWidth, width, schemas, href } = props;
+    const experimentSets = expFxn.experimentSetsFromFile(context, 'list');
+    const searchHref =
+        experimentSets && experimentSets.length > 0 ?
+            '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
+            : null;
+    const expSetTableProps = {
+        searchHref,
+        facets: null,
+        defaultOpenIndices: [0],
+        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />
     };
-
-    render(){
-        const { context, windowWidth, width, schemas, href } = this.props;
-        const experimentSetUrls = expFxn.experimentSetsFromFile(context, 'ids');
-
-        return (
-            <div>
-                <div className="row overview-blocks">
-                    <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-12" />
-                    <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
-                    <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
-                </div>
-                { experimentSetUrls && experimentSetUrls.length > 0 ?
-                    <ExperimentSetTablesLoaded {...{ experimentSetUrls, width, windowWidth }} defaultOpenIndices={[0]} id={object.itemUtil.atId(context)} />
-                    : null }
+    return (
+        <div>
+            <div className="row overview-blocks">
+                <ExternalVisualizationButtons file={context} href={href} wrapInColumn="col-12" />
+                <QualityControlResults file={context} wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
+                <RelatedFilesOverViewBlock file={context} property="related_files" wrapInColumn="col-md-6" hideIfNoValue schemas={schemas} />
             </div>
-        );
-    }
-
+            {searchHref ? <EmbeddedExperimentSetSearchTable {...expSetTableProps} /> : null }
+        </div>
+    );
 }
+FileViewOverview.propTypes = {
+    'context' : PropTypes.shape({
+        'experiments' : PropTypes.arrayOf(PropTypes.shape({
+            'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+                '@id' : PropTypes.string.isRequired
+            }))
+        })),
+        'experiment_sets' : PropTypes.arrayOf(PropTypes.shape({
+            'experiments_in_set' : PropTypes.arrayOf(PropTypes.shape({
+                '@id' : PropTypes.string.isRequired
+            }))
+        }))
+    }).isRequired
+};
+FileViewOverview.getTabObject = function({ context, schemas, windowWidth, href }, width){
+    return {
+        'tab' : <span><i className="icon icon-file-alt fas icon-fw"/> Overview</span>,
+        'key' : 'file-overview',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title">
+                    <span>More Information</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                <FileViewOverview {...{ context, width, windowWidth, schemas, href }} />
+            </div>
+        )
+    };
+};
 
 
 export class FileOverviewHeading extends React.PureComponent {
@@ -209,9 +211,6 @@ export function FileViewDownloadButtonContainer(props){
     );
 }
 FileViewDownloadButtonContainer.defaultProps = { "size" : null };
-
-
-
 
 
 export class ExternalVisualizationButtons extends React.PureComponent {
@@ -300,155 +299,6 @@ export class ExternalVisualizationButtons extends React.PureComponent {
     }
 
 }
-
-
-
-
-function QCMetricFromEmbed(props){
-    const { metric, qcProperty, fallbackTitle, tips, percent } = props;
-    if (!metric[qcProperty]) return null;
-    return (
-        <div className="overview-list-element">
-            <div className="row">
-                <div className="col-4 text-right">
-                    <object.TooltipInfoIconContainerAuto result={metric} property={qcProperty} tips={tips} elementType="h5" fallbackTitle={fallbackTitle || qcProperty} className="mb-0 mt-02" />
-                </div>
-                <div className="col-8">
-                    <div className="inner value">
-                        { percent ? QCMetricFromEmbed.percentOfTotalReads(metric, qcProperty) : Schemas.Term.toName('quality_metric.' + qcProperty, metric[qcProperty], true) }
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-QCMetricFromEmbed.percentOfTotalReads = function(quality_metric, field){
-    var numVal = object.getNestedProperty(quality_metric, field);
-    if (numVal && typeof numVal === 'number' && quality_metric && quality_metric['Total reads']){
-        var percentVal = Math.round((numVal / quality_metric['Total reads']) * 100 * 1000) / 1000;
-        var numValRounded = valueTransforms.roundLargeNumber(numVal);
-        return (
-            <span className="inline-block" data-tip={"Percent of total reads (= " + numValRounded + ")."}>{ percentVal + '%' }</span>
-        );
-    }
-    return '-';
-};
-
-
-export function QCMetricFromSummary(props){
-    const { title } = props;
-    const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
-
-    return (
-        <div className="overview-list-element">
-            <div className="row">
-                <div className="col-4 text-right">
-                    <h5 className="mb-0 mt-02">{ title }</h5>
-                </div>
-                <div className="col-8">
-                    <div className="inner value">
-                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
-                        { value }
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }){
-    // We expect these values to always be strings or undefined which are passed by value (not reference).\
-    // Hence we use var instead of const and safely overwrite them.
-    if (numberType === 'percent'){
-        value += '%';
-    } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
-        value = parseFloat(value);
-        if (!tooltip && value >= 1000) {
-            tooltip = valueTransforms.decorateNumberWithCommas(value);
-        }
-        value = valueTransforms.roundLargeNumber(value);
-    }
-    return { value, tooltip };
-};
-
-
-export class QualityControlResults extends React.PureComponent {
-
-    static defaultProps = {
-        'hideIfNoValue' : false
-    };
-
-    /** To be deprecated (?) */
-    metricsFromEmbeddedReport(){
-        const { file, schemas } = this.props;
-        const commonProps = { 'metric' : file.quality_metric, 'tips' : object.tipsFromSchema(schemas, file.quality_metric) };
-        return (
-            <div className="overview-list-elements-container">
-                <QCMetricFromEmbed {...commonProps} qcProperty="Total reads" fallbackTitle="Total Reads in File" />
-                <QCMetricFromEmbed {...commonProps} qcProperty="Total Sequences" />
-                <QCMetricFromEmbed {...commonProps} qcProperty="Sequence length" />
-                <QCMetricFromEmbed {...commonProps} qcProperty="Cis reads (>20kb)" percent />
-                <QCMetricFromEmbed {...commonProps} qcProperty="Short cis reads (<20kb)" percent />
-                <QCMetricFromEmbed {...commonProps} qcProperty="Trans reads" fallbackTitle="Trans Reads" percent />
-                <QCMetricFromEmbed {...commonProps} qcProperty="Sequence length" />
-                <QCMetricFromEmbed {...commonProps} qcProperty="overall_quality_status" fallbackTitle="Overall Quality" />
-                <QCMetricFromEmbed {...commonProps} qcProperty="url" fallbackTitle="Link to Report" />
-            </div>
-        );
-    }
-
-    metricsFromSummary(){
-        const { file, schemas } = this.props;
-        const metric = file && file.quality_metric;
-        const metricURL = metric && metric.url;
-        return (
-            <div className="overview-list-elements-container">
-                { _.map(file.quality_metric_summary, function(qmsItem){ return <QCMetricFromSummary {...qmsItem} key={qmsItem.title} />; }) }
-                { metricURL ?
-                    <QCMetricFromSummary title="Report" tooltip="Link to full quality metric report" value={
-                        <React.Fragment>
-                            <a href={metricURL} target="_blank" rel="noopener noreferrer">{ valueTransforms.hrefToFilename(metricURL) }</a>
-                            <i className="ml-05 icon icon-fw icon-external-link-alt text-small fas"/>
-                        </React.Fragment>
-                    } />
-                    : null }
-            </div>
-        );
-
-    }
-
-    render(){
-        const { file, hideIfNoValue, schemas, wrapInColumn } = this.props;
-
-        let metrics, titleProperty = "quality_metric_summary";
-
-        const qualityMetricEmbeddedExists = file && file.quality_metric && object.itemUtil.atId(file.quality_metric);
-        const qualityMetricSummaryExists = file && Array.isArray(file.quality_metric_summary) && file.quality_metric_summary.length > 0;
-
-        if (qualityMetricSummaryExists){
-            metrics = this.metricsFromSummary();
-        } else if (qualityMetricEmbeddedExists){
-            metrics = this.metricsFromEmbeddedReport();
-            titleProperty = "quality_metric";
-        } else if (hideIfNoValue){
-            return null;
-        }
-
-        const tips = FileView.schemaForFile(file, schemas);
-
-        return (
-            <WrapInColumn wrap={wrapInColumn} defaultWrapClassName="col-sm-12">
-                <div className="inner">
-                    <object.TooltipInfoIconContainerAuto result={file} property={titleProperty} tips={tips}
-                        elementType="h5" fallbackTitle="Quality Metric Summary" />
-                    { metrics || (<em>Not Available</em>) }
-                </div>
-            </WrapInColumn>
-        );
-    }
-
-}
-
-
 
 /**
  * Reuse when showing related_files of an Item.

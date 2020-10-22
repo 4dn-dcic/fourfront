@@ -1,3 +1,8 @@
+import humanfriendly
+import logging
+import psutil
+
+
 # https://code.google.com/p/modwsgi/wiki/RegisteringCleanupCode
 
 
@@ -27,15 +32,10 @@ class ExecuteOnCompletion2:
     def __call__(self, environ, start_response):
         try:
             result = self.__application(environ, start_response)
-        except:
+        except BaseException:
             self.__callback(environ)
             raise
         return Generator2(result, self.__callback, environ)
-
-
-import logging
-import psutil
-import humanfriendly
 
 
 def rss_checker(rss_limit=None, rss_percent_limit=None):

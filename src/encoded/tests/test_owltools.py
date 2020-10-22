@@ -1,26 +1,16 @@
 import pytest
 
-from rdflib import RDFS, BNode, URIRef, Literal
+from rdflib import BNode, Literal
+from unittest import mock
 from ..commands import owltools as ot
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
-
 @pytest.fixture
-def owler(mocker):
-    return mocker.patch.object(ot, 'Owler')
-
-
-# def emptygen(*args, **kwargs):
-#    return
-#    yield  # necessary to produce generator
-
-
-# def rdfobject_generator(rdfobj_list):
-#    for rdfobj in rdfobj_list:
-#        yield rdfobj
+def owler():
+    return mock.patch.object(ot, 'Owler')
 
 
 @pytest.fixture
@@ -41,9 +31,9 @@ def rdf_objects_2_3():
     return [Literal(rdfobj) for rdfobj in rdfobjs]
 
 
-def test_get_rdfobjects_one_type_two_rdfobjs(mocker, owler, rdf_objects):
+def test_get_rdfobjects_one_type_two_rdfobjs(owler, rdf_objects):
     checks = ['testrdfobj1', 'testrdfobj2']
-    with mocker.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
+    with mock.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
         graph.objects.return_value = rdf_objects
         owler = ot.Owler('http://test.com')
         owler.rdfGraph = graph
@@ -55,9 +45,9 @@ def test_get_rdfobjects_one_type_two_rdfobjs(mocker, owler, rdf_objects):
             assert rdfobj in checks
 
 
-def test_get_rdfobjects_two_types_one_rdfobj(mocker, owler, rdf_objects_2_1):
+def test_get_rdfobjects_two_types_one_rdfobj(owler, rdf_objects_2_1):
     check = 'testrdfobj1'
-    with mocker.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
+    with mock.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
         graph.objects.return_value = rdf_objects_2_1
         owler = ot.Owler('http://test.com')
         owler.rdfGraph = graph
@@ -67,9 +57,9 @@ def test_get_rdfobjects_two_types_one_rdfobj(mocker, owler, rdf_objects_2_1):
         assert rdfobjects[0] == check
 
 
-def test_get_rdfobjects_two_types_three_rdfobj(mocker, rdf_objects_2_3):
+def test_get_rdfobjects_two_types_three_rdfobj(rdf_objects_2_3):
     checks = ['testrdfobj1', 'testrdfobj2', 'testrdfobj3']
-    with mocker.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
+    with mock.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
         graph.objects.return_value = rdf_objects_2_3
         owler = ot.Owler('http://test.com')
         owler.rdfGraph = graph
@@ -81,8 +71,8 @@ def test_get_rdfobjects_two_types_three_rdfobj(mocker, rdf_objects_2_3):
             assert rdfobj in checks
 
 
-def test_get_rdfobjects_none_there(mocker, owler):
-    with mocker.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
+def test_get_rdfobjects_none_there(owler):
+    with mock.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
         graph.objects.return_value = []
         owler = ot.Owler('http://test.com')
         owler.rdfGraph = graph

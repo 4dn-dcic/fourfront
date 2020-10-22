@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -26,6 +26,595 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "name": {
+            "type": "string"
+        },
+        "desc": {
+            "type": "string"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "flagstat_qc": {
+            "title": "Flagstat",
+            "type": "array",
+            "qc_order": 2,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "total": {
+                        "title": "Total",
+                        "type": "number",
+                        "qc_order": 1
+                    },
+                    "total_qc_failed": {
+                        "title": "Total QC Failed",
+                        "type": "number",
+                        "qc_order": 2
+                    },
+                    "duplicates": {
+                        "title": "Duplicates",
+                        "type": "number",
+                        "qc_order": 3
+                    },
+                    "duplicates_qc_failed": {
+                        "title": "Duplicates QC Failed",
+                        "type": "number",
+                        "qc_order": 4
+                    },
+                    "mapped": {
+                        "title": "Mapped",
+                        "type": "number",
+                        "qc_order": 5
+                    },
+                    "mapped_qc_failed": {
+                        "title": "Mapped QC Failed",
+                        "type": "number",
+                        "qc_order": 6
+                    },
+                    "mapped_pct": {
+                        "title": "% Mapped",
+                        "type": "number",
+                        "qc_order": 7
+                    },
+                    "paired": {
+                        "title": "Paired",
+                        "type": "number",
+                        "qc_order": 8
+                    },
+                    "paired_qc_failed": {
+                        "title": "Paired QC Failed",
+                        "type": "number",
+                        "qc_order": 9
+                    },
+                    "read1": {
+                        "title": "Read 1",
+                        "type": "number",
+                        "qc_order": 10
+                    },
+                    "read1_qc_failed": {
+                        "title": "Read 1 QC Failed",
+                        "type": "number",
+                        "qc_order": 11
+                    },
+                    "read2": {
+                        "title": "Read 2",
+                        "type": "number",
+                        "qc_order": 12
+                    },
+                    "read2_qc_failed": {
+                        "title": "Read 2 QC Failed",
+                        "type": "number",
+                        "qc_order": 13
+                    },
+                    "paired_properly": {
+                        "title": "Paired Properly",
+                        "type": "number",
+                        "qc_order": 14
+                    },
+                    "paired_properly_qc_failed": {
+                        "title": "Paired Properly QC Failed",
+                        "type": "number",
+                        "qc_order": 15
+                    },
+                    "paired_properly_pct": {
+                        "title": "% Paired Properly",
+                        "type": "number",
+                        "qc_order": 16
+                    },
+                    "with_itself": {
+                        "title": "With Itself",
+                        "type": "number",
+                        "qc_order": 17
+                    },
+                    "with_itself_qc_failed": {
+                        "title": "With Itself QC Failed",
+                        "type": "number",
+                        "qc_order": 18
+                    },
+                    "singletons": {
+                        "title": "Singletons",
+                        "type": "number",
+                        "qc_order": 19
+                    },
+                    "singletons_qc_failed": {
+                        "title": "Singletons QC Failed",
+                        "type": "number",
+                        "qc_order": 20
+                    },
+                    "singletons_pct": {
+                        "title": "% Singleton",
+                        "type": "number",
+                        "qc_order": 21
+                    },
+                    "diff_chroms": {
+                        "title": "Diff Chroms",
+                        "type": "number",
+                        "qc_order": 22
+                    },
+                    "diff_chroms_qc_failed": {
+                        "title": "Diff Chroms QC Failed",
+                        "type": "number",
+                        "qc_order": 23
+                    }
+                }
+            }
+        },
+        "dup_qc": {
+            "title": "Duplicates",
+            "type": "array",
+            "qc_order": 3,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "unpaired_reads": {
+                        "title": "Unpaired Reads",
+                        "type": "number",
+                        "qc_order": 1
+                    },
+                    "paired_reads": {
+                        "title": "Paired Reads",
+                        "type": "number",
+                        "qc_order": 2
+                    },
+                    "unmapped_reads": {
+                        "title": "Unmapped Reads",
+                        "type": "number",
+                        "qc_order": 3
+                    },
+                    "unpaired_dupes": {
+                        "title": "Unpaired Dupes",
+                        "type": "number",
+                        "qc_order": 4
+                    },
+                    "paired_dupes": {
+                        "title": "Paired Dupes",
+                        "type": "number",
+                        "qc_order": 5
+                    },
+                    "paired_opt_dupes": {
+                        "title": "Paired Opt Dupes",
+                        "type": "number",
+                        "qc_order": 6
+                    },
+                    "dupes_pct": {
+                        "title": "% Dupes",
+                        "type": "number",
+                        "qc_order": 7
+                    }
+                }
+            }
+        },
+        "pbc_qc": {
+            "title": "PCR Bottleneck Coefficient (PBC)",
+            "type": "array",
+            "qc_order": 4,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "total_read_pairs": {
+                        "title": "Total Read Pairs",
+                        "type": "number",
+                        "qc_order": 1
+                    },
+                    "distinct_read_pairs": {
+                        "title": "Distinct Read Pairs",
+                        "type": "number",
+                        "qc_order": 2
+                    },
+                    "one_read_pair": {
+                        "title": "One Read Pair",
+                        "type": "number",
+                        "qc_order": 3
+                    },
+                    "two_read_pair": {
+                        "title": "Two Read Pairs",
+                        "type": "number",
+                        "qc_order": 4
+                    },
+                    "NRF": {
+                        "title": "NRF",
+                        "type": "number",
+                        "qc_order": 5
+                    },
+                    "PBC1": {
+                        "title": "PBC1",
+                        "type": "number",
+                        "qc_order": 6
+                    },
+                    "PBC2": {
+                        "title": "PBC2",
+                        "type": "number",
+                        "qc_order": 7
+                    }
+                }
+            }
+        },
+        "nodup_flagstat_qc": {
+            "title": "Nodup Flagstat",
+            "type": "array",
+            "qc_order": 5,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "total": {
+                        "title": "Total",
+                        "type": "number",
+                        "qc_order": 1
+                    },
+                    "total_qc_failed": {
+                        "title": "Total QC Failed",
+                        "type": "number",
+                        "qc_order": 2
+                    },
+                    "duplicates": {
+                        "title": "Duplicates",
+                        "type": "number",
+                        "qc_order": 3
+                    },
+                    "duplicates_qc_failed": {
+                        "title": "Duplicates QC Failed",
+                        "type": "number",
+                        "qc_order": 4
+                    },
+                    "mapped": {
+                        "title": "Mapped",
+                        "type": "number",
+                        "qc_order": 5
+                    },
+                    "mapped_qc_failed": {
+                        "title": "Mapped QC Failed",
+                        "type": "number",
+                        "qc_order": 6
+                    },
+                    "mapped_pct": {
+                        "title": "% Mapped",
+                        "type": "number",
+                        "qc_order": 7
+                    },
+                    "paired": {
+                        "title": "Paired",
+                        "type": "number",
+                        "qc_order": 8
+                    },
+                    "paired_qc_failed": {
+                        "title": "Paired QC Failed",
+                        "type": "number",
+                        "qc_order": 9
+                    },
+                    "read1": {
+                        "title": "Read 1",
+                        "type": "number",
+                        "qc_order": 10
+                    },
+                    "read1_qc_failed": {
+                        "title": "Read 1 QC Failed",
+                        "type": "number",
+                        "qc_order": 11
+                    },
+                    "read2": {
+                        "title": "Read 2",
+                        "type": "number",
+                        "qc_order": 12
+                    },
+                    "read2_qc_failed": {
+                        "title": "Read 2 QC Failed",
+                        "type": "number",
+                        "qc_order": 13
+                    },
+                    "paired_properly": {
+                        "title": "Paired Properly",
+                        "type": "number",
+                        "qc_order": 14
+                    },
+                    "paired_properly_qc_failed": {
+                        "title": "Paired Properly QC Failed",
+                        "type": "number",
+                        "qc_order": 15
+                    },
+                    "paired_properly_pct": {
+                        "title": "% Paired Properly",
+                        "type": "number",
+                        "qc_order": 16
+                    },
+                    "with_itself": {
+                        "title": "With Itself",
+                        "type": "number",
+                        "qc_order": 17
+                    },
+                    "with_itself_qc_failed": {
+                        "title": "With Itself QC Failed",
+                        "type": "number",
+                        "qc_order": 18
+                    },
+                    "singletons": {
+                        "title": "Singletons",
+                        "type": "number",
+                        "qc_order": 19
+                    },
+                    "singletons_qc_failed": {
+                        "title": "Singletons QC Failed",
+                        "type": "number",
+                        "qc_order": 20
+                    },
+                    "singletons_pct": {
+                        "title": "% Singleton",
+                        "type": "number",
+                        "qc_order": 21
+                    },
+                    "diff_chroms": {
+                        "title": "Diff Chroms",
+                        "type": "number",
+                        "qc_order": 22
+                    },
+                    "diff_chroms_qc_failed": {
+                        "title": "Diff Chroms QC Failed",
+                        "type": "number",
+                        "qc_order": 23
+                    }
+                }
+            }
+        },
+        "overlap_reproducibility_qc": {
+            "title": "Overlap Reproducibility",
+            "type": "object",
+            "qc_order": 2,
+            "additionalProperties": false,
+            "properties": {
+                "Nt": {
+                    "title": "Nt",
+                    "type": "number",
+                    "qc_order": 1
+                },
+                "N1": {
+                    "title": "N1",
+                    "type": "number",
+                    "qc_order": 2
+                },
+                "N2": {
+                    "title": "N2",
+                    "type": "number",
+                    "qc_order": 3
+                },
+                "Np": {
+                    "title": "Np",
+                    "type": "number",
+                    "qc_order": 4
+                },
+                "N_opt": {
+                    "title": "N Optimal",
+                    "type": "number",
+                    "qc_order": 5
+                },
+                "N_consv": {
+                    "title": "N Conservative",
+                    "type": "number",
+                    "qc_order": 6
+                },
+                "opt_set": {
+                    "title": "Optimal Set",
+                    "type": "string",
+                    "qc_order": 7
+                },
+                "consv_set": {
+                    "title": "Conservative Set",
+                    "type": "string",
+                    "qc_order": 8
+                },
+                "rescue_ratio": {
+                    "title": "Rescue Ratio",
+                    "type": "number",
+                    "qc_order": 9
+                },
+                "self_consistency_ratio": {
+                    "title": "Self Consistency Ratio",
+                    "type": "number",
+                    "qc_order": 10
+                },
+                "reproducibility": {
+                    "title": "Reproducibility",
+                    "type": "string",
+                    "qc_order": 11
+                }
+            }
+        },
+        "frip_macs2_qc": {
+            "title": "FRiP MACS2",
+            "type": "object",
+            "qc_order": 3,
+            "additionalProperties": false,
+            "properties": {
+                "rep1": {
+                    "title": "Rep1",
+                    "type": "object",
+                    "qc_order": 1,
+                    "properties": {
+                        "FRiP": {
+                            "title": "Rep1",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep2": {
+                    "title": "Rep2",
+                    "type": "object",
+                    "qc_order": 2,
+                    "additionalProperties": false,
+                    "properties": {
+                        "FRiP": {
+                            "title": "Rep2",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep1-pr1": {
+                    "title": "Rep1 - Pr1",
+                    "type": "object",
+                    "qc_order": 3,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep2-pr1": {
+                    "title": "Rep2 - Pr1",
+                    "type": "object",
+                    "qc_order": 4,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep1-pr2": {
+                    "title": "Rep1 - Pr2",
+                    "type": "object",
+                    "qc_order": 5,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep2-pr2": {
+                    "title": "Rep2 - Pr2",
+                    "type": "object",
+                    "qc_order": 6,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "pooled": {
+                    "title": "Pooled",
+                    "type": "object",
+                    "qc_order": 7,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "ppr1": {
+                    "title": "Ppr1",
+                    "type": "object",
+                    "qc_order": 8,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "ppr2": {
+                    "title": "Ppr2",
+                    "type": "object",
+                    "qc_order": 9,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                }
+            }
+        },
+        "overlap_frip_qc": {
+            "title": "Overlap FRiP",
+            "type": "object",
+            "qc_order": 4,
+            "additionalProperties": false,
+            "properties": {
+                "rep1-rep2": {
+                    "title": "Rep1-Rep2",
+                    "type": "object",
+                    "qc_order": 1,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep1-pr": {
+                    "title": "Rep1-Pr",
+                    "type": "object",
+                    "qc_order": 2,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "rep2-pr": {
+                    "title": "Rep2-Pr",
+                    "type": "object",
+                    "qc_order": 3,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                },
+                "ppr": {
+                    "title": "Ppr",
+                    "type": "object",
+                    "qc_order": 4,
+                    "properties": {
+                        "FRiP": {
+                            "title": "FRiP",
+                            "type": "number",
+                            "qc_order": 1
+                        }
+                    }
+                }
+            }
         }
     },
     "facets": {
@@ -37,5 +626,6 @@
         "overall_quality_status": {
             "title" : "Overall Quality"
         }
-    }
+    },
+    "qc_order": 1
 }

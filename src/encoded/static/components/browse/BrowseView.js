@@ -8,16 +8,12 @@ import memoize from 'memoize-one';
 
 import { IndeterminateCheckbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/IndeterminateCheckbox';
 import { searchFilters, object, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { ColumnCombiner } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
-import { CustomColumnController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/CustomColumnController';
-import { SearchResultTable } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SearchResultTable';
-import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
-import { SortController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SortController';
-import { WindowNavigationController } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/WindowNavigationController';
+import { DisplayTitleColumnWrapper, DisplayTitleColumnDefault } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/table-commons';
+import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 
 // We use own extended navigate fxn (not from shared repo) b.c. need the extra project-specific browse-related functions
 // We could probably also create different 'browseState' module for it, however.
-import { navigate, typedefs, Schemas } from './../util';
+import { navigate as globalNavigate, typedefs, Schemas } from './../util';
 import { PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
 
 import { store } from './../../store';
@@ -27,6 +23,8 @@ import { columnExtensionMap as colExtensionMap4DN } from './columnExtensionMap';
 import { SelectedFilesController } from './components/SelectedFilesController';
 import { ExperimentSetDetailPane } from './components/ExperimentSetDetailPane';
 import { AboveBrowseViewTableControls } from './components/above-table-controls/AboveBrowseViewTableControls';
+
+
 
 
 
@@ -118,140 +116,6 @@ class ExperimentSetCheckBox extends React.PureComponent {
 
 
 
-
-
-
-class ControlsAndResults extends React.PureComponent {
-
-    /**
-     * Different than the functionality in search-portal-components / SearchView.
-     * Accounts for browseBaseState.
-     */
-    static isClearFiltersBtnVisible(context, browseBaseState){
-        const currExpSetFilters = searchFilters.contextFiltersToExpSetFilters(
-            context && context.filters,
-            navigate.getBrowseBaseParams(browseBaseState)
-        );
-        return _.keys(currExpSetFilters || {}).length > 0;
-    }
-
-    static defaultProps = {
-        'href' : '/browse/',
-    };
-
-    constructor(props){
-        super(props);
-        this.onClearFiltersClick = this.onClearFiltersClick.bind(this);
-        this.browseExpSetDetailPane = this.browseExpSetDetailPane.bind(this);
-        this.forceUpdateOnSelf = this.forceUpdateOnSelf.bind(this);
-        this.updateDetailPaneFileSectionStateCache = this.updateDetailPaneFileSectionStateCache.bind(this);
-
-        this.searchResultTableRef = React.createRef();
-
-        this.detailPaneFileSectionStateCache = {};
-
-        this.memoized = {
-            isClearFiltersBtnVisible: memoize(ControlsAndResults.isClearFiltersBtnVisible)
-        };
-    }
-
-    forceUpdateOnSelf(){
-        const searchResultTable = this.searchResultTableRef.current;
-        const dimsContainer = searchResultTable && searchResultTable.getDimensionContainer();
-        return dimsContainer && dimsContainer.resetWidths();
-    }
-
-    onClearFiltersClick(evt, callback = null){
-        const { onClearFilters } = this.props;
-        evt.preventDefault();
-        evt.stopPropagation();
-        onClearFilters(callback);
-    }
-
-    updateDetailPaneFileSectionStateCache(resultID, resultPaneState){
-        // Purposely avoid changing reference to avoid re-renders/updates (except when new components initialize)
-        if (resultPaneState === null){
-            delete this.detailPaneFileSectionStateCache[resultID];
-        } else {
-            this.detailPaneFileSectionStateCache[resultID] = resultPaneState;
-        }
-    }
-
-    browseExpSetDetailPane(result, rowNumber, containerWidth, propsFromTable){
-        return (
-            <ExperimentSetDetailPane
-                {..._.pick(this.props, 'selectedFiles', 'selectFile', 'unselectFile', 'windowWidth', 'href')}
-                {...{ ...propsFromTable, result, containerWidth }} paddingWidth={47}
-                initialStateCache={this.detailPaneFileSectionStateCache} updateFileSectionStateCache={this.updateDetailPaneFileSectionStateCache} />
-        );
-    }
-
-    render() {
-        const {
-
-            // From Redux store or App.js:
-            context, schemas, currentAction, windowWidth, windowHeight, registerWindowOnScrollHandler, session,
-
-            // 4DN-Specific from Redux Store or App.js:
-            browseBaseState, isFullscreen, toggleFullScreen,
-
-            // From BrowseView higher-order-component (extends facets, removes type facet, etc)
-            facets, topLeftChildren, countExternalSets,
-
-            // From WindowNavigationController (or similar) (possibly from Redux store re: href)
-            href, onFilter, getTermStatus,
-
-            // From CustomColumnController:
-            hiddenColumns, addHiddenColumn, removeHiddenColumn,
-            // From ColumnCombiner:
-            columnDefinitions,
-            // From SortController:
-            sortBy, sortColumn, sortReverse,
-
-            // From SelectedFilesController (NOT SelectedItemsController - which is for currentAction=selection|multiselect)
-            selectedFiles, selectedFilesUniqueCount, selectFile, unselectFile, resetSelectedFiles
-
-        } = this.props;
-        const { filters, '@graph': results } = context; // Initial results; cloned, saved to SearchResultTable state, and appended to upon load-as-scroll.
-
-        const showClearFiltersButton = this.memoized.isClearFiltersBtnVisible(context, browseBaseState);
-
-        const facetListProps = {
-            session, schemas, windowWidth, windowHeight, facets, showClearFiltersButton,
-            filters, getTermStatus, onFilter, href
-        };
-
-        const aboveTableControlsProps = {
-            context, href, currentAction, windowHeight, windowWidth, toggleFullScreen, isFullscreen,
-            columnDefinitions, hiddenColumns, addHiddenColumn, removeHiddenColumn,
-            selectedFiles, selectFile, unselectFile, resetSelectedFiles, selectedFilesUniqueCount
-        };
-
-        const tableProps = {
-            results, href, context, sortBy, sortColumn, sortReverse, windowWidth, columnDefinitions,
-            selectedFiles, registerWindowOnScrollHandler, hiddenColumns,
-        };
-
-        return (
-            <div className="row">
-                { facets && facets.length > 0 ?
-                    <div className={"col-md-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3')}>
-                        <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />
-                        <FacetList {...facetListProps} className="with-header-bg" itemTypeForSchemas="ExperimentSetReplicate"
-                            termTransformFxn={Schemas.Term.toName} onClearFilters={this.onClearFiltersClick} separateSingleTermFacets />
-                    </div>
-                    : null }
-                <div className={"expset-result-table-fix col-md-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9')}>
-                    <AboveBrowseViewTableControls {...aboveTableControlsProps} parentForceUpdate={this.forceUpdateOnSelf} showSelectedFileCount />
-                    <SearchResultTable {...tableProps} ref={this.searchResultTableRef} termTransformFxn={Schemas.Term.toName} renderDetailPane={this.browseExpSetDetailPane} />
-                </div>
-            </div>
-        );
-    }
-
-}
-
-
 class ExternaDataExpSetsCount extends React.PureComponent {
 
     constructor(props){
@@ -263,7 +127,7 @@ class ExternaDataExpSetsCount extends React.PureComponent {
         const { browseBaseState, href, context } = this.props;
         e.preventDefault();
         e.stopPropagation();
-        navigate.setBrowseBaseStateAndRefresh(browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', href, context);
+        globalNavigate.setBrowseBaseStateAndRefresh(browseBaseState === 'only_4dn' ? 'all' : 'only_4dn', href, context);
     }
 
     render(){
@@ -276,8 +140,8 @@ class ExternaDataExpSetsCount extends React.PureComponent {
             (browseBaseState === 'all' ? '' : ' available') + " in "
         );
         return (
-            <div className="above-results-table-row text-right text-ellipsis-container">
-                <span className="inline-block mt-08">
+            <div className="above-results-table-row text-right text-truncate">
+                <span className="d-inline-block mt-08">
                     <span className="text-600 text-large">{ countExternalSets }</span>
                     { midString }
                     <a href="#" onClick={this.onBrowseStateToggle}>{ browseBaseState === 'all' ? '4DN-only Data' : 'External Data' }</a>.
@@ -295,56 +159,6 @@ class ExternaDataExpSetsCount extends React.PureComponent {
 export default class BrowseView extends React.PureComponent {
 
     /**
-     * Calculates how many experiment sets are 'External' and do not have award.project===4DN from browse JSON result.
-     *
-     * @param {SearchResponse} context - Browse search result with at least 'facets'.
-     * @returns {number} Count of external experiment sets.
-     */
-    static externalDataSetsCount = memoize(function(context){
-        var projectFacetTerms = (
-            Array.isArray(context.facets) ? _.uniq(_.flatten(_.pluck(_.filter(context.facets, { 'field' : 'award.project' }), 'terms')), 'key') : []
-        );
-        return _.reduce(projectFacetTerms, function(sum, projectTermObj){
-            if (projectTermObj.key === '4DN') return sum; // continue.
-            return sum + projectTermObj.doc_count;
-        }, 0);
-    });
-
-    /**
-     * Function which is passed into a `.filter()` call to
-     * filter context.facets down in response to frontend-state.
-     *
-     * Currently is meant to filter out Award and Project facets if
-     * we're _not_ showing any external data, as determined via the
-     * prop `browseBaseState` (string).
-     *
-     * @param {{ field: string }} facet - Object representing a facet.
-     * @returns {boolean} Whether to keep or discard facet.
-     */
-    static filterFacet(facet, browseBaseState, session){
-        if (facet.hide_from_view) return false;
-
-        // Exclude facets which are part of browse base state filters.
-        if (browseBaseState){
-            const browseBaseParams = navigate.getBrowseBaseParams(browseBaseState);
-            if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
-        }
-
-        return true;
-    }
-
-    /** The static func is memoized since assumed to only be 1 BrowseView ever per page/view. */
-    static transformedFacets = memoize(function(context, browseBaseState, session){
-        return _.filter(
-            context.facets || [],
-            function(facet, index, all){
-                return BrowseView.filterFacet(facet, browseBaseState, session);
-            }
-        );
-    });
-
-
-    /**
      * If different count in Browse result total, refetch chart data.
      *
      * @private
@@ -354,11 +168,16 @@ export default class BrowseView extends React.PureComponent {
      */
     static checkResyncChartData(hrefParts, context){
         setTimeout(function(){
-            if (context && context.total && ChartDataController.isInitialized() && navigate.isBaseBrowseQuery(hrefParts.query)){
-                const cdcState = ChartDataController.getState();
-                const cdcExpSetCount = (cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets);
+            const { total: resultCount = 0 } = context || {};
+            const { query } = hrefParts;
+            if (resultCount && ChartDataController.isInitialized() && globalNavigate.isBaseBrowseQuery(query)){
+                const {
+                    barplot_data_unfiltered: {
+                        total: { experiment_sets: cdcExpSetCount = null } = {}
+                    } = {}
+                } = ChartDataController.getState();
 
-                if (cdcExpSetCount && cdcExpSetCount !== context.total){
+                if (cdcExpSetCount && cdcExpSetCount !== resultCount){
                     if (cdcState.isLoadingChartData){
                         console.info('Already loading chart data, canceling.');
                     } else {
@@ -420,7 +239,6 @@ export default class BrowseView extends React.PureComponent {
     componentDidUpdate(pastProps){
         const { context, href } = this.props;
         const hrefParts = memoizedUrlParse(href);
-
         BrowseView.checkResyncChartData(hrefParts, context);
     }
 
@@ -432,13 +250,11 @@ export default class BrowseView extends React.PureComponent {
      * @returns {JSX.Element} View for Browse page.
      */
     render() {
-        const { context, href, session, browseBaseState } = this.props;
-        const facets = BrowseView.transformedFacets(context, browseBaseState, session);
-
+        const { context, href } = this.props;
         return (
             <div className="browse-page-container search-page-container container" id="content">
                 <SelectedFilesController {...{ href, context }} analyticsAddFilesToCart>
-                    <BrowseTableWithSelectedFilesCheckboxes {...this.props} facets={facets} />
+                    <BrowseTableWithSelectedFilesCheckboxes {...this.props} />
                 </SelectedFilesController>
             </div>
         );
@@ -457,7 +273,7 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
     const browseExternalData = (e)=>{
         e.preventDefault();
         e.stopPropagation();
-        navigate.setBrowseBaseStateAndRefresh('all', href, context);
+        globalNavigate.setBrowseBaseStateAndRefresh('all', href, context);
     };
 
     // If there are no External Sets found:
@@ -479,7 +295,7 @@ const NoResultsView = React.memo(function NoResultsView({ context, href, browseB
                     }
                     { browseBaseState !== 'all' && countExternalSets > 0 ?
                         <div className="mb-10 mt-1">
-                            <button type="button" className="btn btn-primary text-400 inline-block clickable in-stacked-table-button"
+                            <button type="button" className="btn btn-primary text-400 d-inline-block clickable in-stacked-table-button"
                                 onClick={browseExternalData} data-tip="Keep current filters and browse External data">
                                 Browse <span className="text-600">{ countExternalSets }</span> External Data { countExternalSets > 1 ? 'sets ' : 'set ' }
                             </button>
@@ -500,18 +316,13 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
         windowHeight, windowWidth, registerWindowOnScrollHandler,
         toggleFullScreen, isFullscreen, session,
 
-        // Props from BrowseView:
-        facets,
-
         // Props from SelectedFilesController (separate from SPC SearchView SelectedItemsController):
-        selectedFiles, selectFile, unselectFile, resetSelectedFiles,
+        selectedFiles, selectFile, unselectFile, resetSelectedFiles, selectedFilesUniqueCount,
 
         // Default prop / hardcoded (may become customizable later)
-        columnExtensionMap
+        columnExtensionMap,
     } = props;
     const { total = 0, notification = null } = context;
-
-    const countExternalSets = BrowseView.externalDataSetsCount(context);
 
     /**
      * Extends or creates `columnExtensionMap.display_title` with a larger width as well as
@@ -520,63 +331,123 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
      * If no selected files data structure is being fed through props, this function returns `columnExtensionMap`.
      */
     const columnExtensionMapWithSelectedFilesCheckboxes = useMemo(function(){
-
         if (typeof selectedFiles === 'undefined'){
-            // We don't need to add checkbox(es) for file selection.
+            // We don't need to add checkbox(es) for file selection. (This case shouldn't occur).
             return columnExtensionMap;
         }
-
-        // Add Checkboxes
+        // Else, add Checkboxes
         return _.extend({}, columnExtensionMap, {
             // We extend the display_title of global constant colExtensionMap4DN, not the columnExtensionMap,
             // incase the prop version's render fxn is different than what we expect.
             'display_title' : _.extend({}, colExtensionMap4DN.display_title, {
                 'widthMap' : { 'lg' : 210, 'md' : 210, 'sm' : 200 },
-                'render' : (expSet, columnDefinition, paneProps, width) => {
-                    const origTitleBlock = colExtensionMap4DN.display_title.render(expSet, columnDefinition, paneProps, width);
-                    const newChildren = origTitleBlock.props.children.slice(0);
-
-                    newChildren[2] = newChildren[1];
-                    newChildren[2] = React.cloneElement(newChildren[2], { 'className' : newChildren[2].props.className + ' mono-text' });
-                    newChildren[1] = <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />;
-                    return React.cloneElement(origTitleBlock, { 'children' : newChildren });
+                'render' : (expSet, parentProps) => {
+                    const { rowNumber, detailOpen, toggleDetailOpen } = parentProps;
+                    return (
+                        <DisplayTitleColumnWrapper {...{ href, context, rowNumber, detailOpen, toggleDetailOpen }} result={expSet}>
+                            <ExperimentSetCheckBox key="checkbox" {...{ expSet, selectedFiles, selectFile, unselectFile }} />
+                            <DisplayTitleColumnDefault />
+                        </DisplayTitleColumnWrapper>
+                    );
                 }
             })
         });
-
     }, [ columnExtensionMap, selectedFiles, selectFile, unselectFile ]);
 
+    /**
+     * Plain object used for caching to helps to preserve open states of Processed & Raw files' sections to iron out jumping as that state is lost that would
+     * otherwise be encountered during scrolling due to dismounting/destruction of ResultRow components. `detailPaneFileSectionStateCache` is read in constructor
+     * or upon mount by these ResultRows.
+     *
+     * Runs/memoized only once on mount so that same instance of the `detailPaneFileSectionStateCache` object persists throughout lifeycle of
+     * `BrowseTableWithSelectedFilesCheckboxes` component.
+     */
+    const { detailPaneFileSectionStateCache, updateDetailPaneFileSectionStateCache } = useMemo(function(){
+        const detailPaneFileSectionStateCache = {};
+        function updateDetailPaneFileSectionStateCache(resultID, resultPaneState){
+            // Purposely avoid changing reference to avoid re-renders/updates (except when new components initialize)
+            if (resultPaneState === null){
+                delete detailPaneFileSectionStateCache[resultID];
+            } else {
+                detailPaneFileSectionStateCache[resultID] = resultPaneState;
+            }
+        }
+        return { detailPaneFileSectionStateCache, updateDetailPaneFileSectionStateCache };
+    }, []);
+
+    /**
+     * ExperimentSetDetailPane instance will receive props `result`, `containerWidth`, `propsFromTable`, & `rowNumber`
+     * via React.cloneElement in SPC > SearchResultTable.js > ResultRowColumBlock.
+     *
+     * SearchResultTable (& rest of SPC) will soon no longer handle nor pass down selectedFiles so it is passed in (and memoized upon)
+     * here instead.
+     */
+    const detailPane = useMemo(function(){
+        return (
+            <ExperimentSetDetailPane {...{ selectedFiles, selectFile, unselectFile, windowWidth, href, schemas }} paddingWidth={47}
+                initialStateCache={detailPaneFileSectionStateCache} updateFileSectionStateCache={updateDetailPaneFileSectionStateCache} />
+        );
+    }, [ selectedFiles, windowWidth, href, schemas ]);
+
+    /** Some data calculated/derived from search response / `context` for BrowseView UX specifically */
+    const { showClearFiltersButton, countExternalSets, facets } = useMemo(function(){
+        const { filters: contextFilters = null, facets: contextFacets = [] } = context;
+        const currExpSetFilters = searchFilters.contextFiltersToExpSetFilters(
+            contextFilters,
+            globalNavigate.getBrowseBaseParams(browseBaseState)
+        );
+        const showClearFiltersButton = Object.keys(currExpSetFilters || {}).length > 0;
+
+        const projectFacet = _.findWhere(contextFacets, { 'field' : 'award.project' }) || {};
+        const projectFacetTerms = _.uniq(projectFacet.terms || [], 'key');
+        const countExternalSets = projectFacetTerms.reduce(function(sum, projectTermObj){
+            if (projectTermObj.key === '4DN') return sum; // continue.
+            return sum + projectTermObj.doc_count;
+        }, 0);
+
+        // Filtered to exclude type + fields in browse base state.
+        const facets = contextFacets.filter(function(facet, index, all){
+            if (facet.hide_from_view) return false;
+            if (browseBaseState){
+                const browseBaseParams = globalNavigate.getBrowseBaseParams(browseBaseState);
+                if (typeof browseBaseParams[facet.field] !== 'undefined') return false;
+            }
+            return true;
+        });
+
+        return { showClearFiltersButton, countExternalSets, facets };
+    }, [ context ]);
+
+
     if (total === 0 && notification) {
+        // We need to have order & presence of all hooks (such as `useMemo`) be consistent across each
+        // re-render so we can't pre-emptively return this early (prior to definitions of all hooks).
         return <NoResultsView {...{ context, href, browseBaseState, countExternalSets }} />;
     }
 
-    const bodyViewProps = {
-        browseBaseState, session, schemas, countExternalSets, facets,
-        windowHeight, windowWidth, registerWindowOnScrollHandler,
-        toggleFullScreen, isFullscreen,
-        selectedFiles, selectFile, unselectFile, resetSelectedFiles,
-        totalExpected: total
+    const aboveTableControlsProps = { // Some more generic props get passed in by SPC > ControlsAndResults.js
+        href, toggleFullScreen, isFullscreen,
+        selectedFiles, selectFile, unselectFile, resetSelectedFiles, selectedFilesUniqueCount
     };
 
-    // All these controllers pass props down to their children.
-    // So we don't need to be repetitive here; i.e. may assume 'context' is available
-    // in each controller that's child of <WindowNavigationController {...{ context, href }}>.
-    // As well as in ControlsAndResults.
+    const aboveTableComponent = <AboveBrowseViewTableControls {...aboveTableControlsProps} showSelectedFileCount />;
+    const aboveFacetListComponent = <ExternaDataExpSetsCount {...{ countExternalSets, browseBaseState, href }} />;
 
-    // Props passed down from parent components usually overwrite child props' components.
-    // (Unless otherwise implemented)
+    const passProps = {
+        href, context, facets,
+        session, schemas,
+        windowHeight, windowWidth, registerWindowOnScrollHandler,
+        detailPane,
+        showClearFiltersButton,
+        aboveTableComponent, aboveFacetListComponent,
+        columnExtensionMap: columnExtensionMapWithSelectedFilesCheckboxes,
+        navigate: propNavigate,
+        toggleFullScreen, isFullscreen, // todo: remove maybe, pass only to AboveTableControls
+        // selectedFiles, selectFile, unselectFile, resetSelectedFiles, // todo: remove and pass only to AboveTableControls, detailPane, and colExtensionMap
+        totalExpected: total // todo: remove, deprecated
+    };
 
-    return (
-        <WindowNavigationController {...{ href, context }} navigate={propNavigate}>
-            <ColumnCombiner columnExtensionMap={columnExtensionMapWithSelectedFilesCheckboxes}>
-                <CustomColumnController>
-                    <SortController>
-                        <ControlsAndResults {...bodyViewProps} />
-                    </SortController>
-                </CustomColumnController>
-            </ColumnCombiner>
-        </WindowNavigationController>
-    );
+    return <CommonSearchView {...passProps} termTransformFxn={Schemas.Term.toName} />;
 }
 BrowseTableWithSelectedFilesCheckboxes.propTypes = {
     // Props' type validation based on contents of this.props during render.
@@ -597,7 +468,7 @@ BrowseTableWithSelectedFilesCheckboxes.propTypes = {
     'selectedFiles'             : PropTypes.objectOf(PropTypes.object),
 };
 BrowseTableWithSelectedFilesCheckboxes.defaultProps = {
-    'navigate'  : navigate,
+    'navigate'  : globalNavigate,
     'columnExtensionMap' : colExtensionMap4DN
 };
 

@@ -11,7 +11,6 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/status"} ,
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
@@ -60,6 +59,11 @@
             ],
             "additionalProperties": true,
             "properties":{
+                "ID": {
+                    "title": "ID",
+                    "comment": "ID for the Microscope Configuration",
+                    "type": "string"
+                },
                 "Name": {
                     "title": "Name",
                     "comment": "Title for the Microscope Configuration",

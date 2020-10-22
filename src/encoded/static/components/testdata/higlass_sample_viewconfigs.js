@@ -172,7 +172,6 @@ export const SERVER_4DN = {
                 "h": 13,
                 "x": 0,
                 "y": 0,
-                "i": "aa",
                 "moved": false,
                 "static": false
             },

@@ -139,7 +139,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 width,
                 'facets' : null,
                 'searchHref' : "/search/?type=ExperimentSet&experiments_in_set.accession=" + encodeURIComponent(accession),
-                'defaultOpenIndices': ExperimentView.defaultOpenIndices
+                'defaultOpenIndices': ExperimentView.defaultOpenIndices,
             }));
 
         }
@@ -290,7 +290,7 @@ const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
         'render' : function(result, columnDefinition, props, width){
             var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
                 var link = object.atIdFromObject(fContainer.file);
-                var title = typeof fContainer.file.accession === 'string' ? <span className="mono-text">{fContainer.file.accession}</span> : fContainer.file.display_title;
+                var title = typeof fContainer.file.accession === 'string' ? <span className="text-monospace">{fContainer.file.accession}</span> : fContainer.file.display_title;
                 return <span key={link || i}>{ fContainer.relationship_type } { link ? <a href={link}>{ title }</a> : title }</span>;
             });
             return related_files;

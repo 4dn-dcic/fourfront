@@ -1,17 +1,9 @@
-import json
-import requests
-from re import escape
+import uptime
 from pyramid.decorator import reify
-from snovault import (
-    Root,
-    calculated_property,
-    root,
-    COLLECTIONS,
-    STORAGE
-)
-from snovault.util import find_collection_subtypes
+from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
 from .schema_formats import is_accession
-from .search import make_search_subreq
+from dcicutils import lang_utils
+from dcicutils.env_utils import is_stg_or_prd_env
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -20,6 +12,7 @@ from pyramid.security import (
     Everyone,
 )
 from collections import OrderedDict
+from encoded import APP_VERSION_REGISTRY_KEY
 
 
 def includeme(config):
@@ -52,19 +45,25 @@ def item_counts(config):
             es_total += es_count
             warn_str = build_warn_string(db_count, es_count)
             item_name = request.registry[COLLECTIONS][item_type].type_info.name
-            db_es_compare[item_name] = ("DB: %s   ES: %s %s" %
-                                         (str(db_count), str(es_count), warn_str))
+            db_es_compare[item_name] = ("DB: %s   ES: %s %s" % (str(db_count), str(es_count), warn_str))
         warn_str = build_warn_string(db_total, es_total)
         db_es_total = ("DB: %s   ES: %s %s" %
                        (str(db_total), str(es_total), warn_str))
-        responseDict = {
+        response_dict = {
             'title': 'Item Counts',
             'db_es_total': db_es_total,
             'db_es_compare': db_es_compare
         }
-        return responseDict
+        return response_dict
 
     config.add_view(counts_view, route_name='item-counts')
+
+
+def uptime_info():
+    try:
+        return lang_utils.relative_time_string(uptime.uptime())
+    except Exception:
+        return "unavailable"
 
 
 def health_check(config):
@@ -86,24 +85,50 @@ def health_check(config):
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
 
-        responseDict = {
-            "file_upload_bucket": settings.get('file_upload_bucket'),
-            "processed_file_bucket": settings.get('file_wfout_bucket'),
-            "blob_bucket": settings.get('blob_bucket'),
-            "system_bucket": settings.get('system_bucket'),
-            "elasticsearch": settings.get('elasticsearch.server'),
-            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
-            "load_data": settings.get('load_test_data'),
-            "beanstalk_env": settings.get('env.name'),
-            "namespace": settings.get('indexer.namespace'),
+        env_name = settings.get('env.name')
+        # TODO: Move this logic to dcicutils.env_utils
+        # change when we get a CGAP-specific Foursight
+        if env_name and env_name.startswith('fourfront-'):
+            if is_stg_or_prd_env(env_name):
+                if 'data.4dnucleome.org' in request.domain:  # constant should go in utils as well - Will
+                    fs_env = 'data'
+                else:
+                    fs_env = 'staging'
+            else:
+                fs_env = env_name[len('fourfront-'):]
+            foursight_url = 'https://foursight.4dnucleome.org/view/' + fs_env
+        else:
+            foursight_url = None
+
+        response_dict = {
+
             "@type": ["Health", "Portal"],
             "@context": "/health",
             "@id": "/health",
             "content": None,
+
+            'beanstalk_app_version': settings.get('eb_app_version'),
+            "beanstalk_env": env_name,
+            "blob_bucket": settings.get('blob_bucket'),
+            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
             "display_title": "Fourfront Status and Foursight Monitoring",
+            "elasticsearch": settings.get('elasticsearch.server'),
+            "file_upload_bucket": settings.get('file_upload_bucket'),
+            "foursight": foursight_url,
+            "indexer": settings.get('indexer'),
+            "index_server": settings.get('index_server'),
+            "load_data": settings.get('load_test_data'),
+            "namespace": settings.get('indexer.namespace'),
+            "processed_file_bucket": settings.get('file_wfout_bucket'),
+            'project_version': settings.get('encoded_version'),
+            'snovault_version': settings.get('snovault_version'),
+            "system_bucket": settings.get('system_bucket'),
+            'uptime': uptime_info(),
+            'utils_version': settings.get('utils_version'),
+
         }
 
-        return responseDict
+        return response_dict
 
     config.add_view(health_page_view, route_name='health-check')
 
@@ -126,20 +151,21 @@ def submissions_page(config):
         'submissions-page',
         '/submissions'
     )
+
     def submissions_page_view(request):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
 
-        responseDict = {
-            "title" : "Submissions",
-            "notification" : "success",
-            "@type" : [ "Submissions", "Portal" ],
-            "@context" : "/submissions",
-            "@id" : "/submissions",
-            "content" : None
+        response_dict = {
+            "title": "Submissions",
+            "notification": "success",
+            "@type": ["Submissions", "Portal"],
+            "@context": "/submissions",
+            "@id": "/submissions",
+            "content": None
         }
 
-        return responseDict
+        return response_dict
 
     config.add_view(submissions_page_view, route_name='submissions-page')
 
@@ -182,9 +208,11 @@ class FourfrontRoot(Root):
             (Allow, Everyone, ['list', 'search']),
             (Allow, 'group.admin', ALL_PERMISSIONS),
             (Allow, 'remoteuser.EMBED', 'import_items'),
-        ] + [(Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
-        (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
-        (Allow, Everyone, ['visible_for_edit'])]
+        ] + [
+            (Allow, 'remoteuser.INDEXER', ['view', 'view_raw', 'list', 'index']),
+            (Allow, 'remoteuser.EMBED', ['view', 'view_raw', 'expand']),
+            (Allow, Everyone, ['visible_for_edit'])
+        ]
         return acl
 
     def get(self, name, default=None):
@@ -208,11 +236,11 @@ class FourfrontRoot(Root):
         return self.connection.get_by_uuid(uuid, default)
 
     def jsonld_context(self):
-        '''Inherits from '@context' calculated property of Resource in snovault/resources.py'''
+        """Inherits from '@context' calculated property of Resource in snovault/resources.py"""
         return '/home'
 
     def jsonld_type(self):
-        '''Inherits from '@type' calculated property of Root in snovault/resources.py'''
+        """Inherits from '@type' calculated property of Root in snovault/resources.py"""
         return ['HomePage', 'StaticPage'] + super(FourfrontRoot, self).jsonld_type()
 
     @calculated_property(schema={
@@ -220,7 +248,7 @@ class FourfrontRoot(Root):
         "type": "array"
     })
     def content(self, request):
-        '''Returns -object- with pre-named sections'''
+        """Returns -object- with pre-named sections"""
         sections_to_get = ['home.introduction']
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         return_list = []
@@ -261,4 +289,4 @@ class FourfrontRoot(Root):
         "type": "string",
     })
     def app_version(self, registry):
-        return registry.settings['snovault.app_version']
+        return registry.settings[APP_VERSION_REGISTRY_KEY]

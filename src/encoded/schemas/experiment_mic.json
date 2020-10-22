@@ -1,5 +1,5 @@
 {
-    "title": "Microscopy Experiments",
+    "title": "Microscopy Experiment",
     "description": "Imaging Experiments with channel/label/target information.",
     "id": "/profiles/experiment_mic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -46,16 +46,17 @@
             "lookup": 60,
             "enum": [
                 "Widefield",
-                "Epifluorescence",
-                "SIM",
-                "CLSM",
-                "SDCM",
+                "Structured Illumination",
+                "Confocal Laser Scanning",
+                "PALM",
+                "Spinning-Disk Confocal",
+                "Swept-Field Confocal",
                 "STED",
                 "STORM",
-                "Light sheet",
-                "EM",
+                "Light-Sheet",
+                "Electron Microscopy",
                 "TIRF",
-                "HILO"
+                "HiLo"
             ]
         },
         "microscope_qc":{

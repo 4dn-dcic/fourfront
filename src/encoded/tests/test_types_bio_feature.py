@@ -1,4 +1,6 @@
 import pytest
+
+
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
@@ -46,17 +48,20 @@ def component_term(testapp, so_ont):
 
 @pytest.fixture
 def gene_item(testapp, lab, award, human):
-    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}).json['@graph'][0]
+    gene_item = {'lab': lab['@id'], 'award': award['@id'], 'geneid': '5885'}
+    return testapp.post_json('/gene', gene_item).json['@graph'][0]
 
 
 @pytest.fixture
 def mouse_gene_item(testapp, lab, award, mouse):
-    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '16825'}).json['@graph'][0]
+    gene_item = {'lab': lab['@id'], 'award': award['@id'], 'geneid': '16825'}
+    return testapp.post_json('/gene', gene_item).json['@graph'][0]
 
 
 @pytest.fixture
 def armadillo_gene_item(testapp, lab, award):
-    return testapp.post_json('/gene', {'lab': lab['@id'], 'award': award['@id'], 'geneid': '101428042'}).json['@graph'][0]
+    gene_item = {'lab': lab['@id'], 'award': award['@id'], 'geneid': '101428042'}
+    return testapp.post_json('/gene', gene_item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -178,3 +183,9 @@ def test_bio_feature_display_title_multi_species_gene(
 def test_bio_feature_display_title_unknown_organism_gene(
         armadillo_gene_bio_feature, armadillo_gene_item):
     assert armadillo_gene_bio_feature.get('display_title') == armadillo_gene_item.get('display_title') + ' gene'
+
+
+def test_bio_feature_display_title_preferred_name_w_org(
+        testapp, mouse_gene_bio_feature):
+    mfeat = testapp.patch_json(mouse_gene_bio_feature['@id'], {'preferred_label': 'Cool gene'}, status=200).json['@graph'][0]
+    assert mfeat.get('display_title') == 'Cool gene (mouse)'

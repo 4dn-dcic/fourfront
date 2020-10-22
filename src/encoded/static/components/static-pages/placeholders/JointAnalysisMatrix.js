@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import url from 'url';
 import queryString from 'query-string';
-import { Popover, Button } from 'react-bootstrap';
+import Popover from 'react-bootstrap/esm/Popover';
+import Button from 'react-bootstrap/esm/Button'; // TODO: Change to plain HMTL
 
 import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { StackedBlockVisual } from './../components';
@@ -372,6 +373,27 @@ class VisualBody extends React.PureComponent {
         }
         return <span>{ count }</span>;
     }
+    /**
+     * replacement of underscore's invert function.
+     * While underscore's invert requires all of object's values should be
+     * unique and string serializable, VisualBody.invert allows multiple
+     * mappings and convert them to array.
+     **/
+    static invert(object) {
+        const result = {};
+        const keys = Object.keys(object);
+        for (var i = 0, length = keys.length; i < length; i++) {
+            if (result[object[keys[i]]] instanceof Array) {
+                result[object[keys[i]]].push(keys[i]);
+            } else if (result[object[keys[i]]]) {
+                const temp = result[object[keys[i]]];
+                result[object[keys[i]]] = [temp, keys[i]];
+            } else {
+                result[object[keys[i]]] = keys[i];
+            }
+        }
+        return result;
+    }
 
     constructor(props){
         super(props);
@@ -476,7 +498,8 @@ class VisualBody extends React.PureComponent {
                     let facetTerm = aggrData[property];
                     if (valueChangeMap && valueChangeMap[data_source] && valueChangeMap[data_source][property]){
                         // Convert back to in-database value for use in the search query.
-                        const reversedValChangeMapForCurrSource = _.invert(valueChangeMap[data_source][property]);
+                        // const reversedValChangeMapForCurrSource = _.invert(valueChangeMap[data_source][property]);
+                        const reversedValChangeMapForCurrSource = VisualBody.invert(valueChangeMap[data_source][property]);
                         facetTerm = reversedValChangeMapForCurrSource[facetTerm] || facetTerm;
                     }
                     return [ facetField, facetTerm ];

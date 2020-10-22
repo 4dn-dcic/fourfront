@@ -1,5 +1,7 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
+import itertools
+
 from snovault import (
     abstract_collection,
     calculated_property,
@@ -25,7 +27,7 @@ from snovault.util import debug_log
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
-    get_item_if_you_can,
+    get_item_or_none,
     lab_award_attribution_embed_list
 )
 
@@ -126,6 +128,7 @@ class Experiment(Item):
         "biosample.badges.messages",
 
         "experiment_type.experiment_category",
+        "experiment_type.assay_subclass_short",
 
         "files.href",
         "files.accession",
@@ -134,14 +137,22 @@ class Experiment(Item):
         "files.upload_key",
         "files.file_format",
         "files.file_classification",
+        "files.file_type_detailed",
         "files.paired_end",
-        "files.badges.badge.title",
-        "files.badges.badge.commendation",
-        "files.badges.badge.warning",
-        "files.badges.badge.badge_classification",
-        "files.badges.badge.description",
-        "files.badges.badge.badge_icon",
-        "files.badges.messages",
+        "files.external_references.*",
+        # "files.badges.badge.title",
+        # "files.badges.badge.commendation",
+        # "files.badges.badge.warning",
+        # "files.badges.badge.badge_classification",
+        # "files.badges.badge.description",
+        # "files.badges.badge.badge_icon",
+        # "files.badges.messages",
+        "files.quality_metric.Total Sequences",
+        "files.quality_metric.Sequence length",
+        "files.quality_metric.url",
+        "files.quality_metric.overall_quality_status",
+        #"files.quality_metric_summary.*",#todo - delete soon
+        "files.quality_metric.quality_metric_summary.*",
 
         "processed_files.href",
         "processed_files.accession",
@@ -150,6 +161,33 @@ class Experiment(Item):
         "processed_files.upload_key",
         "processed_files.file_format",
         "processed_files.file_classification",
+        "processed_files.file_type_detailed",
+        "processed_files.external_references.*",
+        "processed_files.quality_metric.url",
+        "processed_files.quality_metric.overall_quality_status",
+        "processed_files.quality_metric.quality_metric_summary.*",
+        "processed_files.quality_metric.Total reads",
+        "processed_files.quality_metric.qc_list.value.Total reads",
+
+        # "processed_files.quality_metric_summary.*",#todo - delete soon
+
+
+        "other_processed_files.files.href",
+        "other_processed_files.title",
+        "other_processed_files.description",
+        "other_processed_files.type",
+        "other_processed_files.files.file_type_detailed",
+        "other_processed_files.files.file_format",
+        "other_processed_files.files.file_size",
+        "other_processed_files.files.higlass_uid",
+        "other_processed_files.files.genome_assembly",
+        "other_processed_files.files.status",
+        "other_processed_files.files.last_modified.date_modified",
+        "other_processed_files.files.quality_metric.url",
+        "other_processed_files.files.quality_metric.overall_quality_status",
+        # "other_processed_files.files.quality_metric_summary.*",#todo - delete soon
+        "other_processed_files.files.quality_metric.quality_metric_summary.*",
+        "other_processed_files.files.notes_to_tsv",
 
         "reference_files.accession",
         "reference_files.file_type_detailed",
@@ -303,7 +341,6 @@ class Experiment(Item):
     def publications_of_exp(self, request):
         esets = [request.embed('/', str(uuid), '@@object') for uuid in
                  self.experiment_sets(request)]
-        import itertools
         pubs = list(set(itertools.chain.from_iterable([eset.get('publications_of_set', [])
                                                       for eset in esets])))
         return pubs
@@ -808,7 +845,7 @@ def validate_exp_type_validity_for_experiment(context, request):
     """
     data = request.json
     if 'experiment_type' in data:
-        exp_type_item = get_item_if_you_can(request, data['experiment_type'], 'experiment-types')
+        exp_type_item = get_item_or_none(request, data['experiment_type'], 'experiment-types')
         if not exp_type_item:  # pragma: no cover
             # item level validation will take care of generating the error
             return

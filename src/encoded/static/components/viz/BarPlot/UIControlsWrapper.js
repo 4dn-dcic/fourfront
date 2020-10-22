@@ -7,7 +7,8 @@ import memoize from 'memoize-one';
 
 import { console, layout, searchFilters, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas } from './../../util';
-import { DropdownItem, DropdownButton } from 'react-bootstrap';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { Legend } from './../components';
 
@@ -233,7 +234,7 @@ export class UIControlsWrapper extends React.PureComponent {
         return _.map(keys, (menuKey)=>{
             var [ key, title = null, subtitle = null, disabled = false, tooltip = null ] = Array.isArray(menuKey) ? menuKey : [ menuKey ];
             if (typeof title === 'string' && typeof tooltip === 'string'){
-                title = <span className="inline-block" data-tip={tooltip} data-place="left">{ title }</span>;
+                title = <span className="d-inline-block" data-tip={tooltip} data-place="left">{ title }</span>;
             }
 
             return (
@@ -271,7 +272,7 @@ export class UIControlsWrapper extends React.PureComponent {
         return (
             <div className="show-type-change-section">
                 <h6 className="dropdown-heading">
-                    <span className="inline-block" data-tip={isSelectedDisabled ? "Enable some filters to enable toggling between viewing all and selected items." : null}>Show</span>
+                    <span className="d-inline-block" data-tip={isSelectedDisabled ? "Enable some filters to enable toggling between viewing all and selected items." : null}>Show</span>
                 </h6>
                 <DropdownButton id="select-barplot-show-type"
                     onSelect={this.handleExperimentsShowType}
@@ -293,7 +294,7 @@ export class UIControlsWrapper extends React.PureComponent {
                             ],
                             [
                                 'filtered',
-                                <span key={1} className="inline-block" data-place="left" data-tip={isSelectedDisabled ? 'No filters currently set' : null}>
+                                <span key={1} className="d-inline-block" data-place="left" data-tip={isSelectedDisabled ? 'No filters currently set' : null}>
                                     <span className="text-500">Selected</span> { this.titleMap(aggregateType) }
                                 </span>,
                                 null,

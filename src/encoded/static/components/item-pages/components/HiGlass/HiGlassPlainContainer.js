@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
+import { default as installedPackageLockJson } from './../../../../../../../package-lock.json';
 
 
 /**
@@ -60,7 +61,8 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'viewConfig' : PropTypes.object.isRequired,
         'isValidating' : PropTypes.bool,
         'height' : PropTypes.number,
-        'mountDelay' : PropTypes.number.isRequired
+        'mountDelay' : PropTypes.number.isRequired,
+        'onViewConfigUpdated': PropTypes.func
     };
 
     static defaultProps = {
@@ -89,12 +91,18 @@ export class HiGlassPlainContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-        const { mountDelay } = this.props;
+        const { mountDelay, onViewConfigUpdated } = this.props;
         const finish = () => {
             this.setState(function(currState){
                 return { 'mounted' : true, 'mountCount' : currState.mountCount + 1 };
             }, () => {
                 setTimeout(this.correctTrackDimensions, 500);
+                if (onViewConfigUpdated && typeof onViewConfigUpdated === 'function') {
+                    const hgc = this.getHiGlassComponent();
+                    if (hgc) {
+                        hgc.api.on("viewConfig", onViewConfigUpdated);
+                    }
+                }
             });
         };
 
@@ -179,6 +187,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
     render(){
         const { disabled, isValidating, tilesetUid, height, width, options, style, className, viewConfig, placeholder } = this.props;
         const { mounted, mountCount, hasRuntimeError } = this.state;
+        const { dependencies : { higlass : { version: higlassVersionUsed } } } = installedPackageLockJson;
         let hiGlassInstance = null;
         const outerKey = "mount-number-" + mountCount;
 
@@ -215,7 +224,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
          */
         return (
             <div className={"higlass-view-container" + (className ? ' ' + className : '')} style={style}>
-                <link type="text/css" rel="stylesheet" href="https://unpkg.com/higlass@1.6.11/dist/hglib.css" crossOrigin="true" />
+                <link type="text/css" rel="stylesheet" href={`https://unpkg.com/higlass@${higlassVersionUsed}/dist/hglib.css`} crossOrigin="true" />
                 {/*<script src="https://unpkg.com/higlass@0.10.19/dist/scripts/hglib.js"/>*/}
                 <div className="higlass-wrapper">{ hiGlassInstance }</div>
             </div>

@@ -1,5 +1,5 @@
 {
-    "title": "Visualization Track File",
+    "title": "Visualization Track file",
     "description": "Files used as visualization tracks in HiGlass.",
     "id": "/profiles/file_vistrack.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -61,7 +61,8 @@
                 "GRCh38",
                 "GRCm38",
                 "dm6",
-                "galGal5"
+                "galGal5",
+                "GRCz11"
             ]
         },
         "biosource": {

@@ -168,7 +168,7 @@ def map_doi_pmid(doi):
     res = json.loads(r)
     try:
         return res['records'][0]['pmid']
-    except:
+    except Exception:
         return
 
 
@@ -241,7 +241,7 @@ class Publication(Item, ItemWithAttachment):
                         pub_data = fetch_biorxiv(biox_url)
                     else:
                         pass
-        except:
+        except Exception:
             pass
         if pub_data:
             for k, v in pub_data.items():
@@ -272,16 +272,14 @@ class Publication(Item, ItemWithAttachment):
 
     @calculated_property(schema={
         "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
+        "description": "Publication short attribution, year, and ID (if available).",
         "type": "string"
     })
-    def display_title(self, authors=None, date_published=None, title=None):
+    def display_title(self, ID, authors=None, date_published=None):
         minipub = self.short_attribution(authors, date_published)
-        if minipub and title:
-            return minipub + ' ' + title[0:100]
-        if not minipub and title:
-            return title[0:120]
-        return Item.display_title(self)
+        if minipub:
+            return minipub + ' ' + ID
+        return ID
 
     @calculated_property(schema={
         "title": "Number of Experiment Sets",

@@ -4,9 +4,13 @@ Example.
 
     %(prog)s "https://www.encodeproject.org/search/?type=organism&frame=object"
 """
-EPILOG = __doc__
 
+import argparse
 import rdflib
+import sys
+
+
+EPILOG = __doc__
 
 
 def run(sources, output, parser='json-ld', serializer='xml', base=None):
@@ -17,8 +21,6 @@ def run(sources, output, parser='json-ld', serializer='xml', base=None):
 
 
 def main():
-    import argparse
-    import sys
     stdout = sys.stdout
     if sys.version_info.major > 2:
         stdout = stdout.buffer
@@ -29,7 +31,7 @@ def main():
     rdflib_serializers = sorted(
         p.name for p in rdflib.plugin.plugins(kind=rdflib.serializer.Serializer)
         if '/' not in p.name)
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Convert JSON-LD from source URLs to RDF", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

@@ -16,25 +16,32 @@ The Browser accessible frontend is written in ReactJS_ and uses the same Pyramid
 SOURCE CODE ORGANIZATION
 ------------------------
 
-	*** WARNING THIS IS OUT OF DATE SINCE snovault SPLIT OFF -- REWRITE WHEN IT'S TOTALLY DIVORCED ***
+The top Level is organized into the following folders
 
-	* Root - the root directory contains configuration files and install scripts along with other accessory directories
-		- *bin* - command line excutables (see src/commmands) from buildout (see PyramidDocs_)
-		- *develop* & *develop-eggs* - source and python eggs (created by buildout)
-		- *docs* - documentation (including this file)
-		- *eggs* - Python dependencies from PyPi (created by buildout)
-		- *etc* - apache config and other admin files
-		- *node_modules* - JS (Node) dependencies from npm (created by buildout)
-		- *parts* - wsgi interfaces and ruby dependencies (gems) (created by buildout)
-		- *scripts* - cron jobs
+    * .ebextensions - contains all EB environment provisioning scripts
+    * bin - contains some misc scripts, such as macpoetry-build and test
+    * deploy - contains remaining deployment scripts
+    * docs - contain the source of this documentation
+    * examples - XXX: Unused?
+    * jest
+    * node_modules
+    * parts - contains WSGI process executables
+    * scripts - XXX: Unused?
+    * src - main source code
 
-	* src directory - contains all the python and javascript code for front and backends
-		- *commands* - the python source for command line scripts used for synching, indexing and other utilities independent of the main Pyramid application
-		- *schemas* - JSON schemas (JSONSchema_, JSON-LD_) describing allowed types and values for all metadata objects
-		- *static* - Frontend JS (components), SCSS/CSS (HTML styling), images, fonts and frontend JS libraries
-		- *tests* - Unit and integration tests
-		- *upgrade* - python instructions for upgrading old objects stored to the latest schema
-		- *views* - business logic for dispatching URLs and producing the correct JSON
+
+
+The src directory  contains all the python and javascript code for front and backends
+
+    * commands - the python source for command line scripts used for synching, indexing and other utilities independent of the main Pyramid application
+    * docs - contains some miscellaneous docs
+    * locust - contains locust load testing code
+    * schemas - JSON schemas (JSONSchema_, JSON-LD_) describing allowed types and values for all metadata objects
+    * static - Frontend JS (components), SCSS/CSS (HTML styling), images, fonts and frontend JS libraries
+    * tests - Unit and integration tests
+    * upgrade - python instructions for upgrading old objects stored to the latest schema
+    * workflow_examples - XXX: document me
+    * workflow_test_inserts - XXX: document me
 
 **BACKEND**
 -----------

@@ -1,8 +1,11 @@
 import pytest
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from .workbook_fixtures import app_settings, workbook
-from ..utils import delay_rerun
+# from ..utils import delay_rerun
 
+
+notice_pytest_fixtures(app_settings, workbook)
 
 pytestmark = [
     pytest.mark.working, pytest.mark.indexing,

@@ -1,67 +1,51 @@
-from future.standard_library import install_aliases
-install_aliases()  # NOQA
-import base64
-import codecs
+# from future.standard_library import install_aliases
+# TODO: Once things are working, remove this as probably 2.7 compatibility. --kent&will 4-Feb-2020
+# install_aliases()  # NOQA
+
+import hashlib
 import json
+import mimetypes
 import netaddr
 import os
-try:
-    import subprocess32 as subprocess  # Closes pipes on failure
-except ImportError:
-    import subprocess
-from pyramid.config import Configurator
-from pyramid.path import (
-    AssetResolver,
-    caller_package,
-)
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.session import SignedCookieSessionFactory
-from pyramid.settings import (
-    aslist,
-    asbool,
-)
-from sqlalchemy import engine_from_config
-from webob.cookies import JSONSerializer
-from snovault.json_renderer import json_renderer
-from snovault.app import (
-    STATIC_MAX_AGE,
-    session,
-    json_from_path,
-    configure_dbsession,
-    changelogs,
-    json_asset,
-)
+import sentry_sdk
+# import structlog
+import subprocess
+import sys
+import webtest
+
+from dcicutils.beanstalk_utils import source_beanstalk_env_vars
+# from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
+from dcicutils.env_utils import get_mirror_env_from_context, FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE
+from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
-from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from .commands.create_mapping_on_deploy import (
-    ENV_WEBPROD,
-    ENV_WEBPROD2,
-    BEANSTALK_PROD_ENVS,
-)
+from sentry_sdk.integrations.pyramid import PyramidIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from pkg_resources import resource_filename
+# from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.config import Configurator
+from pyramid_localroles import LocalRolesAuthorizationPolicy
+# from pyramid.path import AssetResolver, caller_package
+# from pyramid.session import SignedCookieSessionFactory
+from pyramid.settings import asbool
+from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
+from snovault.elasticsearch import APP_FACTORY
+# from snovault.json_renderer import json_renderer
+# from sqlalchemy import engine_from_config
+# from webob.cookies import JSONSerializer
+
+from .loadxl import load_all
 from .utils import find_other_in_pair
-import structlog
-import logging
+
+
+if sys.version_info.major < 3:
+    raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
+
 
 # location of environment variables on elasticbeanstalk
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
 
 
-def get_mirror_env(settings):
-    """
-        Figures out who the mirror beanstalk Env is if applicable
-        This is important in our production environment because in our
-        blue-green deployment we maintain two elasticsearch intances that
-        must be up to date with each other.
-    """
-    who_i_am = settings.get('env.name', '')
-    if who_i_am not in BEANSTALK_PROD_ENVS:  # no mirror if we're not in prod
-        return None
-    return find_other_in_pair(who_i_am, BEANSTALK_PROD_ENVS)
-
-
 def static_resources(config):
-    from pkg_resources import resource_filename
-    import mimetypes
     mimetypes.init()
     mimetypes.init([resource_filename('encoded', 'static/mime.types')])
     config.add_static_view('static', 'static', cache_max_age=STATIC_MAX_AGE)
@@ -103,37 +87,22 @@ def static_resources(config):
 
 
 def load_workbook(app, workbook_filename, docsdir):
-    from .loadxl import load_all
-    from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
         'REMOTE_USER': 'IMPORT',
     }
-    testapp = TestApp(app, environ)
+    testapp = webtest.TestApp(app, environ)
     load_all(testapp, workbook_filename, docsdir)
 
 
-def source_beanstalk_env_vars(config_file=BEANSTALK_ENV_PATH):
-    """
-    set environment variables if we are on Elastic Beanstalk
-    AWS_ACCESS_KEY_ID is indicative of whether or not env vars are sourced
-
-    Args:
-        config_file (str): filepath to load env vars from
-    """
-    if os.path.exists(config_file) and not os.environ.get("AWS_ACCESS_KEY_ID"):
-        command = ['bash', '-c', 'source ' + config_file + ' && env']
-        proc = subprocess.Popen(command, stdout=subprocess.PIPE, universal_newlines=True)
-        for line in proc.stdout:
-            key, _, value = line.partition("=")
-            os.environ[key] = value[:-1]
-        proc.communicate()
-
+# This key is best interpreted not as the 'snovault version' but rather the 'version of the app built on snovault'.
+# As such, it should be left this way, even though it may appear redundant with the 'eb_app_version' registry key
+# that we also have, which tries to be the value eb uses. -kmp 28-Apr-2020
+APP_VERSION_REGISTRY_KEY = 'snovault.app_version'
 
 
 def app_version(config):
-    import hashlib
-    if not config.registry.settings.get('snovault.app_version'):
+    if not config.registry.settings.get(APP_VERSION_REGISTRY_KEY):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't check env then git
         version = os.environ.get("ENCODED_VERSION")
@@ -145,10 +114,10 @@ def app_version(config):
                     ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
                 if diff:
                     version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-            except:
+            except Exception:
                 version = "test"
 
-        config.registry.settings['snovault.app_version'] = version
+        config.registry.settings[APP_VERSION_REGISTRY_KEY] = version
 
     # GA Config
     ga_conf_file = config.registry.settings.get('ga_config_location')
@@ -156,8 +125,8 @@ def app_version(config):
     if ga_conf_file and not ga_conf_existing:
         ga_conf_file = os.path.normpath(
             os.path.join(
-                os.path.dirname(os.path.abspath(__file__)), # Absolute loc. of this file
-                "../../",                                   # Go back up to repo dir
+                os.path.dirname(os.path.abspath(__file__)),  # Absolute loc. of this file
+                "../../",                                    # Go back up to repo dir
                 ga_conf_file
             )
         )
@@ -190,16 +159,19 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
-    # set mirrored Elasticsearch location (for webprod/webprod2)
-    settings['mirror.env.name'] = get_mirror_env(settings)
+
+    # set mirrored Elasticsearch location (for staging and production servers)
+    mirror = get_mirror_env_from_context(settings)
+    if mirror is not None:
+        settings['mirror.env.name'] = mirror
+        settings['mirror_health'] = get_health_page(ff_env=mirror)
+
     config = Configurator(settings=settings)
 
-    from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
     config.include(app_version)
 
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
-    from pyramid_localroles import LocalRolesAuthorizationPolicy
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
@@ -212,7 +184,7 @@ def main(global_config, **local_config):
     config.commit()  # commit so search can override listing
 
     # Render an HTML page to browsers and a JSON document for API clients
-    #config.include(add_schemas_to_html_responses)
+    # config.include(add_schemas_to_html_responses)
     config.include('.renderers')
     config.include('.authentication')
     config.include('.server_defaults')
@@ -244,15 +216,24 @@ def main(global_config, **local_config):
     # registered.
     config.include('.upgrade')
 
+    # initialize sentry reporting, split into "production" and "mastertest", do nothing in local/testing
+    current_env = settings.get('env.name', None)
+    if current_env in [FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE]:
+        sentry_sdk.init("https://0d46fafce1d04ea2bfbe11ff15ca896e@o427308.ingest.sentry.io/5379985",
+                        integrations=[PyramidIntegration(), SqlalchemyIntegration()])
+    elif current_env is not None:
+        sentry_sdk.init("https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642",
+                        integrations=[PyramidIntegration(), SqlalchemyIntegration()])
+
     app = config.make_wsgi_app()
 
     workbook_filename = settings.get('load_workbook', '')
-    load_test_only = asbool(settings.get('load_test_only', False))
+    # This option never gets used. Is that bad? -kmp 27-Jun-2020
+    # load_test_only = asbool(settings.get('load_test_only', False))
     docsdir = settings.get('load_docsdir', None)
     if docsdir is not None:
         docsdir = [path.strip() for path in docsdir.strip().split('\n')]
     if workbook_filename:
         load_workbook(app, workbook_filename, docsdir)
-
 
     return app

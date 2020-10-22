@@ -7,8 +7,8 @@ import memoize from 'memoize-one';
 import url from 'url';
 import * as d3 from 'd3';
 import ReactTooltip from 'react-tooltip';
-
-import { DropdownItem, DropdownButton } from 'react-bootstrap';
+import DropdownItem from 'react-bootstrap/esm/DropdownItem';
+import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
 import { console, layout, ajax, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { format as formatDateTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
@@ -37,13 +37,11 @@ export class StatsViewController extends React.PureComponent {
         super(props);
         this.performAggRequests  = this.performAggRequests.bind(this);
         this.stateToChildProps      = this.stateToChildProps.bind(this);
-        this.state = _.extend(
-            {
-                'mounted' : false,
-                'loadingStatus' : 'loading'
-            },
-            _.object(_.map(_.keys(props.searchURIs), function(k){ return [ 'resp' + k, null ]; }))
-        );
+        this.state = {
+            'mounted' : false,
+            'loadingStatus' : 'loading',
+            ..._.object(Object.keys(props.searchURIs).map(function(k){ return [ 'resp' + k, null ]; }))
+        };
     }
 
     componentDidMount(){
@@ -93,7 +91,7 @@ export class StatsViewController extends React.PureComponent {
             uponAllRequestsCompleteCallback();
         };
 
-        _.forEach(chartUrisAsPairs, ([key, uri]) => {
+        chartUrisAsPairs.forEach(([key, uri]) => {
             if (typeof uri === 'function') uri = uri(this.props);
             const uriHost = ownHost && url.parse(uri).host;
             ajax.load(
@@ -107,7 +105,7 @@ export class StatsViewController extends React.PureComponent {
     }
 
     stateToChildProps(state = this.state){
-        return _.object(_.filter(_.pairs(state), ([key, value])=>{
+        return _.object(_.pairs(state).filter(([key, value])=>{
             // Which key:value pairs to pass to children.
             if (key === 'mounted' || key === 'loadingStatus') return true;
             if (!state.mounted/* || state.loadingStatus !== 'complete'*/) return false; // Don't pass responses in until finished.
@@ -116,14 +114,10 @@ export class StatsViewController extends React.PureComponent {
     }
 
     render(){
-        var { children } = this.props,
-            childProps = _.extend(_.omit(this.props, 'children'), this.stateToChildProps(this.state));
+        const { children } = this.props;
+        const childProps = _.extend(_.omit(this.props, 'children'), this.stateToChildProps(this.state));
 
-        if (Array.isArray(children)){
-            return React.Children.map(children, (c) => React.cloneElement(c, childProps));
-        } else {
-            return React.cloneElement(children, childProps);
-        }
+        return React.Children.map(children, function(c){ return React.cloneElement(c, childProps); });
     }
 
 }
@@ -465,7 +459,7 @@ export class HorizontalD3ScaleLegend extends React.Component {
 
     renderColorItem([term, color], idx, all){
         return (
-            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-ellipsis-container" key={term}>
+            <div className="col-sm-4 col-md-3 col-lg-2 mb-03 text-truncate" key={term}>
                 <div className="color-patch" style={{ 'backgroundColor' : color }} data-term={term} />
                 { term }
             </div>

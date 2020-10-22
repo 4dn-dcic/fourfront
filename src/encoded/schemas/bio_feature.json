@@ -124,6 +124,7 @@
                         "description": "One specific modification - list has suggested values.",
                         "type": "string",
                         "suggested_enum": [
+                            "Amino acid substitution",
                             "BrdU",
                             "BrU",
                             "mCherry",

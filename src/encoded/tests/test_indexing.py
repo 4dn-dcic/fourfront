@@ -9,10 +9,12 @@ import json
 import os
 import pkg_resources
 import pytest
+import re
 import time
 import transaction
 import uuid
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from elasticsearch.exceptions import NotFoundError
 from snovault import DBSESSION, TYPES
 from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
@@ -24,7 +26,7 @@ from snovault.elasticsearch.create_mapping import (
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, func
 from timeit import default_timer as timer
 from unittest import mock
 from zope.sqlalchemy import mark_changed
@@ -32,9 +34,25 @@ from .. import main
 from ..utils import delay_rerun
 from ..verifier import verify_item
 from .workbook_fixtures import app_settings
+from .test_permissions import wrangler, wrangler_testapp
+
+
+notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
+
+
+POSTGRES_MAJOR_VERSION_EXPECTED = 11
+
+
+def test_postgres_version(session):
+
+    (version_info,) = session.query(func.version()).one()
+    print("version_info=", version_info)
+    assert isinstance(version_info, str)
+    assert re.match("PostgreSQL %s([.][0-9]+)? " % POSTGRES_MAJOR_VERSION_EXPECTED, version_info)
+
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
@@ -139,7 +157,7 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
         try:
             namespaced_index = get_namespaced_index(app, item_type)
             item_index = es.indices.get(index=namespaced_index)
-        except:
+        except Exception:
             assert False
         found_index_mapping_emb = item_index[namespaced_index]['mappings'][item_type]['properties']['embedded']
         found_index_settings = item_index[namespaced_index]['settings']
@@ -325,3 +343,22 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
                                                                             frame_time, embed_time))
     # userful for seeing debug messages
     # assert False
+
+
+def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
+    """ Tests that anontestapp gets view denied when using datastore=database """
+    file_item_body = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'paired_end': '1',
+        'status': 'released'
+    }
+    res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
+    item_id = res['@graph'][0]['@id']
+    indexer_testapp.post_json('/index', {'record': True})
+    time.sleep(1)  # let es catch up
+    res = anontestapp.get('/' + item_id).json
+    assert res['file_format'] == {'error': 'no view permissions'}
+    res = anontestapp.get('/' + item_id + '?datastore=database').json
+    assert res['file_format'] == {'error': 'no view permissions'}

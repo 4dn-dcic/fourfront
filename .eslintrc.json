@@ -20,7 +20,6 @@
         "no-unused-vars": ["warn", { "args" : "none" }],
         "no-useless-concat": "error",
         "no-useless-constructor": "error",
-        "no-useless-escape" : "warn",
         "no-whitespace-before-property" : "error",
         "object-curly-spacing" : ["error", "always"],
         "prefer-const" : "error",
@@ -71,5 +70,15 @@
     "plugins": [
         "react",
         "cypress"
+    ],
+    "overrides": [
+        {
+            "files" : ["src/encoded/static/data/*.jsx"],
+            "rules" : {
+                "react/jsx-no-undef" : 0,
+                "semi" : 0,
+                "react/react-in-jsx-scope" : 0
+            }
+        }
     ]
 }

@@ -24,7 +24,7 @@ import { navigate } from './../util';
  * @private
  * @ignore
  */
-var refs = {
+const refs = {
     store       : null,
     href        : null, // Cached from redux store updates // TODO: MAYBE REMOVE HREF WHEN SWITCH SEARCH FROM /BROWSE/
     contextFilters : [],
@@ -44,7 +44,7 @@ var refs = {
  * @property {string[]} barplot_data_fields                                 List of fields on which aggregations/bucketing is done for generating `barplot_data_filtered` & `barplot_data_unfiltered`.
  * @property {booolean} isLoadingChartData                                  Whether we are currently loading.
  */
-var state = {
+const state = {
     'barplot_data_filtered'   : null,
     'barplot_data_unfiltered' : null,
     'barplot_data_fields'     : null,
@@ -53,28 +53,12 @@ var state = {
 
 /** Private state & functions **/
 
-/**
- * @private
- * @ignore
- */
-var providerCallbacks = {};
-
-/**
- * @private
- * @ignore
- */
-var providerLoadStartCallbacks = {};
-
-/**
- * @private
- * @ignore
- */
-var currentRequests = { filtered: null, unfiltered: null };
+const providerCallbacks = {};
+const providerLoadStartCallbacks = {};
+const currentRequests = { filtered: null, unfiltered: null };
 
 /**
  * After load & update, called to start any registered 'on update' callbacks.
- *
- * @ignore
  */
 function notifyUpdateCallbacks(){
     console.log('Notifying update callbacks',_.keys(providerCallbacks));
@@ -85,9 +69,6 @@ function notifyUpdateCallbacks(){
 
 /**
  * Before load, called to start any registered 'on load start' callbacks.
- *
- * @private
- * @ignore
  */
 function notifyLoadStartCallbacks(){
     console.log('Notifying load start callbacks', _.keys(providerLoadStartCallbacks));
@@ -114,7 +95,7 @@ function reFetchContext(){
  * @private
  * @type {null|function}
  */
-var reduxSubscription = null;
+let reduxSubscription = null;
 
 /**
  * Flag for whether controller has been initialized.
@@ -124,17 +105,16 @@ var reduxSubscription = null;
  * @private
  * @type {boolean}
  */
-var isInitialized = false;
+let isInitialized = false;
 
-
-var isInitialLoadComplete = false;
+let isInitialLoadComplete = false;
 
 /**
  * @private
  * @ignore
  * @type {number}
  */
-var lastTimeSyncCalled = 0;
+let lastTimeSyncCalled = 0;
 
 
 /**
@@ -239,9 +219,11 @@ export const ChartDataController = {
     initialize : function(browseBaseState = null, fields = null, callback = null){
         if (!refs.store) refs.store = require('./../../store').store;
 
-        var initStoreState = refs.store.getState();
+        const initStoreState = refs.store.getState();
+        const isBrowseHrefOnInit = initStoreState.href.indexOf('/browse/') !== -1;
+
         refs.href = initStoreState.href;
-        refs.contextFilters = (initStoreState.context && initStoreState.context.filters) || [];
+        refs.contextFilters = (isBrowseHrefOnInit && initStoreState.context && initStoreState.context.filters) || [];
 
         if (typeof browseBaseState === 'string'){
             refs.browseBaseState = browseBaseState;
@@ -284,14 +266,14 @@ export const ChartDataController = {
 
             // We treat expSetFilters as being empty if we're not on browse page --
             // if we are not on the browse page, no need to get chart info
-            var isBrowseHrefPrev = prevHref.indexOf('/browse/') !== -1,
-                isBrowseHrefNext = refs.href.indexOf('/browse/') !== -1,
-                prevExpSetFilters = isBrowseHrefPrev ? searchFilters.contextFiltersToExpSetFilters(prevContextFilters,  prevBrowseBaseParams) : {},
-                nextExpSetFilters = isBrowseHrefNext ? searchFilters.contextFiltersToExpSetFilters(refs.contextFilters, nextBrowseBaseParams) : {},
-                didFiltersChange = (
-                    !searchFilters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
-                    (prevHref && (prevSearchQuery !== nextSearchQuery))
-                );
+            const isBrowseHrefPrev = prevHref.indexOf('/browse/') !== -1;
+            const isBrowseHrefNext = refs.href.indexOf('/browse/') !== -1;
+            const prevExpSetFilters = isBrowseHrefPrev ? searchFilters.contextFiltersToExpSetFilters(prevContextFilters,  prevBrowseBaseParams) : {};
+            const nextExpSetFilters = isBrowseHrefNext ? searchFilters.contextFiltersToExpSetFilters(refs.contextFilters, nextBrowseBaseParams) : {};
+            const didFiltersChange = (
+                !searchFilters.compareExpSetFilters(nextExpSetFilters, prevExpSetFilters) ||
+                (prevHref && (prevSearchQuery !== nextSearchQuery))
+            );
 
             // Step 2. Check if need to refresh filtered data only.
             if (didFiltersChange) {
@@ -456,7 +438,7 @@ export const ChartDataController = {
         lastTimeSyncCalled = Date.now();
         if (!syncOpts.fromSync) syncOpts.fromSync = true;
         ChartDataController.setState({ 'isLoadingChartData' : true }, function(){
-            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, syncOpts);
+            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(callback, syncOpts);
         });
     },
 
@@ -478,32 +460,24 @@ export const ChartDataController = {
         } else if (state.barplot_data_unfiltered) {
             ChartDataController.fetchAndSetFilteredBarPlotData(callback, opts);
         } else {
-            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(null, callback, opts);
+            ChartDataController.fetchUnfilteredAndFilteredBarPlotData(callback, opts);
         }
     },
 
     /**
      * Called by ChartDataController.sync() internally.
      */
-    fetchUnfilteredAndFilteredBarPlotData : function(reduxStoreState = null, callback = null, opts = {}){
-        if (!reduxStoreState || !reduxStoreState.href){
-            reduxStoreState = refs.store.getState();
-        }
-
+    fetchUnfilteredAndFilteredBarPlotData : function(callback = null, opts = {}){
 
         const currentBrowseBaseParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-        const currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters(
-            (reduxStoreState.context && reduxStoreState.context.filters) || null,
-            currentBrowseBaseParams
-        );
+        const currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters(refs.contextFilters, currentBrowseBaseParams);
+        const searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(refs.href);
+        const filtersSet = (_.keys(currentExpSetFilters).length > 0) || searchQuery;
 
-        var searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(reduxStoreState.href);
-        var filtersSet = (_.keys(currentExpSetFilters).length > 0) || searchQuery;
+        let barplot_data_filtered = null;
+        let barplot_data_unfiltered = null;
 
-        var barplot_data_filtered = null,
-            barplot_data_unfiltered = null;
-
-        var cb = _.after(filtersSet ? 2 : 1, function(){
+        const cb = _.after(filtersSet ? 2 : 1, function(){
             ChartDataController.setState({
                 'barplot_data_filtered' : barplot_data_filtered,
                 'barplot_data_unfiltered' : barplot_data_unfiltered,
@@ -512,7 +486,7 @@ export const ChartDataController = {
 
         });
 
-        var baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
+        const baseSearchParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
 
         notifyLoadStartCallbacks();
 
@@ -547,7 +521,7 @@ export const ChartDataController = {
             currentRequests.filtered = null;
         }
         if (filtersSet){
-            var filteredSearchParams = navigate.mergeObjectsOfLists(
+            const filteredSearchParams = navigate.mergeObjectsOfLists(
                 { 'q' : searchQuery || null },
                 baseSearchParams,
                 searchFilters.expSetFiltersToJSON(currentExpSetFilters)
@@ -582,15 +556,11 @@ export const ChartDataController = {
      */
     fetchAndSetFilteredBarPlotData : function(callback = null, opts = {}){
 
-        const reduxStoreState = refs.store.getState();
-
+        // `currentBrowseBaseParams` not rly needed for BarPlot agg endpoint (since passing thru all filters anyway)
         const currentBrowseBaseParams = navigate.getBrowseBaseParams(opts.browseBaseState || null);
-        const currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters(
-            (reduxStoreState.context && reduxStoreState.context.filters) || null,
-            // currentBrowseBaseParams - not rly needed for BarPlot agg endpoint
-        );
+        const currentExpSetFilters = searchFilters.contextFiltersToExpSetFilters(refs.contextFilters, currentBrowseBaseParams);
 
-        const searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(reduxStoreState.href);
+        const searchQuery = opts.searchQuery || searchFilters.searchQueryStringFromHref(refs.href);
 
         const filteredSearchParams = navigate.mergeObjectsOfLists(
             { 'q' : searchQuery || null },

@@ -34,7 +34,7 @@ import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from './v
 Cypress.Commands.add('searchPageTotalResultCount', function(options){
 
     function getValue(){
-        const $elem = Cypress.$('div.above-results-table-row .box.results-count > div.inline-block > span.text-500');
+        const $elem = Cypress.$('#results-count');
         const count = parseInt($elem.text());
         expect(typeof count).to.equal("number");
         expect(isNaN(count)).to.be.false;
@@ -145,7 +145,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 });
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
-    cy.get(navUserAcctDropdownBtnSelector).click().wait(100).end()
+    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().wait(100).end()
         .get('#logoutbtn').click().end()
         .get(navUserAcctLoginBtnSelector).should('contain', 'Log In').wait(300).end()
         .get('#slow-load-container').should('not.have.class', 'visible').end();

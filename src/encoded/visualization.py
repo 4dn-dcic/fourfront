@@ -26,7 +26,7 @@ from .types.workflow import (
     WorkflowRunTracingException,
     item_model_to_object
 )
-from .types.base import get_item_if_you_can
+from .types.base import get_item_or_none
 
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
@@ -323,7 +323,7 @@ def date_histogram_aggregations(context, request):
     try:
         json_body = request.json_body
         search_param_lists = json_body.get('search_query_params', deepcopy(DEFAULT_BROWSE_PARAM_LISTS))
-    except:
+    except Exception:
         search_param_lists = request.GET.dict_of_lists()
         if 'group_by' in search_param_lists:
             group_by_fields = search_param_lists['group_by']
@@ -448,9 +448,11 @@ def add_files_to_higlass_viewconf(context, request):
     """
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
-    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
+    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)    
     if not higlass_viewconfig:
-        default_higlass_viewconf = get_item_if_you_can(request, "00000000-1111-0000-1111-000000000000")
+        
+        # @todo: this block will be removed when a workaround to run tests correctly.
+        default_higlass_viewconf = get_item_or_none(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
         # Add a view section if the default higlass_viewconfig lacks one
         if "views" not in higlass_viewconfig:
@@ -463,7 +465,7 @@ def add_files_to_higlass_viewconf(context, request):
             "errors": "No view config found.",
             "new_viewconfig": None,
             "new_genome_assembly" : None
-        }
+        }    
 
     # Get the list of files.
     file_uuids = request.json_body.get('files')
@@ -553,7 +555,7 @@ def get_file_higlass_information(request, file_uuids):
     for file_uuid in file_uuids:
         data = {
             "uuid" : file_uuid,
-            "data" : get_item_if_you_can(request, file_uuid),
+            "data" : get_item_or_none(request, file_uuid),
         }
 
         if data["data"] == None:
@@ -849,7 +851,6 @@ def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, m
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
             "labelPosition": "topLeft",
         },
         "type": "horizontal-divergent-bar",
@@ -908,9 +909,7 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
             "colorRange": [],
-            "valueScaling": "linear",
             "labelPosition": "topLeft",
             "heatmapValueScaling": "log",
         },
@@ -1125,7 +1124,8 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
+            "fontSize": 10, # has to be set explicitly since Higlass has a different default value
+            "geneAnnotationHeight": 12 # has to be set explicitly since Higlass has a different default value
         }
     }
 
@@ -1139,10 +1139,12 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
 
     new_tracks_by_side["top"]["type"] = "horizontal-gene-annotations"
     new_tracks_by_side["top"]["orientation"] = "1d-horizontal"
+    new_tracks_by_side["top"]["height"] = 55 # has to be set explicitly since Higlass has a different default value
     new_tracks_by_side["top"]["uid"] = uuid.uuid4()
 
     new_tracks_by_side["left"]["type"] = "vertical-gene-annotations"
     new_tracks_by_side["left"]["orientation"] = "1d-vertical"
+    new_tracks_by_side["left"]["width"] = 55 # has to be set explicitly since Higlass has a different default value
     new_tracks_by_side["left"]["uid"] = uuid.uuid4()
 
     # For each view:
@@ -1213,7 +1215,6 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
         "name": file["display_title"],
         "options": {
             "name": get_title(file),
-            "coordSystem": file["genome_assembly"],
         }
     }
 
@@ -1236,7 +1237,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
 
     new_tracks_by_side["center"]["name"] = "Chromosome Grid"
     del new_tracks_by_side["center"]["options"]["name"]
-    del new_tracks_by_side["center"]["options"]["coordSystem"]
+   
 
     # For each view:
     for view in views:
@@ -1343,7 +1344,6 @@ def add_2d_file(views, new_content, viewconfig_info, maximum_height):
     new_view = deepcopy(views[0])
     new_view["uid"] = uuid.uuid4()
     new_view["tracks"]["center"][0]["uid"] = uuid.uuid4()
-    new_view["layout"]["i"] = new_view["uid"]
 
     # Replace the central track with the new file
     for i, track in enumerate(new_view["tracks"]["center"][0]["contents"]):
@@ -1388,7 +1388,6 @@ def create_2d_content(file, viewtype):
 
     # Add specific information for this file.
     contents["options"] = {}
-    contents["options"]["coordSystem"] = file["genome_assembly"]
     contents["options"]["name"] = get_title(file)
 
     if file.get("higlass_defaults"):
@@ -1454,21 +1453,7 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["width"] = temp_width
             del track["height"]
-
-        # Also the minimum width/height
-        temp_height = track.get("minWidth", None)
-        temp_width = track.get("minHeight", None)
-
-        if temp_height and temp_width:
-            track["minHeight"] = temp_height
-            track["minWidth"] = temp_width
-        elif temp_height:
-            track["minHeight"] = temp_height
-            del track["minWidth"]
-        elif temp_width:
-            track["minWidth"] = temp_width
-            del track["minHeight"]
-
+        
         # And the orientation
         track_orientation = track.get("orientation", None)
         if track_orientation in orientation_mappings:

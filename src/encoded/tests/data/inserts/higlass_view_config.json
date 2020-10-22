@@ -20,7 +20,6 @@
                     ],
                     "layout": {
                         "static": false,
-                        "i": "view-4dn-mcool-0",
                         "w": 12,
                         "x": 0,
                         "moved": false,
@@ -34,7 +33,6 @@
                                 "uid": "top-annotation-track",
                                 "orientation": "1d-horizontal",
                                 "options": {
-                                    "valueScaling": "linear",
                                     "geneAnnotationHeight": 10,
                                     "showTooltip": false,
                                     "mousePositionColor": "#999999",
@@ -47,7 +45,6 @@
                                     "trackBorderWidth": 0,
                                     "geneStrandSpacing": 4,
                                     "labelColor": "black",
-                                    "coordSystem": "mm10",
                                     "showMousePosition": false,
                                     "trackBorderColor": "black"
                                 },
@@ -55,7 +52,6 @@
                                 "name": "4DNFIWG6CQQA.beddb",
                                 "type": "horizontal-gene-annotations",
                                 "tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
-                                "minHeight": 55,
                                 "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                                 "height": 55,
                                 "position": "top"
@@ -71,22 +67,18 @@
                                     "color": "#777777",
                                     "labelColor": "#888",
                                     "mousePositionColor": "#999999",
-                                    "valueScaling": "linear",
                                     "fontSize": 12,
                                     "labelPosition": "hidden",
                                     "trackBorderWidth": 0,
                                     "minusStrandColor": "red",
                                     "stroke": "#FFFFFF",
-                                    "showTooltip": false,
-                                    "coordSystem": "mm10",
-                                    "showMousePosition": false,
+                                    "showTooltip": false,                                    "showMousePosition": false,
                                     "trackBorderColor": "black"
                                 },
                                 "width": 1130,
                                 "name": "Chromosome Axis",
                                 "type": "horizontal-chromosome-labels",
                                 "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "minHeight": 30,
                                 "height": 35,
                                 "local": true,
                                 "position": "top"
@@ -251,7 +243,6 @@
                                             "mousePositionColor": "#000000",
                                             "trackBorderWidth": 0,
                                             "heatmapValueScaling": "log",
-                                            "coordSystem": "GRCm38",
                                             "labelBottomMargin": 0,
                                             "maxZoom": null,
                                             "trackBorderColor": "black",

@@ -70,7 +70,8 @@
                "Ploidy Authentication",
                "Instrument Authentication",
                "Antibody Authentication",
-               "Tissue Preparation Methods"
+               "Tissue Preparation Methods",
+               "Differentiation Protocol"
             ]
         },
         "url": {
@@ -79,6 +80,16 @@
             "description": "An external resource with additional information about the protocol.",
             "type": "string",
             "format": "uri"
+        },
+        "date_approved": {
+            "title": "Date of Approval",
+            "description": "The date on which the SOP was approved by the 4DN consortium steering committee",
+            "comment": "Should only be used in conjunction with 4DN Standard tag for protocols approved by the consortium",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
         }
     },
     "facets": {

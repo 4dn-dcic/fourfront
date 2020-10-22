@@ -1,9 +1,11 @@
 import pytest
-import time
 import webtest
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from .workbook_fixtures import app_settings, app
 
+
+notice_pytest_fixtures(app_settings, app)
 
 pytestmark = [pytest.mark.indexing, pytest.mark.working]
 
@@ -64,8 +66,13 @@ def help_page_json_deleted():
 
 @pytest.fixture(scope='module')
 def posted_help_page_section(testapp, help_page_section_json):
-    res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
-    return res.json['@graph'][0]
+    try:
+        res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
+        val = res.json['@graph'][0]
+    except webtest.AppError:
+        res = testapp.get('/' + help_page_section_json['uuid'], status=301).follow()
+        val = res.json
+    return val
 
 
 @pytest.fixture(scope='module')
@@ -129,7 +136,10 @@ def test_page_unique_name(testapp, help_page, help_page_deleted):
     new_page = {'name': help_page['name']}
     res = testapp.post_json('/page', new_page, status=422)
     expected_val_err = "%s already exists with name '%s'" % (help_page['uuid'], new_page['name'])
-    assert expected_val_err in res.json['errors'][0]['description']
+    actual_error_description = res.json['errors'][0]['description']
+    print("expected:", expected_val_err)
+    print("actual:", actual_error_description)
+    assert expected_val_err in actual_error_description
 
     # also test PATCH of an existing page with another name
     res = testapp.patch_json(help_page_deleted['@id'], {'name': new_page['name']}, status=422)

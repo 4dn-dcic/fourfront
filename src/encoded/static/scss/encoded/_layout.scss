@@ -142,6 +142,10 @@ blockquote {
 	@include navbar-fixed-position {
 		display: block;
 		height: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+		body[data-current-action="selection"] &,
+		body[data-current-action="multiselect"] & {
+			height: 41px;
+		}
 	}
 }
 
@@ -588,9 +592,6 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 
 /************** Common Typography ************/
 
-.text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
-.text-uppercase 	{ text-transform: uppercase; }
-
 .text-100 { font-weight: 100 !important; }
 .text-200 { font-weight: 200 !important; }
 .text-300 { font-weight: 300 !important; }
@@ -612,15 +613,6 @@ $margin-util-sizes-mini: 1, 2, 3, 4, 5, 6, 7, 8; 		// * 1px
 	font-family: $font-family-monospace;
 }
 
-.text-ellipsis-container {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.no-wrap {
-	white-space: nowrap;
-}
 
 /************** MORE BUTTON STYLES ***********/
 
