@@ -91,7 +91,7 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
         if (selectedFiles){
             wrappedLeftSectionControls = (
                 <ChartDataController.Provider id="selected_files_section">
-                    <SelectedFilesControls {..._.extend(_.pick(this.props, 'href', 'includeFileSets', 'context'), SelectedFilesController.pick(this.props))}
+                    <SelectedFilesControls {..._.extend(_.pick(this.props, 'href', 'includeFileSets', 'context', 'session'), SelectedFilesController.pick(this.props))}
                         subSelectedFiles={filteredSelectedFiles} onFilterFilesByClick={this.handleOpenFileTypeFiltersPanel}
                         currentFileTypeFilters={fileTypeFilters} setFileTypeFilters={this.setFileTypeFilters} />
                 </ChartDataController.Provider>
@@ -99,7 +99,7 @@ export class AboveBrowseViewTableControls extends React.PureComponent {
         }
 
         const aboveTableControlsProps = {
-            ..._.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen'),
+            ..._.pick(this.props, 'isFullscreen', 'windowWidth', 'toggleFullScreen', 'session'),
             "panelMap" : {
                 "filterFilesBy" : {
                     "title" : (

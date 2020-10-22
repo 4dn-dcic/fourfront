@@ -426,7 +426,7 @@ function BrowseTableWithSelectedFilesCheckboxes(props){
     }
 
     const aboveTableControlsProps = { // Some more generic props get passed in by SPC > ControlsAndResults.js
-        href, toggleFullScreen, isFullscreen,
+        href, session, toggleFullScreen, isFullscreen,
         selectedFiles, selectFile, unselectFile, resetSelectedFiles, selectedFilesUniqueCount
     };
 

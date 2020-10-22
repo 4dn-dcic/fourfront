@@ -22,7 +22,7 @@ const { Item } = typedefs;
  * This may likely change in future.
  */
 export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseViewSelectedFilesDownloadButton(props){
-    const { selectedFiles, subSelectedFiles, context } = props;
+    const { selectedFiles, subSelectedFiles, context, session } = props;
 
     const [ selectedFilesUniqueCount, selectedFilesCountIncludingDuplicates ] = useMemo(function(){
         return [ uniqueFileCount(selectedFiles), fileCountWithDuplicates(selectedFiles) ];
@@ -55,7 +55,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
     const cls = "btn-primary"; //disabled ? 'btn-outline-primary' : 'btn-primary';
 
     return (
-        <SelectedFilesDownloadButton {...{ context, disabled }} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
+        <SelectedFilesDownloadButton {...{ context, session, disabled }} selectedFiles={subSelectedFiles || selectedFiles} filenamePrefix="metadata_"
             id="browse-view-download-files-btn" data-tip={tooltip} className={cls}>
             <i className="icon icon-download fas icon-fw mr-07"/>
             <span className="d-none d-lg-inline">Download </span>
@@ -111,7 +111,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
     render(){
         const {
             selectedFiles, filenamePrefix, children, disabled,
-            windowWidth, context, analyticsAddFilesToCart, action,
+            windowWidth, context, analyticsAddFilesToCart, action, session,
             ...btnProps
         } = this.props;
         const { modalOpen } = this.state;
@@ -128,7 +128,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
                     { children }
                 </button>
                 { modalOpen ?
-                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, context, fileCountUnique, fileCountWithDupes, analyticsAddFilesToCart, action }}
+                    <SelectedFilesDownloadModal {...{ selectedFiles, filenamePrefix, context, fileCountUnique, fileCountWithDupes, analyticsAddFilesToCart, action, session }}
                         onHide={this.hideModal}/>
                     : null }
             </React.Fragment>
@@ -184,7 +184,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
     }
 
     render(){
-        const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context } = this.props;
+        const { onHide, filenamePrefix, selectedFiles, fileCountUnique, fileCountWithDupes, context, session } = this.props;
         let { action } = this.props;
         const { disclaimerAccepted } = this.state;
 
@@ -207,7 +207,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                 </Modal.Header>
 
                 <Modal.Body>
-
+                    {!session ? <p className="text-danger"><strong className="text-dark">IMPORTANT: </strong>You must be logged in for bulk downloads as of December 1, 2020. If you do not have an account, you can create a new one.</p> : null }
                     <p>Please press the &quot;Download&quot; button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
                     <ModalCodeSnippet filename={suggestedFilename} isSignedIn={isSignedIn} />
