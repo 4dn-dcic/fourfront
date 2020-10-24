@@ -366,27 +366,27 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
      * @param {Object} trackInfo track info object that holds detail view and track info
      */
     hasSimilarTilesets(updatedTilesetField, trackInfo) {
-      const hgc = this.getHiGlassComponent();
-      const currentViewConf = this.getHiGlassViewConfig(hgc);
+        const hgc = this.getHiGlassComponent();
+        const currentViewConf = this.getHiGlassViewConfig(hgc);
 
-      if (!currentViewConf) {
-        throw new Error("Could not get current view configuration.");
-      }
+        if (!currentViewConf) {
+            throw new Error("Could not get current view configuration.");
+        }
 
-      // Gets all tracks with the same orientaton (e.g. all top tracks)
-      const tracks = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
-      const currentTrack = _.find(tracks, function (t) {
-        return t.uid === trackInfo.uid;
-      });
+        // Gets all tracks with the same orientaton (e.g. all top tracks)
+        const tracks = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
+        const currentTrack = _.find(tracks, function (t) {
+            return t.uid === trackInfo.uid;
+        });
 
-      if (currentTrack) {
-        const similarTilesets = _.filter(
-          tracks,
-          (trackItem) => currentTrack.type === trackItem.type
-        );
-        return similarTilesets && similarTilesets.length > 1;
-      }
-      return false;
+        if (currentTrack) {
+            const similarTilesets = _.filter(
+                tracks,
+                (trackItem) => currentTrack.type === trackItem.type
+            );
+            return similarTilesets && similarTilesets.length > 1;
+        }
+        return false;
     }
     /**
      * Update the current higlass viewconfig for the user, based on the current data.
