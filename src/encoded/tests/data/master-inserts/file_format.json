@@ -41,7 +41,7 @@
     {
         "file_format": "pairsam",
         "standard_file_extension": "sam.pairs.gz",
-        "description": "This format is used for something to do with paired mapped read locations",
+        "description": "A simple tabular format to store the information on ligation junctions detected in sequences from Hi-C experiments. pairsam is a valid extension of the .pairs format and is fully compliant with its specification, defined by the 4DN Consortium.",
         "uuid": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
         "extrafile_formats": ["d13d06cf-218e-6f61-aaf0-91f226248b2c"],
         "lab": "4dn-dcic-lab",
@@ -54,7 +54,7 @@
     {
         "file_format": "pairsam_px2",
         "standard_file_extension": "sam.pairs.gz.px2",
-        "description": "This format is used for something to do with paired mapped read locations",
+        "description": "This format is used for a pairix index of a pairsam file.",
         "uuid": "d13d06cf-218e-6f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
@@ -356,6 +356,7 @@
     {
         "file_format": "spt",
         "standard_file_extension": "spt",
+        "description": "This is a tabular format for results of Single Particle Tracking experiments. It was developed and approved by the 4DN Imaging Working Group.",
         "uuid": "d13d06cf-218e-4f61-55f0-94f446118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
@@ -369,6 +370,7 @@
         "file_format": "bedpe",
         "standard_file_extension": "bedpe.gz",
         "uuid": "d13d06cf-218e-4f61-55f0-94f556118b2c",
+        "description": "This is an extension of the BED file format, used for describing disjointed genomic features, such as paired-end sequence alignments.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -381,6 +383,7 @@
         "file_format": "flex",
         "standard_file_extension": "flex",
         "uuid": "d13d06cf-218e-4f61-55f0-94f666118b2c",
+        "description": "This is a proprietary imaging file format.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -392,6 +395,7 @@
         "file_format": "dv",
         "standard_file_extension": "dv",
         "uuid": "d13d06cf-218e-4f61-55f0-94f776118b2c",
+        "description": "This is a proprietary imaging file format, produced by Deltavision microscopes and accompanying software.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -403,6 +407,7 @@
         "file_format": "r3d",
         "standard_file_extension": "r3d",
         "uuid": "d13d06cf-218e-4f61-55f0-94f886118b2c",
+        "description": "This is a proprietary imaging file format.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -414,6 +419,7 @@
         "file_format": "nd2",
         "standard_file_extension": "nd2",
         "uuid": "d13d06cf-218e-4f61-55f0-94a156118b2c",
+        "description": "This is a proprietary imaging file format.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
@@ -504,6 +510,6 @@
         "uuid": "dba26778-f40a-4561-a552-65539702ded4",
         "assay_types": ["Generic"],
         "file_content": "text",
-        "description": "This format is used for plain text files"
+        "description": "This format is used for plain text files (compressed)"
     }
 ]
