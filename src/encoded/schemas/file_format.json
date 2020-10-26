@@ -194,11 +194,12 @@
             "title": "Assay Types"
         },
         "file_content": {
-            "title": "File Types",
+            "title": "File Content",
             "description": "The type of information contained in the file"
         },
         "url": {
-            "title": "More Information"
+            "title": "More Information",
+            "description": "External Link to file format specification"
         },
         "visualization": {
             "title": "Visualization"
