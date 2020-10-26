@@ -8,8 +8,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "assay_types": ["All Sequencing"],
-        "valid_item_types": ["FileFastq"]
+        "assay_types": ["Sequencing"],
+        "file_content": "reads",
+        "valid_item_types": ["FileFastq"],
+        "url": "http://maq.sourceforge.net/fastq.shtml"
     },
     {
         "file_format": "txt",
@@ -31,8 +33,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "assay_types": ["All Hi-C"],
-        "valid_item_types": ["FileProcessed"]
+        "assay_types": ["Hi-C"],
+        "file_content": "contact list",
+        "valid_item_types": ["FileProcessed"],
+        "url": "https://github.com/4dn-dcic/pairix/blob/master/pairs_format_specification.md"
     },
     {
         "file_format": "pairsam",
@@ -43,6 +47,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Hi-C"],
+        "url": "https://pairsamtools.readthedocs.io/en/latest/pairsam.html",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -53,6 +59,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Hi-C"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -64,7 +71,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "continuous genomic data",
         "visualization": ["HiGlass", "Genome Browsers"],
+        "url": "http://genome.ucsc.edu/goldenPath/help/bigWig.html",
         "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
@@ -76,7 +86,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "continuous genomic data",
         "visualization": ["Genome Browsers"],
+        "url": "https://genome.ucsc.edu/goldenPath/help/bedgraph.html",
         "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
@@ -87,6 +100,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -97,6 +111,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -108,8 +123,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "assay_types": ["All Sequencing"],
-        "valid_item_types": ["FileProcessed"]
+        "assay_types": ["Sequencing"],
+        "file_content": "alignments",
+        "valid_item_types": ["FileProcessed"],
+        "url": "http://samtools.github.io/hts-specs/SAMv1.pdf"
     },
     {
         "file_format": "bai",
@@ -119,6 +136,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -130,7 +149,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
         "visualization": ["Genome Browsers"],
+        "url": "https://m.ensembl.org/info/website/upload/bed.html",
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -141,8 +163,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "assay_types": ["All Hi-C"],
-        "valid_item_types": ["FileProcessed", "FileVistrack"]
+        "assay_types": ["Hi-C"],
+        "file_content": "contact matrix",
+        "valid_item_types": ["FileProcessed", "FileVistrack"],
+        "url": "https://cooler.readthedocs.io/en/latest/schema.html"
     },
     {
         "file_format": "hdf5",
@@ -151,6 +175,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
+        "url": "https://portal.hdfgroup.org/display/HDF5/File+Format+Specification",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -160,6 +186,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -171,8 +198,10 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "visualization": ["Juicebox"],
-        "assay_types": ["All Hi-C"],
-        "valid_item_types": ["FileProcessed"]
+        "assay_types": ["Hi-C"],
+        "file_content": "contact matrix",
+        "valid_item_types": ["FileProcessed"],
+        "url": "https://github.com/aidenlab/Juicebox/blob/master/HiCFormatV8.md"
     },
     {
         "file_format": "mcool",
@@ -183,8 +212,10 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "visualization": ["HiGlass"],
-        "assay_types": ["All Hi-C"],
-        "valid_item_types": ["FileProcessed", "FileVistrack"]
+        "assay_types": ["Hi-C"],
+        "file_content": "contact matrix",
+        "valid_item_types": ["FileProcessed", "FileVistrack"],
+        "url": "https://cooler.readthedocs.io/en/latest/schema.html"
     },
     {
         "file_format": "other",
@@ -206,6 +237,9 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "assay_types": ["Microscopy"],
+        "file_content": "image",
+        "visualization": ["Image Viewer"],
+        "url": "https://docs.openmicroscopy.org/ome-model/5.6.3/ome-tiff/",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -217,6 +251,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy", "Generic"],
+        "file_content": "image",
+        "visualization": ["Image Viewer"],
         "valid_item_types": ["FileMicroscopy", "FileCalibration"]
     },
     {
@@ -227,6 +264,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
         "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileCalibration"]
     },
     {
@@ -237,6 +275,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -248,6 +288,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "sequences",
+        "url": "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -259,6 +302,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "sequences",
+        "url": "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -269,6 +315,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "chromosome sizes",
+        "url": "https://software.broadinstitute.org/software/igv/chromSizes",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -279,6 +328,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileReference"]
     },
     {
@@ -288,6 +338,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Hi-C"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -297,6 +348,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
+        "file_content": "tabular data",
         "valid_item_types": ["FileProcessed"]
     },
 
@@ -307,6 +360,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "SPT results",
+        "url": "https://gitlab.com/tjian-darzacq-lab/write_4dn_spt_format_matlab/-/blob/master/4DN_SPT_format_PDF_description.pdf",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -316,6 +372,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "url": "https://bedtools.readthedocs.io/en/latest/content/general-usage.html#bedpe-format",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -325,6 +384,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -334,6 +395,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -343,6 +406,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -352,6 +417,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -362,6 +429,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -372,6 +441,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -382,6 +452,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -392,6 +464,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "url": "https://genome.ucsc.edu/goldenPath/help/bigBed.html",
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -402,6 +477,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
+        "url": "https://www.json.org/json-en.html",
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -412,6 +489,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "visualization": ["HiGlass"],
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -422,6 +502,8 @@
         "valid_item_types": ["FileProcessed"],
         "file_format": "compressed_txt",
         "uuid": "dba26778-f40a-4561-a552-65539702ded4",
+        "assay_types": ["Generic"],
+        "file_content": "text",
         "description": "This format is used for plain text files"
     }
 ]
