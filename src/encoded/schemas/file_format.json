@@ -136,14 +136,36 @@
                 "title": "Assay or Category",
                 "type": "string",
                 "suggested_enum": [
-                    "All Sequencing",
+                    "Sequencing",
                     "Microscopy",
-                    "All Hi-C",
+                    "Hi-C",
                     "SPRITE",
                     "RNA-seq",
                     "Generic"
                 ]
             }
+        },
+        "file_content": {
+            "title": "File content",
+            "description": "Type of information this file is used for",
+            "type": "string",
+            "suggested_enum": [
+                "chromosome sizes",
+                "continuous genomic data",
+                "genomic features",
+                "alignments",
+                "contact list",
+                "contact matrix",
+                "image",
+                "intermediate file",
+                "multi-contact read clusters",
+                "other",
+                "reads",
+                "sequences",
+                "SPT results",
+                "tabular data",
+                "text"
+            ]
         },
         "visualization": {
             "title": "Visualization",
@@ -152,7 +174,12 @@
             "items": {
                 "title": "Visualization platform",
                 "type": "string",
-                "enum": ["HiGlass", "Juicebox", "Genome Browsers"]
+                "enum": [
+                  "HiGlass",
+                  "Juicebox",
+                  "Genome Browsers",
+                  "Image Viewer"
+                ]
             }
         },
         "url": {
@@ -163,19 +190,27 @@
         }
     },
     "columns": {
+        "assay_types": {
+            "title": "Assay Types"
+        },
+        "file_content": {
+            "title": "File Types",
+            "description": "The type of information contained in the file"
+        },
+        "url": {
+            "title": "More Information"
+        },
+        "visualization": {
+            "title": "Visualization"
+        },
         "standard_file_extension": {
             "title": "Standard file extension",
             "description": "File extension that is standardly used for filenames for upload and that will be used on the portal."
         },
         "other_allowed_extensions": {
             "title": "Allowed extensions",
-            "description": "Other common extensions that are allowed when uploading files of this format"
-        },
-        "assay_types": {
-            "title": "Assay Types"
-        },
-        "visualization": {
-            "title": "Visualization"
+            "description": "Other common extensions that are allowed when uploading files of this format",
+            "default_hidden": true
         }
     },
     "facets": {
@@ -185,6 +220,9 @@
         },
         "assay_types": {
             "title": "Assay Types"
+        },
+        "file_content": {
+            "title": "File Content"
         },
         "visualization": {
             "title": "Visualization"
