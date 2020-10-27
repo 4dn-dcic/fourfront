@@ -105,10 +105,7 @@ export const HIGLASS_WEBSITE = {
                 "w":12,
                 "h":12,
                 "x":0,
-                "y":0,
-                "i":"aa",
-                "moved":false,
-                "static":false
+                "y":0
             }
         }
     ],
@@ -171,9 +168,7 @@ export const SERVER_4DN = {
                 "w": 12,
                 "h": 13,
                 "x": 0,
-                "y": 0,
-                "moved": false,
-                "static": false
+                "y": 0
             },
             "initialYDomain": [
                 235207586.8246398,

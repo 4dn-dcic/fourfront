@@ -848,13 +848,14 @@ def add_bg_bw_multivec_bed_file(views, file, genome_assembly, viewconfig_info, m
     new_track_base = {
         "server": "https://higlass.4dnucleome.org/api/v1",
         "tilesetUid": file["higlass_uid"],
-        "name": file["display_title"],
         "options": {
             "name": get_title(file),
             "labelPosition": "topLeft",
+            "showMousePosition": True,
+            "mousePositionColor": "#999999",
+            "labelTextOpacity": 0.6
         },
         "type": "horizontal-divergent-bar",
-        "orientation": "1d-horizontal",
         "uid": uuid.uuid4(),
     }
 
@@ -906,7 +907,6 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
     new_track_base = {
         "server": "https://higlass.4dnucleome.org/api/v1",
         "tilesetUid": file["higlass_uid"],
-        "name": file["display_title"],
         "options": {
             "name": get_title(file),
             "colorRange": [],
@@ -915,7 +915,6 @@ def add_bigbed_file(views, file, genome_assembly, viewconfig_info, maximum_heigh
         },
         "height": 18,
         "type": "horizontal-vector-heatmap",
-        "orientation": "1d-horizontal",
         "uid": uuid.uuid4(),
     }
 
@@ -1121,9 +1120,11 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
     new_track_base = {
         "server": "https://higlass.4dnucleome.org/api/v1",
         "tilesetUid": file["higlass_uid"],
-        "name": file["display_title"],
         "options": {
             "name": get_title(file),
+            "labelPosition": "hidden",
+            "showMousePosition": True,
+            "mousePositionColor": "#999999",
             "fontSize": 10, # has to be set explicitly since Higlass has a different default value
             "geneAnnotationHeight": 12 # has to be set explicitly since Higlass has a different default value
         }
@@ -1138,12 +1139,10 @@ def add_beddb_file(views, file, genome_assembly, viewconfig_info, maximum_height
     }
 
     new_tracks_by_side["top"]["type"] = "horizontal-gene-annotations"
-    new_tracks_by_side["top"]["orientation"] = "1d-horizontal"
     new_tracks_by_side["top"]["height"] = 55 # has to be set explicitly since Higlass has a different default value
     new_tracks_by_side["top"]["uid"] = uuid.uuid4()
 
     new_tracks_by_side["left"]["type"] = "vertical-gene-annotations"
-    new_tracks_by_side["left"]["orientation"] = "1d-vertical"
     new_tracks_by_side["left"]["width"] = 55 # has to be set explicitly since Higlass has a different default value
     new_tracks_by_side["left"]["uid"] = uuid.uuid4()
 
@@ -1212,9 +1211,10 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
     new_track_base_1d = {
         "server": "https://higlass.4dnucleome.org/api/v1",
         "tilesetUid": file["higlass_uid"],
-        "name": file["display_title"],
         "options": {
             "name": get_title(file),
+            "showMousePosition": True,
+            "mousePositionColor": "#999999",
         }
     }
 
@@ -1228,14 +1228,11 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
     }
 
     new_tracks_by_side["top"]["type"] = "horizontal-chromosome-labels"
-    new_tracks_by_side["top"]["orientation"] = "1d-horizontal"
     new_tracks_by_side["top"]["uid"] = uuid.uuid4()
 
     new_tracks_by_side["left"]["type"] = "vertical-chromosome-labels"
-    new_tracks_by_side["left"]["orientation"] = "1d-vertical"
     new_tracks_by_side["left"]["uid"] = uuid.uuid4()
 
-    new_tracks_by_side["center"]["name"] = "Chromosome Grid"
     del new_tracks_by_side["center"]["options"]["name"]
    
 
@@ -1319,7 +1316,6 @@ def add_2d_file(views, new_content, viewconfig_info, maximum_height):
             chromsize_tracks = [ t for t in views[0]["tracks"]["top"] if "-chromosome-labels" in t["type"] ]
 
             contents = {
-                "name": "Chromosome Grid"
             }
             if len(chromsize_tracks) > 0:
                 chrom_source = chromsize_tracks[-1]
@@ -1382,7 +1378,6 @@ def create_2d_content(file, viewtype):
     contents = {}
 
     contents["tilesetUid"] = file["higlass_uid"]
-    contents["name"] = file["display_title"]
     contents["type"] = viewtype
     contents["server"] = "https://higlass.4dnucleome.org/api/v1"
 
@@ -1412,11 +1407,6 @@ def copy_top_reference_tracks_into_left(target_view, views):
     reference_file_type_mappings = {
         "horizontal-chromosome-labels": "vertical-chromosome-labels",
         "horizontal-gene-annotations": "vertical-gene-annotations",
-    }
-
-    orientation_mappings = {
-        "1d-horizontal": "1d-vertical",
-        "1d-vertical" : "1d-horizontal",
     }
 
     # Look through all of the top views for the chromsize and the gene annotation tracks.
@@ -1454,11 +1444,6 @@ def copy_top_reference_tracks_into_left(target_view, views):
             track["width"] = temp_width
             del track["height"]
         
-        # And the orientation
-        track_orientation = track.get("orientation", None)
-        if track_orientation in orientation_mappings:
-            track["orientation"] = orientation_mappings[track_orientation]
-
     # Add the copied tracks to the left side of this view if it doesn't have the track already.
     for track in reversed(new_tracks):
         if any([t for t in target_view["tracks"]["left"] if t["type"] == track["type"]] ) == False:
