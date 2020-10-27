@@ -155,7 +155,31 @@
             "title": "Synchronization Stage",
             "description": "If a culture is synchronized the cell cycle stage from which the biosample used in an experiment is prepared",
             "type": "string",
-            "lookup": 120
+            "lookup": 120,
+            "suggested_enum": [
+                "non synchronized",
+                "G1",
+                "early G1",
+                "mid G1",
+                "late G1",
+                "G1/S",
+                "S",
+                "mid S",
+                "G2",
+                "mitotic",
+                "prometaphase",
+                "metaphase",
+                "anaphase",
+                "anaphase/telophase",
+                "M/G1",
+                "1h after mitotic shakeoff"
+            ],
+            "ignored_enum": [
+                "3h after mitotic shakeoff",
+                "6h after mitotic shakeoff",
+                "10h after mitotic shakeoff",
+                "21h after mitotic shakeoff"
+            ]
         },
         "cell_line_lot_number": {
             "title": "Cell Line Lot",
