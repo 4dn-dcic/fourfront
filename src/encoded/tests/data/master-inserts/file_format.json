@@ -3,12 +3,15 @@
         "file_format": "fastq",
         "standard_file_extension": "fastq.gz",
         "other_allowed_extensions": ["fq.gz"],
-        "description": "This format is used for short read sequence data - more information can be found here https://www.ncbi.nlm.nih.gov/sra/docs/submitformats/#fastq-files",
+        "description": "Fastq files are the most common type of raw files from sequencing instruments. Some sequencers, specifically some Nanopore sequencers, use fast5 as a raw format, but these will be converted to fastq before submission to the 4DN data portal. Each read in a fastq file contains a read id or header, the sequence, a line containing '+' and then a per-base quality score. On the 4DN data portal, fastq files are generally unfiltered and unclipped/untrimmed. ",
         "uuid": "c13d06cf-218e-4f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileFastq"]
+        "assay_types": ["Sequencing"],
+        "file_content": "reads",
+        "valid_item_types": ["FileFastq"],
+        "url": "http://maq.sourceforge.net/fastq.shtml"
     },
     {
         "file_format": "txt",
@@ -18,38 +21,45 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
         "file_format": "pairs",
         "standard_file_extension": "pairs.gz",
-        "description": "This format is used for something to do with paired mapped read locations",
+        "description": "Pairs files are generated during analysis of genomic contact data and consist of a list of pairs of genomic loci, represented by chromosomal position. ",
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b2c",
         "extrafile_formats": ["d13d06cf-218e-4f61-aaf0-91f226348b2c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "assay_types": ["Hi-C"],
+        "file_content": "contact list",
+        "valid_item_types": ["FileProcessed"],
+        "url": "https://github.com/4dn-dcic/pairix/blob/master/pairs_format_specification.md"
     },
     {
         "file_format": "pairsam",
         "standard_file_extension": "sam.pairs.gz",
-        "description": "This format is used for something to do with paired mapped read locations",
+        "description": "A simple tabular format to store the information on ligation junctions detected in sequences from Hi-C experiments. pairsam is a valid extension of the .pairs format and is fully compliant with its specification, defined by the 4DN Consortium.",
         "uuid": "d13d06cf-218e-5f61-aaf0-91f226248b2c",
         "extrafile_formats": ["d13d06cf-218e-6f61-aaf0-91f226248b2c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Hi-C"],
+        "url": "https://pairsamtools.readthedocs.io/en/latest/pairsam.html",
         "valid_item_types": ["FileProcessed"]
     },
     {
         "file_format": "pairsam_px2",
         "standard_file_extension": "sam.pairs.gz.px2",
-        "description": "This format is used for something to do with paired mapped read locations",
+        "description": "This format is used for a pairix index of a pairsam file.",
         "uuid": "d13d06cf-218e-6f61-aaf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Hi-C"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -61,6 +71,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "continuous genomic data",
+        "visualization": ["HiGlass", "Genome Browsers"],
+        "url": "http://genome.ucsc.edu/goldenPath/help/bigWig.html",
         "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
@@ -72,6 +86,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "continuous genomic data",
+        "visualization": ["Genome Browsers"],
+        "url": "https://genome.ucsc.edu/goldenPath/help/bedgraph.html",
         "valid_item_types": ["FileProcessed", "FileVistrack"]
     },
     {
@@ -82,6 +100,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -92,18 +111,22 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileProcessed"]
     },
     {
         "file_format": "bam",
         "standard_file_extension": "bam",
-        "description": "This format is used for aligned reads",
+        "description": "Bam files are binary alignment files, and are generated after raw reads in fastq format are aligned to a reference genome or other reference sequence. 4DN pipelines use bwa-mem to align and generate bams, while the ENCODE pipelines may use bowtie2. When bam files are indexed, there may also be a corresponding .bai file generated. Samtools can be used to convert between bam and the non-binary sam format.",
         "uuid": "d13d06cf-218e-4f61-aaf0-91f226248b3c",
         "extrafile_formats": ["d13d06c1-218e-4f61-aaf0-91f226248b3c"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "assay_types": ["Sequencing"],
+        "file_content": "alignments",
+        "valid_item_types": ["FileProcessed"],
+        "url": "http://samtools.github.io/hts-specs/SAMv1.pdf"
     },
     {
         "file_format": "bai",
@@ -113,6 +136,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -124,17 +149,24 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "visualization": ["Genome Browsers"],
+        "url": "https://m.ensembl.org/info/website/upload/bed.html",
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
         "file_format": "cool",
         "standard_file_extension": "cool",
-        "description": "This format is used for contact matrices",
+        "description": "Cool files are another way to represent the matrix of contact frequencies generated by Hi-C data analysis and can be generated by the software package cooler. Cool files can also be generated from hic files using the package hic2cool. Cool format is based on hdf5 and contains a sparse matrix of contact frequencies, at a single resolution. ",
         "uuid": "d13d06cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed", "FileVistrack"]
+        "assay_types": ["Hi-C"],
+        "file_content": "contact matrix",
+        "valid_item_types": ["FileProcessed", "FileVistrack"],
+        "url": "https://cooler.readthedocs.io/en/latest/schema.html"
     },
     {
         "file_format": "hdf5",
@@ -143,6 +175,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
+        "url": "https://portal.hdfgroup.org/display/HDF5/File+Format+Specification",
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -152,17 +186,22 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
         "valid_item_types": ["FileProcessed"]
     },
     {
         "file_format": "hic",
         "standard_file_extension": "hic",
-        "description": "This format is used for contact matrices",
+        "description": "Hic files are one way to represent the matrix of contact frequencies generated by Hi-C data analysis. Hic format files can be visualized in Juicebox. ",
         "uuid": "d13d11cf-218e-4f61-bbf0-91f226248b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed"]
+        "visualization": ["Juicebox"],
+        "assay_types": ["Hi-C"],
+        "file_content": "contact matrix",
+        "valid_item_types": ["FileProcessed"],
+        "url": "https://github.com/aidenlab/Juicebox/blob/master/HiCFormatV8.md"
     },
     {
         "file_format": "mcool",
@@ -172,7 +211,11 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
-        "valid_item_types": ["FileProcessed", "FileVistrack"]
+        "visualization": ["HiGlass"],
+        "assay_types": ["Hi-C"],
+        "file_content": "contact matrix",
+        "valid_item_types": ["FileProcessed", "FileVistrack"],
+        "url": "https://cooler.readthedocs.io/en/latest/schema.html"
     },
     {
         "file_format": "other",
@@ -193,6 +236,10 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
+        "visualization": ["Image Viewer"],
+        "url": "https://docs.openmicroscopy.org/ome-model/5.6.3/ome-tiff/",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -204,6 +251,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy", "Generic"],
+        "file_content": "image",
+        "visualization": ["Image Viewer"],
         "valid_item_types": ["FileMicroscopy", "FileCalibration"]
     },
     {
@@ -214,6 +264,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
         "valid_item_types": ["FileProcessed", "FileMicroscopy", "FileCalibration"]
     },
     {
@@ -224,6 +275,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -235,6 +288,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "sequences",
+        "url": "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -246,6 +302,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "sequences",
+        "url": "https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=BlastHelp",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -256,6 +315,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "chromosome sizes",
+        "url": "https://software.broadinstitute.org/software/igv/chromSizes",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -266,6 +328,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileReference"]
     },
     {
@@ -275,6 +338,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Hi-C"],
         "valid_item_types": ["FileProcessed"]
     },
     {
@@ -284,61 +348,83 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
+        "file_content": "tabular data",
         "valid_item_types": ["FileProcessed"]
     },
 
     {
         "file_format": "spt",
         "standard_file_extension": "spt",
+        "description": "This is a tabular format for results of Single Particle Tracking experiments. It was developed and approved by the 4DN Imaging Working Group.",
         "uuid": "d13d06cf-218e-4f61-55f0-94f446118b2c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "particle trajectories",
+        "url": "https://gitlab.com/tjian-darzacq-lab/write_4dn_spt_format_matlab/-/blob/master/4DN_SPT_format_PDF_description.pdf",
         "valid_item_types": ["FileProcessed"]
     },
     {
         "file_format": "bedpe",
         "standard_file_extension": "bedpe.gz",
         "uuid": "d13d06cf-218e-4f61-55f0-94f556118b2c",
+        "description": "This is an extension of the BED file format, used for describing disjointed genomic features, such as paired-end sequence alignments.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "url": "https://bedtools.readthedocs.io/en/latest/content/general-usage.html#bedpe-format",
         "valid_item_types": ["FileProcessed"]
     },
     {
         "file_format": "flex",
         "standard_file_extension": "flex",
         "uuid": "d13d06cf-218e-4f61-55f0-94f666118b2c",
+        "description": "This is a proprietary imaging file format.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
         "file_format": "dv",
         "standard_file_extension": "dv",
         "uuid": "d13d06cf-218e-4f61-55f0-94f776118b2c",
+        "description": "This is a proprietary imaging file format, produced by Deltavision microscopes and accompanying software.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
         "file_format": "r3d",
         "standard_file_extension": "r3d",
         "uuid": "d13d06cf-218e-4f61-55f0-94f886118b2c",
+        "description": "This is a proprietary imaging file format.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
         "file_format": "nd2",
         "standard_file_extension": "nd2",
         "uuid": "d13d06cf-218e-4f61-55f0-94a156118b2c",
+        "description": "This is a proprietary imaging file format.",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Microscopy"],
+        "file_content": "image",
         "valid_item_types": ["FileMicroscopy"]
     },
     {
@@ -349,6 +435,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -359,6 +447,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -369,6 +458,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "index",
         "valid_item_types": ["FileReference"]
     },
     {
@@ -379,6 +470,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "url": "https://genome.ucsc.edu/goldenPath/help/bigBed.html",
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -389,6 +483,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Generic"],
+        "url": "https://www.json.org/json-en.html",
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -399,6 +495,9 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "status": "released",
+        "assay_types": ["Sequencing"],
+        "file_content": "genomic features",
+        "visualization": ["HiGlass"],
         "valid_item_types": ["FileProcessed", "FileReference"]
     },
     {
@@ -409,6 +508,8 @@
         "valid_item_types": ["FileProcessed"],
         "file_format": "compressed_txt",
         "uuid": "dba26778-f40a-4561-a552-65539702ded4",
-        "description": "This format is used for plain text files"
+        "assay_types": ["Generic"],
+        "file_content": "text",
+        "description": "This format is used for plain text files (compressed)"
     }
 ]
