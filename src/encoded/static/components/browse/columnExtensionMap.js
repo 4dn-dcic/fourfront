@@ -101,6 +101,22 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             );
         }
     },
+    'url' : {
+        'title' : "URL", // would get overriden by schema facet title, if any.
+        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }, // Use this to control initial column width at dif window-size breakpoints, e.g. if want more narrow col.
+        'render' : function(result, propsFromTable){
+            const { url: urlValue } = result;
+            let valToShow = urlValue;
+            if (typeof urlValue === "string" && urlValue.match(/^(https?:\/\/)/)){
+                valToShow = valToShow = (
+                    <a href={urlValue} target="_blank" rel="noopener noreferrer">
+                        <i className="icon icon-external-link-alt fas" />
+                    </a>
+                );
+            }
+            return <span className="value text-center">{ valToShow }</span>;
+        }
+    },
     'workflow.title' : {
         'title' : "Workflow",
         'render' : function(result, props){
