@@ -207,22 +207,33 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                 </Modal.Header>
 
                 <Modal.Body>
-                    {!session ? <p className="text-danger"><strong className="text-dark">IMPORTANT: </strong>You must be logged in for bulk downloads as of December 1, 2020. If you do not have an account, you can create a new one.</p> : null }
+                    <div className="important-notes-section">
+                        <h4 className="mb-07 text-500">Important</h4>
+                        <ul className="mb-25">
+                            <li className="mb-05">
+                                <span className="text-danger"><b>As of December 1, 2020</b>, you must include an <b>access key</b> in your cURL command for bulk downloads.</span>
+                            </li>
+                            <li className="mb-05">You can configure the access key in {isSignedIn ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
+                            {!isSignedIn ?
+                                <li>If you don’t already have an account, you can log in with your Google or GitHub credentials.</li>
+                                : null}
+                        </ul>
+                    </div>
                     <p>Please press the &quot;Download&quot; button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
-                    <ModalCodeSnippet filename={suggestedFilename} isSignedIn={isSignedIn} />
+                    <ModalCodeSnippet filename={suggestedFilename} isSignedIn />
 
                     { isSignedIn || foundUnpublishedFiles ?
                         <div className="extra-notes-section">
                             <h4 className="mt-2 mb-07 text-500">Notes</h4>
                             <ul className="mb-25">
-                                { isSignedIn ?
+                                {/* { isSignedIn ?
                                     <li className="mb-05">
                                         To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
                                         <br/>
                                         Use this access key in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, above.
                                     </li>
-                                    : null }
+                                    : null } */}
                                 {/* <li className="mb-05">
                                 {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
                                 </li> */}
