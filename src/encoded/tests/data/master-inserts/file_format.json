@@ -362,7 +362,7 @@
         "award": "1U01CA200059-01",
         "status": "released",
         "assay_types": ["Microscopy"],
-        "file_content": "SPT results",
+        "file_content": "particle trajectories",
         "url": "https://gitlab.com/tjian-darzacq-lab/write_4dn_spt_format_matlab/-/blob/master/4DN_SPT_format_PDF_description.pdf",
         "valid_item_types": ["FileProcessed"]
     },
