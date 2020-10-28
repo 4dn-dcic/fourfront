@@ -550,7 +550,7 @@ def metadata_tsv(context, request):
             ['###',   '',         ''],
             ['###',   'Files Selected for Download:', '', '',            str(summary['counts']['Files Selected for Download'] or 'All'), ''],
             ['###',   'Total File Rows:', '', '',            str(summary['counts']['Total Files']), ''],
-            ['###',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), ''],
+            ['###',   'Unique Downloadable Files:', '', '', str(summary['counts']['Total Unique Files to Download']), '']
         ]
         
         def gen_mini_table(file_tuples):
