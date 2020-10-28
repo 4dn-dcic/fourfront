@@ -48,10 +48,6 @@
             "lookup" : 7,
             "formInput" : "code",
             "properties": {
-                "editable" : {
-                    "type" : "boolean",
-                    "default": true
-                },
                 "exportViewUrl" : {
                     "type" : "string",
                     "default": "/api/v1/viewconfs"
@@ -134,48 +130,6 @@
                                     }
                                 }
                             },
-                            "initialXDomain" : {
-                                "type" : "array",
-                                "items" : {
-                                    "type" : "number"
-                                }
-                            },
-                            "initialYDomain" : {
-                                "type" : "array",
-                                "items" : {
-                                    "type" : "number"
-                                }
-                            },
-                            "layout" : {
-                                "type" : "object",
-                                "properties" : {
-                                    "h" : {
-                                        "type" : "integer",
-                                        "default" : 12
-                                    },
-                                    "w" : {
-                                        "type" : "integer",
-                                        "default" : 12
-                                    },
-                                    "x" : {
-                                        "type" : "integer",
-                                        "default" : 0
-                                    },
-                                    "y" : {
-                                        "type" : "integer",
-                                        "default" : 0
-                                    },
-                                    "moved" : {
-                                        "type" : "boolean",
-                                        "default" : true
-                                    },
-                                    "static" : {
-                                        "type" : "boolean",
-                                        "default" : true
-                                    }
-
-                                }
-                            },
                             "tracks" : {
                                 "type" : "object",
                                 "properties" : {
@@ -183,43 +137,14 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["server", "tilesetUid"],
+                                            "required" : ["tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
-                                                "name" : {
-                                                    "type" : "string"
-                                                },
                                                 "uid" : {
                                                     "type" : "string"
                                                 },
-                                                "header" : {
-                                                    "type" : "string"
-                                                },
-                                                "height" : {
-                                                    "type" : "integer"
-                                                },
-                                                "orientation" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out.",
-                                                    "default" : "1d-horizontal"
-                                                },
-                                                "position" : {
-                                                    "type" : "string",
-                                                    "enum": [
-                                                        "top"
-                                                    ],
-                                                    "default" : "top"
-                                                },
-                                                "server" : {
-                                                    "type" : "string",
-                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
-                                                },
                                                 "tilesetUid" : {
                                                     "type" : "string"
-                                                },
-                                                "type" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out."
                                                 },
                                                 "options" : {
                                                     "additionalProperties" : true,
@@ -227,48 +152,7 @@
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
-                                                        },
-                                                        "labelColor" : {
-                                                            "type" :"string",
-                                                            "default": "#888"
-                                                        },
-                                                        "labelPosition" : {
-                                                            "type" : "string",
-                                                            "comment" : "Should probably be an ENUM.",
-                                                            "default" : "hidden"
-                                                        },
-                                                        "minusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "red"
-                                                        },
-                                                        "plusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "blue"
-                                                        },
-                                                        "trackBorderColor" : {
-                                                            "type" : "string",
-                                                            "default" : "black"
-                                                        },
-                                                        "trackBorderWidth" : {
-                                                            "type" : "integer",
-                                                            "default" : 0
-                                                        },
-                                                        "showMousePosition": {
-                                                            "type" : "boolean",
-                                                            "default": true,
-                                                            "description": "Applicable for BigWag and other 1D track files."
-                                                        },
-                                                        "mousePositionColor": {
-                                                            "type" : "string",
-                                                            "default" : "#999999",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                            "showTooltip" : {
-                                                                "type" : "boolean",
-                                                                "default": false,
-                                                                "description": "Applicable for BigWig and other 1D track files."
-                                                                                                       }
-
+                                                        }
                                                     }
                                                 }
                                             }
@@ -278,46 +162,14 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["server", "tilesetUid"],
+                                            "required" : ["tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
-                                                "name" : {
-                                                    "type" : "string"
-                                                },
                                                 "uid" : {
                                                     "type" : "string"
                                                 },
-                                                "header" : {
-                                                    "type" : "string"
-                                                },
-                                                "width" : {
-                                                    "type" : "integer"
-                                                },
-                                                "minWidth" : {
-                                                    "type" : "integer"
-                                                },
-                                                "orientation" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out.",
-                                                    "default" : "1d-vertical"
-                                                },
-                                                "position" : {
-                                                    "type" : "string",
-                                                    "enum": [
-                                                        "left"
-                                                    ],
-                                                    "default" : "left"
-                                                },
-                                                "server" : {
-                                                    "type" : "string",
-                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
-                                                },
                                                 "tilesetUid" : {
                                                     "type" : "string"
-                                                },
-                                                "type" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out."
                                                 },
                                                 "options" : {
                                                     "additionalProperties" : true,
@@ -325,46 +177,6 @@
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
-                                                        },
-                                                        "labelColor" : {
-                                                            "type" :"string",
-                                                            "default": "black"
-                                                        },
-                                                        "labelPosition" : {
-                                                            "type" : "string",
-                                                            "comment" : "Should probably be an ENUM.",
-                                                            "default" : "hidden"
-                                                        },
-                                                        "minusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "red"
-                                                        },
-                                                        "plusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "blue"
-                                                        },
-                                                        "trackBorderColor" : {
-                                                            "type" : "string",
-                                                            "default" : "black"
-                                                        },
-                                                        "trackBorderWidth" : {
-                                                            "type" : "integer",
-                                                            "default" : 0
-                                                        },
-                                                        "showMousePosition": {
-                                                            "type" : "boolean",
-                                                            "default": true,
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "mousePositionColor": {
-                                                            "type" : "string",
-                                                            "default" : "#999999",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "showTooltip" : {
-                                                            "type" : "boolean",
-                                                            "default": false,
-                                                            "description": "Applicable for BigWig and other 1D track files."
                                                         }
                                                     }
                                                 }
@@ -375,43 +187,14 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["server", "tilesetUid"],
+                                            "required" : ["tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
-                                                "name" : {
-                                                    "type" : "string"
-                                                },
                                                 "uid" : {
                                                     "type" : "string"
                                                 },
-                                                "header" : {
-                                                    "type" : "string"
-                                                },
-                                                "height" : {
-                                                    "type" : "integer"
-                                                },
-                                                "orientation" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out.",
-                                                    "default" : "1d-horizontal"
-                                                },
-                                                "position" : {
-                                                    "type" : "string",
-                                                    "enum": [
-                                                        "bottom"
-                                                    ],
-                                                    "default" : "bottom"
-                                                },
-                                                "server" : {
-                                                    "type" : "string",
-                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
-                                                },
                                                 "tilesetUid" : {
                                                     "type" : "string"
-                                                },
-                                                "type" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out."
                                                 },
                                                 "options" : {
                                                     "additionalProperties" : true,
@@ -419,46 +202,6 @@
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
-                                                        },
-                                                        "labelColor" : {
-                                                            "type" :"string",
-                                                            "default": "black"
-                                                        },
-                                                        "labelPosition" : {
-                                                            "type" : "string",
-                                                            "comment" : "Should probably be an ENUM.",
-                                                            "default" : "hidden"
-                                                        },
-                                                        "minusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "red"
-                                                        },
-                                                        "plusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "blue"
-                                                        },
-                                                        "trackBorderColor" : {
-                                                            "type" : "string",
-                                                            "default" : "black"
-                                                        },
-                                                        "trackBorderWidth" : {
-                                                            "type" : "integer",
-                                                            "default" : 0
-                                                        },
-                                                        "showMousePosition": {
-                                                            "type" : "boolean",
-                                                            "default": true,
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "mousePositionColor": {
-                                                            "type" : "string",
-                                                            "default" : "#999999",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "showTooltip" : {
-                                                            "type" : "boolean",
-                                                            "default": false,
-                                                            "description": "Applicable for BigWig and other 1D track files."
                                                         }
                                                     }
                                                 }
@@ -469,46 +212,14 @@
                                         "type" : "array",
                                         "items" : {
                                             "type" : "object",
-                                            "required" : ["server", "tilesetUid"],
+                                            "required" : ["tilesetUid"],
                                             "additionalProperties" : true,
                                             "properties": {
-                                                "name" : {
-                                                    "type" : "string"
-                                                },
                                                 "uid" : {
                                                     "type" : "string"
                                                 },
-                                                "header" : {
-                                                    "type" : "string"
-                                                },
-                                                "width" : {
-                                                    "type" : "integer"
-                                                },
-                                                "minWidth" : {
-                                                    "type" : "integer"
-                                                },
-                                                "orientation" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out.",
-                                                    "default" : "1d-vertical"
-                                                },
-                                                "position" : {
-                                                    "type" : "string",
-                                                    "enum": [
-                                                        "right"
-                                                    ],
-                                                    "default" : "right"
-                                                },
-                                                "server" : {
-                                                    "type" : "string",
-                                                    "default" : "https://higlass.4dnucleome.org/api/v1"
-                                                },
                                                 "tilesetUid" : {
                                                     "type" : "string"
-                                                },
-                                                "type" : {
-                                                    "type" : "string",
-                                                    "comment" : "This might be an ENUM, need to figure out."
                                                 },
                                                 "options" : {
                                                     "additionalProperties" : true,
@@ -516,46 +227,6 @@
                                                     "properties": {
                                                         "name" : {
                                                             "type" : "string"
-                                                        },
-                                                        "labelColor" : {
-                                                            "type" :"string",
-                                                            "default": "black"
-                                                        },
-                                                        "labelPosition" : {
-                                                            "type" : "string",
-                                                            "comment" : "Should probably be an ENUM.",
-                                                            "default" : "hidden"
-                                                        },
-                                                        "minusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "red"
-                                                        },
-                                                        "plusStrandColor" : {
-                                                            "type" : "string",
-                                                            "default": "blue"
-                                                        },
-                                                        "trackBorderColor" : {
-                                                            "type" : "string",
-                                                            "default" : "black"
-                                                        },
-                                                        "trackBorderWidth" : {
-                                                            "type" : "integer",
-                                                            "default" : 0
-                                                        },
-                                                        "showMousePosition": {
-                                                            "type" : "boolean",
-                                                            "default": true,
-                                                            "description": "Applicable for BigWag and other 1D track files."
-                                                        },
-                                                        "mousePositionColor": {
-                                                            "type" : "string",
-                                                            "default" : "#999999",
-                                                            "description": "Applicable for BigWig and other 1D track files."
-                                                        },
-                                                        "showTooltip" : {
-                                                            "type" : "boolean",
-                                                            "default": false,
-                                                            "description": "Applicable for BigWig and other 1D track files."
                                                         }
                                                     }
                                                 }
@@ -571,50 +242,20 @@
                                                 "uid" : {
                                                     "type" : "string"
                                                 },
-                                                "height" : {
-                                                    "type" : "integer"
-                                                },
-                                                "position" : {
-                                                    "type" : "string",
-                                                    "enum": [
-                                                        "center"
-                                                    ],
-                                                    "default" : "center"
-                                                },
                                                 "type" : {
                                                     "type" : "string",
-                                                    "default" : "combined",
-                                                    "comment" : "This might be an ENUM, need to figure out."
+                                                    "default" : "combined"
                                                 },
                                                 "contents" : {
                                                     "type" : "array",
                                                     "items" : {
                                                         "type" : "object",
                                                         "properties": {
-                                                            "name" : {
-                                                                "type" : "string"
-                                                            },
                                                             "uid" : {
                                                                 "type" : "string"
                                                             },
-                                                            "server" : {
-                                                                "type" : "string",
-                                                                "default" : "https://higlass.4dnucleome.org/api/v1"
-                                                            },
                                                             "tilesetUid" : {
                                                                 "type" : "string"
-                                                            },
-                                                            "position" : {
-                                                                "type" : "string",
-                                                                "enum": [
-                                                                    "center"
-                                                                ],
-                                                                "default" : "center"
-                                                            },
-                                                            "type" : {
-                                                                "type" : "string",
-                                                                "default" : "heatmap",
-                                                                "comment" : "This might be an ENUM, need to figure out."
                                                             },
                                                             "options" : {
                                                                 "additionalProperties" : true,

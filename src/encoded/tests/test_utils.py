@@ -77,7 +77,9 @@ def test_utc_today_str():
 
 @pytest.mark.parametrize('principals, allow', [
     (['role1', 'role2'], False),
-    (['role1', 'userid.uuid'], True)
+    (['role1', 'userid.uuid'], True),
+    (['role1', 'group.admin'], True),
+    (['system.Everyone'], False)
 ])
 def test_check_user_is_logged_in(principals, allow):
     """ Simple test that ensures the logged in check is working as expected """
