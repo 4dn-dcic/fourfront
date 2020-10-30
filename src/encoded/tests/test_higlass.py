@@ -23,21 +23,14 @@ def higlass_mcool_viewconf(testapp, award, lab):
         'lab': lab['@id'],
         "title":
         "Test MCOOL Display",
-        "description":
-        "An MCOOL file track plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
-        "uuid":
-        "00000000-1111-0000-1111-000000000002",
-        "name":
-        "higlass-mcool-test-view",
-        "genome_assembly":
-        "GRCm38",
+        "description": "An MCOOL file track plus annotations for gene GRCm38 (tileset 'IUcqX4GzTNWJIzE2-b_sZg') and chromosome 'JXbq7f-GTeq3FJy_ilIomQ'.",
+        "uuid": "00000000-1111-0000-1111-000000000002",
+        "name": "higlass-mcool-test-view",
+        "genome_assembly": "GRCm38",
         "viewconfig": {
-            "editable":
-            True,
-            "zoomFixed":
-            False,
-            "exportViewUrl":
-            "/api/v1/viewconfs",
+            "editable": True,
+            "zoomFixed": False,
+            "exportViewUrl": "/api/v1/viewconfs",
             "zoomLocks": {
                 "locksByViewUid": {},
                 "locksDict": {}
@@ -48,20 +41,16 @@ def higlass_mcool_viewconf(testapp, award, lab):
             },
             "trackSourceServers": ["https://higlass.4dnucleome.org/api/v1"],
             "views": [{
-                "uid":
-                "view-4dn-mcool-0",
+                "uid": "view-4dn-mcool-0",
                 "layout": {
                     "w": 12,
                     "h": 12,
                     "x": 0,
-                    "y": 0,
-                    "moved": False,
-                    "static": True
+                    "y": 0
                 },
                 "initialXDomain": [102391829.2052902, 2938891536.27695],
                 "initialYDomain": [129711724.73566854, 1810982460.1999617],
-                "autocompleteSource":
-                "/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
+                "autocompleteSource": "/api/v1/suggest/?d=IUcqX4GzTNWJIzE2-b_sZg&",
                 "genomePositionSearchBox": {
                     "autocompleteServer":
                     "https://higlass.4dnucleome.org/api/v1",
@@ -72,7 +61,6 @@ def higlass_mcool_viewconf(testapp, award, lab):
                 },
                 "tracks": {
                     "top": [{
-                        "name": "Gene Annotations (GRCm38)",
                         "server": "https://higlass.4dnucleome.org/api/v1",
                         "tilesetUid": "IUcqX4GzTNWJIzE2-b_sZg",
                         "type": "horizontal-gene-annotations",
@@ -88,37 +76,23 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "mousePositionColor": "#999999"
                         },
                         "height": 55,
-                        "header": "",
-                        "position": "top",
-                        "orientation": "1d-horizontal",
                         "uid": "top-annotation-track"
                     }, {
-                        "name": "Chromosome Axis",
                         "server": "https://higlass.4dnucleome.org/api/v1",
                         "tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
                         "type": "horizontal-chromosome-labels",
-                        "local": True,
-                        "thumbnail": None,
                         "options": {
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
                         "height": 30,
-                        "position": "top",
-                        "orientation": "1d-horizontal",
                         "uid": "top-chromosome-track"
                     }],
                     "left": [{
-                        "name":
-                        "Gene Annotations (GRCm38)",
-                        "server":
-                        "https://higlass.4dnucleome.org/api/v1",
-                        "tilesetUid":
-                        "IUcqX4GzTNWJIzE2-b_sZg",
-                        "uid":
-                        "left-annotation-track",
-                        "type":
-                        "vertical-gene-annotations",
+                        "server": "https://higlass.4dnucleome.org/api/v1",
+                        "tilesetUid": "IUcqX4GzTNWJIzE2-b_sZg",
+                        "uid": "left-annotation-track",
+                        "type": "vertical-gene-annotations",
                         "options": {
                             "labelColor": "black",
                             "labelPosition": "hidden",
@@ -130,112 +104,49 @@ def higlass_mcool_viewconf(testapp, award, lab):
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
-                        "width":
-                        55,
-                        "header":
-                        "",
-                        "orientation":
-                        "1d-vertical",
-                        "position":
-                        "left"
+                        "width": 55
                     }, {
-                        "name":
-                        "Chromosome Axis",
-                        "server":
-                        "https://higlass.4dnucleome.org/api/v1",
-                        "tilesetUid":
-                        "JXbq7f-GTeq3FJy_ilIomQ",
-                        "uid":
-                        "left-chromosome-track",
-                        "type":
-                        "vertical-chromosome-labels",
+                        "server": "https://higlass.4dnucleome.org/api/v1",
+                        "tilesetUid": "JXbq7f-GTeq3FJy_ilIomQ",
+                        "uid": "left-chromosome-track",
+                        "type": "vertical-chromosome-labels",
                         "options": {
                             "showMousePosition": False,
                             "mousePositionColor": "#999999"
                         },
-                        "width":
-                        20,
-                        "minWidth":
-                        20,
-                        "orientation":
-                        "1d-vertical",
-                        "position":
-                        "left"
+                        "width": 20
                     }],
                     "center": [{
-                        "uid":
-                        "center-mcool-track",
-                        "type":
-                        "combined",
-                        "height":
-                        250,
+                        "uid": "center-mcool-track",
+                        "type": "combined",
+                        "height": 250,
                         "contents": [{
-                            "server":
-                            "https://higlass.4dnucleome.org/api/v1",
-                            "tilesetUid":
-                            "LTiacew8TjCOaP9gpDZwZw",
-                            "type":
-                            "heatmap",
-                            "position":
-                            "center",
-                            "uid":
-                            "GjuZed1ySGW1IzZZqFB9BA",
-                            "name":
-                            "4DNFI1TBYKV3.mcool",
+                            "server": "https://higlass.4dnucleome.org/api/v1",
+                            "tilesetUid": "LTiacew8TjCOaP9gpDZwZw",
+                            "type": "heatmap",
+                            "position": "center",
+                            "uid": "GjuZed1ySGW1IzZZqFB9BA",
                             "options": {
-                                "backgroundColor":
-                                "#eeeeee",
-                                "labelPosition":
-                                "topLeft",
-
+                                "backgroundColor": "#eeeeee",
+                                "labelPosition": "topLeft",
                                 "colorRange": [
                                     "white", "rgba(245,166,35,1.0)",
                                     "rgba(208,2,27,1.0)", "black"
                                 ],
-                                "maxZoom":
-                                None,
-                                "colorbarPosition":
-                                "topRight",
-                                "trackBorderWidth":
-                                0,
-                                "trackBorderColor":
-                                "black",
-                                "heatmapValueScaling":
-                                "log",
-                                "showMousePosition":
-                                False,
-                                "mousePositionColor":
-                                "#999999",
-                                "showTooltip":
-                                False,
-                                "name":
-                                "4DNFI1TBYKV3.mcool",
-                                "scaleStartPercent":
-                                "0.00000",
-                                "scaleEndPercent":
-                                "1.00000"
-                            },
-                            "transforms": [{
-                                "name": "KR",
-                                "value": "KR"
-                            }, {
-                                "name": "ICE",
-                                "value": "weight"
-                            }, {
-                                "name": "VC",
-                                "value": "VC"
-                            }, {
-                                "name": "VC_SQRT",
-                                "value": "VC_SQRT"
-                            }],
-                            "resolutions": [
-                                1000, 2000, 5000, 10000, 25000, 50000, 100000,
-                                250000, 500000, 1000000, 2500000, 5000000,
-                                10000000
-                            ]
+                                "maxZoom": None,
+                                "colorbarPosition": "topRight",
+                                "trackBorderWidth": 0,
+                                "trackBorderColor": "black",
+                                "heatmapValueScaling": "log",
+                                "showMousePosition": False,
+                                "mousePositionColor": "#999999",
+                                "showTooltip": False,
+                                "name": "4DNFI1TBYKV3.mcool",
+                                "scaleStartPercent": "0.00000",
+                                "scaleEndPercent": "1.00000"
+                            }
                         }],
-                        "position":
-                        "center",
+                        "position": "center",
                         "options": {}
                     }],
                     "right": [],
@@ -300,9 +211,7 @@ def higlass_blank_viewconf(testapp, lab, award):
                     "w": 12,
                     "h": 12,
                     "x": 0,
-                    "y": 0,
-                    "moved": False,
-                    "static": False
+                    "y": 0
                 },
                 "initialYDomain": [549528857.4793874, 2550471142.5206127]
             }],
@@ -507,7 +416,7 @@ def test_add_bedGraph_higlass(testapp, higlass_mcool_viewconf,
 
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # Only one new top track should have appeared.
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
@@ -1342,7 +1251,7 @@ def test_add_files_by_accession(testapp, mcool_file_json,
 
     # 1 central track should be in the new view.
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # 1 more track should be on top.
     assert_true(len(tracks["top"]) == len(old_tracks["top"]) + 1)
@@ -1466,7 +1375,7 @@ def test_add_bigwig_higlass(testapp, higlass_mcool_viewconf, bigwig_file_json):
 
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # Only one new top track should have appeared.
     assert_true(len(tracks["left"]) == len(old_tracks["left"]))
@@ -1521,7 +1430,7 @@ def test_add_bigbed_higlass(testapp, higlass_mcool_viewconf, bigbed_file_json):
 
     # Assert_true(there is still 1 central view)
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # Make sure the view has an initialXDomain and initialYDomain.
     assert_true(len(new_higlass_json["views"][0]["initialXDomain"]) == 2)
@@ -1623,7 +1532,7 @@ def test_add_bed_with_beddb(testapp, higlass_mcool_viewconf,
 
     # Central track is unchanged
     assert_true(len(tracks["center"][0]["contents"]) == 1)
-    assert_true("mcool" in tracks["center"][0]["contents"][0]["name"])
+    assert_true(tracks["center"][0]["contents"][0]["type"] == "heatmap")
 
     # The top track should be a bed-like track
     found_data_track = False
@@ -1971,7 +1880,6 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json,
     for t in full_higlass_json["views"][0]["tracks"]["top"]:
         if t["type"] == "horizontal-chromosome-labels":
             t['height'] = 50
-            t["orientation"] = "1d-horizontal"
 
     # Remove the mcool from the central contents.
     full_higlass_json["views"][0]["tracks"]["center"] = []
@@ -2041,6 +1949,7 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json,
 
     vertical_tracks_found = 0
     for track in restored_2d_track_higlass_json["views"][0]["tracks"]["left"]:
+        vertical_tracks_found += 1
         if "uid" in track:
             assert_true(
                 track["uid"] not in top_track_uids,
@@ -2048,9 +1957,7 @@ def test_remove_1d(testapp, higlass_mcool_viewconf, chromsizes_file_json,
                     uid=track["uid"]))
         if track["type"] in types_to_find:
             types_to_find[track["type"]] += 1
-        if track["orientation"] == "1d-vertical":
-            vertical_tracks_found += 1
-
+            
     assert_true(types_to_find["vertical-gene-annotations"] > 0)
     assert_true(types_to_find["vertical-chromosome-labels"] > 0)
     assert_true(vertical_tracks_found > 0)

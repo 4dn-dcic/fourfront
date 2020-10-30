@@ -22,7 +22,7 @@ function labDisplayTitleRenderFxn(result, props){
         return <span className="value">{ labLink }</span>;
     }
     return (
-        <span>
+        <span className="text-truncate">
             <i className="icon icon-fw icon-user far user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
             { labLink }
         </span>
@@ -65,8 +65,13 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     'date_published' : {
         'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
         'render' : function(result, props){
-            if (!result.date_published) return null;
-            return formatPublicationDate(result.date_published);
+            const { date_published = null } = result;
+            if (!date_published) return null;
+            return (
+                <span className="value text-right">
+                    { formatPublicationDate(date_published) }
+                </span>
+            );
         },
         'order' : 504
     },
@@ -76,7 +81,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'render' : function googleAnalyticsDate(result, props){
             if (!result.google_analytics || !result.google_analytics.for_date) return null;
             return (
-                <span className="value">
+                <span className="value text-right">
                     <LocalizedTime timestamp={result.google_analytics.for_date} formatType="date-sm" localize={false} />
                 </span>
             );
@@ -94,6 +99,22 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
                     { statusFormatted }
                 </span>
             );
+        }
+    },
+    'url' : {
+        'title' : "URL", // would get overriden by schema facet title, if any.
+        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 }, // Use this to control initial column width at dif window-size breakpoints, e.g. if want more narrow col.
+        'render' : function(result, propsFromTable){
+            const { url: urlValue } = result;
+            let valToShow = urlValue;
+            if (typeof urlValue === "string" && urlValue.match(/^(https?:\/\/)/)){
+                valToShow = valToShow = (
+                    <a href={urlValue} target="_blank" rel="noopener noreferrer">
+                        <i className="icon icon-external-link-alt fas" />
+                    </a>
+                );
+            }
+            return <span className="value text-center">{ valToShow }</span>;
         }
     },
     'workflow.title' : {
@@ -135,7 +156,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         'render' : function publicRelease(result, props){
             if (!result.public_release) return null;
             return (
-                <span className="value">
+                <span className="value text-right">
                     <LocalizedTime timestamp={result.public_release} formatType="date-sm" />
                 </span>
             );
@@ -153,7 +174,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             if (!number_of_experiments){
                 number_of_experiments = 0;
             }
-            return <span className="value">{ number_of_experiments }</span>;
+            return <span className="value text-center">{ number_of_experiments }</span>;
         }
     },
     'number_of_files' : {
@@ -168,7 +189,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             if (!number_of_files){
                 number_of_files = 0;
             }
-            return <span className="value">{ number_of_files }</span>;
+            return <span className="value text-center">{ number_of_files }</span>;
         }
 
     },

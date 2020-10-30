@@ -19,10 +19,8 @@
                         3350629531.737105
                     ],
                     "layout": {
-                        "static": false,
                         "w": 12,
                         "x": 0,
-                        "moved": false,
                         "y": 0,
                         "h": 12
                     },
@@ -31,7 +29,6 @@
                             {
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "uid": "top-annotation-track",
-                                "orientation": "1d-horizontal",
                                 "options": {
                                     "geneAnnotationHeight": 10,
                                     "showTooltip": false,
@@ -49,20 +46,14 @@
                                     "trackBorderColor": "black"
                                 },
                                 "width": 1130,
-                                "name": "4DNFIWG6CQQA.beddb",
                                 "type": "horizontal-gene-annotations",
                                 "tilesetUid": "XGrAqZupQb2h5Pjiarf8PA",
-                                "header": "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
-                                "height": 55,
-                                "position": "top"
+                                "height": 55
                             },
                             {
                                 "server": "https://higlass.4dnucleome.org/api/v1",
                                 "uid": "top-chromosome-track",
-                                "thumbnail": null,
-                                "orientation": "1d-horizontal",
                                 "options": {
-                                    "plusStrandColor": "blue",
                                     "fontIsAligned": false,
                                     "color": "#777777",
                                     "labelColor": "#888",
@@ -70,18 +61,15 @@
                                     "fontSize": 12,
                                     "labelPosition": "hidden",
                                     "trackBorderWidth": 0,
-                                    "minusStrandColor": "red",
                                     "stroke": "#FFFFFF",
-                                    "showTooltip": false,                                    "showMousePosition": false,
+                                    "showTooltip": false,
+                                    "showMousePosition": false,
                                     "trackBorderColor": "black"
                                 },
                                 "width": 1130,
-                                "name": "Chromosome Axis",
                                 "type": "horizontal-chromosome-labels",
                                 "tilesetUid": "OqB3CMF7RMyQ0a1w3RaFqg",
-                                "height": 35,
-                                "local": true,
-                                "position": "top"
+                                "height": 35
                             }
                         ],
                         "whole": [],
@@ -186,10 +174,8 @@
                         3257874853.005984
                     ],
                     "layout": {
-                        "static": false,
                         "h": 12,
                         "x": 0,
-                        "moved": false,
                         "y": 0,
                         "w": 12
                     },
@@ -204,21 +190,6 @@
                                 "contents": [
                                     {
                                         "type": "heatmap",
-                                        "resolutions": [
-                                            1000,
-                                            2000,
-                                            5000,
-                                            10000,
-                                            25000,
-                                            50000,
-                                            100000,
-                                            250000,
-                                            500000,
-                                            1000000,
-                                            2500000,
-                                            5000000,
-                                            10000000
-                                        ],
                                         "tilesetUid": "OxZJjFLwRYq8PA_cRgipbQ",
                                         "server": "https://higlass.4dnucleome.org/api/v1",
                                         "options": {
@@ -249,24 +220,6 @@
                                             "showTooltip": false,
                                             "showMousePosition": false
                                         },
-                                        "transforms": [
-                                            {
-                                                "name": "ICE",
-                                                "value": "weight"
-                                            },
-                                            {
-                                                "name": "VC",
-                                                "value": "VC"
-                                            },
-                                            {
-                                                "name": "KR",
-                                                "value": "KR"
-                                            },
-                                            {
-                                                "name": "VC_SQRT",
-                                                "value": "VC_SQRT"
-                                            }
-                                        ],
                                         "width": 1110,
                                         "height": 513,
                                         "position": "center",

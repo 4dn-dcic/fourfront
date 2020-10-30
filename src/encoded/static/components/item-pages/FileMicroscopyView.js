@@ -5,7 +5,8 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
-import { EmbeddedExperimentSetSearchTable, ExperimentSetsTableTabViewTitle } from './components/tables/ExperimentSetTables';
+import { SearchTableTitle } from './components/tables/ItemPageTable';
+import { EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock } from './FileView';
 import { QualityControlResults } from './QualityMetricView';
@@ -66,7 +67,7 @@ class FileMicroscopyViewOverview extends React.Component {
             searchHref,
             facets: null,
             defaultOpenIndices: [0],
-            title: <ExperimentSetsTableTabViewTitle externalSearchLinkVisible />
+            title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible />
         };
 
         return (

@@ -292,7 +292,9 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
     }
 
     return (
-        <div>
+        // This rendered within a row by AboveTableControlsBase.js
+        // TODO maybe refactor some of this stuff to be simpler.
+        <div className="col">
             <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">

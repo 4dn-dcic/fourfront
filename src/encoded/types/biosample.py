@@ -120,6 +120,66 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         return 'None'
 
     @calculated_property(schema={
+        "title": "Tissue, Organ/System Info",
+        "description": "Useful faceting info for biosample",
+        "type": "object",
+        "properties": {
+            "tissue_source": {
+                "type": "string"
+            },
+            "organ_system": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            },
+        }
+    })
+    def tissue_organ_info(self, request, biosource, cell_culture_details=None):
+        """ For efficiency and practicality we first check to see if there are cell culture details
+            and if there are (only checking the first one as the differentiation state should be the same on all)
+            does it have 'tissue' term?  If so use it to populate property and if not then check the biosource(s)
+            and if there are more than one (no cases so far) see if there is tissue and if so if different call mixed
+        """
+        # NOTE: 2020-10-20 although it is possible for there to be both multiple biosources and cell_culture_details
+        # in one biosample - there are no cases and are unlikely to be in the future but if there ever were there
+        # would potentially be some imprecision in the prop values for that case
+        sample_info = {}
+        tissue = None
+        organ = []
+        if cell_culture_details:  # this is a list but for ccd only take first as all should be same tissue if there
+            cell_culture_details = _get_item_info(request, [cell_culture_details[0]], 'cell_culture_details')[0]
+            if cell_culture_details and 'tissue' in cell_culture_details:
+                tissue, organ = _get_sample_tissue_organ(request, cell_culture_details.get('tissue'))
+
+        if not tissue:  # ccd was absent or had no tissue info so check the biosource
+            biosource = _get_item_info(request, biosource, 'biosources')
+            tissue_terms = set()
+            for bios in biosource:
+                # generally only one but account for edge case of multiple with different tissue
+                if 'tissue' in bios:
+                    tissue_terms.add(bios.get('tissue'))
+            if not tissue_terms:
+                return None  # no tissue found
+            elif len(tissue_terms) == 1:  # we have a single tissue (usual case)
+                (tterm, ) = tissue_terms
+                tissue, organ = _get_sample_tissue_organ(request, tterm)
+            else:  # edge case of more than one tissue mark it as mixed but return all the relevant slims
+                for term in tissue_terms:
+                    _, organs = _get_sample_tissue_organ(request, term)
+                    organ.extend(organs)
+                organ = list(set([o for o in organ if o]))
+                tissue = 'mixed tissue'
+        # put info in right place and return it
+        if tissue:
+            sample_info['tissue_source'] = tissue
+        if organ:
+            sample_info['organ_system'] = organ
+        if sample_info:
+            return sample_info
+        return None
+
+    @calculated_property(schema={
         "title": "Biosource summary",
         "description": "Summary of any biosources comprising the biosample.",
         "type": "string",
@@ -132,7 +192,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 ret_str += (bios_props['biosource_name'] + ' and ')
         if len(ret_str) > 0:
             ret_str = ret_str[:-5]
-            if cell_culture_details and len(cell_culture_details) == 1:
+            if cell_culture_details:  # will assume same differentiation if multiple bccs
                 cc_props = get_item_or_none(request, cell_culture_details[0], 'biosample_cell_cultures', frame='embedded')
                 if cc_props and 'tissue' in cc_props:
                     ret_str = ret_str + ' differentiated to ' + cc_props['tissue'].get('display_title')
@@ -229,6 +289,35 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                         # make data for new biosample_relation
                         target_bs.properties['biosample_relation'].append(relationship_entry)
                         target_bs.update(target_bs.properties)
+
+
+def _get_sample_tissue_organ(request, tissue_id):
+    """ Helper function used in the tissue_organ_info calculated_property
+    """
+    tissue = None
+    organ_system = []
+    tissue_term = _get_item_info(request, [tissue_id], 'ontology_terms')[0]  # 1 item list
+    if tissue_term:
+        tissue = tissue_term.get('display_title')
+        if 'slim_terms' in tissue_term:
+            slim_terms = _get_item_info(request, tissue_term.get('slim_terms'), 'ontology_terms')
+            for st in slim_terms:
+                if st.get('is_slim_for') in ['developmental', 'system', 'organ']:
+                    organ_system.append(st.get('display_title'))
+    return tissue, organ_system
+
+
+def _get_item_info(request, item, itype):
+    """ Helper function used in the tissue_organ_info calculated_property
+
+        Getting object representation of Items which may be passed as a list
+        may have more than one associated Item
+    """
+    items = []
+    for it in item:
+        items.append(get_item_or_none(request, it, itype))
+    # don't want any None values
+    return [i for i in items if i]
 
 
 @calculated_property(context=Biosample, category='action')
