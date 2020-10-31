@@ -47,47 +47,48 @@ FILE        = 2
 FILE_ONLY   = 3
 
 # includes concatenated properties
+# tuple structure is (key/title - (field type, [field name], remove duplicates) 
 TSV_MAPPING = OrderedDict([
-    ('File Download URL',           (FILE,      ['href'])),
-    ('Experiment Set Accession',    (EXP_SET,   ['accession'])),
-    ('Experiment Accession',        (EXP,       ['accession'])),
-    ('Experiment Set Accession ',   (FILE_ONLY, ['experiment_sets.accession'])), #do not remove trailing whitespace
-    ('Experiment Accession ',       (FILE_ONLY, ['experiments.accession'])), #do not remove trailing whitespace
-    ('File Accession',              (FILE,      ['accession'])),
+    ('File Download URL',           (FILE,      ['href'], True)),
+    ('Experiment Set Accession',    (EXP_SET,   ['accession'], True)),
+    ('Experiment Accession',        (EXP,       ['accession'], True)),
+    ('Experiment Set Accession ',   (FILE_ONLY, ['experiment_sets.accession'], True)), #do not remove trailing whitespace of the key
+    ('Experiment Accession ',       (FILE_ONLY, ['experiments.accession'], True)), #do not remove trailing whitespace of the key
+    ('File Accession',              (FILE,      ['accession'], True)),
 
-    ('Size (MB)',                   (FILE,      ['file_size'])),
-    ('md5sum',                      (FILE,      ['md5sum'])),
-    ('File Type',                   (FILE,      ['file_type'])),
-    ('File Format',                 (FILE,      ['file_format.display_title'])),
-   #('Experiment Title',            (EXP,       ['display_title'])),
-    ('Experiment Type',             (EXP,       ['experiment_type.display_title'])),
-    ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
-    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'])),
-    ('Condition',                   (EXP_SET,   ['condition'])),
-    ('Dataset',                     (EXP_SET,   ['dataset_label'])),
+    ('Size (MB)',                   (FILE,      ['file_size'], True)),
+    ('md5sum',                      (FILE,      ['md5sum'], True)),
+    ('File Type',                   (FILE,      ['file_type'], True)),
+    ('File Format',                 (FILE,      ['file_format.display_title'], True)),
+   #('Experiment Title',            (EXP,       ['display_title'], True)),
+    ('Experiment Type',             (EXP,       ['experiment_type.display_title'], True)),
+    ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'], True)),
+    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'], True)),
+    ('Condition',                   (EXP_SET,   ['condition'], True)),
+    ('Dataset',                     (EXP_SET,   ['dataset_label'], True)),
 
-    ('Biosource',                   (EXP,       ['biosample.biosource_summary'])),
-    ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'])),
-    ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'])),
-    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'])),
-   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
-    ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
-    ('Related File',                (FILE,      ['related_files.file.accession'])),
-    ('Paired End',                  (FILE,      ['paired_end'])),
-    ('Set Status',                  (EXP_SET,   ['status'])),
-    ('File Status',                 (FILE,      ['status'])),
-    ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
-    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'])),
-    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'])),
-    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'])),
-    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'])),
-    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'])), #do not remove trailing whitespace
-    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'])), #do not remove trailing whitespace
-    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
-    ('Project',                     (EXP_SET,   ['award.project'])),
-    ('Generating Lab',              (FILE,      ['lab.display_title'])),
-    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])),
-    ('Notes',                       (FILE,      ['notes_to_tsv'])),
+    ('Biosource',                   (EXP,       ['biosample.biosource_summary'], True)),
+    ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'], True)),
+    ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'], True)),
+    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'], True)),
+   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'], True)),
+    ('Related File Relationship',   (FILE,      ['related_files.relationship_type'], False)),
+    ('Related File',                (FILE,      ['related_files.file.accession'], False)),
+    ('Paired End',                  (FILE,      ['paired_end'], True)),
+    ('Set Status',                  (EXP_SET,   ['status'], True)),
+    ('File Status',                 (FILE,      ['status'], True)),
+    ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'], True)),
+    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'], True)),
+    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'], True)),
+    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'], True)),
+    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'], True)),
+    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
+    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'], True)), #do not remove trailing whitespace of the key
+    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'], True)),
+    ('Project',                     (EXP_SET,   ['award.project'], True)),
+    ('Generating Lab',              (FILE,      ['lab.display_title'], True)),
+    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'], True)),
+    ('Notes',                       (FILE,      ['notes_to_tsv'], True)),
 
 
 
@@ -331,23 +332,33 @@ def metadata_tsv(context, request):
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
 
-    def get_values_for_field(item, field):
+    def get_values_for_field(item, field, remove_duplicates=True):
         c_value = []
-        for value in simple_path_ids(item, field):
-            if str(value) not in c_value:
+
+        if remove_duplicates:
+            for value in simple_path_ids(item, field):
+                if str(value) not in c_value:
+                    c_value.append(str(value))
+            return list(set(c_value))
+        else:
+            for value in simple_path_ids(item, field):
                 c_value.append(str(value))
-        return list(set(c_value))
+            return c_value  
 
     def get_value_for_column(item, col):
         temp = []
         for c in TSV_MAPPING[col][1]:
-            c_value = get_values_for_field(item, c)
+            c_value = get_values_for_field(item, c, TSV_MAPPING[col][2])
             if len(temp):
                 if len(c_value):
                     temp = [x + ' ' + c_value[0] for x in temp]
             else:
                 temp = c_value
-        return ', '.join(list(set(temp)))
+
+        if TSV_MAPPING[col][2]:   
+            return ', '.join(list(set(temp)))
+        else:
+            return ', '.join(temp)    
 
     def get_correct_rep_no(column_name, column_vals_dict, experiment_set):
         '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
