@@ -298,9 +298,12 @@ class ExperimentSet(Item):
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
-        "experiments_in_set.reference_files.file_type_detailed",
+        "experiments_in_set.reference_files.file_type",
+        "experiments_in_set.reference_files.file_format",
         "experiments_in_set.reference_files.file_size",
+        "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
+        "experiments_in_set.reference_files.md5sum",
 
         'sample_image.caption',
         'sample_image.microscopy_file.accession',
