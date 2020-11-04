@@ -51,7 +51,7 @@ sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?
 COMMON_EXCLUDED_URI_PARAMS = [
     'frame', 'format', 'limit', 'sort', 'from', 'field',
     'mode', 'redirected_from', 'datastore', 'referrer',
-    'currentAction'
+    'currentAction', 'additional_facets'
 ]
 
 
@@ -142,7 +142,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, query_filters = set_filters(request, search, result, principals, doc_types)
 
     ### Set starting facets
-    facets = initialize_facets(request, doc_types, prepared_terms, schemas)
+    additional_facets = request.normalized_params.getall('additional_facets')
+    facets = initialize_facets(request, doc_types, prepared_terms, schemas, additional_facets)
 
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
@@ -167,7 +168,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
-    result['facets'] = format_facets(es_results, facets, total, search_frame)
+    result['facets'] = format_facets(es_results, facets, total, additional_facets, search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
 
     # Add batch actions
@@ -494,9 +495,9 @@ def prepare_search_term(request):
     Ignore certain keywords, such as type, format, and field
     """
     prepared_terms = {}
-    prepared_vals = []
-    for field, val in request.normalized_params.iteritems():
-        if field.startswith('validation_errors') or field.startswith('aggregated_items'):
+    for field, val in request.normalized_params.items():
+        if field.startswith('validation_errors') or field.startswith('aggregated_items') or \
+                field == 'additional_facets':
             continue
         elif field == 'q': # searched string has field 'q'
             # people shouldn't provide multiple queries, but if they do,
@@ -898,7 +899,54 @@ def set_filters(request, search, result, principals, doc_types):
     return search, final_filters
 
 
-def initialize_facets(request, doc_types, prepared_terms, schemas):
+def initialize_additional_facets(request, doc_types, additional_facets, append_facets, current_type_schema):
+    """ Helper function for below method that handles additional_facets URL param
+
+        :param request: current request
+        :param doc_types: doc_types we are searching on
+        :param additional_facets: extra facets specified
+        :param append_facets: list to add additional_facets to
+        :param current_type_schema: schema of the item we are faceting on
+    """
+    for extra_facet in additional_facets:
+        aggregation_type = 'terms'  # default
+
+        # check if defined in facets
+        if 'facets' in current_type_schema:
+            if extra_facet in current_type_schema['facets']:
+                if not current_type_schema['facets'][extra_facet].get('disabled', False):
+                    append_facets.append((extra_facet, current_type_schema['facets'][extra_facet]))
+                continue  # if we found the facet, always continue from here
+
+        # not specified as facet - infer range vs. term based on schema
+        field_definition = schema_for_field(extra_facet, request, doc_types)
+        if not field_definition:  # if not on schema, try "terms"
+            append_facets.append((
+                extra_facet, {'title': extra_facet.title()}
+            ))
+        else:
+            t = field_definition.get('type', None)
+            if not t:
+                log.error('Encountered an additional facet that has no type! %s' % field_definition)
+                continue  # drop this facet
+
+            # terms for string
+            if t == 'string':
+                append_facets.append((
+                    extra_facet, {'title': extra_facet.title(), 'aggregation_type': aggregation_type}
+                ))
+            else:  # try stats
+                aggregation_type = 'stats'
+                append_facets.append((
+                    extra_facet, {
+                        'title': field_definition.get('title', extra_facet.title()),
+                        'aggregation_type': aggregation_type,
+                        'number_step': 'any'
+                    }
+                ))
+
+
+def initialize_facets(request, doc_types, prepared_terms, schemas, additional_facets):
     """
     Initialize the facets used for the search. If searching across multiple
     doc_types, only use the default 'Data Type' and 'Status' facets.
@@ -930,10 +978,14 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
 
+    current_type_schema = request.registry[TYPES][doc_types[0]].schema
+    initialize_additional_facets(request, doc_types, additional_facets,
+                                 append_facets, current_type_schema)
+
+
     # Add facets from schema if one Item type is defined.
     # Also, conditionally add extra appendable facets if relevant for type from schema.
     if len(doc_types) == 1 and doc_types[0] != 'Item':
-        current_type_schema = request.registry[TYPES][doc_types[0]].schema
         if 'facets' in current_type_schema:
             schema_facets = OrderedDict(current_type_schema['facets'])
             for schema_facet in schema_facets.items():
@@ -1314,7 +1366,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, total, search_frame='embedded'):
+def format_facets(es_results, facets, total, additional_facets, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
     Sort based off of the 'order' of the facets
@@ -1337,6 +1389,9 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     # If no order is provided, assume 0 to
     # retain order of non-explicitly ordered facets
     for field, facet in sorted(facets, key=lambda fct: fct[1].get('order', 0)):
+        if facet.get('default_hidden', False) and field not in additional_facets:  # skip if specified
+            continue
+
         result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
