@@ -171,11 +171,8 @@ export default class BrowseView extends React.PureComponent {
             const { total: resultCount = 0 } = context || {};
             const { query } = hrefParts;
             if (resultCount && ChartDataController.isInitialized() && globalNavigate.isBaseBrowseQuery(query)){
-                const {
-                    barplot_data_unfiltered: {
-                        total: { experiment_sets: cdcExpSetCount = null } = {}
-                    } = {}
-                } = ChartDataController.getState();
+                const cdcState = ChartDataController.getState();
+                const cdcExpSetCount = (cdcState.barplot_data_unfiltered && cdcState.barplot_data_unfiltered.total && cdcState.barplot_data_unfiltered.total.experiment_sets);
 
                 if (cdcExpSetCount && cdcExpSetCount !== resultCount){
                     if (cdcState.isLoadingChartData){
