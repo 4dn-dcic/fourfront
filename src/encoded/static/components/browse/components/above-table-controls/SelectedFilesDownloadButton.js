@@ -78,6 +78,7 @@ export class SelectedFilesDownloadButton extends React.PureComponent {
         'children' : PropTypes.node.isRequired,
         'disabled' : PropTypes.bool,
         'context' : PropTypes.object,
+        'session' : PropTypes.bool,
         'analyticsAddFilesToCart' : PropTypes.bool
     };
 
@@ -190,8 +191,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
         const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
         const userInfo = JWT.getUserInfo();
-        const isSignedIn = !!(userInfo && userInfo.details && userInfo.details.email && userInfo.id_token);
-        const profileHref = (isSignedIn && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
+        const profileHref = (session && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);
 
         if ('search' === analytics.hrefToListName(window && window.location.href)) {
@@ -213,21 +213,21 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             <li className="mb-05">
                                 <span className="text-danger"><b>As of December 1, 2020</b>, you must include an <b>access key</b> in your cURL command for bulk downloads.</span>
                             </li>
-                            <li className="mb-05">You can configure the access key in {isSignedIn ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
-                            {!isSignedIn ?
+                            <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
+                            {!session ?
                                 <li>If you don’t already have an account, you can log in with your Google or GitHub credentials.</li>
                                 : null}
                         </ul>
                     </div>
                     <p>Please press the &quot;Download&quot; button below to save the metadata TSV file which contains download URLs and other information for the selected files.</p>
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
-                    <ModalCodeSnippet filename={suggestedFilename} isSignedIn />
+                    <ModalCodeSnippet filename={suggestedFilename} session={session} />
 
-                    { isSignedIn || foundUnpublishedFiles ?
+                    { session || foundUnpublishedFiles ?
                         <div className="extra-notes-section">
                             <h4 className="mt-2 mb-07 text-500">Notes</h4>
                             <ul className="mb-25">
-                                {/* { isSignedIn ?
+                                {/* { session ?
                                     <li className="mb-05">
                                         To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
                                         <br/>
@@ -235,7 +235,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                                     </li>
                                     : null } */}
                                 {/* <li className="mb-05">
-                                {isSignedIn ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
+                                {session ? 'If you do not provide an access key, files' : 'Files'} which do not have a status of &quot;released&quot; cannot be downloaded via cURL and must be downloaded directly through the website.
                                 </li> */}
                                 { foundUnpublishedFiles ?
                                     <li>
@@ -265,11 +265,11 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 }
 
 const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
-    const { filename, isSignedIn } = props;
+    const { filename, session } = props;
     return (
         <pre className="mb-15">
             cut -f 1 <b>{ filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
-            { isSignedIn ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
+            { session ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
         </pre>
     );
 });
