@@ -63,6 +63,7 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
+from ..utils import check_user_is_logged_in
 
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
@@ -1181,6 +1182,7 @@ def download(context, request):
     '''
     Endpoint for handling /@@download/ URLs
     '''
+    check_user_is_logged_in(request)
 
     # first check for restricted status
     if context.properties.get('status') == 'restricted':
