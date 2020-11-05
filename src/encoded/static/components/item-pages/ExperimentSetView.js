@@ -94,7 +94,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
      * Executed on width change, as well as this ItemView's prop change.
      */
     getTabViewContents(){
-        const { context, schemas, windowWidth, windowHeight, href } = this.props;
+        const { context, schemas, windowWidth, windowHeight, href, session } = this.props;
         const { mounted } = this.state;
 
         //context = SET; // Use for testing along with _testing_data
@@ -105,7 +105,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         const rawFilesLen = (rawFiles && rawFiles.length) || 0;
         const width = this.getTabViewWidth();
 
-        const commonProps = { width, context, schemas, windowWidth, href, mounted };
+        const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
         const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
 
         var tabs = [];
@@ -227,7 +227,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
-        const { context, files, selectedFiles } = this.props;
+        const { context, files, selectedFiles, session } = this.props;
         const selectedFilesUniqueCount = RawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
         const fileCount = files.length;
         const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
@@ -237,7 +237,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
@@ -621,10 +621,10 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     ];
 
     render(){
-        const { context, files, selectedFiles } = this.props;
+        const { context, session, files, selectedFiles } = this.props;
         return (
             <div className="processed-files-table-section exp-table-section">
-                <ProcessedFilesTableSectionHeader {...{ context, files, selectedFiles }} />
+                <ProcessedFilesTableSectionHeader {...{ context, session, files, selectedFiles }} />
                 {this.renderTopRow()}
                 <ExperimentsWithoutFilesStackedTable {...this.props} />
                 <QCMetricsTable {...this.props} />
@@ -633,7 +633,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 }
 
-const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context }){
+const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context, session }){
     const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
     const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
     return (
@@ -643,7 +643,7 @@ const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTable
             </span>
             { selectedFiles ? // Make sure data structure is present (even if empty)
                 <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                    <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                    <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                         id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
                         <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
                         <span className="d-none d-sm-inline">Download </span>
