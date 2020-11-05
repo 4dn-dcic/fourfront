@@ -169,12 +169,10 @@ export default class App extends React.PureComponent {
             session = !!(JWT.get('cookie'));
         }
 
-        //initialize navigate obj prior to using in application
-        navigate.initializeFromApp(this);
-
-        // Save navigate fxn and other req'd stuffs to GLOBAL navigate obj.
+        // Initialize navigate function/obj prior to using in application.
+        // Saves navigate fxn and other req'd stuffs to GLOBAL navigate obj.
         // So that we may call it from anywhere if necessary without passing through props.
-        navigate.setNavigateFunction(this.navigate);
+        navigate.initializeFromApp(this);
         navigate.registerCallbackFunction(Alerts.updateCurrentAlertsTitleMap.bind(this, null));
 
         if (context.schemas) Schemas.set(context.schemas);
