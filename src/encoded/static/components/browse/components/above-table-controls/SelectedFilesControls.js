@@ -270,7 +270,7 @@ const SelectedFilesFilterByButton = React.memo(function SelectedFilesFilterByBut
 
 export const SelectedFilesControls = React.memo(function SelectedFilesControls(props){
     const {
-        href, context,
+        href, context, session,
         selectedFiles, subSelectedFiles,
         currentFileTypeFilters,
         setFileTypeFilters,
@@ -298,7 +298,7 @@ export const SelectedFilesControls = React.memo(function SelectedFilesControls(p
             <SelectAllFilesButton {...selectedFileProps} {...{ href, context }} totalFilesCount={totalUniqueFilesCount} />
             <div className="pull-left box selection-buttons">
                 <div className="btn-group">
-                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context }} totalFilesCount={totalUniqueFilesCount} />
+                    <BrowseViewSelectedFilesDownloadButton {...{ selectedFiles, subSelectedFiles, context, session }} totalFilesCount={totalUniqueFilesCount} />
                     <SelectedFilesFilterByButton totalFilesCount={totalUniqueFilesCount} onFilterFilesByClick={props.panelToggleFxns.filterFilesBy}
                         active={currentOpenPanel === "filterFilesBy"} // <- must be boolean
                         {...selectedFileProps} {...{ currentFileTypeFilters, setFileTypeFilters, currentOpenPanel }} />

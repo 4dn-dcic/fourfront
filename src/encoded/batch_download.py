@@ -569,6 +569,10 @@ def metadata_tsv(context, request):
             ret_rows.append(['###', '- Commented out {} file{} which are currently not available (i.e. file restricted, or not yet finished uploading):'.format(str(len(summary['lists']['Not Available'])), 's' if len(summary['lists']['Not Available']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Not Available'])
 
+        # add unauthenticated download is not permitted warning
+        ret_rows.append(['###', '', '', '', '', '', ''])
+        ret_rows.append(['###', 'IMPORTANT: As of December 1, 2020, you must include an access key in your cURL command for bulk downloads. You can configure the access key in your profile. If you don’t already have an account, you can log in with your Google or GitHub credentials.', '', '', '', ''])
+
         return ret_rows
 
     def stream_tsv_output(file_row_dictionaries):
