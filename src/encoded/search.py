@@ -51,7 +51,7 @@ sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?
 COMMON_EXCLUDED_URI_PARAMS = [
     'frame', 'format', 'limit', 'sort', 'from', 'field',
     'mode', 'redirected_from', 'datastore', 'referrer',
-    'currentAction', 'additional_facets'
+    'currentAction', 'additional_facet'
 ]
 
 
@@ -142,7 +142,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, query_filters = set_filters(request, search, result, principals, doc_types)
 
     ### Set starting facets
-    additional_facets = request.normalized_params.getall('additional_facets')
+    additional_facets = request.normalized_params.getall('additional_facet')
     facets = initialize_facets(request, doc_types, prepared_terms, schemas, additional_facets)
 
     ### Adding facets, plus any optional custom aggregations.
@@ -497,7 +497,7 @@ def prepare_search_term(request):
     prepared_terms = {}
     for field, val in request.normalized_params.items():
         if field.startswith('validation_errors') or field.startswith('aggregated_items') or \
-                field == 'additional_facets':
+                field == 'additional_facet':
             continue
         elif field == 'q': # searched string has field 'q'
             # people shouldn't provide multiple queries, but if they do,
