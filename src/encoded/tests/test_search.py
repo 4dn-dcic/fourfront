@@ -786,14 +786,15 @@ class TestSearchHiddenAndAdditionalFacets:
     ])
     def test_search_mixing_additional_and_default_hidden(self, testapp, hidden_facet_test_data, _facets):
         """ Tests that we can mix additional_facets with those both on and off schema """
+        [sample_string_field, sample_number_field] = _facets
         facets = testapp.get('/search/?type=TestingHiddenFacets'
                              '&additional_facet=%s'
-                             '&additional_facet=%s' % (_facets[0], _facets[1])).json['facets']
+                             '&additional_facet=%s' % (sample_string_field, sample_number_field)).json['facets']
         expected = self.DEFAULT_FACETS + _facets
         actual = [facet['field'] for facet in facets]
         assert sorted(expected) == sorted(actual)
         for facet in facets:
-            if facet['field'] == _facets[1]:  # second slot holds number field
+            if facet['field'] == sample_number_field:  # second slot holds number field
                 assert facet['aggregation_type'] == 'stats'
             else:
                 assert facet['aggregation_type'] == 'terms'

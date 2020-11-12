@@ -982,27 +982,26 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
     initialize_additional_facets(request, doc_types, additional_facets,
                                  append_facets, current_type_schema)
 
-
     # Add facets from schema if one Item type is defined.
     # Also, conditionally add extra appendable facets if relevant for type from schema.
     if len(doc_types) == 1 and doc_types[0] != 'Item':
         if 'facets' in current_type_schema:
             schema_facets = OrderedDict(current_type_schema['facets'])
             for schema_facet in schema_facets.items():
-                if schema_facet[1].get('disabled', False):
+                if schema_facet[1].get('disabled', False) or schema_facet[1].get('default_hidden', False):
                     disabled_facets.append(schema_facet[0])
-                    continue # Skip disabled facets.
+                    continue  # Skip disabled facets.
                 facets.append(schema_facet)
 
-    ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
-    used_facets = [ facet[0] for facet in facets + append_facets ]
+    # Add facets for any non-schema ?field=value filters requested in the search (unless already set)
+    used_facets = [facet[0] for facet in facets + append_facets]
     used_facet_titles = used_facet_titles = [
         facet[1]['title'] for facet in facets + append_facets
         if 'title' in facet[1]
     ]
     for field in prepared_terms:
         if field.startswith('embedded'):
-            split_field = field.strip().split('.') # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
+            split_field = field.strip().split('.')  # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
             use_field = '.'.join(split_field[1:])
 
             # 'terms' is the default per-term bucket aggregation for all non-schema facets
