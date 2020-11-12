@@ -128,8 +128,8 @@ TSV_MAPPING = OrderedDict([
 
 EXTRA_FIELDS = {
     EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
-    EXP     : [],
-    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size']
+    EXP     : ['reference_files.accession', 'reference_files.href', 'reference_files.file_format.display_title', 'reference_files.file_type', 'reference_files.md5sum', 'reference_files.file_size', 'reference_files.status'],
+    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size', 'file_classification']
 }
 
 
@@ -325,9 +325,12 @@ def metadata_tsv(context, request):
         'lists' : {
             'Not Available'     : [],
             'Duplicate Files'   : [],
-            'Extra Files'       : []
+            'Extra Files'       : [],
+            'Reference Files'   : []
         }
     }
+    exp_process_file_cache = {} # experiments that have processed files selected for download (it is used to decide whether to include ref files or not)
+    ref_files_cache = {} # ref files can be related to multiple experiments, so this dict is used to eliminate multiple lines
 
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
@@ -391,9 +394,25 @@ def metadata_tsv(context, request):
             if (
                 (('Experiment Set Accession' in column_vals_dict and set_accession  == column_vals_dict['Experiment Set Accession']) or set_accession  == 'NONE') and
                 (('Experiment Accession' in column_vals_dict and exp_accession  == column_vals_dict['Experiment Accession']) or exp_accession  == 'NONE') and
-                (file_accession == column_vals_dict['File Accession']           or file_accession == 'NONE')
+                (file_accession == column_vals_dict['File Accession'] or column_vals_dict['Related File Relationship'] == 'reference file for' or file_accession == 'NONE')
             ):
+                # if the file is a processed file than add the related exp to the exp_ref_file_cache dict. to check 
+                # whether to include exp's ref files since we will not include ref files if at least one processed file
+                # is selected for download.
+                if column_vals_dict['File Classification'] == 'processed file' and exp_accession:
+                    exp_process_file_cache[exp_accession] = True
+                # exclude ref files that any processed files of the parent experiment is already selected for downloads
+                if column_vals_dict['Related File Relationship'] == 'reference file for' and exp_accession:
+                    if exp_accession in exp_process_file_cache:
+                        return False
+                    if column_vals_dict['File Accession'] in ref_files_cache:
+                        ref_files_cache[column_vals_dict['File Accession']].append(exp_accession)
+                        return False
+                    else:
+                        ref_files_cache[column_vals_dict['File Accession']] = [exp_accession]
+ 
                 return True
+        
         return False
 
     def format_experiment_set(exp_set):
@@ -442,10 +461,20 @@ def metadata_tsv(context, request):
         for column in exp_cols:
             exp_row_vals[column] = get_value_for_column(exp, column)
 
-        return chain.from_iterable(
-            map(
-                lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
-                sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+        return chain(
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
+                    sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+                )
+            ),
+            # ref files should be iterated after the end of exp's raw and 
+            # processed files iteration since we do decision whether to include the ref. files or not
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(dict(f, **{ 'reference_file_for' : exp.get('accession') }), exp, exp_row_vals, exp_set, exp_set_row_vals),
+                    sorted(exp.get('reference_files', []), key=lambda d: d.get("accession"))
+                )
             )
         )
 
@@ -461,6 +490,12 @@ def metadata_tsv(context, request):
             f_row_vals[column] = get_value_for_column(f, column)
 
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
+        
+        # Some extra fields to decide whether to include exp's reference files or not
+        if 'reference_file_for' in f:
+            all_row_vals['Related File Relationship'] = 'reference file for'
+        if not all_row_vals.get('File Classification'):
+            all_row_vals['File Classification'] = f.get('file_classification', '')
 
         # If no EXP properties, likely is processed file from an ExpSet, so show all Exps' values.
         exp_col_names = [ k for k,v in TSV_MAPPING.items() if v[0] == EXP ]
@@ -510,6 +545,9 @@ def metadata_tsv(context, request):
 
         if file_row_dict['Related File Relationship'] == 'secondary file for':
             summary['lists']['Extra Files'].append(('Secondary file for ' + file_row_dict.get('Related File', 'unknown file.'), file_row_dict ))
+        elif file_row_dict['Related File Relationship'] == 'reference file for':
+            file_row_dict['Related File'] = 'Experiment - ' + (', '.join(ref_files_cache[file_row_dict['File Accession']]))
+            summary['lists']['Reference Files'].append(('Reference file for ' + file_row_dict.get('Related File', 'unknown exp.'), file_row_dict ))
 
         if not file_row_dict['File Type']:
             file_row_dict['File Type'] = 'other'
@@ -573,6 +611,9 @@ def metadata_tsv(context, request):
         if len(summary['lists']['Extra Files']) > 0:
             ret_rows.append(['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', ''])
             gen_mini_table(summary['lists']['Extra Files'])
+        if len(summary['lists']['Reference Files']) > 0:
+            ret_rows.append(['###', '- Added {} reference file{} which {} attached to an experiment:'.format(str(len(summary['lists']['Reference Files'])), 's' if len(summary['lists']['Reference Files']) > 1 else '', 'are' if len(summary['lists']['Reference Files']) > 1 else 'is'), '', '', '', ''])
+            gen_mini_table(summary['lists']['Reference Files'])
         if len(summary['lists']['Duplicate Files']) > 0:
             ret_rows.append(['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Duplicate Files'])
