@@ -483,7 +483,7 @@ def metadata_tsv(context, request):
         :returns List of dictionaries which represent File item rows, with column headers as keys.
         '''
         files_returned = [] # Function output
-        f['href'] = request.host_url + f['href']
+        f['href'] = request.host_url + f.get('href', '')
         f_row_vals = {}
         file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE or TSV_MAPPING[col][0] == FILE_ONLY ]
         for column in file_cols:

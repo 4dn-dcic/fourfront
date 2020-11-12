@@ -223,7 +223,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
                     <ModalCodeSnippet filename={suggestedFilename} session={session} />
 
-                    { session || foundUnpublishedFiles ?
+                    { /*session || */foundUnpublishedFiles ?
                         <div className="extra-notes-section">
                             <h4 className="mt-2 mb-07 text-500">Notes</h4>
                             <ul className="mb-25">
