@@ -330,7 +330,7 @@ def metadata_tsv(context, request):
         }
     }
     exp_process_file_cache = {} # experiments that have processed files selected for download (it is used to decide whether to include ref files or not)
-    ref_files_cache = {} # ref files can be related to multiple experiments, so this dict is used to eliminate multiple lines
+    # ref_files_cache = {} # ref files can be related to multiple experiments, so this dict is used to eliminate multiple lines
 
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
@@ -405,11 +405,11 @@ def metadata_tsv(context, request):
                 if column_vals_dict['Related File Relationship'] == 'reference file for' and exp_accession:
                     if exp_accession in exp_process_file_cache:
                         return False
-                    if column_vals_dict['File Accession'] in ref_files_cache:
-                        ref_files_cache[column_vals_dict['File Accession']].append(exp_accession)
-                        return False
-                    else:
-                        ref_files_cache[column_vals_dict['File Accession']] = [exp_accession]
+                    # if column_vals_dict['File Accession'] in ref_files_cache:
+                    #     ref_files_cache[column_vals_dict['File Accession']].append(exp_accession)
+                    #     return False
+                    # else:
+                    #     ref_files_cache[column_vals_dict['File Accession']] = [exp_accession]
  
                 return True
         
@@ -494,6 +494,7 @@ def metadata_tsv(context, request):
         # Some extra fields to decide whether to include exp's reference files or not
         if 'reference_file_for' in f:
             all_row_vals['Related File Relationship'] = 'reference file for'
+            all_row_vals['Related File'] = 'Experiment - ' + f.get('reference_file_for', '')
         if not all_row_vals.get('File Classification'):
             all_row_vals['File Classification'] = f.get('file_classification', '')
 
@@ -546,7 +547,7 @@ def metadata_tsv(context, request):
         if file_row_dict['Related File Relationship'] == 'secondary file for':
             summary['lists']['Extra Files'].append(('Secondary file for ' + file_row_dict.get('Related File', 'unknown file.'), file_row_dict ))
         elif file_row_dict['Related File Relationship'] == 'reference file for':
-            file_row_dict['Related File'] = 'Experiment - ' + (', '.join(ref_files_cache[file_row_dict['File Accession']]))
+            # file_row_dict['Related File'] = 'Experiment - ' + (', '.join(ref_files_cache[file_row_dict['File Accession']]))
             summary['lists']['Reference Files'].append(('Reference file for ' + file_row_dict.get('Related File', 'unknown exp.'), file_row_dict ))
 
         if not file_row_dict['File Type']:
@@ -623,7 +624,7 @@ def metadata_tsv(context, request):
 
         # add unauthenticated download is not permitted warning
         ret_rows.append(['###', '', '', '', '', '', ''])
-        ret_rows.append(['###', 'IMPORTANT: As of December 1, 2020, you must include an access key in your cURL command for bulk downloads. You can configure the access key in your profile. If you don’t already have an account, you can log in with your Google or GitHub credentials.', '', '', '', ''])
+        ret_rows.append(['###', 'IMPORTANT: As of October 15, 2020, you must include an access key in your cURL command for bulk downloads. You can configure the access key in your profile. If you don’t already have an account, you can log in with your Google or GitHub credentials.', '', '', '', ''])
 
         return ret_rows
 
@@ -638,7 +639,7 @@ def metadata_tsv(context, request):
         # Initial 2 lines: Intro, Headers
         writer.writerow([
             '###', 'N.B.: File summary located at bottom of TSV file.', '', '', '', '',
-            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L [--user <access_key_id>:<access_key_secret>]'.format(filename_to_suggest)
+            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L --user <access_key_id>:<access_key_secret>'.format(filename_to_suggest)
         ])
         yield line.read().encode('utf-8')
         writer.writerow([column.strip() for column in header])
