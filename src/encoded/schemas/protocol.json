@@ -112,6 +112,9 @@
         },
         "tags": {
             "title": "Certification"
+        },
+        "attachment": {
+            "title": "File"
         }
     }
 }
