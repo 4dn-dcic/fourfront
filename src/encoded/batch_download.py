@@ -128,7 +128,7 @@ TSV_MAPPING = OrderedDict([
 
 EXTRA_FIELDS = {
     EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
-    EXP     : ['reference_files.accession', 'reference_files.href', 'reference_files.file_format.display_title', 'reference_files.file_type', 'reference_files.md5sum', 'reference_files.file_size', 'reference_files.status', 'reference_files.contributing_labs.display_title'],
+    EXP     : ['reference_files.accession', 'reference_files.href', 'reference_files.file_format.display_title', 'reference_files.file_type', 'reference_files.md5sum', 'reference_files.file_size', 'reference_files.status', 'reference_files.lab.display_title', 'reference_files.contributing_labs.display_title'],
     FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size', 'file_classification']
 }
 
