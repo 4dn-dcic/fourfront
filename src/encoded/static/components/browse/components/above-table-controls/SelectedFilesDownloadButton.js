@@ -215,7 +215,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             </li>
                             <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
                             {!session ?
-                                <li>If you don’t already have an account, you can log in with your Google or GitHub credentials.</li>
+                                <li>{"If you don't already have an account, you can log in with your Google or GitHub credentials."}</li>
                                 : null}
                         </ul>
                     </div>

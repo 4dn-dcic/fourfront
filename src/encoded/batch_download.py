@@ -128,7 +128,7 @@ TSV_MAPPING = OrderedDict([
 
 EXTRA_FIELDS = {
     EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
-    EXP     : ['reference_files.accession', 'reference_files.href', 'reference_files.file_format.display_title', 'reference_files.file_type', 'reference_files.md5sum', 'reference_files.file_size', 'reference_files.status'],
+    EXP     : ['reference_files.accession', 'reference_files.href', 'reference_files.file_format.display_title', 'reference_files.file_type', 'reference_files.md5sum', 'reference_files.file_size', 'reference_files.status', 'reference_files.contributing_labs.display_title'],
     FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size', 'file_classification']
 }
 
@@ -329,8 +329,7 @@ def metadata_tsv(context, request):
             'Reference Files'   : []
         }
     }
-    exp_process_file_cache = {} # experiments that have processed files selected for download (it is used to decide whether to include ref files or not)
-    # ref_files_cache = {} # ref files can be related to multiple experiments, so this dict is used to eliminate multiple lines
+    exp_raw_file_cache = {} # experiments that have processed files selected for download (it is used to decide whether to include ref files or not)
 
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
@@ -396,20 +395,17 @@ def metadata_tsv(context, request):
                 (('Experiment Accession' in column_vals_dict and exp_accession  == column_vals_dict['Experiment Accession']) or exp_accession  == 'NONE') and
                 (file_accession == column_vals_dict['File Accession'] or column_vals_dict['Related File Relationship'] == 'reference file for' or file_accession == 'NONE')
             ):
-                # if the file is a processed file than add the related exp to the exp_ref_file_cache dict. to check 
-                # whether to include exp's ref files since we will not include ref files if at least one processed file
+                # if the file is a raw file (actually if classification is not processed file, then we assume it as a raw file),
+                # then add the related exp to the exp_raw_file_cache dict. to check 
+                # whether to include exp's ref files since we will include ref files if at least one raw file
                 # is selected for download.
-                if column_vals_dict['File Classification'] == 'processed file' and exp_accession:
-                    exp_process_file_cache[exp_accession] = True
-                # exclude ref files that any processed files of the parent experiment is already selected for downloads
-                if column_vals_dict['Related File Relationship'] == 'reference file for' and exp_accession:
-                    if exp_accession in exp_process_file_cache:
+                if exp_accession and len(column_vals_dict['File Classification']) > 0 and column_vals_dict['File Classification'] != 'processed file':
+                    exp_raw_file_cache[exp_accession] = True
+                
+                # include ref files if at least one raw file of the parent experiment is already selected for downloads, else discard it
+                if exp_accession and column_vals_dict['Related File Relationship'] == 'reference file for':
+                    if exp_accession not in exp_raw_file_cache:
                         return False
-                    # if column_vals_dict['File Accession'] in ref_files_cache:
-                    #     ref_files_cache[column_vals_dict['File Accession']].append(exp_accession)
-                    #     return False
-                    # else:
-                    #     ref_files_cache[column_vals_dict['File Accession']] = [exp_accession]
  
                 return True
         
@@ -624,7 +620,7 @@ def metadata_tsv(context, request):
 
         # add unauthenticated download is not permitted warning
         ret_rows.append(['###', '', '', '', '', '', ''])
-        ret_rows.append(['###', 'IMPORTANT: As of October 15, 2020, you must include an access key in your cURL command for bulk downloads. You can configure the access key in your profile. If you don’t already have an account, you can log in with your Google or GitHub credentials.', '', '', '', ''])
+        ret_rows.append(['###', 'IMPORTANT: As of October 15, 2020, you must include an access key in your cURL command for bulk downloads. You can configure the access key in your profile. If you do not already have an account, you can log in with your Google or GitHub credentials.', '', '', '', ''])
 
         return ret_rows
 

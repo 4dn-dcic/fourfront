@@ -304,6 +304,7 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
         "experiments_in_set.reference_files.md5sum",
+        "experiments_in_set.reference_files.contributing_labs.display_title",
 
         'sample_image.caption',
         'sample_image.microscopy_file.accession',
