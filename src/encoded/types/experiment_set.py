@@ -249,9 +249,10 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Total reads",
         "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
 
-        "experiments_in_set.processed_files.related_files.relationship_type",
-        "experiments_in_set.processed_files.related_files.file.accession",
-        "experiments_in_set.processed_files.related_files.file.file_type",
+        # deleting these first -Will
+        #"experiments_in_set.processed_files.related_files.relationship_type",
+        #"experiments_in_set.processed_files.related_files.file.accession",
+        #"experiments_in_set.processed_files.related_files.file.file_type",
 
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",
