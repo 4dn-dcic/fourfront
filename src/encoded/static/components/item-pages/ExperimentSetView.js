@@ -928,7 +928,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
         }, []);
 
         _.forEach(allCollectionsFromExperiments, function(collection){
-            const { title, files } = collection;
+            const { title, files, description } = collection;
             if (collectionsByTitle[title]){ // Same title exists already from ExpSet.other_processed_files or another Experiment.other_processed_files.
                 // Add in files unless is already present (== duplicate).
                 _.forEach(files, function(f){
@@ -942,6 +942,8 @@ class SupplementaryFilesTabView extends React.PureComponent {
                         collectionsByTitle[title].files.push(f);
                     }
                 });
+                //clone description from exp's OPF if expset's OPF collection's missing
+                collectionsByTitle[title].description = collectionsByTitle[title].description || description;
             } else {
                 collectionsByTitle[title] = collection;
             }

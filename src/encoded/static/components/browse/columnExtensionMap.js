@@ -117,6 +117,19 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             return <span className="value text-center">{ valToShow }</span>;
         }
     },
+    'attachment' : {
+        'widthMap' : { 'lg' : 120, 'md' : 120, 'sm' : 120 },
+        'render': function(result, props){
+            const { attachment = null } = result;
+            if (!attachment) return null;
+            const { href: attachHref = '' } = attachment;
+            return (
+                <a href={object.itemUtil.atId(result) + attachHref} className="btn btn-xs btn-primary" data-tip="Download attached file" disabled={attachHref.length === 0}>
+                    <i className="icon icon-fw icon-file-pdf far" />
+                </a>
+            );
+        }
+    },
     'workflow.title' : {
         'title' : "Workflow",
         'render' : function(result, props){
