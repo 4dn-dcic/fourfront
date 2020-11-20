@@ -342,6 +342,35 @@
             }
         }
     },
+    "external_submission": {
+        "external_submission": {
+            "title": "External Submission",
+            "description": "The external resource where 4DN has deposited this item.",
+            "internal_comment": "Only admins are allowed to set or update these values.",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "object",
+            "lookup": 1000,
+            "additionalProperties": false,
+            "required": ["date_exported", "database"],
+            "properties": {
+                "date_exported": {
+                    "title": "Date Exported",
+                    "description": "The date when this item was exported for the most recent submission/update.",
+                    "type": "string",
+                    "anyOf": [
+                        {"format": "date-time"},
+                        {"format": "date"}
+                    ]
+                },
+                "database": {
+                    "title": "Database",
+                    "description": "The name of the external resource.",
+                    "type": "string",
+                    "enum": ["GEO"]
+                }
+        }
+    },
     "library": {
         "library_prep_kit": {
             "title": "Library Prep Kit",
