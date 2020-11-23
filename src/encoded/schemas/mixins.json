@@ -369,6 +369,7 @@
                     "type": "string",
                     "enum": ["GEO"]
                 }
+            }
         }
     },
     "library": {
