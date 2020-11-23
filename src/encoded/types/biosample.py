@@ -194,7 +194,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             ret_str = ret_str[:-5]
             if cell_culture_details:  # will assume same differentiation if multiple bccs
                 cc_props = get_item_or_none(request, cell_culture_details[0], 'biosample_cell_cultures', frame='embedded')
-                if cc_props and 'tissue' in cc_props:
+                if (cc_props and 'tissue' in cc_props and
+                        cc_props.get('in_vitro_differentiated', '') == 'Yes'):
                     ret_str = ret_str + ' differentiated to ' + cc_props['tissue'].get('display_title')
             return ret_str
         return 'None'  # pragma: no cover
