@@ -870,7 +870,11 @@ class TestSearchHiddenAndAdditionalFacets:
 
 @pytest.fixture(scope='session')
 def bucket_range_data_raw():
-    """ 10 objects with a numerical field we will bucket on """
+    """ 10 objects with a numerical field we will bucket on.
+            'special_integer' has i in it.
+            'special_object_that_holds_integer' holds a single integer field with i as well
+            'array_of_objects_that_holds_integer' holds 2 objects that are mirrors of one another
+    """
     return [{
         'special_integer': i,
         'special_object_that_holds_integer': {
