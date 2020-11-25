@@ -21,6 +21,7 @@
         "crosslinking_temperature": 37,
         "award": "1U01CA200059-02",
         "dbxrefs": ["SRA:SRX764985", "GEO:GSM1551599"],
+        "external_submission": {"date_exported": "2020-11-23", "database": "GEO"},
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c444",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
