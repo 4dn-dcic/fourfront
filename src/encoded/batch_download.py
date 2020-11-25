@@ -283,7 +283,9 @@ def metadata_tsv(context, request):
             elif itemType == FILE:
                 search_params['field'].append('experiments_in_set.files.' + param_field)
                 search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+                search_params['field'].append('experiments_in_set.other_processed_files.files.' + param_field)
                 search_params['field'].append('processed_files.' + param_field)
+                search_params['field'].append('other_processed_files.files.' + param_field)
         elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
             if itemType == EXP_SET:
                 search_params['field'].append('experiment_set.' + param_field)
@@ -411,6 +413,13 @@ def metadata_tsv(context, request):
         
         return False
 
+    def flatten_other_processed_files(other_processed_files):
+        flat_list = []
+        for opf in other_processed_files:
+            for f in opf.get('files', []):
+                flat_list.append(f)
+        return flat_list 
+
     def format_experiment_set(exp_set):
         '''
         :param exp_set: A dictionary representation of ExperimentSet as received from /search/ results.
@@ -443,7 +452,7 @@ def metadata_tsv(context, request):
             chain.from_iterable(
                 map(
                     lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
-                    exp_set.get('processed_files', [])
+                    exp_set.get('processed_files', []) + flatten_other_processed_files(exp_set.get('other_processed_files', []))
                 )
             )
         ), key=sort_files_from_expset_by_replicate_numbers)
@@ -461,7 +470,7 @@ def metadata_tsv(context, request):
             chain.from_iterable(
                 map(
                     lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
-                    sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+                    sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession")) + sorted(flatten_other_processed_files(exp.get('other_processed_files', [])), key=lambda d: d.get("accession"))
                 )
             ),
             # ref files should be iterated after the end of exp's raw and 
@@ -543,7 +552,6 @@ def metadata_tsv(context, request):
         if file_row_dict['Related File Relationship'] == 'secondary file for':
             summary['lists']['Extra Files'].append(('Secondary file for ' + file_row_dict.get('Related File', 'unknown file.'), file_row_dict ))
         elif file_row_dict['Related File Relationship'] == 'reference file for':
-            # file_row_dict['Related File'] = 'Experiment - ' + (', '.join(ref_files_cache[file_row_dict['File Accession']]))
             summary['lists']['Reference Files'].append(('Reference file for ' + file_row_dict.get('Related File', 'unknown exp.'), file_row_dict ))
 
         if not file_row_dict['File Type']:

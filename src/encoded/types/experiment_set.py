@@ -298,6 +298,7 @@ class ExperimentSet(Item):
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
+        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_type",
         "experiments_in_set.reference_files.file_format",
         "experiments_in_set.reference_files.file_size",
