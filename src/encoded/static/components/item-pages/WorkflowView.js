@@ -50,7 +50,7 @@ export function commonGraphPropsFromProps(props){
         'href'              : props.href,
         'renderDetailPane'  : function(selectedNode, paneProps){
             return (
-                <WorkflowDetailPane {...paneProps} {..._.pick(props, 'schemas', 'context', 'legendItems', 'windowWidth')} selectedNode={selectedNode} />
+                <WorkflowDetailPane {...paneProps} {..._.pick(props, 'session', 'schemas', 'context', 'legendItems', 'windowWidth')} selectedNode={selectedNode} />
             );
         },
         'renderNodeElement' : function(node, graphProps){
