@@ -55,7 +55,7 @@ export class WorkflowDetailPane extends React.PureComponent {
         if (node){
 
             var commonDetailProps = _.extend(
-                _.pick(this.props, 'schemas', 'keyTitleDescriptionMap', 'windowHeight', 'windowWidth'),
+                _.pick(this.props, 'schemas', 'session', 'keyTitleDescriptionMap', 'windowHeight', 'windowWidth'),
                 { 'key' : 'body', 'node' : node }
             );
 

@@ -715,6 +715,7 @@ i.item-status-indicator-dot {
 		}
 		.detail-embedded-table-container {
 			overflow-x: auto;
+			max-height: 50vh;
 			table.detail-embedded-table {
 				min-width: 100%;
 				tr th {
@@ -1435,7 +1436,7 @@ $badge-item-min-height: 90px;
 		}
 
 		> .table-for-collection {
-			margin-left: 21px;
+			margin-left: 15px;
 			overflow: hidden;
 		}
 
