@@ -148,10 +148,18 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         // Supplementary Files Tab
         if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
+            const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context) || [];
+            const opfCollections = SupplementaryFilesTabView.combinedOtherProcessedFiles(context) || [];
+            const allOpfFiles = _.reduce(opfCollections, function (memo, coll) { return memo.concat(coll.files || []); }, []);
+            const allFiles = referenceFiles.concat(allOpfFiles);
             tabs.push({
                 tab : <span><i className="icon icon-copy far icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
-                content : <SupplementaryFilesTabView {...propsForTableSections} {...this.state} />
+                content: (
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={allFiles}>
+                        <SupplementaryFilesTabView {...propsForTableSections} {...this.state} />
+                    </SelectedFilesController>
+                )
             });
         }
 
@@ -780,7 +788,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     render(){
-        const { collection, index, width, mounted, defaultOpen, windowWidth, href } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         const qcMetricsHeading = (
@@ -807,7 +815,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
                     <div className="table-for-collection">
                         { higlass_view_config ?
                             <HiGlassAdjustableWidthRow higlassItem={higlass_view_config} windowWidth={windowWidth} mounted={mounted} width={width - 21}
-                                renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
+                                renderRightPanel={this.renderFilesTable} selectedFiles={selectedFiles} leftPanelDefaultCollapsed={defaultOpen === false} />
                             : this.renderFilesTable(width - 21) }
                         <QCMetricsTable {...{ 'width': width - 20, windowWidth, href, files, 'heading': qcMetricsHeading }} />
                     </div>
@@ -872,6 +880,8 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
 
 
 class SupplementaryFilesTabView extends React.PureComponent {
+
+    static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     /** @returns {boolean} true if at least one file inside the collection is viewable */
     static checkOPFCollectionPermission({ files }){
@@ -994,7 +1004,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
     });
 
     render(){
-        const { context, width, mounted, windowWidth, href } = this.props;
+        const { context, session, width, mounted, windowWidth, href, selectedFiles } = this.props;
         const gridState = mounted && layout.responsiveGridState(windowWidth);
         const otherProcessedFileSetsCombined = SupplementaryFilesTabView.combinedOtherProcessedFiles(context);
         const otherProcessedFileSetsCombinedLen = otherProcessedFileSetsCombined.length;
@@ -1008,8 +1018,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
             (otherProcessedFileSetsCombinedLen > 0 ? (otherProcessedFileSetsCombinedLen + " Processed Files Collection" + (otherProcessedFileSetsCombinedLen > 1 ? "s" : "")) : '')
         );
 
-        const commonProps = { context, width, mounted, windowWidth, href };
+        const selectedFilesUniqueCount = SupplementaryFilesTabView.selectedFilesUniqueCount(selectedFiles);
 
+        const commonProps = { context, width, mounted, windowWidth, href, ...SelectedFilesController.pick(this.props) };
+
+        const filenamePrefix = (context.accession || context.display_title) + "_supp_files_";
         // TODO: Metadata.tsv stuff needs to be setup before we can select files from other_processed_files & reference_files
         //const commonProps = _.extend({ context, width, mounted, windowWidth }, SelectedFilesController.pick(this.props));
 
@@ -1018,6 +1031,17 @@ class SupplementaryFilesTabView extends React.PureComponent {
                 <h3 className="tab-section-title">
                     Supplementary Files
                     { titleDetailString.length > 0 ? <span className="small">&nbsp;&nbsp; &bull; {titleDetailString}</span> : null }
+                    {selectedFiles ? // Make sure data structure is present (even if empty)
+                        <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
+                            <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
+                                id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
+                                <i className="icon icon-download fas icon-fw mr-07 align-baseline" />
+                                <span className="d-none d-sm-inline">Download </span>
+                                <span className="count-to-download-integer">{selectedFilesUniqueCount}</span>
+                                <span className="d-none d-sm-inline text-400"> Supplementary Files</span>
+                            </SelectedFilesDownloadButton>
+                        </div>
+                        : null}
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { referenceFilesLen > 0 ?

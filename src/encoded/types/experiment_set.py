@@ -249,6 +249,10 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.quality_metric.Total reads",
         "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
 
+        "experiments_in_set.processed_files.related_files.relationship_type",
+        "experiments_in_set.processed_files.related_files.file.accession",
+        "experiments_in_set.processed_files.related_files.file.file_type",
+
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
@@ -266,11 +270,14 @@ class ExperimentSet(Item):
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.href",
         "other_processed_files.files.status",
+        "other_processed_files.files.md5sum",
         "other_processed_files.files.last_modified.date_modified",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
+        "other_processed_files.files.contributing_labs.display_title",
+        "other_processed_files.files.lab.display_title",
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -285,18 +292,27 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.higlass_uid",
         "experiments_in_set.other_processed_files.files.genome_assembly",
         "experiments_in_set.other_processed_files.files.status",
+        "experiments_in_set.other_processed_files.files.md5sum",
         "experiments_in_set.other_processed_files.files.last_modified.date_modified",
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
         #"experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
+        "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
+        "experiments_in_set.other_processed_files.files.lab.display_title",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
         "experiments_in_set.reference_files.file_type_detailed",
+        "experiments_in_set.reference_files.file_type",
+        "experiments_in_set.reference_files.file_format",
         "experiments_in_set.reference_files.file_size",
+        "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
+        "experiments_in_set.reference_files.md5sum",
+        "experiments_in_set.reference_files.lab.display_title",
+        "experiments_in_set.reference_files.contributing_labs.display_title",
 
         'sample_image.caption',
         'sample_image.microscopy_file.accession',

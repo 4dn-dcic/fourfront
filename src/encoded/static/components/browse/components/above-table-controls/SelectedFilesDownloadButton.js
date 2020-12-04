@@ -211,11 +211,11 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                         <h4 className="mb-07 text-500">Important</h4>
                         <ul className="mb-25">
                             <li className="mb-05">
-                                <span className="text-danger"><b>As of December 1, 2020</b>, you must include an <b>access key</b> in your cURL command for bulk downloads.</span>
+                                <span className="text-danger"><b>As of October 15, 2020</b>, you must include an <b>access key</b> in your cURL command for bulk downloads.</span>
                             </li>
                             <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
                             {!session ?
-                                <li>If you don’t already have an account, you can log in with your Google or GitHub credentials.</li>
+                                <li>{"If you don't already have an account, you can log in with your Google or GitHub credentials."}</li>
                                 : null}
                         </ul>
                     </div>
@@ -223,7 +223,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                     <p>Once you have saved the metadata TSV, you may download the files on any machine or server with the following cURL command:</p>
                     <ModalCodeSnippet filename={suggestedFilename} session={session} />
 
-                    { session || foundUnpublishedFiles ?
+                    { /*session || */foundUnpublishedFiles ?
                         <div className="extra-notes-section">
                             <h4 className="mt-2 mb-07 text-500">Notes</h4>
                             <ul className="mb-25">
