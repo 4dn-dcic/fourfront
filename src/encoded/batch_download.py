@@ -497,7 +497,10 @@ def metadata_tsv(context, request):
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
         
         # Some extra fields to decide whether to include exp's reference files or not
-        if 'reference_file_for' in f:
+        #
+        # IMPORTANT: since we add the Supplementary Files download option in Exp Set, users can download reference files directly.
+        # So directly downloaded reference files should not be considered as 'reference file for' of an experiment)
+        if not any(triple[2] == f.get('accession', '') for triple in accession_triples) and 'reference_file_for' in f:
             all_row_vals['Related File Relationship'] = 'reference file for'
             all_row_vals['Related File'] = 'Experiment - ' + f.get('reference_file_for', '')
         if not all_row_vals.get('File Classification'):
