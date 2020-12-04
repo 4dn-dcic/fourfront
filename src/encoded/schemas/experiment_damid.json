@@ -19,6 +19,7 @@
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/external_submission" },
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/tags" },
