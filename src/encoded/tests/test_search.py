@@ -867,3 +867,96 @@ class TestSearchHiddenAndAdditionalFacets:
         """
         self.check_and_verify_result(many_non_nested_facets, _facet, n_expected)
 
+
+@pytest.fixture(scope='session')
+def bucket_range_data_raw():
+    """ 10 objects with a numerical field we will bucket on.
+            'special_integer' has i in it.
+            'special_object_that_holds_integer' holds a single integer field with i as well
+            'array_of_objects_that_holds_integer' holds 2 objects that are mirrors of one another
+    """
+    return [{
+        'special_integer': i,
+        'special_object_that_holds_integer': {
+            'embedded_integer': i
+        },
+        'array_of_objects_that_holds_integer': [
+            {
+                'embedded_identifier': 'forward',
+                'embedded_integer': 0 if i < 5 else 9
+            },
+            {
+                'embedded_identifier': 'reverse',
+                'embedded_integer': 9 if i < 5 else 0
+            },
+        ]
+    } for i in range(10)]
+
+
+@pytest.fixture(scope='module')  # XXX: consider scope further - Will 11/5/2020
+def bucket_range_data(testapp, bucket_range_data_raw):
+    for entry in bucket_range_data_raw:
+        testapp.post_json('/TestingBucketRangeFacets', entry, status=201)
+    testapp.post_json('/index', {'record': False})
+
+
+class TestSearchBucketRangeFacets:
+    """ Class that encapsulates tests for BucketRanges """
+
+    @staticmethod
+    def verify_facet_counts(facets, expected_fields, expected_cardinality, expected_count):
+        """ Checks for given expected facets, checking bucket cardinality and document count
+            Note that the actual range properties are trivial (we are not testing elasticsearch)
+        """
+        for facet in facets:
+            if facet['field'] in expected_fields:
+                assert len(facet['ranges']) == expected_cardinality
+                for bucket in facet['ranges']:
+                    assert bucket['doc_count'] == expected_count
+
+    @staticmethod
+    def select_facet(facets, facet_name):
+        result = None
+        for facet in facets:
+            if facet['field'] == facet_name:
+                result = facet
+                break
+        return result
+
+    @pytest.fixture(scope='module')
+    def bucket_range_facet_result(self, testapp, bucket_range_data):
+        return testapp.get('/search/?type=TestingBucketRangeFacets').json['facets']
+
+    @pytest.mark.parametrize('expected_fields, expected_counts', [
+        (['special_integer', 'special_object_that_holds_integer.embedded_integer'], 5),
+        (['array_of_objects_that_holds_integer.embedded_integer'], 10)
+    ])
+    def test_search_bucket_range_simple(self, bucket_range_facet_result, expected_fields, expected_counts):
+        """ Tests searching a collection of documents with varying integer field types that
+            have the same distribution - all of which should give the same results. """
+        self.verify_facet_counts(bucket_range_facet_result, expected_fields, 2, expected_counts)
+
+    @pytest.mark.parametrize('identifier', [
+        'reverse', 'forward'
+    ])
+    def test_search_bucket_range_nested_qualifier(self, testapp, bucket_range_data, identifier):
+        """ Tests aggregating on a nested field while selecting for a field within the nested object. """
+        res = testapp.get('/search/?type=TestingBucketRangeFacets'
+                          '&array_of_objects_that_holds_integer.embedded_identifier=%s' % identifier).json['facets']
+        self.verify_facet_counts(res, ['array_of_objects_that_holds_integer.embedded_integer'],
+                                 2, 10)
+
+    @pytest.mark.parametrize('identifier', [
+        'reverse', 'forward'
+    ])
+    def test_search_bucket_range_nested_qualifier(self, testapp, bucket_range_data, identifier):
+        """ Tests aggregating on a nested field while selecting for a field within the nested object (no change). """
+        res = testapp.get('/search/?type=TestingBucketRangeFacets'
+                          '&array_of_objects_that_holds_integer.embedded_integer.from=6'
+                          '&array_of_objects_that_holds_integer.embedded_identifier=%s' % identifier).json['facets']
+        self.verify_facet_counts(res, ['array_of_objects_that_holds_integer.embedded_integer'],
+                                 2, 10)
+        facet_with_labels = self.select_facet(res, 'array_of_objects_that_holds_integer.embedded_integer')
+        for r in facet_with_labels['ranges']:
+            assert 'label' in r
+            assert r['label'] in ['Low', 'High']

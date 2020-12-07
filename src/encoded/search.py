@@ -1241,29 +1241,48 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
         ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
+        agg_type = facet.get('aggregation_type', 'terms')
+        agg_id = agg_type + ':' + agg_name
+        facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
 
-        if facet.get('aggregation_type') == 'stats':
+        # handle stats aggregetation
+        if agg_type == 'stats':
 
             if is_date_field:
                 facet['field_type'] = 'date'
             elif is_numerical_field:
                 facet['field_type'] = field_schema['type'] or "number"
 
-            aggs[facet['aggregation_type'] + ":" + agg_name] = {
+            aggs[agg_id] = {
                 'aggs': {
-                    "primary_agg" : {
-                        'stats' : {
-                            'field' : query_field
+                    "primary_agg": {
+                        'stats': {
+                            'field': query_field
                         }
                     }
                 },
                 'filter': {'bool': facet_filters}
             }
 
-        else: # Default -- facetable terms
+        # handle range aggregation
+        elif agg_type == 'range':
+            ranges = [{k: v for k, v in r.items() if k in ['from', 'to']} for r in facet['ranges']]
+            aggs[agg_id] = {
+                'aggs': {
+                    'primary_agg': {
+                        'range': {
+                            'field': query_field,
+                            'ranges': ranges
+                        }
+                    }
+                },
+                'filter': {'bool': facet_filters}
+            }
+
+        # default - terms aggregation
+        else:
 
             facet['aggregation_type'] = 'terms'
-            facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
             term_aggregation = {
                 "terms" : {
                     'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
@@ -1401,15 +1420,31 @@ def format_facets(es_results, facets, total, additional_facets, search_frame='em
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
         field_agg_name = field.replace('.', '-')
-        full_agg_name = facet['aggregation_type'] + ':' + field_agg_name
+        agg_type = facet['aggregation_type']
+        full_agg_name = agg_type + ':' + field_agg_name
 
         if full_agg_name in aggregations:
-            if facet['aggregation_type'] == 'stats':
+            if agg_type == 'stats':
                 result_facet['total'] = aggregations[full_agg_name]['doc_count']
                 # Used for fields on which can do range filter on, to provide min + max bounds
                 for k in aggregations[full_agg_name]["primary_agg"].keys():
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
-            else: # 'terms' assumed.
+
+            elif agg_type == 'range':
+                bucket_location = aggregations[full_agg_name]['primary_agg']
+
+                # TODO - refactor ?
+                # merge bucket labels from ranges into buckets
+                for r in result_facet['ranges']:
+                    for b in bucket_location['buckets']:
+
+                        # if ranges match we found our bucket, propagate doc_count into 'ranges' field
+                        if (r.get('from', -1) == b.get('from', -1)) and (r.get('to', -1) == b.get('to', -1)):
+                            r['doc_count'] = b['doc_count']
+                            break
+
+            # 'terms' assumed
+            else:
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 # Choosing to show facets with one term for summary info on search it provides
