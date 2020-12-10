@@ -49,7 +49,17 @@ export function getTitleForCustomTab(tabName){
     }
 }
 
+const getTabStaticContent = memoize(function (context, tabLocation) {
+    if (context && context.static_content && Array.isArray(context.static_content) && typeof tabLocation === 'string') {
+        const staticContent = _.pluck(_.filter(context.static_content || [], function (s) {
+            return s.content && !s.content.error && s.location === 'tab:expsets-table';
+        }), 'content');
+        return staticContent;
+    }
 
+    return null;
+});
+export { getTabStaticContent };
 
 /**
  * @prop {Object[]} contents - List of objects for tabs containing 'tab', 'content', and maybe 'key'.
