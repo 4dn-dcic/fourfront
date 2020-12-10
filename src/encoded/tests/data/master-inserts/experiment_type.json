@@ -173,6 +173,19 @@
         "valid_item_types": ["ExperimentSeq"]
     },
     {
+        "title": "RNA-seq",
+        "experiment_category": "Sequencing",
+        "assay_classification": "RNA Quantification",
+        "assay_subclassification": "Transcription",
+        "assay_subclass_short": "Transcription",
+        "raw_file_types": "Reads (fastq) provided by lab",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "uuid": "19f848e6-7c52-4b8b-8aa8-e82ea0a968ce",
+        "other_tags": ["1D"],
+        "valid_item_types": ["ExperimentSeq"]
+    },
+    {
         "title": "CUT&RUN",
         "experiment_category": "Sequencing",
         "assay_classification": "Linear DNA Enrichment",
