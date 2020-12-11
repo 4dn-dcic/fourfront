@@ -49,10 +49,13 @@ export function getTitleForCustomTab(tabName){
     }
 }
 
+/**
+ * gets all static content from context having tabLocation as location (e.g. tab:expsets-table, tab:overview ...)
+ */
 const getTabStaticContent = memoize(function (context, tabLocation) {
     if (context && context.static_content && Array.isArray(context.static_content) && typeof tabLocation === 'string') {
         const staticContent = _.pluck(_.filter(context.static_content || [], function (s) {
-            return s.content && !s.content.error && s.location === 'tab:expsets-table';
+            return s.content && !s.content.error && s.location === tabLocation;
         }), 'content');
         return staticContent;
     }
