@@ -37,4 +37,4 @@ if [ "${TRAVIS_JOB_ID}" = "" -o "$(echo "$TRAVIS_JOB_ID" | cut -c '1-4')" = "4dn
     echo "NOTE: Simulating TRAVIS_JOB_ID=$TRAVIS_JOB_ID"
 fi
 
-python $(dirname $0)/test.py "$@"
+poetry run python $(dirname $0)/test.py "$@"
