@@ -354,6 +354,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert swag_bios not in not_uuids
 
 
+@pytest.mark.action_fail
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3

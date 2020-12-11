@@ -93,7 +93,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         search_term = 'search-info-header.' + doc_types[0]
         try:
             static_section = request.registry['collections']['StaticSection'].get(search_term)
-        except NotFoundError:  # search could fail
+        except Exception:  # search could fail, NotFoundError does not catch for some reason
             static_section = None
         if static_section and hasattr(static_section.model, 'source'):
             item = static_section.model.source['object']
