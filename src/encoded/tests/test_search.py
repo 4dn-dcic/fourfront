@@ -704,7 +704,7 @@ def hidden_facet_data_two():
     }
 
 
-@pytest.fixture(scope='module')  # TODO consider this further...
+@pytest.fixture(scope='session')  # TODO consider this further...
 def hidden_facet_test_data(testapp, hidden_facet_data_one, hidden_facet_data_two):
     testapp.post_json('/TestingHiddenFacets', hidden_facet_data_one, status=201)
     testapp.post_json('/TestingHiddenFacets', hidden_facet_data_two, status=201)
@@ -893,7 +893,7 @@ def bucket_range_data_raw():
     } for i in range(10)]
 
 
-@pytest.fixture(scope='module')  # XXX: consider scope further - Will 11/5/2020
+@pytest.fixture(scope='session')  # XXX: consider scope further - Will 11/5/2020
 def bucket_range_data(testapp, bucket_range_data_raw):
     for entry in bucket_range_data_raw:
         testapp.post_json('/TestingBucketRangeFacets', entry, status=201)
@@ -923,18 +923,15 @@ class TestSearchBucketRangeFacets:
                 break
         return result
 
-    @pytest.fixture(scope='module')
-    def bucket_range_facet_result(self, testapp, bucket_range_data):
-        return testapp.get('/search/?type=TestingBucketRangeFacets').json['facets']
-
     @pytest.mark.parametrize('expected_fields, expected_counts', [
         (['special_integer', 'special_object_that_holds_integer.embedded_integer'], 5),
         (['array_of_objects_that_holds_integer.embedded_integer'], 10)
     ])
-    def test_search_bucket_range_simple(self, bucket_range_facet_result, expected_fields, expected_counts):
+    def test_search_bucket_range_simple(self, testapp, expected_fields, expected_counts):
         """ Tests searching a collection of documents with varying integer field types that
             have the same distribution - all of which should give the same results. """
-        self.verify_facet_counts(bucket_range_facet_result, expected_fields, 2, expected_counts)
+        res = testapp.get('/search/?type=TestingBucketRangeFacets').json['facets']
+        self.verify_facet_counts(res, expected_fields, 2, expected_counts)
 
     @pytest.mark.parametrize('identifier', [
         'reverse', 'forward'
