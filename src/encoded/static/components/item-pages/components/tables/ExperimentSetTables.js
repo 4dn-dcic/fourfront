@@ -87,13 +87,13 @@ export function ExperimentSetsTableTabView(props){
     };
     return (
         <div className="overflow-hidden">
-            <EmbeddedExperimentSetSearchTable {...tableProps}>{children}</EmbeddedExperimentSetSearchTable>
             { staticContent && staticContent.length > 0 ? (
-                <div className="mt-2">
-                    <hr />
+                <div className="mb-2">
                     <UserContentBodyList contents={staticContent} windowWidth={windowWidth} />
+                    <hr />
                 </div>
             ) : null}
+            <EmbeddedExperimentSetSearchTable {...tableProps}>{children}</EmbeddedExperimentSetSearchTable>        
         </div>);
 }
 ExperimentSetsTableTabView.getTabObject = function(props){
