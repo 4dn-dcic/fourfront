@@ -39,7 +39,7 @@ build:  # builds
 build-after-poetry:  # continuation of build after poetry install
 	make moto-setup
 	make npm-setup
-	python setup_eb.py develop
+	poetry run python setup_eb.py develop
 
 build-dev:  # same as build, but sets up locust as well
 	make build
