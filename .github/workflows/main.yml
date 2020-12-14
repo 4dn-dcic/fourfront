@@ -68,7 +68,7 @@ jobs:
           make travis-test-unit
 
       - name: Cleanup
-        if: ${{ matrix.test_type == 'UNIT' }}  # longer test job must purge indices
+        if: ${{ matrix.test_type == 'NPM' }}  # NPM runs for >50 mins so will purge indices
         env:
           S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
           TRAVIS_JOB_ID: ${{ github.run_number }}
