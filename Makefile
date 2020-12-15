@@ -24,7 +24,8 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 	bin/macpoetry-install
 
 configure:  # does any pre-requisite installs
-	pip install poetry
+	pip install --upgrade pip
+	pip install poetry==1.0.10  # pinned to avoid build problems we cannot fix in pyproject.toml
 
 macbuild:  # builds for Catalina
 	make configure
@@ -38,8 +39,11 @@ build:  # builds
 
 build-after-poetry:  # continuation of build after poetry install
 	make moto-setup
-	make npm-setup
+	make npm-setup  # cgap uses 'make npm-setup-if-needed' here. should this also do that? -kmp 15-Dec-2020
 	python setup_eb.py develop
+
+fix-dist-info:
+	@scripts/fix-dist-info
 
 build-dev:  # same as build, but sets up locust as well
 	make build
