@@ -14,7 +14,7 @@ def publication_PMID(testapp, lab, award):
         'lab': lab['@id'],
         'ID': "PMID:26673895",
     }
-    return testapp.post_json('/publication', item).json['@graph'][0]
+    return testapp.post_json('/publication', item, status=201).json['@graph'][0]
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def publication_doi_pubmed(testapp, lab, award):
         'lab': lab['@id'],
         'ID': "doi:10.1093/nar/gkv1046",
     }
-    return testapp.post_json('/publication', item).json['@graph'][0]
+    return testapp.post_json('/publication', item, status=201).json['@graph'][0]
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def publication_doi_biorxiv(testapp, lab, award):
         'lab': lab['@id'],
         'ID': "doi:10.1101/000091"
     }
-    return testapp.post_json('/publication', item).json['@graph'][0]
+    return testapp.post_json('/publication', item, status=201).json['@graph'][0]
 
 
 # data from test/datafixtures

@@ -39,7 +39,7 @@ build:  # builds
 build-after-poetry:  # continuation of build after poetry install
 	make moto-setup
 	make npm-setup
-	python setup_eb.py develop
+	poetry run python setup_eb.py develop
 
 build-dev:  # same as build, but sets up locust as well
 	make build
@@ -84,10 +84,10 @@ test-any:
 	bin/test -vv --timeout=200
 
 travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --timeout=200 -m "working and not performance and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not performance and not indexing and not action_fail" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --timeout=200 -m "working and not performance and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not performance and indexing and not action_fail" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update
