@@ -231,9 +231,6 @@
     "columns": {
         "microscope_modality":{
             "title": "Microscope modality"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     }
 }

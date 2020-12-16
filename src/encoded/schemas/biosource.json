@@ -167,9 +167,6 @@
         },
         "modifications.display_title": {
             "title": "Modification"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     }
 }

@@ -146,9 +146,6 @@
         },
         "genomic_change": {
             "title": "Type of modification"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     }
 }

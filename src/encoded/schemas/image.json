@@ -56,10 +56,5 @@
     },
     "boost_values": {
         "caption": 2.0
-    },
-    "columns": {
-        "last_modified.date_modified": {
-            "default_hidden": true
-        }
     }
 }

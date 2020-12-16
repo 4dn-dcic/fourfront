@@ -87,9 +87,6 @@
     "columns": {
         "antibody_vendor": {
             "title": "Vendor"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     }
 }

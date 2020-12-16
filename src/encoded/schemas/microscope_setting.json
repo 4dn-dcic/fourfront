@@ -51,10 +51,5 @@
         "tier_level": {
             "title": "Biosource Type"
         }
-    },
-    "columns": {
-        "last_modified.date_modified": {
-            "default_hidden": true
-        }
     }
 }

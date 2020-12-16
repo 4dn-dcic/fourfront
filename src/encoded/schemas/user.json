@@ -201,10 +201,5 @@
         "submits_for.display_title" : {
             "title" : "Submits for Lab"
         }
-    },
-    "columns": {
-        "last_modified.date_modified": {
-            "default_hidden": true
-        }
     }
 }

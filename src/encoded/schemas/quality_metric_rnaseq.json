@@ -831,9 +831,6 @@
     "columns": {
         "overall_quality_status": {
             "title" : "Overall Quality"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     },
     "qc_order": 1

@@ -213,9 +213,6 @@
             "title": "Allowed extensions",
             "description": "Other common extensions that are allowed when uploading files of this format",
             "default_hidden": true
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     },
     "facets": {

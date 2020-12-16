@@ -100,9 +100,6 @@
         },
         "fly_strain": {
             "title" : "Fly Strain"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     },
     "facets": {

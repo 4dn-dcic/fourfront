@@ -138,10 +138,5 @@
         "name": 1.0,
         "title": 1.0,
         "pi.title": 1.0
-    },
-    "columns": {
-        "last_modified.date_modified": {
-            "default_hidden": true
-        }
     }
 }

@@ -87,9 +87,6 @@
         },
         "mouse_strain": {
             "title" : "Mouse Strain"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     },
     "facets": {

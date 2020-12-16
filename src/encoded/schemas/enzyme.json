@@ -112,9 +112,6 @@
         },
         "site_length": {
             "title": "Site Length"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     }
 }

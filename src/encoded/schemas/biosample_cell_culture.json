@@ -194,10 +194,5 @@
             "lookup": 140,
             "enum": ["Yes", "No"]
         }
-    },
-    "columns": {
-        "last_modified.date_modified": {
-            "default_hidden": true
-        }
     }
 }

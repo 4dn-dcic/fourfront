@@ -55,11 +55,6 @@
             "format": "uri"
         }
     },
-    "columns": {
-        "last_modified.date_modified": {
-            "default_hidden": true
-        }
-    },
     "boost_values": {
         "name": 1.0,
         "title": 1.0

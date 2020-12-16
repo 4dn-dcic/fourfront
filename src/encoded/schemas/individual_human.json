@@ -91,9 +91,6 @@
         },
         "health_status": {
             "title" : "Individual Health Status"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     },
     "facets": {

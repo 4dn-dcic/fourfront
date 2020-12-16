@@ -297,9 +297,6 @@
     "columns" : {
         "submitted_by.display_title" : {
             "title" : "Creator"
-        },
-        "last_modified.date_modified": {
-            "default_hidden": true
         }
     },
     "excludedColumns" : ["lab.display_title"]
