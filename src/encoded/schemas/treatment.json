@@ -51,6 +51,9 @@
     "columns": {
         "treatment_type": {
           "title": "Treatment type"
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     }
 }

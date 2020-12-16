@@ -102,6 +102,9 @@
         },
         "badge_classification": {
             "title": "Badge Classification"
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     }
 }

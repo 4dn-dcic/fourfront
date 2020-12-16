@@ -254,6 +254,9 @@
             "title": "Run Platform",
             "colTitle": "Platform",
             "default_hidden" : true
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     }
 }

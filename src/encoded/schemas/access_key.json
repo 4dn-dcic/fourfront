@@ -51,5 +51,10 @@
         "user.display_title" : {
             "title" : "User Name"
         }
+    },
+    "columns": {
+        "last_modified.date_modified": {
+            "default_hidden": true
+        }
     }
 }

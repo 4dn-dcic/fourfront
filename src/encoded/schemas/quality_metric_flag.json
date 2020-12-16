@@ -57,6 +57,9 @@
         "overall_quality_status": {
             "title" : "Overall Quality",
             "default_hidden": true
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     }
 }

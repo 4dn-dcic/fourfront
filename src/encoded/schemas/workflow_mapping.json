@@ -148,5 +148,10 @@
                 }
             }
         }
+    },
+    "columns": {
+        "last_modified.date_modified": {
+            "default_hidden": true
+        }
     }
 }

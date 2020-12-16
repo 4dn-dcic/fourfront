@@ -175,6 +175,9 @@
         },
         "organism_name": {
             "title": "Species"
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     }
 }

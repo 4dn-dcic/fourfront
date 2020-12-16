@@ -158,6 +158,9 @@
         },
         "microscope.Type":{ 
             "title": "Type"
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     },
     "excludedColumns" : ["lab.display_title"]

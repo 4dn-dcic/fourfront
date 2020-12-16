@@ -258,6 +258,9 @@
         },
         "biosample.treatments.display_title": {
             "title": "Treatments"
+        },
+        "last_modified.date_modified": {
+            "default_hidden": true
         }
     }
 }

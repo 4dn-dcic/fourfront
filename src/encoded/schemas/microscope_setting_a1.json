@@ -167,5 +167,10 @@
             "lookup": 54,
             "linkTo": "Image"
         }
+    },
+    "columns": {
+        "last_modified.date_modified": {
+            "default_hidden": true
+        }
     }
 }
