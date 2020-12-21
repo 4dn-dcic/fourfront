@@ -37,6 +37,7 @@ import MicroscopeConfigurationView  from './item-pages/MicroscopeConfigurationVi
 import BiosampleView            from './item-pages/BiosampleView';
 import BiosourceView            from './item-pages/BiosourceView';
 import ProtocolView             from './item-pages/ProtocolView';
+import ImageView                from './item-pages/ImageView';
 import DocumentView             from './item-pages/DocumentView';
 import PublicationView          from './item-pages/PublicationView';
 import QualityMetricView        from './item-pages/QualityMetricView';
@@ -73,6 +74,7 @@ content_views.register(FileView,                'File');
 content_views.register(MicroscopeConfigurationView, 'MicroscopeConfiguration');
 content_views.register(HealthView,              'Health');
 content_views.register(HiGlassViewConfigView,   'HiglassViewConfig');
+content_views.register(ImageView,               'Image');
 content_views.register(ProtocolView,            'Protocol');
 content_views.register(DocumentView,            'Document');
 content_views.register(PublicationView,         'Publication');
