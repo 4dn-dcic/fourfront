@@ -27,6 +27,7 @@ from elasticsearch import (
     RequestError,
     ConnectionTimeout
 )
+from elasticsearch.exceptions import NotFoundError
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPFound
@@ -90,7 +91,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # into Elasticsearch it will not be loaded
     if (len(doc_types) == 1) and 'Item' not in doc_types:
         search_term = 'search-info-header.' + doc_types[0]
-        static_section = request.registry['collections']['StaticSection'].get(search_term)
+        try:
+            static_section = request.registry['collections']['StaticSection'].get(search_term)
+        except Exception:  # search could fail, NotFoundError does not catch for some reason
+            static_section = None
         if static_section and hasattr(static_section.model, 'source'):
             item = static_section.model.source['object']
             result['search_header'] = {}

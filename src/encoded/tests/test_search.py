@@ -354,6 +354,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert swag_bios not in not_uuids
 
 
+@pytest.mark.action_fail
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3
@@ -923,18 +924,15 @@ class TestSearchBucketRangeFacets:
                 break
         return result
 
-    @pytest.fixture(scope='module')
-    def bucket_range_facet_result(self, testapp, bucket_range_data):
-        return testapp.get('/search/?type=TestingBucketRangeFacets').json['facets']
-
     @pytest.mark.parametrize('expected_fields, expected_counts', [
         (['special_integer', 'special_object_that_holds_integer.embedded_integer'], 5),
         (['array_of_objects_that_holds_integer.embedded_integer'], 10)
     ])
-    def test_search_bucket_range_simple(self, bucket_range_facet_result, expected_fields, expected_counts):
+    def test_search_bucket_range_simple(self, testapp, bucket_range_data, expected_fields, expected_counts):
         """ Tests searching a collection of documents with varying integer field types that
             have the same distribution - all of which should give the same results. """
-        self.verify_facet_counts(bucket_range_facet_result, expected_fields, 2, expected_counts)
+        res = testapp.get('/search/?type=TestingBucketRangeFacets').json['facets']
+        self.verify_facet_counts(res, expected_fields, 2, expected_counts)
 
     @pytest.mark.parametrize('identifier', [
         'reverse', 'forward'
