@@ -3,7 +3,9 @@ module.exports = function(api){
     api.cache(true);
     return {
         "presets" : [
-            "@babel/preset-env",
+            // We don't need to convert import/export statements.
+            // @see https://stackoverflow.com/questions/63563485/how-can-i-preserve-dynamic-import-statements-with-babel-preset-env
+            [ "@babel/preset-env", { "modules": false } ],
             "@babel/preset-react",
         ],
         "plugins": [
