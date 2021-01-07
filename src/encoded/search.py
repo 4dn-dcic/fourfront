@@ -1616,7 +1616,6 @@ def build_table_columns(request, schemas, doc_types):
     if 'date_created' not in columns:
         columns['date_created'] = {
             "title"             : "Date Created",
-            "colTitle"          : "Created",
             "default_hidden"    : True,
             "order"             : 510
         }
@@ -1624,7 +1623,6 @@ def build_table_columns(request, schemas, doc_types):
     if 'last_modified.date_modified' not in columns:
         columns['last_modified.date_modified'] = {
             "title"             : "Date Modified",
-            "colTitle"          : "Modified",
             "default_hidden"    : True,
             "order"             : 520
         }
