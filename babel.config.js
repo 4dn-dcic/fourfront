@@ -1,7 +1,7 @@
 
 module.exports = function(api){
     const modulesEnabled = api.env("test");
-    api.cache(true);
+    api.cache.using(function(){ return process.env.NODE_ENV; });
     return {
         "presets" : [
             // We don't need to convert import/export statements unless in test/Jest environment (as Webpack will handle later; not converting here preserves code-splitting).
