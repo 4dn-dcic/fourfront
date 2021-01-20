@@ -94,7 +94,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
      * Executed on width change, as well as this ItemView's prop change.
      */
     getTabViewContents(){
-        const { context, schemas, windowWidth, windowHeight, href } = this.props;
+        const { context, schemas, windowWidth, windowHeight, href, session } = this.props;
         const { mounted } = this.state;
 
         //context = SET; // Use for testing along with _testing_data
@@ -105,7 +105,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         const rawFilesLen = (rawFiles && rawFiles.length) || 0;
         const width = this.getTabViewWidth();
 
-        const commonProps = { width, context, schemas, windowWidth, href, mounted };
+        const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
         const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
 
         var tabs = [];
@@ -148,10 +148,18 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
         // Supplementary Files Tab
         if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
+            const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context) || [];
+            const opfCollections = SupplementaryFilesTabView.combinedOtherProcessedFiles(context) || [];
+            const allOpfFiles = _.reduce(opfCollections, function (memo, coll) { return memo.concat(coll.files || []); }, []);
+            const allFiles = referenceFiles.concat(allOpfFiles);
             tabs.push({
                 tab : <span><i className="icon icon-copy far icon-fw"/> Supplementary Files</span>,
                 key : 'supplementary-files',
-                content : <SupplementaryFilesTabView {...propsForTableSections} {...this.state} />
+                content: (
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={allFiles}>
+                        <SupplementaryFilesTabView {...propsForTableSections} {...this.state} />
+                    </SelectedFilesController>
+                )
             });
         }
 
@@ -227,7 +235,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
-        const { context, files, selectedFiles } = this.props;
+        const { context, files, selectedFiles, session } = this.props;
         const selectedFilesUniqueCount = RawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
         const fileCount = files.length;
         const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
@@ -237,7 +245,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
                             <span className="d-none d-sm-inline">Download </span>
@@ -621,10 +629,10 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     ];
 
     render(){
-        const { context, files, selectedFiles } = this.props;
+        const { context, session, files, selectedFiles } = this.props;
         return (
             <div className="processed-files-table-section exp-table-section">
-                <ProcessedFilesTableSectionHeader {...{ context, files, selectedFiles }} />
+                <ProcessedFilesTableSectionHeader {...{ context, session, files, selectedFiles }} />
                 {this.renderTopRow()}
                 <ExperimentsWithoutFilesStackedTable {...this.props} />
                 <QCMetricsTable {...this.props} />
@@ -633,7 +641,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     }
 }
 
-const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context }){
+const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context, session }){
     const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
     const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
     return (
@@ -643,7 +651,7 @@ const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTable
             </span>
             { selectedFiles ? // Make sure data structure is present (even if empty)
                 <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
-                    <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context }} disabled={selectedFilesUniqueCount === 0}
+                    <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                         id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
                         <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
                         <span className="d-none d-sm-inline">Download </span>
@@ -780,7 +788,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     render(){
-        const { collection, index, width, mounted, defaultOpen, windowWidth, href } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         const qcMetricsHeading = (
@@ -807,7 +815,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
                     <div className="table-for-collection">
                         { higlass_view_config ?
                             <HiGlassAdjustableWidthRow higlassItem={higlass_view_config} windowWidth={windowWidth} mounted={mounted} width={width - 21}
-                                renderRightPanel={this.renderFilesTable} leftPanelDefaultCollapsed={defaultOpen === false} />
+                                renderRightPanel={this.renderFilesTable} selectedFiles={selectedFiles} leftPanelDefaultCollapsed={defaultOpen === false} />
                             : this.renderFilesTable(width - 21) }
                         <QCMetricsTable {...{ 'width': width - 20, windowWidth, href, files, 'heading': qcMetricsHeading }} />
                     </div>
@@ -873,6 +881,8 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
 
 class SupplementaryFilesTabView extends React.PureComponent {
 
+    static selectedFilesUniqueCount = memoize(uniqueFileCount);
+
     /** @returns {boolean} true if at least one file inside the collection is viewable */
     static checkOPFCollectionPermission({ files }){
         return _.any(files || [], function(file){
@@ -928,7 +938,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
         }, []);
 
         _.forEach(allCollectionsFromExperiments, function(collection){
-            const { title, files } = collection;
+            const { title, files, description } = collection;
             if (collectionsByTitle[title]){ // Same title exists already from ExpSet.other_processed_files or another Experiment.other_processed_files.
                 // Add in files unless is already present (== duplicate).
                 _.forEach(files, function(f){
@@ -942,6 +952,8 @@ class SupplementaryFilesTabView extends React.PureComponent {
                         collectionsByTitle[title].files.push(f);
                     }
                 });
+                //clone description from exp's OPF if expset's OPF collection's missing
+                collectionsByTitle[title].description = collectionsByTitle[title].description || description;
             } else {
                 collectionsByTitle[title] = collection;
             }
@@ -992,7 +1004,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
     });
 
     render(){
-        const { context, width, mounted, windowWidth, href } = this.props;
+        const { context, session, width, mounted, windowWidth, href, selectedFiles } = this.props;
         const gridState = mounted && layout.responsiveGridState(windowWidth);
         const otherProcessedFileSetsCombined = SupplementaryFilesTabView.combinedOtherProcessedFiles(context);
         const otherProcessedFileSetsCombinedLen = otherProcessedFileSetsCombined.length;
@@ -1006,8 +1018,11 @@ class SupplementaryFilesTabView extends React.PureComponent {
             (otherProcessedFileSetsCombinedLen > 0 ? (otherProcessedFileSetsCombinedLen + " Processed Files Collection" + (otherProcessedFileSetsCombinedLen > 1 ? "s" : "")) : '')
         );
 
-        const commonProps = { context, width, mounted, windowWidth, href };
+        const selectedFilesUniqueCount = SupplementaryFilesTabView.selectedFilesUniqueCount(selectedFiles);
 
+        const commonProps = { context, width, mounted, windowWidth, href, ...SelectedFilesController.pick(this.props) };
+
+        const filenamePrefix = (context.accession || context.display_title) + "_supp_files_";
         // TODO: Metadata.tsv stuff needs to be setup before we can select files from other_processed_files & reference_files
         //const commonProps = _.extend({ context, width, mounted, windowWidth }, SelectedFilesController.pick(this.props));
 
@@ -1016,6 +1031,17 @@ class SupplementaryFilesTabView extends React.PureComponent {
                 <h3 className="tab-section-title">
                     Supplementary Files
                     { titleDetailString.length > 0 ? <span className="small">&nbsp;&nbsp; &bull; {titleDetailString}</span> : null }
+                    {selectedFiles ? // Make sure data structure is present (even if empty)
+                        <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
+                            <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
+                                id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
+                                <i className="icon icon-download fas icon-fw mr-07 align-baseline" />
+                                <span className="d-none d-sm-inline">Download </span>
+                                <span className="count-to-download-integer">{selectedFilesUniqueCount}</span>
+                                <span className="d-none d-sm-inline text-400"> Supplementary Files</span>
+                            </SelectedFilesDownloadButton>
+                        </div>
+                        : null}
                 </h3>
                 <hr className="tab-section-title-horiz-divider"/>
                 { referenceFilesLen > 0 ?

@@ -86,5 +86,23 @@
         "3p_adenylation_time": 20,
         "3p_adenylation_temperature": 58,
         "reaction_time": 9
+    },
+    {
+        "accession":"4DNEXRNASEQ1",
+        "biosample":"234511bc-8535-4448-903e-854af460b255",
+        "experiment_type": "19f848e6-7c52-4b8b-8aa8-e82ea0a968ce",
+        "files": ["4DNFIN232JB1", "4DNFIN232JB2"],
+        "description": "RNA-seq experiment",
+        "award": "1U01CA200059-01",
+        "lab": "test-4dn-lab",
+        "uuid": "66741e2f-3e43-4388-8bbb-e861f209c557",
+        "submitted_by": "4dndcic@gmail.com",
+        "biosample_quantity": 2000000,
+        "biosample_quantity_units": "cells",
+        "status": "in review by lab",
+        "average_fragment_size": 100,
+        "fragmentation_method": "chemical",
+        "molecule": "polyA RNA",
+        "library_preparation_date": "2017-01-05"
     }
 ]

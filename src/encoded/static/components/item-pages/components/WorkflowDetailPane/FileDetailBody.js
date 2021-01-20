@@ -23,6 +23,7 @@ export class FileDetailBody extends React.PureComponent {
         'node' : PropTypes.object.isRequired,
         'file' : PropTypes.object.isRequired,
         'schemas' : PropTypes.object.isRequired,
+        'session' : PropTypes.bool.isRequired,
         'minHeight' : PropTypes.number,
         'keyTitleDescriptionMap' : PropTypes.object,
         'windowWidth' : PropTypes.number.isRequired
@@ -80,12 +81,12 @@ export class FileDetailBody extends React.PureComponent {
     }
 
     downloadLinkBox(){
-        var { node, file } = this.props, content;
+        var { node, file, session } = this.props, content;
 
         if (WorkflowNodeElement.isNodeQCMetric(node)){
             content = <ViewMetricButton {...{ node, file }}/>;
         } else {
-            content = <fileUtil.FileDownloadButtonAuto result={file} />;
+            content = <fileUtil.FileDownloadButtonAuto result={file} session={session} />;
         }
 
         return (

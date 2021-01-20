@@ -47,47 +47,48 @@ FILE        = 2
 FILE_ONLY   = 3
 
 # includes concatenated properties
+# tuple structure is (key/title - (field type, [field name], remove duplicates) 
 TSV_MAPPING = OrderedDict([
-    ('File Download URL',           (FILE,      ['href'])),
-    ('Experiment Set Accession',    (EXP_SET,   ['accession'])),
-    ('Experiment Accession',        (EXP,       ['accession'])),
-    ('Experiment Set Accession ',   (FILE_ONLY, ['experiment_sets.accession'])), #do not remove trailing whitespace
-    ('Experiment Accession ',       (FILE_ONLY, ['experiments.accession'])), #do not remove trailing whitespace
-    ('File Accession',              (FILE,      ['accession'])),
+    ('File Download URL',           (FILE,      ['href'], True)),
+    ('Experiment Set Accession',    (EXP_SET,   ['accession'], True)),
+    ('Experiment Accession',        (EXP,       ['accession'], True)),
+    ('Experiment Set Accession ',   (FILE_ONLY, ['experiment_sets.accession'], True)), #do not remove trailing whitespace of the key
+    ('Experiment Accession ',       (FILE_ONLY, ['experiments.accession'], True)), #do not remove trailing whitespace of the key
+    ('File Accession',              (FILE,      ['accession'], True)),
 
-    ('Size (MB)',                   (FILE,      ['file_size'])),
-    ('md5sum',                      (FILE,      ['md5sum'])),
-    ('File Type',                   (FILE,      ['file_type'])),
-    ('File Format',                 (FILE,      ['file_format.display_title'])),
-   #('Experiment Title',            (EXP,       ['display_title'])),
-    ('Experiment Type',             (EXP,       ['experiment_type.display_title'])),
-    ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'])),
-    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'])),
-    ('Condition',                   (EXP_SET,   ['condition'])),
-    ('Dataset',                     (EXP_SET,   ['dataset_label'])),
+    ('Size (MB)',                   (FILE,      ['file_size'], True)),
+    ('md5sum',                      (FILE,      ['md5sum'], True)),
+    ('File Type',                   (FILE,      ['file_type'], True)),
+    ('File Format',                 (FILE,      ['file_format.display_title'], True)),
+   #('Experiment Title',            (EXP,       ['display_title'], True)),
+    ('Experiment Type',             (EXP,       ['experiment_type.display_title'], True)),
+    ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'], True)),
+    ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'], True)),
+    ('Condition',                   (EXP_SET,   ['condition'], True)),
+    ('Dataset',                     (EXP_SET,   ['dataset_label'], True)),
 
-    ('Biosource',                   (EXP,       ['biosample.biosource_summary'])),
-    ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'])),
-    ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'])),
-    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'])),
-   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'])),
-    ('Related File Relationship',   (FILE,      ['related_files.relationship_type'])),
-    ('Related File',                (FILE,      ['related_files.file.accession'])),
-    ('Paired End',                  (FILE,      ['paired_end'])),
-    ('Set Status',                  (EXP_SET,   ['status'])),
-    ('File Status',                 (FILE,      ['status'])),
-    ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'])),
-    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'])),
-    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'])),
-    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'])),
-    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'])),
-    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'])), #do not remove trailing whitespace
-    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'])), #do not remove trailing whitespace
-    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'])),
-    ('Project',                     (EXP_SET,   ['award.project'])),
-    ('Generating Lab',              (FILE,      ['lab.display_title'])),
-    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'])),
-    ('Notes',                       (FILE,      ['notes_to_tsv'])),
+    ('Biosource',                   (EXP,       ['biosample.biosource_summary'], True)),
+    ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'], True)),
+    ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'], True)),
+    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'], True)),
+   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'], True)),
+    ('Related File Relationship',   (FILE,      ['related_files.relationship_type'], False)),
+    ('Related File',                (FILE,      ['related_files.file.accession'], False)),
+    ('Paired End',                  (FILE,      ['paired_end'], True)),
+    ('Set Status',                  (EXP_SET,   ['status'], True)),
+    ('File Status',                 (FILE,      ['status'], True)),
+    ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'], True)),
+    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'], True)),
+    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'], True)),
+    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'], True)),
+    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'], True)),
+    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
+    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'], True)), #do not remove trailing whitespace of the key
+    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'], True)),
+    ('Project',                     (EXP_SET,   ['award.project'], True)),
+    ('Generating Lab',              (FILE,      ['lab.display_title'], True)),
+    ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'], True)),
+    ('Notes',                       (FILE,      ['notes_to_tsv'], True)),
 
 
 
@@ -127,8 +128,8 @@ TSV_MAPPING = OrderedDict([
 
 EXTRA_FIELDS = {
     EXP_SET : ['replicate_exps.replicate_exp.accession', 'lab.correspondence.contact_email'],
-    EXP     : [],
-    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size']
+    EXP     : ['reference_files.accession', 'reference_files.href', 'reference_files.file_format.display_title', 'reference_files.file_type', 'reference_files.md5sum', 'reference_files.file_size', 'reference_files.status', 'reference_files.lab.display_title', 'reference_files.contributing_labs.display_title'],
+    FILE    : ['extra_files.href', 'extra_files.file_format', 'extra_files.md5sum', 'extra_files.use_for', 'extra_files.file_size', 'file_classification']
 }
 
 
@@ -282,7 +283,9 @@ def metadata_tsv(context, request):
             elif itemType == FILE:
                 search_params['field'].append('experiments_in_set.files.' + param_field)
                 search_params['field'].append('experiments_in_set.processed_files.' + param_field)
+                search_params['field'].append('experiments_in_set.other_processed_files.files.' + param_field)
                 search_params['field'].append('processed_files.' + param_field)
+                search_params['field'].append('other_processed_files.files.' + param_field)
         elif search_params['type'][0:4] == 'File' and search_params['type'][4:7] != 'Set':
             if itemType == EXP_SET:
                 search_params['field'].append('experiment_set.' + param_field)
@@ -324,30 +327,42 @@ def metadata_tsv(context, request):
         'lists' : {
             'Not Available'     : [],
             'Duplicate Files'   : [],
-            'Extra Files'       : []
+            'Extra Files'       : [],
+            'Reference Files'   : []
         }
     }
+    exp_raw_file_cache = {} # experiments that have processed files selected for download (it is used to decide whether to include ref files or not)
 
     if filename_to_suggest is None:
         filename_to_suggest = 'metadata_' + datetime.utcnow().strftime('%Y-%m-%d-%Hh-%Mm') + '.tsv'
 
-    def get_values_for_field(item, field):
+    def get_values_for_field(item, field, remove_duplicates=True):
         c_value = []
-        for value in simple_path_ids(item, field):
-            if str(value) not in c_value:
+
+        if remove_duplicates:
+            for value in simple_path_ids(item, field):
+                if str(value) not in c_value:
+                    c_value.append(str(value))
+            return list(set(c_value))
+        else:
+            for value in simple_path_ids(item, field):
                 c_value.append(str(value))
-        return list(set(c_value))
+            return c_value  
 
     def get_value_for_column(item, col):
         temp = []
         for c in TSV_MAPPING[col][1]:
-            c_value = get_values_for_field(item, c)
+            c_value = get_values_for_field(item, c, TSV_MAPPING[col][2])
             if len(temp):
                 if len(c_value):
                     temp = [x + ' ' + c_value[0] for x in temp]
             else:
                 temp = c_value
-        return ', '.join(list(set(temp)))
+
+        if TSV_MAPPING[col][2]:   
+            return ', '.join(list(set(temp)))
+        else:
+            return ', '.join(temp)    
 
     def get_correct_rep_no(column_name, column_vals_dict, experiment_set):
         '''Find which Replicate Exp our File Row Object belongs to, and return its replicate number.'''
@@ -380,10 +395,30 @@ def metadata_tsv(context, request):
             if (
                 (('Experiment Set Accession' in column_vals_dict and set_accession  == column_vals_dict['Experiment Set Accession']) or set_accession  == 'NONE') and
                 (('Experiment Accession' in column_vals_dict and exp_accession  == column_vals_dict['Experiment Accession']) or exp_accession  == 'NONE') and
-                (file_accession == column_vals_dict['File Accession']           or file_accession == 'NONE')
+                (file_accession == column_vals_dict['File Accession'] or column_vals_dict['Related File Relationship'] == 'reference file for' or file_accession == 'NONE')
             ):
+                # if the file is a raw file (actually if classification is not processed file, then we assume it as a raw file),
+                # then add the related exp to the exp_raw_file_cache dict. to check 
+                # whether to include exp's ref files since we will include ref files if at least one raw file
+                # is selected for download.
+                if exp_accession and len(column_vals_dict['File Classification']) > 0 and column_vals_dict['File Classification'] != 'processed file':
+                    exp_raw_file_cache[exp_accession] = True
+                
+                # include ref files if at least one raw file of the parent experiment is already selected for downloads, else discard it
+                if exp_accession and column_vals_dict['Related File Relationship'] == 'reference file for':
+                    if exp_accession not in exp_raw_file_cache:
+                        return False
+ 
                 return True
+        
         return False
+
+    def flatten_other_processed_files(other_processed_files):
+        flat_list = []
+        for opf in other_processed_files:
+            for f in opf.get('files', []):
+                flat_list.append(f)
+        return flat_list 
 
     def format_experiment_set(exp_set):
         '''
@@ -417,7 +452,7 @@ def metadata_tsv(context, request):
             chain.from_iterable(
                 map(
                     lambda f: format_file(f, exp_set, dict(exp_set_row_vals, **{ 'Experiment Accession' : 'NONE' }), exp_set, exp_set_row_vals),
-                    exp_set.get('processed_files', [])
+                    exp_set.get('processed_files', []) + flatten_other_processed_files(exp_set.get('other_processed_files', []))
                 )
             )
         ), key=sort_files_from_expset_by_replicate_numbers)
@@ -431,10 +466,20 @@ def metadata_tsv(context, request):
         for column in exp_cols:
             exp_row_vals[column] = get_value_for_column(exp, column)
 
-        return chain.from_iterable(
-            map(
-                lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
-                sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession"))
+        return chain(
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(f, exp, exp_row_vals, exp_set, exp_set_row_vals),
+                    sorted(exp.get('files', []), key=lambda d: d.get("accession")) + sorted(exp.get('processed_files', []), key=lambda d: d.get("accession")) + sorted(flatten_other_processed_files(exp.get('other_processed_files', [])), key=lambda d: d.get("accession"))
+                )
+            ),
+            # ref files should be iterated after the end of exp's raw and 
+            # processed files iteration since we do decision whether to include the ref. files or not
+            chain.from_iterable(
+                map(
+                    lambda f: format_file(dict(f, **{ 'reference_file_for' : exp.get('accession') }), exp, exp_row_vals, exp_set, exp_set_row_vals),
+                    sorted(exp.get('reference_files', []), key=lambda d: d.get("accession"))
+                )
             )
         )
 
@@ -443,13 +488,23 @@ def metadata_tsv(context, request):
         :returns List of dictionaries which represent File item rows, with column headers as keys.
         '''
         files_returned = [] # Function output
-        f['href'] = request.host_url + f['href']
+        f['href'] = request.host_url + f.get('href', '')
         f_row_vals = {}
         file_cols = [ col for col in header if TSV_MAPPING[col][0] == FILE or TSV_MAPPING[col][0] == FILE_ONLY ]
         for column in file_cols:
             f_row_vals[column] = get_value_for_column(f, column)
 
         all_row_vals = dict(exp_set_row_vals, **dict(exp_row_vals, **f_row_vals)) # Combine data from ExpSet, Exp, and File
+        
+        # Some extra fields to decide whether to include exp's reference files or not
+        #
+        # IMPORTANT: since we add the Supplementary Files download option in Exp Set, users can download reference files directly.
+        # So directly downloaded reference files should not be considered as 'reference file for' of an experiment)
+        if not any(triple[2] == f.get('accession', '') for triple in accession_triples) and 'reference_file_for' in f:
+            all_row_vals['Related File Relationship'] = 'reference file for'
+            all_row_vals['Related File'] = 'Experiment - ' + f.get('reference_file_for', '')
+        if not all_row_vals.get('File Classification'):
+            all_row_vals['File Classification'] = f.get('file_classification', '')
 
         # If no EXP properties, likely is processed file from an ExpSet, so show all Exps' values.
         exp_col_names = [ k for k,v in TSV_MAPPING.items() if v[0] == EXP ]
@@ -499,6 +554,8 @@ def metadata_tsv(context, request):
 
         if file_row_dict['Related File Relationship'] == 'secondary file for':
             summary['lists']['Extra Files'].append(('Secondary file for ' + file_row_dict.get('Related File', 'unknown file.'), file_row_dict ))
+        elif file_row_dict['Related File Relationship'] == 'reference file for':
+            summary['lists']['Reference Files'].append(('Reference file for ' + file_row_dict.get('Related File', 'unknown exp.'), file_row_dict ))
 
         if not file_row_dict['File Type']:
             file_row_dict['File Type'] = 'other'
@@ -562,12 +619,19 @@ def metadata_tsv(context, request):
         if len(summary['lists']['Extra Files']) > 0:
             ret_rows.append(['###', '- Added {} extra file{} which {} attached to a primary selected file (e.g. pairs_px2 index file with a pairs file):'.format(str(len(summary['lists']['Extra Files'])), 's' if len(summary['lists']['Extra Files']) > 1 else '', 'are' if len(summary['lists']['Extra Files']) > 1 else 'is'), '', '', '', ''])
             gen_mini_table(summary['lists']['Extra Files'])
+        if len(summary['lists']['Reference Files']) > 0:
+            ret_rows.append(['###', '- Added {} reference file{} which {} attached to an experiment:'.format(str(len(summary['lists']['Reference Files'])), 's' if len(summary['lists']['Reference Files']) > 1 else '', 'are' if len(summary['lists']['Reference Files']) > 1 else 'is'), '', '', '', ''])
+            gen_mini_table(summary['lists']['Reference Files'])
         if len(summary['lists']['Duplicate Files']) > 0:
             ret_rows.append(['###', '- Commented out {} duplicate file{} (e.g. a raw file shared by two experiments):'.format(str(len(summary['lists']['Duplicate Files'])), 's' if len(summary['lists']['Duplicate Files']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Duplicate Files'])
         if len(summary['lists']['Not Available']) > 0:
             ret_rows.append(['###', '- Commented out {} file{} which are currently not available (i.e. file restricted, or not yet finished uploading):'.format(str(len(summary['lists']['Not Available'])), 's' if len(summary['lists']['Not Available']) > 1 else ''), '', '', '', ''])
             gen_mini_table(summary['lists']['Not Available'])
+
+        # add unauthenticated download is not permitted warning
+        ret_rows.append(['###', '', '', '', '', '', ''])
+        ret_rows.append(['###', 'IMPORTANT: As of October 15, 2020, you must include an access key in your cURL command for bulk downloads. You can configure the access key in your profile. If you do not already have an account, you can log in with your Google or GitHub credentials.', '', '', '', ''])
 
         return ret_rows
 
@@ -582,7 +646,7 @@ def metadata_tsv(context, request):
         # Initial 2 lines: Intro, Headers
         writer.writerow([
             '###', 'N.B.: File summary located at bottom of TSV file.', '', '', '', '',
-            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L [--user <access_key_id>:<access_key_secret>]'.format(filename_to_suggest)
+            'Suggested command to download: ', '', '', 'cut -f 1 ./{} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L --user <access_key_id>:<access_key_secret>'.format(filename_to_suggest)
         ])
         yield line.read().encode('utf-8')
         writer.writerow([column.strip() for column in header])

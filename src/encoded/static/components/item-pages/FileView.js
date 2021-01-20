@@ -85,7 +85,7 @@ export default class FileView extends WorkflowRunTracingView {
         return (
             <React.Fragment>
                 { super.itemMidSection() }
-                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas', 'windowWidth')} />
+                <FileOverviewHeading {..._.pick(this.props, 'context', 'schemas', 'windowWidth', 'session')} />
             </React.Fragment>
         );
     }
@@ -175,7 +175,7 @@ export class FileOverviewHeading extends React.PureComponent {
     }
 
     render(){
-        const { context, schemas, windowWidth } = this.props;
+        const { context, schemas, windowWidth, session } = this.props;
         const { mounted, isPropertiesOpen } = this.state;
         const gridState = layout.responsiveGridState(windowWidth);
         const isSmallerSize = mounted && (gridState === "xs" || gridState === "sm");
@@ -192,7 +192,7 @@ export class FileOverviewHeading extends React.PureComponent {
                     </OverviewHeadingContainer>
                 </div>
                 <div className="col-12 col-md-4 mt-1 mb-3">
-                    <FileViewDownloadButtonContainer file={context} size="lg" verticallyCentered={!isSmallerSize && isPropertiesOpen} />
+                    <FileViewDownloadButtonContainer file={context} size="lg" verticallyCentered={!isSmallerSize && isPropertiesOpen} session={session} />
                 </div>
 
             </div>
@@ -202,11 +202,11 @@ export class FileOverviewHeading extends React.PureComponent {
 
 
 export function FileViewDownloadButtonContainer(props){
-    const { className, size, file, context, result } = props;
+    const { className, size, file, context, result, session } = props;
     const fileToUse = file || context || result;
     return (
         <div className={"file-download-container" + (className ? " " + className : "")}>
-            <fileUtil.FileDownloadButtonAuto result={fileToUse} size={size} />
+            <fileUtil.FileDownloadButtonAuto result={fileToUse} size={size} session={session} />
         </div>
     );
 }

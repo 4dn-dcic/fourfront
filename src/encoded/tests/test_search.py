@@ -354,6 +354,7 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert swag_bios not in not_uuids
 
 
+@pytest.mark.action_fail
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3
@@ -642,3 +643,318 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
 
     #assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] > 0
     #assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] < count_exp_set_test_inserts
+
+
+@pytest.fixture(scope='session')
+def hidden_facet_data_one():
+    """ Sample TestingHiddenFacets object we are going to facet on """
+    return {
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'sid': 1,
+        'unfaceted_string': 'hello',
+        'unfaceted_integer': 123,
+        'disabled_string': 'orange',
+        'disabled_integer': 789,
+        'unfaceted_object': {
+            'mother': 'Anne',
+            'father': 'Bob'
+        },
+        'unfaceted_array_of_objects': [
+            {
+                'fruit': 'orange',
+                'color': 'orange',
+                'uid': 1
+            },
+            {
+                'fruit': 'banana',
+                'color': 'yellow',
+                'uid': 2
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope='session')
+def hidden_facet_data_two():
+    """ A second sample TestingHiddenFacets object we are going to facet on """
+    return {
+        'first_name': 'Boston',
+        'last_name': 'Bruins',
+        'sid': 2,
+        'unfaceted_string': 'world',
+        'unfaceted_integer': 456,
+        'disabled_string': 'apple',
+        'disabled_integer': 101112,
+        'unfaceted_object': {
+            'mother': 'Candice',
+            'father': 'Doug'
+        },
+        'unfaceted_array_of_objects': [
+            {
+                'fruit': 'blueberry',
+                'color': 'blue',
+                'uid': 3
+            },
+            {
+                'fruit': 'mango',
+                'color': 'yellow',
+                'uid': 4
+            },
+        ]
+    }
+
+
+@pytest.fixture(scope='module')  # TODO consider this further...
+def hidden_facet_test_data(testapp, hidden_facet_data_one, hidden_facet_data_two):
+    testapp.post_json('/TestingHiddenFacets', hidden_facet_data_one, status=201)
+    testapp.post_json('/TestingHiddenFacets', hidden_facet_data_two, status=201)
+    testapp.post_json('/index', {'record': False})
+
+
+class TestSearchHiddenAndAdditionalFacets:
+    """ Encapsulates tests meant for testing behavior associated with default_hidden, hidden
+        and additional_facets
+    """
+    DEFAULT_FACETS = ['first_name', 'status', 'type', 'validation_errors.name']
+    DEFAULT_HIDDEN_FACETS = ['last_name', 'sid']
+    ADDITIONAL_FACETS = ['unfaceted_string', 'unfaceted_integer']
+    DISABLED_FACETS = ['disabled_string', 'disabled_integer']
+
+    @staticmethod
+    def check_and_verify_result(facets, desired_facet, number_expected):
+        """ Helper method for later tests that checks terms count and average. """
+        for facet in facets:
+            field = facet['field']
+            if field == desired_facet and 'terms' in facet:
+                assert len(facet['terms']) == number_expected
+            elif field == facet and 'avg' in facet:
+                assert facet['avg'] == number_expected
+            else:
+                continue
+            break
+
+    def test_search_default_hidden_facets_dont_show(self, testapp, hidden_facet_test_data):
+        facets = testapp.get('/search/?type=TestingHiddenFacets').json['facets']
+        actual = [facet['field'] for facet in facets]
+        assert self.DEFAULT_FACETS == sorted(actual)
+
+    @pytest.mark.parametrize('facet', ADDITIONAL_FACETS)
+    def test_search_one_additional_facet(self, testapp, hidden_facet_test_data, facet):
+        """ Tests that specifying each of the 'additional' facets works correctly """
+        facets = testapp.get('/search/?type=TestingHiddenFacets&additional_facet=%s' % facet).json['facets']
+        expected = self.DEFAULT_FACETS + [facet]
+        actual = [facet['field'] for facet in facets]
+        assert sorted(expected) == sorted(actual)
+
+    def test_search_multiple_additional_facets(self, testapp, hidden_facet_test_data):
+        """ Tests that enabling multiple additional facets works """
+        facets = testapp.get('/search/?type=TestingHiddenFacets'
+                             '&additional_facet=unfaceted_string'
+                             '&additional_facet=unfaceted_integer').json['facets']
+        expected = self.DEFAULT_FACETS + self.ADDITIONAL_FACETS
+        for facet in facets:
+            assert facet['field'] in expected
+            if facet['field'] == 'unfaceted_integer':
+                assert facet['aggregation_type'] == 'stats'
+            else:
+                assert facet['aggregation_type'] == 'terms'
+
+    @pytest.mark.parametrize('facet', DEFAULT_HIDDEN_FACETS)
+    def test_search_one_additional_default_hidden_facet(self, testapp, hidden_facet_test_data, facet):
+        """ Tests that passing default_hidden facets to additional_facets works correctly """
+        facets = testapp.get('/search/?type=TestingHiddenFacets&additional_facet=%s' % facet).json['facets']
+        expected = self.DEFAULT_FACETS + [facet]
+        actual = [facet['field'] for facet in facets]
+        assert sorted(expected) == sorted(actual)
+
+    def test_search_multiple_additional_default_hidden_facets(self, testapp, hidden_facet_test_data):
+        """ Tests that passing multiple hidden_facets as additionals works correctly """
+        facets = testapp.get('/search/?type=TestingHiddenFacets'
+                             '&additional_facet=last_name'
+                             '&additional_facet=sid').json['facets']
+        expected = self.DEFAULT_FACETS + self.DEFAULT_HIDDEN_FACETS
+        for facet in facets:
+            assert facet['field'] in expected
+            if facet['field'] == 'sid':
+                assert facet['aggregation_type'] == 'stats'
+            else:
+                assert facet['aggregation_type'] == 'terms'
+
+    @pytest.mark.parametrize('_facets', [
+        ['last_name', 'unfaceted_integer'],  # second slot holds number field
+        ['unfaceted_string', 'sid']
+    ])
+    def test_search_mixing_additional_and_default_hidden(self, testapp, hidden_facet_test_data, _facets):
+        """ Tests that we can mix additional_facets with those both on and off schema """
+        [sample_string_field, sample_number_field] = _facets
+        facets = testapp.get('/search/?type=TestingHiddenFacets'
+                             '&additional_facet=%s'
+                             '&additional_facet=%s' % (sample_string_field, sample_number_field)).json['facets']
+        expected = self.DEFAULT_FACETS + _facets
+        actual = [facet['field'] for facet in facets]
+        assert sorted(expected) == sorted(actual)
+        for facet in facets:
+            if facet['field'] == sample_number_field:  # second slot holds number field
+                assert facet['aggregation_type'] == 'stats'
+            else:
+                assert facet['aggregation_type'] == 'terms'
+
+    @pytest.mark.parametrize('_facet', DISABLED_FACETS)
+    def test_search_disabled_overrides_additional(self, testapp, hidden_facet_test_data, _facet):
+        """ Hidden facets should NEVER be faceted on """
+        facets = testapp.get('/search/?type=TestingHiddenFacets&additional_facet=%s' % _facet).json['facets']
+        field_names = [facet['field'] for facet in facets]
+        assert _facet not in field_names  # always hidden should not be here, even if specified
+
+    @pytest.mark.parametrize('_facets', [
+        ('last_name', 'unfaceted_integer', 'disabled_integer'),  # default_hidden second
+        ('sid', 'unfaceted_string', 'disabled_string')  # disabled always last
+    ])
+    def test_search_additional_mixing_disabled_default_hidden(self, testapp, hidden_facet_test_data, _facets):
+        """ Tests that supplying multiple additional facets combined with hidden still respects the
+            hidden restriction. """
+        facets = testapp.get('/search/?type=TestingHiddenFacets'
+                             '&additional_facet=%s'
+                             '&additional_facet=%s' 
+                             '&additional_facet=%s' % (_facets[0], _facets[1], _facets[2])).json['facets']
+        expected = self.DEFAULT_FACETS + [_facets[0], _facets[1]]  # first two should show
+        actual = [facet['field'] for facet in facets]
+        assert sorted(expected) == sorted(actual)
+
+    @pytest.mark.parametrize('_facet', [
+        'unfaceted_object.mother',
+        'unfaceted_object.father'
+    ])
+    def test_search_additional_object_facets(self, testapp, hidden_facet_test_data, _facet):
+        """ Tests that specifying an object field as an additional_facet works correctly """
+        facets = testapp.get('/search/?type=TestingHiddenFacets'
+                             '&additional_facet=%s' % _facet).json['facets']
+        expected = self.DEFAULT_FACETS + [_facet]
+        actual = [facet['field'] for facet in facets]
+        assert sorted(expected) == sorted(actual)
+
+    @pytest.mark.parametrize('_facet, n_expected', [
+        ('unfaceted_array_of_objects.fruit', 4),
+        ('unfaceted_array_of_objects.color', 3),
+        ('unfaceted_array_of_objects.uid', 2.5)  # stats avg
+    ])
+    def test_search_additional_nested_facets(self, testapp, hidden_facet_test_data, _facet, n_expected):
+        """ Tests that specifying an array of object field mapped with nested as an additional_facet
+            works correctly. """
+        [desired_facet] = [facet for facet in testapp.get('/search/?type=TestingHiddenFacets'
+                                                          '&additional_facet=%s' % _facet).json['facets']
+                           if facet['field'] == _facet]
+        if 'terms' in desired_facet:
+            assert len(desired_facet['terms']) == n_expected
+        else:
+            assert desired_facet['avg'] == n_expected
+
+    @pytest.fixture
+    def many_non_nested_facets(self, testapp, hidden_facet_test_data):
+        return testapp.get('/search/?type=TestingHiddenFacets'  
+                           '&additional_facet=non_nested_array_of_objects.fruit'
+                           '&additional_facet=non_nested_array_of_objects.color'
+                           '&additional_facet=non_nested_array_of_objects.uid').json['facets']
+
+    @pytest.mark.parametrize('_facet, n_expected', [
+        ('unfaceted_array_of_objects.fruit', 4),
+        ('unfaceted_array_of_objects.color', 3),
+        ('unfaceted_array_of_objects.uid', 2.5)  # stats avg
+    ])
+    def test_search_additional_non_nested_facets(self, many_non_nested_facets, _facet, n_expected):
+        """ Tests trying to facet on an array of objects field that is not nested, requesting
+            all at the same time.
+        """
+        self.check_and_verify_result(many_non_nested_facets, _facet, n_expected)
+
+
+@pytest.fixture(scope='session')
+def bucket_range_data_raw():
+    """ 10 objects with a numerical field we will bucket on.
+            'special_integer' has i in it.
+            'special_object_that_holds_integer' holds a single integer field with i as well
+            'array_of_objects_that_holds_integer' holds 2 objects that are mirrors of one another
+    """
+    return [{
+        'special_integer': i,
+        'special_object_that_holds_integer': {
+            'embedded_integer': i
+        },
+        'array_of_objects_that_holds_integer': [
+            {
+                'embedded_identifier': 'forward',
+                'embedded_integer': 0 if i < 5 else 9
+            },
+            {
+                'embedded_identifier': 'reverse',
+                'embedded_integer': 9 if i < 5 else 0
+            },
+        ]
+    } for i in range(10)]
+
+
+@pytest.fixture(scope='module')  # XXX: consider scope further - Will 11/5/2020
+def bucket_range_data(testapp, bucket_range_data_raw):
+    for entry in bucket_range_data_raw:
+        testapp.post_json('/TestingBucketRangeFacets', entry, status=201)
+    testapp.post_json('/index', {'record': False})
+
+
+class TestSearchBucketRangeFacets:
+    """ Class that encapsulates tests for BucketRanges """
+
+    @staticmethod
+    def verify_facet_counts(facets, expected_fields, expected_cardinality, expected_count):
+        """ Checks for given expected facets, checking bucket cardinality and document count
+            Note that the actual range properties are trivial (we are not testing elasticsearch)
+        """
+        for facet in facets:
+            if facet['field'] in expected_fields:
+                assert len(facet['ranges']) == expected_cardinality
+                for bucket in facet['ranges']:
+                    assert bucket['doc_count'] == expected_count
+
+    @staticmethod
+    def select_facet(facets, facet_name):
+        result = None
+        for facet in facets:
+            if facet['field'] == facet_name:
+                result = facet
+                break
+        return result
+
+    @pytest.mark.parametrize('expected_fields, expected_counts', [
+        (['special_integer', 'special_object_that_holds_integer.embedded_integer'], 5),
+        (['array_of_objects_that_holds_integer.embedded_integer'], 10)
+    ])
+    def test_search_bucket_range_simple(self, testapp, bucket_range_data, expected_fields, expected_counts):
+        """ Tests searching a collection of documents with varying integer field types that
+            have the same distribution - all of which should give the same results. """
+        res = testapp.get('/search/?type=TestingBucketRangeFacets').json['facets']
+        self.verify_facet_counts(res, expected_fields, 2, expected_counts)
+
+    @pytest.mark.parametrize('identifier', [
+        'reverse', 'forward'
+    ])
+    def test_search_bucket_range_nested_qualifier(self, testapp, bucket_range_data, identifier):
+        """ Tests aggregating on a nested field while selecting for a field within the nested object. """
+        res = testapp.get('/search/?type=TestingBucketRangeFacets'
+                          '&array_of_objects_that_holds_integer.embedded_identifier=%s' % identifier).json['facets']
+        self.verify_facet_counts(res, ['array_of_objects_that_holds_integer.embedded_integer'],
+                                 2, 10)
+
+    @pytest.mark.parametrize('identifier', [
+        'reverse', 'forward'
+    ])
+    def test_search_bucket_range_nested_qualifier(self, testapp, bucket_range_data, identifier):
+        """ Tests aggregating on a nested field while selecting for a field within the nested object (no change). """
+        res = testapp.get('/search/?type=TestingBucketRangeFacets'
+                          '&array_of_objects_that_holds_integer.embedded_integer.from=6'
+                          '&array_of_objects_that_holds_integer.embedded_identifier=%s' % identifier).json['facets']
+        self.verify_facet_counts(res, ['array_of_objects_that_holds_integer.embedded_integer'],
+                                 2, 10)
+        facet_with_labels = self.select_facet(res, 'array_of_objects_that_holds_integer.embedded_integer')
+        for r in facet_with_labels['ranges']:
+            assert 'label' in r
+            assert r['label'] in ['Low', 'High']

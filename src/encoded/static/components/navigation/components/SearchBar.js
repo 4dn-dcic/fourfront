@@ -187,20 +187,19 @@ export class SearchBar extends React.PureComponent {
                 const isVisible = isSelectAction(currentAction) || SearchBar.hasInput(typedSearchQuery) || isSearchItemTypeDropDownToggleOn || false;
                 return { typedSearchQuery, isVisible, isSearchItemTypeDropDownToggleOn: isVisible ? isSearchItemTypeDropDownToggleOn : false };
             });
-        }, 100);
+        }, 200);
     }
 
     onToggleSearchItemType(isOpen, event) {
+        if (!isOpen && this.inputElemRef && this.inputElemRef.current) {
+            const { typedSearchQuery } = this.state;
+            const isInputElemActive = document.activeElement === this.inputElemRef.current;
+            if (!isInputElemActive && typedSearchQuery.length === 0) {
+                this.inputElemRef.current.focus();
+            }
+        }
         this.setState((state, props) => {
             return { isSearchItemTypeDropDownToggleOn: isOpen };
-        }, () => {
-            const { typedSearchQuery, isSearchItemTypeDropDownToggleOn } = this.state;
-            if (!isSearchItemTypeDropDownToggleOn && this.inputElemRef && this.inputElemRef.current) {
-                const isInputElemActive = document.activeElement === this.inputElemRef.current;
-                if (!isInputElemActive && typedSearchQuery.length === 0) {
-                    this.inputElemRef.current.focus();
-                }
-            }
         });
     }
 

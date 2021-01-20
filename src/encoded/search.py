@@ -27,6 +27,7 @@ from elasticsearch import (
     RequestError,
     ConnectionTimeout
 )
+from elasticsearch.exceptions import NotFoundError
 from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPFound
@@ -51,7 +52,7 @@ sanitize_search_string_re = re.compile(r'[\\\+\-\&\|\!\(\)\{\}\[\]\^\~\:\/\\\*\?
 COMMON_EXCLUDED_URI_PARAMS = [
     'frame', 'format', 'limit', 'sort', 'from', 'field',
     'mode', 'redirected_from', 'datastore', 'referrer',
-    'currentAction'
+    'currentAction', 'additional_facet'
 ]
 
 
@@ -90,7 +91,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # into Elasticsearch it will not be loaded
     if (len(doc_types) == 1) and 'Item' not in doc_types:
         search_term = 'search-info-header.' + doc_types[0]
-        static_section = request.registry['collections']['StaticSection'].get(search_term)
+        try:
+            static_section = request.registry['collections']['StaticSection'].get(search_term)
+        except Exception:  # search could fail, NotFoundError does not catch for some reason
+            static_section = None
         if static_section and hasattr(static_section.model, 'source'):
             item = static_section.model.source['object']
             result['search_header'] = {}
@@ -142,7 +146,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, query_filters = set_filters(request, search, result, principals, doc_types)
 
     ### Set starting facets
-    facets = initialize_facets(request, doc_types, prepared_terms, schemas)
+    additional_facets = request.normalized_params.getall('additional_facet')
+    facets = initialize_facets(request, doc_types, prepared_terms, schemas, additional_facets)
 
     ### Adding facets, plus any optional custom aggregations.
     ### Uses 'size' and 'from_' to conditionally skip (no facets if from > 0; no aggs if size > 0).
@@ -167,7 +172,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
-    result['facets'] = format_facets(es_results, facets, total, search_frame)
+    result['facets'] = format_facets(es_results, facets, total, additional_facets, search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
 
     # Add batch actions
@@ -494,9 +499,9 @@ def prepare_search_term(request):
     Ignore certain keywords, such as type, format, and field
     """
     prepared_terms = {}
-    prepared_vals = []
-    for field, val in request.normalized_params.iteritems():
-        if field.startswith('validation_errors') or field.startswith('aggregated_items'):
+    for field, val in request.normalized_params.items():
+        if field.startswith('validation_errors') or field.startswith('aggregated_items') or \
+                field == 'additional_facet':
             continue
         elif field == 'q': # searched string has field 'q'
             # people shouldn't provide multiple queries, but if they do,
@@ -898,7 +903,54 @@ def set_filters(request, search, result, principals, doc_types):
     return search, final_filters
 
 
-def initialize_facets(request, doc_types, prepared_terms, schemas):
+def initialize_additional_facets(request, doc_types, additional_facets, append_facets, current_type_schema):
+    """ Helper function for below method that handles additional_facets URL param
+
+        :param request: current request
+        :param doc_types: doc_types we are searching on
+        :param additional_facets: extra facets specified
+        :param append_facets: list to add additional_facets to
+        :param current_type_schema: schema of the item we are faceting on
+    """
+    for extra_facet in additional_facets:
+        aggregation_type = 'terms'  # default
+
+        # check if defined in facets
+        if 'facets' in current_type_schema:
+            if extra_facet in current_type_schema['facets']:
+                if not current_type_schema['facets'][extra_facet].get('disabled', False):
+                    append_facets.append((extra_facet, current_type_schema['facets'][extra_facet]))
+                continue  # if we found the facet, always continue from here
+
+        # not specified as facet - infer range vs. term based on schema
+        field_definition = schema_for_field(extra_facet, request, doc_types)
+        if not field_definition:  # if not on schema, try "terms"
+            append_facets.append((
+                extra_facet, {'title': extra_facet.title()}
+            ))
+        else:
+            t = field_definition.get('type', None)
+            if not t:
+                log.error('Encountered an additional facet that has no type! %s' % field_definition)
+                continue  # drop this facet
+
+            # terms for string
+            if t == 'string':
+                append_facets.append((
+                    extra_facet, {'title': extra_facet.title(), 'aggregation_type': aggregation_type}
+                ))
+            else:  # try stats
+                aggregation_type = 'stats'
+                append_facets.append((
+                    extra_facet, {
+                        'title': field_definition.get('title', extra_facet.title()),
+                        'aggregation_type': aggregation_type,
+                        'number_step': 'any'
+                    }
+                ))
+
+
+def initialize_facets(request, doc_types, prepared_terms, schemas, additional_facets):
     """
     Initialize the facets used for the search. If searching across multiple
     doc_types, only use the default 'Data Type' and 'Status' facets.
@@ -930,27 +982,30 @@ def initialize_facets(request, doc_types, prepared_terms, schemas):
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
 
+    current_type_schema = request.registry[TYPES][doc_types[0]].schema
+    initialize_additional_facets(request, doc_types, additional_facets,
+                                 append_facets, current_type_schema)
+
     # Add facets from schema if one Item type is defined.
     # Also, conditionally add extra appendable facets if relevant for type from schema.
     if len(doc_types) == 1 and doc_types[0] != 'Item':
-        current_type_schema = request.registry[TYPES][doc_types[0]].schema
         if 'facets' in current_type_schema:
             schema_facets = OrderedDict(current_type_schema['facets'])
             for schema_facet in schema_facets.items():
-                if schema_facet[1].get('disabled', False):
+                if schema_facet[1].get('disabled', False) or schema_facet[1].get('default_hidden', False):
                     disabled_facets.append(schema_facet[0])
-                    continue # Skip disabled facets.
+                    continue  # Skip disabled facets.
                 facets.append(schema_facet)
 
-    ## Add facets for any non-schema ?field=value filters requested in the search (unless already set)
-    used_facets = [ facet[0] for facet in facets + append_facets ]
+    # Add facets for any non-schema ?field=value filters requested in the search (unless already set)
+    used_facets = [facet[0] for facet in facets + append_facets]
     used_facet_titles = used_facet_titles = [
         facet[1]['title'] for facet in facets + append_facets
         if 'title' in facet[1]
     ]
     for field in prepared_terms:
         if field.startswith('embedded'):
-            split_field = field.strip().split('.') # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
+            split_field = field.strip().split('.')  # Will become, e.g. ['embedded', 'experiments_in_set', 'files', 'file_size', 'from']
             use_field = '.'.join(split_field[1:])
 
             # 'terms' is the default per-term bucket aggregation for all non-schema facets
@@ -1190,29 +1245,48 @@ def set_facets(search, facets, search_filters, string_query, request, doc_types,
 
         ## Create the aggregation itself, extend facet with info to pass down to front-end
         agg_name = field.replace('.', '-')
+        agg_type = facet.get('aggregation_type', 'terms')
+        agg_id = agg_type + ':' + agg_name
+        facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
 
-        if facet.get('aggregation_type') == 'stats':
+        # handle stats aggregetation
+        if agg_type == 'stats':
 
             if is_date_field:
                 facet['field_type'] = 'date'
             elif is_numerical_field:
                 facet['field_type'] = field_schema['type'] or "number"
 
-            aggs[facet['aggregation_type'] + ":" + agg_name] = {
+            aggs[agg_id] = {
                 'aggs': {
-                    "primary_agg" : {
-                        'stats' : {
-                            'field' : query_field
+                    "primary_agg": {
+                        'stats': {
+                            'field': query_field
                         }
                     }
                 },
                 'filter': {'bool': facet_filters}
             }
 
-        else: # Default -- facetable terms
+        # handle range aggregation
+        elif agg_type == 'range':
+            ranges = [{k: v for k, v in r.items() if k in ['from', 'to']} for r in facet['ranges']]
+            aggs[agg_id] = {
+                'aggs': {
+                    'primary_agg': {
+                        'range': {
+                            'field': query_field,
+                            'ranges': ranges
+                        }
+                    }
+                },
+                'filter': {'bool': facet_filters}
+            }
+
+        # default - terms aggregation
+        else:
 
             facet['aggregation_type'] = 'terms'
-            facet_filters = generate_filters_for_terms_agg_from_search_filters(query_field, search_filters, string_query)
             term_aggregation = {
                 "terms" : {
                     'size'    : 100,            # Maximum terms returned (default=10); see https://github.com/10up/ElasticPress/wiki/Working-with-Aggregations
@@ -1314,7 +1388,7 @@ def execute_search(search):
     return es_results
 
 
-def format_facets(es_results, facets, total, search_frame='embedded'):
+def format_facets(es_results, facets, total, additional_facets, search_frame='embedded'):
     """
     Format the facets for the final results based on the es results.
     Sort based off of the 'order' of the facets
@@ -1337,6 +1411,9 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
     # If no order is provided, assume 0 to
     # retain order of non-explicitly ordered facets
     for field, facet in sorted(facets, key=lambda fct: fct[1].get('order', 0)):
+        if facet.get('default_hidden', False) and field not in additional_facets:  # skip if specified
+            continue
+
         result_facet = {
             'field' : field,
             'title' : facet.get('title', field),
@@ -1347,15 +1424,31 @@ def format_facets(es_results, facets, total, search_frame='embedded'):
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
         field_agg_name = field.replace('.', '-')
-        full_agg_name = facet['aggregation_type'] + ':' + field_agg_name
+        agg_type = facet['aggregation_type']
+        full_agg_name = agg_type + ':' + field_agg_name
 
         if full_agg_name in aggregations:
-            if facet['aggregation_type'] == 'stats':
+            if agg_type == 'stats':
                 result_facet['total'] = aggregations[full_agg_name]['doc_count']
                 # Used for fields on which can do range filter on, to provide min + max bounds
                 for k in aggregations[full_agg_name]["primary_agg"].keys():
                     result_facet[k] = aggregations[full_agg_name]["primary_agg"][k]
-            else: # 'terms' assumed.
+
+            elif agg_type == 'range':
+                bucket_location = aggregations[full_agg_name]['primary_agg']
+
+                # TODO - refactor ?
+                # merge bucket labels from ranges into buckets
+                for r in result_facet['ranges']:
+                    for b in bucket_location['buckets']:
+
+                        # if ranges match we found our bucket, propagate doc_count into 'ranges' field
+                        if (r.get('from', -1) == b.get('from', -1)) and (r.get('to', -1) == b.get('to', -1)):
+                            r['doc_count'] = b['doc_count']
+                            break
+
+            # 'terms' assumed
+            else:
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 # Choosing to show facets with one term for summary info on search it provides
@@ -1519,13 +1612,19 @@ def build_table_columns(request, schemas, doc_types):
             "default_hidden"    : True,
             "order"             : 501
         }
-    # Add date column, if not present, at end.
+    # Add created date column, if not present, at end.
     if 'date_created' not in columns:
         columns['date_created'] = {
             "title"             : "Date Created",
-            "colTitle"          : "Created",
             "default_hidden"    : True,
             "order"             : 510
+        }
+    # Add modified date column, if not present, at end.   
+    if 'last_modified.date_modified' not in columns:
+        columns['last_modified.date_modified'] = {
+            "title"             : "Date Modified",
+            "default_hidden"    : True,
+            "order"             : 520
         }
     return columns
 

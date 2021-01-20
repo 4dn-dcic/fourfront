@@ -117,6 +117,19 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             return <span className="value text-center">{ valToShow }</span>;
         }
     },
+    'attachment' : {
+        'widthMap' : { 'lg' : 120, 'md' : 120, 'sm' : 120 },
+        'render': function(result, props){
+            const { attachment = null } = result;
+            if (!attachment) return null;
+            const { href: attachHref = '' } = attachment;
+            return (
+                <a href={object.itemUtil.atId(result) + attachHref} className="btn btn-xs btn-primary" data-tip="Download attached file" disabled={attachHref.length === 0}>
+                    <i className="icon icon-fw icon-file-pdf far" />
+                </a>
+            );
+        }
+    },
     'workflow.title' : {
         'title' : "Workflow",
         'render' : function(result, props){
@@ -217,4 +230,31 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     'experiments_in_set.biosample.biosource_summary' : {
         'widthMap' : { 'lg' : 260, 'md' : 230, 'sm' : 180 }
     },
+    'date_created' : {
+        'title' : 'Date Created',
+        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
+        'render' : function dateCreatedTitle(result, props){
+            if (!result.date_created) return null;
+            return (
+                <span className="value text-center">
+                    <LocalizedTime timestamp={result.date_created} formatType="date-sm" />
+                </span>
+            );
+        },
+        'order' : 510
+    },
+    'last_modified.date_modified' : {
+        'title' : 'Date Modified',
+        'widthMap' : { 'lg' : 140, 'md' : 120, 'sm' : 120 },
+        'render' : function lastModifiedDate(result, props){
+            const { last_modified : { date_modified = null } = {} } = result;
+            if (!date_modified) return null;
+            return (
+                <span className="value text-center">
+                    <LocalizedTime timestamp={date_modified} formatType="date-sm" />
+                </span>
+            );
+        },
+        'order' : 515
+    }
 });

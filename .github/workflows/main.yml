@@ -1,0 +1,76 @@
+# Build for fourfront
+
+name: CI
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    name: Test Suite for fourfront
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-18.04
+
+    # Build matrix
+    strategy:
+      matrix:
+        test_type: ['UNIT', 'NPM']
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+
+      - name: Install/Link Postgres
+        run: |
+          sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-common postgresql-11 postgresql-client-11
+          echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
+          sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
+      - name: Install Deps
+        run: |
+          make build
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: QA (NPM)
+        if: ${{ matrix.test_type == 'NPM' }}
+        env:
+          S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
+          TRAVIS_JOB_ID: ${{ github.run_number }}
+        run: |
+          npm test
+          make travis-test-npm
+
+      - name: QA (UNIT)
+        if: ${{ matrix.test_type == 'UNIT' }}
+        env:
+          S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
+          TRAVIS_JOB_ID: ${{ github.run_number }}
+        run: |
+          make travis-test-unit
+
+      - name: Cleanup
+        if: ${{ matrix.test_type == 'NPM' }}  # NPM runs for >50 mins so will purge indices
+        env:
+          S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
+          TRAVIS_JOB_ID: ${{ github.run_number }}
+        run: |
+          poetry run wipe-test-indices $TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
