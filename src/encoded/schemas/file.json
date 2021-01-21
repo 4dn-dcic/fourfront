@@ -420,9 +420,11 @@
             "default_hidden" : true
         },
         "tags": {
+            "title": "Tags",
             "default_hidden" : true
         },
         "genome_assembly": {
+            "title": "Genome Assembly",
             "default_hidden" : true
         }
     }
