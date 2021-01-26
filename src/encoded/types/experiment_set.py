@@ -61,6 +61,7 @@ class ExperimentSet(Item):
         ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        # Badge linkTo
         "badges.badge.title",
         "badges.badge.commendation",
         "badges.badge.warning",
@@ -69,34 +70,45 @@ class ExperimentSet(Item):
         "badges.badge.badge_icon",
         "badges.messages",
 
-        "produced_in_pub.title",
+        # Publication linkTo
         "produced_in_pub.ID",
+        "produced_in_pub.title",
         "produced_in_pub.url",
         "produced_in_pub.abstract",
         "produced_in_pub.journal",
         "produced_in_pub.authors",
         "produced_in_pub.short_attribution",
         "produced_in_pub.date_published",
+
+        # Publication linkTo
+        "publications_of_set.ID",
         "publications_of_set.title",
         "publications_of_set.abstract",
         "publications_of_set.journal",
         "publications_of_set.authors",
         "publications_of_set.date_published",
 
+        # Experiment linkTo
         "experiments_in_set.@type",
+        "experiments_in_set.accession",
+        "experiments_in_set.status",
+        "experiments_in_set.external_references.*",
+
+        # ExperimentType linkTo
+        "experiments_in_set.experiment_type.title",
         "experiments_in_set.experiment_type.display_title",
         "experiments_in_set.experiment_type.assay_classification",
         "experiments_in_set.experiment_type.assay_subclassification",
         "experiments_in_set.experiment_type.assay_subclass_short",
         "experiments_in_set.experiment_type.experiment_category",
         "experiments_in_set.experiment_type.other_tags",
-        "experiments_in_set.accession",
-        "experiments_in_set.status",
-        "experiments_in_set.external_references.*",
+
+        # object field
         "experiments_in_set.experiment_categorizer.field",
         "experiments_in_set.experiment_categorizer.value",
         "experiments_in_set.experiment_categorizer.combined",
 
+        # Badges linkTo
         "experiments_in_set.badges.badge.title",
         "experiments_in_set.badges.badge.commendation",
         "experiments_in_set.badges.badge.warning",
@@ -105,28 +117,72 @@ class ExperimentSet(Item):
         "experiments_in_set.badges.badge.description",
         "experiments_in_set.badges.messages",
 
+        # Biosample linkTo
         "experiments_in_set.biosample.accession",
+        "experiments_in_set.biosample.treatments_summary",
+        # XXX: calc prop that needs updating to rely on embeds -Will
         "experiments_in_set.biosample.modifications_summary",
         "experiments_in_set.biosample.biosource_summary",
         "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosample_category",
+
+        # XXX: this field needs to be refactored to work with invalidation scope -Will
         "experiments_in_set.biosample.tissue_organ_info.organ_system",
         "experiments_in_set.biosample.tissue_organ_info.tissue_source",
+
+        # Biosource linkTo
         "experiments_in_set.biosample.biosource.biosource_type",
+        "experiments_in_set.biosample.biosource.individual",
+        "experiments_in_set.biosample.biosource.cell_line",
+        "experiments_in_set.biosample.biosource.tissue",
+        "experiments_in_set.biosample.biosource.modifications",
+        "experiments_in_set.biosample.biosource.cell_line_tier",
+        "experiments_in_set.biosample.biosource.override_biosource_name",
+
+        # OntologyTerm linkTo
+        "experiments_in_set.biosample.biosource.cell_line.term_id",
+        "experiments_in_set.biosample.biosource.cell_line.term_name",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
         "experiments_in_set.biosample.biosource.cell_line.slim_terms",
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
+
+        # OntologyTerm linkTo
+        "experiments_in_set.biosample.biosource.tissue.term_id",
+        "experiments_in_set.biosample.biosource.tissue.term_name",
         "experiments_in_set.biosample.biosource.tissue.preferred_name",
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
-        "experiments_in_set.biosample.biosource.cell_line_tier",
+
+        # Organism linkTo
         "experiments_in_set.biosample.biosource.individual.organism.name",
+
+        # OntologyTerm linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
+        "experiments_in_set.biosample.cell_culture_details.tissue.term_id",
+        "experiments_in_set.biosample.cell_culture_details.tissue.term_name",
+        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms",
+        "experiments_in_set.biosample.cell_culture_details.tissue.synonyms"
+
+        # Modification linkTo
         "experiments_in_set.biosample.modifications.modification_type",
-        "experiments_in_set.biosample.modifications.display_title",
+        "experiments_in_set.biosample.modifications.genomic_change",
+        "experiments_in_set.biosample.modifications.target_of_mod",
+        "experiments_in_set.biosample.modifications.override_modification_name",
+
+        # Treatment linkTo
         "experiments_in_set.biosample.treatments.treatment_type",
-        "experiments_in_set.biosample.treatments.display_title",
-        "experiments_in_set.biosample.treatments_summary",
+        "experiments_in_set.biosample.treatments.description",
+        "experiments_in_set.biosample.treatments.chemical",
+        "experiments_in_set.biosample.treatments.biological_agent",
+        "experiments_in_set.biosample.treatments.constructs",
+        "experiments_in_set.biosample.treatments.duration",
+        "experiments_in_set.biosample.treatments.duration_units",
+        "experiments_in_set.biosample.treatments.concentration",
+        "experiments_in_set.biosample.treatments.concentration_units",
+        "experiments_in_set.biosample.treatments.temperature",
+
+
+        # Badges linkTo
         "experiments_in_set.biosample.badges.badge.title",
         "experiments_in_set.biosample.badges.badge.commendation",
         "experiments_in_set.biosample.badges.badge.warning",
@@ -135,8 +191,13 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.badges.badge.description",
         "experiments_in_set.biosample.badges.messages",
 
+        # Enzyme linkTo
         "experiments_in_set.digestion_enzyme.name",
+
+        # File linkTo
         "experiments_in_set.filesets.files_in_set.accession",
+
+        # Last modified
         "experiments_in_set.last_modified.date_modified",
 
         # Files - For common embeds (href, file_format, etc) we could programatically get rid of a bunch of similar lines - e.g.:
@@ -144,6 +205,7 @@ class ExperimentSet(Item):
         #     ExperimentSet.embedded_list.append("experiments_in_set.files." + f)
         #     ExperimentSet.embedded_list.append("experiments_in_set.processed_files." + f) ...
 
+        # File linkTo
         "experiments_in_set.files.href",
         "experiments_in_set.files.accession",
         "experiments_in_set.files.uuid",
@@ -156,19 +218,26 @@ class ExperimentSet(Item):
         "experiments_in_set.files.file_classification",
         "experiments_in_set.files.paired_end",
         "experiments_in_set.files.status",
+        "experiments_in_set.files.notes_to_tsv",
         "experiments_in_set.files.external_references.*",
+
+        # File linkTo
         "experiments_in_set.files.extra_files",
         "experiments_in_set.files.extra_files.href",
         "experiments_in_set.files.extra_files.file_format",
         "experiments_in_set.files.extra_files.file_size",
         "experiments_in_set.files.extra_files.md5sum",
         "experiments_in_set.files.extra_files.use_for",
+
+        # QualityMetric linkTo
         "experiments_in_set.files.quality_metric.display_title",
         "experiments_in_set.files.quality_metric.Total Sequences",
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
         "experiments_in_set.files.quality_metric.overall_quality_status",
-        "experiments_in_set.files.quality_metric.quality_metric_summary.*", # This may not yet be enabled on raw files.
+        "experiments_in_set.files.quality_metric.quality_metric_summary.*",  # This may not yet be enabled on raw files.
+
+        # Badge linkTo
         "experiments_in_set.files.badges.badge.title",
         "experiments_in_set.files.badges.badge.commendation",
         "experiments_in_set.files.badges.badge.warning",
@@ -176,15 +245,22 @@ class ExperimentSet(Item):
         "experiments_in_set.files.badges.badge.badge_icon",
         "experiments_in_set.files.badges.badge.description",
         "experiments_in_set.files.badges.messages",
-        "experiments_in_set.files.notes_to_tsv",
-        "experiments_in_set.files.contributing_labs.display_title",
-        "experiments_in_set.files.lab.display_title",
 
+        # Lab linkTos
+        "experiments_in_set.files.contributing_labs.name",
+        "experiments_in_set.files.lab.name",
+        "processed_files.lab.name",
+        "processed_files.contributing_labs.name",
+
+        "experiments_in_set.files.related_files",
         "experiments_in_set.files.related_files.relationship_type",
+
+        # File linkTo
         "experiments_in_set.files.related_files.file.accession",
         "experiments_in_set.files.related_files.file.paired_end",
         "experiments_in_set.files.related_files.file.file_type",
 
+        # ProcessedFile linkTo
         "processed_files.href",
         "processed_files.accession",
         "processed_files.uuid",
@@ -197,20 +273,25 @@ class ExperimentSet(Item):
         "processed_files.status",
         "processed_files.external_references.*",
         "processed_files.md5sum",
+        "processed_files.higlass_uid",
+        "processed_files.genome_assembly",
+        "processed_files.notes_to_tsv",
+
+        # File linkTo
         "processed_files.extra_files",
         "processed_files.extra_files.href",
         "processed_files.extra_files.file_format",
         "processed_files.extra_files.file_size",
         "processed_files.extra_files.md5sum",
         "processed_files.extra_files.use_for",
-        "processed_files.higlass_uid",
-        "processed_files.genome_assembly",
+
         "processed_files.last_modified.date_modified",
+
+        # StaticSection linkTo
         "processed_files.static_content.location",
         "processed_files.static_content.description",
         "processed_files.static_content.content.@type",
-        "processed_files.contributing_labs.display_title",
-        "processed_files.lab.display_title",
+
 
         # "processed_files.quality_metric.Total reads",
         # "processed_files.quality_metric.Total Sequences",
@@ -218,10 +299,10 @@ class ExperimentSet(Item):
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric.quality_metric_summary.*",
-        "processed_files.notes_to_tsv",
         "processed_files.quality_metric.Total reads",
         "processed_files.quality_metric.qc_list.value.Total reads",
 
+        # FileProcessed linkTo
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
         "experiments_in_set.processed_files.uuid",
@@ -236,30 +317,37 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.md5sum",
         "experiments_in_set.processed_files.higlass_uid",
         "experiments_in_set.processed_files.genome_assembly",
+        "experiments_in_set.processed_files.notes_to_tsv",
+
+        # File linkTo
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
+        "experiments_in_set.processed_files.extra_files.accession",
         "experiments_in_set.processed_files.extra_files.file_format",
         "experiments_in_set.processed_files.extra_files.file_size",
         "experiments_in_set.processed_files.extra_files.md5sum",
         "experiments_in_set.processed_files.extra_files.use_for",
 
+        # QualityMetric linkTo
         "experiments_in_set.processed_files.quality_metric.url",
         "experiments_in_set.processed_files.quality_metric.overall_quality_status",
         "experiments_in_set.processed_files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.processed_files.quality_metric.Total reads",
         "experiments_in_set.processed_files.quality_metric.qc_list.value.Total reads",
 
+        # File linkTo
         "experiments_in_set.processed_files.related_files.relationship_type",
         "experiments_in_set.processed_files.related_files.file.accession",
         "experiments_in_set.processed_files.related_files.file.file_type",
 
+        # StaticSection linkTo
         "experiments_in_set.processed_files.static_content.location",
         "experiments_in_set.processed_files.static_content.description",
         "experiments_in_set.processed_files.static_content.content.@type",  # Should only pull in @id, uuid, & display_title
+
         "experiments_in_set.processed_files.last_modified.date_modified",
-        "experiments_in_set.processed_files.notes_to_tsv",
-        "experiments_in_set.processed_files.contributing_labs.display_title",
-        "experiments_in_set.processed_files.lab.display_title",
+        "experiments_in_set.processed_files.contributing_labs.name",
+        "experiments_in_set.processed_files.lab.name",
         # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
@@ -271,7 +359,9 @@ class ExperimentSet(Item):
         "other_processed_files.files.href",
         "other_processed_files.files.status",
         "other_processed_files.files.md5sum",
+
         "other_processed_files.files.last_modified.date_modified",
+
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
@@ -300,7 +390,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
         "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
-        "experiments_in_set.other_processed_files.files.lab.display_title",
+        "experiments_in_set.other_processed_files.files.lab.name",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
@@ -311,7 +401,7 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
         "experiments_in_set.reference_files.md5sum",
-        "experiments_in_set.reference_files.lab.display_title",
+        "experiments_in_set.reference_files.lab.name",
         "experiments_in_set.reference_files.contributing_labs.display_title",
 
         'sample_image.caption',

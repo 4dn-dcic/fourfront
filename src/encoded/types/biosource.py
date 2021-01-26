@@ -40,29 +40,52 @@ class Biosource(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        "individual.age",
-        "individual.age_units",
-        "individual.sex",
-        "individual.organism.name",
-        "individual.life_stage",
-        "individual.mouse_life_stage",
-        "individual.mouse_strain",
-        "individual.ethnicity",
-        "individual.health_status",
-        "modifications.modification_type",
-        "tissue.term_name",
-        "tissue.preferred_name",
-        "tissue.slim_terms",
-        "tissue.synonyms",
-        "tissue.source_ontologies.ontology_name",
-        "cell_line.term_name",
-        "cell_line.preferred_name",
-        "cell_line.slim_terms",
-        "cell_line.synonyms",
+        # Individual linkTo
+        'individual.accession',
+        'individual.age',
+        'individual.age_units',
+        'individual.sex',
+        'individual.life_stage',
+        'individual.mouse_life_stage',
+        'individual.mouse_strain',
+        'individual.ethnicity',
+        'individual.health_status',
+
+        # Organism linkTo
+        'individual.organism.name',
+        'individual.organism.scientific_name',
+
+        # Modification linkTo
+        'modifications.modification_type',
+        'modifications.genomic_change',
+        'modifications.target_of_mod',
+        'modifications.override_modification_name',
+
+        # OntologyTerm linkTo
+        'tissue.term_name',
+        'tissue.term_id',
+        'tissue.preferred_name',
+        'tissue.slim_terms',
+        'tissue.synonyms',
+
+        # Ontology linkTo
+        'tissue.source_ontologies.ontology_name',
+
+        # OntologyTerm linkTo
+        'cell_line.term_name',
+        'cell_line.preferred_name',
+        'cell_line.slim_terms',
+        'cell_line.synonyms',
+        'cell_line.term_id',
+
+        # Protocol linkTo
         'SOP_cell_line.attachment.href',
         'SOP_cell_line.attachment.type',
         'SOP_cell_line.attachment.md5sum',
         'SOP_cell_line.description'
+        'SOP_cell_line.protocol_type',
+        'SOP_cell_line.title',
+        'SOP_cell_line.date_created'
     ]
 
     @calculated_property(schema={

@@ -24,7 +24,12 @@ class BioFeature(Item):
     item_type = 'bio_feature'
     schema = load_schema('encoded:schemas/bio_feature.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        # OntologyTerm linkTo
         'feature_type.preferred_name',
+        'feature_type.slim_terms',
+        'feature_type.synonyms',
+        'feature_type.term_name',
+        'feature_type.term_id'
     ]
 
     @calculated_property(schema={

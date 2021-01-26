@@ -35,6 +35,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        # Badge linkTo
         'badges.badge.title',
         'badges.badge.commendation',
         'badges.badge.warning',
@@ -42,15 +43,28 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'badges.badge.description',
         'badges.badge.badge_icon',
         'badges.messages',
-        'biosource.biosource_type',
+
+        # Biosource linkTo - many calc prop dependencies
+        'biosource.*',
         'biosource.individual.sex',
         'biosource.individual.organism.name',
-        'biosource.biosource_vendor.name',
-        "biosource.cell_line.slim_terms",
-        "biosource.cell_line.synonyms",
-        "biosource.cell_line_tier",
-        "biosource.tissue.slim_terms",
-        "biosource.tissue.synonyms",
+        'biosource.biosource_vendor.name',  # display_title uses this
+
+        # OntologyTerm linkTo
+        'biosource.cell_line.slim_terms',
+        'biosource.cell_line.synonyms',
+        'biosource.cell_line.preferred_name',
+        'biosource.cell_line.term_name',
+        'biosource.cell_line.term_id',
+
+        # OntologyTerm linkTo
+        'biosource.tissue.slim_terms',
+        'biosource.tissue.synonyms',
+        'biosource.tissue.preferred_name',
+        'biosource.tissue.term_name',
+        'biosource.tissue.term_id',
+
+        # BiosampleCellCulture linkTo + Image linkTo
         'cell_culture_details.*',
         'cell_culture_details.morphology_image.caption',
         'cell_culture_details.morphology_image.attachment.href',
@@ -59,18 +73,54 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'cell_culture_details.morphology_image.attachment.download',
         'cell_culture_details.morphology_image.attachment.width',
         'cell_culture_details.morphology_image.attachment.height',
+
+        # OntologyTerm linkTo
         'cell_culture_details.tissue.term_name',
         'cell_culture_details.tissue.preferred_name',
+        'cell_culture_details.tissue.slim_terms',
+        'cell_culture_details.tissue.synonyms',
+        'cell_culture_details.tissue.term_id',
+
+        # Modification linkTo
         'modifications.modification_type',
+        'modifications.genomic_change',
+        'modifications.target_of_mod',
+        'modifications.override_modification_name',
         'modifications.description',
+
+        # Treatment linkTo, verbose display_title so many embeds necessary
         'treatments.treatment_type',
         'treatments.description',
+        'treatments.chemical',
+        'treatments.biological_agent',
+        'treatments.constructs',
+        'treatments.duration',
+        'treatments.duration_units',
+        'treatments.concentration',
+        'treatments.concentration_units',
+        'treatments.temperature',
+
+        # Construct linkTo
+        'treatments.constructs.name',
+
+        # Biofeature linkTo
+        'treatments.constructs.expression_products.feature_type',
+        'treatments.constructs.expression_products.preferred_label',
+        'treatments.constructs.expression_products.cellular_structure',
+        'treatments.constructs.expression_products.organism_name',
         'treatments.constructs.expression_products.relevant_genes',
-        'treatments.constructs.expression_products.feature_mods.mod_type',
+        'treatments.constructs.expression_products.feature_mods',
+        'treatments.constructs.expression_products.genome_location',
+        'treatments.constructs.expression_products.feature_mods.mod_type',  # object
+
+        # Protocol linkTo
+        'biosample_protocols.description',
+        'biosample_protocols.protocol_type',
+        'biosample_protocols.title',
+        'biosample_protocols.date_created',
         'biosample_protocols.attachment.href',
         'biosample_protocols.attachment.type',
         'biosample_protocols.attachment.md5sum',
-        'biosample_protocols.description'
     ]
     name_key = 'accession'
 
@@ -219,7 +269,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             return 'mixed sample'
         elif len(biosource_types) < 1:  # pragma: no cover
             # shouldn't happen so raise an exception
-            raise "Biosource always needs type - why can't we find it"
+            raise Exception("Biosource always needs type - why can't we find it")
 
         # we've got a single type of biosource
         if cell_culture_details:  # this is now an array but just check the first

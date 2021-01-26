@@ -228,6 +228,8 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
+
+    # TODO: embed file_format
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         # 'experiments.display_title',
         'experiments.accession',
@@ -279,6 +281,7 @@ class File(Item):
         "type": "string"
     })
     def display_title(self, request, file_format, accession=None, external_accession=None):
+        # TODO: refactor to use file_format embed
         accession = accession or external_accession
         file_format_item = get_item_or_none(request, file_format, 'file-formats')
         try:

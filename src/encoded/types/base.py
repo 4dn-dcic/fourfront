@@ -189,7 +189,8 @@ static_content_embed_list = [
 
 lab_award_attribution_embed_list = [
     "award.project",
-    "award.center_title",
+    "award.center_title",  # XXX: breaks invalidation scope due to call to embed -Willf
+    "award.pi.last_name",  # used in above calc prop
     "lab.city",
     "lab.state",
     "lab.country",
