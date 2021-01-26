@@ -182,12 +182,6 @@
         },
         "award.project" : {
             "title" : "Project"
-        },
-        "date_created": {
-            "default_hidden" : true
-        },
-        "last_modified.date_modified": {
-            "default_hidden" : true
         }
     }
 }

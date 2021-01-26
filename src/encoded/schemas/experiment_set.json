@@ -263,9 +263,6 @@
         "public_release": {
             "title" : "Public Release",
             "default_hidden" : true
-        },
-        "last_modified.date_modified": {
-            "default_hidden" : true
         }
     }
 

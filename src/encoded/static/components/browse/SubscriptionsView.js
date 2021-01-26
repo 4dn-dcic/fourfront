@@ -143,7 +143,7 @@ class SubscriptionEntry extends React.PureComponent {
             "display_title" : { "title" : "Title", widthMap : { sm: 240, md: 320, lg: 400 } },
             "@type" : { "title" : "Type" },
             "status": { "title" : "Status", widthMap : { sm: 180, md: 200, lg: 240 } },
-            "last_modified.date_modified": { "title" : "Modified" },
+            "last_modified.date_modified": { "title" : "Date Modified" },
             "date_created": { "title" : "Created" }
         }
     };
