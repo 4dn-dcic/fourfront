@@ -413,16 +413,12 @@
         "source_experiment_sets.@id" : {
             "title" : "Experiment Set"
         },
-        "date_created": {
-            "default_hidden" : true
-        },
-        "last_modified.date_modified": {
-            "default_hidden" : true
-        },
         "tags": {
+            "title": "Tags",
             "default_hidden" : true
         },
         "genome_assembly": {
+            "title": "Genome Assembly",
             "default_hidden" : true
         }
     }
