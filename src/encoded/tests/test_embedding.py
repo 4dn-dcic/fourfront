@@ -88,12 +88,12 @@ def test_linked_uuids_experiment(experiment, lab, award, human_biosample, human_
     linked_uuids = dummy_request._linked_uuids
     # starting item is not in linked_uuids
     assert (experiment['uuid'], experiment['@type'][0]) in linked_uuids
-    assert lab['uuid'] in linked_uuids
-    assert award['uuid'] in linked_uuids
+    assert (lab['uuid'], lab['@type'][0]) in linked_uuids
+    assert (award['uuid'], award['@type'][0]) in linked_uuids
     # biosample is added because of biosample.biosource
-    assert human_biosample['uuid'] in linked_uuids
-    assert human_biosource['uuid'] in linked_uuids
-    assert mboI['uuid'] in linked_uuids
+    assert (human_biosample['uuid'], human_biosample['@type'][0]) in linked_uuids
+    assert (human_biosource['uuid'], human_biosource['@type'][0]) in linked_uuids
+    assert (mboI['uuid'], mboI['@type'][0]) in linked_uuids
 
 
 @pytest.mark.parametrize('item_type', ORDER)

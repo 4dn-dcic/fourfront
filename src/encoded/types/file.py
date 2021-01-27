@@ -229,8 +229,8 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
-        'files_in_set.file_classification'
-    
+        'files_in_set.file_classification',
+
         # FileFormat linkTo
         'files_in_set.file_format.file_format',
     ]

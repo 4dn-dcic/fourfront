@@ -164,8 +164,8 @@ class Experiment(Item):
         'biosample.treatments.duration_units',
         'biosample.treatments.concentration',
         'biosample.treatments.concentration_units',
-        'biosample.treatments.temperature'
-        
+        'biosample.treatments.temperature',
+
         # Badge linkTo
         'biosample.badges.badge.title',
         'biosample.badges.badge.commendation',

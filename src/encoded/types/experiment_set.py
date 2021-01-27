@@ -322,7 +322,7 @@ class ExperimentSet(Item):
         # File linkTo
         "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
-        "experiments_in_set.processed_files.extra_files.accession",
+        # "experiments_in_set.processed_files.extra_files.accession", XXX: Data model error? Bad embed? -Will
         "experiments_in_set.processed_files.extra_files.file_format",
         "experiments_in_set.processed_files.extra_files.file_size",
         "experiments_in_set.processed_files.extra_files.md5sum",
