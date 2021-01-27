@@ -54,7 +54,7 @@ QC_SUMMARY_SCHEMA = {
     }
 }
 
-"""OVERALL QAULITY SCORE INFO
+"""OVERALL QUALITY SCORE INFO
 All QC objects come with a field 'overall_quality_status', which is by default set to 'PASS'
 For some qc object we don't have a current protocol to judge the overall quality based on the
 fields in the qc item.
@@ -73,7 +73,15 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded_list = ['award.project', 'quality_metrics.overall_quality_status']
+    embedded_list = [
+        # Award linkTo
+        'award.project',
+        'award.name',
+
+        # QualityMetric linkTo
+        'quality_metrics.overall_quality_status',
+        'quality_metrics.url'
+    ]
 
 
 @abstract_collection(
@@ -149,7 +157,7 @@ class QualityMetricBamqc(QualityMetric):
     def quality_metric_summary(self, request):
         qc = self.properties
         qc_summary = []
-        
+
         if 'Total Reads' not in qc:
             return
 
@@ -228,7 +236,7 @@ class QualityMetricPairsqc(QualityMetric):
     def quality_metric_summary(self, request):
         qc = self.properties
         qc_summary = []
-        
+
         if 'Total reads' not in qc:
             return
 
@@ -454,19 +462,19 @@ class QualityMetricQclist(QualityMetric):
                 if 'quality_metric_summary' in qc_obj:
                     for qcs_item in qc_obj['quality_metric_summary']:
                         qc_summary.append(qcs_item)
-        
+
         return qc_summary if qc_summary else None
 
 
 def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
-    """ 
-        Chipseq and Atacseq QCs both have common QC Summary metrics. This method 
+    """
+        Chipseq and Atacseq QCs both have common QC Summary metrics. This method
         calculates the metrics within quality_metric_summary calculated property
-    """    
-    
+    """
+
     def round2(numVal):
         return round(numVal * 100) / 100
-    
+
     qc_summary = []
 
     if 'overlap_reproducibility_qc' in quality_metric:

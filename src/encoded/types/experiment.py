@@ -111,7 +111,7 @@ class Experiment(Item):
         'produced_in_pub.date_published',
 
         # Publication linkTo
-        'publications_of_exp.ID'
+        'publications_of_exp.ID',
         'publications_of_exp.title',
         'publications_of_exp.abstract',
         'publications_of_exp.journal',

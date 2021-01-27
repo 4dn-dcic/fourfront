@@ -53,7 +53,9 @@ class Lab(Item):
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
     embedded_list = Item.embedded_list + [
+        # Award linkTo
         'awards.project',
+        'awards.name',
         'awards.center_title'
     ]
 

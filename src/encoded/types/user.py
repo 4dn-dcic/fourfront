@@ -75,11 +75,15 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     embedded_list = [
-        'lab.awards.project',
+        # Lab linkTo
         'lab.name',
-        'lab.display_title',
+
+        # Award linkTo
+        'lab.awards.name',
+        'lab.awards.project',
+
+        # Lab linkTo
         'submits_for.name',
-        'submits_for.display_title'
     ]
 
     STATUS_ACL = {

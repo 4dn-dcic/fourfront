@@ -40,7 +40,10 @@ class TreatmentAgent(Treatment):
 
     item_type = 'treatment_agent'
     schema = load_schema('encoded:schemas/treatment_agent.json')
-    embedded_list = Treatment.embedded_list + ['constructs.name']
+    embedded_list = Treatment.embedded_list + [
+        # Construct linkTo
+        'constructs.name'
+    ]
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -94,8 +97,13 @@ class TreatmentRnai(Treatment):
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
     embedded_list = Treatment.embedded_list + [
+        # Vendor linkTo
         'rnai_vendor.name',
+        'rnai_vendor.title',
+
+        # Construct linkTo
         'constructs.designed_to_target',
+        'constructs.name',
     ]
 
     @calculated_property(schema={

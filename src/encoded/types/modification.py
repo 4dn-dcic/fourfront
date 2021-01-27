@@ -22,10 +22,19 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        # Construct linkTo
+        'constructs.name',
         'constructs.construct_type',
         'constructs.tags',
         'constructs.designed_to_target',
+
+        # GenomicRegion linkTo
         'modified_regions.aliases',
+        'modified_regions.genome_assembly',
+        'modified_regions.location_description',
+        'modified_regions.start_coordinate',
+        'modified_regions.end_coordinate',
+        'modified_regions.chromosome',
     ]
 
     @calculated_property(schema={

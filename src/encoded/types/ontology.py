@@ -23,11 +23,22 @@ class OntologyTerm(Item):
     item_type = 'ontology_term'
     schema = load_schema('encoded:schemas/ontology_term.json')
     embedded_list = [
+        # OntologyTerm linkTo
         'slim_terms.is_slim_for',
         'slim_terms.term_name',
+        'slim_terms.term_id',
+        'slim_terms.preferred_name',
+
+        # Ontology linkTo
         'source_ontologies.ontology_name',
-        'parents.source_ontologies',
-        'parents.term_id'
+
+        # OntologyTerm linkTo
+        'parents.term_id',
+        'parents.term_name',
+        'parents.preferred_name',
+
+        # Ontology linkTo
+        'parents.source_ontologies.ontology_name',
     ]
     name_key = 'term_id'
 

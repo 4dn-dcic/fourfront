@@ -660,6 +660,7 @@ class Workflow(Item):
         Item.embedded_list +
         lab_award_attribution_embed_list +
         [
+            # XXX: embeds need review
             'steps.name',
             'steps.inputs',
             'steps.outputs',
@@ -707,6 +708,7 @@ class WorkflowRun(Item):
         Item.embedded_list +
         lab_award_attribution_embed_list +
         [
+            # XXX: Embeds need review
             'workflow.category',
             'workflow.experiment_types',
             'workflow.app_name',

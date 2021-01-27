@@ -82,7 +82,7 @@ class Biosource(Item):
         'SOP_cell_line.attachment.href',
         'SOP_cell_line.attachment.type',
         'SOP_cell_line.attachment.md5sum',
-        'SOP_cell_line.description'
+        'SOP_cell_line.description',
         'SOP_cell_line.protocol_type',
         'SOP_cell_line.title',
         'SOP_cell_line.date_created'

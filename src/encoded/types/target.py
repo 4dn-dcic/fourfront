@@ -21,7 +21,10 @@ class Target(Item):
 
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + ['targeted_genome_regions.*']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        # GenomicRegion linkTo (is * really necessary?) - Will
+        'targeted_genome_regions.*'
+    ]
 
     @calculated_property(schema={
         "title": "Target summary",

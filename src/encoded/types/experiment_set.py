@@ -161,7 +161,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.cell_culture_details.tissue.term_id",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_name",
         "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms",
-        "experiments_in_set.biosample.cell_culture_details.tissue.synonyms"
+        "experiments_in_set.biosample.cell_culture_details.tissue.synonyms",
 
         # Modification linkTo
         "experiments_in_set.biosample.modifications.modification_type",
@@ -348,7 +348,6 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.last_modified.date_modified",
         "experiments_in_set.processed_files.contributing_labs.name",
         "experiments_in_set.processed_files.lab.name",
-        # "experiments_in_set.processed_files.@type"
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",

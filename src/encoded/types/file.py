@@ -70,6 +70,7 @@ logging.getLogger('boto3').setLevel(logging.CRITICAL)
 
 log = structlog.getLogger(__name__)
 
+# XXX: Need expanding to cover display_title
 file_workflow_run_embeds = [
     'workflow_run_inputs.workflow.title',
     'workflow_run_inputs.input_files.workflow_argument_name',
@@ -179,14 +180,24 @@ class FileSetCalibration(FileSet):
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
     embedded_list = Item.embedded_list + [
+        # User linkTo
+        'files_in_set.submitted_by.first_name',
+        'files_in_set.submitted_by.last_name',
         'files_in_set.submitted_by.job_title',
+
+        # Lab linkTo
         'files_in_set.lab.title',
+        'files_in_set.lab.name',
+
+        # File linkTo
         'files_in_set.accession',
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
+        'files_in_set.file_classification',
+
+        # FileFormat linkTo
         'files_in_set.file_format.file_format',
-        'files_in_set.file_classification'
     ]
 
 
@@ -204,14 +215,24 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
     schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
     name_key = 'accession'
     embedded_list = Item.embedded_list + [
+        # User linkTo
+        'files_in_set.submitted_by.first_name',
+        'files_in_set.submitted_by.last_name',
         'files_in_set.submitted_by.job_title',
+
+        # Lab linkTo
         'files_in_set.lab.title',
+        'files_in_set.lab.name',
+
+        # File linkTo
         'files_in_set.accession',
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
-        'files_in_set.file_format.file_format',
         'files_in_set.file_classification'
+    
+        # FileFormat linkTo
+        'files_in_set.file_format.file_format',
     ]
 
 
@@ -231,30 +252,62 @@ class File(Item):
 
     # TODO: embed file_format
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # 'experiments.display_title',
+        # XXX: Experiment linkTo
         'experiments.accession',
-        'experiments.experiment_type.display_title',
+
+        # ExperimentType linkTo
+        'experiments.experiment_type.title',
+
+        # ExperimentSet linkTo
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
-        'experiments.biosample.biosource.display_title',
-        'experiments.biosample.biosource.biosource_type',
+
+        # Enzyme linkTo
+        'experiments.digestion_enzyme.name',
+
+        # Standard embed
+        'experiments.last_modified.date_modified',
+
+        # Biosample linkTo
+        'experiments.biosample.accession',
         'experiments.biosample.biosource_summary',
         'experiments.biosample.modifications_summary',
         'experiments.biosample.treatments_summary',
+
+        # Biosource linkTo
+        'experiments.biosample.biosource.biosource_type',
+        'experiments.biosample.biosource.individual',
+        'experiments.biosample.biosource.cell_line',
+        'experiments.biosample.biosource.cell_line_tier',
+        'experiments.biosample.biosource.tissue',
+        'experiments.biosample.biosource.modifications',
+        'experiments.biosample.biosource.override_biosource_name',
+
+        # Organism linkTo
         'experiments.biosample.biosource.individual.organism.name',
-        'experiments.digestion_enzyme.name',
-        'experiments.last_modified.date_modified',
+        'experiments.biosample.biosource.individual.organism.scientific_name',
+
+
+        # FileFormat linkTo
         'file_format.file_format',
+
+        # File linkTo
         'related_files.relationship_type',
         'related_files.file.accession',
-        'quality_metric.display_title',
+
+        # QualityMetric linkTo
+        'quality_metric.url',
         'quality_metric.@type',
-        'quality_metric.qc_list.qc_type',
-        'quality_metric.qc_list.value.display_title',
-        'quality_metric.qc_list.value.@type',
-        'quality_metric.quality_metric_summary.*',
         'quality_metric.Total reads',
+
+        # Calc prop depends on qc_list
+        'quality_metric.quality_metric_summary.*',
+
+        # QualityMetric linkTo
+        'quality_metric.qc_list.qc_type',
+        'quality_metric.qc_list.value.url',
+        'quality_metric.qc_list.value.@type',
         'quality_metric.qc_list.value.Total reads'
     ]
     name_key = 'accession'
@@ -771,10 +824,11 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds + [
-        "quality_metric.overall_quality_status",
-        "quality_metric.Total Sequences",
-        "quality_metric.Sequence length",
-        "quality_metric.url"
+        # QualityMetric linkTo
+        'quality_metric.overall_quality_status',
+        'quality_metric.Total Sequences',
+        'quality_metric.Sequence length',
+        'quality_metric.url'
     ]
     name_key = 'accession'
     rev = dict(File.rev, **{
@@ -821,8 +875,11 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        # ExperimentSet linkTo
         'experiment_sets.accession',
         'experiment_sets.last_modified.date_modified',
+
+        # QualityMetric linkTo
         "quality_metric.Total reads",
         "quality_metric.Trans reads",
         "quality_metric.Cis reads (>20kb)",
@@ -1066,9 +1123,18 @@ class FileMicroscopy(ItemWithAttachment, File):
     item_type = 'file_microscopy'
     schema = load_schema('encoded:schemas/file_microscopy.json')
     embedded_list = File.embedded_list + [
+        # Experiment linkTo
+        "experiments.accession",
         "experiments.@type",
+
+        # ImagingPath linkTo
         "experiments.imaging_paths.channel",
-        "experiments.imaging_paths.path",
+        "experiments.imaging_paths.path.target",
+        "experiments.imaging_paths.path.labeled_probe",
+        "experiments.imaging_paths.path.other_probes",
+        "experiments.imaging_paths.path.labels",
+
+        # Microscope linkTo
         "experiments.files.microscope_settings.ch00_light_source_center_wl",
         "experiments.files.microscope_settings.ch01_light_source_center_wl",
         "experiments.files.microscope_settings.ch02_light_source_center_wl",
