@@ -168,7 +168,8 @@
             "type": "string",
             "enum": [
                 "CWL",
-                "WDL"
+                "WDL",
+                "WDL_DRAFT2"
             ],
             "default": "CWL"
         },
