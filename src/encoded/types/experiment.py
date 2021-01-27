@@ -502,7 +502,6 @@ class ExperimentCaptureC(Experiment):
         # File linkTo
         'targeted_regions.oligo_file.file_format.*',
         'targeted_regions.oligo_file.accession',
-        'targeted_regions.oligo_file.external_accession',
         'targeted_regions.oligo_file.href',
     ]
     name_key = 'accession'
