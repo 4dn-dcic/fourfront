@@ -163,6 +163,7 @@
                 "other",
                 "reads",
                 "sequences",
+                "particle localizations",
                 "particle trajectories",
                 "tabular data",
                 "text"
