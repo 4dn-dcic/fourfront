@@ -29,7 +29,18 @@ class BioFeature(Item):
         'feature_type.slim_terms',
         'feature_type.synonyms',
         'feature_type.term_name',
-        'feature_type.term_id'
+        'feature_type.term_id',
+
+        # Gene linkTo
+        'relevant_genes.gene_id',
+        'relevant_genes.preferred_symbol',
+
+        # GenomicRegion linkTo
+        'genome_location.genome_assembly',
+        'genome_location.location_description',
+        'genome_location.start_coordinate',
+        'genome_location.end_coordinate',
+        'genome_location.chromosome',
     ]
 
     @calculated_property(schema={

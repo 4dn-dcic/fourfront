@@ -56,6 +56,7 @@ class Lab(Item):
         # Award linkTo
         'awards.project',
         'awards.name',
+        'awards.pi.last_name',
         'awards.center_title'
     ]
 

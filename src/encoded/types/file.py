@@ -271,23 +271,42 @@ class File(Item):
 
         # Biosample linkTo
         'experiments.biosample.accession',
-        'experiments.biosample.biosource_summary',
+        'experiments.biosample.biosource_summary',  # XXX: calc props require more embeds
         'experiments.biosample.modifications_summary',
         'experiments.biosample.treatments_summary',
 
         # Biosource linkTo
         'experiments.biosample.biosource.biosource_type',
-        'experiments.biosample.biosource.individual',
-        'experiments.biosample.biosource.cell_line',
         'experiments.biosample.biosource.cell_line_tier',
-        'experiments.biosample.biosource.tissue',
-        'experiments.biosample.biosource.modifications',
         'experiments.biosample.biosource.override_biosource_name',
+
+        # OntologyTerm linkTo
+        'experiments.biosample.biosource.cell_line.preferred_name',
+        'experiments.biosample.biosource.cell_line.term_name',
+        'experiments.biosample.biosource.cell_line.term_id',
+
+        # OntologyTerm linkTo
+        'experiments.biosample.biosource.tissue.preferred_name',
+        'experiments.biosample.biosource.tissue.term_name',
+        'experiments.biosample.biosource.tissue.term_id',
+
+        # Modification linkTo
+        'experiments.biosample.biosource.modifications.modification_type',
+        'experiments.biosample.biosource.modifications.genomic_change',
+        'experiments.biosample.biosource.modifications.override_modification_name',
+
+        # BioFeature linkTo
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_type',
+        'experiments.biosample.biosource.modifications.target_of_mod',
+        'experiments.biosample.biosource.modifications.target_of_mod',
+        'experiments.biosample.biosource.modifications.target_of_mod',
+        'experiments.biosample.biosource.modifications.target_of_mod',
+        'experiments.biosample.biosource.modifications.target_of_mod',
+        'experiments.biosample.biosource.modifications.target_of_mod',
 
         # Organism linkTo
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.biosample.biosource.individual.organism.scientific_name',
-
 
         # FileFormat linkTo
         'file_format.file_format',
@@ -1129,10 +1148,18 @@ class FileMicroscopy(ItemWithAttachment, File):
 
         # ImagingPath linkTo
         "experiments.imaging_paths.channel",
-        "experiments.imaging_paths.path.target",
         "experiments.imaging_paths.path.labeled_probe",
         "experiments.imaging_paths.path.other_probes",
         "experiments.imaging_paths.path.labels",
+
+        # BioFeature linkTo
+        "experiments.imaging_paths.path.target.feature_type",
+        "experiments.imaging_paths.path.target.preferred_label",
+        "experiments.imaging_paths.path.target.cellular_structure",
+        "experiments.imaging_paths.path.target.organism_name",
+        "experiments.imaging_paths.path.target.relevant_genes",
+        "experiments.imaging_paths.path.target.feature_mods",
+        "experiments.imaging_paths.path.target.genome_location",
 
         # Microscope linkTo
         "experiments.files.microscope_settings.ch00_light_source_center_wl",

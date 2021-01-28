@@ -121,7 +121,7 @@ class Experiment(Item):
 
         # Biosample linkTo
         'biosample.accession',
-        'biosample.modifications_summary',
+        'biosample.modifications_summary',  # XXX: investigate these calc props for needed embeds
         'biosample.treatments_summary',
         'biosample.biosource_summary',
         'biosample.biosample_type',
@@ -150,21 +150,31 @@ class Experiment(Item):
         # Modification linkTo
         'biosample.modifications.modification_type',
         'biosample.modifications.genomic_change',
-        'biosample.modifications.target_of_mod',
         'biosample.modifications.override_modification_name',
         'biosample.modifications.description',
+
+        # BioFeature linkTo
+        'biosample.modifications.target_of_mod.feature_type',
+        'biosample.modifications.target_of_mod.preferred_label',
+        'biosample.modifications.target_of_mod.cellular_structure',
+        'biosample.modifications.target_of_mod.organism_name',
+        'biosample.modifications.target_of_mod.relevant_genes',
+        'biosample.modifications.target_of_mod.feature_mods',
+        'biosample.modifications.target_of_mod.genome_location',
 
         # Treatment linkTo
         'biosample.treatments.treatment_type',
         'biosample.treatments.description',
         'biosample.treatments.chemical',
         'biosample.treatments.biological_agent',
-        'biosample.treatments.constructs',
         'biosample.treatments.duration',
         'biosample.treatments.duration_units',
         'biosample.treatments.concentration',
         'biosample.treatments.concentration_units',
         'biosample.treatments.temperature',
+
+        # Construct linkTo
+        'biosample.treatments.constructs.name',
 
         # Badge linkTo
         'biosample.badges.badge.title',
@@ -186,11 +196,13 @@ class Experiment(Item):
         'files.uuid',
         'files.file_size',
         'files.upload_key',
-        'files.file_format',
         'files.file_classification',
         'files.file_type_detailed',
         'files.paired_end',
         'files.external_references.*',
+
+        # FileFormat linkTo
+        'files.file_format.file_format',
 
         # QualityMetric linkTo
         'files.quality_metric.Total Sequences',
@@ -205,10 +217,12 @@ class Experiment(Item):
         'processed_files.uuid',
         'processed_files.file_size',
         'processed_files.upload_key',
-        'processed_files.file_format',
         'processed_files.file_classification',
         'processed_files.file_type_detailed',
         'processed_files.external_references.*',
+
+        # FileFormat linkTo
+        'processed_files.file_format.file_format',
 
         # QualityMetric linkTo
         'processed_files.quality_metric.url',
@@ -226,11 +240,13 @@ class Experiment(Item):
         # File linkTo
         "other_processed_files.files.href",
         "other_processed_files.files.file_type_detailed",
-        "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.status",
+
+        # FileFormat linkTo
+        "other_processed_files.files.file_format.file_format",
 
         # last modification (since just time, no invalidation)
         "other_processed_files.files.last_modified.date_modified",
@@ -495,9 +511,21 @@ class ExperimentCaptureC(Experiment):
         'targeted_regions.target.preferred_label',
         'targeted_regions.target.cellular_structure',
         'targeted_regions.target.organism_name',
-        'targeted_regions.target.relevant_genes',
-        'targeted_regions.target.feature_mods',
-        'targeted_regions.target.genome_location',
+
+        # GenomicRegion linkTo
+        'targeted_regions.target.genome_location.genome_assembly',
+        'targeted_regions.target.genome_location.location_description',
+        'targeted_regions.target.genome_location.start_coordinate',
+        'targeted_regions.target.genome_location.end_coordinate',
+        'targeted_regions.target.genome_location.chromosome',
+
+        # Object
+        'targeted_regions.target.feature_mods.mod_type',
+        'targeted_regions.target.feature_mods.mod_position',
+
+        # Gene linkTo
+        'targeted_regions.target.relevant_genes.gene_id',
+        'targeted_regions.target.relevant_genes.preferred_symbol',
 
         # File linkTo
         'targeted_regions.oligo_file.file_format.*',

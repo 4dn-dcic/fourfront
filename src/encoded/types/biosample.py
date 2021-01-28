@@ -84,16 +84,23 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         # Modification linkTo
         'modifications.modification_type',
         'modifications.genomic_change',
-        'modifications.target_of_mod',
         'modifications.override_modification_name',
         'modifications.description',
+
+        # BioFeature linkTo
+        'modifications.target_of_mod.feature_type',
+        'modifications.target_of_mod.preferred_label',
+        'modifications.target_of_mod.cellular_structure',
+        'modifications.target_of_mod.organism_name',
+        'modifications.target_of_mod.relevant_genes',
+        'modifications.target_of_mod.feature_mods',
+        'modifications.target_of_mod.genome_location',
 
         # Treatment linkTo, verbose display_title so many embeds necessary
         'treatments.treatment_type',
         'treatments.description',
         'treatments.chemical',
         'treatments.biological_agent',
-        'treatments.constructs',
         'treatments.duration',
         'treatments.duration_units',
         'treatments.concentration',
@@ -109,9 +116,21 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'treatments.constructs.expression_products.cellular_structure',
         'treatments.constructs.expression_products.organism_name',
         'treatments.constructs.expression_products.relevant_genes',
-        'treatments.constructs.expression_products.feature_mods',
-        'treatments.constructs.expression_products.genome_location',
-        'treatments.constructs.expression_products.feature_mods.mod_type',  # object
+
+        # Object field
+        'treatments.constructs.expression_products.feature_mods.mod_position',
+        'treatments.constructs.expression_products.feature_mods.mod_type',
+
+        # GenomicRegion linkTo
+        'treatments.constructs.expression_products.genome_location.genome_assembly',
+        'treatments.constructs.expression_products.genome_location.location_description',
+        'treatments.constructs.expression_products.genome_location.start_coordinate',
+        'treatments.constructs.expression_products.genome_location.end_coordinate',
+        'treatments.constructs.expression_products.genome_location.chromosome',
+
+        # Gene linkTo
+        'treatments.constructs.expression_products.relevant_genes.gene_id',
+        'treatments.constructs.expression_products.relevant_genes.preferred_symbol',
 
         # Protocol linkTo
         'biosample_protocols.description',

@@ -132,10 +132,6 @@ class ExperimentSet(Item):
 
         # Biosource linkTo
         "experiments_in_set.biosample.biosource.biosource_type",
-        "experiments_in_set.biosample.biosource.individual",
-        "experiments_in_set.biosample.biosource.cell_line",
-        "experiments_in_set.biosample.biosource.tissue",
-        "experiments_in_set.biosample.biosource.modifications",
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.override_biosource_name",
 
@@ -166,21 +162,30 @@ class ExperimentSet(Item):
         # Modification linkTo
         "experiments_in_set.biosample.modifications.modification_type",
         "experiments_in_set.biosample.modifications.genomic_change",
-        "experiments_in_set.biosample.modifications.target_of_mod",
         "experiments_in_set.biosample.modifications.override_modification_name",
+
+        # BioFeature linkTo
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_type",
+        "experiments_in_set.biosample.modifications.target_of_mod.preferred_label",
+        "experiments_in_set.biosample.modifications.target_of_mod.cellular_structure",
+        "experiments_in_set.biosample.modifications.target_of_mod.organism_name",
+        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods",
+        "experiments_in_set.biosample.modifications.target_of_mod.genome_location",
 
         # Treatment linkTo
         "experiments_in_set.biosample.treatments.treatment_type",
         "experiments_in_set.biosample.treatments.description",
         "experiments_in_set.biosample.treatments.chemical",
         "experiments_in_set.biosample.treatments.biological_agent",
-        "experiments_in_set.biosample.treatments.constructs",
         "experiments_in_set.biosample.treatments.duration",
         "experiments_in_set.biosample.treatments.duration_units",
         "experiments_in_set.biosample.treatments.concentration",
         "experiments_in_set.biosample.treatments.concentration_units",
         "experiments_in_set.biosample.treatments.temperature",
 
+        # Construct linkTo
+        "experiments_in_set.biosample.treatments.constructs.name",
 
         # Badges linkTo
         "experiments_in_set.biosample.badges.badge.title",
@@ -212,7 +217,6 @@ class ExperimentSet(Item):
         "experiments_in_set.files.file_size",
         "experiments_in_set.files.upload_key",
         "experiments_in_set.files.md5sum",
-        "experiments_in_set.files.file_format",
         "experiments_in_set.files.file_type",
         "experiments_in_set.files.file_type_detailed",
         "experiments_in_set.files.file_classification",
@@ -221,16 +225,20 @@ class ExperimentSet(Item):
         "experiments_in_set.files.notes_to_tsv",
         "experiments_in_set.files.external_references.*",
 
+        # FileFormat linkTo
+        "experiments_in_set.files.file_format.file_format",
+
         # File linkTo
         "experiments_in_set.files.extra_files",
         "experiments_in_set.files.extra_files.href",
-        "experiments_in_set.files.extra_files.file_format",
         "experiments_in_set.files.extra_files.file_size",
         "experiments_in_set.files.extra_files.md5sum",
         "experiments_in_set.files.extra_files.use_for",
 
+        # FileFormat linkTo
+        "experiments_in_set.files.extra_files.file_format.file_format",
+
         # QualityMetric linkTo
-        "experiments_in_set.files.quality_metric.display_title",
         "experiments_in_set.files.quality_metric.Total Sequences",
         "experiments_in_set.files.quality_metric.Sequence length",
         "experiments_in_set.files.quality_metric.url",
@@ -252,7 +260,6 @@ class ExperimentSet(Item):
         "processed_files.lab.name",
         "processed_files.contributing_labs.name",
 
-        "experiments_in_set.files.related_files",
         "experiments_in_set.files.related_files.relationship_type",
 
         # File linkTo
@@ -278,12 +285,13 @@ class ExperimentSet(Item):
         "processed_files.notes_to_tsv",
 
         # File linkTo
-        "processed_files.extra_files",
         "processed_files.extra_files.href",
-        "processed_files.extra_files.file_format",
         "processed_files.extra_files.file_size",
         "processed_files.extra_files.md5sum",
         "processed_files.extra_files.use_for",
+
+        # FileFormat linkTo
+        "processed_files.extra_files.file_format.file_format",
 
         "processed_files.last_modified.date_modified",
 
@@ -320,13 +328,13 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.notes_to_tsv",
 
         # File linkTo
-        "experiments_in_set.processed_files.extra_files",
         "experiments_in_set.processed_files.extra_files.href",
-        # "experiments_in_set.processed_files.extra_files.accession", XXX: Data model error? Bad embed? -Will
-        "experiments_in_set.processed_files.extra_files.file_format",
         "experiments_in_set.processed_files.extra_files.file_size",
         "experiments_in_set.processed_files.extra_files.md5sum",
         "experiments_in_set.processed_files.extra_files.use_for",
+
+        # FileFormat linkTo
+        "experiments_in_set.processed_files.extra_files.file_format.file_format",
 
         # QualityMetric linkTo
         "experiments_in_set.processed_files.quality_metric.url",
@@ -365,8 +373,11 @@ class ExperimentSet(Item):
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
-        "other_processed_files.files.contributing_labs.display_title",
-        "other_processed_files.files.lab.display_title",
+
+        # Lab linkTo
+        "other_processed_files.files.contributing_labs.name",
+        "other_processed_files.files.lab.name",
+
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -376,7 +387,6 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.type",
         "experiments_in_set.other_processed_files.files.accession",
         "experiments_in_set.other_processed_files.files.file_type_detailed",
-        "experiments_in_set.other_processed_files.files.file_format",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
         "experiments_in_set.other_processed_files.files.genome_assembly",
@@ -385,23 +395,29 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.last_modified.date_modified",
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
-        #"experiments_in_set.other_processed_files.files.quality_metric_summary.*", #tood - delete soon
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
-        "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
+
+        # FileFormat linkTo
+        "experiments_in_set.other_processed_files.files.file_format.file_format",
+
+        # Lab linkTo
+        "experiments_in_set.other_processed_files.files.contributing_labs.name",
         "experiments_in_set.other_processed_files.files.lab.name",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
         "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_type",
-        "experiments_in_set.reference_files.file_format",
         "experiments_in_set.reference_files.file_size",
         "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
         "experiments_in_set.reference_files.md5sum",
         "experiments_in_set.reference_files.lab.name",
-        "experiments_in_set.reference_files.contributing_labs.display_title",
+        "experiments_in_set.reference_files.contributing_labs.name",
+
+        # FileFormat linkTo
+        "experiments_in_set.reference_files.file_format.file_format",
 
         'sample_image.caption',
         'sample_image.microscopy_file.accession',

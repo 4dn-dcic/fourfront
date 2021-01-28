@@ -58,8 +58,16 @@ class Biosource(Item):
         # Modification linkTo
         'modifications.modification_type',
         'modifications.genomic_change',
-        'modifications.target_of_mod',
         'modifications.override_modification_name',
+
+        # BioFeature linkTo
+        'modifications.target_of_mod.feature_type',
+        'modifications.target_of_mod.preferred_label',
+        'modifications.target_of_mod.cellular_structure',
+        'modifications.target_of_mod.organism_name',
+        'modifications.target_of_mod.relevant_genes',
+        'modifications.target_of_mod.feature_mods',
+        'modifications.target_of_mod.genome_location',
 
         # OntologyTerm linkTo
         'tissue.term_name',
