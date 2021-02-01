@@ -70,7 +70,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'options' : { 'bounded' : false },
         'isValidating' : false,
         'disabled' : false,
-        'height' : 600,
+        'height' : 500,
         'viewConfig' : null,
         'mountDelay' : 500,
         'placeholder' : <HiGlassLoadingIndicator/>,
@@ -127,42 +127,12 @@ export class HiGlassPlainContainer extends React.PureComponent {
                     'higlass-dependencies'
                 ).then((loadedDeps) =>{
                     higlassDependencies = loadedDeps;
-                    const { higlassRegister, SequenceTrack, TranscriptsTrack, ClinvarTrack, TextTrack, OrthologsTrack, PileupTrack, GnomadTrack } = higlassDependencies;
+                    const { higlassRegister, StackedBarTrack } = higlassDependencies;
 
                     higlassRegister({
-                        name: 'SequenceTrack',
-                        track: SequenceTrack,
-                        config: SequenceTrack.config,
-                    });
-                    higlassRegister({
-                        name: 'TranscriptsTrack',
-                        track: TranscriptsTrack,
-                        config: TranscriptsTrack.config,
-                    });
-                    higlassRegister({
-                        name: 'ClinvarTrack',
-                        track: ClinvarTrack,
-                        config: ClinvarTrack.config,
-                    });
-                    higlassRegister({
-                        name: 'TextTrack',
-                        track: TextTrack,
-                        config: TextTrack.config,
-                    });
-                    higlassRegister({
-                        name: 'OrthologsTrack',
-                        track: OrthologsTrack,
-                        config: OrthologsTrack.config,
-                    });
-                    higlassRegister({
-                        name: 'PileupTrack',
-                        track: PileupTrack,
-                        config: PileupTrack.config,
-                    });
-                    higlassRegister({
-                        name: 'GnomadTrack',
-                        track: GnomadTrack,
-                        config: GnomadTrack.config,
+                        name: 'StackedBarTrack',
+                        track: StackedBarTrack,
+                        config: StackedBarTrack.config,
                     });
                     finish();
                 });
@@ -230,8 +200,7 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
     const { HiGlassComponent } = higlassDependencies || {};
 
     let hiGlassInstance = null;
-
-    if (isValidating || !mounted || !higlassInitialized || higlassVersionUsed === null){ // Still loading/initializing...
+    if (isValidating || !mounted){
         const placeholderStyle = { width: width || null };
         if (typeof height === 'number' && height >= 140){
             placeholderStyle.height = height;
@@ -265,7 +234,7 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
             }, 500);
         };
         hiGlassInstance = (
-            <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', 'height' : '100%', 'width' : width || null }} ref={instanceContainerRefFunction}>
+            <div key={outerKey} className="higlass-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={instanceContainerRefFunction}>
                 <HiGlassComponent {...{ options, viewConfig, width, height, ref }} />
             </div>
         );
