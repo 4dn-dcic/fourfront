@@ -227,11 +227,6 @@ module.exports = [
                 // but probably speed up build a little bit.
                 'higlass/dist/hglib' : 'empty-module',
                 'higlass-register': 'empty-module',
-                'higlass-sequence': 'empty-module',
-                'higlass-transcripts': 'empty-module',
-                'higlass-clinvar': 'empty-module',
-                'higlass-text': 'empty-module',
-                'higlass-orthologs': 'empty-module',
                 'higlass-multivec': 'empty-module',
                 'auth0-lock': 'empty-module',
                 'aws-sdk': 'empty-module',
