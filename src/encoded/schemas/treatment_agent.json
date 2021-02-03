@@ -81,7 +81,7 @@
             "title": "Concentration units",
             "type": "string",
             "lookup": 40,
-            "suggest_enum": [
+            "suggested_enum": [
                 "pM",
                 "nM",
                 "μM",
