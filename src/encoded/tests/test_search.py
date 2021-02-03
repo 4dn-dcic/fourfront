@@ -105,8 +105,6 @@ def test_search_with_embedding(workbook, testapp):
     assert test_json['biosource'][0]['biosource_type'] == 'immortalized cell line'
     # this specific linked should be embedded ('biosource.biosource_vendor')
     assert isinstance(test_json['biosource'][0]['biosource_vendor'], dict)
-    # this specific field was not embedded and should not be present
-    assert 'description' not in test_json['biosource'][0]
     # since lab.awards was not specifically embedded, the field should not exist
     assert test_json['lab'].get('awards') is None
 
@@ -428,7 +426,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     schema = type_info.schema
     embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded_list, schema)
     # we're looking for this specific facet, which is not in the schema
-    assert 'biosource.biosource_type' in embeds
+    assert 'biosource.*' in embeds
     res = testapp.get('/search/?type=Biosample&biosource.biosource_type=immortalized+cell+line').json
     assert 'facets' in res
     facet_fields = [ facet['field'] for facet in res['facets'] ]

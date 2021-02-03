@@ -71,10 +71,10 @@ class BiosampleCellCulture(Item):
     schema = load_schema('encoded:schemas/biosample_cell_culture.json')
     embedded_list = Item.embedded_list + [
         # Protocol linkTo
-        'protocol_additional.protocol_type',
-        'protocol_additional.title',
-        'protocol_additional.attachment',
-        'protocol_additional.date_created',
+        'protocols_additional.protocol_type',
+        'protocols_additional.title',
+        'protocols_additional.attachment',
+        'protocols_additional.date_created',
 
         # Protocol linkTo
         'authentication_protocols.protocol_type',
@@ -103,7 +103,7 @@ class Construct(Item):
         'expression_products.organism_name',
         'expression_products.relevant_genes',
         'expression_products.feature_mods',
-        'expression_products.genome_location'
+        'expression_products.genome_location',
 
         # Vendor linkTo
         'construct_vendor.title'

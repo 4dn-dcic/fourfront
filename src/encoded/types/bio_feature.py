@@ -32,7 +32,7 @@ class BioFeature(Item):
         'feature_type.term_id',
 
         # Gene linkTo
-        'relevant_genes.gene_id',
+        'relevant_genes.geneid',
         'relevant_genes.preferred_symbol',
 
         # GenomicRegion linkTo

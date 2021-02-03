@@ -129,7 +129,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'treatments.constructs.expression_products.genome_location.chromosome',
 
         # Gene linkTo
-        'treatments.constructs.expression_products.relevant_genes.gene_id',
+        'treatments.constructs.expression_products.relevant_genes.geneid',
         'treatments.constructs.expression_products.relevant_genes.preferred_symbol',
 
         # Protocol linkTo
@@ -149,6 +149,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "type": "string",
     })
     def modifications_summary(self, request, modifications=None):
+        """ Requires modifications.modification_name (display_title embeds) """
         if modifications:
             ret_str = ''
             for mod in modifications:
@@ -180,6 +181,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "type": "string",
     })
     def treatments_summary(self, request, treatments=None):
+        """ Just relies on display title, which should be properly embedded. """
         if treatments:
             treat_list = []
             for tmt in treatments:
@@ -254,6 +256,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "type": "string",
     })
     def biosource_summary(self, request, biosource, cell_culture_details=None):
+        """ XXX: This field, if embedded, needs embeds adjusted. """
         ret_str = ''
         for bios in biosource:
             bios_props = get_item_or_none(request, bios, 'biosources')
@@ -288,7 +291,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             return 'mixed sample'
         elif len(biosource_types) < 1:  # pragma: no cover
             # shouldn't happen so raise an exception
-            raise Exception("Biosource always needs type - why can't we find it")
+            raise Exception("Biosource has no types: %s" % biosource_types)
 
         # we've got a single type of biosource
         if cell_culture_details:  # this is now an array but just check the first

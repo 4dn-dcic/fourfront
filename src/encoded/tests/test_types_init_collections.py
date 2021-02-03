@@ -38,6 +38,7 @@ def targets(target_w_desc, target_w_region, target_w_genes):
             }
 
 
+@pytest.mark.skip  # targets are not used
 def test_calculated_target_summaries(testapp, targets):
     for name in targets:
         summary = targets[name]['target_summary']

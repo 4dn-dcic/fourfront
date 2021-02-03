@@ -271,7 +271,7 @@ class File(Item):
 
         # Biosample linkTo
         'experiments.biosample.accession',
-        'experiments.biosample.biosource_summary',  # XXX: calc props require more embeds
+        'experiments.biosample.biosource_summary',  # REQUIRES additional embeds #1
         'experiments.biosample.modifications_summary',
         'experiments.biosample.treatments_summary',
 
@@ -289,6 +289,7 @@ class File(Item):
         'experiments.biosample.biosource.tissue.preferred_name',
         'experiments.biosample.biosource.tissue.term_name',
         'experiments.biosample.biosource.tissue.term_id',
+        'experiments.biosample.biosource.tissue.in_vitro_differentiated',  # needed for calc prop #1
 
         # Modification linkTo
         'experiments.biosample.biosource.modifications.modification_type',
@@ -297,12 +298,12 @@ class File(Item):
 
         # BioFeature linkTo
         'experiments.biosample.biosource.modifications.target_of_mod.feature_type',
-        'experiments.biosample.biosource.modifications.target_of_mod',
-        'experiments.biosample.biosource.modifications.target_of_mod',
-        'experiments.biosample.biosource.modifications.target_of_mod',
-        'experiments.biosample.biosource.modifications.target_of_mod',
-        'experiments.biosample.biosource.modifications.target_of_mod',
-        'experiments.biosample.biosource.modifications.target_of_mod',
+        'experiments.biosample.biosource.modifications.target_of_mod.preferred_label',
+        'experiments.biosample.biosource.modifications.target_of_mod.cellular_structure',
+        'experiments.biosample.biosource.modifications.target_of_mod.organism_name',
+        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods',
+        'experiments.biosample.biosource.modifications.target_of_mod.genome_location',
 
         # Organism linkTo
         'experiments.biosample.biosource.individual.organism.name',

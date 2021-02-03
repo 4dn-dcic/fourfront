@@ -119,10 +119,9 @@ class ExperimentSet(Item):
 
         # Biosample linkTo
         "experiments_in_set.biosample.accession",
-        "experiments_in_set.biosample.treatments_summary",
-        # XXX: calc prop that needs updating to rely on embeds -Will
-        "experiments_in_set.biosample.modifications_summary",
-        "experiments_in_set.biosample.biosource_summary",
+        "experiments_in_set.biosample.treatments_summary",  # calc prop covered by display title
+        "experiments_in_set.biosample.modifications_summary",  # calc prop covered by display_title
+        "experiments_in_set.biosample.biosource_summary",  # requires additional embedding
         "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosample_category",
 
@@ -148,6 +147,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.tissue.preferred_name",
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
+        "experiments_in_set.biosample.biosource.tissue.in_vitro_differentiated",  # needed for biosource_summary calc prop
 
         # Organism linkTo
         "experiments_in_set.biosample.biosource.individual.organism.name",
@@ -160,6 +160,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.cell_culture_details.tissue.synonyms",
 
         # Modification linkTo
+        "experiments_in_set.biosample.modifications.modification_name",  # calc prop
         "experiments_in_set.biosample.modifications.modification_type",
         "experiments_in_set.biosample.modifications.genomic_change",
         "experiments_in_set.biosample.modifications.override_modification_name",
