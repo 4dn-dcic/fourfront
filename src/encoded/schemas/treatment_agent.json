@@ -81,7 +81,7 @@
             "title": "Concentration units",
             "type": "string",
             "lookup": 40,
-            "enum": [
+            "suggest_enum": [
                 "pM",
                 "nM",
                 "μM",
@@ -93,7 +93,8 @@
                 "percent",
                 "units",
                 "U/mL",
-                "MOI"
+                "MOI",
+                "pfu"
               ]
         },
         "duration": {
