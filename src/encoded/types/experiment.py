@@ -524,7 +524,7 @@ class ExperimentCaptureC(Experiment):
         'targeted_regions.target.feature_mods.mod_position',
 
         # Gene linkTo
-        'targeted_regions.target.relevant_genes.gene_id',
+        'targeted_regions.target.relevant_genes.geneid',
         'targeted_regions.target.relevant_genes.preferred_symbol',
 
         # File linkTo

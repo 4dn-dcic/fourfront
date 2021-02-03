@@ -124,6 +124,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource_summary",  # requires additional embedding
         "experiments_in_set.biosample.biosample_type",
         "experiments_in_set.biosample.biosample_category",
+        "experiments_in_set.biosample.cell_culture_details.in_vitro_differentiated",  # needed for biosource_summary calc prop
 
         # XXX: this field needs to be refactored to work with invalidation scope -Will
         "experiments_in_set.biosample.tissue_organ_info.organ_system",
@@ -147,7 +148,6 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.tissue.preferred_name",
         "experiments_in_set.biosample.biosource.tissue.slim_terms",
         "experiments_in_set.biosample.biosource.tissue.synonyms",
-        "experiments_in_set.biosample.biosource.tissue.in_vitro_differentiated",  # needed for biosource_summary calc prop
 
         # Organism linkTo
         "experiments_in_set.biosample.biosource.individual.organism.name",

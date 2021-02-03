@@ -279,6 +279,7 @@ class File(Item):
         'experiments.biosample.biosource.biosource_type',
         'experiments.biosample.biosource.cell_line_tier',
         'experiments.biosample.biosource.override_biosource_name',
+        'experiments.biosample.cell_culture_details.in_vitro_differentiated',  # needed for calc prop #1
 
         # OntologyTerm linkTo
         'experiments.biosample.biosource.cell_line.preferred_name',
@@ -289,7 +290,6 @@ class File(Item):
         'experiments.biosample.biosource.tissue.preferred_name',
         'experiments.biosample.biosource.tissue.term_name',
         'experiments.biosample.biosource.tissue.term_id',
-        'experiments.biosample.biosource.tissue.in_vitro_differentiated',  # needed for calc prop #1
 
         # Modification linkTo
         'experiments.biosample.biosource.modifications.modification_type',
