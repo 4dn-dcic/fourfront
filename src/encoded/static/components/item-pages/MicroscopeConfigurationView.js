@@ -74,8 +74,8 @@ function onLoadSchema(complete) {
 }
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/svg/";
-const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMicroscopyMetadataToolReact/master/public/assets/png/";
+const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/schemasV4_images/svg/";
+const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/schemasV4_images/png/";
 
 let MicroscopyMetadataTool = null;
 
