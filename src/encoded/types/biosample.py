@@ -9,6 +9,7 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
 
 
 @collection(
@@ -34,113 +35,82 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             "badge.description"
         ]
     }
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # Badge linkTo
-        'badges.badge.title',
-        'badges.badge.commendation',
-        'badges.badge.warning',
-        'badges.badge.badge_classification',
-        'badges.badge.description',
-        'badges.badge.badge_icon',
-        'badges.messages',
+    embedded_list = (
+            Item.embedded_list + lab_award_attribution_embed_list +
+            DependencyEmbedder.embed_defaults_for_type(base_path='modifications',
+                                                       t='modification') +
+            DependencyEmbedder.embed_defaults_for_type(base_path='modifications.target_of_mod',
+                                                       t='bio_feature') +
+            DependencyEmbedder.embed_defaults_for_type(base_path='treatments',
+                                                       t='treatment') +
+            [
+                # Badge linkTo
+                'badges.badge.title',
+                'badges.badge.commendation',
+                'badges.badge.warning',
+                'badges.badge.badge_classification',
+                'badges.badge.description',
+                'badges.badge.badge_icon',
+                'badges.messages',
 
-        # Biosource linkTo - many calc prop dependencies
-        'biosource.*',
-        'biosource.individual.sex',
-        'biosource.individual.organism.name',
-        'biosource.biosource_vendor.name',  # display_title uses this
+                # Biosource linkTo - many calc prop dependencies
+                'biosource.*',
+                'biosource.individual.sex',
+                'biosource.individual.organism.name',
+                'biosource.biosource_vendor.name',  # display_title uses this
 
-        # OntologyTerm linkTo
-        'biosource.cell_line.slim_terms',
-        'biosource.cell_line.synonyms',
-        'biosource.cell_line.preferred_name',
-        'biosource.cell_line.term_name',
-        'biosource.cell_line.term_id',
+                # OntologyTerm linkTo
+                'biosource.cell_line.synonyms',
+                'biosource.cell_line.preferred_name',
+                'biosource.cell_line.term_name',
+                'biosource.cell_line.term_id',
 
-        # OntologyTerm linkTo
-        'biosource.tissue.slim_terms',
-        'biosource.tissue.synonyms',
-        'biosource.tissue.preferred_name',
-        'biosource.tissue.term_name',
-        'biosource.tissue.term_id',
+                # OntologyTerm linkTo
+                'biosource.tissue.synonyms',
+                'biosource.tissue.preferred_name',
+                'biosource.tissue.term_name',
+                'biosource.tissue.term_id',
 
-        # BiosampleCellCulture linkTo + Image linkTo
-        'cell_culture_details.*',
-        'cell_culture_details.morphology_image.caption',
-        'cell_culture_details.morphology_image.attachment.href',
-        'cell_culture_details.morphology_image.attachment.type',
-        'cell_culture_details.morphology_image.attachment.md5sum',
-        'cell_culture_details.morphology_image.attachment.download',
-        'cell_culture_details.morphology_image.attachment.width',
-        'cell_culture_details.morphology_image.attachment.height',
+                # OntologyTerm linkTo
+                'biosource.tissue.slim_terms.synonyms',
+                'biosource.tissue.slim_terms.preferred_name',
+                'biosource.tissue.slim_terms.term_name',
+                'biosource.tissue.slim_terms.term_id',
 
-        # OntologyTerm linkTo
-        'cell_culture_details.tissue.term_name',
-        'cell_culture_details.tissue.preferred_name',
-        'cell_culture_details.tissue.slim_terms',
-        'cell_culture_details.tissue.synonyms',
-        'cell_culture_details.tissue.term_id',
+                # BiosampleCellCulture linkTo + Image linkTo
+                'cell_culture_details.*',
+                'cell_culture_details.morphology_image.caption',
+                'cell_culture_details.morphology_image.attachment.href',
+                'cell_culture_details.morphology_image.attachment.type',
+                'cell_culture_details.morphology_image.attachment.md5sum',
+                'cell_culture_details.morphology_image.attachment.download',
+                'cell_culture_details.morphology_image.attachment.width',
+                'cell_culture_details.morphology_image.attachment.height',
 
-        # Modification linkTo
-        'modifications.modification_type',
-        'modifications.genomic_change',
-        'modifications.override_modification_name',
-        'modifications.description',
+                # OntologyTerm linkTo
+                'cell_culture_details.tissue.term_name',
+                'cell_culture_details.tissue.preferred_name',
+                'cell_culture_details.tissue.synonyms',
+                'cell_culture_details.tissue.term_id',
 
-        # BioFeature linkTo
-        'modifications.target_of_mod.feature_type',
-        'modifications.target_of_mod.preferred_label',
-        'modifications.target_of_mod.cellular_structure',
-        'modifications.target_of_mod.organism_name',
-        'modifications.target_of_mod.relevant_genes',
-        'modifications.target_of_mod.feature_mods',
-        'modifications.target_of_mod.genome_location',
+                'cell_culture_details.tissue.slim_terms.synonyms',
+                'cell_culture_details.tissue.slim_terms.preferred_name',
+                'cell_culture_details.tissue.slim_terms.term_name',
+                'cell_culture_details.tissue.slim_terms.term_id',
 
-        # Treatment linkTo, verbose display_title so many embeds necessary
-        'treatments.treatment_type',
-        'treatments.description',
-        'treatments.chemical',
-        'treatments.biological_agent',
-        'treatments.duration',
-        'treatments.duration_units',
-        'treatments.concentration',
-        'treatments.concentration_units',
-        'treatments.temperature',
+                # Construct linkTo
+                'treatments.constructs.name',
 
-        # Construct linkTo
-        'treatments.constructs.name',
-
-        # Biofeature linkTo
-        'treatments.constructs.expression_products.feature_type',
-        'treatments.constructs.expression_products.preferred_label',
-        'treatments.constructs.expression_products.cellular_structure',
-        'treatments.constructs.expression_products.organism_name',
-        'treatments.constructs.expression_products.relevant_genes',
-
-        # Object field
-        'treatments.constructs.expression_products.feature_mods.mod_position',
-        'treatments.constructs.expression_products.feature_mods.mod_type',
-
-        # GenomicRegion linkTo
-        'treatments.constructs.expression_products.genome_location.genome_assembly',
-        'treatments.constructs.expression_products.genome_location.location_description',
-        'treatments.constructs.expression_products.genome_location.start_coordinate',
-        'treatments.constructs.expression_products.genome_location.end_coordinate',
-        'treatments.constructs.expression_products.genome_location.chromosome',
-
-        # Gene linkTo
-        'treatments.constructs.expression_products.relevant_genes.geneid',
-        'treatments.constructs.expression_products.relevant_genes.preferred_symbol',
-
-        # Protocol linkTo
-        'biosample_protocols.description',
-        'biosample_protocols.protocol_type',
-        'biosample_protocols.title',
-        'biosample_protocols.date_created',
-        'biosample_protocols.attachment.href',
-        'biosample_protocols.attachment.type',
-        'biosample_protocols.attachment.md5sum',
-    ]
+                # Protocol linkTo
+                'biosample_protocols.description',
+                'biosample_protocols.protocol_type',
+                'biosample_protocols.title',
+                'biosample_protocols.date_created',
+                'biosample_protocols.attachment.href',
+                'biosample_protocols.attachment.type',
+                'biosample_protocols.attachment.md5sum',
+            ]
+    )
     name_key = 'accession'
 
     @calculated_property(schema={

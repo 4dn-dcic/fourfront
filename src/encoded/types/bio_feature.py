@@ -26,7 +26,6 @@ class BioFeature(Item):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
         # OntologyTerm linkTo
         'feature_type.preferred_name',
-        'feature_type.slim_terms',
         'feature_type.synonyms',
         'feature_type.term_name',
         'feature_type.term_id',

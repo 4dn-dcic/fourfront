@@ -21,12 +21,14 @@ from snovault import (
 from .base import (
     Item,
     set_namekey_from_title,
+    lab_award_attribution_embed_list,
     ALLOW_OWNER_EDIT,
     ALLOW_CURRENT,
     DELETED,
     ONLY_ADMIN_VIEW,
     ALLOW_LAB_SUBMITTER_EDIT
 )
+from .dependencies import DependencyEmbedder
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import (
@@ -55,7 +57,11 @@ class AnalysisStep(Item):
 
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded_list = Item.embedded_list + ['software_used.*', 'qa_stats_generated.*']
+    embedded_list = Item.embedded_list + [
+        'software_used.name',
+        'software_used.title',
+        'qa_stats_generated.attachment'
+    ]
 
 
 @collection(
@@ -95,19 +101,12 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
-    embedded_list = Item.embedded_list + [
-        # BioFeature linkTo
-        'expression_products.feature_type',
-        'expression_products.preferred_label',
-        'expression_products.cellular_structure',
-        'expression_products.organism_name',
-        'expression_products.relevant_genes',
-        'expression_products.feature_mods',
-        'expression_products.genome_location',
+    embedded_list = Item.embedded_list + \
+                    DependencyEmbedder.embed_defaults_for_type(base_path='expression_products', t='bio_feature') + [
+                        # Vendor linkTo
+                        'construct_vendor.title'
+                    ]
 
-        # Vendor linkTo
-        'construct_vendor.title'
-    ]
 
 @collection(
     name='documents',
@@ -120,6 +119,9 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
+    embedded_list = Item.embedded_list + [
+        'map.attachment'
+    ]
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -206,7 +208,12 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded_list = Item.embedded_list + ['enzyme_source.title']
+    embedded_list = Item.embedded_list + [
+        'enzyme_source.title'
+        
+        # Enzyme linkTo
+        'mixed_enzymes.name'
+    ]
 
 
 @collection(
@@ -226,11 +233,28 @@ class ExperimentType(Item):
     name_key = 'experiment_name'
 
     embedded_list = Item.embedded_list + [
-        "sop.description",
-        "reference_pubs.short_attribution",
-        "reference_pubs.authors",
-        "reference_pubs.date_published",
-        "reference_pubs.journal"
+        # Publication linkTo
+        'reference_pubs.short_attribution',
+        'reference_pubs.authors',
+        'reference_pubs.date_published',
+        'reference_pubs.journal',
+
+        # Protocol linkTo
+        'sop.protocol_type',
+        'sop.title',
+        'sop.attachment',
+        'sop.date_created',
+
+        # Protocol linkTo
+        'other_protocols.protocol_type',
+        'other_protocols.title',
+        'other_protocols.attachment',
+        'other_protocols.date_created',
+
+        # OntologyTerm linkTo
+        'controlled_term.preferred_name',
+        'controlled_term.term_name',
+        'controlled_term.term_id'
     ]
 
     def _update(self, properties, sheets=None):
@@ -253,6 +277,9 @@ class FileFormat(Item, ItemWithAttachment):
     item_type = 'file_format'
     schema = load_schema('encoded:schemas/file_format.json')
     name_key = 'file_format'
+    embedded_list = Item.embedded_list + [
+        'extrafile_formats.file_format'
+    ]
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -427,7 +454,7 @@ class Vendor(Item):
     item_type = 'vendor'
     schema = load_schema('encoded:schemas/vendor.json')
     name_key = 'name'
-    embedded_list = Item.embedded_list + ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title

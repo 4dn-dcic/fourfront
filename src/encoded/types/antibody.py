@@ -8,8 +8,10 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
 import string
 import re
 
@@ -27,7 +29,11 @@ class Antibody(Item):
     item_type = 'antibody'
     schema = load_schema('encoded:schemas/antibody.json')
     name_key = 'antibody_id'
-    embedded_list = Item.embedded_list + ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody_target', t='bio_feature'
+    ) + [
+        'antibody_vendor.title'
+    ]
 
     def _update(self, properties, sheets=None):
         # set antibody_id based on values of antibody_name and product_no
