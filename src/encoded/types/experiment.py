@@ -52,6 +52,13 @@ EXP_CATEGORIZER_SCHEMA = {
 }
 
 
+def _build_experiment_embedded_list():
+    """ Helper function intended to be used to create the embedded list for experiment.
+        All types should implement a function like this going forward.
+    """
+    pass
+
+
 @abstract_collection(
     name='experiments',
     unique_key='accession',
