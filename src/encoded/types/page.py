@@ -174,7 +174,6 @@ def includeme(config):
     config.add_view(static_page, route_name='staticpage')
 
 
-
 @collection(
     name='pages',
     lookup_key='name',
@@ -186,13 +185,18 @@ class Page(Item):
     """Links to StaticSections"""
     item_type = 'page'
     schema = load_schema('encoded:schemas/page.json')
-    embedded_list = ['content.*']
+    embedded_list = [
+        # StaticSection linkTo
+        'content.*'
+    ]
 
     STATUS_ACL = StaticSection.STATUS_ACL
 
     class Collection(Item.Collection):
         pass
 
+
+# XXX: Unclear what/why the intended effect is here... - Will 2/10/21
 for field in ['display_title', 'name', 'description', 'content.name']:
     Page.embedded_list = Page.embedded_list + [
         'children.' + field, 'children.children.' + field, 'children.children.children.' + field
@@ -200,6 +204,7 @@ for field in ['display_title', 'name', 'description', 'content.name']:
 
 
 #### Must add validators for add/edit since 'name' path is now lookup_key, not unique_key
+
 
 def validate_unique_page_name(context, request):
     '''validator to ensure page 'name' lookup_key is unique

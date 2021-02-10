@@ -21,4 +21,3 @@ class Target(Item):
 
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list

@@ -7,18 +7,11 @@ from snovault.attachment import ItemWithAttachment
 from .base import Item
 
 
-@collection(
-    name='protocols',
-    properties={
-        'title': 'Protocols',
-        'description': 'Listing of protocols',
-    })
-class Protocol(Item, ItemWithAttachment):
-    """Protocol class."""
-
-    item_type = 'protocol'
-    schema = load_schema('encoded:schemas/protocol.json')
-    embedded_list = Item.embedded_list + [
+def _build_protocol_embedded_list():
+    """ Helper function intended to be used to create the embedded list for protocol.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + [
         # Award linkTo
         "award.project",
         "award.name",
@@ -30,6 +23,20 @@ class Protocol(Item, ItemWithAttachment):
         # ExperimentType linkTo
         "experiment_type.title"
     ]
+
+
+@collection(
+    name='protocols',
+    properties={
+        'title': 'Protocols',
+        'description': 'Listing of protocols',
+    })
+class Protocol(Item, ItemWithAttachment):
+    """Protocol class."""
+
+    item_type = 'protocol'
+    schema = load_schema('encoded:schemas/protocol.json')
+    embedded_list = _build_protocol_embedded_list()
     rev = {
         'exp_type': ('ExperimentType', 'other_protocols'),
         'sop_exp': ('ExperimentType', 'sop')

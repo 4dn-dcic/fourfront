@@ -192,6 +192,21 @@ def map_doi_biox(doi):
 # Outside methods for online data fetch
 ################################################
 
+def _build_publication_embedded_list():
+    """ Helper function intended to be used to create the embedded list for publication.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + lab_award_attribution_embed_list + [
+        # ExperimentSet linkTo
+        "exp_sets_prod_in_pub.accession",
+
+        # ExperimentType linkTo
+        "exp_sets_prod_in_pub.experimentset_type",
+
+        # ExperimentType linkTo
+        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title",
+    ]
+
 
 @collection(
     name='publications',
@@ -203,16 +218,7 @@ class Publication(Item, ItemWithAttachment):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # ExperimentSet linkTo
-        "exp_sets_prod_in_pub.accession",
-
-        # ExperimentType linkTo
-        "exp_sets_prod_in_pub.experimentset_type",
-
-        # ExperimentType linkTo
-        "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title",
-    ]
+    embedded_list = _build_publication_embedded_list()
 
     class Collection(Item.Collection):
         pass

@@ -61,6 +61,23 @@ USER_DELETED = [
 ] + ONLY_ADMIN_VIEW_DETAILS
 
 
+def _build_user_embedded_list():
+    """ Helper function intended to be used to create the embedded list for user.
+        All types should implement a function like this going forward.
+    """
+    return [
+        # Lab linkTo
+        'lab.name',
+
+        # Award linkTo
+        'lab.awards.name',
+        'lab.awards.project',
+
+        # Lab linkTo
+        'submits_for.name',
+    ]
+
+
 @collection(
     name='users',
     unique_key='user:email',
@@ -74,17 +91,7 @@ class User(Item):
 
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
-    embedded_list = [
-        # Lab linkTo
-        'lab.name',
-
-        # Award linkTo
-        'lab.awards.name',
-        'lab.awards.project',
-
-        # Lab linkTo
-        'submits_for.name',
-    ]
+    embedded_list = _build_user_embedded_list()
 
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,

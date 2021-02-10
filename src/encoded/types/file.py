@@ -1363,6 +1363,8 @@ def download(context, request):
                 (request.range.start or 0)
             )
 
+    # TODO: AWS Open Data Bucket URL Resolution should probably happen here
+    #       Might be we need some additional metadata in *.ini?
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
