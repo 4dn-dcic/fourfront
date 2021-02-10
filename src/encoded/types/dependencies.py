@@ -12,12 +12,16 @@ class DependencyEmbedderError(Exception):
 class DependencyEmbedder:
     """ Utility class intended to be used to produce the embedded list necessary for a default embed
         of a given type. This class is intended to be used by calling the `embed_defaults_for_type` method.
-        Note that the type mappings are specified in EMBED_MAPPER.
+        Note that the type mappings are specified in EMBED_MAPPER and that 'compound' embeds are
+        specified verbosely ie: bio_feature embeds an ontology_term
     """
 
+    # Note that these match item_type field in the type definition!
     BIO_FEATURE = 'bio_feature'
     MODIFICATION = 'modification'
     TREATMENT = 'treatment'
+    ONTOLOGY_TERM = 'ontology_term'
+    PROTOCOL = 'protocol'
 
     EMBED_MAPPER = {
         BIO_FEATURE: [
@@ -27,7 +31,7 @@ class DependencyEmbedder:
             'preferred_label',
             'cellular_structure',
             'organism_name',
-            'relevant_genes.gene_id',
+            'relevant_genes.geneid',
             'relevant_genes.preferred_symbol',
             'feature_mods',
             'genome_location.genome_assembly',
@@ -46,7 +50,7 @@ class DependencyEmbedder:
             'target_of_mod.preferred_label',
             'target_of_mod.cellular_structure',
             'target_of_mod.organism_name',
-            'target_of_mod.relevant_genes.gene_id',
+            'target_of_mod.relevant_genes.geneid',
             'target_of_mod.relevant_genes.preferred_symbol',
             'target_of_mod.feature_mods',
             'target_of_mod.genome_location.genome_assembly',
@@ -63,7 +67,7 @@ class DependencyEmbedder:
             'target.preferred_label',
             'target.cellular_structure',
             'target.organism_name',
-            'target.relevant_genes.gene_id',
+            'target.relevant_genes.geneid',
             'target.relevant_genes.preferred_symbol',
             'target.feature_mods',
             'target.genome_location.genome_assembly',
@@ -71,6 +75,17 @@ class DependencyEmbedder:
             'target.genome_location.start_coordinate',
             'target.genome_location.end_coordinate',
             'target.genome_location.chromosome',
+        ],
+        ONTOLOGY_TERM: [
+            'term_id',
+            'term_name',
+            'preferred_name',
+        ],
+        PROTOCOL: [
+            'protocol_type',
+            'title',
+            'attachment',
+            'date_created',
         ]
     }
 

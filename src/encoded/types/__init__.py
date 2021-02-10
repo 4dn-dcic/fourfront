@@ -45,6 +45,17 @@ def includeme(config):
     config.scan()
 
 
+def _build_analysis_step_embedded_list():
+    """ Helper function intended to be used to create the embedded list for analysis_step.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + [
+        'software_used.name',
+        'software_used.title',
+        'qa_stats_generated.attachment'
+    ]
+
+
 @collection(
     name='analysis-steps',
     unique_key='analysis_step:name',
@@ -57,11 +68,18 @@ class AnalysisStep(Item):
 
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded_list = Item.embedded_list + [
-        'software_used.name',
-        'software_used.title',
-        'qa_stats_generated.attachment'
-    ]
+    embedded_list = _build_analysis_step_embedded_list()
+
+
+def _build_biosample_cell_culture_embedded_list():
+    """ Helper function intended to be used to create the embedded list for biosample_cell_culture.
+        All types should implement a function like this going forward.
+    """
+    protocols_additional_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='protocols_additional',
+                                                                             t='protocol')
+    authentication_protocols_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='authentication_protocols',
+                                                                                 t='protocol')
+    return Item.embedded_list + protocols_additional_embeds + authentication_protocols_embeds
 
 
 @collection(
@@ -75,18 +93,18 @@ class BiosampleCellCulture(Item):
 
     item_type = 'biosample_cell_culture'
     schema = load_schema('encoded:schemas/biosample_cell_culture.json')
-    embedded_list = Item.embedded_list + [
-        # Protocol linkTo
-        'protocols_additional.protocol_type',
-        'protocols_additional.title',
-        'protocols_additional.attachment',
-        'protocols_additional.date_created',
+    embedded_list = _build_biosample_cell_culture_embedded_list()
 
-        # Protocol linkTo
-        'authentication_protocols.protocol_type',
-        'authentication_protocols.title',
-        'authentication_protocols.attachment',
-        'authentication_protocols.date_created',
+
+def _build_construct_embedded_list():
+    """ Helper function intended to be used to create the embedded list for analysis_step.
+        All types should implement a function like this going forward.
+    """
+    expression_products_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='expression_products',
+                                                                            t='bio_feature')
+    return Item.embedded_list + expression_products_embeds + [
+        # Vendor linkTo
+        'construct_vendor.title'
     ]
 
 
@@ -101,11 +119,7 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
-    embedded_list = Item.embedded_list + \
-                    DependencyEmbedder.embed_defaults_for_type(base_path='expression_products', t='bio_feature') + [
-                        # Vendor linkTo
-                        'construct_vendor.title'
-                    ]
+    embedded_list = _build_construct_embedded_list()
 
 
 @collection(
@@ -209,8 +223,8 @@ class Enzyme(Item):
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
     embedded_list = Item.embedded_list + [
-        'enzyme_source.title'
-        
+        'enzyme_source.title',
+
         # Enzyme linkTo
         'mixed_enzymes.name'
     ]

@@ -7,6 +7,23 @@ from snovault import (
 from .base import (
     Item
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_ontology_term_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ontology_term.
+        All types should implement a function like this going forward.
+    """
+    slim_terms_embed = DependencyEmbedder.embed_defaults_for_type(base_path='slim_terms',
+                                                                  t='ontology_term')
+    parents_embed = DependencyEmbedder.embed_defaults_for_type(base_path='parents',
+                                                               t='ontology_term')
+    return slim_terms_embed + parents_embed + [
+        # Ontology linkTo
+        'source_ontologies.ontology_name',
+        # Ontology linkTo
+        'parents.source_ontologies.ontology_name',
+    ]
 
 
 @collection(
@@ -22,24 +39,7 @@ class OntologyTerm(Item):
 
     item_type = 'ontology_term'
     schema = load_schema('encoded:schemas/ontology_term.json')
-    embedded_list = [
-        # OntologyTerm linkTo
-        'slim_terms.is_slim_for',
-        'slim_terms.term_name',
-        'slim_terms.term_id',
-        'slim_terms.preferred_name',
-
-        # Ontology linkTo
-        'source_ontologies.ontology_name',
-
-        # OntologyTerm linkTo
-        'parents.term_id',
-        'parents.term_name',
-        'parents.preferred_name',
-
-        # Ontology linkTo
-        'parents.source_ontologies.ontology_name',
-    ]
+    embedded_list = _build_ontology_term_embedded_list()
     name_key = 'term_id'
 
     def _update(self, properties, sheets=None):
@@ -65,6 +65,17 @@ class OntologyTerm(Item):
         return term_id
 
 
+def _build_ontology_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ontology.
+        All types should implement a function like this going forward.
+    """
+    synonym_terms_embed = DependencyEmbedder.embed_defaults_for_type(base_path='synonym_terms',
+                                                                     t='ontology_term')
+    definition_terms_embed = DependencyEmbedder.embed_defaults_for_type(base_path='parents',
+                                                                        t='ontology_term')
+    return synonym_terms_embed + definition_terms_embed
+
+
 @collection(
     name='ontologys',
     unique_key='ontology:ontology_prefix',
@@ -77,10 +88,7 @@ class Ontology(Item):
 
     item_type = 'ontology'
     schema = load_schema('encoded:schemas/ontology.json')
-    embedded_list = [
-        'synonym_terms.*',
-        'definition_terms.*',
-    ]
+    embedded_list = _build_ontology_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",
