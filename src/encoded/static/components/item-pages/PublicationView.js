@@ -8,8 +8,8 @@ import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/compo
 import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
 import { PageTitleContainer, TitleAndSubtitleUnder, OnlyTitle, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
-import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
-import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
+import { EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
+import { SearchTableTitle } from './components/tables/ItemPageTable';
 import DefaultItemView from './DefaultItemView';
 import { UserContentBodyList } from './../static-pages/components';
 import { getTabStaticContent } from './components/TabbedView';
@@ -28,25 +28,12 @@ export default class PublicationView extends DefaultItemView {
         } = this.props;
         const tabs = [];
         const width = this.getTabViewWidth();
-        const anyPublications = exp_sets_used_in_pub.length > 0 || exp_sets_prod_in_pub.length > 0;
-
+        //summary tab
         tabs.push(PublicationSummary.getTabObject(this.props, width));
-
+        //experiment sets tab
+        const anyPublications = exp_sets_used_in_pub.length > 0 || exp_sets_prod_in_pub.length > 0;
         if (anyPublications){
-            const expSetTableProps = _.extend(
-                {
-                    width,
-                    searchHref : (
-                        "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
-                        "publications_of_set.display_title=" + encodeURIComponent(display_title)
-                    ),
-                    // Keep facets as they are returned from backend search response except the following:
-                    hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"]
-                    //facets : null // hide FacetList
-                },
-                this.props
-            );
-            tabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps));
+            tabs.push(PublicationExperimentSets.getTabObject(this.props, width));
         }
 
         return tabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
@@ -248,6 +235,82 @@ class PublicationSummary extends React.PureComponent {
                         <UserContentBodyList contents={staticContent} windowWidth={windowWidth} />
                     </div>
                 ) : null }
+            </div>
+        );
+    }
+}
+/**
+ * Instead of using standard ExperimentSetsTableTabView experiment sets tab content,
+ * we splitted experiment sets into 2 table, one of for exp_sets_used_in_pub and the other
+ * is for exp_sets_prod_in_pub
+ */
+class PublicationExperimentSets extends React.PureComponent {
+    /**
+         * Get overview tab object for tabpane.
+         *
+         * @param {Object} props - Parent Component props, as passed down from app.js
+         * @param {number} width - Width of tab container.
+         */
+    static getTabObject(props, width) {
+        return {
+            'tab': <span><i className="icon icon-file-alt far icon-fw" /> Experiment Sets</span>,
+            'key': 'expsets-table',
+            //'disabled' : !Array.isArray(context.experiments),
+            'content': <PublicationExperimentSets {...props} width={width} />
+        };
+    }
+    render() {
+        const { context, windowWidth } = this.props;
+        const {
+            display_title,
+            exp_sets_used_in_pub = [],
+            exp_sets_prod_in_pub = []
+        } = context || {};
+
+        const staticContent = getTabStaticContent(context, 'tab:expsets-table');
+        const prodTableProps = {
+            searchHref: (
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
+                "produced_in_pub.display_title=" + encodeURIComponent(display_title)
+            ),
+            title: <SearchTableTitle title="Experiment Set" headerElement="h4" externalSearchLinkVisible />,
+            facets: null
+        };
+        const usedTableProps = {
+            searchHref: (
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
+                "pubs_using.display_title=" + encodeURIComponent(display_title)
+            ),
+            title: <SearchTableTitle title="Experiment Set" headerElement="h4" externalSearchLinkVisible />,
+            facets: null
+        };
+
+        return (
+            <div className="overflow-hidden">
+                { staticContent && staticContent.length > 0 ? (
+                    <div className="mb-2">
+                        <UserContentBodyList contents={staticContent} windowWidth={windowWidth} />
+                        <hr />
+                    </div>
+                ) : null}
+                {exp_sets_prod_in_pub && exp_sets_prod_in_pub.length > 0 ? (
+                    <React.Fragment>
+                        <h3 className="tab-section-title">
+                            <span>Experiment Sets Produced In Publication</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider" />
+                        <EmbeddedExperimentSetSearchTable {...prodTableProps} />
+                    </React.Fragment>
+                ) : null}
+                {exp_sets_used_in_pub && exp_sets_used_in_pub.length > 0 ? (
+                    <React.Fragment>
+                        <h3 className="mt-2 mb-15 text-300">
+                            <span>Experiment Sets Used In Publication</span>
+                        </h3>
+                        <hr className="tab-section-title-horiz-divider" />
+                        <EmbeddedExperimentSetSearchTable {...usedTableProps} />
+                    </React.Fragment>
+                ) : null}
             </div>
         );
     }
