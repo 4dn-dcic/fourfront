@@ -71,7 +71,7 @@ def _build_ontology_embedded_list():
     """
     synonym_terms_embed = DependencyEmbedder.embed_defaults_for_type(base_path='synonym_terms',
                                                                      t='ontology_term')
-    definition_terms_embed = DependencyEmbedder.embed_defaults_for_type(base_path='parents',
+    definition_terms_embed = DependencyEmbedder.embed_defaults_for_type(base_path='definition_terms',
                                                                         t='ontology_term')
     return synonym_terms_embed + definition_terms_embed
 

@@ -22,6 +22,8 @@ class DependencyEmbedder:
     TREATMENT = 'treatment'
     ONTOLOGY_TERM = 'ontology_term'
     PROTOCOL = 'protocol'
+    GENE = 'gene'
+    GENOMIC_REGION = 'genomic_region'
 
     EMBED_MAPPER = {
         BIO_FEATURE: [
@@ -86,7 +88,19 @@ class DependencyEmbedder:
             'title',
             'attachment',
             'date_created',
-        ]
+        ],
+        GENE: [
+            'geneid',
+            'preferred_symbol'
+        ],
+        GENOMIC_REGION: [
+            'genome_assembly',
+            'location_description',
+            'start_coordinate',
+            'end_coordinate',
+            'chromosome'
+        ],
+
     }
 
     @classmethod
@@ -100,3 +114,19 @@ class DependencyEmbedder:
         if t not in cls.EMBED_MAPPER:
             raise DependencyEmbedderError('Type %s is not mapped! Types mapped: %s' % (t, cls.EMBED_MAPPER.keys()))
         return ['.'.join([base_path, e]) for e in cls.EMBED_MAPPER[t]]
+
+    @classmethod
+    def embed_for_type(cls, *, base_path, t, additional_embeds: list):
+        """ Embeds the defaults for the given type, plus any additional embeds.
+            NOTE: additional_embeds are not validated against the schema!
+
+        :param base_path: path to linkTo
+        :param t: type to embed
+        :param additional_embeds: fields other than those needed for default linkTo to be embedded.
+        :return: list of embeds
+        """
+        if not isinstance(additional_embeds, list):
+            raise DependencyEmbedderError('Invalid type for additional embeds! Gave: %s, of type %s' %
+                                          (additional_embeds, type(additional_embeds)))
+        return cls.embed_defaults_for_type(base_path=base_path, t=t) + ['.'.join([base_path, e])
+                                                                        for e in additional_embeds]

@@ -97,7 +97,7 @@ class BiosampleCellCulture(Item):
 
 
 def _build_construct_embedded_list():
-    """ Helper function intended to be used to create the embedded list for analysis_step.
+    """ Helper function intended to be used to create the embedded list for construct.
         All types should implement a function like this going forward.
     """
     expression_products_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='expression_products',
@@ -133,9 +133,6 @@ class Document(ItemWithAttachment, Item):
 
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
-    embedded_list = Item.embedded_list + [
-        'map.attachment'
-    ]
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -230,6 +227,22 @@ class Enzyme(Item):
     ]
 
 
+def _build_experiment_type_embedded_list():
+    """ Helper function intended to be used to create the embedded list for experiment_type.
+        All types should implement a function like this going forward.
+    """
+    sop_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='sop', t='protocol')
+    other_protocol_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='other_protocols', t='protocol')
+    controlled_term_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='controlled_term', t='ontology_term')
+    return Item.embedded_list + sop_embeds + other_protocol_embeds + controlled_term_embeds + [
+        # Publication linkTo
+        'reference_pubs.short_attribution',
+        'reference_pubs.authors',
+        'reference_pubs.date_published',
+        'reference_pubs.journal',
+    ]
+
+
 @collection(
     name='experiment-types',
     unique_key='experiment_type:experiment_name',
@@ -245,31 +258,7 @@ class ExperimentType(Item):
     item_type = 'experiment_type'
     schema = load_schema('encoded:schemas/experiment_type.json')
     name_key = 'experiment_name'
-
-    embedded_list = Item.embedded_list + [
-        # Publication linkTo
-        'reference_pubs.short_attribution',
-        'reference_pubs.authors',
-        'reference_pubs.date_published',
-        'reference_pubs.journal',
-
-        # Protocol linkTo
-        'sop.protocol_type',
-        'sop.title',
-        'sop.attachment',
-        'sop.date_created',
-
-        # Protocol linkTo
-        'other_protocols.protocol_type',
-        'other_protocols.title',
-        'other_protocols.attachment',
-        'other_protocols.date_created',
-
-        # OntologyTerm linkTo
-        'controlled_term.preferred_name',
-        'controlled_term.term_name',
-        'controlled_term.term_id'
-    ]
+    embedded_list = _build_experiment_type_embedded_list()
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title

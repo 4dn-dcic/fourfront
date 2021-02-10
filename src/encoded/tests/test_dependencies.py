@@ -16,7 +16,7 @@ class TestDependencyEmbedder:
             'treatment.target.preferred_label',
             'treatment.target.cellular_structure',
             'treatment.target.organism_name',
-            'treatment.target.relevant_genes.gene_id',
+            'treatment.target.relevant_genes.geneid',
             'treatment.target.relevant_genes.preferred_symbol',
             'treatment.target.feature_mods',
             'treatment.target.genome_location.genome_assembly',
@@ -33,7 +33,7 @@ class TestDependencyEmbedder:
             'experiment_set.treatment.target.preferred_label',
             'experiment_set.treatment.target.cellular_structure',
             'experiment_set.treatment.target.organism_name',
-            'experiment_set.treatment.target.relevant_genes.gene_id',
+            'experiment_set.treatment.target.relevant_genes.geneid',
             'experiment_set.treatment.target.relevant_genes.preferred_symbol',
             'experiment_set.treatment.target.feature_mods',
             'experiment_set.treatment.target.genome_location.genome_assembly',
@@ -56,3 +56,36 @@ class TestDependencyEmbedder:
     def test_dependency_embedder_error(self, t):
         with pytest.raises(DependencyEmbedderError):
             DependencyEmbedder.embed_defaults_for_type(base_path='dummy-path', t=t)
+        with pytest.raises(DependencyEmbedderError):
+            DependencyEmbedder.embed_for_type(base_path='dummy-path', t=t, additional_embeds=[])
+
+    @pytest.mark.parametrize('base_path,t,additional,expected', [
+        ('genes', 'gene', [], [
+            'genes.geneid',
+            'genes.preferred_symbol',
+        ]),
+        ('genes', 'gene', ['description'], [
+            'genes.geneid',
+            'genes.preferred_symbol',
+            'genes.description'
+        ]),
+        ('genes.most_severe_gene', 'gene', ['description', 'another_field'], [
+            'genes.most_severe_gene.geneid',
+            'genes.most_severe_gene.preferred_symbol',
+            'genes.most_severe_gene.description',
+            'genes.most_severe_gene.another_field'
+        ])
+    ])
+    def test_dependency_embedder_additional_basic(self, base_path, t, additional, expected):
+        embeds = DependencyEmbedder.embed_for_type(base_path=base_path, t=t, additional_embeds=additional)
+        assert sorted(embeds) == sorted(expected)
+
+    @pytest.mark.parametrize('additional', [
+        'a string',
+        5,
+        None,
+        object()
+    ])
+    def test_dependency_embedder_additional_error(self, additional):
+        with pytest.raises(DependencyEmbedderError):
+            DependencyEmbedder.embed_for_type(base_path='dummy-path', t='gene', additional_embeds=additional)  # noQA type hints working as intended

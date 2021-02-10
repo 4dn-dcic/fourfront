@@ -10,6 +10,19 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_bio_feature_embedded_list():
+    """ Helper function intended to be used to create the embedded list for bio_feature.
+        All types should implement a function like this going forward.
+    """
+    feature_type_embeds = DependencyEmbedder.embed_for_type(base_path='feature_type', t='ontology_term',
+                                                            additional_embeds=['synonyms'])
+    gene_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='relevant_genes', t='gene')
+    genome_location_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='genome_location',
+                                                                        t='genomic_region')
+    return Item.embedded_list + lab_award_attribution_embed_list + feature_type_embeds + gene_embeds + genome_location_embeds
 
 
 @collection(
@@ -23,24 +36,7 @@ class BioFeature(Item):
 
     item_type = 'bio_feature'
     schema = load_schema('encoded:schemas/bio_feature.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # OntologyTerm linkTo
-        'feature_type.preferred_name',
-        'feature_type.synonyms',
-        'feature_type.term_name',
-        'feature_type.term_id',
-
-        # Gene linkTo
-        'relevant_genes.geneid',
-        'relevant_genes.preferred_symbol',
-
-        # GenomicRegion linkTo
-        'genome_location.genome_assembly',
-        'genome_location.location_description',
-        'genome_location.start_coordinate',
-        'genome_location.end_coordinate',
-        'genome_location.chromosome',
-    ]
+    embedded_list = _build_bio_feature_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",

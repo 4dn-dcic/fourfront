@@ -12,6 +12,69 @@ from .base import (
 from .dependencies import DependencyEmbedder
 
 
+def _build_biosample_embedded_list():
+    """ Helper function intended to be used to create the embedded list for biosample.
+        All types should implement a function like this going forward.
+    """
+    modification_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications',
+                                                                     t='modification')
+    mod_bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications.target_of_mod',
+                                                                        t='bio_feature')
+    treatments_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='treatments',
+                                                                   t='treatment')
+    biosource_cell_line_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.cell_line',
+                                                                   t='ontology_term',
+                                                                   additional_embeds=['synonyms'])
+    biosource_tissue_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.tissue',
+                                                                t='ontology_term',
+                                                                additional_embeds=['synonyms'])
+    biosource_tissue_slim_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.tissue.slim_terms',
+                                                                     t='ontology_term',
+                                                                     additional_embeds=['synonyms'])
+    cell_culture_details_embeds = DependencyEmbedder.embed_for_type(base_path='cell_culture_details.tissue',
+                                                                    t='ontology_term',
+                                                                    additional_embeds=['synonyms'])
+    cell_culture_details_tissue_embeds = DependencyEmbedder.embed_for_type(
+        base_path='cell_culture_details.tissue.slim_terms',
+        t='ontology_term',
+        additional_embeds=['synonyms'])
+    biosample_protocols_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='biosample_protocols',
+                                                                            t='protocol')
+    return (
+        Item.embedded_list + lab_award_attribution_embed_list + modification_embeds + mod_bio_feature_embeds
+        + treatments_embeds + biosource_cell_line_embeds + biosource_tissue_embeds + biosource_tissue_slim_embeds
+        + cell_culture_details_embeds + cell_culture_details_tissue_embeds + biosample_protocols_embeds + [
+            # Badge linkTo
+            'badges.badge.title',
+            'badges.badge.commendation',
+            'badges.badge.warning',
+            'badges.badge.badge_classification',
+            'badges.badge.description',
+            'badges.badge.badge_icon',
+            'badges.messages',
+
+            # Biosource linkTo - many calc prop dependencies
+            'biosource.*',
+            'biosource.individual.sex',
+            'biosource.individual.organism.name',
+            'biosource.biosource_vendor.name',  # display_title uses this
+
+            # BiosampleCellCulture linkTo + Image linkTo
+            'cell_culture_details.*',
+            'cell_culture_details.morphology_image.caption',
+            'cell_culture_details.morphology_image.attachment.href',
+            'cell_culture_details.morphology_image.attachment.type',
+            'cell_culture_details.morphology_image.attachment.md5sum',
+            'cell_culture_details.morphology_image.attachment.download',
+            'cell_culture_details.morphology_image.attachment.width',
+            'cell_culture_details.morphology_image.attachment.height',
+
+            # Construct linkTo
+            'treatments.constructs.name',
+        ]
+    )
+
+
 @collection(
     name='biosamples',
     unique_key='accession',
@@ -35,82 +98,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             "badge.description"
         ]
     }
-    embedded_list = (
-            Item.embedded_list + lab_award_attribution_embed_list +
-            DependencyEmbedder.embed_defaults_for_type(base_path='modifications',
-                                                       t='modification') +
-            DependencyEmbedder.embed_defaults_for_type(base_path='modifications.target_of_mod',
-                                                       t='bio_feature') +
-            DependencyEmbedder.embed_defaults_for_type(base_path='treatments',
-                                                       t='treatment') +
-            [
-                # Badge linkTo
-                'badges.badge.title',
-                'badges.badge.commendation',
-                'badges.badge.warning',
-                'badges.badge.badge_classification',
-                'badges.badge.description',
-                'badges.badge.badge_icon',
-                'badges.messages',
-
-                # Biosource linkTo - many calc prop dependencies
-                'biosource.*',
-                'biosource.individual.sex',
-                'biosource.individual.organism.name',
-                'biosource.biosource_vendor.name',  # display_title uses this
-
-                # OntologyTerm linkTo
-                'biosource.cell_line.synonyms',
-                'biosource.cell_line.preferred_name',
-                'biosource.cell_line.term_name',
-                'biosource.cell_line.term_id',
-
-                # OntologyTerm linkTo
-                'biosource.tissue.synonyms',
-                'biosource.tissue.preferred_name',
-                'biosource.tissue.term_name',
-                'biosource.tissue.term_id',
-
-                # OntologyTerm linkTo
-                'biosource.tissue.slim_terms.synonyms',
-                'biosource.tissue.slim_terms.preferred_name',
-                'biosource.tissue.slim_terms.term_name',
-                'biosource.tissue.slim_terms.term_id',
-
-                # BiosampleCellCulture linkTo + Image linkTo
-                'cell_culture_details.*',
-                'cell_culture_details.morphology_image.caption',
-                'cell_culture_details.morphology_image.attachment.href',
-                'cell_culture_details.morphology_image.attachment.type',
-                'cell_culture_details.morphology_image.attachment.md5sum',
-                'cell_culture_details.morphology_image.attachment.download',
-                'cell_culture_details.morphology_image.attachment.width',
-                'cell_culture_details.morphology_image.attachment.height',
-
-                # OntologyTerm linkTo
-                'cell_culture_details.tissue.term_name',
-                'cell_culture_details.tissue.preferred_name',
-                'cell_culture_details.tissue.synonyms',
-                'cell_culture_details.tissue.term_id',
-
-                'cell_culture_details.tissue.slim_terms.synonyms',
-                'cell_culture_details.tissue.slim_terms.preferred_name',
-                'cell_culture_details.tissue.slim_terms.term_name',
-                'cell_culture_details.tissue.slim_terms.term_id',
-
-                # Construct linkTo
-                'treatments.constructs.name',
-
-                # Protocol linkTo
-                'biosample_protocols.description',
-                'biosample_protocols.protocol_type',
-                'biosample_protocols.title',
-                'biosample_protocols.date_created',
-                'biosample_protocols.attachment.href',
-                'biosample_protocols.attachment.type',
-                'biosample_protocols.attachment.md5sum',
-            ]
-    )
+    embedded_list = _build_biosample_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
