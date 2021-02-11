@@ -21,7 +21,6 @@ export default class PublicationView extends DefaultItemView {
     getTabViewContents(){
         const {
             context : {
-                display_title,
                 exp_sets_used_in_pub = [],
                 exp_sets_prod_in_pub = []
             }
@@ -245,12 +244,18 @@ class PublicationSummary extends React.PureComponent {
  * is for exp_sets_prod_in_pub
  */
 class PublicationExperimentSets extends React.PureComponent {
+    static propTypes = {
+        'facetAutoDisplayThreshold' : PropTypes.number.isRequired
+    };
+    static defaultProps = {
+        'facetAutoDisplayThreshold': 10
+    };
     /**
-         * Get overview tab object for tabpane.
-         *
-         * @param {Object} props - Parent Component props, as passed down from app.js
-         * @param {number} width - Width of tab container.
-         */
+     * Get experiment sets tab object for tabpane.
+     *
+     * @param {Object} props - Parent Component props, as passed down from app.js
+     * @param {number} width - Width of tab container.
+     */
     static getTabObject(props, width) {
         return {
             'tab': <span><i className="icon icon-file-alt far icon-fw" /> Experiment Sets</span>,
@@ -260,7 +265,7 @@ class PublicationExperimentSets extends React.PureComponent {
         };
     }
     render() {
-        const { context, windowWidth } = this.props;
+        const { context, windowWidth, facetAutoDisplayThreshold } = this.props;
         const {
             display_title,
             exp_sets_used_in_pub = [],
@@ -274,7 +279,8 @@ class PublicationExperimentSets extends React.PureComponent {
                 "produced_in_pub.display_title=" + encodeURIComponent(display_title)
             ),
             title: <SearchTableTitle title="Experiment Set" headerElement="h4" externalSearchLinkVisible />,
-            facets: null
+            hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"],
+            facets: exp_sets_prod_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
         };
         const usedTableProps = {
             searchHref: (
@@ -282,7 +288,8 @@ class PublicationExperimentSets extends React.PureComponent {
                 "pubs_using.display_title=" + encodeURIComponent(display_title)
             ),
             title: <SearchTableTitle title="Experiment Set" headerElement="h4" externalSearchLinkVisible />,
-            facets: null
+            hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"],
+            facets: exp_sets_used_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
         };
 
         return (
