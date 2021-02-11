@@ -3,7 +3,6 @@ import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from './.
 
 describe('JupyterHub - Basic tests', function () {
 
-
     context('Login and run an example notebook ', function () {
 
         // the hard-coded block below will be replaced with the actual authentication cookie
@@ -22,8 +21,8 @@ describe('JupyterHub - Basic tests', function () {
             cy.setCookie('jupyterhub-hub-login',jupyterhub_hub_login );
             cy.visit('https://jupyter.4dnucleome.org/user/ugurcamoglu@gmail.com/tree?').wait(1000).end();
         });
-        it('Ensure logged in, visit example file', function () {
 
+        it('Ensure logged in, visit example file', function () {
             cy.get('#notebook_list .item_name').should('contain', 'examples').end();
 
             //Because it opens a new page in the click event, we act as a url
@@ -37,8 +36,8 @@ describe('JupyterHub - Basic tests', function () {
                     const newUrl='https://jupyter.4dnucleome.org'+href;
                     cy.visit(newUrl).end();
                 });
-
         });
+
         it('Running Finn et al, Microscopy and HiC data overlayed file', function () {
             cy.setCookie('jupyterhub-session-id',jupyterhub_session_id);
             cy.setCookie('_xsrf', _xsrf);
@@ -47,8 +46,8 @@ describe('JupyterHub - Basic tests', function () {
             cy.visit('https://jupyter.4dnucleome.org/user/ugurcamoglu@gmail.com/notebooks/examples/Finn%20et%20al%2C%20Microscopy%20and%20HiC%20data%20overlayed.ipynb').end()
                 .get('#run_int.btn-group .btn-default .toolbar-btn-label').should('contain', 'Run')
                 .dblclick().end().wait(8000);
-
         });
+
         it('Finn et al, Microscopy and HiC data overlayed file result, total count matched ', function () {
             const $elem = Cypress.$('#notebook-container .cell.code_cell.rendered.unselected .output_wrapper .prompt.output_prompt bdi');
 
