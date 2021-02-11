@@ -1,6 +1,4 @@
 
-import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from './../support/variables';
-
 describe('JupyterHub - Basic tests', function () {
 
     context('Login and run an example notebook ', function () {
@@ -12,7 +10,7 @@ describe('JupyterHub - Basic tests', function () {
         const jupyterhub_hub_login="2|1:0|10:1613039224|20:jupyterhub-hub-login|44:YzE2OWYzYjNmZmM3NDZiOGI2MjdiYmE2MzYyYzE2NWI=|2f5717b9fa300321ffb4f9a5ac35a1b688f5a82e873254a7a27cbaf5bdb50141";
 
         it('JupytherHub login and set cookie data', function () {
-            cy.loginJupyterhub({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': false }).end();
+            // cy.loginJupyterhub({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': false }).end();
             // Cypress.Cookies.debug(true);
 
             cy.setCookie('jupyterhub-session-id',jupyterhub_session_id);
