@@ -40,8 +40,11 @@ describe('JupyterHub - Basic tests', function () {
             cy.setCookie('jupyterhub-session-id',jupyterhub_session_id);
             cy.setCookie('_xsrf', _xsrf);
             cy.setCookie('jupyterhub-user-ugurcamoglu%40gmail.com',jupyterhub_user);
-            cy.setCookie('jupyterhub-hub-login',jupyterhub_hub_login );
+            cy.setCookie('jupyterhub-hub-login', jupyterhub_hub_login);
             cy.visit('https://jupyter.4dnucleome.org/user/ugurcamoglu@gmail.com/notebooks/examples/Finn%20et%20al%2C%20Microscopy%20and%20HiC%20data%20overlayed.ipynb').end()
+
+                //kernel ready check
+                .get('#notification_kernel').should('not.equal', 'Connecting to kernel').end()
                 .get('#run_int.btn-group .btn-default .toolbar-btn-label').should('contain', 'Run')
                 .dblclick().end().wait(8000);
         });
