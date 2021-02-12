@@ -278,7 +278,7 @@ class PublicationExperimentSets extends React.PureComponent {
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
                 "produced_in_pub.display_title=" + encodeURIComponent(display_title)
             ),
-            title: <SearchTableTitle title="Experiment Set" headerElement="h4" externalSearchLinkVisible />,
+            title: <SearchTableTitle title="Experiment Set" titleSuffix="Produced In Publication" headerElement="h4" externalSearchLinkVisible />,
             hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"],
             facets: exp_sets_prod_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
         };
@@ -287,10 +287,15 @@ class PublicationExperimentSets extends React.PureComponent {
                 "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
                 "pubs_using.display_title=" + encodeURIComponent(display_title)
             ),
-            title: <SearchTableTitle title="Experiment Set" headerElement="h4" externalSearchLinkVisible />,
+            title: <SearchTableTitle title="Experiment Set" titleSuffix="Used In Publication" headerElement="h4" externalSearchLinkVisible />,
             hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"],
             facets: exp_sets_used_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
         };
+        const totalExperimentSets = exp_sets_used_in_pub.length + exp_sets_prod_in_pub.length;
+        let titleDetailString = null;
+        if (exp_sets_used_in_pub.length > 0 && exp_sets_prod_in_pub.length > 0) {
+            titleDetailString = totalExperimentSets + " Experiment Sets associated with this Publication";
+        }
 
         return (
             <div className="overflow-hidden">
@@ -300,23 +305,21 @@ class PublicationExperimentSets extends React.PureComponent {
                         <hr />
                     </div>
                 ) : null}
-                {exp_sets_prod_in_pub && exp_sets_prod_in_pub.length > 0 ? (
+                {titleDetailString ? (
                     <React.Fragment>
                         <h3 className="tab-section-title">
-                            <span>Experiment Sets Produced In Publication</span>
+                            Experiment Sets {titleDetailString.length > 0 ? <span className="small">&nbsp;&nbsp; &bull; {titleDetailString}</span> : null}
                         </h3>
                         <hr className="tab-section-title-horiz-divider" />
-                        <EmbeddedExperimentSetSearchTable {...prodTableProps} />
                     </React.Fragment>
                 ) : null}
+
+                {exp_sets_prod_in_pub && exp_sets_prod_in_pub.length > 0 ? (
+                    <EmbeddedExperimentSetSearchTable {...prodTableProps} />
+                ) : null}
+
                 {exp_sets_used_in_pub && exp_sets_used_in_pub.length > 0 ? (
-                    <React.Fragment>
-                        <h3 className="mt-2 mb-15 text-300">
-                            <span>Experiment Sets Used In Publication</span>
-                        </h3>
-                        <hr className="tab-section-title-horiz-divider" />
-                        <EmbeddedExperimentSetSearchTable {...usedTableProps} />
-                    </React.Fragment>
+                    <EmbeddedExperimentSetSearchTable {...usedTableProps} />
                 ) : null}
             </div>
         );

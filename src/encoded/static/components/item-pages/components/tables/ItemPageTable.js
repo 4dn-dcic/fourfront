@@ -104,6 +104,7 @@ export const SearchTableTitle = React.memo(function (props) {
         href: currentSearchHref,
         externalSearchLinkVisible = true,
         title: propTitle,
+        titleSuffix,
         headerElement = 'h3'
     } = props;
 
@@ -119,6 +120,7 @@ export const SearchTableTitle = React.memo(function (props) {
                 <span>
                     {typeof totalCount === "number" ? <span className="text-500">{totalCount + " "}</span> : null}
                     {title + (typeof totalCount === "number" && totalCount !== 1 ? "s" : "")}
+                    {titleSuffix && typeof titleSuffix === "string" && titleSuffix.length > 0 ? <span className="text-500">{" - " + titleSuffix}</span> : null}
                 </span>
                 {
                     externalSearchLinkVisible && currentSearchHref ?
@@ -137,6 +139,7 @@ SearchTableTitle.propTypes = {
     href: PropTypes.string,
     externalSearchLinkVisible: PropTypes.bool,
     title: PropTypes.string,
+    titleSuffix: PropTypes.string,
     headerElement: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']).isRequired,
 };
 
