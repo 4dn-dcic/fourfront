@@ -37,6 +37,7 @@ jobs:
 
       - name: Install/Link Postgres
         run: |
+          sudo apt update -yq
           sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-common postgresql-11 postgresql-client-11
           echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
           sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
