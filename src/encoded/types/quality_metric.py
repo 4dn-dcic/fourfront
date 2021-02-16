@@ -535,6 +535,6 @@ def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
 class QualityMetricMcool(QualityMetric):
     """Subclass of quality matrics for mcool files"""
 
-    item_type = 'quality_metric_mcoolfile'
+    item_type = 'quality_metric_mcool'
     schema = load_schema('encoded:schemas/quality_metric_mcool.json')
     embedded_list = QualityMetric.embedded_list
