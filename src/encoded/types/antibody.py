@@ -17,7 +17,7 @@ import re
 
 
 def _build_antibody_embedded_list():
-    """ Helper function intended to be used to create the embedded list for ontology_term.
+    """ Helper function intended to be used to create the embedded list for antibody.
         All types should implement a function like this going forward.
     """
     antibody_target_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='antibody_target', t='bio_feature')
