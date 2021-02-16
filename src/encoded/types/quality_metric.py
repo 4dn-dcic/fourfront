@@ -149,7 +149,7 @@ class QualityMetricBamqc(QualityMetric):
     def quality_metric_summary(self, request):
         qc = self.properties
         qc_summary = []
-        
+
         if 'Total Reads' not in qc:
             return
 
@@ -228,7 +228,7 @@ class QualityMetricPairsqc(QualityMetric):
     def quality_metric_summary(self, request):
         qc = self.properties
         qc_summary = []
-        
+
         if 'Total reads' not in qc:
             return
 
@@ -454,19 +454,19 @@ class QualityMetricQclist(QualityMetric):
                 if 'quality_metric_summary' in qc_obj:
                     for qcs_item in qc_obj['quality_metric_summary']:
                         qc_summary.append(qcs_item)
-        
+
         return qc_summary if qc_summary else None
 
 
 def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
-    """ 
-        Chipseq and Atacseq QCs both have common QC Summary metrics. This method 
+    """
+        Chipseq and Atacseq QCs both have common QC Summary metrics. This method
         calculates the metrics within quality_metric_summary calculated property
-    """    
-    
+    """
+
     def round2(numVal):
         return round(numVal * 100) / 100
-    
+
     qc_summary = []
 
     if 'overlap_reproducibility_qc' in quality_metric:
@@ -525,3 +525,16 @@ def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
                            "numberType": "integer"})
 
     return qc_summary if qc_summary else None
+
+@collection(
+    name='quality-metrics-mcool',
+    properties={
+        'title': 'QC Quality metrics for mcool files',
+        'description': 'Listing of QC Quality Metrics for mcool files.',
+    })
+class QualityMetricMcool(QualityMetric):
+    """Subclass of quality matrics for mcool files"""
+
+    item_type = 'quality_metric_mcoolfile'
+    schema = load_schema('encoded:schemas/quality_metric_mcool.json')
+    embedded_list = QualityMetric.embedded_list
