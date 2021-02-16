@@ -28,8 +28,8 @@
             "default": "1"
         },
         "Failed Balancing": {
-            "title": "Fail Balancing",
-            "type": "list",
+            "title": "Failed Balancing",
+            "type": "array",
             "qc_order": 1
         }
     },
