@@ -93,7 +93,7 @@ ITEM_INDEX_ORDER = [
     'QualityMetricRnaseqMadqc',
     'QualityMetricWorkflowrun',
     'QualityMetricQclist',
-    'QualityMetricMcoolfile'
+    'QualityMetricMcool'
 
     'ExperimentAtacseq',
     'ExperimentCaptureC',
