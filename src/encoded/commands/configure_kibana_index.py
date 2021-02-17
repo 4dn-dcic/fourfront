@@ -40,6 +40,8 @@ def main():
         use_es = get_health_page(ff_env=args.env)['elasticsearch']
 
     # create client and ensure kibana index exists
+    # TODO: CGAP does this differently. If port 443 is used, Will says use_ssl is implied and can be omitted here.
+    #       Need to verify that and then make both systems agree here. -kmp 16-Feb-2021
     es_options = {'use_ssl': True}
     client = create_es_client(use_es, use_aws_auth=True, **es_options)
     if not client.indices.exists(index='.kibana'):
