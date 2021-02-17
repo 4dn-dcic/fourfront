@@ -43,6 +43,10 @@ def test_setup_eb():
     assert isinstance(setup_eb.VERSION, str)
     assert setup_eb.VERSION[0].isdigit()
 
+    assert setup_eb.fix_requirement("1.3.5") == "==1.3.5"
+    assert setup_eb.fix_requirement("^1.3.5") == ">=1.3.5,<2"
+    assert setup_eb.fix_requirement("~1.3.5") == ">=1.3.5,<1.4"
+
 
 if __name__ == '__main__':
 
