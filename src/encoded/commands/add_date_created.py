@@ -20,7 +20,7 @@ import pytz
 from future.utils import iteritems
 from pyramid import paster
 from pyramid.traversal import resource_path
-from webtest import TestApp
+from dcicutils.misc_utils import TestApp
 
 
 pacific = pytz.timezone('US/Pacific')
