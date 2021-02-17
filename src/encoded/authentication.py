@@ -440,8 +440,7 @@ def impersonate_user(context, request):
     }
 
     id_token = jwt.encode(jwt_contents, b64decode(auth0_secret, '-_'),
-                          algorithm=JWT_ENCODING_ALGORITHM
-						  )
+                          algorithm=JWT_ENCODING_ALGORITHM)
     user_properties['id_token'] = id_token.decode('utf-8')
 
     return user_properties
