@@ -93,7 +93,7 @@ export function ExperimentSetsTableTabView(props){
                     <hr />
                 </div>
             ) : null}
-            <EmbeddedExperimentSetSearchTable {...tableProps}>{children}</EmbeddedExperimentSetSearchTable>        
+            <EmbeddedExperimentSetSearchTable {...tableProps}>{children}</EmbeddedExperimentSetSearchTable>
         </div>);
 }
 ExperimentSetsTableTabView.getTabObject = function(props){

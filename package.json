@@ -68,7 +68,7 @@
     "babel-plugin-minify-dead-code-elimination": "^0.5.1",
     "codacy-coverage": "^3.4.0",
     "coveralls": "^3.1.0",
-    "cypress": "^4.10.0",
+    "cypress": "^6.2.1",
     "empty-module": "0.0.2",
     "esdoc": "^1.1.0",
     "esdoc-ecmascript-proposal-plugin": "^1.0.0",
