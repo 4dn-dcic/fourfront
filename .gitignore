@@ -1,4 +1,5 @@
 .coverage
+*.srctr*
 coverage.xml
 beanstalk.cfg
 /coverage
@@ -16,6 +17,7 @@ beanstalk.cfg
 /develop-eggs/
 /downloads/
 /eggs/
+/ped_files_data/
 /.eggs/
 /extends/
 /jsconfig.json
@@ -66,8 +68,17 @@ elasticsearch-*.deb
 # Emacs backup files
 *~
 
+# PyCharm metadata
+.idea/
+
 # Virtual environments
+# Conventions vary, including env, venv, or longer names like cgap_env,
+# but typically they end in "env".
 *env/
 
-# PyCharm
-.idea/
+# Saved configurations from Elastic beanstalk that have been downloaded.
+.elasticbeanstalk/saved_configs/
+.elasticbeanstalk/app_versions/
+
+# Used for some kinds of debugging in dcicutils, snovault, cgap & ff.
+DEBUGLOG-*
