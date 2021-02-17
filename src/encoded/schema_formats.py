@@ -1,16 +1,40 @@
+import glob
+import io
+import json
+import pkg_resources
 import re
 import rfc3987
+
 from jsonschema_serialize_fork import FormatChecker
 from pyramid.threadlocal import get_current_request
 from .server_defaults import (
     ACCESSION_FACTORY,
+    ACCESSION_PREFIX,
+    TEST_PREFIX,
     test_accession,
 )
 from uuid import UUID
 
-accession_re = re.compile(r'^4DN(EX|ES|FI|FS|SR|BS|IN|WF)[1-9A-Z]{7}$')
-test_accession_re = re.compile(r'^TST(EX|ES|FI|FS|SR|BS|IN|WF)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$')
+
+def compute_accession_codes():
+    letter_pairs = set()
+    for file in glob.glob(pkg_resources.resource_filename('encoded', 'schemas/*.json')):
+        with io.open(file) as fp:
+            schema = json.load(fp)
+        letter_pair = schema.get('properties', {}).get('accession', {}).get('accessionType')
+        if letter_pair:
+            if not isinstance(letter_pair, str) or len(letter_pair) != 2:
+                raise RuntimeError("accession_type in %s is not a 2-character string:", letter_pair)
+            letter_pairs.add(letter_pair)
+    return "|".join(sorted(letter_pairs))
+
+
+ACCESSION_CODES = compute_accession_codes()
+
+accession_re = re.compile(r'^%s(%s)[1-9A-Z]{7}$' % (ACCESSION_PREFIX, ACCESSION_CODES))
+test_accession_re = re.compile(r'^%s(%s)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$' % (TEST_PREFIX, ACCESSION_CODES))
 uuid_re = re.compile(r'(?i)\{?(?:[0-9a-f]{4}-?){8}\}?')
+
 
 @FormatChecker.cls_checks("uuid")
 def is_uuid(instance):
