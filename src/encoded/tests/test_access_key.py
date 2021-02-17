@@ -153,12 +153,12 @@ def test_access_key_user_disable_login(anontestapp, no_login_access_key):
 
 def test_access_key_edit(anontestapp, access_key):
     headers = {'Authorization': auth_header(access_key)}
-    NEW_DESCRIPTION = 'new description'
-    properties = {'description': NEW_DESCRIPTION}
+    new_description = 'new description'
+    properties = {'description': new_description}
     anontestapp.put_json(access_key['@id'], properties, headers=headers)
 
     res = anontestapp.get(access_key['@id'], properties, headers=headers)
-    assert res.json['description'] == NEW_DESCRIPTION
+    assert res.json['description'] == new_description
 
 
 @pytest.mark.parametrize('frame', ['', 'raw', 'object', 'embedded', 'page'])
@@ -172,4 +172,4 @@ def test_access_key_uses_edw_hash(app, access_key):
     root = app.registry[COLLECTIONS]
     obj = root.by_item_type['access_key'][access_key['access_key_id']]
     pwhash = obj.properties['secret_access_key_hash']
-    assert EDWHash.encrypt(access_key['secret_access_key']) == pwhash
+    assert EDWHash.hash(access_key['secret_access_key']) == pwhash
