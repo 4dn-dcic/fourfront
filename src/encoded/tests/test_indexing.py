@@ -31,7 +31,7 @@ from timeit import default_timer as timer
 from unittest import mock
 from zope.sqlalchemy import mark_changed
 from .. import main
-from ..utils import delay_rerun
+from ..util import delay_rerun
 from ..verifier import verify_item
 from .workbook_fixtures import app_settings
 from .test_permissions import wrangler, wrangler_testapp
@@ -88,7 +88,8 @@ def setup_and_teardown(app):
     # AFTER THE TEST
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
-    meta = MetaData(bind=session.connection(), reflect=True)
+    meta = MetaData(bind=session.connection())
+    meta.reflect()
     for table in meta.sorted_tables:
         print('Clear table %s' % table)
         print('Count before -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)))

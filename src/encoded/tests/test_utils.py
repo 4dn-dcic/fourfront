@@ -3,8 +3,8 @@ import pytest
 import re
 from pyramid.httpexceptions import HTTPForbidden
 
-from ..utils import (compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str,
-                     customized_delay_rerun, check_user_is_logged_in)
+from ..util import (compute_set_difference_one, find_other_in_pair, delay_rerun, utc_today_str,
+                    customized_delay_rerun, check_user_is_logged_in)
 
 
 pytestmark = pytest.mark.working
