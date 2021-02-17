@@ -23,6 +23,38 @@ function setDevelopment(done){
     done();
 }
 
+function cleanBuildDirectory(done){
+    const buildDir = "./src/encoded/static/build/";
+    const pathsToDelete = [];
+    fs.readdir(buildDir, function(err, files){
+        files.forEach(function(fileName){
+            if (fileName === ".gitignore") { // Skip
+                return;
+            }
+            const filePath = path.resolve(buildDir, fileName);
+            pathsToDelete.push(filePath);
+        });
+
+        const filesToDeleteLen = pathsToDelete.length;
+
+        if (filesToDeleteLen === 0) {
+            done();
+            return;
+        }
+
+        var countDeleted = 0;
+        pathsToDelete.forEach(function(filePath){
+            fs.unlink(filePath, function(err){
+                countDeleted++;
+                if (countDeleted === filesToDeleteLen) {
+                    console.log("Cleaned " + countDeleted + " files from " + buildDir);
+                    done();
+                }
+            });
+        });
+    });
+}
+
 function webpackOnBuild(done) {
     var start = Date.now();
     return function (err, stats) {
@@ -254,6 +286,7 @@ const doSassBuild = (done, options = {}) => {
 
 
 const devQuick = gulp.series(
+    cleanBuildDirectory,
     setQuick,
     doWebpack,
     gulp.parallel(watch, watchSharedPortalComponents, watchMicroscopyMetadataTool)
@@ -263,6 +296,7 @@ const devQuick = gulp.series(
 );
 
 const devAnalyzed = gulp.series(
+    cleanBuildDirectory,
     setDevelopment,
     buildSharedPortalComponents,
     buildMicroscopyMetadataTool,
@@ -270,6 +304,7 @@ const devAnalyzed = gulp.series(
 );
 
 const build = gulp.series(
+    cleanBuildDirectory,
     setProduction,
     doWebpack
 );
