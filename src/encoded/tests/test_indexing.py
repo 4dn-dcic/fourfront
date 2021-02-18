@@ -24,13 +24,13 @@ from snovault.elasticsearch.create_mapping import (
     build_index_record,
     compare_against_existing_mapping
 )
-from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
+from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from sqlalchemy import MetaData, func
 from timeit import default_timer as timer
 from unittest import mock
 from zope.sqlalchemy import mark_changed
-from .. import main
+from .. import main, loadxl
 from ..util import delay_rerun
 from ..verifier import verify_item
 from .workbook_fixtures import app_settings
@@ -62,7 +62,9 @@ TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 def app(app_settings, request):
     # for now, don't run with mpindexer. Add `True` to params above to do so
     if request.param:
-        app_settings['mpindexer'] = True
+        # we disable the MPIndexer since the build runs on a small machine
+        # snovault should be testing the mpindexer - Will 12/12/2020
+        app_settings['mpindexer'] = False
     app = main({}, **app_settings)
 
     yield app
@@ -128,6 +130,7 @@ def test_indexing_simple(app, testapp, indexer_testapp):
         count += 1
     assert res.json['total'] >= 2
     assert uuid in uuids
+
     namespaced_indexing = get_namespaced_index(app, 'indexing')
     indexing_doc = es.get(index=namespaced_indexing, doc_type='indexing', id='latest_indexing')
     indexing_source = indexing_doc['_source']
@@ -284,7 +287,7 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     assert val_err_view['validation_errors'] == es_res['_source']['validation_errors']
 
 
-# @pytest.mark.performance
+@pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
 def test_load_and_index_perf_data(testapp, indexer_testapp):
     '''
@@ -316,7 +319,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
 
     # load -em up
     start = timer()
-    with mock.patch('encoded.loadxl.get_app') as mocked_app:
+    with mock.patch.object(loadxl, 'get_app') as mocked_app:
         mocked_app.return_value = testapp.app
         data = {'store': json_inserts}
         res = testapp.post_json('/load_data', data,  # status=200
