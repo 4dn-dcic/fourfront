@@ -14,6 +14,7 @@ from pyramid.testing import DummyRequest  # , setUp, tearDown
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
+from snovault.util import generate_indexer_namespace_for_testing
 from .conftest_settings import make_app_settings_dictionary
 from .. import main
 from ..loadxl import load_all
@@ -43,8 +44,7 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We 
     return settings
 
 
-# We're not CGAP
-# INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('cgap')
+INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('cgap')
 
 
 @pytest.fixture(scope='session')
@@ -57,9 +57,7 @@ def es_app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_serv
     settings['collection_datastore'] = 'elasticsearch'
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
-
-    # Only needed for CGAP
-    # settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
+    settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
 
     # use aws auth to access elasticsearch
     if aws_auth:
