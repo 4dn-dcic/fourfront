@@ -181,7 +181,9 @@ def security_tween_factory(handler, registry):
                             # by libs/react-middleware.js which is imported by server.js and compiled into
                             # renderer.js. Is used to get access to User Info on initial web page render.
                             response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
-                            response.headers['X-User-Info'] = json.dumps(request.user_info) # Re-ified property set in authentication.py
+                            user_info = request.user_info # Re-ified property set in authentication.py
+                            del user_info["id_token"] # Redundant - don't need this in SSR nor browser as get from X-Request-JWT.
+                            response.headers['X-User-Info'] = json.dumps(user_info)
                         else:
                             response.headers['X-Request-JWT'] = "null"
             return response

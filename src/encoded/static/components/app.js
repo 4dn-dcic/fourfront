@@ -125,13 +125,6 @@ export default class App extends React.PureComponent {
         });
     }
 
-    /**
-     * @property {boolean} initialSession - Whether user is logged in upon initial render. Only passed in on server-side render.
-     */
-    static defaultProps = {
-        'initialSession' : null
-    };
-
     static debouncedOnNavigationTooltipRebuild = _.debounce(ReactTooltip.rebuild, 500);
 
     /**
@@ -141,13 +134,13 @@ export default class App extends React.PureComponent {
     constructor(props){
         super(props);
         _.bindAll(this, 'currentAction', 'loadSchemas',
-            'setIsSubmitting', 'stayOnSubmissionsPage', 'authenticateUser',
-            'updateUserInfo', 'confirmNavigation', 'navigate',
+            'setIsSubmitting', 'stayOnSubmissionsPage',
+            'updateAppSessionState', 'confirmNavigation', 'navigate',
             // Global event handlers. These will catch events unless they are caught and prevented from bubbling up earlier.
             'handleClick', 'handleSubmit', 'handlePopState', 'handleBeforeUnload'
         );
 
-        const { context, initialSession } = props;
+        const { context } = props;
 
         Alerts.setStore(store);
 
@@ -160,14 +153,7 @@ export default class App extends React.PureComponent {
         this.historyEnabled = !!(typeof window != 'undefined' && window.history && window.history.pushState);
 
         // Todo: Migrate session & user_actions to redux store?
-        let session = false;
-        if (typeof initialSession === 'boolean'){
-            // Only provided from server
-            session = initialSession;
-        } else {
-            // Only available client-side. Same cookie sent to server-side to authenticate initialSession, so it must match.
-            session = !!(JWT.get('cookie'));
-        }
+        const session = !!(JWT.getUserInfo());
 
         // Initialize navigate function/obj prior to using in application.
         // Saves navigate fxn and other req'd stuffs to GLOBAL navigate obj.
@@ -175,7 +161,6 @@ export default class App extends React.PureComponent {
         navigate.initializeFromApp(this);
         navigate.registerCallbackFunction(Alerts.updateCurrentAlertsTitleMap.bind(this, null));
 
-        if (context.schemas) Schemas.set(context.schemas);
 
         /**
          * Initial state of application.
@@ -212,11 +197,10 @@ export default class App extends React.PureComponent {
      * - Sets state.mounted to be true.
      * - Clears out any UTM URI parameters three seconds after mounting (giving Google Analytics time to pick them up).
      *
-     * @private
      */
     componentDidMount() {
         const { href, context } = this.props;
-
+        ajax.AJAXSettings.addSessionExpiredCallback(this.updateAppSessionState);
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
         const windowHref = (window && window.location && window.location.href) || href;
@@ -239,9 +223,6 @@ export default class App extends React.PureComponent {
             );
         }
 
-        // Authenticate user if not yet handled server-side w/ cookie and rendering props.
-        this.authenticateUser();
-
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
 
@@ -263,6 +244,7 @@ export default class App extends React.PureComponent {
             window.onhashchange = this.onHashChange;
         }
 
+        // TODO: We don't need this in here, can be in SubmissionsView itself...
         window.onbeforeunload = this.handleBeforeUnload;
 
         // Save some stuff to global window variables so we can access it in tests:
@@ -624,71 +606,6 @@ export default class App extends React.PureComponent {
         navigate(windowHref, { 'replace': true });
     }
 
-    /**
-     * Grabs JWT from local cookie and, if not already authenticated or are missing 'user_actions',
-     * perform authentication via AJAX to grab user actions, updated JWT token, and save to localStorage.
-     *
-     * @deprecated (?) Since browser.js calls JWT.remove() + reloads as anonymous user
-     * @private
-     * @param {function} [callback=null] Optional callback to be ran upon completing authentication.
-     * @returns {void}
-     */
-    authenticateUser(callback = null){
-        const { session } = this.state;
-        const idToken = JWT.get();
-
-        // Currently we usually only have at most 1 group per User.
-        // If changes, we may need to register multiple events
-        // or figure out prioritization of group to register.
-        const {
-            user_actions: userActions = null,
-            details: {
-                uuid: userId = null,
-                groups = null
-            } = {}
-        } = JWT.getUserInfo() || {};
-
-        if (idToken && (!session || !userId || !userActions)){
-            // if JWT present, and session not yet set (from back-end), try to authenticate
-            // This is very unlikely due to us rendering re: session server-side. Mostly a remnant or if localStorage cleared.
-            console.info('AUTHENTICATING USER; JWT PRESENT BUT NO STATE.SESSION OR USER_ACTIONS');
-            ajax.promise('/login', 'POST', { 'Authorization' : 'Bearer ' + idToken }, JSON.stringify({ 'id_token' : idToken }))
-                .then((response) => {
-                    if (response.code || response.status || response.id_token !== idToken) throw response;
-                    return response;
-                })
-                .then(
-                    (response) => {
-                        JWT.saveUserInfo(response);
-                        this.updateUserInfo(callback);
-                        analytics.setUserID(userId);
-                        analytics.event('Authentication', 'ExistingSessionLogin', {
-                            userId,
-                            name: userId,
-                            userGroups: groups && JSON.stringify(groups.sort()),
-                            eventLabel: 'Authenticated ClientSide'
-                        });
-                    },
-                    (error) => {
-                        // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
-                        // and unset state.session (via this.updateUserInfo())
-                        JWT.remove();
-                        this.updateUserInfo(callback);
-                    }
-                );
-            return idToken;
-        } else {
-            console.info('User is logged in already, continuing session.');
-            // analytics.setUserID(userId); is performed in SPC/analytics.js on init.
-            analytics.event('Authentication', 'ExistingSessionLogin', {
-                userId,
-                name: userId,
-                userGroups: groups && JSON.stringify(groups.sort()),
-                eventLabel: 'Authenticated ServerSide'
-            });
-        }
-        return null;
-    }
 
     /**
      * Tests that JWT is present along with user info and user actions, and if so, updates `state.session`.
@@ -698,13 +615,13 @@ export default class App extends React.PureComponent {
      * @param {function} [callback=null] Optional callback to be ran upon completing authentication.
      * @returns {void}
      */
-    updateUserInfo(callback = null){
+    updateAppSessionState(callback = null){
         // get user actions (a function of log in) from local storage
         const userInfo  = JWT.getUserInfo();
         // We definitively use Cookies for JWT.
         // It can be unset via response headers from back-end.
-        const currentToken = JWT.get('cookie');
-        const session = !!(userInfo && currentToken); // cast to bool
+        // const currentToken = JWT.get('cookie');
+        const session = !!(userInfo); // cast to bool
 
         this.setState(function({ session : existingSession }){
             if (session === existingSession) {
@@ -910,7 +827,7 @@ export default class App extends React.PureComponent {
                 return false;
             }
 
-            this.currentNavigationRequest = ajax.fetch(targetHref, { 'cache' : options.cache === false ? false : true });
+            this.currentNavigationRequest = ajax.fetch(targetHref);
             // Keep a reference in current scope to later assert if same request instance (vs new superceding one).
             const currentRequestInThisScope = this.currentNavigationRequest;
             const timeout = new Timeout(App.SLOW_REQUEST_TIME);
@@ -928,10 +845,6 @@ export default class App extends React.PureComponent {
             currentRequestInThisScope
                 .then((response)=>{
                     console.info("Fetched new context", response);
-
-                    // Update `state.session` after (possibly) removing expired JWT. Backend does this via set cookie header.
-                    // Also, may have been logged out in different browser window so keep state.session up-to-date BEFORE a re-request
-                    this.updateUserInfo();
 
                     if (!object.isValidJSON(response)) { // Probably only if 500 server error or similar. Or link to xml or image etc.
                         // navigate normally to URL of unexpected non-JSON response so back button works.
@@ -1187,7 +1100,7 @@ export default class App extends React.PureComponent {
             hrefParts,
             lastCSSBuildTime,
             'updateUploads'  : this.updateUploads,
-            'updateUserInfo' : this.updateUserInfo,
+            'updateAppSessionState' : this.updateAppSessionState,
             'setIsSubmitting': this.setIsSubmitting,
             'onBodyClick'    : this.handleClick,
             'onBodySubmit'   : this.handleSubmit,
@@ -1293,7 +1206,7 @@ class ContentRenderer extends React.PureComponent {
         const commonContentViewProps = _.pick(this.props,
             // Props from App:
             'schemas', 'session', 'href', 'navigate', 'uploads', 'updateUploads',
-            'browseBaseState', 'setIsSubmitting', 'updateUserInfo', 'context', 'currentAction',
+            'browseBaseState', 'setIsSubmitting', 'updateAppSessionState', 'context', 'currentAction',
             // Props from BodyElement:
             'windowWidth', 'windowHeight', 'registerWindowOnResizeHandler', 'registerWindowOnScrollHandler',
             'addToBodyClassList', 'removeFromBodyClassList', 'toggleFullScreen', 'isFullscreen'
@@ -1767,7 +1680,7 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateUserInfo, browseBaseState, lastCSSBuildTime } = this.props;
+        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
@@ -1778,7 +1691,7 @@ class BodyElement extends React.PureComponent {
 
         const navbarProps = {
             href, context, currentAction, hrefParts, session, schemas,
-            browseBaseState, updateUserInfo, addToBodyClassList, removeFromBodyClassList,
+            browseBaseState, updateAppSessionState, addToBodyClassList, removeFromBodyClassList,
             windowWidth, windowHeight, isFullscreen, overlaysContainer
         };
 
@@ -1788,9 +1701,9 @@ class BodyElement extends React.PureComponent {
 
                 <script data-prop-name="lastCSSBuildTime" type="application/json" dangerouslySetInnerHTML={{ __html: lastCSSBuildTime }}/>
 
-                <script data-prop-name="user_details" type="application/json" dangerouslySetInnerHTML={{
-                    __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
-                }}/>
+                <script data-prop-name="user_info" type="application/json" dangerouslySetInnerHTML={{
+                    __html: jsonScriptEscape(JSON.stringify(JWT.getUserInfo())) /* Kept up-to-date in browser.js */
+                }} />
 
                 <script data-prop-name="context" type="application/json" dangerouslySetInnerHTML={{
                     __html: jsonScriptEscape(JSON.stringify(context))

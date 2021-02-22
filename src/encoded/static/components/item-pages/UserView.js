@@ -107,35 +107,28 @@ class SyncedAccessKeyTable extends React.PureComponent {
     /**
      * Add new access key for user via AJAX.
      *
+     * * @todo Determine if we even need to pass in user email, given server can authenticate us.
+     *
      * @param {MouseEvent} e - Click event.
      */
     handleCreate(e) {
-        const item = {};
-        const idToken = JWT.get();
-        if (idToken){
-            const decoded = JWT.decode(idToken);
-            item.user = decoded.email_verified ? decoded.email.toLowerCase() : "";
-        } else {
-            console.warn("Access key aborted");
-            return;
-        }
 
-        ajax.load('/access-keys/', (resp)=>{
-            const [ newKey ] = resp['@graph'];
-            this.setState(function({ access_keys : prevKeys }){
+        ajax.load('/access-keys/', (resp) => {
+            const [newKey] = resp['@graph'];
+            this.setState(function ({ access_keys: prevKeys }) {
                 const nextKeys = prevKeys.slice(0);
                 nextKeys.unshift(newKey); // Add to start of list.
-                return { 'access_keys' : nextKeys };
+                return { 'access_keys': nextKeys };
             }, () => {
                 this.showNewSecret(resp);
             });
-        }, 'POST', (err)=>{
+        }, 'POST', (err) => {
             Alerts.queue({
-                'title'     : "Adding access key failed",
-                "message"   : "Check your internet connection or if you have been logged out due to expired session.",
-                "style"     : 'danger'
+                'title': "Adding access key failed",
+                "message": "Check your internet connection or if you have been logged out due to expired session.",
+                "style": 'danger'
             });
-        }, JSON.stringify(item));
+        }, "{}"); // Yep - no post body
     }
 
     showNewSecret(response, reset = false) {
@@ -707,7 +700,7 @@ class BasicForm extends React.PureComponent {
 export class ImpersonateUserForm extends React.PureComponent {
 
     static propTypes = {
-        'updateUserInfo': PropTypes.func.isRequired
+        'updateAppSessionState': PropTypes.func.isRequired
     };
 
     constructor(props){
@@ -724,15 +717,15 @@ export class ImpersonateUserForm extends React.PureComponent {
      * @param {Object} data - User ID or email address.
      */
     handleSubmit(data) {
-        const { updateUserInfo } = this.props;
+        const { updateAppSessionState } = this.props;
         const url = "/impersonate-user";
         const postData = { 'userid' : data };
         const callbackFxn = (resp) => {
             //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
             //    localStorage.setItem("user_info", JSON.stringify(payload));
             //}
-            JWT.saveUserInfo(resp);
-            updateUserInfo();
+            JWT.saveUserInfoLocalStorage(resp);
+            updateAppSessionState();
             let navTarget = "/";
             const profileAction = resp.user_actions && _.find(resp.user_actions, { 'id' : 'profile' });
             if (profileAction && profileAction.href){

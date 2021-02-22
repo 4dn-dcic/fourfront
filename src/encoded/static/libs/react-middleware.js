@@ -34,20 +34,17 @@ const render = function (AppComponent, body, res) {
     // It is only returned if successfully authenticated, else is cleared out or set to "expired".
     const jwtToken = res.getHeader('X-Request-JWT');
 
-    let initialSession = false;
     let userInfo = null;
 
-    if (JWT.maybeValid(jwtToken)){
+    if (JWT.maybeValid(jwtToken)) {
         // Receiving 'X-User-Info' header allows us to have user info such as name
         // in server-side render instead of relying only on JWT (stored in cookie)
         // post-mount + AJAX request for user info.
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
-        if (userInfo){
+        if (userInfo) {
             JWT.saveUserInfoLocalStorage(userInfo);
-            JWT.save(jwtToken); // Just in case we want to access this later in server-side for some reason.
-            initialSession = true;
         }
-    } else if (jwtToken === 'expired'){
+    } else if (jwtToken === 'expired') {
         disp_dict.alerts.push(Alerts.LoggedOut);
     }
     // End JWT token grabbing
@@ -60,7 +57,7 @@ const render = function (AppComponent, body, res) {
 
     try {
         AppWithReduxProps = connect(mapStateToProps)(AppComponent);
-        markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps initialSession={initialSession} /></Provider>);
+        markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
         // TODO maybe in future: Try to utilize https://reactjs.org/docs/react-dom-server.html#rendertonodestream instead -- would require big edits to subprocess-middleware, however (e.g. removing buffering, piping stream directly to process.stdout).
     } catch (err) {
         store.dispatch({
@@ -84,6 +81,8 @@ const render = function (AppComponent, body, res) {
     }
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    // Prevent this header from arriving to downstream client for security.
+    res.removeHeader("X-Request-JWT");
     //var duration = process.hrtime(start);
     //res.setHeader('X-React-duration', duration[0] * 1e6 + (duration[1] / 1000 | 0));
     return new Buffer('<!DOCTYPE html>\n' + markup);

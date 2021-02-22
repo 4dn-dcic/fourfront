@@ -7,7 +7,7 @@ import jwt
 from base64 import b64decode
 
 from passlib.context import CryptContext
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy
@@ -192,7 +192,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         request.set_property(get_user_info, "user_info", True)
         return email
 
-    def get_token_info(self, token, request):
+    @staticmethod
+    def get_token_info(token, request):
         '''
         Given a jwt get token info from auth0, handle retrying and whatnot.
         This is only called if we receive a Bearer token in Authorization header.
@@ -228,16 +229,25 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         return None
 
 
-def get_jwt(request):
-    token = None
-    try:
-        # ensure this is a jwt token not basic auth:
-        auth_type = request.headers['Authorization'][:6]
-        if auth_type.strip().lower() == 'bearer':
-            token = request.headers['Authorization'][7:]
-    except (ValueError, TypeError, KeyError):
-        pass
-
+def get_jwt_from_auth_header(request):
+    if "Authorization" in request.headers:
+        try:
+            # Ensure this is a JWT token, not basic auth.
+            # Per https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication and
+            # https://tools.ietf.org/html/rfc6750, JWT is introduced by 'bearer', as in
+            #   Authorization: Bearer something.something.something
+            # rather than, for example, the 'basic' key information, which as discussed in
+            # https://tools.ietf.org/html/rfc7617 is base64 encoded and looks like:
+            #   Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+            # See also https://jwt.io/introduction/ for other info specific to JWT.
+            [ auth_type, auth_data ] = request.headers['Authorization'].strip().split(' ', 1)
+            if auth_type.lower() == 'bearer':
+                return auth_data.strip()  # The spec says exactly one space, but then a token, so spaces don't matter
+        except Exception:
+            return None
+    return None
+def get_jwt(request):  
+    token = get_jwt_from_auth_header(request)
     if not token and request.method in ('GET', 'HEAD'):
         # Only grab this if is a GET request, not a transactional request to help mitigate CSRF attacks.
         # See: https://en.wikipedia.org/wiki/Cross-site_request_forgery#Cookie-to-header_token
@@ -254,15 +264,45 @@ def get_jwt(request):
 @debug_log
 def login(context, request):
     '''
-    Check the auth0 assertion and return User Information to be stored client-side
-    user_info comes from /session-properties and other places and would contain ultimately:
-        { id_token: string, user_actions : string[], details : { uuid, email, first_name, last_name, groups, timezone, status } }
+    Save JWT as httpOnly cookie
     '''
-    user_info = getattr(request, 'user_info', None)
-    if user_info and user_info.get('id_token'): # Authenticated
-        return user_info
+    # Allow providing token thru Authorization header as well as POST request body.
+    # Should be about equally secure if using HTTPS.
+    request_token = get_jwt_from_auth_header(request)
+    if request_token is None:
+        request_token = request.json_body.get("id_token", None)
 
-    raise LoginDenied(domain=request.domain)
+    request_parts = urlparse(request.referrer)
+    request_domain = request_parts.hostname
+
+    is_https = request_parts.scheme == "https"
+
+
+    # The below 'check' is disabled to provide less feedback than possible
+    # to make it slightly harder for brute force attacks.
+
+    # is_valid_token = Auth0AuthenticationPolicy.get_token_info(request_token, request)
+    # if not is_valid_token:
+    #     # Doesn't check if User exists in system, just if token is validly signed,
+    #     # to allow for unregistered users to still have cookie stored so
+    #     # they can go through registration process.
+    #     # (This check is not strictly needed for anything, just provides more feedback faster.. maybe should be removed?)
+    #     raise LoginDenied(domain=request.domain)
+
+
+    request.response.set_cookie(
+        "jwtToken",
+        value=request_token,
+        # THE BELOW NEEDS TESTING RE: CLOUD ENVIRONMENT:
+        domain=request_domain,
+        path="/",
+        httponly=True,
+        samesite="strict",
+        overwrite=True,
+        secure=is_https
+    )
+
+    return { "saved_cookie" : True }   
 
 
 @view_config(route_name='logout',
@@ -279,19 +319,36 @@ def logout(context, request):
     The front-end handles logging out by discarding the locally-held JWT from
     browser cookies and re-requesting the current 4DN URL.
     """
-    #request.session.invalidate()
-    #request.response.headerlist.extend(forget(request))
+    # Deletes the cookie
+    request.response.set_cookie(
+        name='jwtToken',
+        value=None,
+        max_age=0,
+        path='/',
+        overwrite=True
+    )
 
-    # call auth0 to logout
-    auth0_logout_url = "https://{domain}/v2/logout" \
-                .format(domain='hms-dbmi.auth0.com')
+    request.response.status_code = 401
+    request.response.headers['WWW-Authenticate'] = (
+        "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\""
+        .format(request.domain, request.domain)
+    )
 
-    requests.get(auth0_logout_url)
+    return { "deleted_cookie" : True }
 
-    if asbool(request.params.get('redirect', True)):
-        raise HTTPFound(location=request.resource_path(request.root))
+    # TODO: NEED DO THIS CLIENTSIDE SO IT UNSETS USER'S COOKIE - MUST BE THRU REDIRECT NOT AJAX
+    # (we don't do this - i.e. we don't bother to log user out of all of Auth0 session, just out of
+    # own web app)
 
-    return {}
+    # call auth0 to logout -
+    # auth0_logout_url = "https://{domain}/v2/logout" \
+    #             .format(domain='hms-dbmi.auth0.com')
+    #requests.get(auth0_logout_url)
+
+    #if asbool(request.params.get('redirect', True)):
+    #    raise HTTPFound(location=request.resource_path(request.root))
+
+    #return {}
 
 
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
@@ -341,7 +398,7 @@ def session_properties(context, request):
         if principal.startswith('userid.'):
             break
     else:
-        return {}
+        raise LoginDenied(domain=request.domain)
 
     namespace, userid = principal.split('.', 1)
     properties = get_basic_properties_for_user(request, userid)
@@ -409,9 +466,28 @@ def impersonate_user(context, request):
         'email_verified': True,
         'aud': auth0_client,
     }
+    id_token = jwt.encode(
+        jwt_contents,
+        b64decode(auth0_secret, '-_'),
+        algorithm=JWT_ENCODING_ALGORITHM
+	)
 
-    id_token = jwt.encode(jwt_contents, b64decode(auth0_secret, '-_'), algorithm='HS256')
-    user_properties['id_token'] = id_token.decode('utf-8')
+    # Better place to get this maybe?
+    request_parts = urlparse(request.referrer)
+    request_domain = request_parts.hostname
+    is_https = request_parts.scheme == "https"
+
+    request.response.set_cookie(
+        "jwtToken",
+        value=id_token.decode('utf-8'),
+        # THE BELOW NEEDS TESTING RE: CLOUD ENVIRONMENT:
+        domain=request_domain,
+        path="/",
+        httponly=True,
+        samesite="strict",
+        overwrite=True,
+        secure=is_https
+    )
 
     return user_properties
 
