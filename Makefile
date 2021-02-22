@@ -120,7 +120,9 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	bin/test -vv --timeout=200 -m "working and not performance"
+	# bin/test -vv --timeout=200 -m "working and not performance and not action_fail"
+	bin/test -vv --timeout=200 -m "working and not performance and indexing and not action_fail"; bin/test -vv --timeout=200 -m "working and not performance and not indexing and not action_fail"
+
 
 test-any:
 	bin/test -vv --timeout=200
