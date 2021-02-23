@@ -1,13 +1,12 @@
+import contextlib
 import pytest
 import webtest
 
-# from dcicutils.qa_utils import notice_pytest_fixtures
-# from .workbook_fixtures import app_settings, app
+from dcicutils.qa_utils import notice_pytest_fixtures
+from dcicutils.misc_utils import url_path_join
 
 
-# notice_pytest_fixtures(app_settings, app)
-
-pytestmark = [pytest.mark.indexing, pytest.mark.working]
+pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 
 @pytest.fixture(scope='session')
@@ -78,41 +77,59 @@ def posted_help_page_section(workbook, es_testapp, help_page_section_json):
     return val
 
 
-@pytest.fixture()
-def help_page(workbook, es_testapp, posted_help_page_section, help_page_json):
+# Move this to some test utilities place when debugged
+JSON_HEADERS = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+
+
+# Move this to some test utilities place when debugged
+@contextlib.contextmanager
+def posted_page(testapp, base_url, content):
+    uuid = content.get('uuid')
     try:
-        res = es_testapp.post_json('/pages/', help_page_json, status=201)
-        val = res.json['@graph'][0]
+        [val] = testapp.post_json(base_url, content, status=201).maybe_follow().json['@graph']
     except webtest.AppError:
-        res = es_testapp.get('/' + help_page_json['uuid'], status=301).follow()
-        val = res.json
-    return val
+        val = testapp.get(url_path_join('/', base_url, uuid),
+                          headers=JSON_HEADERS,
+                          status=301).maybe_follow().json
+    uuid = uuid or val.get('uuid')
+    yield val
+    if uuid:
+        # Note: This needs to be .delete_json, not just .delete to avoid a 415 error
+        # where a "Content-Type: application/json" header goes unspecified. -kmp 23-Feb-2021
+        testapp.delete_json(url_path_join('/', base_url , uuid))
 
 
-@pytest.fixture()
-def help_page_deleted(workbook, es_testapp, posted_help_page_section, help_page_json_draft):
-    try:
-        res = es_testapp.post_json('/pages/', help_page_json_draft, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = es_testapp.get('/' + help_page_json_draft['uuid'], status=301).follow()
-        val = res.json
-    return val
+@pytest.yield_fixture()
+def posted_help_page(workbook, es_testapp, posted_help_page_section, help_page_json):
+    notice_pytest_fixtures(workbook, posted_help_page_section)
+    with posted_page(es_testapp, '/pages', help_page_json) as val:
+        yield val
 
 
-@pytest.fixture()
-def help_page_restricted(workbook, es_testapp, posted_help_page_section, help_page_json_deleted):
-    try:
-        res = es_testapp.post_json('/pages/', help_page_json_deleted, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = es_testapp.get('/' + help_page_json_deleted['uuid'], status=301).follow()
-        val = res.json
-    return val
+@pytest.yield_fixture()
+def posted_help_page_draft(workbook, es_testapp, posted_help_page_section, help_page_json_draft):
+    notice_pytest_fixtures(workbook, posted_help_page_section)
+    with posted_page(es_testapp, '/pages', help_page_json_draft) as val:
+        yield val
 
 
-def test_get_help_page(workbook, es_testapp, help_page):
-    help_page_url = "/" + help_page['name']
+@pytest.yield_fixture()
+def posted_help_page_deleted(workbook, es_testapp, posted_help_page_section, help_page_json_deleted):
+    notice_pytest_fixtures(workbook, posted_help_page_section)
+    with posted_page(es_testapp, '/pages', help_page_json_deleted) as val:
+        yield val
+
+# TODO: There is no help_page_json_restricted.  What was that supposed to test? -kmp 23-Feb-2021
+#
+# @pytest.yield_fixture()
+# def posted_help_page_restricted(workbook, es_testapp, posted_help_page_section, help_page_json_restricted):
+#     notice_pytest_fixtures(workbook, posted_help_page_section)
+#     with posted_page(es_testapp, '/pages', help_page_json_restricted) as val:
+#         yield val
+
+
+def test_get_help_page(workbook, es_testapp, posted_help_page):
+    help_page_url = "/" + posted_help_page['name']
     res = es_testapp.get(help_page_url, status=200)
     assert res.json['@id'] == help_page_url
     assert res.json['@context'] == help_page_url
@@ -121,30 +138,38 @@ def test_get_help_page(workbook, es_testapp, help_page):
     # assert res.json['content'] == help_page['content'] # No longer works latter is set to an @id of static_section
     # Instead lets check what we have embedded on GET request is inside our doc file (rest_api_submission.md).
     assert 'Accession and uuid are automatically assigned during initial posting' in res.json['content'][0]['content']
-    assert res.json['toc'] == help_page['table-of-contents']
+    assert res.json['toc'] == posted_help_page['table-of-contents']
 
 
-def test_get_help_page_deleted(workbook, anon_html_es_testapp, help_page_deleted):
-    help_page_url = "/" + help_page_deleted['name']
+def test_get_help_page_draft(workbook, anon_html_es_testapp, html_es_testapp, posted_help_page_draft):
+    help_page_url = "/" + posted_help_page_draft['name']
     anon_html_es_testapp.get(help_page_url, status=403)
+    html_es_testapp.get(help_page_url, status=200)
 
 
-def test_get_help_page_no_access(workbook, anon_html_es_testapp, es_testapp, help_page_restricted):
-    help_page_url = "/" + help_page_restricted['name']
+def test_get_help_page_deleted(workbook, anon_html_es_testapp, html_es_testapp, posted_help_page_deleted):
+    help_page_url = "/" + posted_help_page_deleted['name']
+    anon_html_es_testapp.get(help_page_url, status=403)
+    html_es_testapp.get(help_page_url, status=200)  # Why 200 and not 404? -kmp 23-Feb-2021
+
+
+# Changed out posted_help_page_restricted for posted_help_page. -kmp 23-Feb-2021
+def test_get_help_page_no_access(workbook, anon_html_es_testapp, es_testapp, posted_help_page):
+    help_page_url = "/" + posted_help_page['name']
     anon_html_es_testapp.get(help_page_url, status=403)
     es_testapp.get(help_page_url, status=200)
 
 
-def test_page_unique_name(workbook, es_testapp, help_page, help_page_deleted):
+def test_page_unique_name(workbook, es_testapp, posted_help_page, posted_help_page_deleted):
     # POST again with same name and expect validation error
-    new_page = {'name': help_page['name']}
+    new_page = {'name': posted_help_page['name']}
     res = es_testapp.post_json('/page', new_page, status=422)
-    expected_val_err = "%s already exists with name '%s'" % (help_page['uuid'], new_page['name'])
+    expected_val_err = "%s already exists with name '%s'" % (posted_help_page['uuid'], new_page['name'])
     actual_error_description = res.json['errors'][0]['description']
     print("expected:", expected_val_err)
     print("actual:", actual_error_description)
     assert expected_val_err in actual_error_description
 
     # also test PATCH of an existing page with another name
-    res = es_testapp.patch_json(help_page_deleted['@id'], {'name': new_page['name']}, status=422)
+    res = es_testapp.patch_json(posted_help_page_deleted['@id'], {'name': new_page['name']}, status=422)
     assert expected_val_err in res.json['errors'][0]['description']
