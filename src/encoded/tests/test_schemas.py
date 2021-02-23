@@ -15,8 +15,8 @@ SCHEMA_FILES = [
 ]
 
 
-@pytest.fixture(scope='module')
-def master_mixins():
+def compute_master_mixins():
+    """This computes the value used by the master_mixins fixture. That function can't be called separately."""
     mixins = load_schema('encoded:schemas/mixins.json')
     mixin_keys = [
         'schema_version',
@@ -43,6 +43,11 @@ def master_mixins():
     ]
     for key in mixin_keys:
         assert(mixins[key])
+
+
+@pytest.fixture(scope='module')
+def master_mixins():
+    return compute_master_mixins()
 
 
 def camel_case(name):
