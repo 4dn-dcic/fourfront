@@ -1,8 +1,6 @@
 import base64
 import os
 from operator import itemgetter
-from datetime import datetime
-import time
 import jwt
 from base64 import b64decode
 
@@ -36,7 +34,6 @@ from snovault import (
     CONNECTION,
     COLLECTIONS
 )
-from snovault.storage import User
 from snovault.validation import ValidationFailure
 from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
@@ -45,6 +42,27 @@ from snovault.schema_utils import validate_request
 from snovault.util import debug_log
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
+
+
+JWT_ENCODING_ALGORITHM = 'HS256'
+
+# Might need to keep a list of previously used algorithms here, not just the one we use now.
+# Decryption algorithm used to default to a long list, but more recent versions of jwt library
+# say we should stop assuming that.
+#
+# In case it goes away, as far as I can tell, the default for decoding from their
+# default_algorithms() method used to be what we've got in JWT_ALL_ALGORITHMS here.
+#  -kmp 15-May-2020
+
+JWT_ALL_ALGORITHMS = ['ES512', 'RS384', 'HS512', 'ES256', 'none',
+                      'RS256', 'PS512', 'ES384', 'HS384', 'ES521',
+                      'PS384', 'HS256', 'PS256', 'RS512']
+
+# Probably we could get away with fewer, but I think not as few as just our own encoding algorithm,
+# so for now I believe the above list was the default, and this just rearranges it to prefer the one
+# we use for encoding. -kmp 19-Jan-2021
+
+JWT_DECODING_ALGORITHMS = [JWT_ENCODING_ALGORITHM]
 
 
 def includeme(config):
@@ -193,12 +211,32 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         return email
 
     @staticmethod
+    def email_is_partners_or_hms(payload):
+        """
+        Checks that the given JWT payload belongs to a partners email.
+        """
+        for identity in payload.get('identities', []): # if auth0 decoded
+            if identity.get('connection', '') in ['partners', 'hms-it']:
+                return True
+
+        # XXX: Refactor to use regex? Also should potentially be data-driven?
+        if 'partners' in payload.get('sub', ''):
+            return True
+        elif 'harvard.edu' in payload.get('sub', ''):
+            return True
+        elif payload.get('email_verified'):
+            return True
+        else:
+            return False
+
+    @staticmethod
     def get_token_info(token, request):
         '''
         Given a jwt get token info from auth0, handle retrying and whatnot.
         This is only called if we receive a Bearer token in Authorization header.
         '''
         try:
+
             # lets see if we have an auth0 token or our own
             registry = request.registry
             auth0_client = registry.settings.get('auth0.client')
@@ -206,8 +244,9 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             if auth0_client and auth0_secret:
                 # leeway accounts for clock drift between us and auth0
                 payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
+                                     algorithms=JWT_DECODING_ALGORITHMS,
                                      audience=auth0_client, leeway=30)
-                if 'email' in payload and payload.get('email_verified') is True:
+                if 'email' in payload and Auth0AuthenticationPolicy.email_is_partners_or_hms(payload):
                     request.set_property(lambda r: False, 'auth0_expired')
                     return payload
 
@@ -215,7 +254,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
                 resp  = requests.post(user_url, {'id_token':token})
                 payload = resp.json()
-                if 'email' in payload and payload.get('email_verified') is True:
+                if 'email' in payload and Auth0AuthenticationPolicy.email_is_partners_or_hms(payload):
                     request.set_property(lambda r: False, 'auth0_expired')
                     return payload
 
@@ -246,26 +285,27 @@ def get_jwt_from_auth_header(request):
         except Exception:
             return None
     return None
-def get_jwt(request):  
+
+
+def get_jwt(request):
+
+    # First try to obtain JWT from headers
     token = get_jwt_from_auth_header(request)
-    if not token and request.method in ('GET', 'HEAD'):
-        # Only grab this if is a GET request, not a transactional request to help mitigate CSRF attacks.
-        # See: https://en.wikipedia.org/wiki/Cross-site_request_forgery#Cookie-to-header_token
-        # The way our JS grabs and sticks JWT into Authorization header is somewhat analogous to above approach.
-        # TODO: Ensure our `Access-Control-Allow-Origin` response headers are appropriate (more for CGAP).
-        # TODO: Get a security audit done.
+
+    # If the JWT is not in the headers, get it from cookies
+    if not token:
         token = request.cookies.get('jwtToken')
 
     return token
 
 
-@view_config(route_name='login', request_method='POST',
-             permission=NO_PERMISSION_REQUIRED)
+@view_config(route_name='login', request_method='POST', permission=NO_PERMISSION_REQUIRED)
 @debug_log
 def login(context, request):
     '''
     Save JWT as httpOnly cookie
     '''
+
     # Allow providing token thru Authorization header as well as POST request body.
     # Should be about equally secure if using HTTPS.
     request_token = get_jwt_from_auth_header(request)
@@ -302,7 +342,7 @@ def login(context, request):
         secure=is_https
     )
 
-    return { "saved_cookie" : True }   
+    return { "saved_cookie" : True }
 
 
 @view_config(route_name='logout',
@@ -319,6 +359,7 @@ def logout(context, request):
     The front-end handles logging out by discarding the locally-held JWT from
     browser cookies and re-requesting the current 4DN URL.
     """
+
     # Deletes the cookie
     request.response.set_cookie(
         name='jwtToken',
@@ -343,12 +384,13 @@ def logout(context, request):
     # call auth0 to logout -
     # auth0_logout_url = "https://{domain}/v2/logout" \
     #             .format(domain='hms-dbmi.auth0.com')
-    #requests.get(auth0_logout_url)
 
-    #if asbool(request.params.get('redirect', True)):
-    #    raise HTTPFound(location=request.resource_path(request.root))
+    # requests.get(auth0_logout_url)
 
-    #return {}
+    # if asbool(request.params.get('redirect', True)):
+    #     raise HTTPFound(location=request.resource_path(request.root))
+
+    # return {}
 
 
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
@@ -466,6 +508,7 @@ def impersonate_user(context, request):
         'email_verified': True,
         'aud': auth0_client,
     }
+
     id_token = jwt.encode(
         jwt_contents,
         b64decode(auth0_secret, '-_'),
@@ -518,7 +561,7 @@ def generate_password():
 @debug_log
 def create_unauthorized_user(context, request):
     """
-    Endpoint to create an unauthorized user, which will have no lab or award.
+    Endpoint to create an unauthorized user, which will have no institution/project.
     Requires a reCAPTCHA response, which is propogated from the front end
     registration form. This is so the endpoint cannot be abused.
     Given a user properties in the request body, will validate those and also
@@ -551,7 +594,7 @@ def create_unauthorized_user(context, request):
     user_props['was_unauthorized'] = True
     user_props['email'] = user_props_email  # lowercased
     user_coll = request.registry[COLLECTIONS]['User']
-    request.remote_user = 'EMBED'  # permission = import_items
+    request.remote_user = 'EMBED'  # permission = restricted_fields
 
     # validate the User json
     validate_request(user_coll.type_info.schema, request, user_props)
