@@ -90,7 +90,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
                 'headers' : { 'Authorization': 'Bearer ' + token, 'Content-Type' : "application/json; charset=UTF-8" },
                 'followRedirect' : true
             }).then(function(resp){
-                if (resp.statusText && resp.statusText === 'OK') {
+                if (resp.status && resp.status === 200) {
                     cy.request({
                         'url': '/session-properties',
                         'method': 'GET',
@@ -99,7 +99,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
                         // Triggers app.state.session change (req'd to update UI)
                         w.fourfront.app.updateAppSessionState();
                         // Refresh curr page/context
-                        w.fourfront.navigate('', { 'inPlace': true });
+                        w.fourfront.navigate('', { 'inPlace' : true });
                     }).end();
                 }
             }).end();
