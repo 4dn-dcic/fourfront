@@ -82,7 +82,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 
     function performLogin(token){
         return cy.window().then((w)=>{
-            w.fourfront.JWT.save(token);
+            // w.fourfront.JWT.save(token);
             cy.request({
                 'url' : '/login',
                 'method' : 'POST',
@@ -90,11 +90,18 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
                 'headers' : { 'Authorization': 'Bearer ' + token, 'Content-Type' : "application/json; charset=UTF-8" },
                 'followRedirect' : true
             }).then(function(resp){
-                w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
-                // Triggers app.state.session change (req'd to update UI)
-                w.fourfront.app.updateAppSessionState();
-                // Refresh curr page/context
-                w.fourfront.navigate('', { 'inPlace' : true });
+                if (resp.statusText && resp.statusText === 'OK') {
+                    cy.request({
+                        'url': '/session-properties',
+                        'method': 'GET',
+                    }).then(function (userInfoResponse) {
+                        w.fourfront.JWT.saveUserInfoLocalStorage(JSON.parse(userInfoResponse.headers['x-user-info']));
+                        // Triggers app.state.session change (req'd to update UI)
+                        w.fourfront.app.updateAppSessionState();
+                        // Refresh curr page/context
+                        w.fourfront.navigate('', { 'inPlace': true });
+                    }).end();
+                }
             }).end();
         }).end();
     }
@@ -135,7 +142,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
     };
 
     jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
-    expect(jwt_token).to.have.length.greaterThan(0);
+    // expect(jwt_token).to.have.length.greaterThan(0);
     Cypress.log({
         'name' : "Login 4DN",
         'message' : 'Generated own JWT with length ' + jwt_token.length,
