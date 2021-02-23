@@ -142,7 +142,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
     };
 
     jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
-    // expect(jwt_token).to.have.length.greaterThan(0);
+    expect(jwt_token).to.have.length.greaterThan(0);
     Cypress.log({
         'name' : "Login 4DN",
         'message' : 'Generated own JWT with length ' + jwt_token.length,
