@@ -36,15 +36,15 @@ const render = function (AppComponent, body, res) {
 
     let userInfo = null;
 
-    if (JWT.maybeValid(jwtToken)) {
+    if (JWT.maybeValid(jwtToken)){
         // Receiving 'X-User-Info' header allows us to have user info such as name
         // in server-side render instead of relying only on JWT (stored in cookie)
         // post-mount + AJAX request for user info.
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
-        if (userInfo) {
+        if (userInfo){
             JWT.saveUserInfoLocalStorage(userInfo);
         }
-    } else if (jwtToken === 'expired') {
+    } else if (jwtToken === 'expired'){
         disp_dict.alerts.push(Alerts.LoggedOut);
     }
     // End JWT token grabbing

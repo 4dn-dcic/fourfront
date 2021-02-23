@@ -113,20 +113,20 @@ class SyncedAccessKeyTable extends React.PureComponent {
      */
     handleCreate(e) {
 
-        ajax.load('/access-keys/', (resp) => {
-            const [newKey] = resp['@graph'];
-            this.setState(function ({ access_keys: prevKeys }) {
+        ajax.load('/access-keys/', (resp)=>{
+            const [ newKey ] = resp['@graph'];
+            this.setState(function({ access_keys : prevKeys }){
                 const nextKeys = prevKeys.slice(0);
                 nextKeys.unshift(newKey); // Add to start of list.
-                return { 'access_keys': nextKeys };
+                return { 'access_keys' : nextKeys };
             }, () => {
                 this.showNewSecret(resp);
             });
-        }, 'POST', (err) => {
+        }, 'POST', (err)=>{
             Alerts.queue({
-                'title': "Adding access key failed",
-                "message": "Check your internet connection or if you have been logged out due to expired session.",
-                "style": 'danger'
+                'title'     : "Adding access key failed",
+                "message"   : "Check your internet connection or if you have been logged out due to expired session.",
+                "style"     : 'danger'
             });
         }, "{}"); // Yep - no post body
     }

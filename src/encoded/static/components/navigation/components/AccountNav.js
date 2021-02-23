@@ -83,10 +83,10 @@ export const AccountNav = React.memo(function AccountNav(props){
     );
 });
 AccountNav.propTypes = {
-    'session'         : PropTypes.bool.isRequired,      /** Passed in by App */
-    'href'            : PropTypes.string.isRequired,    /** Passed in by Redux store */
-    'updateAppSessionState'  : PropTypes.func.isRequired,      /** Passed in by App */
-    'mounted'         : PropTypes.bool                  /** Passed in by Navigation */
+    'session'               : PropTypes.bool.isRequired,      /** Passed in by App */
+    'href'                  : PropTypes.string.isRequired,    /** Passed in by Redux store */
+    'updateAppSessionState' : PropTypes.func.isRequired,      /** Passed in by App */
+    'mounted'               : PropTypes.bool                  /** Passed in by Navigation */
 };
 
 

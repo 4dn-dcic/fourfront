@@ -211,25 +211,6 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         return email
 
     @staticmethod
-    def email_is_partners_or_hms(payload):
-        """
-        Checks that the given JWT payload belongs to a partners email.
-        """
-        for identity in payload.get('identities', []): # if auth0 decoded
-            if identity.get('connection', '') in ['partners', 'hms-it']:
-                return True
-
-        # XXX: Refactor to use regex? Also should potentially be data-driven?
-        if 'partners' in payload.get('sub', ''):
-            return True
-        elif 'harvard.edu' in payload.get('sub', ''):
-            return True
-        elif payload.get('email_verified'):
-            return True
-        else:
-            return False
-
-    @staticmethod
     def get_token_info(token, request):
         '''
         Given a jwt get token info from auth0, handle retrying and whatnot.
@@ -246,7 +227,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
                                      algorithms=JWT_DECODING_ALGORITHMS,
                                      audience=auth0_client, leeway=30)
-                if 'email' in payload and Auth0AuthenticationPolicy.email_is_partners_or_hms(payload):
+                if 'email' in payload and payload.get('email_verified') is True:
                     request.set_property(lambda r: False, 'auth0_expired')
                     return payload
 
@@ -254,7 +235,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
                 resp  = requests.post(user_url, {'id_token':token})
                 payload = resp.json()
-                if 'email' in payload and Auth0AuthenticationPolicy.email_is_partners_or_hms(payload):
+                if 'email' in payload and payload.get('email_verified') is True:
                     request.set_property(lambda r: False, 'auth0_expired')
                     return payload
 
@@ -561,7 +542,7 @@ def generate_password():
 @debug_log
 def create_unauthorized_user(context, request):
     """
-    Endpoint to create an unauthorized user, which will have no institution/project.
+    Endpoint to create an unauthorized user, which will have no lab or award.
     Requires a reCAPTCHA response, which is propogated from the front end
     registration form. This is so the endpoint cannot be abused.
     Given a user properties in the request body, will validate those and also
@@ -594,7 +575,7 @@ def create_unauthorized_user(context, request):
     user_props['was_unauthorized'] = True
     user_props['email'] = user_props_email  # lowercased
     user_coll = request.registry[COLLECTIONS]['User']
-    request.remote_user = 'EMBED'  # permission = restricted_fields
+    request.remote_user = 'EMBED'  # permission = import_items
 
     # validate the User json
     validate_request(user_coll.type_info.schema, request, user_props)
