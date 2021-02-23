@@ -62,7 +62,7 @@ def workflow(testapp, software, award, lab):
     workflow_uuid = '023bfb3e-9a8b-42b9-a9d4-216079526f68'
     return workflow_uuid
 
-@pytest.mark.broken_remotely  # do not run on GA
+@pytest.mark.broken # do not run
 def test_pseudo_run(testapp, input_json):
     # this test can be problematic; uncomment the following line to disable it
     # assert False

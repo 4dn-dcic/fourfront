@@ -1,5 +1,6 @@
 import pytest
 
+from dcicutils.misc_utils import filtered_warnings
 from dcicutils.qa_utils import MockResponse
 from unittest import mock
 from pyramid.testing import DummyRequest
@@ -40,13 +41,19 @@ VARIOUS_MIME_TYPES_TO_TEST = ['*/*', 'text/html', 'application/json', 'applicati
 
 def test_best_mime_type(the_constant_answer=MIME_TYPE_DEFAULT):
 
-    for requested_mime_type in VARIOUS_MIME_TYPES_TO_TEST:
-        req = DummyRequest(headers={'Accept': requested_mime_type})
-        assert best_mime_type(req, 'legacy') == the_constant_answer
-        assert best_mime_type(req, 'modern') == the_constant_answer
-        req = DummyRequest(headers={})  # The Accept header in the request just isn't being consulted
-        assert best_mime_type(req, 'modern') == the_constant_answer
-        assert best_mime_type(req, 'modern') == the_constant_answer
+    with filtered_warnings("ignore", category=DeprecationWarning):
+        # Suppresses this warning:
+        #     DeprecationWarning: The behavior of .best_match for the Accept classes is currently being maintained
+        #       for backward compatibility, but the method will be deprecated in the future, as its behavior is not
+        #       specified in (and currently does not conform to) RFC 7231.
+
+        for requested_mime_type in VARIOUS_MIME_TYPES_TO_TEST:
+            req = DummyRequest(headers={'Accept': requested_mime_type})
+            assert best_mime_type(req, 'legacy') == the_constant_answer
+            assert best_mime_type(req, 'modern') == the_constant_answer
+            req = DummyRequest(headers={})  # The Accept header in the request just isn't being consulted
+            assert best_mime_type(req, 'modern') == the_constant_answer
+            assert best_mime_type(req, 'modern') == the_constant_answer
 
 
 def test_best_mime_type_traditional():
