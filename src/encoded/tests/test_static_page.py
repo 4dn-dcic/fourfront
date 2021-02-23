@@ -66,17 +66,6 @@ def help_page_json_deleted():
     }
 
 
-@pytest.fixture()
-def posted_help_page_section(workbook, es_testapp, help_page_section_json):
-    try:
-        res = es_testapp.post_json('/static-sections/', help_page_section_json, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = es_testapp.get('/' + help_page_section_json['uuid'], status=301).follow()
-        val = res.json
-    return val
-
-
 # Move this to some test utilities place when debugged
 JSON_HEADERS = {'Content-Type': 'application/json', 'Accept': 'application/json'}
 
@@ -86,17 +75,27 @@ JSON_HEADERS = {'Content-Type': 'application/json', 'Accept': 'application/json'
 def posted_page(testapp, base_url, content):
     uuid = content.get('uuid')
     try:
-        [val] = testapp.post_json(base_url, content, status=201).maybe_follow().json['@graph']
+        [val] = testapp.post_json(base_url, content, status=(201, 301)).maybe_follow().json['@graph']
     except webtest.AppError:
         val = testapp.get(url_path_join('/', base_url, uuid),
                           headers=JSON_HEADERS,
-                          status=301).maybe_follow().json
+                          status=(200, 301)).maybe_follow().json
     uuid = uuid or val.get('uuid')
     yield val
     if uuid:
-        # Note: This needs to be .delete_json, not just .delete to avoid a 415 error
-        # where a "Content-Type: application/json" header goes unspecified. -kmp 23-Feb-2021
-        testapp.delete_json(url_path_join('/', base_url , uuid))
+        # Note: Without JSON headers, this will get a 415 even if it's not using the result data. -kmp 23-Feb-2021
+        testapp.delete(url_path_join('/', uuid), headers=JSON_HEADERS)
+
+
+def wait_for_index(testapp):
+    testapp.post_json("/index", {"record": False})
+
+
+@pytest.fixture()
+def posted_help_page_section(workbook, es_testapp, help_page_section_json):
+    notice_pytest_fixtures(workbook)
+    with posted_page(es_testapp, '/static-sections', help_page_section_json) as val:
+        yield val
 
 
 @pytest.yield_fixture()
@@ -129,6 +128,7 @@ def posted_help_page_deleted(workbook, es_testapp, posted_help_page_section, hel
 
 
 def test_get_help_page(workbook, es_testapp, posted_help_page):
+    wait_for_index(es_testapp)
     help_page_url = "/" + posted_help_page['name']
     res = es_testapp.get(help_page_url, status=200)
     assert res.json['@id'] == help_page_url
@@ -142,22 +142,25 @@ def test_get_help_page(workbook, es_testapp, posted_help_page):
 
 
 def test_get_help_page_draft(workbook, anon_html_es_testapp, html_es_testapp, posted_help_page_draft):
+    wait_for_index(html_es_testapp)
     help_page_url = "/" + posted_help_page_draft['name']
     anon_html_es_testapp.get(help_page_url, status=403)
     html_es_testapp.get(help_page_url, status=200)
 
 
 def test_get_help_page_deleted(workbook, anon_html_es_testapp, html_es_testapp, posted_help_page_deleted):
+    wait_for_index(html_es_testapp)
     help_page_url = "/" + posted_help_page_deleted['name']
     anon_html_es_testapp.get(help_page_url, status=403)
     html_es_testapp.get(help_page_url, status=200)  # Why 200 and not 404? -kmp 23-Feb-2021
 
 
 # Changed out posted_help_page_restricted for posted_help_page. -kmp 23-Feb-2021
-def test_get_help_page_no_access(workbook, anon_html_es_testapp, es_testapp, posted_help_page):
+def test_get_help_page_no_access(workbook, anon_html_es_testapp, html_es_testapp, posted_help_page):
+    wait_for_index(html_es_testapp)
     help_page_url = "/" + posted_help_page['name']
     anon_html_es_testapp.get(help_page_url, status=403)
-    es_testapp.get(help_page_url, status=200)
+    html_es_testapp.get(help_page_url, status=200)
 
 
 def test_page_unique_name(workbook, es_testapp, posted_help_page, posted_help_page_deleted):
