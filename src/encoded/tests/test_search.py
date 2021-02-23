@@ -357,8 +357,7 @@ def test_search_query_string_with_booleans(workbook, es_testapp):
     assert swag_bios not in not_uuids
 
 
-@pytest.mark.action_fail
-@pytest.mark.skip(reason="test failing")
+@pytest.mark.broken  # doesn't work on GitHub
 def test_metadata_tsv_view(workbook, html_es_testapp):
 
     file_accession_col_index = 3

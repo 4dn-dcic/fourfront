@@ -120,18 +120,36 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	# bin/test -vv --timeout=200 -m "working and not performance and not action_fail"
-	bin/test -vv --timeout=200 -m "working and not performance and indexing and not action_fail"; bin/test -vv --timeout=200 -m "working and not performance and not indexing and not action_fail"
+	make test-npm
+	make test-unit
 
+retest:
+	bin/test  -vv --last-failed
 
 test-any:
 	bin/test -vv --timeout=200
 
+test-npm:
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not broken_locally and not sloppy and not indexing"
+
+test-unit:
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not broken_locally and not sloppy and indexing"
+
+test-performance:
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and performance and not broken and not broken_locally and not sloppy"
+
+test-integrated:
+	bin/test -vv --timeout=200 -m "working and not manual and (integrated or integratedx) and not performance and not broken and not broken_locally and not sloppy"
+
+travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
+	make travis-test-npm
+	make travis-test-unit
+
 travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not performance and not indexing and not action_fail" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not broken_remotely and not sloppy and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not performance and indexing and not action_fail" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not broken_remotely and not sloppy and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update
@@ -158,6 +176,6 @@ info:
 	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
 	   $(info - Use 'make psql-test' to start psql on data associated with an active test.)
 	   $(info - Use 'make retest' to run failing tests from the previous test run.)
-	   $(info - Use 'make test' to run tests with normal options we use on travis ('-m "working and not performance"').)
+	   $(info - Use 'make test' to run tests with normal options similar to what we use on GitHub Actions.)
 	   $(info - Use 'make test-any' to run tests without marker constraints (i.e., with no '-m' option).)
 	   $(info - Use 'make update' to update dependencies (and the lock file).)
