@@ -17,11 +17,11 @@ export default class UserRegistrationForm extends React.PureComponent {
         // We might lose JWT token via navigating to other windows, so we keep it cached here.
         // We also allow new props.jwtToken to overwrite state.jwtToken, as long as new props.jwtToken
         // is not blank.
-        return { 'jwtToken' : props.jwtToken || state.jwtToken || null };
+        //return { 'unverifiedUserEmail' : unverifiedUserEmail || state.jwtToken || null };
     }
 
     static propTypes = {
-        'jwtToken' : PropTypes.string.isRequired,
+        'unverifiedUserEmail' : PropTypes.string.isRequired,
         'onComplete' : PropTypes.func.isRequired,
         'endpoint' : PropTypes.string.isRequired,
         'captchaSiteKey' : PropTypes.string
@@ -52,7 +52,7 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.recaptchaContainerRef = React.createRef();
 
         this.state = {
-            'jwtToken'             : props.jwtToken, // We cache our JWT token here as it might get unset when opening lab selection window.
+            'unverifiedUserEmail'  : props.unverifiedUserEmail, // We cache our JWT token here as it might get unset when opening lab selection window.
             'captchaResponseToken' : null,
             'captchaErrorMsg'      : null,
             'registrationStatus'   : 'form',
@@ -146,17 +146,16 @@ export default class UserRegistrationForm extends React.PureComponent {
         evt.stopPropagation();
 
         const { endpoint, onComplete } = this.props;
-        const { jwtToken, value_for_pending_lab } = this.state;
+        const { unverifiedUserEmail, value_for_pending_lab } = this.state;
         const maySubmit = this.maySubmitForm();
         const formData = serialize(this.formRef.current, { 'hash' : true });
-        const decodedToken = JWT.decode(jwtToken);
 
         if (!maySubmit) {
             return;
         }
 
         // Add data which is held in state but not form fields -- email & lab.
-        formData.email = decodedToken.email;
+        formData.email = unverifiedUserEmail;
         if (value_for_pending_lab){ // Add pending_lab, if any.
             formData.pending_lab = value_for_pending_lab;
         }
@@ -172,14 +171,14 @@ export default class UserRegistrationForm extends React.PureComponent {
             // We may have lost our JWT, e.g. by opening a new 4DN window which unsets the cookie.
             // So we reset our cached JWT token to our cookies/localStorage prior to making request
             // so that it is delivered/authenticated as part of registration (required by backend/security).
-            var existingToken = JWT.get();
-            if (!existingToken){
-                if (!jwtToken){
-                    this.setState({ 'registrationStatus' : 'network-failure' });
-                    return;
-                }
-                JWT.save(jwtToken);
-            }
+            // var existingToken = JWT.get();
+            // if (!existingToken){
+            //     if (!jwtToken){
+            //         this.setState({ 'registrationStatus' : 'network-failure' });
+            //         return;
+            //     }
+            //     JWT.save(jwtToken);
+            // }
 
             ajax.load(
                 endpoint,
@@ -214,10 +213,9 @@ export default class UserRegistrationForm extends React.PureComponent {
         const { schemas, heading } = this.props;
         const {
             registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
-            value_for_pending_lab_details, value_for_pending_lab, jwtToken, captchaErrorMsg : captchaError
+            value_for_pending_lab_details, value_for_pending_lab, captchaErrorMsg : captchaError, unverifiedUserEmail
         } = this.state;
-        const decodedToken = JWT.decode(jwtToken);
-        const { email } = decodedToken;
+        const { email } = unverifiedUserEmail;
         // eslint-disable-next-line no-useless-escape
         const emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const contactEmail = value_for_contact_email && value_for_contact_email.toLowerCase();
