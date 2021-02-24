@@ -50,24 +50,6 @@
         "uuid": "fb287a31-e765-41c5-8c1d-665f8e9f025b"
     },
     {
-        "email": "burak_alver@hms.harvard.edu",
-        "first_name": "Burak",
-        "job_title": "Project Coordinator / Manager",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Alver",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "preferred_email" : "fake_email_address@email.com",
-        "submits_for": [
-            "4dn-dcic-lab"
-        ],
-        "aliases": [
-            "dcic:burak_alver",
-            "4dn-dcic-lab:burak_alver"
-        ]
-    },
-    {
         "email": "andrew_schroeder@hms.harvard.edu",
         "first_name": "Andy",
         "job_title": "Data Wrangler",
@@ -86,17 +68,6 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Lee",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267998888",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
-    },
-    {
-        "email": "koray_kirli@hms.harvard.edu",
-        "first_name": "Koray",
-        "job_title": "Data Wrangler",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Kirli",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
