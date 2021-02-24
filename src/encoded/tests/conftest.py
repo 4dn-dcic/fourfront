@@ -3,7 +3,9 @@
 http://pyramid.readthedocs.org/en/latest/narr/testing.html
 """
 
+import datetime as datetime_module
 import logging
+import os
 import pytest
 import webtest
 import pkg_resources
@@ -14,7 +16,7 @@ from pyramid.testing import DummyRequest  # , setUp, tearDown
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
-from snovault.util import generate_indexer_namespace_for_testing
+# from snovault.util import generate_indexer_namespace_for_testing
 from .conftest_settings import make_app_settings_dictionary
 from .. import main
 from ..loadxl import load_all
@@ -31,6 +33,7 @@ README:
 
 @pytest.fixture(autouse=True)
 def autouse_external_tx(external_tx):
+    notice_pytest_fixtures(external_tx)
     pass
 
 
@@ -42,6 +45,18 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We 
     # add some here for file testing
     settings[DBSESSION] = DBSession
     return settings
+
+
+# Overrides snovault. If this works, we'll port it back to snovault.
+def generate_indexer_namespace_for_testing(prefix='sno'):
+    travis_job_id = os.environ.get('TRAVIS_JOB_ID')
+    if travis_job_id:
+        # Nowadays, this might be a GitHub run id, which isn't globally unique.
+        # Each repo is monotonic but at different pace and they can collide. Repo prefix is essential.
+        return "%s-%s-" % (prefix, travis_job_id)
+    else:
+        # We've experimentally determined that it works pretty well to just use the timestamp.
+        return "%s-test-%s" % (prefix, int(datetime_module.datetime.now().timestamp() * 1000000))
 
 
 INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('cgap')
