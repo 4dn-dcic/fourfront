@@ -13,7 +13,7 @@ from snovault.util import add_default_embeds
 from ..commands.run_upgrader_on_inserts import get_inserts
 
 
-pytestmark = [pytest.mark.working, pytest.mark.schema, pytest.mark.indexing]
+pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 # just a little helper function

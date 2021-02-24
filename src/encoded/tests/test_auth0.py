@@ -5,7 +5,7 @@ import requests
 from ..authentication import get_jwt
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.indexing]
 
 
 @pytest.fixture(scope='session')

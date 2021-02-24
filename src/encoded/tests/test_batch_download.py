@@ -10,7 +10,7 @@ from ..util import delay_rerun
 #   See longer explanation at top of test_aggregation.py -kmp 28-Jun-2020
 # notice_pytest_fixtures(app_settings, app, workbook)
 
-pytestmark = [pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun), pytest.mark.triage]
+pytestmark = [pytest.mark.flaky(rerun_filter=delay_rerun), pytest.mark.triage]
 
 
 @pytest.mark.skip(reason="update data when we have a working experiment")

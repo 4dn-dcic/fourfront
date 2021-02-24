@@ -13,7 +13,7 @@ from ..util import delay_rerun
 # notice_pytest_fixtures(app_settings, app, workbook)
 
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [pytest.mark.working, pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 
 def test_aggregation_facet(workbook, es_testapp):

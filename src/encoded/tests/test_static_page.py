@@ -6,7 +6,7 @@ from dcicutils.qa_utils import notice_pytest_fixtures
 from dcicutils.misc_utils import url_path_join
 
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing]
+pytestmark = [pytest.mark.working]
 
 
 @pytest.fixture(scope='session')
