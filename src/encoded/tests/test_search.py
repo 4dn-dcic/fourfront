@@ -1,5 +1,6 @@
 import json
 import pytest
+import webtest
 
 from datetime import datetime, timedelta
 from dcicutils.misc_utils import Retry, ignored
@@ -357,7 +358,8 @@ def test_search_query_string_with_booleans(workbook, es_testapp):
     assert swag_bios not in not_uuids
 
 
-@pytest.mark.broken  # test doesn't work
+@pytest.mark.broken  # test doesn't work, this will keep make from running it
+@pytest.mark.skip  # In case of running the file by name, this still doesn't want to run
 def test_metadata_tsv_view(workbook, html_es_testapp):
 
     file_accession_col_index = 3
@@ -399,7 +401,7 @@ def test_metadata_tsv_view(workbook, html_es_testapp):
         assert int(result_rows[summary_start_row + 4][4]) == summary_start_row
         assert int(result_rows[summary_start_row + 5][4]) <= summary_start_row
 
-   # run a simple GET query with type=ExperimentSetReplicate
+    # run a simple GET query with type=ExperimentSetReplicate
     # OLD URL FORMAT IS USED -- TESTING REDIRECT TO NEW URL
     res = html_es_testapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv')
     # Follow redirect
@@ -572,7 +574,6 @@ class ItemTypeChecker:
         # so it shouldn't be slow for others. At least that's the theory. -kmp 27-Jan-2021
         extra = "&status=deleted" if deleted else ""
         return client.get('/%s?limit=all%s' % (item_type, extra), status=[200, 301]).follow()
-
 
     CONSIDER_DELETED = True
 
