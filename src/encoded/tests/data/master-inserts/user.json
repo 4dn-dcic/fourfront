@@ -57,17 +57,6 @@
         "date_created": "2017-04-07T19:56:09.798042+00:00"
     },
     {
-        "email": "johnsonjp@gmail.com",
-        "first_name": "Jeremy",
-        "job_title": "Software Developer",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Johnson",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
-    },
-    {
         "email": "duplexa@gmail.com",
         "first_name": "Soo",
         "job_title": "Senior Researcher",
@@ -96,17 +85,6 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Balashov",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab245628888",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
-    },
-    {
-        "email": "carl_vitzthum@hms.harvard.edu",
-        "first_name": "Carl",
-        "job_title": "Software Developer",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Vitzthum",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
