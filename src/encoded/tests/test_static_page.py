@@ -163,7 +163,7 @@ def test_get_help_page_no_access(workbook, anon_html_es_testapp, html_es_testapp
     html_es_testapp.get(help_page_url, status=200)
 
 
-def test_page_unique_name(workbook, es_testapp, posted_help_page, posted_help_page_deleted):
+def test_page_unique_name(workbook, es_testapp, posted_help_page, posted_help_page_draft):
     # POST again with same name and expect validation error
     new_page = {'name': posted_help_page['name']}
     res = es_testapp.post_json('/page', new_page, status=422)
@@ -174,5 +174,5 @@ def test_page_unique_name(workbook, es_testapp, posted_help_page, posted_help_pa
     assert expected_val_err in actual_error_description
 
     # also test PATCH of an existing page with another name
-    res = es_testapp.patch_json(posted_help_page_deleted['@id'], {'name': new_page['name']}, status=422)
+    res = es_testapp.patch_json(posted_help_page_draft['@id'], {'name': new_page['name']}, status=422)
     assert expected_val_err in res.json['errors'][0]['description']
