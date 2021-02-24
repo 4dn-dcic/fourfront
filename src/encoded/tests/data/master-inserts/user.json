@@ -27,6 +27,29 @@
         "viewing_groups": ["4DN"]
     },
     {
+        "lab": "4dn-dcic-lab",
+        "email": "peter_park@hms.harvard.edu",
+        "groups": [
+          "read-only-admin"
+        ],
+        "status": "current",
+        "aliases": [
+          "dcic:peter_park"
+        ],
+        "timezone": "US/Eastern",
+        "job_title": "Principal Investigator (4DN Grantee)",
+        "last_name": "Park",
+        "first_name": "Peter",
+        "submits_for": [
+          "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+        ],
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "viewing_groups": [
+          "4DN"
+        ],
+        "uuid": "fb287a31-e765-41c5-8c1d-665f8e9f025b"
+    },
+    {
         "email": "burak_alver@hms.harvard.edu",
         "first_name": "Burak",
         "job_title": "Project Coordinator / Manager",
