@@ -357,7 +357,7 @@ def test_search_query_string_with_booleans(workbook, es_testapp):
     assert swag_bios not in not_uuids
 
 
-@pytest.mark.broken  # doesn't work on GitHub
+@pytest.mark.broken  # test doesn't work
 def test_metadata_tsv_view(workbook, html_es_testapp):
 
     file_accession_col_index = 3
@@ -399,7 +399,7 @@ def test_metadata_tsv_view(workbook, html_es_testapp):
         assert int(result_rows[summary_start_row + 4][4]) == summary_start_row
         assert int(result_rows[summary_start_row + 5][4]) <= summary_start_row
 
-    # run a simple GET query with type=ExperimentSetReplicate
+   # run a simple GET query with type=ExperimentSetReplicate
     # OLD URL FORMAT IS USED -- TESTING REDIRECT TO NEW URL
     res = html_es_testapp.get('/metadata/type=ExperimentSetReplicate/metadata.tsv')
     # Follow redirect
@@ -559,22 +559,59 @@ def test_collection_actions_filtered_by_permission(workbook, es_testapp, anon_es
     assert len(res.json['@graph']) == 0
 
 
-@Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
-def check_item_type(client, item_type):
-    # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
-    return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+class ItemTypeChecker:
+
+    @staticmethod
+    @Retry.retry_allowed('ItemTypeCheckerf.check_item_type', wait_seconds=1, retries_allowed=5)
+    def check_item_type(client, item_type, deleted=False):
+        # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
+        #
+        # We retry a lot of times because it's still fast if things are working quickly, but if it's
+        # slow it's better to wait than fail the test. Slowness is not what we're trying to check for here.
+        # And even if it's slow for one item, that same wait time will help others have time to catch up,
+        # so it shouldn't be slow for others. At least that's the theory. -kmp 27-Jan-2021
+        extra = "&status=deleted" if deleted else ""
+        return client.get('/%s?limit=all%s' % (item_type, extra), status=[200, 301]).follow()
+
+
+    CONSIDER_DELETED = True
+
+    @classmethod
+    def get_all_items_of_type(cls, client, item_type):
+        if cls.CONSIDER_DELETED:
+            try:
+                res = cls.check_item_type(client, item_type)
+                items_not_deleted = res.json.get('@graph', [])
+            except webtest.AppError:
+                items_not_deleted = []
+            try:
+                res = cls.check_item_type(client, item_type, deleted=True)
+                items_deleted = res.json.get('@graph', [])
+            except webtest.AppError:
+                items_deleted = []
+            return items_not_deleted + items_deleted
+        else:
+            res = cls.check_item_type(client, item_type)
+            items_not_deleted = res.json.get('@graph', [])
+            return items_not_deleted
 
 
 @pytest.mark.flaky
-def test_index_data_workbook(es_app, workbook, es_testapp, indexer_testapp, html_es_testapp):
-    es = es_app.registry['elasticsearch']
+def test_index_data_workbook(workbook, es_testapp, indexer_testapp, html_es_testapp):
+    es = es_testapp.app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
-    create_mapping.run(es_app, sync_index=True)
+    create_mapping.run(es_testapp.app, sync_index=True)
     # check counts and ensure they're equal
     es_testapp_counts = es_testapp.get('/counts')
-    split_counts = es_testapp_counts.json['db_es_total'].split()
-    assert(int(split_counts[1]) == int(split_counts[3]))  # 2nd is db, 4th is es
+    # e.g., {"db_es_total": "DB: 748 ES: 748 ", ...}
+    db_es_total = es_testapp_counts.json['db_es_total']
+    split_counts = db_es_total.split()
+    db_total = int(split_counts[1])
+    es_total = int(split_counts[3])
+    assert(db_total == es_total)  # 2nd is db, 4th is es
+    # e.g., {..., "db_es_compare": {"AnalysisStep": "DB: 26 ES: 26 ", ...}, ...}
     for item_name, item_counts in es_testapp_counts.json['db_es_compare'].items():
+        print("item_name=", item_name, "item_counts=", item_counts)
         # make sure counts for each item match ES counts
         split_item_counts = item_counts.split()
         db_item_count = int(split_item_counts[1])
@@ -583,17 +620,20 @@ def test_index_data_workbook(es_app, workbook, es_testapp, indexer_testapp, html
 
         # check ES counts directly. Must skip abstract collections
         # must change counts result ("ItemName") to item_type format
-        item_type = es_app.registry[COLLECTIONS][item_name].type_info.item_type
-        namespaced_index = get_namespaced_index(es_app, item_type)
+        item_type = es_testapp.app.registry[COLLECTIONS][item_name].type_info.item_type
+        namespaced_index = get_namespaced_index(es_testapp.app, item_type)
 
         es_direct_count = es.count(index=namespaced_index, doc_type=item_type).get('count')
         assert es_item_count == es_direct_count
 
         if es_item_count == 0:
             continue
+
         # check items in search result individually
-        res = check_item_type(client=es_testapp, item_type=item_type)
-        for item_res in res.json.get('@graph', []):
+        search_url = '/%s?limit=all' % item_type
+        print("search_url=", search_url)
+        items = ItemTypeChecker.get_all_items_of_type(client=es_testapp, item_type=item_type)
+        for item_res in items:
             index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                     id=item_res['uuid'])['_source']
             # make sure that the linked_uuids match the embedded data
