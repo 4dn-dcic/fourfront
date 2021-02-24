@@ -232,5 +232,17 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "eric_berg@hms.harvard.edu",
+        "status": "current",
+        "timezone": "US/Eastern",
+        "last_name": "Berg",
+        "first_name": "Eric",
+        "lab": "4dn-dcic-lab",
+        "uuid": "0b7cddf7-c438-4334-9d4f-6dd1646fd28e",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
     }
 ]
