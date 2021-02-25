@@ -53,13 +53,13 @@ def generate_indexer_namespace_for_testing(prefix='sno'):
     if travis_job_id:
         # Nowadays, this might be a GitHub run id, which isn't globally unique.
         # Each repo is monotonic but at different pace and they can collide. Repo prefix is essential.
-        return "%s-%s-" % (prefix, travis_job_id)
+        return "%s-test-%s-" % (prefix, travis_job_id)
     else:
         # We've experimentally determined that it works pretty well to just use the timestamp.
-        return "%s-test-%s" % (prefix, int(datetime_module.datetime.now().timestamp() * 1000000))
+        return "%s-test-%s-" % (prefix, int(datetime_module.datetime.now().timestamp() * 1000000))
 
 
-INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('cgap')
+INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('ff')
 
 
 @pytest.fixture(scope='session')
