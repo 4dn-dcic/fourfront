@@ -98,7 +98,7 @@ class QualityMetric(Item):
         'description': 'Listing of FastQC Quality Metrics',
     })
 class QualityMetricFastqc(QualityMetric):
-    """Subclass of quality matrics for fastq files."""
+    """Subclass of quality metrics for fastq files."""
 
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
@@ -112,7 +112,7 @@ class QualityMetricFastqc(QualityMetric):
         'description': 'Listing of Bam Check Quality Metrics'
     })
 class QualityMetricBamcheck(QualityMetric):
-    """Subclass of quality matrics for bam files."""
+    """Subclass of quality metrics for bam files."""
 
     item_type = 'quality_metric_bamcheck'
     schema = load_schema('encoded:schemas/quality_metric_bamcheck.json')
@@ -139,7 +139,7 @@ class QualityMetricBamcheck(QualityMetric):
         'description': 'Listing of BamQC Quality Metrics',
     })
 class QualityMetricBamqc(QualityMetric):
-    """Subclass of quality matrics for bam files."""
+    """Subclass of quality metrics for bam files."""
 
     item_type = 'quality_metric_bamqc'
     schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
@@ -149,7 +149,7 @@ class QualityMetricBamqc(QualityMetric):
     def quality_metric_summary(self, request):
         qc = self.properties
         qc_summary = []
-        
+
         if 'Total Reads' not in qc:
             return
 
@@ -218,7 +218,7 @@ class QualityMetricBamqc(QualityMetric):
         'description': 'Listing of PairsQC Quality Metrics',
     })
 class QualityMetricPairsqc(QualityMetric):
-    """Subclass of quality matrics for pairs files."""
+    """Subclass of quality metrics for pairs files."""
 
     item_type = 'quality_metric_pairsqc'
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
@@ -228,7 +228,7 @@ class QualityMetricPairsqc(QualityMetric):
     def quality_metric_summary(self, request):
         qc = self.properties
         qc_summary = []
-        
+
         if 'Total reads' not in qc:
             return
 
@@ -268,7 +268,7 @@ class QualityMetricPairsqc(QualityMetric):
         'description': 'Listing of Dedup QC Quality Metrics for Repli-seq',
     })
 class QualityMetricDedupqcRepliseq(QualityMetric):
-    """Subclass of quality matrics for repli-seq dedup."""
+    """Subclass of quality metrics for repli-seq dedup."""
 
     item_type = 'quality_metric_dedupqc_repliseq'
     schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
@@ -282,7 +282,7 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for ChIP-seq',
     })
 class QualityMetricChipseq(QualityMetric):
-    """Subclass of quality matrics for chip-seq"""
+    """Subclass of quality metrics for chip-seq"""
 
     item_type = 'quality_metric_chipseq'
     schema = load_schema('encoded:schemas/quality_metric_chipseq.json')
@@ -300,7 +300,7 @@ class QualityMetricChipseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for ATAC-seq',
     })
 class QualityMetricAtacseq(QualityMetric):
-    """Subclass of quality matrics for atac-seq"""
+    """Subclass of quality metrics for atac-seq"""
 
     item_type = 'quality_metric_atacseq'
     schema = load_schema('encoded:schemas/quality_metric_atacseq.json')
@@ -318,7 +318,7 @@ class QualityMetricAtacseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for RNA-seq',
     })
 class QualityMetricRnaseq(QualityMetric):
-    """Subclass of quality matrics for rna-seq"""
+    """Subclass of quality metrics for rna-seq"""
 
     item_type = 'quality_metric_rnaseq'
     schema = load_schema('encoded:schemas/quality_metric_rnaseq.json')
@@ -359,7 +359,7 @@ class QualityMetricRnaseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for RNA-seq MAD QC',
     })
 class QualityMetricRnaseqMadqc(QualityMetric):
-    """Subclass of quality matrics for rna-seq MAD QC"""
+    """Subclass of quality metrics for rna-seq MAD QC"""
 
     item_type = 'quality_metric_rnaseq_madqc'
     schema = load_schema('encoded:schemas/quality_metric_rnaseq_madqc.json')
@@ -373,7 +373,7 @@ class QualityMetricRnaseqMadqc(QualityMetric):
         'description': 'Listing of QC Quality Metrics for MARGI.',
     })
 class QualityMetricMargi(QualityMetric):
-    """Subclass of quality matrics for MARGI"""
+    """Subclass of quality metrics for MARGI"""
 
     item_type = 'quality_metric_margi'
     schema = load_schema('encoded:schemas/quality_metric_margi.json')
@@ -423,7 +423,7 @@ class QualityMetricMargi(QualityMetric):
         'description': 'Listing of QC Quality Metrics for Workflow Run.',
     })
 class QualityMetricWorkflowrun(QualityMetric):
-    """Subclass of quality matrics for Workflow run"""
+    """Subclass of quality metrics for Workflow run"""
 
     item_type = 'quality_metric_workflowrun'
     schema = load_schema('encoded:schemas/quality_metric_workflowrun.json')
@@ -437,7 +437,7 @@ class QualityMetricWorkflowrun(QualityMetric):
         'description': 'Listing of QC Quality Metrics for QC List.',
     })
 class QualityMetricQclist(QualityMetric):
-    """Subclass of quality matrics for QCList"""
+    """Subclass of quality metrics for QCList"""
     item_type = 'quality_metric_qclist'
     schema = load_schema('encoded:schemas/quality_metric_qclist.json')
     embedded_list = QualityMetric.embedded_list + [
@@ -454,19 +454,19 @@ class QualityMetricQclist(QualityMetric):
                 if 'quality_metric_summary' in qc_obj:
                     for qcs_item in qc_obj['quality_metric_summary']:
                         qc_summary.append(qcs_item)
-        
+
         return qc_summary if qc_summary else None
 
 
 def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
-    """ 
-        Chipseq and Atacseq QCs both have common QC Summary metrics. This method 
+    """
+        Chipseq and Atacseq QCs both have common QC Summary metrics. This method
         calculates the metrics within quality_metric_summary calculated property
-    """    
-    
+    """
+
     def round2(numVal):
         return round(numVal * 100) / 100
-    
+
     qc_summary = []
 
     if 'overlap_reproducibility_qc' in quality_metric:
