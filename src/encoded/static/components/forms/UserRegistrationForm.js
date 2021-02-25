@@ -145,8 +145,8 @@ export default class UserRegistrationForm extends React.PureComponent {
         evt.preventDefault();
         evt.stopPropagation();
 
-        const { endpoint, onComplete } = this.props;
-        const { unverifiedUserEmail, value_for_pending_lab } = this.state;
+        const { endpoint, onComplete, unverifiedUserEmail } = this.props;
+        const { value_for_pending_lab } = this.state;
         const maySubmit = this.maySubmitForm();
         const formData = serialize(this.formRef.current, { 'hash' : true });
 
@@ -183,9 +183,10 @@ export default class UserRegistrationForm extends React.PureComponent {
             ajax.load(
                 endpoint,
                 (resp) => {
+                    const jwtToken = resp.getHeader('X-Request-JWT');
                     // TODO
                     this.setState({ 'registrationStatus' : 'success-loading' });
-                    onComplete(); // <- Do request to login, then hide/unmount this component.
+                    onComplete(jwtToken); // <- Do request to login, then hide/unmount this component.
                 },
                 'POST',
                 (err) => {
