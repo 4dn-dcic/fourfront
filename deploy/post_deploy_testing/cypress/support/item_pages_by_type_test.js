@@ -157,7 +157,7 @@ export function createItemPageTestsForItemTypeRange(
                                                 cy.root().should('not.contain', "client-side error").end();
                                             } else {
                                                 let currTabTitle = null;
-                                                cy.get("h3.tab-section-title").then(function($tabTitle){
+                                                cy.get("h3.tab-section-title, h4.tab-section-title").first().then(function($tabTitle){
                                                     currTabTitle = $tabTitle.text();
                                                 }).end().get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function($tab){
                                                     const tabKey = $tab.children('span.tab').attr('data-tab-key');
@@ -165,7 +165,7 @@ export function createItemPageTestsForItemTypeRange(
                                                         .wait(200)
                                                         .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                                         .should('have.id', "tab:" + tabKey).within(function($tabPanel){
-                                                            cy.get("h3.tab-section-title").then(function($tabTitle){
+                                                            cy.get("h3.tab-section-title, h4.tab-section-title").first().then(function($tabTitle){
                                                                 const nextTabTitle = $tabTitle.text();
                                                                 expect(nextTabTitle).to.not.equal(currTabTitle);
                                                                 currTabTitle = nextTabTitle;
