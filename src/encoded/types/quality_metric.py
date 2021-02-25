@@ -274,6 +274,34 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
     embedded_list = QualityMetric.embedded_list
 
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc = self.properties
+        qc_summary = []
+
+        if 'Total aligned' not in qc:
+            return
+
+        def percent(numVal):
+            '''convert to percentage of Total Aligned'''
+            return round((numVal / qc.get('Total aligned')) * 100 * 1000) / 1000
+
+        def million(numVal):
+            return str(round(numVal / 10000) / 100) + "m"
+
+        def tooltip(numVal):
+            return "Percent of total aligned reads (=%s)" % million(numVal)
+
+        qc_summary.append({"title": "Total Aligned",
+                           "value": str(qc.get("Total aligned")),
+                           "numberType": "integer"})
+        qc_summary.append({"title": "Removed Duplicates",
+                           "value": str(percent(qc.get("Number of removed duplicates"))),
+                           "tooltip": tooltip(qc.get("Number of removed duplicates")),
+                           "numberType": "percent"})
+
+        return qc_summary
+
 
 @collection(
     name='quality-metrics-chipseq',
