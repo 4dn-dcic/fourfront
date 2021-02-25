@@ -39,7 +39,6 @@ def biosample_w_treatment(testapp, biosample_1, rnai):
     return testapp.patch_json(biosample_1['@id'], {'treatments': [rnai['@id']]}).json['@graph'][0]
 
 
-@pytest.fixture
 def biosample_relation(derived_from):
     return {"biosample_relation": [{"relationship_type": "derived from",
             "biosample": derived_from['@id']}]}

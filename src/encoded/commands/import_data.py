@@ -27,7 +27,7 @@ import os.path
 from base64 import b64encode
 from pyramid.compat import ascii_native_
 from pyramid import paster
-from webtest import TestApp
+from dcicutils.misc_utils import TestApp
 from wsgiproxy.proxies import ALLOWED_METHODS
 from urllib.parse import urlparse
 from .. import loadxl

@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 clean:  # clear node modules, eggs, npm build stuff
 	make clean-python-caches
 	make clean-npm-caches
@@ -38,7 +40,7 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 
 configure:  # does any pre-requisite installs
 	pip install --upgrade pip
-	pip install poetry==1.0.10  # pinned to avoid build problems we cannot fix in pyproject.toml
+	pip install poetry==1.1.4  # poetry latest as of 1/25/2021 seemed to work but apparantly does not
 
 build:  # builds
 	make configure
@@ -93,10 +95,16 @@ deploy2:  # spins up waittress to serve the application
 	pserve development.ini
 
 psql-dev:  # starts psql with the url after 'sqlalchemy.url =' in development.ini
-	@psql `grep 'sqlalchemy[.]url =' development.ini | sed -E 's/^.* = (.*)/\1/'`
+	@scripts/psql-start dev
 
-kibana-start:
+psql-test:  # starts psql with a url constructed from data in 'ps aux'.
+	@scripts/psql-start test
+
+kibana-start:  # starts a dev version of kibana (default port)
 	scripts/kibana-start
+
+kibana-start-test:  # starts a test version of kibana (port chosen for active tests)
+	scripts/kibana-start test
 
 kibana-stop:
 	scripts/kibana-stop
@@ -140,11 +148,14 @@ info:
 	   $(info - Use 'make configure' to install poetry. You should not have to do this directly.)
 	   $(info - Use 'make deploy1' to spin up postgres/elasticsearch and load inserts.)
 	   $(info - Use 'make deploy2' to spin up the application server.)
-	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
-	   $(info - Use 'make kibana-start' to start kibana, and 'make kibana-stop' to stop it.)
+	   $(info - Use 'make kibana-start' to start kibana on the default local ES port, and 'make kibana-stop' to stop it.)
+	   $(info - Use 'make kibana-start-test' to start kibana on the port being used for active testing, and 'make kibana-stop' to stop it.)
 	   $(info - Use 'make kill' to kill postgres and elasticsearch proccesses. Please use with care.)
 	   $(info - Use 'make moto-setup' to install moto, for less flaky tests. Implied by 'make build'.)
 	   $(info - Use 'make npm-setup' to build the front-end. Implied by 'make build'.)
+	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
+	   $(info - Use 'make psql-test' to start psql on data associated with an active test.)
+	   $(info - Use 'make retest' to run failing tests from the previous test run.)
 	   $(info - Use 'make test' to run tests with normal options we use on travis ('-m "working and not performance"').)
 	   $(info - Use 'make test-any' to run tests without marker constraints (i.e., with no '-m' option).)
 	   $(info - Use 'make update' to update dependencies (and the lock file).)

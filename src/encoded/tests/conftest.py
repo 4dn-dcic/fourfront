@@ -19,12 +19,6 @@ from .. import main
 from .conftest_settings import make_app_settings_dictionary
 
 
-pytest_plugins = [
-    'encoded.tests.datafixtures',
-    'snovault.tests.serverfixtures',
-]
-
-
 @pytest.fixture(autouse=True)
 def autouse_external_tx(external_tx):
     pass
@@ -125,8 +119,7 @@ def dummy_request(root, registry, app):
 
 @pytest.fixture(scope='session')
 def app(app_settings):
-    '''WSGI application level functional testing.
-    '''
+    """ WSGI application level functional testing. """
     return main({}, **app_settings)
 
 
@@ -156,7 +149,10 @@ def root(registry):
 
 @pytest.fixture
 def anonhtmltestapp(app):
-    return webtest.TestApp(app)
+    environ = {
+        'HTTP_ACCEPT': 'text/html',
+    }
+    return webtest.TestApp(app, environ)
 
 
 @pytest.fixture
@@ -165,6 +161,7 @@ def htmltestapp(app):
     # TODO: Name may be misleading. If only for HTML testing, seems like it should be text/html.
     #       Or if it spans CSS and other things, maybe call it page_content_testapp? -kmp 03-Feb-2020
     environ = {
+        'HTTP_ACCEPT': 'text/html',
         'REMOTE_USER': 'TEST',
     }
     return webtest.TestApp(app, environ)

@@ -5,7 +5,8 @@ import json
 import os
 import boto3
 from pyramid.paster import get_app
-from webtest import TestApp, AppError
+from webtest import AppError
+from dcicutils.misc_utils import TestApp
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
 
 log = structlog.getLogger(__name__)
