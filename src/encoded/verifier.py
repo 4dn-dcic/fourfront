@@ -4,7 +4,7 @@ from snovault import TYPES
 # TODO: Production code should not depend on tests. -kmp 14-Feb-2020
 from .tests.test_create_mapping import test_create_mapping
 from .tests.test_embedding import test_add_default_embeds, test_manual_embeds
-from .tests.test_schemas import master_mixins, test_load_schema
+from .tests.test_schemas import compute_master_mixins, test_load_schema
 
 
 def verifier(func):
@@ -58,7 +58,7 @@ def verify_profile(item_type, indexer_testapp):
 @verifier
 def verify_schema(item_type_camel, registry):
     # test schema
-    test_load_schema(item_type_camel + ".json", master_mixins(), registry)
+    test_load_schema(item_type_camel + ".json", compute_master_mixins(), registry)
 
 
 @verifier

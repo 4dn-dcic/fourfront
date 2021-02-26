@@ -1,8 +1,11 @@
 """\
 Examples
 For the development.ini you must supply the paster app name:
+
     %(prog)s development.ini --app-name app --init --clear
+
 """
+
 import argparse
 import atexit
 import logging
@@ -47,7 +50,7 @@ def nginx_server_process(prefix='', echo=False):
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
         description="Run development servers", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )

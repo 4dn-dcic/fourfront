@@ -6,7 +6,8 @@ from unittest import mock
 from ..tests import datafixtures
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+# in cgap these are marked broken -kmp 24-Feb-2021
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema, pytest.mark.indexing, pytest.mark.sloppy]
 
 
 @pytest.yield_fixture(scope='session')

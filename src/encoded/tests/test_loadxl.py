@@ -1,6 +1,5 @@
 import pytest
 
-from past.builtins import basestring
 from pkg_resources import resource_filename
 from unittest import mock
 from .. import loadxl
@@ -186,5 +185,5 @@ def test_load_all_gen(testapp):
         assert res4.count('SKIP:') == 0
         assert res4.count('ERROR:') == 1
         assert 'Failure loading inserts' in res4
-        assert isinstance(catch4.caught, basestring)
+        assert isinstance(catch4.caught, str)
         assert 'Failure loading inserts' in catch4.caught

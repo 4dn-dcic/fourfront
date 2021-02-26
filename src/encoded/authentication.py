@@ -6,6 +6,7 @@ import time
 import jwt
 from base64 import b64decode
 
+from dcicutils.misc_utils import remove_element
 from passlib.context import CryptContext
 from urllib.parse import urlencode
 from pyramid.authentication import (
@@ -45,6 +46,27 @@ from snovault.schema_utils import validate_request
 from snovault.util import debug_log
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
+
+
+JWT_ENCODING_ALGORITHM = 'HS256'
+
+# Might need to keep a list of previously used algorithms here, not just the one we use now.
+# Decryption algorithm used to default to a long list, but more recent versions of jwt library
+# say we should stop assuming that.
+#
+# In case it goes away, as far as I can tell, the default for decoding from their
+# default_algorithms() method used to be what we've got in JWT_ALL_ALGORITHMS here.
+#  -kmp 15-May-2020
+
+JWT_ALL_ALGORITHMS = ['ES512', 'RS384', 'HS512', 'ES256', 'none',
+                      'RS256', 'PS512', 'ES384', 'HS384', 'ES521',
+                      'PS384', 'HS256', 'PS256', 'RS512']
+
+# Probably we could get away with fewer, but I think not as few as just our own encoding algorithm,
+# so for now I believe the above list was the default, and this just rearranges it to prefer the one
+# we use for encoding. -kmp 19-Jan-2021
+
+JWT_DECODING_ALGORITHMS = [JWT_ENCODING_ALGORITHM] + remove_element(JWT_ENCODING_ALGORITHM, JWT_ALL_ALGORITHMS)
 
 
 def includeme(config):
@@ -205,6 +227,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             if auth0_client and auth0_secret:
                 # leeway accounts for clock drift between us and auth0
                 payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
+                                     algorithms=JWT_DECODING_ALGORITHMS,
                                      audience=auth0_client, leeway=30)
                 if 'email' in payload and payload.get('email_verified') is True:
                     request.set_property(lambda r: False, 'auth0_expired')
@@ -229,21 +252,27 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
 
 def get_jwt(request):
+
     token = None
+
+    # First try to obtain JWT from headers
     try:
-        # ensure this is a jwt token not basic auth:
-        auth_type = request.headers['Authorization'][:6]
-        if auth_type.strip().lower() == 'bearer':
-            token = request.headers['Authorization'][7:]
-    except (ValueError, TypeError, KeyError):
+        # Ensure this is a JWT token, not basic auth.
+        # Per https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication and
+        # https://tools.ietf.org/html/rfc6750, JWT is introduced by 'bearer', as in
+        #   Authorization: Bearer something.something.something
+        # rather than, for example, the 'basic' key information, which as discussed in
+        # https://tools.ietf.org/html/rfc7617 is base64 encoded and looks like:
+        #   Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+        # See also https://jwt.io/introduction/ for other info specific to JWT.
+        [auth_type, auth_data] = request.headers['Authorization'].strip().split(' ', 1)
+        if auth_type.lower() == 'bearer':
+            token = auth_data.strip()  # The spec says exactly one space, but then a token, so spaces don't matter
+    except Exception:
         pass
 
-    if not token and request.method in ('GET', 'HEAD'):
-        # Only grab this if is a GET request, not a transactional request to help mitigate CSRF attacks.
-        # See: https://en.wikipedia.org/wiki/Cross-site_request_forgery#Cookie-to-header_token
-        # The way our JS grabs and sticks JWT into Authorization header is somewhat analogous to above approach.
-        # TODO: Ensure our `Access-Control-Allow-Origin` response headers are appropriate (more for CGAP).
-        # TODO: Get a security audit done.
+    # If the JWT is not in the headers, get it from cookies
+    if not token:
         token = request.cookies.get('jwtToken')
 
     return token
@@ -410,7 +439,8 @@ def impersonate_user(context, request):
         'aud': auth0_client,
     }
 
-    id_token = jwt.encode(jwt_contents, b64decode(auth0_secret, '-_'), algorithm='HS256')
+    id_token = jwt.encode(jwt_contents, b64decode(auth0_secret, '-_'),
+                          algorithm=JWT_ENCODING_ALGORITHM)
     user_properties['id_token'] = id_token.decode('utf-8')
 
     return user_properties

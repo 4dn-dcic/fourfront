@@ -2,7 +2,7 @@ import json
 import pytest
 
 from dcicutils.env_utils import is_stg_or_prd_env, CGAP_ENV_PRODUCTION_BLUE_NEW, CGAP_ENV_PRODUCTION_GREEN_NEW
-from dcicutils.ff_utils import patch_metadata
+from dcicutils.ff_utils import patch_metadata, purge_metadata
 from ..types.workflow import _wfoutput_bucket_for_env
 
 
@@ -62,7 +62,7 @@ def workflow(testapp, software, award, lab):
     workflow_uuid = '023bfb3e-9a8b-42b9-a9d4-216079526f68'
     return workflow_uuid
 
-@pytest.mark.action_fail  # do not run on GA
+@pytest.mark.broken # do not run
 def test_pseudo_run(testapp, input_json):
     # this test can be problematic; uncomment the following line to disable it
     # assert False
@@ -74,6 +74,7 @@ def test_pseudo_run(testapp, input_json):
     output = json.loads(res.json['output'])
     patch_metadata({'status':'deleted'}, output['ff_meta']['uuid'], ff_env='fourfront-webdev')
     purge_metadata(output['ff_meta']['uuid'], ff_env='fourfront-webdev')
+
 
 def test_workflow_for_env():
 

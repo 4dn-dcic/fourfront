@@ -36,7 +36,6 @@ def cell_value(cell, datemode):
     raise ValueError(repr(cell), 'unknown cell type')
 
 
-
 def reader(stream, sheetname=None):
     """ Read named sheet or first and only sheet from xlsx file
     """
@@ -67,8 +66,7 @@ class DictReader:
     def __iter__(self):
         return self
 
-    @property
-    def fieldnames(self):
+    def _assure_fieldnames_encached(self):
         if self._fieldnames is None:
             try:
                 self._fieldnames = next(self.reader)
@@ -76,24 +74,40 @@ class DictReader:
                 pass
             else:
                 self.line_num += 1
-        #self.line_num = self.reader.line_num
+
+        # Yes, we definitely do not want to re-sync to the underlying .reader stream's line number,
+        # since our line number is not counting the lines in that file. See comment in __next__() below.
+        # -kmp 18-Jan-2021
+        # self.line_num = self.reader.line_num
+
+    @property
+    def fieldnames(self):
+        self._assure_fieldnames_encached()
         return self._fieldnames
 
     @fieldnames.setter
     def fieldnames(self, value):
         self._fieldnames = value
 
+    # If we ever wanted to know the line number of the underlying .csv file, this would be how to do it,
+    # since our .line_num is not counting the actual line numbers in the file.
+    #
+    # @property
+    # def csv_line_num(self):
+    #     return self.reader.line_num
+
     def __next__(self):
-        if self._fieldnames is None:
-            # Used only for its side effect.
-            self.fieldnames
+        self._assure_fieldnames_encached()
         row = next(self.reader)
+        # For reasons of history, we apparently only increment the line number only once per __next__ call,
+        # even though we will skip blank lines in the file, so this line number does NOT represent the CSV
+        # line number when debugging. Rather, it is some more abstract quantity. -kmp 18-Jan-2021
         self.line_num += 1
 
         # unlike the basic reader, we prefer not to return blanks,
         # because we will typically wind up with a dict full of None
         # values
-        while row == []:
+        while row == []:  # noQA - PyCharm thinks 'while not row:' is simpler, but this seems clearer. -kmp 18-Jan-2021
             row = next(self.reader)
         d = dict(zip(self.fieldnames, row))
         lf = len(self.fieldnames)
@@ -109,7 +123,11 @@ class DictReader:
 def zipfile_to_csv(zipfilename, outpath, ext='.csv', dialect='excel', **fmtparams):
     """ For Google Drive download zips
     """
-    zf = ZipFile(zipfilename)
+    # TODO: This function is presumably untested because this file had an unused 'import zipfile' and this
+    #       reference to ZipFile did not have a module qualifier on it, so PyCharm was asserting this was
+    #       going to get an undefined variable reference. I've added the qualifier, and PyCharm assures me
+    #       there is a function zipfile.ZipFile, but I assume nothing uses this. -kmp 18-Jan-2021
+    zf = zipfile.ZipFile(zipfilename)
     for name in zf.namelist():
         subpath, entry_ext = os.path.splitext(name)
         if entry_ext.lower() != '.xlsx':
@@ -120,4 +138,3 @@ def zipfile_to_csv(zipfilename, outpath, ext='.csv', dialect='excel', **fmtparam
         csvfile = open(os.path.join(outpath, subpath + ext), 'w')
         wr = csv.writer(csvfile, dialect=dialect, **fmtparams)
         wr.writerows(list(reader(sheet)))
-

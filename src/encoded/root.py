@@ -1,18 +1,13 @@
 import uptime
-from pyramid.decorator import reify
-from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
-from .schema_formats import is_accession
+
+from collections import OrderedDict
 from dcicutils import lang_utils
 from dcicutils.env_utils import is_stg_or_prd_env
-from pyramid.security import (
-    ALL_PERMISSIONS,
-    Allow,
-    Authenticated,
-    Deny,
-    Everyone,
-)
-from collections import OrderedDict
 from encoded import APP_VERSION_REGISTRY_KEY
+from pyramid.decorator import reify
+from pyramid.security import ALL_PERMISSIONS, Allow, Authenticated, Deny, Everyone
+from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
+from .schema_formats import is_accession
 
 
 def includeme(config):
@@ -115,8 +110,8 @@ def health_check(config):
             "elasticsearch": settings.get('elasticsearch.server'),
             "file_upload_bucket": settings.get('file_upload_bucket'),
             "foursight": foursight_url,
-            "indexer": settings.get('indexer'),
-            "index_server": settings.get('index_server'),
+            "indexer": settings.get("indexer"),
+            "index_server": settings.get("index_server"),
             "load_data": settings.get('load_test_data'),
             "namespace": settings.get('indexer.namespace'),
             "processed_file_bucket": settings.get('file_wfout_bucket'),
@@ -253,7 +248,7 @@ class FourfrontRoot(Root):
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         return_list = []
         for section_name in sections_to_get:
-            try: # Can be caused by 404 / Not Found during indexing
+            try:  # Can be caused by 404 / Not Found during indexing
                 res = request.embed('/static-sections', section_name, '@@embedded', as_user=user)
                 return_list.append(res)
             except KeyError:
@@ -269,7 +264,7 @@ class FourfrontRoot(Root):
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         try:
             return request.embed('/search/?type=StaticSection&section_type=Home+Page+Slide&sort=name', as_user=user).get('@graph', [])
-        except KeyError: # Can be caused by 404 / Not Found during indexing
+        except KeyError:  # Can be caused by 404 / Not Found during indexing
             return []
 
     @calculated_property(schema={
@@ -281,7 +276,7 @@ class FourfrontRoot(Root):
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         try:
             return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=user).get('@graph', [])
-        except KeyError: # Can be caused by 404 / Not Found during indexing
+        except KeyError:  # Can be caused by 404 / Not Found during indexing
             return []
 
     @calculated_property(schema={

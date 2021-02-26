@@ -1,7 +1,12 @@
-from unittest import mock
-from ..root import uptime_info
+import pytest
+
 from dcicutils import lang_utils
 from dcicutils.misc_utils import ignored
+from unittest import mock
+from ..root import uptime_info
+
+
+pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
 def test_uptime_info():
