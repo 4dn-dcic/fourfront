@@ -183,10 +183,7 @@ export default class UserRegistrationForm extends React.PureComponent {
             ajax.load(
                 endpoint,
                 (resp) => {
-                    const jwtToken = resp.getHeader('X-Request-JWT');
-                    // TODO
-                    this.setState({ 'registrationStatus' : 'success-loading' });
-                    onComplete(jwtToken); // <- Do request to login, then hide/unmount this component.
+                    onComplete(); // <- Do request to login, then hide/unmount this component.
                 },
                 'POST',
                 (err) => {
