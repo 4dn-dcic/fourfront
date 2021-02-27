@@ -27,22 +27,27 @@
         "viewing_groups": ["4DN"]
     },
     {
-        "email": "burak_alver@hms.harvard.edu",
-        "first_name": "Burak",
-        "job_title": "Project Coordinator / Manager",
         "lab": "4dn-dcic-lab",
-        "last_name": "Alver",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "preferred_email" : "fake_email_address@email.com",
-        "submits_for": [
-            "4dn-dcic-lab"
+        "email": "peter_park@hms.harvard.edu",
+        "groups": [
+          "read-only-admin"
         ],
+        "status": "current",
         "aliases": [
-            "dcic:burak_alver",
-            "4dn-dcic-lab:burak_alver"
-        ]
+          "dcic:peter_park"
+        ],
+        "timezone": "US/Eastern",
+        "job_title": "Principal Investigator (4DN Grantee)",
+        "last_name": "Park",
+        "first_name": "Peter",
+        "submits_for": [
+          "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989"
+        ],
+        "submitted_by": "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "viewing_groups": [
+          "4DN"
+        ],
+        "uuid": "fb287a31-e765-41c5-8c1d-665f8e9f025b"
     },
     {
         "email": "andrew_schroeder@hms.harvard.edu",
@@ -57,17 +62,6 @@
         "date_created": "2017-04-07T19:56:09.798042+00:00"
     },
     {
-        "email": "johnsonjp@gmail.com",
-        "first_name": "Jeremy",
-        "job_title": "Software Developer",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Johnson",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
-    },
-    {
         "email": "duplexa@gmail.com",
         "first_name": "Soo",
         "job_title": "Senior Researcher",
@@ -79,34 +73,12 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
-        "email": "koray_kirli@hms.harvard.edu",
-        "first_name": "Koray",
-        "job_title": "Data Wrangler",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Kirli",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
-    },
-    {
         "email": "alexander_balashov@hms.harvard.edu",
         "first_name": "Alex",
         "job_title": "Software Developer",
         "lab": "4dn-dcic-lab",
         "last_name": "Balashov",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab245628888",
-        "viewing_groups": ["4DN"],
-        "groups": ["admin"],
-        "submits_for": ["4dn-dcic-lab"]
-    },
-    {
-        "email": "carl_vitzthum@hms.harvard.edu",
-        "first_name": "Carl",
-        "job_title": "Software Developer",
-        "lab": "4dn-dcic-lab",
-        "last_name": "Vitzthum",
-        "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
@@ -257,6 +229,18 @@
         "lab": "4dn-dcic-lab",
         "last_name": "Çamoğlu",
         "uuid": "37947162-919f-42c4-8875-50dbf798a459",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
+        "email": "eric_berg@hms.harvard.edu",
+        "status": "current",
+        "timezone": "US/Eastern",
+        "last_name": "Berg",
+        "first_name": "Eric",
+        "lab": "4dn-dcic-lab",
+        "uuid": "0b7cddf7-c438-4334-9d4f-6dd1646fd28e",
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "submits_for": ["4dn-dcic-lab"]
