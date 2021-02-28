@@ -125,26 +125,26 @@ test-any:
 
 
 test-npm:
-	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not broken_locally and not sloppy and not indexing"
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not indexing"
 
 test-unit:
-	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not broken_locally and not sloppy and indexing"
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and indexing"
 
 test-performance:
-	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and performance and not broken and not broken_locally and not sloppy"
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and performance and not broken and not sloppy"
 
 test-integrated:
-	bin/test -vv --timeout=200 -m "working and not manual and (integrated or integratedx) and not performance and not broken and not broken_locally and not sloppy"
+	bin/test -vv --timeout=200 -m "working and not manual and (integrated or integratedx) and not performance and not broken and not sloppy"
 
 travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
 	make travis-test-npm
 	make travis-test-unit
 
 travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not broken_remotely and not sloppy and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not broken_remotely and not sloppy and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update
