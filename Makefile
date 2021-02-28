@@ -117,9 +117,6 @@ test:
 	make test-npm
 	make test-unit
 
-retest:
-	bin/test  -vv --last-failed
-
 test-any:
 	bin/test -vv --timeout=200
 
@@ -129,12 +126,6 @@ test-npm:
 
 test-unit:
 	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and indexing"
-
-test-performance:
-	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and performance and not broken and not sloppy"
-
-test-integrated:
-	bin/test -vv --timeout=200 -m "working and not manual and (integrated or integratedx) and not performance and not broken and not sloppy"
 
 travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
 	make travis-test-npm
