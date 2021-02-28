@@ -159,7 +159,6 @@ info:
 	   $(info - Use 'make moto-setup' to install moto, for less flaky tests. Implied by 'make build'.)
 	   $(info - Use 'make npm-setup' to build the front-end. Implied by 'make build'.)
 	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
-	   $(info - Use 'make retest' to run failing tests from the previous test run.)
 	   $(info - Use 'make test' to run tests with normal options similar to what we use on GitHub Actions.)
 	   $(info - Use 'make test-any' to run tests without marker constraints (i.e., with no '-m' option).)
 	   $(info - Use 'make update' to update dependencies (and the lock file).)
