@@ -7,8 +7,13 @@ import uuid
 from ..schema_formats import ACCESSION_CODES, is_uuid
 
 
+# Any legacy codes that have been discontinued and aren't mentioned in schemas
+# but that have accessions that must still be parsed should go here. -kmp 2-Mar-2021
+LEGACY_ACCESSION_CODES = ""
+
 def compute_accession_codes():
-    letter_pairs = set()
+    legacy_codes = [x for x in LEGACY_ACCESSION_CODES.split("|") if x]
+    letter_pairs = set(legacy_codes)
     for file in glob.glob(pkg_resources.resource_filename('encoded', 'schemas/*.json')):
         with io.open(file) as fp:
             schema = json.load(fp)
