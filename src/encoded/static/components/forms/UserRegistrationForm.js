@@ -13,13 +13,6 @@ import Collapse from 'react-bootstrap/esm/Collapse';
 
 export default class UserRegistrationForm extends React.PureComponent {
 
-    static getDerivedStateFromProps(props, state){
-        // We might lose JWT token via navigating to other windows, so we keep it cached here.
-        // We also allow new props.jwtToken to overwrite state.jwtToken, as long as new props.jwtToken
-        // is not blank.
-        //return { 'unverifiedUserEmail' : unverifiedUserEmail || state.jwtToken || null };
-    }
-
     static propTypes = {
         'unverifiedUserEmail' : PropTypes.string.isRequired,
         'onComplete' : PropTypes.func.isRequired,
@@ -295,7 +288,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <hr className="mt-1 mb-2" />
 
                     <div className="form-group">
-                        <label htmlFor="pendingLab">Preferred Contact Email <span className="text-300">(Optional)</span></label>
+                        <label htmlFor="pendingLab">Associated Lab <span className="text-300">(Optional)</span></label>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
@@ -385,20 +378,27 @@ class LookupLabField extends React.PureComponent {
     }
 
     receiveItem(items, endDataPost) {
-        if (!items || !Array.isArray(items) || items.length === 0 || !_.every(items, function (item) { return item.id && typeof item.id === 'string' && item.json; })) {
+        const { onSelect } = this.props;
+
+        if (!items || !Array.isArray(items) || items.length === 0) {
             return;
         }
+
+        if (!_.every(items, function ({ id, json }){ return id && typeof id === 'string' && json; })){
+            return;
+        }
+
         endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
         if (items.length > 1) {
             console.warn('Multiple labs selected but we only get a single item, since handler\'s multiple version not implemented yet!');
         }
 
-        this.setState({ 'isSelecting' : !endDataPost }, ()=>{
+        this.setState({ 'isSelecting' : !endDataPost }, function(){
             // Invoke the object callback function, using the text input.
             // eslint-disable-next-line react/destructuring-assignment
 
             // TODO: Currently, we support only a single lab selection. Add multiple version.
-            this.props.onSelect(items[0].id, items[0].json);
+            onSelect(items[0].id, items[0].json);
         });
     }
 
