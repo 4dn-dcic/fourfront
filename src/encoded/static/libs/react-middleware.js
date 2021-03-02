@@ -2,19 +2,19 @@
 
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { transformResponse } from 'subprocess-middleware';
 import fs from 'fs';
 import { store, mapStateToProps } from './../store';
 import { Provider, connect } from 'react-redux';
 // We get a different console w. different methods & properties on server-side.
 import { console as browserConsole, object, JWT } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import App from './../components';
 
 
 const cssFileStats = fs.statSync(__dirname + '/../css/style.css');
 const lastCSSBuildTime = Date.parse(cssFileStats.mtime.toUTCString());
 
-const render = function (AppComponent, body, res) {
+export function appRenderFxn(body, res) {
 
     //var start = process.hrtime();
 
@@ -56,7 +56,7 @@ const render = function (AppComponent, body, res) {
     var markup, AppWithReduxProps;
 
     try {
-        AppWithReduxProps = connect(mapStateToProps)(AppComponent);
+        AppWithReduxProps = connect(mapStateToProps)(App);
         markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
         // TODO maybe in future: Try to utilize https://reactjs.org/docs/react-dom-server.html#rendertonodestream instead -- would require big edits to subprocess-middleware, however (e.g. removing buffering, piping stream directly to process.stdout).
     } catch (err) {
@@ -76,7 +76,7 @@ const render = function (AppComponent, body, res) {
         });
         // To debug in browser, pause on caught exceptions:
         res.statusCode = 500;
-        AppWithReduxProps = connect(mapStateToProps)(AppComponent);
+        AppWithReduxProps = connect(mapStateToProps)(App);
         markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
     }
 
@@ -85,10 +85,5 @@ const render = function (AppComponent, body, res) {
     res.removeHeader("X-Request-JWT");
     //var duration = process.hrtime(start);
     //res.setHeader('X-React-duration', duration[0] * 1e6 + (duration[1] / 1000 | 0));
-    return new Buffer('<!DOCTYPE html>\n' + markup);
-};
-
-
-export function build(Component) {
-    return transformResponse(render.bind(render, Component));
+    return Buffer.from('<!DOCTYPE html>\n' + markup);
 }

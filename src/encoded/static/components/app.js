@@ -182,7 +182,7 @@ export default class App extends React.PureComponent {
         // (App works as a single-page-application (SPA))
         this.currentNavigationRequest = null;
 
-        console.info("App Initial State: ", this.state);
+        if (!isServerSide()) console.info("App Initial State: ", this.state);
     }
 
     /**

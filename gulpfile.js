@@ -26,6 +26,7 @@ function setDevelopment(done){
 function cleanBuildDirectory(done){
     const buildDir = "./src/encoded/static/build/";
     const pathsToDelete = [];
+
     fs.readdir(buildDir, function(err, files){
         files.forEach(function(fileName){
             if (fileName === ".gitignore") { // Skip
@@ -53,6 +54,7 @@ function cleanBuildDirectory(done){
             });
         });
     });
+
 }
 
 function webpackOnBuild(done) {
@@ -84,20 +86,19 @@ function watch(){
 
 function getSharedPortalComponentsLink(){
     let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
-    let isLinked = false;
+    const origPath = sharedComponentPath;
 
-    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
-        for (var i = 0; i < 10; i++) { // Incase multiple links.
-            sharedComponentPath = fs.readlinkSync(sharedComponentPath);
-            isLinked = true;
-        }
-    } catch (e){
-        // ... not linked
-    }
+    // Follow any symlinks to get to real path.
+    sharedComponentPath = fs.realpathSync(sharedComponentPath);
+
+    const isLinked = origPath !== sharedComponentPath;
 
     console.log(
         "`@hms-dbmi-bgm/shared-portal-components` directory is",
-        isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
+        isLinked ?
+            "sym-linked to `" + sharedComponentPath + "`."
+            :
+            "NOT sym-linked."
     );
 
     return { isLinked, sharedComponentPath: isLinked ? sharedComponentPath : null };
@@ -124,7 +125,13 @@ function buildSharedPortalComponents(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`buildSharedPortalComponents errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`buildSharedPortalComponents process exited with code ${code}`);
         done();
     });
 }
@@ -151,23 +158,25 @@ function watchSharedPortalComponents(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`watchSharedPortalComponents errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`watchSharedPortalComponents process exited with code ${code}`);
         done();
     });
 }
 
 function getMicroscopyMetadataToolLink(){
     let metadataToolPath = path.resolve(__dirname, 'node_modules/4dn-microscopy-metadata-tool');
-    let isLinked = false;
+    const origPath = metadataToolPath;
 
-    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
-        for (var i = 0; i < 10; i++) { // Incase multiple links.
-            metadataToolPath = fs.readlinkSync(metadataToolPath);
-            isLinked = true;
-        }
-    } catch (e){
-        // ... not linked
-    }
+    // Follow any symlinks to get to real path.
+    metadataToolPath = fs.realpathSync(metadataToolPath);
+
+    const isLinked = origPath !== metadataToolPath;
 
     console.log(
         "`4dn-microscopy-metadata-tool` directory is",
