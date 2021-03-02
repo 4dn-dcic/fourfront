@@ -16,6 +16,8 @@ from snovault.schema_utils import server_default
 
 
 ACCESSION_FACTORY = __name__ + ':accession_factory'
+ACCESSION_PREFIX = '4DN'
+ACCESSION_TEST_PREFIX = 'TST'
 
 
 def includeme(config):
