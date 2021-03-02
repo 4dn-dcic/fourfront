@@ -45,7 +45,6 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.recaptchaContainerRef = React.createRef();
 
         this.state = {
-            'unverifiedUserEmail'  : props.unverifiedUserEmail, // We cache our JWT token here as it might get unset when opening lab selection window.
             'captchaResponseToken' : null,
             'captchaErrorMsg'      : null,
             'registrationStatus'   : 'form',
@@ -201,10 +200,10 @@ export default class UserRegistrationForm extends React.PureComponent {
     }
 
     render(){
-        const { schemas, heading } = this.props;
+        const { schemas, heading, unverifiedUserEmail } = this.props;
         const {
             registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
-            value_for_pending_lab_details, value_for_pending_lab, captchaErrorMsg : captchaError, unverifiedUserEmail
+            value_for_pending_lab_details, value_for_pending_lab, captchaErrorMsg: captchaError
         } = this.state;
 
         // eslint-disable-next-line no-useless-escape
@@ -288,7 +287,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <hr className="mt-1 mb-2" />
 
                     <div className="form-group">
-                        <label htmlFor="pendingLab">Associated Lab <span className="text-300">(Optional)</span></label>
+                        <label htmlFor="pendingLab">Primary Lab <span className="text-300">(Optional)</span></label>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
@@ -369,10 +368,11 @@ class LookupLabField extends React.PureComponent {
         };
     }
 
-    toggleIsSelecting(isSelecting){
-        this.setState(function(currState){
-            if (typeof isSelecting !== 'boolean') isSelecting = !currState.isSelecting;
-            if (isSelecting === currState.isSelecting) return null;
+    toggleIsSelecting(isSelecting = null){
+        this.setState(function({ "isSelecting": prevIsSelecting }){
+            if (typeof isSelecting !== 'boolean') {
+                isSelecting = !prevIsSelecting;
+            }
             return { isSelecting };
         });
     }
@@ -388,16 +388,18 @@ class LookupLabField extends React.PureComponent {
             return;
         }
 
-        endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+        // endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+
         if (items.length > 1) {
             console.warn('Multiple labs selected but we only get a single item, since handler\'s multiple version not implemented yet!');
         }
 
-        this.setState({ 'isSelecting' : !endDataPost }, function(){
+        // We can change back to `endDataPost` instead of `false` in future if we ever allow multiple labs.
+        // But most likely additional labs would go into different field, since User.lab is not an array at moment anyway.
+        this.setState({ 'isSelecting' : false }, function(){
             // Invoke the object callback function, using the text input.
             // eslint-disable-next-line react/destructuring-assignment
 
-            // TODO: Currently, we support only a single lab selection. Add multiple version.
             onSelect(items[0].id, items[0].json);
         });
     }
@@ -445,7 +447,9 @@ class LookupLabField extends React.PureComponent {
                         </button>
                     </div>
                 </div>
-                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+                { isSelecting ?
+                    <LinkToSelector isSelecting onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+                    : null }
             </React.Fragment>
         );
     }
