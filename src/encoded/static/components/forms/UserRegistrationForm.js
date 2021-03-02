@@ -213,7 +213,7 @@ export default class UserRegistrationForm extends React.PureComponent {
             registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
             value_for_pending_lab_details, value_for_pending_lab, captchaErrorMsg : captchaError, unverifiedUserEmail
         } = this.state;
-        const { email } = unverifiedUserEmail;
+
         // eslint-disable-next-line no-useless-escape
         const emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const contactEmail = value_for_contact_email && value_for_contact_email.toLowerCase();
@@ -268,8 +268,8 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <div className="form-group">
                         <label htmlFor="email-address">Primary E-Mail or Username</label>
                         <h4 id="email-address" className="text-300 mt-0">
-                            { object.itemUtil.User.gravatar(email, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
-                            { email }
+                            { object.itemUtil.User.gravatar(unverifiedUserEmail, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
+                            { unverifiedUserEmail }
                         </h4>
                     </div>
 
