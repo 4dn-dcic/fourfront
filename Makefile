@@ -40,7 +40,7 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 
 configure:  # does any pre-requisite installs
 	pip install --upgrade pip
-	pip install poetry==1.1.4  # poetry latest as of 1/25/2021 seemed to work but apparantly does not
+	pip install poetry==1.1.4  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
 
 build:  # builds
 	make configure
