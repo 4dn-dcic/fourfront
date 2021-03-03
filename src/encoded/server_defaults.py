@@ -1,18 +1,12 @@
-from datetime import datetime
 import random
 import uuid
 
-from string import (
-    digits,
-    ascii_uppercase,
-    )
-
+from datetime import datetime
 from jsonschema_serialize_fork import NO_DEFAULT
-
 from pyramid.path import DottedNameResolver
 from pyramid.threadlocal import get_current_request
-
 from snovault.schema_utils import server_default
+from string import digits, ascii_uppercase
 
 
 ACCESSION_FACTORY = __name__ + ':accession_factory'
@@ -116,7 +110,7 @@ FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
 
 def enc_accession(accession_type):
     random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
-    return '4DN' + accession_type + random_part
+    return ACCESSION_PREFIX + accession_type + random_part
 
 
 TEST_ACCESSION_FORMAT = (digits, ) * 7
