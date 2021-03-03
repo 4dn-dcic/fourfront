@@ -11,7 +11,7 @@ export class HiGlassEmbeddedInstance extends React.PureComponent {
 
     static defaultProps = {
         "headerElement": "h3",
-        "headerClassName": "section-title"
+        "headerClassName": "tab-section-title mb-0"
     };
 
     static propTypes = {
@@ -42,18 +42,21 @@ export class HiGlassEmbeddedInstance extends React.PureComponent {
     }
 
     render() {
-        const { headerElement = 'h3', headerClassName = "section-title" } = this.props;
+        const { headerElement = 'h3', headerClassName = "tab-section-title mb-0" } = this.props;
         const { higlassItem, loading } = this.state;
         // If HiGlass item is loaded, then display viewer
         if (higlassItem) {
-            const { title, options: { collapsible: isCollapsible = false, default_open = true } = {} } = higlassItem;
+            const { title: propTitle, options: { collapsible: isCollapsible = false, default_open = true } = {} } = higlassItem;
             const headerProps = { className: headerClassName };
+            const title = (propTitle && !isCollapsible) ? React.createElement(headerElement, headerProps, propTitle) : null;
+
             return (
                 <React.Fragment>
-                    {title && !isCollapsible ? React.createElement(headerElement, headerProps, title) : null}
+                    {title}
+                    {title ? (<hr className="tab-section-title-horiz-divider mb-2"></hr>) : null}
                     {
                         isCollapsible ?
-                            <ExpandableStaticHeader context={higlassItem} defaultOpen={default_open} title={title} href={null} titleElement={headerElement} titleTip={higlassItem.description} />
+                            <ExpandableStaticHeader context={higlassItem} defaultOpen={default_open} title={propTitle} href={null} titleElement={headerElement} titleTip={higlassItem.description} titleClassName="mb-0" />
                             : <BasicUserContentBody context={higlassItem} href={null} />
                     }
                 </React.Fragment>
@@ -61,7 +64,7 @@ export class HiGlassEmbeddedInstance extends React.PureComponent {
         }
         // If we're loading, show a loading screen
         if (loading) {
-            return <div className="text-center"><HiGlassLoadingIndicator title="Loading" /></div>;
+            return <div className="text-center mb-3 mt-3"><HiGlassLoadingIndicator title="Loading" /></div>;
         }
         return null;
     }
