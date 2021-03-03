@@ -1,16 +1,23 @@
 import re
 import rfc3987
+
+from dcicutils.misc_utils import ignored
 from jsonschema_serialize_fork import FormatChecker
 from pyramid.threadlocal import get_current_request
 from .server_defaults import (
     ACCESSION_FACTORY,
+    ACCESSION_PREFIX,
+    ACCESSION_TEST_PREFIX,
     test_accession,
 )
-from uuid import UUID
 
-accession_re = re.compile(r'^4DN(EX|ES|FI|FS|SR|BS|IN|WF)[1-9A-Z]{7}$')
-test_accession_re = re.compile(r'^TST(EX|ES|FI|FS|SR|BS|IN|WF)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$')
-uuid_re = re.compile(r'(?i)\{?(?:[0-9a-f]{4}-?){8}\}?')
+
+ACCESSION_CODES = "BS|ES|EX|FI|FS|IN|SR|WF"
+
+accession_re = re.compile(r'^%s(%s)[1-9A-Z]{7}$' % (ACCESSION_PREFIX, ACCESSION_CODES))
+test_accession_re = re.compile(r'^%s(%s)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$' % (ACCESSION_TEST_PREFIX, ACCESSION_CODES))
+uuid_re = re.compile(r'(?i)\{?(?:[0-9a-f]{4}-?){8}\}?')  # NoQA - https://youtrack.jetbrains.com/issue/PY-47380
+
 
 @FormatChecker.cls_checks("uuid")
 def is_uuid(instance):
@@ -20,7 +27,7 @@ def is_uuid(instance):
 
 
 def is_accession(instance):
-    ''' just a pattern checker '''
+    """Just a pattern checker."""
     # Unfortunately we cannot access the accessionType here
     return (
         accession_re.match(instance) is not None or
@@ -42,14 +49,14 @@ def is_accession_for_server(instance):
 
 @FormatChecker.cls_checks("gene_name")
 def is_gene_name(instance):
-    ''' should check a webservice at HGNC/MGI for validation '''
+    """This SHOULD check a webservice at HGNC/MGI for validation, but for now this just returns True always.."""
+    ignored(instance)
     return True
 
 
 @FormatChecker.cls_checks("target_label")
 def is_target_label(instance):
     if is_gene_name(instance):
-        #note this always returns true
         return True
     mod_histone_patt = "^H([234]|2A|2B)[KRT][0-9]+(me|ac|ph)"
     fusion_patt = "^(eGFP|HA)-"
