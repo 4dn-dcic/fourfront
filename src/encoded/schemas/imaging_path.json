@@ -78,7 +78,31 @@
             "internal_comment": "Link to a label database through ontologies",
             "items": {
                 "title": "Label",
-                "type": "string"
+                "type": "string",
+                "suggested_enum": [
+                    "Alexa Fluor 488",
+                    "Alexa Fluor 568",
+                    "Alexa Fluor 594",
+                    "Alexa Fluor 647",
+                    "Alexa Fluor 700",
+                    "ATTO 565",
+                    "ATTO 633",
+                    "Cy3",
+                    "Cy5",
+                    "DAPI",
+                    "eGFP",
+                    "dTomato"
+                ],
+                "ignored_enum": [
+                    "CF568",
+                    "a594",
+                    "PAJF549",
+                    "PAJF646",
+                    "429/470nm fluorophore",
+                    "547/565nm fluorophore",
+                    "NEB-SNAP-Cell_647",
+                    "DyLight650"
+                ]
             }
         },
         "other_probes": {
