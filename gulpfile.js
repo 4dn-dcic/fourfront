@@ -95,10 +95,7 @@ function getSharedPortalComponentsLink(){
 
     console.log(
         "`@hms-dbmi-bgm/shared-portal-components` directory is",
-        isLinked ?
-            "sym-linked to `" + sharedComponentPath + "`."
-            :
-            "NOT sym-linked."
+        isLinked ? "sym-linked to `" + sharedComponentPath + "`." : "NOT sym-linked."
     );
 
     return { isLinked, sharedComponentPath: isLinked ? sharedComponentPath : null };
@@ -112,7 +109,7 @@ function buildSharedPortalComponents(done){
         return;
     }
 
-    // Same as shared-portal-components own build method, but with "--watch"
+    // Same as shared-portal-components own build method
     const subP = spawn(
         path.join(sharedComponentPath, 'node_modules/.bin/babel'),
         [
@@ -207,7 +204,13 @@ function buildMicroscopyMetadataTool(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`buildMicroscopyMetadataTool errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`buildMicroscopyMetadataTool process exited with code ${code}`);
         done();
     });
 }
@@ -234,7 +237,13 @@ function watchMicroscopyMetadataTool(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`watchMicroscopyMetadataTool errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`watchMicroscopyMetadataTool process exited with code ${code}`);
         done();
     });
 }

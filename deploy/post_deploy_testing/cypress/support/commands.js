@@ -82,20 +82,27 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 
     function performLogin(token){
         return cy.window().then((w)=>{
-            // w.fourfront.JWT.save(token);
             cy.request({
                 'url' : '/login',
                 'method' : 'POST',
                 'body' : JSON.stringify({ 'id_token' : token }),
-                'headers' : { 'Authorization': 'Bearer ' + token, 'Content-Type' : "application/json; charset=UTF-8" },
+                'headers' : {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': "application/json",
+                    'Content-Type': "application/json; charset=UTF-8"
+                },
                 'followRedirect' : true
             }).then(function(resp){
                 if (resp.status && resp.status === 200) {
                     cy.request({
                         'url': '/session-properties',
                         'method': 'GET',
+                        'headers' : {
+                            'Accept': "application/json",
+                            'Content-Type': "application/json; charset=UTF-8"
+                        }
                     }).then(function (userInfoResponse) {
-                        w.fourfront.JWT.saveUserInfoLocalStorage(JSON.parse(userInfoResponse.headers['x-user-info']));
+                        w.fourfront.JWT.saveUserInfoLocalStorage(JSON.parse(userInfoResponse.body));
                         // Triggers app.state.session change (req'd to update UI)
                         w.fourfront.app.updateAppSessionState();
                         // Refresh curr page/context

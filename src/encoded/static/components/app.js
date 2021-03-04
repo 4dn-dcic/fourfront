@@ -16,7 +16,7 @@ import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -244,7 +244,6 @@ export default class App extends React.PureComponent {
             window.onhashchange = this.onHashChange;
         }
 
-        // TODO: We don't need this in here, can be in SubmissionsView itself...
         window.onbeforeunload = this.handleBeforeUnload;
 
         // Save some stuff to global window variables so we can access it in tests:
@@ -392,8 +391,9 @@ export default class App extends React.PureComponent {
 
     /**
      * If no schemas yet stored in our state, we AJAX them in from `/profiles/?format=json`.
+     * Performed after/outside initial page render, because it's a lot of data and sending down alongside
+     * or within html response would significantly increase time to page render.
      *
-     * @public
      * @param {function} [callback=null] - If defined, will be executed upon completion of load, with schemas passed in as first argument.
      * @param {boolean} [forceFetch=false] - If true, will ignore any previously-fetched schemas and fetch new ones.
      * @returns {void}
@@ -408,6 +408,7 @@ export default class App extends React.PureComponent {
         }
         ajax.promise('/profiles/?format=json').then((data) => {
             if (object.isValidJSON(data)){
+                // Performed prior to state update, to be available globally immediately after state update.
                 Schemas.set(data);
                 this.setState({ 'schemas' : data }, () => {
                     // Rebuild tooltips because they likely use descriptions from schemas
@@ -1360,9 +1361,8 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     componentDidMount(){
-        if (window && window.fourfront) window.fourfront.bodyElem = this;
         this.setupScrollHandler();
-        window.addEventListener('resize', this.onResize);
+        WindowEventDelegator.addHandler('resize', this.onResize);
         this.onResize();
     }
 
@@ -1382,9 +1382,9 @@ class BodyElement extends React.PureComponent {
      * @returns {void}
      */
     componentWillUnmount(){
-        window.removeEventListener("scroll", this.throttledScrollHandler);
+        WindowEventDelegator.removeHandler("scroll", this.throttledScrollHandler);
         delete this.throttledScrollHandler;
-        window.removeEventListener('resize', this.onResize);
+        WindowEventDelegator.removeHandler('resize', this.onResize);
     }
 
     /**
@@ -1617,7 +1617,7 @@ class BodyElement extends React.PureComponent {
         // We add as property of class instance so we can remove event listener on unmount, for example.
         this.throttledScrollHandler = _.throttle(raf.bind(window, handleScroll), 10);
 
-        window.addEventListener("scroll", this.throttledScrollHandler);
+        WindowEventDelegator.addHandler("scroll", this.throttledScrollHandler);
         setTimeout(this.throttledScrollHandler, 100, null);
     }
 

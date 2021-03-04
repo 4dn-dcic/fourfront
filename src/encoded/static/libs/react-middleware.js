@@ -57,8 +57,13 @@ export function appRenderFxn(body, res) {
 
     try {
         AppWithReduxProps = connect(mapStateToProps)(App);
-        markup = ReactDOMServer.renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
-        // TODO maybe in future: Try to utilize https://reactjs.org/docs/react-dom-server.html#rendertonodestream instead -- would require big edits to subprocess-middleware, however (e.g. removing buffering, piping stream directly to process.stdout).
+        // TODO maybe in future: Try to utilize https://reactjs.org/docs/react-dom-server.html#rendertonodestream instead.
+        // would require big edits to subprocess-middleware, however (e.g. removing buffering, piping stream directly to process.stdout (?)).
+        markup = ReactDOMServer.renderToString(
+            <Provider store={store}>
+                <AppWithReduxProps />
+            </Provider>
+        );
     } catch (err) {
         store.dispatch({
             type: 'context',
@@ -81,9 +86,12 @@ export function appRenderFxn(body, res) {
     }
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+
     // Prevent this header from arriving to downstream client for security.
     res.removeHeader("X-Request-JWT");
+
     //var duration = process.hrtime(start);
     //res.setHeader('X-React-duration', duration[0] * 1e6 + (duration[1] / 1000 | 0));
+
     return Buffer.from('<!DOCTYPE html>\n' + markup);
 }
