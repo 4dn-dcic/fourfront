@@ -115,11 +115,19 @@
                 "type": "string"
             }
         },
+        "imaging_rounds": {
+            "title": "Imaging Rounds",
+            "description": "Number (or range) of imaging round for sequential hybridization",
+            "comment": "Use 1-N for imaging of hybridization steps 1-N, or 0 for imaging of pre-hybridized probes",
+            "type": "string",
+            "pattern": "^[0-9]+(?:\\-[0-9]+)?$",
+            "lookup": 80
+        },
         "file_reference": {
             "title": "Supporting Files",
             "description": "Files associated with the imaging path (ex. probe sequences)",
             "type": "array",
-            "lookup": 80,
+            "lookup": 90,
             "items": {
                 "title": "File",
                 "description": "File metadata.",

@@ -118,6 +118,28 @@
                 "title": "Image ID",
                 "type": "string"
             }
+        },
+        "extinguishing_method": {
+            "title" : "Fluorescence Extinguishing Method",
+            "description": "Method of extinguishing fluorescent signal after an imaging cycle",
+            "type" : "string",
+            "lookup": 68,
+            "suggested_enum": [
+                "DNase treatment",
+                "fluorophore cleavage",
+                "photobleaching",
+                "strand displacement"
+            ]
+        },
+        "fiducial_label": {
+            "title": "Fiducial Label",
+            "description": "Type of fiducial label used for drift correction during sequential imaging",
+            "type": "string",
+            "lookup": 69,
+            "suggested_enum": [
+                "beads",
+                "oligos"
+            ]
         }
     },
     "columns": {
