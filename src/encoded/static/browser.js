@@ -18,7 +18,7 @@ import { BrowserFeat } from '@hms-dbmi-bgm/shared-portal-components/es/component
  * If no user_details provided, assume not logged in and unset JWT, then continue.
  * User info would have been obtained on login & contains user_actions (only obtained through /login).
  */
-function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
+function updateSessionInfo(){
 
     let props;
 
@@ -26,30 +26,22 @@ function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
     // keep <script data-prop-type="user_details"> in <head>, before <script data-prop-type="inline">, in app.js
     // so is available before this JS (via bundle.js)
     try {
-        props = App.getRenderedPropValues(document, 'user_details');
+        props = App.getRenderedPropValues(document, 'user_info');
     } catch(e) {
         console.error(e);
         return false;
     }
 
-    const { user_details } = props;
+    const { user_info } = props;
+    const { details: { email } = {} } = user_info || {};
 
-    if (user_details && typeof user_details.email === 'string'){
-        // We have userDetails from server-side; keep client-side in sync (in case updated via/by back-end / dif client at some point)
-        var savedDetails = JWT.saveUserDetails(user_details);
-        if (savedDetails){
-            // We're fully logged in w/ up-to-date user details from backend
-            return false;
-        }
-        // else - localStorage.user_info doesn't exist, we don't have user_actions to resume session, so delete cookie & reload this page
-        // as non-signed-in user.
-        // Re: other session data - JWT token (stored as cookie) will match session as was used to auth server-side.
-        // user_actions will be left over in localStorage from initial login request (doesn't expire)
+    if (email && typeof email === 'string'){
+        // We have user_info from server-side; keep client-side in sync (in case updated via/by back-end / dif client at some point)
+        JWT.saveUserInfoLocalStorage(user_info);
+    } else {
+        // Ensure no lingering userInfo or token in localStorage or cookies
         JWT.remove();
-        return true;
     }
-    JWT.remove(); // Ensure no lingering userInfo or token in localStorage or cookies
-    return false;
 }
 
 // Treat domready function as the entry point to the application.
@@ -57,10 +49,7 @@ function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
 // point should be definitions.
 if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
 
-    if (reloadIfBadUserInfo()){
-        // TODO maybe: Show an 'error, please wait' + App.authenticateUser (try to make static).
-        window.location.reload(); // Exits
-    }
+    updateSessionInfo();
 
     domready(function(){
         console.log('Browser: ready');
