@@ -102,7 +102,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
                             'Content-Type': "application/json; charset=UTF-8"
                         }
                     }).then(function (userInfoResponse) {
-                        w.fourfront.JWT.saveUserInfoLocalStorage(JSON.parse(userInfoResponse.body));
+                        w.fourfront.JWT.saveUserInfoLocalStorage(userInfoResponse.body);
                         // Triggers app.state.session change (req'd to update UI)
                         w.fourfront.app.updateAppSessionState();
                         // Refresh curr page/context
