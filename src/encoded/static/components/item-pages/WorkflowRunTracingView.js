@@ -212,12 +212,6 @@ export class FileViewGraphSection extends WorkflowGraphSection {
         };
     }
 
-    componentWillReceiveProps(nextProps){
-        if (this.props.steps !== nextProps.steps){
-            this.setState(checkIfIndirectOrReferenceNodesExist(nextProps.steps));
-        }
-    }
-
     isNodeCurrentContext(node){
         return FileViewGraphSection.isNodeCurrentContext(node, this.props.context);
     }
