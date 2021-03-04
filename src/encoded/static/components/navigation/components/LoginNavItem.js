@@ -9,7 +9,7 @@ import { UserRegistrationModal } from './UserRegistrationModal';
 
 
 export const LoginNavItem = React.memo(function LoginNavItem(props){
-    const { id, isRegistrationModalVisible, showLock, isLoading } = props;
+    const { id = 'loginbtn', isRegistrationModalVisible, showLock, isLoading } = props;
     return (
         <React.Fragment>
             <Nav.Link key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
@@ -33,4 +33,18 @@ LoginNavItem.propTypes = {
     'id'            : PropTypes.string,
     'windowWidth'   : PropTypes.number,
     ...UserRegistrationModal.propTypes
+};
+
+/**
+ * Somewhat 'wrap-around' but arguably likely cleanest way to open Auth0 login dialog modal
+ * and not require to move up and pass down login-related stuff like `showLock()`.
+ */
+export const onLoginNavItemClick = function(e) {
+    e.preventDefault();
+    const btnElem = document.getElementById("loginbtn");
+    if (btnElem && typeof btnElem.click === "function"){
+        // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+        btnElem.click();
+    }
+    return false;
 };
