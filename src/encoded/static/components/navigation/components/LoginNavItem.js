@@ -34,3 +34,17 @@ LoginNavItem.propTypes = {
     'windowWidth'   : PropTypes.number,
     ...UserRegistrationModal.propTypes
 };
+
+/**
+ * Somewhat 'wrap-around' but arguably likely cleanest way to open Auth0 login dialog modal
+ * and not require to move up and pass down login-related stuff like `showLock()`.
+ */
+export const onLoginNavItemClick = function(e) {
+    e.preventDefault();
+    const btnElem = document.getElementById("loginbtn");
+    if (btnElem && typeof btnElem.click === "function"){
+        // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+        btnElem.click();
+    }
+    return false;
+};
