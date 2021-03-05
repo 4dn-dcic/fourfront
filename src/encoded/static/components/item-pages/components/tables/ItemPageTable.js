@@ -331,11 +331,13 @@ class ItemPageTableRow extends React.PureComponent {
             );
         });
 
-        return (
-            <div className={"table-row clearfix" + (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '')}>
-                { renderedCols }
-            </div>
+        const cls = (
+            "table-row clearfix" +
+            (typeof renderDetailPane !== 'function' ? ' no-detail-pane' : '') +
+            (open ? " detail-open" : "")
         );
+
+        return <div className={cls}>{ renderedCols }</div>;
     }
 
     render(){

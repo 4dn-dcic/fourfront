@@ -182,17 +182,17 @@ export default class HealthView extends React.PureComponent {
             db_es_total = null,
             mounted = false
         } = this.state;
-        const { title: ctxTitle, description } = propContext;
+        const { description } = propContext;
         const notYetLoaded = (db_es_compare === null && db_es_total === null);
-        const title = typeof ctxTitle === "string" ? ctxTitle : memoizedUrlParse(href).path;
+
         const width = layout.gridContainerWidth(windowWidth);
-        //extend context to include shared-portal-components version
+        // extend context to include shared-portal-components version
         const { dependencies: { '@hms-dbmi-bgm/shared-portal-components': { version: spcVersion, from: spcFrom } = {} } } = installedPackageLockJson;
         let spcVersionUsed;
         if (spcFrom && spcFrom.indexOf('#') > -1) { //e.g. github:4dn-dcic/shared-portal-components#0.0.2.70
-            [spcVersionUsed] = spcFrom.split('#').splice(-1);
+            [ spcVersionUsed ] = spcFrom.split('#').splice(-1);
         }
-        const context = _.extend({ spc_version: spcVersionUsed || spcVersion || '-' }, propContext);
+        const context = { ...propContext, "spc_version": spcVersionUsed || spcVersion || "-" };
 
         return (
             <div className="view-item container" id="content">

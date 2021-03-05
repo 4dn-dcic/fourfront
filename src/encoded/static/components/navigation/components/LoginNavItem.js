@@ -9,10 +9,10 @@ import { UserRegistrationModal } from './UserRegistrationModal';
 
 
 export const LoginNavItem = React.memo(function LoginNavItem(props){
-    const { id = 'loginbtn', isRegistrationModalVisible, showLock, isLoading } = props;
+    const { id = "loginbtn", unverifiedUserEmail, showLock, isLoading, isAuth0LibraryLoaded = true } = props;
     return (
         <React.Fragment>
-            <Nav.Link key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
+            <Nav.Link key="login-reg-btn" active={unverifiedUserEmail} onClick={showLock} className="user-account-item" id={id} disabled={!isAuth0LibraryLoaded}>
                 { isLoading ? (
                     <i className="account-icon icon icon-spin icon-circle-notch fas align-middle"/>
                 ) : (
@@ -23,7 +23,7 @@ export const LoginNavItem = React.memo(function LoginNavItem(props){
                     </React.Fragment>
                 )}
             </Nav.Link>
-            { isRegistrationModalVisible ? <UserRegistrationModal {...props} /> : null }
+            { unverifiedUserEmail ? <UserRegistrationModal {...props} /> : null }
         </React.Fragment>
     );
 });

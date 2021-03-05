@@ -82,19 +82,33 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 
     function performLogin(token){
         return cy.window().then((w)=>{
-            w.fourfront.JWT.save(token);
             cy.request({
                 'url' : '/login',
                 'method' : 'POST',
                 'body' : JSON.stringify({ 'id_token' : token }),
-                'headers' : { 'Authorization': 'Bearer ' + token, 'Content-Type' : "application/json; charset=UTF-8" },
+                'headers' : {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': "application/json",
+                    'Content-Type': "application/json; charset=UTF-8"
+                },
                 'followRedirect' : true
             }).then(function(resp){
-                w.fourfront.JWT.saveUserInfoLocalStorage(resp.body);
-                // Triggers app.state.session change (req'd to update UI)
-                w.fourfront.app.updateUserInfo();
-                // Refresh curr page/context
-                w.fourfront.navigate('', { 'inPlace' : true });
+                if (resp.status && resp.status === 200) {
+                    cy.request({
+                        'url': '/session-properties',
+                        'method': 'GET',
+                        'headers' : {
+                            'Accept': "application/json",
+                            'Content-Type': "application/json; charset=UTF-8"
+                        }
+                    }).then(function (userInfoResponse) {
+                        w.fourfront.JWT.saveUserInfoLocalStorage(userInfoResponse.body);
+                        // Triggers app.state.session change (req'd to update UI)
+                        w.fourfront.app.updateAppSessionState();
+                        // Refresh curr page/context
+                        w.fourfront.navigate('', { 'inPlace' : true });
+                    }).end();
+                }
             }).end();
         }).end();
     }

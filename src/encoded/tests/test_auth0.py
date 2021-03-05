@@ -106,22 +106,23 @@ def test_get_jwt_falls_back_to_cookie(fake_request):
     assert jwt == 'test_token'
 
 
-def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
-    anontestapp.post_json('/login', auth0_4dn_user_token, status=401)
+def test_auth_token_unknown_user(anontestapp, auth0_4dn_user_token):
+    # Should succeed regardless of token - endpoint just saves cookie.
+    # (We give less feedback from this endpoint than we could to help avoid brute-force attacks)
+    anontestapp.post_json('/login', auth0_4dn_user_token, status=200)
 
 
-def test_login_token_no_email(anontestapp, auth0_access_token_no_email, headers):
+def test_auth_token_no_email(anontestapp, auth0_access_token_no_email, headers):
     headers1 = headers.copy()
     headers1['Authorization'] = 'Bearer ' + auth0_access_token_no_email
     # Log in without headers
-    anontestapp.post_json('/login', headers=headers1, status=401)
+    anontestapp.get('/session-properties', headers=headers1, status=401)
 
-
-def test_invalid_login(anontestapp, headers):
+def test_invalid_auth_token(anontestapp, headers):
     headers1 = headers.copy()
     headers1['Authorization'] = 'Bearer invalid token'
     # Log in without headers
-    anontestapp.post_json('/login', headers=headers1, status=401)
+    anontestapp.get('/session-properties', headers=headers1, status=401)
 
 
 # TODO (C4-173): This is intentionally disabled for now. It requires additional security that we need to reconsider.
