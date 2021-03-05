@@ -82,27 +82,28 @@ describe("HiGlass Display pages", function(){
 
             // Delete all newly created higlass views.
             cy.wrap(testItemsToDeleteIDs).each(function(testItemID){ // Synchronously process async stuff.
-                cy.window().then(function(w){
-                    const token = w.fourfront.JWT.get();
-                    cy.request({
-                        method: "DELETE",
-                        url: testItemID,
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            "Content-Type" : "application/json",
-                            "Accept" : "application/json"
-                        }
-                    }).end().request({
-                        method: "PATCH",
-                        url: testItemID,
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            "Content-Type" : "application/json",
-                            "Accept" : "application/json"
-                        },
-                        body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+                cy.getCookie('jwtToken')
+                    .then((cookie) => {
+                        const token = cookie.value;
+                        cy.request({
+                            method: "DELETE",
+                            url: testItemID,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type" : "application/json",
+                                "Accept" : "application/json"
+                            }
+                        }).end().request({
+                            method: "PATCH",
+                            url: testItemID,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type" : "application/json",
+                                "Accept" : "application/json"
+                            },
+                            body: JSON.stringify({ "tags" : ["deleted_by_cypress_test"] })
+                        });
                     });
-                });
             });
 
             // Empty the array now that we're done.
@@ -223,8 +224,9 @@ describe("HiGlass Display pages", function(){
 
             // Edit the higlass display back to draft status.
             cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500).end()
-                .window().then(function(w){
-                    const token = w.fourfront.JWT.get();
+                .getCookie('jwtToken')
+                .then((cookie) => {
+                    const token = cookie.value;
                     return cy.request({
                         method: "PATCH",
                         url: draftUrl,
@@ -234,8 +236,8 @@ describe("HiGlass Display pages", function(){
                             "Accept" : "application/json"
                         },
                         body: JSON.stringify({ "status" : "draft" })
-                    });
-                }).logout4DN();
+                    }).logout4DN();
+                });
         });
 
         it('Can release HiGlass Item to public.', function() {
