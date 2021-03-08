@@ -35,17 +35,26 @@ export class NavigationBar extends React.PureComponent {
         'isFullscreen' : PropTypes.bool
     };
 
+    /**
+     * Checks to see if is production href to determine whether to store/get localStorage
+     * state for "user has clicked agree before".
+     *
+     * @returns {boolean} Whether to look at localStorage.
+     */
+    static inferCookieAcceptanceFromLocalStorage(href){
+        // return true; // uncomment for testing on localhost
+        const initHostName = memoizedUrlParse(href).hostname;
+        if (initHostName && portalConfig.productionHosts.indexOf(initHostName) > -1) {
+            return true;
+        }
+        return false;
+    }
+
     constructor(props){
         super(props);
-        this.hideTestWarning = this.hideTestWarning.bind(this);
+        this.handleAcceptDisclaimer = this.handleAcceptDisclaimer.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
-
-        let testWarning = true;
-        const initHostName = memoizedUrlParse(props.href).hostname;
-        if (initHostName && portalConfig.productionHosts.indexOf(initHostName) > -1) {
-            testWarning = false;
-        }
 
         /**
          * Navbar state.
@@ -57,7 +66,7 @@ export class NavigationBar extends React.PureComponent {
          * @property {boolean} state.mobileDropdownOpen Helper state to keep track of if menu open on mobile because mobile menu doesn't auto-close after navigation.
          */
         this.state = {
-            testWarning,
+            'testWarning'           : false,
             'mounted'               : false,
             'mobileDropdownOpen'    : false
         };
@@ -70,7 +79,24 @@ export class NavigationBar extends React.PureComponent {
      * @returns {void}
      */
     componentDidMount(){
-        this.setState({ 'mounted' : true });
+        const { href } = this.props;
+
+        let testWarning = true;
+        let lsResult = null;
+
+        if (NavigationBar.inferCookieAcceptanceFromLocalStorage(href)){
+            if (window && window.localStorage && window.localStorage.getItem){
+                lsResult = window.localStorage.getItem("accepted_privacy_policy_disclaimer");
+                if (lsResult) {
+                    lsResult = new Date(lsResult);
+                    if (!isNaN(lsResult.valueOf())) {
+                        testWarning = false;
+                    }
+                }
+            }
+        }
+
+        this.setState({ testWarning, 'mounted' : true });
     }
 
     /**
@@ -100,7 +126,7 @@ export class NavigationBar extends React.PureComponent {
      * @param {React.SyntheticEvent} [e] An event, if any. Unused.
      * @returns {void}
      */
-    hideTestWarning(e) {
+    handleAcceptDisclaimer(e) {
         // Remove the warning banner because the user clicked the close icon
         this.setState({ 'testWarning': false });
 
@@ -110,6 +136,10 @@ export class NavigationBar extends React.PureComponent {
         if (hdrs.length) {
             window.scrollBy(0,-1);
             window.scrollBy(0,1);
+        }
+
+        if (window && window.localStorage && window.localStorage.setItem) {
+            window.localStorage.setItem("accepted_privacy_policy_disclaimer", (new Date()).toISOString());
         }
     }
 
@@ -129,7 +159,7 @@ export class NavigationBar extends React.PureComponent {
         return (
             <div className={navClassName}>
                 <div id="top-nav" className="navbar-fixed-top" role="navigation">
-                    <TestWarning visible={testWarningVisible} setHidden={this.hideTestWarning} href={href} />
+                    <TestWarning visible={testWarningVisible} onAccept={this.handleAcceptDisclaimer} href={href} />
                     <div className="navbar-inner-container">
                         <Navbar label="main" expand="md" className="navbar-main" id="navbar-icon"
                             onToggle={this.onToggleNavBar} expanded={mobileDropdownOpen}>
