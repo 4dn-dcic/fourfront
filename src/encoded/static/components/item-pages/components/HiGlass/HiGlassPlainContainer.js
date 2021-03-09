@@ -67,7 +67,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
     };
 
     static defaultProps = {
-        'options' : { 'bounded' : false },
+        'options' : { 'bounded' : true },
         'isValidating' : false,
         'disabled' : false,
         'height' : 500,
@@ -141,14 +141,14 @@ export class HiGlassPlainContainer extends React.PureComponent {
                 finish();
             }
 
-        }, mountDelay);
+        }, mountDelay || 500);
 
     }
 
     correctTrackDimensions(){
         var hgc = this.getHiGlassComponent();
         if (hgc){
-            //HiGlassPlainContainer.correctTrackDimensions(hgc);
+            HiGlassPlainContainer.correctTrackDimensions(hgc);
         } else {
             console.error('NO HGC');
         }
