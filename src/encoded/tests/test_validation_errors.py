@@ -7,8 +7,8 @@ from .workbook_fixtures import app_settings, workbook
 
 notice_pytest_fixtures(app_settings, workbook)
 
-# skip the tests since validation_errors removed in search.py
-# workaround: pytest.mark.skip fails in GithubActions: https://stackoverflow.com/a/42512169
+# skip all tests tests since validation_errors removed in search.py
+# https://stackoverflow.com/a/42512169
 if pytest.__version__ < "3.0.0":
   pytest.skip()
 else:
