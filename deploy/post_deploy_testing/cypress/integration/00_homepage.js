@@ -12,6 +12,11 @@ describe('Home Page', function () {
     });
 
 
+    it('Has log in/register button having #loginbtn', function() {
+        cy.get('#loginbtn').should('contain', 'Log In');
+    });
+
+
     it('Has introduction (indexed)', function () {
 
         cy.get('.home-content-area h2.homepage-section-title').should('contain', 'Introduction').end()

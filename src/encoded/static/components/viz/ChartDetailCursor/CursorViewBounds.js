@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
-import { console, isServerSide, layout, analytics, searchFilters } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, layout, analytics, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { barplot_color_cycler } from './../ColorCycler';
 import ChartDetailCursor from './ChartDetailCursor';
 
@@ -106,12 +106,12 @@ export default class CursorViewBounds extends React.PureComponent {
             if (typeof this.state.selectedTerm === 'string'){
                 this.cursorRef.current.update({ 'sticky' : true });
                 setTimeout(()=>{
-                    window.addEventListener('click', this.handleClickAnywhere);
-                    window.addEventListener('mousemove', this.handleMouseMoveToUnsticky);
+                    WindowEventDelegator.addHandler('click', this.handleClickAnywhere);
+                    WindowEventDelegator.addHandler('mousemove', this.handleMouseMoveToUnsticky);
                 }, 100);
             } else {
-                window.removeEventListener('click', this.handleClickAnywhere);
-                window.removeEventListener('mousemove', this.handleMouseMoveToUnsticky);
+                WindowEventDelegator.removeHandler('click', this.handleClickAnywhere);
+                WindowEventDelegator.removeHandler('mousemove', this.handleMouseMoveToUnsticky);
                 if (!this.state.hoverTerm){
                     this.cursorRef.current.reset(true);
                 } else {

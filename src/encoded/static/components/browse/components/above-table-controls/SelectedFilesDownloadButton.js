@@ -11,7 +11,7 @@ import Modal from 'react-bootstrap/esm/Modal';
 import { console, ajax, JWT, typedefs, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { uniqueFileCount, fileCountWithDuplicates } from './../SelectedFilesController';
-
+import { onLoginNavItemClick } from './../../../navigation/components/LoginNavItem';
 
 // eslint-disable-next-line no-unused-vars
 const { Item } = typedefs;
@@ -215,7 +215,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                             </li>
                             <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
                             {!session ?
-                                <li>{"If you don't already have an account, you can log in with your Google or GitHub credentials."}</li>
+                                <li>{"If you don't already have an account, you can "}<a onClick={onLoginNavItemClick} href="#loginbtn">log in</a>{" with your Google or GitHub credentials."}</li>
                                 : null}
                         </ul>
                     </div>

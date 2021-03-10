@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+
 clean:  # clear node modules, eggs, npm build stuff
 	make clean-python-caches
 	make clean-npm-caches
@@ -38,7 +40,7 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 
 configure:  # does any pre-requisite installs
 	pip install --upgrade pip
-	pip install poetry==1.0.10  # pinned to avoid build problems we cannot fix in pyproject.toml
+	pip install poetry==1.1.4  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
 
 build:  # builds
 	make configure
@@ -112,16 +114,28 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	bin/test -vv --timeout=200 -m "working and not performance"
+	make test-npm
+	make test-unit
 
 test-any:
 	bin/test -vv --timeout=200
 
+
+test-npm:
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not indexing"
+
+test-unit:
+	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and indexing"
+
+travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
+	make travis-test-npm
+	make travis-test-unit
+
 travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not performance and not indexing and not action_fail" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not performance and indexing and not action_fail" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and indexing" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update
@@ -140,11 +154,11 @@ info:
 	   $(info - Use 'make configure' to install poetry. You should not have to do this directly.)
 	   $(info - Use 'make deploy1' to spin up postgres/elasticsearch and load inserts.)
 	   $(info - Use 'make deploy2' to spin up the application server.)
-	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
 	   $(info - Use 'make kibana-start' to start kibana, and 'make kibana-stop' to stop it.)
 	   $(info - Use 'make kill' to kill postgres and elasticsearch proccesses. Please use with care.)
 	   $(info - Use 'make moto-setup' to install moto, for less flaky tests. Implied by 'make build'.)
 	   $(info - Use 'make npm-setup' to build the front-end. Implied by 'make build'.)
-	   $(info - Use 'make test' to run tests with normal options we use on travis ('-m "working and not performance"').)
+	   $(info - Use 'make psql-dev' to start psql on data associated with an active 'make deploy1'.)
+	   $(info - Use 'make test' to run tests with normal options similar to what we use on GitHub Actions.)
 	   $(info - Use 'make test-any' to run tests without marker constraints (i.e., with no '-m' option).)
 	   $(info - Use 'make update' to update dependencies (and the lock file).)

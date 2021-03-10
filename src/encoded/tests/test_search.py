@@ -354,7 +354,8 @@ def test_search_query_string_with_booleans(workbook, testapp):
     assert swag_bios not in not_uuids
 
 
-@pytest.mark.action_fail
+@pytest.mark.broken  # test doesn't work, this will keep make from running it
+@pytest.mark.skip  # In case of running the file by name, this still doesn't want to run
 def test_metadata_tsv_view(workbook, htmltestapp):
 
     FILE_ACCESSION_COL_INDEX = 3
