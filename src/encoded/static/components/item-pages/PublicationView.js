@@ -248,7 +248,7 @@ class PublicationExperimentSets extends React.PureComponent {
         'facetAutoDisplayThreshold' : PropTypes.number.isRequired
     };
     static defaultProps = {
-        'facetAutoDisplayThreshold': 1
+        'facetAutoDisplayThreshold': 10
     };
     /**
      * Get experiment sets tab object for tabpane.
