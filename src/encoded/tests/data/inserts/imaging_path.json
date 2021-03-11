@@ -26,6 +26,7 @@
         "type_labeled_probe": "BAC",
         "labeled_probe":"BAC",
         "labels": ["Atto 633"],
+        "experiment_type": "b27b17cd-544a-3a3b-abc3-17a544544b3c",
         "imaging_rounds": "1-62"
     },
     {
