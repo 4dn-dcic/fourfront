@@ -86,7 +86,7 @@
                         "title": "Imaging channnel",
                         "description" : "channel info, ie. ch00, ch01...",
                         "type": "string",
-                        "pattern": "^(ch\\d\\d)$"
+                        "enum": ["ch00", "ch01", "ch02", "ch03", "ch04"]
                     }
                 }
             }
@@ -124,6 +124,7 @@
             "description": "Method of extinguishing fluorescent signal after an imaging cycle",
             "type" : "string",
             "lookup": 68,
+            "use_for": ["sequential imaging"],
             "suggested_enum": [
                 "DNase treatment",
                 "fluorophore cleavage",
@@ -136,6 +137,7 @@
             "description": "Type of fiducial label used for drift correction during sequential imaging",
             "type": "string",
             "lookup": 69,
+            "use_for": ["sequential imaging"],
             "suggested_enum": [
                 "beads",
                 "oligos"
