@@ -142,6 +142,9 @@
     "facets": {
         "type_labeled_probe": {
             "title": "Probe Type"
+        },
+        "labels": {
+            "title": "Labels"
         }
     },
     "columns": {
