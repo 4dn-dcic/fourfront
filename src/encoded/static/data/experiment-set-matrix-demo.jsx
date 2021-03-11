@@ -1,13 +1,13 @@
 <div key="someRandomKey">
     <h3>Basic Usage</h3>
     <p>
-        Use JSX component in body of static section of filetype that has a filetype of jsx. ExperimentSetMatrix can display multiple sections grouped by <code>sectionKeys</code>. Each section has own query URLs and fields.
-        For all type of declarations, it is imperative to supply at least the following 2 props, <code>sectionKeys</code> and <code>queries</code> with which a minimal experiment set matrix can be embedded:
+        Use a JSX component in the body of a static section that has a filetype of jsx - set the File Type to jsx in the options of the static section. An ExperimentSetMatrix can display multiple sections grouped by <code>sectionKeys</code>. Each section has its own query URLs and fields.
+        For any declaration, it is imperative to supply at least the following 2 props, <code>sectionKeys</code> and <code>queries</code> with which a minimal experiment set matrix can be embedded:
     </p>
 
     <ul>
-        <li key="0"><code>{'sectionKeys={["KEY1", "KEY2", ... etc]}'}</code> - required - A section key is required to distinguish each section, even the matrix consists of only a single section. Most of the props (queries, valueChangeMap, fieldChangeMap, groupingProperties, columnGrouping, headerFor, sectionStyle) is an object whose keys are matching the values defined in <code>sectionKeys</code>.</li>
-        <li key="1"><code>{'queries={{"KEY1": {"url": "http://...", "url_fields": ["field1", "field2" ... etc]}, "KEY2": {"url": "http://...", "url_fields": ["field a", "field b" ... etc]}}}'}</code> - required - <code>queries</code> is an object whose keys are matching the values defined in <code>sectionKeys</code>. <code>url</code> field defines the query url, whereas <code>url_fields</code> defines the field to be retrieved.</li>
+        <li key="0"><code>{'sectionKeys={["KEY1", "KEY2", ... etc]}'}</code> - <strong>required</strong> - A section key is required to distinguish each section, even if the matrix consists of only a single section. The value of the key is used to map configuration properties to the correct section.  As shown in the examples, objects are configured (queries, valueChangeMap, fieldChangeMap, groupingProperties, columnGrouping, headerFor, sectionStylel) and keyed by a value in the <code>sectionKeys</code>.</li>
+        <li key="1"><code>{'queries={{"KEY1": {"url": "http://...", "url_fields": ["field1", "field2" ... etc]}, "KEY2": {"url": "http://...", "url_fields": ["field a", "field b" ... etc]}}}'}</code> - <strong>required</strong> - <code>queries</code> is an object mapped to a <code>sectionKey</code>. The <code>url</code> field defines the query url, and <code>url_fields</code> specifies the specific fields to be returned from the search result.</li>
         <li key="2"><code>{'session={session}'}</code> - This should always be <code>{'session={session}'}</code>, it means to use/pass-in in-code variable <code>session</code>, which is a boolean informing whether end-user is logged in, change of which triggers results refresh.</li>
         <li key="3"><code>{'key="anyRandomTextString"'}</code> - This should always be set to any random string value, it tells React to avoid completely initiating a new instance of this component on extraneous changes, e.g. browser window width. This may be excluded if your component is within a parent/root JSX element that has a <code>key</code> prop, such as this static section.</li>
     </ul>
@@ -50,7 +50,7 @@
         }}
         fieldChangeMap={{
             "4DN": {
-                "experiment_category": "experiments_in_set.experiment_type.display_title",
+                "experiment_category": "experiments_in_set.experiment_type.assay_subclass_short",
                 "experiment_type": "experiments_in_set.experiment_type.display_title",
                 "cell_type": "experiments_in_set.biosample.biosource_summary",
                 "sub_cat": "experiments_in_set.experiment_categorizer.value",
