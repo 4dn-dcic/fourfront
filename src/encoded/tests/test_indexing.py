@@ -232,7 +232,6 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, award, lab, file
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
-@pytest.mark.skip(reason="validation_errors facet removed in search.py")
 def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
     """
     Create an item (file-processed) with a validation error and index,
