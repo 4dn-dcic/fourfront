@@ -87,6 +87,7 @@
                     "Alexa Fluor 700",
                     "ATTO 565",
                     "ATTO 633",
+                    "ATTO 647N",
                     "Cy3",
                     "Cy5",
                     "DAPI",
@@ -95,11 +96,13 @@
                 ],
                 "ignored_enum": [
                     "CF568",
-                    "a594",
                     "PAJF549",
                     "PAJF646",
                     "429/470nm fluorophore",
+                    "495/517nm fluorophore",
                     "547/565nm fluorophore",
+                    "mKate2",
+                    "mTagBFP2",
                     "NEB-SNAP-Cell_647",
                     "DyLight650"
                 ]
