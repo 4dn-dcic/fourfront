@@ -14,7 +14,7 @@ import { StackedBlockVisual } from './../components';
 export class ExperimentSetMatrix extends React.PureComponent {
 
     static defaultProps = {
-        "sectionKeys": ["4DN", 'ENCODE'],
+        "sectionKeys": ["4DN", "ENCODE"],
         "queries": {
             "4DN": {
                 "url": "/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all",
