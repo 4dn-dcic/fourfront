@@ -84,9 +84,15 @@
                     },
                     "channel":{
                         "title": "Imaging channnel",
-                        "description" : "channel info, ie. ch01, ch02...",
+                        "description" : "channel info, ie. ch00, ch01...",
                         "type": "string",
                         "pattern": "^(ch\\d\\d)$"
+                    },
+                    "experiment_type": {
+                        "title": "Experiment Type",
+                        "type": "string",
+                        "description": "If multi-modal imaging, a controlled term specifying the type of imaging experiment for this path (e.g. RNA MERFISH, DNA seqFISH)",
+                        "linkTo": "ExperimentType"
                     }
                 }
             }
