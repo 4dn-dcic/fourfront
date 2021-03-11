@@ -80,7 +80,7 @@ def fastq_json(award, experiment, lab, file_formats):
 
 
 @pytest.fixture
-def proc_file_json(award, experiment, lab, file_formats):
+def proc_file_json(award, experiment, lab, another_lab, file_formats):
     return {
         'accession': '4DNFIO67APU2',
         'award': award['uuid'],
@@ -89,6 +89,7 @@ def proc_file_json(award, experiment, lab, file_formats):
         'filename': 'test.pairs.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploading',
+        'contributing_labs': [another_lab['uuid']]
     }
 
 

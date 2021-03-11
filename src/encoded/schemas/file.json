@@ -220,10 +220,16 @@
             "linkTo": "QualityMetric"
         },
         "override_lab_name": {
-            "description": "The lab that did the experiment if not the attributed Lab from whence this file",
+            "description": "The lab that generated the file if not the attributed Lab for this file",
             "type": "string",
             "permission": "import_items",
             "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_experimental_lab": {
+            "description": "The lab that experiment or experiment set to which this file is associated",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop"
         },
         "override_experiment_type": {
             "description": "The type of experiment to which this file is associated",
