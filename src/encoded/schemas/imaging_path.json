@@ -137,6 +137,13 @@
                 "type": "string",
                 "linkTo": "FileReference"
             }
+        },
+        "experiment_type": {
+            "title": "Experiment Type",
+            "type": "string",
+            "lookup": 100,
+            "description": "If multi-modal imaging, a controlled term specifying the type of imaging experiment for this path (e.g. RNA MERFISH, DNA seqFISH)",
+            "linkTo": "ExperimentType"
         }
     },
     "facets": {
