@@ -7,18 +7,12 @@ from .workbook_fixtures import app_settings, workbook
 
 notice_pytest_fixtures(app_settings, workbook)
 
-# skip all tests tests since validation_errors removed in search.py
-# https://stackoverflow.com/a/42512169
-if pytest.__version__ < "3.0.0":
-  pytest.skip()
-else:
-  pytestmark = pytest.mark.skip
+pytestmark = [
+    pytest.mark.working, pytest.mark.indexing,
+    # pytest.mark.flaky(rerun_filter=delay_rerun),
+]
 
-# pytestmark = [
-#     pytest.mark.working, pytest.mark.indexing,
-#     # pytest.mark.flaky(rerun_filter=delay_rerun),
-# ]
-
+@pytest.mark.skip(reason="validation_errors facet was removed in search.py")
 def test_validation_err_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
     val_err_facets = [facet for facet in res['facets'] if facet['title'] == 'Validation Errors']
