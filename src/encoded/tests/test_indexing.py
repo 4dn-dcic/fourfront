@@ -88,7 +88,8 @@ def setup_and_teardown(app):
     # AFTER THE TEST
     session = app.registry[DBSESSION]
     connection = session.connection().connect()
-    meta = MetaData(bind=session.connection(), reflect=True)
+    meta = MetaData(bind=session.connection())
+    meta.reflect()
     for table in meta.sorted_tables:
         print('Clear table %s' % table)
         print('Count before -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)))
