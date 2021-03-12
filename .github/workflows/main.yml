@@ -35,6 +35,12 @@ jobs:
         with:
           python-version: '3.6'
 
+      # Per doc for node install at https://github.com/actions/setup-node#usage
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+          check-latest: false
+
       - name: Install/Link Postgres
         run: |
           sudo apt update -yq
@@ -43,6 +49,7 @@ jobs:
           sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
       - name: Install Deps
         run: |
+          node --version
           make build
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -55,23 +62,32 @@ jobs:
         if: ${{ matrix.test_type == 'NPM' }}
         env:
           S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
-          TRAVIS_JOB_ID: ${{ github.run_number }}
+          # The need for this old environment variable name will go away soon.
+          # Once the new snovault is in, we should retain these for a little while to make sure the right
+          # variable is being used, and then this can go away. -kmp 9-Mar-2021
+          # I have named the ID slightly differently so we can see if the old names are in use.
+          TRAVIS_JOB_ID: ff-npm-x-test-${{ github.run_number }}-
+          # This will be the new environment variable name.
+          TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
         run: |
           npm test
           make travis-test-npm
+          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          # Until the next version of snovault, the following two are prudent. We can remove them soon. -kmp 9-Mar-2021
+          poetry run wipe-test-indices $TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices ff-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
       - name: QA (UNIT)
         if: ${{ matrix.test_type == 'UNIT' }}
         env:
           S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
-          TRAVIS_JOB_ID: ${{ github.run_number }}
+          # The need for this old environment variable name will go away soon.
+          TRAVIS_JOB_ID: ff-unit-x-test-${{ github.run_number }}-
+          # This will be the new environment variable name.
+          TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
           make travis-test-unit
-
-      - name: Cleanup
-        if: ${{ matrix.test_type == 'NPM' }}  # NPM runs for >50 mins so will purge indices
-        env:
-          S3_ENCRYPT_KEY: ${{ secrets.S3_ENCRYPT_KEY }}
-          TRAVIS_JOB_ID: ${{ github.run_number }}
-        run: |
+          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          # Until the next version of snovault, the following two are prudent. We can remove them soon. -kmp 9-Mar-2021
           poetry run wipe-test-indices $TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices ff-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
