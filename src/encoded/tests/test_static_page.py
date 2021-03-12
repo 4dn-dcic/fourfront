@@ -2,7 +2,7 @@ import pytest
 import webtest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
-from .workbook_fixtures import app_settings, app
+from .workbook_fixtures import app_settings, app  # are these needed? -kmp 12-Mar-2021
 
 
 notice_pytest_fixtures(app_settings, app)

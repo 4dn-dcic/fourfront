@@ -8,7 +8,7 @@ from encoded.commands.purge_item_type import purge_item_type_from_storage
 notice_pytest_fixtures(app_settings, app, workbook)
 
 
-pytestmark = [pytest.mark.working]
+pytestmark = [pytest.mark.working, pytest.mark.workbook]
 
 
 @pytest.fixture

@@ -17,7 +17,8 @@ from .workbook_fixtures import app_settings, app, workbook
 pytestmark = [
     pytest.mark.working,
     pytest.mark.schema,
-    pytest.mark.indexing,
+    # pytest.mark.indexing,
+    pytest.mark.workbook,
     #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
 ]
 
