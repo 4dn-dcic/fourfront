@@ -1,20 +1,22 @@
-'''py.test fixtures for Pyramid.
+"""py.test fixtures for Pyramid.
 
 http://pyramid.readthedocs.org/en/latest/narr/testing.html
-'''
+"""
+
+import datetime as datetime_module
 import logging
+import os
+import pkg_resources
 import pytest
 import webtest
-import os
-import tempfile
-import subprocess
-import time
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from pyramid.request import apply_request_extensions
-from pyramid.testing import DummyRequest, setUp, tearDown
+from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
-from snovault.elasticsearch import ELASTIC_SEARCH
+from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
+from snovault.util import generate_indexer_namespace_for_testing
 from .. import main
 from .conftest_settings import make_app_settings_dictionary
 
@@ -60,36 +62,6 @@ def pytest_configure():
 
 
 @pytest.yield_fixture
-def config():
-    # From https://docs.pylonsproject.org/projects/pyramid/en/latest/api/testing.html#pyramid.testing.setUp
-    # setUp:
-    #   Set Pyramid registry and request thread locals for the duration of a single unit test.
-    #   Use this function in the setUp method of a unittest test case which directly or indirectly uses:
-    #     * any method of the pyramid.config.Configurator object returned by this function.
-    #     * the pyramid.threadlocal.get_current_registry() or pyramid.threadlocal.get_current_request() functions.
-    # tearDown:
-    #   Undo the effects of pyramid.testing.setUp(). Use this function in the tearDown method of a unit test
-    #   that uses pyramid.testing.setUp() in its setUp method.
-    #
-    # The recommended use with unittest can be found here:
-    # https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/testing.html#test-set-up-and-tear-down
-    #   class MyTest(unittest.TestCase):
-    #     def setUp(self):
-    #       self.config = testing.setUp()
-    #     def tearDown(self):
-    #       testing.tearDown()
-    # This is the approximate equivalent in pyTest:
-
-    # TODO: Reonsider whether this setup/teardown is being done correctly
-    #  Then again, this fixture might not be used at all. I inserted this here and it didn't fail the tests:
-    #     raise Exception("fixture config used")
-    #  -kmp 28-Jun-2020
-    the_config = setUp()
-    yield the_config
-    tearDown()
-
-
-@pytest.yield_fixture
 def threadlocals(request, dummy_request, registry):
     threadlocal_manager.push({'request': dummy_request, 'registry': registry})
     yield dummy_request
@@ -127,8 +99,8 @@ def dummy_request(root, registry, app):
 
 @pytest.fixture(scope='session')
 def app(app_settings):
-    '''WSGI application level functional testing.
-    '''
+    """WSGI application level functional testing.
+    """
     return main({}, **app_settings)
 
 
