@@ -5,7 +5,7 @@ from snovault import COLLECTIONS, TYPES
 from snovault.elasticsearch.create_mapping import type_mapping
 from snovault.util import add_default_embeds
 from unittest.mock import patch, MagicMock
-from .datafixtures import ORDER
+from .conftest_settings import ORDER
 from ..commands import create_mapping_on_deploy
 from ..commands.create_mapping_on_deploy import (
     ITEM_INDEX_ORDER,
