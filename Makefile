@@ -114,8 +114,8 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	make test-npm
 	make test-unit
+	make test-npm
 
 test-any:
 	bin/test -vv --timeout=200
