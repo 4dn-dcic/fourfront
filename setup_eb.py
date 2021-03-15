@@ -10,14 +10,18 @@ ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
 PYPROJECT_TOML = toml.decoder.load(os.path.join(ROOT_DIR, 'pyproject.toml'))
 POETRY_DATA = PYPROJECT_TOML['tool']['poetry']
 
-_CARET_MATCH = re.compile(r"[\^]([0-9]+)([.].*)$")
+_CARET_MATCH = re.compile(r"[\^]([0-9]+)([.].*)?$")
+_TILDE_MATCH = re.compile(r"[~]([0-9]+[.])([0-9]+)([.].*)?$")
 
 
 def fix_requirement(requirement):
     m = _CARET_MATCH.match(requirement)
     if m:
-        return ">=%s%s,<%s" % (m.group(1), m.group(2), int(m.group(1))+1)
-    elif requirement[0].isdigit():
+        return ">=%s%s,<%s" % (m.group(1), m.group(2), int(m.group(1)) + 1)
+    m = _TILDE_MATCH.match(requirement)
+    if m:
+        return ">=%s%s%s,<%s%s" % (m.group(1), m.group(2), m.group(3), m.group(1), int(m.group(2)) + 1)
+    if requirement[0].isdigit():
         return "==" + requirement
     else:
         return requirement
