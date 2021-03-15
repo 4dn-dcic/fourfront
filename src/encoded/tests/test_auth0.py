@@ -12,7 +12,7 @@ from http import cookies
 from pyramid.testing import DummyRequest
 from ..authentication import get_jwt
 from ..edw_hash import EDWHash
-from ..utils import get_trusted_email
+from ..util import get_trusted_email
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.indexing]

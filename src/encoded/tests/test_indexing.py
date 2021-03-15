@@ -31,7 +31,7 @@ from timeit import default_timer as timer
 from unittest import mock
 from zope.sqlalchemy import mark_changed
 from .. import main
-from ..utils import delay_rerun
+from ..util import delay_rerun
 from ..verifier import verify_item
 from .workbook_fixtures import app_settings  # why does this care?? does it? -kmp 12-Mar-2021
 from .test_permissions import wrangler, wrangler_testapp
