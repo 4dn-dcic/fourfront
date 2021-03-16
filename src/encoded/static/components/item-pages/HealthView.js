@@ -2,9 +2,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import url from 'url';
 import ReactTooltip from 'react-tooltip';
-import * as d3 from 'd3';
+import { select as d3Select } from 'd3-selection';
+import { color as d3Color } from 'd3-color';
+import { interpolateRgb } from 'd3-interpolate';
+import { scaleOrdinal } from 'd3-scale';
+import { schemeCategory10 } from 'd3-scale-chromatic';
+import { treemap as d3Treemap, treemapResquarify, hierarchy as d3Hierarchy } from 'd3-hierarchy';
 import _ from 'underscore';
 
 import { ajax, layout, navigate, JWT, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -178,17 +182,17 @@ export default class HealthView extends React.PureComponent {
             db_es_total = null,
             mounted = false
         } = this.state;
-        const { title: ctxTitle, description } = propContext;
+        const { description } = propContext;
         const notYetLoaded = (db_es_compare === null && db_es_total === null);
-        const title = typeof ctxTitle === "string" ? ctxTitle : memoizedUrlParse(href).path;
+
         const width = layout.gridContainerWidth(windowWidth);
-        //extend context to include shared-portal-components version
+        // extend context to include shared-portal-components version
         const { dependencies: { '@hms-dbmi-bgm/shared-portal-components': { version: spcVersion, from: spcFrom } = {} } } = installedPackageLockJson;
         let spcVersionUsed;
         if (spcFrom && spcFrom.indexOf('#') > -1) { //e.g. github:4dn-dcic/shared-portal-components#0.0.2.70
-            [spcVersionUsed] = spcFrom.split('#').splice(-1);
+            [ spcVersionUsed ] = spcFrom.split('#').splice(-1);
         }
-        const context = _.extend({ spc_version: spcVersionUsed || spcVersion || '-' }, propContext);
+        const context = { ...propContext, "spc_version": spcVersionUsed || spcVersion || "-" };
 
         return (
             <div className="view-item container" id="content">
@@ -269,13 +273,17 @@ class HealthChart extends React.PureComponent {
         if (!es_compare || typeof es_compare !== 'object') return null;
         return {
             'name' : 'Indexing Status',
-            'children' : _.filter(_.map(_.pairs(es_compare), function(pair){
-                var itemType = pair[0];
+            'children' : _.filter(_.map(_.pairs(es_compare), function([ itemType, compareString ]){
                 if (itemType === 'ontology_term') return null;
-                var compareString = pair[1];
-                var dbCount = parseInt(compareString.slice(4));
-                var esCount = parseInt(compareString.slice(11 + (dbCount + '').length));
-                return { 'name' : itemType, 'children' : [{ 'name' : 'Indexed', 'size' : esCount }, { 'name' : 'Left to Index', 'size' : dbCount - esCount } ] };
+                const dbCount = parseInt(compareString.slice(4));
+                const esCount = parseInt(compareString.slice(11 + (dbCount + '').length));
+                return {
+                    'name': itemType,
+                    'children': [
+                        { 'name': 'Indexed', 'size': esCount },
+                        { 'name': 'Left to Index', 'size': dbCount - esCount }
+                    ]
+                };
             }))
         };
     }
@@ -305,70 +313,81 @@ class HealthChart extends React.PureComponent {
     }
 
     transitionSize(){
-        if (!this.props.mounted) return null;
-        var svg = this.svgRef && this.svgRef.current && d3.select(this.svgRef.current);
+        const { mounted } = this.props;
+        if (!mounted) return null;
+        const svg = this.svgRef && this.svgRef.current && d3Select(this.svgRef.current);
         svg.selectAll('g').transition()
             .duration(750)
-            .attr('transform', function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
-            .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items (' + (parseInt((d.data.size / (d.parent.value || 1)) * 10000) / 100) + '%)<br/>Status: ' + d.data.name; })
+            .attr('transform', function(d) {
+                return "translate(" + d.x0 + "," + d.y0 + ")";
+            })
+            .attr("data-tip", function(d){
+                return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items (' + (parseInt((d.data.size / (d.parent.value || 1)) * 10000) / 100) + '%)<br/>Status: ' + d.data.name;
+            })
             .select("rect")
-            .attr("width", function(d) { return d.x1 - d.x0; })
-            .attr("height", function(d) { return d.y1 - d.y0; });
+            .attr("width", function(d) {
+                return d.x1 - d.x0;
+            })
+            .attr("height", function(d) {
+                return d.y1 - d.y0;
+            });
     }
 
     drawTreeMap(){
-        var { width, height, mounted } = this.props;
-
-        var dataToShow = HealthChart.es_compare_to_d3_hierarchy(this.props.db_es_compare);
+        const { width, height, mounted, db_es_compare } = this.props;
+        const dataToShow = HealthChart.es_compare_to_d3_hierarchy(db_es_compare);
 
         if (!dataToShow || !mounted) return null;
 
-        var svg = this.svgRef && this.svgRef.current && d3.select(this.svgRef.current),
-            fader = function(color) { return d3.interpolateRgb(color, "#fff")(0.2); },
-            colorFallback = d3.scaleOrdinal(d3.schemeCategory10.map(fader));
+        const svg = this.svgRef && this.svgRef.current && d3Select(this.svgRef.current);
+        function fader(color) {
+            return interpolateRgb(color, "#fff")(0.2);
+        }
+
+        const colorFallback = scaleOrdinal(schemeCategory10.map(fader));
 
         function colorStatus(origColor, status){
-            var d3Color;
+            let d3ColorUsed;
             if (['deleted', 'Left to Index'].indexOf(status) > -1){
-                d3Color = d3.color(origColor);
-                return d3Color.darker(1);
+                d3ColorUsed = d3Color(origColor);
+                return d3ColorUsed.darker(1);
             }
             if (['upload failed'].indexOf(status) > -1){
-                return d3.interpolateRgb(origColor, "rgb(222, 82, 83)")(0.6);
+                return interpolateRgb(origColor, "rgb(222, 82, 83)")(0.6);
             }
             if (['released to lab', 'released to project', 'in review by lab', 'in review by project'].indexOf(status) > -1){
-                d3Color = d3.color(origColor);
-                return d3Color.darker(0.5);
+                d3ColorUsed = d3Color(origColor);
+                return d3ColorUsed.darker(0.5);
             }
             if (['uploaded', 'released', 'current'].indexOf(status) > -1){
-                d3Color = d3.color(origColor);
-                return d3Color.brighter(0.25);
+                d3ColorUsed = d3Color(origColor);
+                return d3ColorUsed.brighter(0.25);
             }
             return origColor;
         }
 
-        var treemap = d3.treemap()
-            .tile(d3.treemapResquarify)
+        const treemap = d3Treemap()
+            .tile(treemapResquarify)
             .size([width, height])
             .round(true)
             .paddingInner(1);
 
-        var root = d3.hierarchy(dataToShow)
+        const root = d3Hierarchy(dataToShow)
             .eachBefore(function(d) {d.data.id = (d.parent ? d.parent.data.id + "." : "") + d.data.name; })
             .sum(function(d){ return d.size; })
             .sort(function(a, b) { return b.height - a.height || b.value - a.value; });
 
         treemap(root);
 
-        var cell = svg.selectAll("g").data(root.leaves(), function(n){
+        const cell = svg.selectAll("g").data(root.leaves(), function(n){
             return n.data.id;
         });
 
         cell.exit().remove();
 
-        var enteringCells = cell.enter();
+        const enteringCells = cell.enter();
 
-        var enteringCellGroups = enteringCells.append("g")
+        const enteringCellGroups = enteringCells.append("g")
             .attr('class', 'treemap-rect-elem')
             .attr("transform", function(d) { return "translate(" + d.x0 + "," + d.y0 + ")"; })
             .attr("data-tip", function(d){ return '<span class="text-500">' + d.parent.data.name + "</span><br/>" + d.data.size + ' Items (' + (parseInt((d.data.size / (d.parent.value || 1)) * 10000) / 100) + '%)<br/>Status: ' + d.data.name; })
@@ -401,7 +420,7 @@ class HealthChart extends React.PureComponent {
     }
 
     render(){
-        var { width, height, mounted } = this.props;
+        const { width, height, mounted } = this.props;
 
         if (!mounted) return null;
 

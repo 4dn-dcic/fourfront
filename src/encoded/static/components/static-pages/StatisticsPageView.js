@@ -63,9 +63,10 @@ export default class StatisticsPageView extends React.PureComponent {
 
                 // FOR DEVELOPMENT:
                 // include `/* webpackMode: "eager" */`, since `npm run dev-quick` won't re-compile dynamic imports correctly.
+                // "statistics-page-components" is aliased to './components/StatisticsPageViewBody' in webpack.config.js
                 import(
                     /* webpackChunkName: "statistics-page-components" */
-                    './components/StatisticsPageViewBody'
+                    "statistics-page-components"
                 ).then((loadedModule) => {
                     _.extend(dynamicImports, loadedModule);
                     this.setState({ mounted: true });

@@ -13,6 +13,10 @@
         "submitted_by": "4dndcic@gmail.com",
         "microscope_qc": "4DNFSMICTEST",
         "files": ["4DNFIOTESTM1", "4DNFIOTESTM2", "4DNFIOTESTM3", "4DNFIOTESTM4"],
-        "imaging_paths":[{"path": "test:imagepath001", "channel": "ch01"}]
+        "imaging_paths":[
+            {"path": "test:imagepath001", "channel": "ch01"},
+            {"path": "test:imagepath002", "channel": "ch01"}],
+        "extinguishing_method": "strand displacement",
+        "fiducial_label": "beads"
     }
 ]

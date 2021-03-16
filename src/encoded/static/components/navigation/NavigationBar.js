@@ -28,7 +28,7 @@ export class NavigationBar extends React.PureComponent {
     static propTypes = {
         'href': PropTypes.string,
         'session': PropTypes.bool,
-        'updateUserInfo': PropTypes.func.isRequired,
+        'updateAppSessionState': PropTypes.func.isRequired,
         'context': PropTypes.object,
         'schemas': PropTypes.any,
         'browseBaseState': PropTypes.string,
@@ -160,7 +160,7 @@ const CollapsedNav = React.memo(function CollapsedNav(props) {
         overlaysContainer, windowWidth, windowHeight,
         browseBaseState, testWarningVisible,
         addToBodyClassList, removeFromBodyClassList,
-        schemas, updateUserInfo
+        schemas, updateAppSessionState
     } = props;
 
     const leftNavProps = {
@@ -170,7 +170,7 @@ const CollapsedNav = React.memo(function CollapsedNav(props) {
 
     const userActionNavProps = {
         windowWidth, windowHeight, href, mounted, overlaysContainer, session,
-        schemas, updateUserInfo, testWarningVisible
+        schemas, updateAppSessionState, testWarningVisible
     };
 
     return (

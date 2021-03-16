@@ -6,7 +6,7 @@ import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Dropdown from 'react-bootstrap/esm/Dropdown';
 
-import { JWT, console, object, layout, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { JWT, console, object, layout, ajax, navigate, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 
 import { ItemFileAttachment } from './components/ItemFileAttachment';
@@ -131,7 +131,7 @@ export class MicroMetaTabView extends React.PureComponent {
     componentDidMount(){
 
         const onComplete = () => {
-            window.addEventListener("scroll", this.updateContainerOffsets);
+            WindowEventDelegator.addHandler("scroll", this.updateContainerOffsets);
             this.updateContainerOffsets();
             this.setState({ mounted: true });
         };
@@ -156,7 +156,7 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     componentWillUnmount(){
-        window.removeEventListener("scroll", this.updateContainerOffsets);
+        WindowEventDelegator.removeHandler("scroll", this.updateContainerOffsets);
     }
 
     updateContainerOffsets(){

@@ -1,7 +1,7 @@
 import pytest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
-from ..utils import delay_rerun
+from ..util import delay_rerun
 from .workbook_fixtures import app_settings, app, workbook
 
 
@@ -13,7 +13,10 @@ from .workbook_fixtures import app_settings, app, workbook
 notice_pytest_fixtures(app_settings, app, workbook)
 
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [pytest.mark.working,
+              # pytest.mark.indexing,
+              pytest.mark.workbook,
+              pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 
 def test_aggregation_facet(workbook, testapp):

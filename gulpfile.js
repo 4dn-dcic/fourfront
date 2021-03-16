@@ -23,6 +23,40 @@ function setDevelopment(done){
     done();
 }
 
+function cleanBuildDirectory(done){
+    const buildDir = "./src/encoded/static/build/";
+    const pathsToDelete = [];
+
+    fs.readdir(buildDir, function(err, files){
+        files.forEach(function(fileName){
+            if (fileName === ".gitignore") { // Skip
+                return;
+            }
+            const filePath = path.resolve(buildDir, fileName);
+            pathsToDelete.push(filePath);
+        });
+
+        const filesToDeleteLen = pathsToDelete.length;
+
+        if (filesToDeleteLen === 0) {
+            done();
+            return;
+        }
+
+        var countDeleted = 0;
+        pathsToDelete.forEach(function(filePath){
+            fs.unlink(filePath, function(err){
+                countDeleted++;
+                if (countDeleted === filesToDeleteLen) {
+                    console.log("Cleaned " + countDeleted + " files from " + buildDir);
+                    done();
+                }
+            });
+        });
+    });
+
+}
+
 function webpackOnBuild(done) {
     var start = Date.now();
     return function (err, stats) {
@@ -52,16 +86,12 @@ function watch(){
 
 function getSharedPortalComponentsLink(){
     let sharedComponentPath = path.resolve(__dirname, 'node_modules/@hms-dbmi-bgm/shared-portal-components');
-    let isLinked = false;
+    const origPath = sharedComponentPath;
 
-    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
-        for (var i = 0; i < 10; i++) { // Incase multiple links.
-            sharedComponentPath = fs.readlinkSync(sharedComponentPath);
-            isLinked = true;
-        }
-    } catch (e){
-        // ... not linked
-    }
+    // Follow any symlinks to get to real path.
+    sharedComponentPath = fs.realpathSync(sharedComponentPath);
+
+    const isLinked = origPath !== sharedComponentPath;
 
     console.log(
         "`@hms-dbmi-bgm/shared-portal-components` directory is",
@@ -79,7 +109,7 @@ function buildSharedPortalComponents(done){
         return;
     }
 
-    // Same as shared-portal-components own build method, but with "--watch"
+    // Same as shared-portal-components own build method
     const subP = spawn(
         path.join(sharedComponentPath, 'node_modules/.bin/babel'),
         [
@@ -92,7 +122,13 @@ function buildSharedPortalComponents(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`buildSharedPortalComponents errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`buildSharedPortalComponents process exited with code ${code}`);
         done();
     });
 }
@@ -119,23 +155,25 @@ function watchSharedPortalComponents(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`watchSharedPortalComponents errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`watchSharedPortalComponents process exited with code ${code}`);
         done();
     });
 }
 
 function getMicroscopyMetadataToolLink(){
     let metadataToolPath = path.resolve(__dirname, 'node_modules/4dn-microscopy-metadata-tool');
-    let isLinked = false;
+    const origPath = metadataToolPath;
 
-    try { // Get exact path to dir, else leave. Used to avoid needing to webpack dependency itself.
-        for (var i = 0; i < 10; i++) { // Incase multiple links.
-            metadataToolPath = fs.readlinkSync(metadataToolPath);
-            isLinked = true;
-        }
-    } catch (e){
-        // ... not linked
-    }
+    // Follow any symlinks to get to real path.
+    metadataToolPath = fs.realpathSync(metadataToolPath);
+
+    const isLinked = origPath !== metadataToolPath;
 
     console.log(
         "`4dn-microscopy-metadata-tool` directory is",
@@ -166,7 +204,13 @@ function buildMicroscopyMetadataTool(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`buildMicroscopyMetadataTool errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`buildMicroscopyMetadataTool process exited with code ${code}`);
         done();
     });
 }
@@ -193,7 +237,13 @@ function watchMicroscopyMetadataTool(done){
         { stdio: "inherit" }
     );
 
+    subP.on("error", (err)=>{
+        console.log(`watchMicroscopyMetadataTool errored - ${err}`);
+        return;
+    });
+
     subP.on("close", (code)=>{
+        console.log(`watchMicroscopyMetadataTool process exited with code ${code}`);
         done();
     });
 }
@@ -254,6 +304,7 @@ const doSassBuild = (done, options = {}) => {
 
 
 const devQuick = gulp.series(
+    cleanBuildDirectory,
     setQuick,
     doWebpack,
     gulp.parallel(watch, watchSharedPortalComponents, watchMicroscopyMetadataTool)
@@ -263,6 +314,7 @@ const devQuick = gulp.series(
 );
 
 const devAnalyzed = gulp.series(
+    cleanBuildDirectory,
     setDevelopment,
     buildSharedPortalComponents,
     buildMicroscopyMetadataTool,
@@ -270,6 +322,7 @@ const devAnalyzed = gulp.series(
 );
 
 const build = gulp.series(
+    cleanBuildDirectory,
     setProduction,
     doWebpack
 );

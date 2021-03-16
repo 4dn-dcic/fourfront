@@ -445,6 +445,19 @@ class ExperimentSet(Item):
                           reverse=True)[0].get('@id')
 
     @calculated_property(schema={
+        "title": "Publications Using",
+        "description": "Publications using this Experiment Set",
+        "type": "array",
+        "items": {
+            "title": "Publication",
+            "type": "string",
+            "linkTo": "Publication"
+        }
+    })
+    def pubs_using(self, request):
+        return self.rev_link_atids(request, 'publications_using')
+
+    @calculated_property(schema={
         "title": "Publications",
         "description": "Publications associated with this Experiment Set.",
         "type": "array",

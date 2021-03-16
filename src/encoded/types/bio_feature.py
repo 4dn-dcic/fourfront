@@ -49,7 +49,7 @@ class BioFeature(Item):
         featstr = ''
         modstr = ''
         orgstr = ''
-        if organism_name and organism_name != 'human':
+        if organism_name and organism_name not in ['human', 'unspecified']:
             orgstr = organism_name
         if preferred_label:
             if orgstr:

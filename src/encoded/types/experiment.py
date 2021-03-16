@@ -251,6 +251,11 @@ class Experiment(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.status",
+        "other_processed_files.files.notes_to_tsv",
+
+        "other_processed_files.files.quality_metric.url",
+        "other_processed_files.files.quality_metric.overall_quality_status",
+        "other_processed_files.files.quality_metric.quality_metric_summary.*",
 
         # FileFormat linkTo
         "other_processed_files.files.file_format.file_format",
@@ -893,7 +898,10 @@ class ExperimentMic(Experiment):
         'sample_image.attachment.md5sum',
         'sample_image.attachment.download',
         'sample_image.attachment.width',
-        'sample_image.attachment.height'
+        'sample_image.attachment.height',
+
+        'imaging_paths.path.imaging_rounds',
+        'imaging_paths.path.experiment_type'
     ]
     name_key = 'accession'
 
