@@ -34,7 +34,7 @@ from snovault.elasticsearch import APP_FACTORY
 # from webob.cookies import JSONSerializer
 
 from .loadxl import load_all
-from .utils import find_other_in_pair
+from .util import find_other_in_pair
 
 
 if sys.version_info.major < 3:

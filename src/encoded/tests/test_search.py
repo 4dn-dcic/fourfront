@@ -11,13 +11,14 @@ from snovault.util import add_default_embeds
 from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-# from ..utils import customized_delay_rerun
+# from ..util import customized_delay_rerun
 
 
 pytestmark = [
     pytest.mark.working,
     pytest.mark.schema,
-    pytest.mark.indexing,
+    # pytest.mark.indexing,
+    pytest.mark.workbook,
     #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
 ]
 
