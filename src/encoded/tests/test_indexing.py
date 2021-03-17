@@ -25,7 +25,7 @@ from snovault.elasticsearch.create_mapping import (
     compare_against_existing_mapping
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
+from snovault.elasticsearch.indexer_utils import get_namespaced_index, compute_invalidation_scope
 from sqlalchemy import MetaData, func
 from timeit import default_timer as timer
 from unittest import mock
@@ -365,3 +365,26 @@ def test_permissions_database_applies_permissions(award, lab, file_formats, wran
     assert res['file_format'] == {'error': 'no view permissions'}
     res = anontestapp.get('/' + item_id + '?datastore=database').json
     assert res['file_format'] == {'error': 'no view permissions'}
+
+
+class TestInvalidationScopeViewFourfront:
+    """ Integrated testing of invalidation scope - requires ES component, so in this file. """
+
+    class MockedRequest:
+        def __init__(self, registry, source_type, target_type):
+            self.registry = registry
+            self.json = {
+                'source_type': source_type,
+                'target_type': target_type
+            }
+
+    @pytest.mark.parametrize('source_type, target_type, invalidated', [
+        ('FileProcessed', 'WorkflowRunAwsem', [
+            'status', 'uuid'  # 100% wrong
+        ]),
+    ])
+    def test_invalidation_scope_view_parametrized(self, indexer_testapp, source_type, target_type, invalidated):
+        """ Just call the route function - test some basic interactions. """
+        req = self.MockedRequest(indexer_testapp.app.registry, source_type, target_type)
+        scope = compute_invalidation_scope(None, req)
+        assert sorted(scope['Invalidated']) == sorted(invalidated)

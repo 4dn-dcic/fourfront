@@ -644,6 +644,29 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
     return steps
 
 
+def _build_workflows_embedded_list():
+    """ Helper function for building workflow embedded list. """
+    return Item.embedded_list + lab_award_attribution_embed_list + [
+        'steps.name',
+
+        # Objects
+        'steps.inputs',
+        'steps.outputs',
+
+        # Software linkTo
+        'steps.meta.software_used.name',
+        'steps.meta.software_used.title',
+        'steps.meta.software_used.version',
+        'steps.meta.software_used.source_url',
+
+        # FileFormat linkTo
+        'arguments.argument_format.file_format',
+
+        'arguments.argument_type',
+        'arguments.workflow_argument_name'
+    ]
+
+
 @collection(
     name='workflows',
     unique_key='accession',
@@ -656,23 +679,7 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = workflow_schema
-    embedded_list = (
-        Item.embedded_list +
-        lab_award_attribution_embed_list +
-        [
-            # XXX: embeds need review
-            'steps.name',
-            'steps.inputs',
-            'steps.outputs',
-            'steps.meta.software_used.name',
-            'steps.meta.software_used.title',
-            'steps.meta.software_used.version',
-            'steps.meta.software_used.source_url',
-            'arguments.argument_type',
-            'arguments.argument_format',
-            'arguments.workflow_argument_name'
-        ]
-    )
+    embedded_list = _build_workflows_embedded_list()
     name_key = 'accession'
     rev = {
         'newer_versions': ('Workflow', 'previous_version')
@@ -693,6 +700,57 @@ class Workflow(Item):
         return self.rev_link_atids(request, "newer_versions")
 
 
+def _build_workflow_run_embedded_list():
+    """ Helper function for building workflow embedded list. """
+    return Item.embedded_list + lab_award_attribution_embed_list + [
+        # Workflow linkTo
+        'workflow.category',
+        'workflow.experiment_types',
+        'workflow.app_name',
+        'workflow.title',
+        'workflow.steps.name',
+
+        # Software linkTo
+        'workflow.steps.meta.software_used.name',
+        'workflow.steps.meta.software_used.title',
+        'workflow.steps.meta.software_used.version',
+        'workflow.steps.meta.software_used.source_url',
+
+        # String
+        'input_files.workflow_argument_name',
+        # File linkTo
+        'input_files.value.filename',
+        'input_files.value.display_title',
+        'input_files.value.href',
+        'input_files.value.file_format',
+        'input_files.value.accession',
+        'input_files.value.@type',
+        'input_files.value.@id',
+        'input_files.value.file_size',
+        'input_files.value.quality_metric.url',
+        'input_files.value.quality_metric.overall_quality_status',
+        'input_files.value.status',
+
+        # String
+        'output_files.workflow_argument_name',
+
+        # File linkTo
+        'output_files.value.filename',
+        'output_files.value.display_title',
+        'output_files.value.href',
+        'output_files.value.file_format',
+        'output_files.value.accession',
+        'output_files.value.@type',
+        'output_files.value.@id',
+        'output_files.value.file_size',
+        'output_files.value.quality_metric.url',
+        'output_files.value.quality_metric.overall_quality_status',
+        'output_files.value.status',
+        'output_files.value_qc.url',
+        'output_files.value_qc.overall_quality_status'
+    ]
+
+
 @collection(
     name='workflow-runs',
     properties={
@@ -704,48 +762,7 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded_list = (
-        Item.embedded_list +
-        lab_award_attribution_embed_list +
-        [
-            # XXX: Embeds need review
-            'workflow.category',
-            'workflow.experiment_types',
-            'workflow.app_name',
-            'workflow.title',
-            'workflow.steps.name',
-            'workflow.steps.meta.software_used.name',
-            'workflow.steps.meta.software_used.title',
-            'workflow.steps.meta.software_used.version',
-            'workflow.steps.meta.software_used.source_url',
-            'input_files.workflow_argument_name',
-            'input_files.value.filename',
-            'input_files.value.display_title',
-            'input_files.value.href',
-            'input_files.value.file_format',
-            'input_files.value.accession',
-            'input_files.value.@type',
-            'input_files.value.@id',
-            'input_files.value.file_size',
-            'input_files.value.quality_metric.url',
-            'input_files.value.quality_metric.overall_quality_status',
-            'input_files.value.status',
-            'output_files.workflow_argument_name',
-            'output_files.value.filename',
-            'output_files.value.display_title',
-            'output_files.value.href',
-            'output_files.value.file_format',
-            'output_files.value.accession',
-            'output_files.value.@type',
-            'output_files.value.@id',
-            'output_files.value.file_size',
-            'output_files.value.quality_metric.url',
-            'output_files.value.quality_metric.overall_quality_status',
-            'output_files.value.status',
-            'output_files.value_qc.url',
-            'output_files.value_qc.overall_quality_status'
-        ]
-    )
+    embedded_list = _build_workflow_run_embedded_list()
 
     @calculated_property(schema=workflow_run_steps_property_schema, category='page')
     def steps(self, request):
