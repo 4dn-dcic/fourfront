@@ -190,7 +190,10 @@ static_content_embed_list = [
 lab_award_attribution_embed_list = [
     "award.project",
     "award.center_title",
-    "award.pi.last_name",  # used in above calc prop
+    "award.name",  # used in center_title calc prop
+    "award.center",  # used in center_title calc prop
+    "award.description",  # used in center_title calc prop
+    "award.pi.last_name",  # used in center_title calc prop
     "lab.title",
     "lab.correspondence",  # Not a real linkTo - temp workaround
     "lab.pi.first_name",  # this and next used in above calcprop
@@ -204,7 +207,7 @@ lab_award_attribution_embed_list = [
     "contributing_labs.pi.contact_email",
     "contributing_labs.pi.preferred_email",
     "contributing_labs.pi.email",
-    "submitted_by.job_title",
+    "submitted_by.job_title",  # XXX: Is this right? below comment suggests no...
     "submitted_by.first_name",  # this and next used in above calcprop
     "submitted_by.last_name",
     "submitted_by.timezone",  # is this used in attribution or elsewhere on item pages so should be included?
