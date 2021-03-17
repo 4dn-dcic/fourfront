@@ -1324,8 +1324,6 @@ def download(context, request):
     else:
         raise ValueError(external.get('service'))
 
-    import pdb; pdb.set_trace()
-
     # Analytics Stuff
     ga_config = request.registry.settings.get('ga_config')
 
