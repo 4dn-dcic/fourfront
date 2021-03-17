@@ -371,7 +371,7 @@ class File(Item):
             if not rep_set_info:
                 return info
             # pieces of info to get from the repset if there is one
-            ds, c, el = self._get_ds_cond__lab_from_repset(rep_set_info)
+            ds, c, el = self._get_ds_cond_lab_from_repset(rep_set_info)
             info['dataset'] = ds
             info['condition'] = c
             info['experimental_lab'] = el
@@ -411,7 +411,7 @@ class File(Item):
                     repset = repset[0]
                     rep_set_info = get_item_or_none(request, repset)
                     if rep_set_info is not None:
-                        ds, c = self._get_ds_cond_from_repset(rep_set_info)
+                        ds, c, el = self._get_ds_cond_lab_from_repset(rep_set_info)
                         info['dataset'] = ds
                         info['condition'] = c
                         rep_exps = rep_set_info.get('replicate_exps', [])
@@ -487,6 +487,12 @@ class File(Item):
             # so dcic-lab is added as contributing as opposed to user supplied files that may or may not be
             # from the same lab
             if 'lab_name' not in track_info:
+                labid = props.get('lab')
+                lab = get_item_or_none(request, labid)
+                cont_labs = props.get('contributing_labs', None)
+                if cont_labs and 'dcic_uuid' in cont_labs:
+                    # this means the file is produced by a standard processing pipeline here
+                    track_info['lab_name'] = '4DN-DCIC Lab, HMS'
                 labid = props.get('lab')
                 lab = get_item_or_none(request, labid)
                 if lab is not None:
