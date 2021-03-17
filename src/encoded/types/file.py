@@ -706,6 +706,58 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    def get_presigned_url_location(self, external, request, filename) -> str:
+        """ Opens an S3 boto3 client and returns a presigned url for the requested file to be downloaded"""
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if request.range:
+            param_get_object.update({'Range': request.headers.get('Range')})
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
+        return location
+
+    def get_open_data_url_or_presigned_url_location(self, external, request, filename) -> str:
+        """ Checks if the S3 file to be downloaded is both publicly released and transfered to the Open Data S3 bucket.
+            Returns the Open Data S3 url for the file if present, and otherwise returns a presigned S3 URL
+            to a 4DN bucket. """
+        # See if the download should potentially be released to the Open Data Bucket
+        if self.properties['status'] == 'released':
+            # Build the Open Data S3 url to this file
+            open_data_bucket = '4dn-open-data-public'
+            if 'wfoutput' in self.get_bucket(request.registry):
+                bucket_type = 'wfoutput'
+            else:
+                bucket_type = 'files'
+            open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
+                bucket_type=bucket_type, uuid=self.uuid, filename=filename,
+            )
+            # Check if the file exists in the Open Data S3 bucket
+            client = boto3.client('s3')
+            try:
+                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
+                # Returning a valid S3 URL to the public url of the file
+                res = client.head_object(Bucket=open_data_bucket, Key=open_data_key)
+                location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
+                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
+                )
+                return location
+            except ClientError:
+                # If a ClientError is raised, the file does not exist in the Open Data S3 bucket
+                # Falling back to returning a presigned url
+                # TODO log that this file could be transferred over?
+                location = self.get_presigned_url_location(external, request, filename)
+                return location
+        else:
+            location = self.get_presigned_url_location(external, request, filename)
+            return location
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
@@ -1179,9 +1231,7 @@ def is_file_to_download(properties, file_format, expected_filename=None):
              permission='view', subpath_segments=[0, 1])
 @debug_log
 def download(context, request):
-    '''
-    Endpoint for handling /@@download/ URLs
-    '''
+    """ Endpoint for handling /@@download/ URLs """
     check_user_is_logged_in(request)
 
     # first check for restricted status
@@ -1270,21 +1320,11 @@ def download(context, request):
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto3.client('s3')
-        param_get_object = {
-            'Bucket': external['bucket'],
-            'Key': external['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
-        }
-        if request.range:
-            param_get_object.update({'Range': request.headers.get('Range')})
-        location = conn.generate_presigned_url(
-            ClientMethod='get_object',
-            Params=param_get_object,
-            ExpiresIn=36*60*60
-        )
+        location = context.get_open_data_url_or_presigned_url_location(external, request, filename)
     else:
         raise ValueError(external.get('service'))
+
+    import pdb; pdb.set_trace()
 
     # Analytics Stuff
     ga_config = request.registry.settings.get('ga_config')
