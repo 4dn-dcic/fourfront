@@ -758,6 +758,37 @@ class File(Item):
             location = self.get_presigned_url_location(external, request, filename)
             return location
 
+    @calculated_property(schema={
+        "title": "Open Data URL",
+        "description": "Location of file on Open Data Bucket, if it exists",
+        "type": "string"
+    })
+    def open_data_url(self, filename, status):
+        """ Computes the open data URL and checks if it exists. """
+        if status == 'released':
+            open_data_bucket = '4dn-open-data-public'
+            if 'wfoutput' in self.get_bucket(self.registry):
+                bucket_type = 'wfoutput'
+            else:
+                bucket_type = 'files'
+            open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
+                bucket_type=bucket_type, uuid=self.uuid, filename=filename,
+            )
+            # Check if the file exists in the Open Data S3 bucket
+            client = boto3.client('s3')
+            try:
+                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
+                # Returning a valid S3 URL to the public url of the file
+                res = client.head_object(Bucket=open_data_bucket, Key=open_data_key)
+                location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
+                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
+                )
+                return location
+            except ClientError:
+                return None
+        else:
+            return None
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
