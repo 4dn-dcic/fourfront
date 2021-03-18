@@ -334,7 +334,7 @@ MIME_TYPE_HTML = 'text/html'
 MIME_TYPE_JSON = 'application/json'
 MIME_TYPE_LD_JSON = 'application/ld+json'
 
-MIME_TYPES_SUPPORTED = [MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON]
+MIME_TYPES_SUPPORTED = [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
 MIME_TYPE_DEFAULT = MIME_TYPES_SUPPORTED[0]
 MIME_TYPE_TRIAGE_MODE = 'modern'  # if this doesn't work, fall back to 'legacy'
 
@@ -410,20 +410,23 @@ def should_transform(request, response):
     if response.content_type != 'application/json':
         return False
 
-    # This is weirdly redundant with the next clause starting at 'format =' below. -kmp 11-Mar-2021
-    # If we have a 'frame' that is not None or page, force JSON, since our UI doesn't handle all various
-    # forms of the data, just embedded/page.
-    request_frame = request.params.get("frame", "page")
-    if request_frame != "page":
-        return False
+    # TODO: This would be an incompatible change, but an improvement? For now, let's disable it so we an phase it
+    #       it in on a separate PR. There is a corresponding part of the test that needs to be uncommented as well
+    #       to make all this work. -kmp 18-Mar-2021
+    #
+    # # If we have a 'frame' that is not None or page, force JSON, since our UI doesn't handle all various
+    # # forms of the data, just embedded/page.
+    # frame_param = request.params.get("frame", "page")
+    # if frame_param != "page":
+    #     return False
 
     # The `format` URI param allows us to override request's 'Accept' header.
-    format = request.params.get('format')
-    if format is not None:
-        format = format.lower()
-        if format == 'json':
+    format_param = request.params.get('format')
+    if format_param is not None:
+        format_param = format_param.lower()
+        if format_param == 'json':
             return False
-        if format == 'html':
+        if format_param == 'html':
             return True
         else:
             raise HTTPNotAcceptable("Improper format URI parameter",
@@ -433,16 +436,14 @@ def should_transform(request, response):
     # which should contain 'text/html'
     # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
     mime_type = best_mime_type(request)
-    format = mime_type.split('/', 1)[1]  # Will be 1 of 'html', 'json', 'json-ld'
+    mime_type_format = mime_type.split('/', 1)[1]  # Will be 1 of 'html', 'json', 'json-ld'
 
     # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?)
     # which can parse JSON-LDs. At some point we could maybe have it to be same as
     # making an `@@object` or `?frame=object` request (?) esp if fill
     # out @context response w/ schema(s) (or link to schema)
 
-    if format == 'html':
-        return True
-    return False
+    return mime_type_format == 'html'
 
 
 def render_page_html_tween_factory(handler, registry):
