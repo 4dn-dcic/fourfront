@@ -723,37 +723,11 @@ class File(Item):
         )
         return location
 
-    def get_open_data_url_or_presigned_url_location(self, external, request, filename) -> str:
-        """ Checks if the S3 file to be downloaded is both publicly released and transfered to the Open Data S3 bucket.
-            Returns the Open Data S3 url for the file if present, and otherwise returns a presigned S3 URL
-            to a 4DN bucket. """
-        # See if the download should potentially be released to the Open Data Bucket
-        if self.properties['status'] == 'released':
-            # Build the Open Data S3 url to this file
-            open_data_bucket = '4dn-open-data-public'
-            if 'wfoutput' in self.get_bucket(request.registry):
-                bucket_type = 'wfoutput'
-            else:
-                bucket_type = 'files'
-            open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
-                bucket_type=bucket_type, uuid=self.uuid, filename=filename,
-            )
-            # Check if the file exists in the Open Data S3 bucket
-            client = boto3.client('s3')
-            try:
-                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
-                # Returning a valid S3 URL to the public url of the file
-                res = client.head_object(Bucket=open_data_bucket, Key=open_data_key)
-                location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
-                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
-                )
-                return location
-            except ClientError:
-                # If a ClientError is raised, the file does not exist in the Open Data S3 bucket
-                # Falling back to returning a presigned url
-                # TODO log that this file could be transferred over?
-                location = self.get_presigned_url_location(external, request, filename)
-                return location
+    def get_open_data_url_or_presigned_url_location(self) -> str:
+        """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
+            a presigned S3 URL to a 4DN bucket. """
+        if self.open_data_url:
+            return self.open_data_url
         else:
             location = self.get_presigned_url_location(external, request, filename)
             return location
@@ -763,8 +737,10 @@ class File(Item):
         "description": "Location of file on Open Data Bucket, if it exists",
         "type": "string"
     })
-    def open_data_url(self, filename, status):
+    def open_data_url(self, status, filename=None):
         """ Computes the open data URL and checks if it exists. """
+        if not filename:
+            return None
         if status == 'released':
             open_data_bucket = '4dn-open-data-public'
             if 'wfoutput' in self.get_bucket(self.registry):
