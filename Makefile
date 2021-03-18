@@ -120,8 +120,8 @@ clean-python:
 	pip freeze | xargs pip uninstall -y
 
 test:
-	make test-npm
 	make test-unit
+	make test-npm
 
 retest:
 	bin/test  -vv --last-failed
@@ -142,8 +142,8 @@ test-integrated:
 	bin/test -vv --timeout=200 -m "working and not manual and (integrated or integratedx) and not performance and not broken and not sloppy"
 
 travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
-	make travis-test-npm
 	make travis-test-unit
+	make travis-test-npm
 
 travis-test-npm:  # Note this only does the 'not indexing' tests
 	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
@@ -160,7 +160,7 @@ help:
 info:
 	@: $(info Here are some 'make' options:)
 	   $(info - Use 'make aws-ip-ranges' to download latest ip range information. Invoked automatically when needed.)
-	   $(info - Use 'make build' (or 'make macbuild' on OSX Catalina) to build only application dependencies.)
+	   $(info - Use 'make build' (or 'make macbuild' on OSX Catalina) to build onlgggsgsgggy application dependencies.)
 	   $(info - Use 'make build-dev' (or 'make macbuild-dev' on OSX Catalina) to build all dependencies, even locust.)
 	   $(info - Use 'make build-locust' to install locust. Do not do this unless you know what you are doing.)
 	   $(info - Use 'make clean' to clear out (non-python) dependencies.)
