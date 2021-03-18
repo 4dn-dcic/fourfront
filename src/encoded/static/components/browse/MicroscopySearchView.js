@@ -6,6 +6,7 @@ import _ from 'underscore';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import Modal from 'react-bootstrap/esm/Modal';
+import { v4 as uuidv4 } from 'uuid';
 
 import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/SearchView';
 import { AboveSearchViewTableControls } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/above-table-controls/AboveSearchViewTableControls';
@@ -122,7 +123,25 @@ export default class MicroscopySearchView extends React.PureComponent {
             this.setState({ 'confirmLoading': false });
         };
 
-        const microscope = { 'Name': microscopeName, 'Tier': tier, 'ValidationTier': tier/*validationTier*/ };
+        // const microscope = { 'Name': microscopeName, 'Tier': tier, 'ValidationTier': tier/*validationTier*/ };
+        const microscope = {
+            "Name": microscopeName,
+            "Schema_ID": "Instrument.json",
+            "ID": uuidv4(),
+            "Tier": tier,
+            "ValidationTier": tier,
+            "Version": "2.00.0",
+            "MicroscopeStand": {
+                "Name": microscopeName,
+                "Schema_ID": "InvertedMicroscopeStand.json",
+                "ID": uuidv4(),
+                "Tier": tier,
+                "ValidationTier": tier,
+                "Version": "2.00.0"
+            },
+            "components": [],
+            "linkedFields": null
+        };
 
         const payload = {
             'title': microscopeName,
