@@ -976,9 +976,9 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
         # TODO: Re-enable below line if/when 'range' URI param queries for date & numerical fields are implemented.
         # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
-    validation_error_facets = [
-        ('validation_errors.name', {'title': 'Validation Errors', 'order': 999})
-    ]
+    # validation_error_facets = [
+    #     ('validation_errors.name', {'title': 'Validation Errors', 'order': 999})
+    # ]
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
 
@@ -1069,7 +1069,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
     # Append additional facets (status, validation_errors, ...) at the end of
     # list unless were already added via schemas, etc.
     used_facets = [ facet[0] for facet in facets ] # Reset this var
-    for ap_facet in append_facets + validation_error_facets:
+    for ap_facet in append_facets: # + validation_error_facets:
         if ap_facet[0] not in used_facets:
             facets.append(ap_facet)
         else: # Update with better title if not already defined from e.g. requested filters.

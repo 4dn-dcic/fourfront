@@ -1,7 +1,7 @@
 import datetime
 import pytest
 
-from ..utils import utc_today_str
+from ..util import utc_today_str
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 

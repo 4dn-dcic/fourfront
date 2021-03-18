@@ -1,7 +1,7 @@
 import pytest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
-from ..utils import delay_rerun
+from ..util import delay_rerun
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
 
@@ -10,7 +10,9 @@ from .workbook_fixtures import app_settings, app, workbook
 #   See longer explanation at top of test_aggregation.py -kmp 28-Jun-2020
 notice_pytest_fixtures(app_settings, app, workbook)
 
-pytestmark = [pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun)]
+pytestmark = [# pytest.mark.indexing,
+              pytest.mark.workbook,
+              pytest.mark.flaky(rerun_filter=delay_rerun)]
 
 
 @pytest.mark.skip(reason="update data when we have a working experiment")
