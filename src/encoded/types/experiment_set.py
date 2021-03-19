@@ -321,7 +321,10 @@ class ExperimentSet(Item):
         'sample_image.attachment.md5sum',
         'sample_image.attachment.download',
         'sample_image.attachment.width',
-        'sample_image.attachment.height'
+        'sample_image.attachment.height',
+
+        'imaging_paths.path.imaging_rounds',
+        'imaging_paths.path.experiment_type'
     ]
 
     @calculated_property(schema={
