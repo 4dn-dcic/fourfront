@@ -647,6 +647,18 @@ def file_fastq(testapp, lab, award, file_formats):
     return testapp.post_json('/file_fastq', item).json['@graph'][0]
 
 
+@pytest.fixture
+def file_fastq_released(testapp, lab, award, file_formats):
+    item = {
+        'file_format': file_formats.get('fastq').get('@id'),
+        'md5sum': 'd41d8cd9f00b204e9800998ecf8427e',
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'status': 'released',  # avoid s3 upload codepath
+    }
+    return testapp.post_json('/file_fastq', item).json['@graph'][0]
+
+
 RED_DOT = """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA
 AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 9TXL0Y4OHwAAAABJRU5ErkJggg=="""

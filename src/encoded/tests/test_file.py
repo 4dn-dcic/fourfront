@@ -260,6 +260,21 @@ def test_s3_filename_validation(testapp, fastq_uploading, file_formats):
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
 
 
+def test_files_open_data_url_not_released(testapp, file_fastq):
+    """ Test S3 Open Data URL when a file has not been flagged as released """
+    pass   # TODO
+
+
+def test_files_open_data_url_released_not_transferred(testapp, file_fastq_released):
+    """ Test S3 Open Data URL when a file has been released but not transferred to Open Data """
+    pass   # TODO
+
+
+def test_files_open_data_url_released_and_transferred(testapp, file_fastq_released):
+    """ Test S3 Open Data URL when a file has been released and has been transferred to Open Data"""
+    pass   # TODO
+
+
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
     fastq_uploading.pop('filename')
     res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
