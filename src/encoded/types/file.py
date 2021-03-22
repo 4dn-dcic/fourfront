@@ -333,8 +333,11 @@ class File(Item):
                 return obucket.get('title')
         return None
 
-    def _get_ds_cond_lab_from_repset(self, repset):
-        return (repset.get('dataset_label', None), repset.get('condition', None), repset.get('lab', None))
+    def _get_ds_cond_lab_from_repset(self, request, repset):
+        elab = get_item_or_none(request, repset.get('lab'))
+        if elab:
+            elab = elab.get('display_title')
+        return (repset.get('dataset_label', None), repset.get('condition', None), elab)
 
     def _get_file_experiment_info(self, request, currinfo):
         """
@@ -371,7 +374,7 @@ class File(Item):
             if not rep_set_info:
                 return info
             # pieces of info to get from the repset if there is one
-            ds, c, el = self._get_ds_cond_lab_from_repset(rep_set_info)
+            ds, c, el = self._get_ds_cond_lab_from_repset(request, rep_set_info)
             info['dataset'] = ds
             info['condition'] = c
             info['experimental_lab'] = el
@@ -393,7 +396,9 @@ class File(Item):
                 return info
             # check to see if we have experimental lab
             if 'experimental_lab' not in info or info.get('experimental_lab') is None:
-                info['experimental_lab'] = exp_info.get('lab')
+                elab = get_item_or_none(request, exp_info.get('lab'))
+                if elab:
+                    info['experimental_lab'] = elab.get('display_title')
             exp_type = get_item_or_none(request, exp_info.get('experiment_type'))
             if exp_type is not None:
                 info['experiment_type'] = exp_type.get('title')
@@ -411,9 +416,11 @@ class File(Item):
                     repset = repset[0]
                     rep_set_info = get_item_or_none(request, repset)
                     if rep_set_info is not None:
-                        ds, c, el = self._get_ds_cond_lab_from_repset(rep_set_info)
+                        ds, c, el = self._get_ds_cond_lab_from_repset(request, rep_set_info)
                         info['dataset'] = ds
                         info['condition'] = c
+                        if info.get('experimental_lab') is None:
+                            info['experimental_lab'] = el
                         rep_exps = rep_set_info.get('replicate_exps', [])
                         for rep in rep_exps:
                             if rep.get('replicate_exp') == expid:
@@ -487,16 +494,23 @@ class File(Item):
             # so dcic-lab is added as contributing as opposed to user supplied files that may or may not be
             # from the same lab
             if 'lab_name' not in track_info:
+                labname = None
                 labid = props.get('lab')
                 lab = get_item_or_none(request, labid)
                 cont_labs = props.get('contributing_labs', None)
-                if cont_labs and 'dcic_uuid' in cont_labs:
-                    # this means the file is produced by a standard processing pipeline here
-                    track_info['lab_name'] = '4DN-DCIC Lab, HMS'
-                labid = props.get('lab')
-                lab = get_item_or_none(request, labid)
-                if lab is not None:
-                    track_info['lab_name'] = lab.get('display_title')
+                if cont_labs:
+                    dciclab_atid = '/labs/4dn-dcic-lab/'
+                    dciclab = get_item_or_none(request, dciclab_atid)
+                    if dciclab and dciclab.get('uuid') in cont_labs:
+                        # this means the file is produced by a standard processing pipeline
+                        # so set dcic as labname
+                        labname = dciclab.get('display_title')
+                    elif lab:
+                        labname = lab.get('display_title')
+                elif lab:
+                    labname = lab.get('display_title')
+
+                track_info['lab_name'] = labname
 
         track_title = self.generate_track_title(track_info, props)
         if track_title is not None:
