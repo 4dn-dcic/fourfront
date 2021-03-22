@@ -726,8 +726,9 @@ class File(Item):
     def get_open_data_url_or_presigned_url_location(self, external, request, filename) -> str:
         """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
             a presigned S3 URL to a 4DN bucket. """
-        if self.open_data_url:  #
-            return self.open_data_url
+        open_data_url = self.properties['open_data_url']
+        if open_data_url:
+            return open_data_url
         else:
             location = self.get_presigned_url_location(external, request, filename)
             return location
