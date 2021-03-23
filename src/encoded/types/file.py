@@ -733,11 +733,6 @@ class File(Item):
             location = self.get_presigned_url_location(external, request, filename)
             return location
 
-    @calculated_property(schema={
-        "title": "Open Data URL",
-        "description": "Location of file on Open Data Bucket, if it exists",
-        "type": "string"
-    })
     def open_data_url(self, status, filename=None):
         """ Computes the open data URL and checks if it exists. """
         if not filename:
