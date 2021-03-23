@@ -1153,6 +1153,7 @@ def test_permissions_validate_false(award, lab, file_formats, submitter_testapp,
     Only admin can use validate=false with POST/PUT/PATCH
     """
     file_item_body = {
+        'status': 'released',  # XXX: not added automatically?
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': file_formats.get('fastq').get('uuid'),

@@ -277,58 +277,39 @@ def test_s3_filename_validation(testapp, fastq_uploading, file_formats):
 
 def test_files_open_data_url_not_released(testapp, fastq_json):
     """ Test S3 Open Data URL when a file has not been flagged as released """
-    mock_boto3 = MockBoto3()
-    with mock.patch.object(boto3, 'client', mock_boto3.client):
-        s3 = boto3.client('s3')
-        assert isinstance(s3, MockBotoS3Client)
-        res = testapp.post_json('/file_fastq', fastq_json, status=201)
-        resobj = res.json['@graph'][0]
-        s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
-        # 1. check that initial download works
-        download_link = resobj['href']
-        direct_res = testapp.get(download_link, status=307)
-        # 2. check that the bucket in the redirect is the 4DN test bucket, not open data
-        non_open_data_bucket = 'test-wfout-bucket.s3.amazonaws.com'
-        assert non_open_data_bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
-        pass
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    resobj = res.json['@graph'][0]
+    # 1. check that initial download works
+    download_link = resobj['href']
+    direct_res = testapp.get(download_link, status=307)
+    # 2. check that the bucket in the redirect is the 4DN test bucket, not open data
+    non_open_data_bucket = 'test-wfout-bucket.s3.amazonaws.com'
+    assert non_open_data_bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
 
 
 def test_files_open_data_url_released_not_transferred(testapp, fastq_json_released):
     """ Test S3 Open Data URL when a file has been released but not transferred to Open Data """
-
-    mock_boto3 = MockBoto3()
-    with mock.patch.object(boto3, 'client', mock_boto3.client):
-        s3 = boto3.client('s3')
-        assert isinstance(s3, MockBotoS3Client)
-        res = testapp.post_json('/file_fastq', fastq_json, status=201)
-        resobj = res.json['@graph'][0]
-        s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
-        # 1. check that initial download works
-        download_link = resobj['href']
-        direct_res = testapp.get(download_link, status=307)
-        # 2. check that the bucket in the redirect is the 4DN test bucket, not open data
-        non_open_data_bucket = 'test-wfout-bucket.s3.amazonaws.com'
-        assert non_open_data_bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
-        pass
+    res = testapp.post_json('/file_fastq', fastq_json_released, status=201)
+    resobj = res.json['@graph'][0]
+    # 1. check that initial download works
+    download_link = resobj['href']
+    direct_res = testapp.get(download_link, status=307)
+    # 2. check that the bucket in the redirect is the 4DN test bucket, not open data
+    non_open_data_bucket = 'test-wfout-bucket.s3.amazonaws.com'
+    assert non_open_data_bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
 
 
-
-def test_files_open_data_url_released_and_transferred(testapp, file_fastq_released):
+def test_files_open_data_url_released_and_transferred(testapp, fastq_json_released):
     """ Test S3 Open Data URL when a file has been released and has been transferred to Open Data"""
-    bucket = '4dn-open-data-public' # the Open Data bucket, not the 4DN test bucket
-    mock_boto3 = MockBoto3()
-    with mock.patch.object(boto3, 'client', mock_boto3.client):
-        s3 = boto3.client('s3')
-        assert isinstance(s3, MockBotoS3Client)
-        res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    with mock.patch('encoded.types.file.File._head_s3', return_value=None):
+        res = testapp.post_json('/file_fastq', fastq_json_released, status=201)
+        bucket = '4dn-open-data-public' # the Open Data bucket, not the 4DN test bucket
         resobj = res.json['@graph'][0]
-        s3.put_object(Bucket=bucket, Key=resobj['upload_key'], Body=str.encode(''))
         # 1. check that initial download works
         download_link = resobj['href']
         direct_res = testapp.get(download_link, status=307)
         # 2. check that the bucket in the redirect is the open data bucket, not 4DN test
         assert bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
-        pass
 
 
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):

@@ -723,21 +723,30 @@ class File(Item):
         )
         return location
 
-    def get_open_data_url_or_presigned_url_location(self, external, request, filename) -> str:
+    def get_open_data_url_or_presigned_url_location(self, external, request, filename, datastore_is_database) -> str:
         """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
             a presigned S3 URL to a 4DN bucket. """
-        open_data_url = self.open_data_url(self.properties['status'], filename=filename)
+        if datastore_is_database:  # view model came from DB - must compute calc prop
+            open_data_url = self._open_data_url(self.properties['status'], filename=filename)
+        else:  # view model came from elasticsearch - calc props should be here
+            es_model_props = self.model.source['embedded']
+            open_data_url = es_model_props.get('open_data_url', None)
         if open_data_url:
             return open_data_url
         else:
             location = self.get_presigned_url_location(external, request, filename)
             return location
 
-    def open_data_url(self, status, filename=None):
-        """ Computes the open data URL and checks if it exists. """
+    @staticmethod
+    def _head_s3(client, bucket, key):
+        """ Helper for below method for mocking purposes. """
+        return client.head_object(Bucket=bucket, Key=key)
+
+    def _open_data_url(self, status, filename=None):
+        """ Helper for below method containing core functionality. """
         if not filename:
             return None
-        if status == 'released':
+        if status == 'released':  # TODO handle archived
             open_data_bucket = '4dn-open-data-public'
             if 'wfoutput' in self.get_bucket(self.registry):
                 bucket_type = 'wfoutput'
@@ -751,7 +760,7 @@ class File(Item):
             try:
                 # If the file exists in the Open Data S3 bucket, client.head_object will succeed
                 # Returning a valid S3 URL to the public url of the file
-                res = client.head_object(Bucket=open_data_bucket, Key=open_data_key)
+                res = self._head_s3(client, open_data_bucket, open_data_key)
                 location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
                     open_data_bucket=open_data_bucket, open_data_key=open_data_key,
                 )
@@ -760,6 +769,15 @@ class File(Item):
                 return None
         else:
             return None
+
+    @calculated_property(schema={
+        "title": "Open Data URL",
+        "description": "Location of file on Open Data Bucket, if it exists",
+        "type": "string"
+    })
+    def open_data_url(self, status, filename=None):
+        """ Computes the open data URL and checks if it exists. """
+        return self._open_data_url(status, filename)
 
     @classmethod
     def get_bucket(cls, registry):
@@ -1319,11 +1337,12 @@ def download(context, request):
                 (request.range.end or properties.get('file_size', 0)) -
                 (request.range.start or 0)
             )
-
+    request_datastore_is_database = (request.datastore == 'database')
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        location = context.get_open_data_url_or_presigned_url_location(external, request, filename)
+        location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
+                                                                       request_datastore_is_database)
     else:
         raise ValueError(external.get('service'))
 
