@@ -1,146 +1,117 @@
 import pytest
-import webtest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
-from .workbook_fixtures import app_settings, app  # are these needed? -kmp 12-Mar-2021
+from ..util import workbook_lookup
 
 
-notice_pytest_fixtures(app_settings, app)
-
-pytestmark = [pytest.mark.indexing, pytest.mark.working]
+pytestmark = [pytest.mark.working, pytest.mark.workbook]
 
 
-@pytest.fixture(scope='module')
-def help_page_section_json():
-    return {
-        "title": "",
-        "name" : "help.user-guide.rest-api.rest_api_submission",
-        "file": "/docs/source/rest_api_submission.rst",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020"
-    }
-
-@pytest.fixture(scope='module')
-def help_page_json():
-    return {
-        "name": "help/user-guide/rest-api",
-        "title": "The REST-API",
-        "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
-        "uuid": "a2aa8bb9-9dd9-4c80-bdb6-2349b7a3540d",
-        "table-of-contents": {
-            "enabled": True,
-            "header-depth": 4,
-            "list-styles": ["decimal", "lower-alpha", "lower-roman"]
-        }
-    }
-
-@pytest.fixture(scope='module')
-def help_page_json_draft():
-    return {
-        "name": "help/user-guide/rest-api-draft",
-        "title": "The REST-API",
-        "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
-        "uuid": "a2aa8bb9-9dd9-4c80-bdb6-2349b7a3540c",
-        "table-of-contents": {
-            "enabled": True,
-            "header-depth": 4,
-            "list-styles": ["decimal", "lower-alpha", "lower-roman"]
-        },
-        "status" : "draft"
-    }
-
-@pytest.fixture(scope='module')
-def help_page_json_deleted():
-    return {
-        "name": "help/user-guide/rest-api-deleted",
-        "title": "The REST-API",
-        "content": ["442c8aa0-dc6c-43d7-814a-854af460b020"],
-        "uuid": "a2aa8bb9-9dd9-4c80-bdb6-2349b7a3540a",
-        "table-of-contents": {
-            "enabled": True,
-            "header-depth": 4,
-            "list-styles": ["decimal", "lower-alpha", "lower-roman"]
-        },
-        "status" : "deleted"
-    }
+def wait_for_index(testapp):
+    testapp.post_json("/index", {"record": False})
 
 
-@pytest.fixture(scope='module')
-def posted_help_page_section(testapp, help_page_section_json):
-    try:
-        res = testapp.post_json('/static-sections/', help_page_section_json, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = testapp.get('/' + help_page_section_json['uuid'], status=301).follow()
-        val = res.json
-    return val
+@pytest.fixture
+def static_help_page_default():
+    return workbook_lookup(item_type='Page', name='help/user-guide/rest-api')
 
 
-@pytest.fixture(scope='module')
-def help_page(testapp, posted_help_page_section, help_page_json):
-    try:
-        res = testapp.post_json('/pages/', help_page_json, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = testapp.get('/' + help_page_json['uuid'], status=301).follow()
-        val = res.json
-    return val
+def test_static_help_page_default(static_help_page_default):
+    assert static_help_page_default['name'] == 'help/user-guide/rest-api'
 
 
-@pytest.fixture(scope='module')
-def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
-    try:
-        res = testapp.post_json('/pages/', help_page_json_draft, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = testapp.get('/' + help_page_json_draft['uuid'], status=301).follow()
-        val = res.json
-    return val
+@pytest.fixture
+def static_help_page_draft():
+    return workbook_lookup(item_type='Page', name='help/user-guide/rest-api-draft')
 
 
-@pytest.fixture(scope='module')
-def help_page_restricted(testapp, posted_help_page_section, help_page_json_deleted):
-    try:
-        res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
-        val = res.json['@graph'][0]
-    except webtest.AppError:
-        res = testapp.get('/' + help_page_json_deleted['uuid'], status=301).follow()
-        val = res.json
-    return val
+@pytest.fixture
+def static_help_page_deleted():
+    return workbook_lookup(item_type='Page', name='help/user-guide/rest-api-deleted')
 
 
-def test_get_help_page(testapp, help_page):
-    help_page_url = "/" + help_page['name']
-    res = testapp.get(help_page_url, status=200)
+def test_get_help_page(workbook, es_testapp, static_help_page_default):
+    wait_for_index(es_testapp)
+    help_page_url = "/" + static_help_page_default['name']
+    res = es_testapp.get(help_page_url, status=200)
     assert res.json['@id'] == help_page_url
     assert res.json['@context'] == help_page_url
     assert 'HelpPage' in res.json['@type']
     assert 'StaticPage' in res.json['@type']
-    #assert res.json['content'] == help_page['content'] # No longer works latter is set to an @id of static_section
-    assert 'Accession and uuid are automatically assigned during initial posting' in res.json['content'][0]['content'] # Instead lets check what we have embedded on GET request is inside our doc file (rest_api_submission.md).
-    assert res.json['toc'] == help_page['table-of-contents']
+    # assert res.json['content'] == help_page['content'] # No longer works latter is set to an @id of static_section
+    # Instead lets check what we have embedded on GET request is inside our doc file (rest_api_submission.md).
+    assert 'Accession and uuid are automatically assigned during initial posting' in res.json['content'][0]['content']
+    assert res.json['toc'] == static_help_page_default['table-of-contents']
 
 
-def test_get_help_page_deleted(anonhtmltestapp, help_page_deleted):
-    help_page_url = "/" + help_page_deleted['name']
-    anonhtmltestapp.get(help_page_url, status=403)
+def test_get_help_page_draft(workbook, anon_html_es_testapp, html_es_testapp, static_help_page_draft):
+    wait_for_index(html_es_testapp)
+    help_page_url = "/" + static_help_page_draft['name']
+    anon_html_es_testapp.get(help_page_url, status=403)
+    html_es_testapp.get(help_page_url, status=200)
 
 
-def test_get_help_page_no_access(anonhtmltestapp, testapp, help_page_restricted):
-    help_page_url = "/" + help_page_restricted['name']
-    anonhtmltestapp.get(help_page_url, status=403)
-    testapp.get(help_page_url, status=200)
+def test_get_help_page_deleted(workbook, anon_html_es_testapp, html_es_testapp, static_help_page_deleted):
+    wait_for_index(html_es_testapp)
+    help_page_url = "/" + static_help_page_deleted['name']
+    anon_html_es_testapp.get(help_page_url, status=403)
+    html_es_testapp.get(help_page_url, status=200)  # Why 200 and not 404? -kmp 23-Feb-2021
 
 
-def test_page_unique_name(testapp, help_page, help_page_deleted):
+def test_get_help_page_no_access(workbook, anon_es_testapp, es_testapp, anon_html_es_testapp, html_es_testapp,
+                                 static_help_page_default, static_help_page_draft, static_help_page_deleted):
+    notice_pytest_fixtures(workbook)
+    wait_for_index(es_testapp)
+    success = True
+    for app_name, testapp, role in [("anon_es", anon_es_testapp, 'anon'),
+                                    ("es", es_testapp, 'system'),
+                                    ("anon_html_es", anon_html_es_testapp, 'anon'),
+                                    ("html_es", html_es_testapp, 'system')]:
+        for help_page, is_public in [(static_help_page_default, True),
+                                     (static_help_page_draft, False),
+                                     (static_help_page_deleted, False)]:
+            expected_code = 200 if is_public else (403 if role == 'anon' else 200)
+            page_name = help_page['name']
+            help_page_url = "/" + page_name
+            res = testapp.get(help_page_url, status=(200, 301, 403, 404)).maybe_follow()
+            actual_code = res.status_code
+            if actual_code == expected_code:
+                print("%s => %s: SUCCESS (%s)" % (app_name, page_name, actual_code))
+            else:
+                print("%s => %s: FAILED (%s, not %s): %s..."
+                      % (app_name, page_name, actual_code, expected_code, res.body[:20]))
+                success = False
+    assert success, "Test failed."
+
+
+def check_page_unique_name(testapp, conflicting_page, page_to_patch):
+    wait_for_index(testapp)
     # POST again with same name and expect validation error
-    new_page = {'name': help_page['name']}
-    res = testapp.post_json('/page', new_page, status=422)
-    expected_val_err = "%s already exists with name '%s'" % (help_page['uuid'], new_page['name'])
-    actual_error_description = res.json['errors'][0]['description']
-    print("expected:", expected_val_err)
-    print("actual:", actual_error_description)
-    assert expected_val_err in actual_error_description
+    conflicting_document = {'name': conflicting_page['name']}
+    conflict_message = "%s already exists with name '%s'" % (conflicting_page['uuid'], conflicting_page['name'])
 
-    # also test PATCH of an existing page with another name
-    res = testapp.patch_json(help_page_deleted['@id'], {'name': new_page['name']}, status=422)
-    assert expected_val_err in res.json['errors'][0]['description']
+    def check_conflict(res):
+        actual_error_description = res.json['errors'][0]['description']
+        print("expected:", conflict_message)
+        print("actual:", actual_error_description)
+        assert conflict_message in actual_error_description
+
+    # Test that POST of a new page with the same name as an existing page is not allowed.
+    check_conflict(testapp.post_json('/page', conflicting_document, status=422))
+    # Also test PATCH of an existing page with the same name as another existing page is not allowed.
+    page_to_patch_uuid_url = '/' + page_to_patch['uuid']
+    check_conflict(testapp.patch_json(page_to_patch_uuid_url, conflicting_document, status=422))
+    actual_page_to_patch = testapp.get(page_to_patch_uuid_url).maybe_follow().json
+    check_conflict(testapp.patch_json(actual_page_to_patch['@id'], conflicting_document, status=422))
+
+
+def test_page_unique_name(workbook, es_testapp, static_help_page_draft, static_help_page_default):
+    check_page_unique_name(testapp=es_testapp,
+                           conflicting_page=static_help_page_default,
+                           page_to_patch=static_help_page_draft)
+
+
+def test_page_unique_name_deleted(workbook, es_testapp, static_help_page_draft, static_help_page_deleted):
+    check_page_unique_name(testapp=es_testapp,
+                           conflicting_page=static_help_page_deleted,
+                           page_to_patch=static_help_page_draft)

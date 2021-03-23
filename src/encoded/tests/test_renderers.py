@@ -5,7 +5,12 @@ from dcicutils.lang_utils import n_of
 from dcicutils.misc_utils import filtered_warnings
 from dcicutils.qa_utils import MockResponse
 from pyramid.testing import DummyRequest
-from ..renderers import should_transform
+from unittest import mock
+from .. import renderers
+from ..renderers import (
+    best_mime_type, should_transform, MIME_TYPES_SUPPORTED, MIME_TYPE_DEFAULT,
+    MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON, MIME_TYPE_TRIAGE_MODE,
+)
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
@@ -20,7 +25,53 @@ class DummyResponse(MockResponse):
         super().__init__(status_code=status_code, json=json, content=content, url=url)
 
 
+def test_mime_variables():
+
+    # Really these don't need testing but it's useful visually to remind us of their values here.
+    assert MIME_TYPE_HTML == 'text/html'
+    assert MIME_TYPE_JSON == 'application/json'
+    assert MIME_TYPE_LD_JSON == 'application/ld+json'
+
+    # The MIME_TYPES_SUPPORTED is a list whose first element has elevated importance as we've structured things.
+    # First check that it is a list, and that its contents contain the things we support. That isn't controversial.
+    assert isinstance(MIME_TYPES_SUPPORTED, list)
+    assert set(MIME_TYPES_SUPPORTED) == {MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON}
+    # Check that the first element is consistent with the MIME_TYPE_DEFAULT.
+    # It's an accident of history that this next relationship matters, but at this point check for consistency.
+    assert MIME_TYPE_DEFAULT == MIME_TYPES_SUPPORTED[0]
+    # Now we concern ourselves with the actual values...
+    assert MIME_TYPES_SUPPORTED == [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
+    assert MIME_TYPE_DEFAULT == MIME_TYPE_HTML
+
+    # Regardless of whether we're using legacy mode or modern mode, we should get the same result.
+    assert MIME_TYPE_TRIAGE_MODE in ['legacy', 'modern']
+
+
 VARIOUS_MIME_TYPES_TO_TEST = ['*/*', 'text/html', 'application/json', 'application/ld+json', 'text/xml', 'who/cares']
+
+
+def test_best_mime_type():
+
+    # TODO: I think best_mime_type is not doing the right thing. It SHOULD be looking at the Accept header
+    #       not at a constant list. For now a test of legacy behavior to keep it stable, but at some point
+    #       we should experiment with making it responsive to bids in the Accept field.
+    #       -kmp 18-Mar-2021
+
+    the_constant_answer=MIME_TYPE_DEFAULT
+
+    with filtered_warnings("ignore", category=DeprecationWarning):
+        # Suppresses this warning:
+        #     DeprecationWarning: The behavior of .best_match for the Accept classes is currently being maintained
+        #       for backward compatibility, but the method will be deprecated in the future, as its behavior is not
+        #       specified in (and currently does not conform to) RFC 7231.
+        for requested_mime_type in VARIOUS_MIME_TYPES_TO_TEST:
+            req = DummyRequest(headers={'Accept': requested_mime_type})
+            assert best_mime_type(req, 'legacy') == the_constant_answer
+            assert best_mime_type(req, 'modern') == the_constant_answer
+            req = DummyRequest(headers={})  # The Accept header in the request just isn't being consulted
+            assert best_mime_type(req, 'modern') == the_constant_answer
+            assert best_mime_type(req, 'modern') == the_constant_answer
+
 
 TYPICAL_URLS = [
     'http://whatever/foo',
@@ -88,7 +139,7 @@ def test_should_transform():
                                     # it just can't be transformed at all.
                                     rule_applied = "content_type is not application/json"
                                     correct = not _should_transform
-                                # Lack of support for this case is a bug we should fix. -kmp 17-Mar-2021
+                                # TODO: Lack of support for this case is a bug we should fix. -kmp 17-Mar-2021
                                 # elif params.get("frame", "page") != 'page':
                                 #     rule_applied = "?frame=xxx is not page"
                                 #     correct = not _should_transform
@@ -130,3 +181,18 @@ def test_should_transform():
             % (n_passed, n_failed, n_of(problem_area, "problem area"), ", ".join(problem_area))
     )
     print("\n", n_passed, "combinations tried. ALL PASSED")
+
+
+def test_should_transform_without_best_mime_type():
+
+    # As we call things now, we really don't need the best_mime_type function because it just returns the
+    # first element of its first argument. That probably should change. Because it should be a function
+    # of the request and its Accept offerings. Even so, we test for this now not because this makes programs
+    # right, but so we notice if/when this truth changes. -kmp 23-Mar-2021
+
+    with mock.patch.object(renderers, "best_mime_type") as mock_best_mime_type:
+
+        # Demonstrate that best_mime_type(...) could be replaced by MIME_TYPES_SUPPORTED[0]
+        mock_best_mime_type.return_value = MIME_TYPES_SUPPORTED[0]
+
+        test_should_transform()

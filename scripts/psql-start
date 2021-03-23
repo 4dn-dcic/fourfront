@@ -1,0 +1,70 @@
+#!/bin/bash
+
+port=$1
+
+dev_url_line=`grep 'sqlalchemy[.]url =' development.ini`
+
+dev_url=`echo "${dev_url_line}" | sed -E 's/^.* = (.*)$/\1/'`
+dev_port=`echo "${dev_url_line}" | sed -E 's|^.* = .*:([0-9]+)/postgres[?].*$|\1|'`
+
+
+# echo "dev_url=${dev_url}"
+# echo "dev_port=${dev_port}"
+
+
+# There seem be two processes, one for postgres and one for postgres-engine.
+# The relevant data can be obtained from either, but matching both 
+# the match for postgres[^-] excludes the matches on postgres-engine so we
+# can assume the match is unique.
+
+if [ "$port" = 'test' ]; then
+
+    test_process=`ps aux | grep '.*[p]ostgres -D.*/private[a-zA-Z0-9_/-]*/postgresql[^-]'`
+
+    if [ -z "${test_process}" ]; then
+
+        echo "No test process found."
+	exit 1
+
+    else
+
+        test_url=`echo "$test_process" | sed -E 's|^.*postgres[ ]+-D[ ]+([/a-zA-Z0-9_-]+)[ ]+.*-p[ ]+([0-9]+)([^0-9].*)?$|postgresql://postgres@localhost:\2/postgres?host=\1|'`
+        psql "${test_url}"
+
+        # psql `ps aux | grep '.*[p]ostgres -D.*/private[a-zA-Z0-9_/-]*/postgresql[^-]' | sed -E 's|^.*postgres[ ]+-D[ ]+([/a-zA-Z0-9_-]+)[ ]+.*-p[ ]+([0-9]+)([^0-9].*)?$|postgresql://postgres@localhost:\2/postgres?host=\1|'`
+
+    fi
+
+elif [ "$port" = 'dev' -o "$port" = "$dev_port" ]; then
+
+    dev_url=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's/^.* = (.*)/\1/'`
+    psql "${dev_url}"
+
+elif [[ "${port}" =~ ^[0-9]+$ ]]; then
+
+    port_process=`ps aux | grep ".*[p]ostgres -D.*/private[a-zA-Z0-9_/-]*/postgresql[^-].*-p[ ]+${port}.*"`
+
+    if [ -z "${port_process}" ]; then
+
+        echo "No postgres process found on port ${port}."
+	exit 1
+
+    else
+
+        port_url=`echo "$test_process" | sed -E 's|^.*postgres[ ]+-D[ ]+([/a-zA-Z0-9_-]+)[ ]+.*-p[ ]+([0-9]+)([^0-9].*)?$|postgresql://postgres@localhost:\2/postgres?host=\1|'`
+        psql "${port_url}"
+
+        # psql `ps aux | grep '.*[p]ostgres -D.*/private[a-zA-Z0-9_/-]*/postgresql[^-]' | sed -E 's|^.*postgres[ ]+-D[ ]+([/a-zA-Z0-9_-]+)[ ]+.*-p[ ]+([0-9]+)([^0-9].*)?$|postgresql://postgres@localhost:\2/postgres?host=\1|'`
+
+    fi
+
+else
+
+    echo "Syntax: $0 [ <port> | test | dev ]"
+    echo ""
+    echo "Starts psql for debugging in a way that corresponds to the given port."
+    echo "The port can be an integer or one of the special tokens 'dev' or 'test'."
+    echo "If 'dev' is given, the port from development.ini (currently '${dev_port}') is used."
+    echo "If 'test' is given, the port will be found from data in 'ps aux'."
+
+fi
