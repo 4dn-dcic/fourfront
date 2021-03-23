@@ -1,5 +1,9 @@
 import pkg_resources
 
+from snovault.util import generate_indexer_namespace_for_testing
+
+
+INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('ff')
 
 _app_settings = {
     'collection_datastore': 'database',
