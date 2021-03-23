@@ -435,15 +435,14 @@ def should_transform(request, response):
     # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
     # which should contain 'text/html'
     # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
-    mime_type = best_mime_type(request)
-    mime_type_format = mime_type.split('/', 1)[1]  # Will be 1 of 'html', 'json', 'json-ld'
+    mime_type = best_mime_type(request)  # Result will be one of MIME_TYPES_SUPPORTED
 
     # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?)
     # which can parse JSON-LDs. At some point we could maybe have it to be same as
     # making an `@@object` or `?frame=object` request (?) esp if fill
     # out @context response w/ schema(s) (or link to schema)
 
-    return mime_type_format == 'html'
+    return mime_type == MIME_TYPE_HTML
 
 
 def render_page_html_tween_factory(handler, registry):

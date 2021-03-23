@@ -8,29 +8,57 @@ from pyramid.testing import DummyRequest
 from unittest import mock
 from .. import renderers
 from ..renderers import (
-    should_transform, best_mime_type, MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON,
-    MIME_TYPES_SUPPORTED, MIME_TYPE_DEFAULT, MIME_TYPE_TRIAGE_MODE,
+    best_mime_type, should_transform, MIME_TYPES_SUPPORTED, MIME_TYPE_DEFAULT,
+    MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON, MIME_TYPE_TRIAGE_MODE,
 )
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working]
 
 
+class DummyResponse(MockResponse):
+
+    def __init__(self, content_type=None, status_code: int = 200, json=None, content=None, url=None,
+                 params=None):
+        self.params = {} if params is None else params
+        self.content_type = content_type
+        super().__init__(status_code=status_code, json=json, content=content, url=url)
+
+
 def test_mime_variables():
+
     # Really these don't need testing but it's useful visually to remind us of their values here.
     assert MIME_TYPE_HTML == 'text/html'
     assert MIME_TYPE_JSON == 'application/json'
     assert MIME_TYPE_LD_JSON == 'application/ld+json'
-    assert set(MIME_TYPES_SUPPORTED) == {MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON}
+
+    # The MIME_TYPES_SUPPORTED is a list whose first element has elevated importance as we've structured things.
+    # First check that it is a list, and that its contents contain the things we support. That isn't controversial.
+    assert isinstance(MIME_TYPES_SUPPORTED, list)
+    assert set(MIME_TYPES_SUPPORTED) == {MIME_TYPE_JSON, MIME_TYPE_HTML, MIME_TYPE_LD_JSON}
+    # Check that the first element is consistent with the MIME_TYPE_DEFAULT.
+    # It's an accident of history that this next relationship matters, but at this point check for consistency.
+    assert MIME_TYPE_DEFAULT == MIME_TYPES_SUPPORTED[0]
+    # Now we concern ourselves with the actual values...
+    assert MIME_TYPES_SUPPORTED == [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
     assert MIME_TYPE_DEFAULT == MIME_TYPE_HTML
+
+    # Regardless of whether we're using legacy mode or modern mode, we should get the same result.
     assert MIME_TYPE_TRIAGE_MODE in ['legacy', 'modern']
 
 
-def test_best_mime_type(the_constant_answer=MIME_TYPE_DEFAULT):
-    # TODO: I think this function is not doing the right thing. It SHOULD be looking at the Accept header
+VARIOUS_MIME_TYPES_TO_TEST = ['*/*', 'text/html', 'application/json', 'application/ld+json', 'text/xml', 'who/cares']
+
+
+def test_best_mime_type():
+
+    # TODO: I think best_mime_type is not doing the right thing. It SHOULD be looking at the Accept header
     #       not at a constant list. For now a test of legacy behavior to keep it stable, but at some point
     #       we should experiment with making it responsive to bids in the Accept field.
     #       -kmp 18-Mar-2021
+
+    the_constant_answer=MIME_TYPE_DEFAULT
+
     with filtered_warnings("ignore", category=DeprecationWarning):
         # Suppresses this warning:
         #     DeprecationWarning: The behavior of .best_match for the Accept classes is currently being maintained
@@ -44,17 +72,6 @@ def test_best_mime_type(the_constant_answer=MIME_TYPE_DEFAULT):
             assert best_mime_type(req, 'modern') == the_constant_answer
             assert best_mime_type(req, 'modern') == the_constant_answer
 
-
-class DummyResponse(MockResponse):
-
-    def __init__(self, content_type=None, status_code: int = 200, json=None, content=None, url=None,
-                 params=None):
-        self.params = {} if params is None else params
-        self.content_type = content_type
-        super().__init__(status_code=status_code, json=json, content=content, url=url)
-
-
-VARIOUS_MIME_TYPES_TO_TEST = ['*/*', 'text/html', 'application/json', 'application/ld+json', 'text/xml', 'who/cares']
 
 TYPICAL_URLS = [
     'http://whatever/foo',
@@ -167,7 +184,15 @@ def test_should_transform():
 
 
 def test_should_transform_without_best_mime_type():
+
+    # As we call things now, we really don't need the best_mime_type function because it just returns the
+    # first element of its first argument. That probably should change. Because it should be a function
+    # of the request and its Accept offerings. Even so, we test for this now not because this makes programs
+    # right, but so we notice if/when this truth changes. -kmp 23-Mar-2021
+
     with mock.patch.object(renderers, "best_mime_type") as mock_best_mime_type:
+
         # Demonstrate that best_mime_type(...) could be replaced by MIME_TYPES_SUPPORTED[0]
         mock_best_mime_type.return_value = MIME_TYPES_SUPPORTED[0]
+
         test_should_transform()

@@ -70,7 +70,7 @@ if [ -z "${existing_network}" ]; then
     docker network create localnet --driver=bridge
 else
     echo "docker localnet is already set up. From 'docker network':"
-    # echo " ${existing_network}"
+    echo " ${existing_network}"
 fi
 
 # This pattern is structured so that if we need to extract the container id (e.g., to kill it), it will be in \1.
