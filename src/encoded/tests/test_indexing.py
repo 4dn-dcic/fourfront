@@ -241,7 +241,6 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     indexer_queue = app.registry[INDEXER_QUEUE]
     es = app.registry[ELASTIC_SEARCH]
     fp_body = {
-        'status': 'released',  # XXX: not assigned automaticallly?
         'schema_version': '3',
         'uuid': str(uuid.uuid4()),
         'file_format': file_formats.get('mcool').get('uuid'),

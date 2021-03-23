@@ -84,7 +84,7 @@ def fastq_json(award, experiment, lab, file_formats):
 @pytest.fixture
 def fastq_json_released(award, experiment, lab, file_formats):
     return {
-        'accession': '4DNFIO67APU2',
+        'accession': '4DNFIO67APU3',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': file_formats.get('fastq').get('uuid'),
@@ -97,7 +97,7 @@ def fastq_json_released(award, experiment, lab, file_formats):
 @pytest.fixture
 def proc_file_json(award, experiment, lab, file_formats):
     return {
-        'accession': '4DNFIO67APU2',
+        'accession': '4DNFIO67APU4',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': file_formats.get('pairs').get('uuid'),

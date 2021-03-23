@@ -742,7 +742,7 @@ class File(Item):
         """ Helper for below method for mocking purposes. """
         return client.head_object(Bucket=bucket, Key=key)
 
-    def _open_data_url(self, status, filename=None):
+    def _open_data_url(self, status, filename):
         """ Helper for below method containing core functionality. """
         if not filename:
             return None
@@ -775,7 +775,7 @@ class File(Item):
         "description": "Location of file on Open Data Bucket, if it exists",
         "type": "string"
     })
-    def open_data_url(self, status, filename=None):
+    def open_data_url(self, status=None, filename=None):
         """ Computes the open data URL and checks if it exists. """
         return self._open_data_url(status, filename)
 
