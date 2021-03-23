@@ -108,7 +108,7 @@ jobs:
           # The need for this old environment variable name will go away soon.
           TRAVIS_JOB_ID: ff-unit-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
-          TEST_JOB_ID: f-unit-test-${{ github.run_number }}-
+          TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
           # Until the next version of snovault, the following two are prudent. We can remove them soon. -kmp 9-Mar-2021
