@@ -1159,7 +1159,8 @@ def test_permissions_validate_false(award, lab, file_formats, submitter_testapp,
         'file_format': file_formats.get('fastq').get('uuid'),
         'paired_end': '1'
     }
-    res = submitter_testapp.post_json('/file_fastq', file_item_body, status=201)
+    # does it matter that the wrangler posts this? I don't think so for this test - Will 03/23/2021
+    res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201)
 
     # no permissions
     submitter_testapp.post_json('/file_fastq/?validate=false', file_item_body, status=403)
