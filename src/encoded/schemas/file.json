@@ -313,6 +313,9 @@
         "track_and_facet_info.lab_name": {
             "title": "Generating Lab"
         },
+        "track_and_facet_info.experimental_lab": {
+            "title": "Experimental Lab"
+        },
         "file_size" : {
             "title" : "File Size",
             "description" : "Filter using range of size of the file",
@@ -372,6 +375,9 @@
         },
         "track_and_facet_info.lab_name": {
             "title": "Generating Lab"
+        },
+        "track_and_facet_info.experimental_lab": {
+            "title": "Experimental Lab"
         },
         "file_size" : {
             "title" : "File Size"
