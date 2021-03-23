@@ -33,12 +33,10 @@ from zope.sqlalchemy import mark_changed
 from .. import main, loadxl
 from ..util import delay_rerun
 from ..verifier import verify_item
-# from .workbook_fixtures import app_settings
 from .test_permissions import wrangler, wrangler_testapp
 
 
 notice_pytest_fixtures(
-    # app_settings,
     wrangler, wrangler_testapp
 )
 
