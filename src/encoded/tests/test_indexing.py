@@ -33,12 +33,12 @@ from zope.sqlalchemy import mark_changed
 from .. import main, loadxl
 from ..util import delay_rerun
 from ..verifier import verify_item
+from .workbook_fixtures import app_settings  # why does this care?? does it? -kmp 12-Mar-2021
 from .test_permissions import wrangler, wrangler_testapp
 
 
-notice_pytest_fixtures(
-    wrangler, wrangler_testapp
-)
+notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
+
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
 
@@ -59,13 +59,13 @@ TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
 @pytest.yield_fixture(scope='session', params=[False])
-def app(es_app_settings, request):
+def app(app_settings, request):
     # for now, don't run with mpindexer. Add `True` to params above to do so
     if request.param:
         # we disable the MPIndexer since the build runs on a small machine
         # snovault should be testing the mpindexer - Will 12/12/2020
-        es_app_settings['mpindexer'] = False
-    app = main({}, **es_app_settings)
+        app_settings['mpindexer'] = False
+    app = main({}, **app_settings)
 
     yield app
 
@@ -288,7 +288,6 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
     assert val_err_view['validation_errors'] == es_res['_source']['validation_errors']
 
 
-# TODO: This might need to use es_testapp now. -kmp 14-Mar-2021
 @pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
 def test_load_and_index_perf_data(testapp, indexer_testapp):
@@ -352,7 +351,7 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     # assert False
 
 
-def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anon_es_testapp,
+def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp,
                                                   indexer_testapp):
     """ Tests that anontestapp gets view denied when using datastore=database """
     file_item_body = {
@@ -366,7 +365,7 @@ def test_permissions_database_applies_permissions(award, lab, file_formats, wran
     item_id = res['@graph'][0]['@id']
     indexer_testapp.post_json('/index', {'record': True})
     time.sleep(1)  # let es catch up
-    res = anon_es_testapp.get('/' + item_id).json
+    res = anontestapp.get('/' + item_id).json
     assert res['file_format'] == {'error': 'no view permissions'}
-    res = anon_es_testapp.get('/' + item_id + '?datastore=database').json
+    res = anontestapp.get('/' + item_id + '?datastore=database').json
     assert res['file_format'] == {'error': 'no view permissions'}
