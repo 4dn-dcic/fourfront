@@ -726,11 +726,13 @@ class File(Item):
     def get_open_data_url_or_presigned_url_location(self, external, request, filename, datastore_is_database) -> str:
         """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
             a presigned S3 URL to a 4DN bucket. """
+        open_data_url = None
         if datastore_is_database:  # view model came from DB - must compute calc prop
             open_data_url = self._open_data_url(self.properties['status'], filename=filename)
         else:  # view model came from elasticsearch - calc props should be here
-            es_model_props = self.model.source['embedded']
-            open_data_url = es_model_props.get('open_data_url', None)
+            if hasattr(self.model, 'source'):
+                es_model_props = self.model.source['embedded']
+                open_data_url = es_model_props.get('open_data_url', None)
         if open_data_url:
             return open_data_url
         else:
