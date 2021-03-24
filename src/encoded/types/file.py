@@ -734,6 +734,81 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    def get_presigned_url_location(self, external, request, filename) -> str:
+        """ Opens an S3 boto3 client and returns a presigned url for the requested file to be downloaded"""
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if request.range:
+            param_get_object.update({'Range': request.headers.get('Range')})
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
+        return location
+
+    def get_open_data_url_or_presigned_url_location(self, external, request, filename, datastore_is_database) -> str:
+        """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
+            a presigned S3 URL to a 4DN bucket. """
+        open_data_url = None
+        if datastore_is_database:  # view model came from DB - must compute calc prop
+            open_data_url = self._open_data_url(self.properties['status'], filename=filename)
+        else:  # view model came from elasticsearch - calc props should be here
+            if hasattr(self.model, 'source'):
+                es_model_props = self.model.source['embedded']
+                open_data_url = es_model_props.get('open_data_url', None)
+        if open_data_url:
+            return open_data_url
+        else:
+            location = self.get_presigned_url_location(external, request, filename)
+            return location
+
+    @staticmethod
+    def _head_s3(client, bucket, key):
+        """ Helper for below method for mocking purposes. """
+        return client.head_object(Bucket=bucket, Key=key)
+
+    def _open_data_url(self, status, filename):
+        """ Helper for below method containing core functionality. """
+        if not filename:
+            return None
+        if status == 'released':  # TODO handle archived
+            open_data_bucket = '4dn-open-data-public'
+            if 'wfoutput' in self.get_bucket(self.registry):
+                bucket_type = 'wfoutput'
+            else:
+                bucket_type = 'files'
+            open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
+                bucket_type=bucket_type, uuid=self.uuid, filename=filename,
+            )
+            # Check if the file exists in the Open Data S3 bucket
+            client = boto3.client('s3')
+            try:
+                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
+                # Returning a valid S3 URL to the public url of the file
+                res = self._head_s3(client, open_data_bucket, open_data_key)
+                location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
+                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
+                )
+                return location
+            except ClientError:
+                return None
+        else:
+            return None
+
+    @calculated_property(schema={
+        "title": "Open Data URL",
+        "description": "Location of file on Open Data Bucket, if it exists",
+        "type": "string"
+    })
+    def open_data_url(self, status=None, filename=None):
+        """ Computes the open data URL and checks if it exists. """
+        return self._open_data_url(status, filename)
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
@@ -1207,9 +1282,7 @@ def is_file_to_download(properties, file_format, expected_filename=None):
              permission='view', subpath_segments=[0, 1])
 @debug_log
 def download(context, request):
-    '''
-    Endpoint for handling /@@download/ URLs
-    '''
+    """ Endpoint for handling /@@download/ URLs """
     check_user_is_logged_in(request)
 
     # first check for restricted status
@@ -1294,23 +1367,12 @@ def download(context, request):
                 (request.range.end or properties.get('file_size', 0)) -
                 (request.range.start or 0)
             )
-
+    request_datastore_is_database = (request.datastore == 'database')
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto3.client('s3')
-        param_get_object = {
-            'Bucket': external['bucket'],
-            'Key': external['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
-        }
-        if request.range:
-            param_get_object.update({'Range': request.headers.get('Range')})
-        location = conn.generate_presigned_url(
-            ClientMethod='get_object',
-            Params=param_get_object,
-            ExpiresIn=36*60*60
-        )
+        location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
+                                                                       request_datastore_is_database)
     else:
         raise ValueError(external.get('service'))
 
