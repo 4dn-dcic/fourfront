@@ -356,7 +356,7 @@ def test_impersonate_user(anontestapp, admin, submitter):
         # a different, cleaner error if we don't get the data we expect to get. -kmp 9-Mar-2021
         c = cookies.SimpleCookie()
         c.load(res.headers['Set-Cookie'])
-        returned_jwt_hashed = EDWHash.hash(c['jwtToken'].value)
+        returned_jwt_hashed = EDWHash.encrypt(c['jwtToken'].value)
         jwt_headers = jwt.get_unverified_header(c['jwtToken'].value)
         email_from_jwt = jwt.decode(c['jwtToken'].value, verify=False)['email']
         c = None
@@ -380,7 +380,7 @@ def test_impersonate_user(anontestapp, admin, submitter):
     users2_0 = users2[0]
     assert '@id' in users2_0
     try:
-        sent_jwt_hashed = EDWHash.hash(res2.request.cookies['jwtToken'])
+        sent_jwt_hashed = EDWHash.encrypt(res2.request.cookies['jwtToken'])
     except Exception:
         raise AssertionError("jwtToken cookie not found in second request.")
     assert sent_jwt_hashed == returned_jwt_hashed, "The jwtToken returned from first request wasn't sent on the second."
