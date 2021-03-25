@@ -9,6 +9,7 @@ import structlog
 import webtest
 
 from base64 import b64encode
+from dcicutils.misc_utils import ignored
 from PIL import Image
 from pkg_resources import resource_filename
 from pyramid.paster import get_app
@@ -97,6 +98,7 @@ def load_data_view(context, request):
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     """
+    ignored(context)
     # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
     config_uri = request.json.get('config_uri', 'production.ini')
     patch_only = request.json.get('patch_only', False)

@@ -7,7 +7,7 @@ from snovault import DBSESSION
 from snovault.elasticsearch import create_mapping
 from .. import main
 from ..loadxl import load_all
-from .conftest_settings import make_app_settings_dictionary
+from .conftest_settings import make_app_settings_dictionary, INDEXER_NAMESPACE_FOR_TESTING
 
 
 # this file was previously used to setup the test fixtures for the BDD tests.
@@ -29,7 +29,7 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server,
     settings['collection_datastore'] = 'elasticsearch'
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
-    settings['indexer.namespace'] = os.environ.get('TRAVIS_JOB_ID', '') # set namespace for tests
+    settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
 
     # use aws auth to access elasticsearch
     if aws_auth:
@@ -48,9 +48,9 @@ def app(app_settings, **kwargs):
 
     yield app
 
-    DBSession = app.registry[DBSESSION]
+    db_session = app.registry[DBSESSION]
     # Dispose connections so postgres can tear down.
-    DBSession.bind.pool.dispose()
+    db_session.bind.pool.dispose()
 
 
 @pytest.mark.fixture_cost(500)
@@ -65,7 +65,7 @@ def workbook(app):
     # just load the workbook inserts
     load_res = load_all(testapp, pkg_resources.resource_filename('encoded', 'tests/data/workbook-inserts/'), [])
     if load_res:
-        raise(load_res)
+        raise load_res
 
     testapp.post_json('/index', {})
     yield

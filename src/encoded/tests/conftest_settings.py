@@ -1,5 +1,9 @@
 import pkg_resources
 
+from snovault.util import generate_indexer_namespace_for_testing
+
+
+INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('ff')
 
 _app_settings = {
     'collection_datastore': 'database',
@@ -37,3 +41,32 @@ _app_settings = {
 
 def make_app_settings_dictionary():
     return _app_settings.copy()
+
+
+ORDER = [
+    'user', 'award', 'lab', 'static_section', 'higlass_view_config', 'page',
+    'ontology', 'ontology_term', 'file_format', 'badge', 'organism', 'gene',
+    'genomic_region', 'bio_feature', 'target', 'imaging_path', 'publication',
+    'publication_tracking', 'document', 'image', 'vendor', 'construct',
+    'modification', 'experiment_type', 'protocol', 'sop_map', 'biosample_cell_culture',
+    'individual_human', 'individual_mouse', 'individual_fly', 'individual_primate',
+    'individual_chicken', 'individual_zebrafish', 'biosource', 'antibody', 'enzyme',
+    'treatment_rnai', 'treatment_agent',
+    'biosample', 'quality_metric_fastqc', 'quality_metric_bamcheck', 'quality_metric_rnaseq',
+    'quality_metric_bamqc', 'quality_metric_pairsqc', 'quality_metric_margi',
+    'quality_metric_dedupqc_repliseq', 'quality_metric_chipseq', 'quality_metric_workflowrun',
+    'quality_metric_atacseq', 'quality_metric_rnaseq_madqc',  'quality_metric_qclist',
+    'microscope_setting_d1', 'microscope_setting_d2',
+    'microscope_setting_a1', 'microscope_setting_a2', 'file_fastq',
+    'file_processed', 'file_reference', 'file_calibration', 'file_microscopy',
+    'file_set', 'file_set_calibration', 'file_set_microscope_qc',
+    'file_vistrack', 'experiment_hi_c', 'experiment_capture_c',
+    'experiment_repliseq', 'experiment_atacseq', 'experiment_chiapet',
+    'experiment_damid', 'experiment_seq', 'experiment_tsaseq',
+    'experiment_mic', 'experiment_set', 'experiment_set_replicate',
+    'data_release_update', 'software', 'analysis_step', 'workflow',
+    'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
+    'tracking_item', 'quality_metric_flag',
+    'summary_statistic', 'summary_statistic_hi_c', 'workflow_run',
+    'microscope_configuration'
+]

@@ -2,13 +2,13 @@ import pytest
 import time
 from dcicutils.qa_utils import notice_pytest_fixtures
 from .workbook_fixtures import app_settings, app, workbook
-from encoded.commands.purge_item_type import purge_item_type_from_storage
+from ..commands.purge_item_type import purge_item_type_from_storage
 
 
 notice_pytest_fixtures(app_settings, app, workbook)
 
 
-pytestmark = [pytest.mark.working, pytest.mark.workbook]
+pytestmark = [pytest.mark.working]
 
 
 @pytest.fixture
@@ -41,7 +41,7 @@ def many_dummy_static_sections(testapp):
     return paths
 
 
-@pytest.mark.parametrize('item_type', ['static_section'])  # maybe should test some other types...
+@pytest.mark.parametrize('item_type', ['static_section'])  # XXX: Maybe parametrize on a few types?
 def test_purge_item_type_from_db(testapp, dummy_static_section, item_type):
     """ Tests purging all items of a certain item type from the DB """
     assert purge_item_type_from_storage(testapp, [item_type]) is True
@@ -61,6 +61,9 @@ def test_purge_item_type_from_db_many(testapp, many_dummy_static_sections):
     testapp.get('/search/?type=StaticSection', status=404)
 
 
+# Just this one test is a workbook test, but note well that it does not modify the workbook.
+# It should just try and fail, so that should be OK for the workbook. -kmp 22-Mar-2021
+@pytest.mark.workbook
 def test_purge_item_type_with_links_fails(testapp, workbook):
     """ Tries to remove 'lab', which should fail since it has links """
     testapp.post_json('/index', {'record': True})  # must index everything so individual links show up
