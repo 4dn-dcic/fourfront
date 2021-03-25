@@ -64,7 +64,8 @@ def app(app_settings, request):
     if request.param:
         # we disable the MPIndexer since the build runs on a small machine
         # snovault should be testing the mpindexer - Will 12/12/2020
-        app_settings['mpindexer'] = False
+        # Experimentally re-enabled -kmp 24-Mar-2021
+        app_settings['mpindexer'] = True
     app = main({}, **app_settings)
 
     yield app
