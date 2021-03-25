@@ -478,18 +478,23 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             '@id' : fileMicroscopyID = null,
             omerolink = null
         } = {},
+        attachment : {
+            'href' : attachmentHref = null,
+            'caption' : attachmentCaption = null
+        } = {},
         custom_link = null
     } = item;
 
-    const linkHref = (fileMicroscopyID && omerolink) || custom_link || linkToItem;
-    const { attachment = null } = item;
-    const { href: attachmentHref = null, caption: attachmentCaption = null } = attachment || {};
+    const imageSrc =  linkToItem + attachmentHref;
+    const linkHref = (fileMicroscopyID && omerolink) || custom_link || imageSrc;
     const filename = itemAttachmentFileName(item);
 
     if (!attachmentHref || !isAttachmentImage(filename)) return <EmbeddedItemWithAttachment {...props} />;
 
+    const linkProps = (imageSrc === linkHref) ? { target: '_blank', rel: 'noreferrer' } : {};
+
     const imageElem = (
-        <a href={linkHref} className="image-wrapper">
+        <a href={linkHref} className="image-wrapper" {...linkProps}>
             <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
