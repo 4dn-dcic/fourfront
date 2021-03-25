@@ -146,10 +146,10 @@ travis-test:  # Actually, we don't normally use this. Instead the GA workflow se
 	make travis-test-npm
 
 travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update

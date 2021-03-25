@@ -357,7 +357,9 @@ def test_permissions_database_applies_permissions(award, lab, file_formats, wran
         'lab': lab['uuid'],
         'file_format': file_formats.get('fastq').get('uuid'),
         'paired_end': '1',
-        'status': 'released'
+        'status': 'released',
+        'uuid': 'f40ecbb0-294f-4a51-9b1b-effaddb14b1d',
+        'accession': '4DNFIFGXXBKV'
     }
     res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
     item_id = res['@graph'][0]['@id']
