@@ -101,8 +101,7 @@ def dummy_request(root, registry, app):
 
 @pytest.fixture(scope='session')
 def app(app_settings):
-    """WSGI application level functional testing.
-    """
+    """ WSGI application level functional testing. """
     return main({}, **app_settings)
 
 
