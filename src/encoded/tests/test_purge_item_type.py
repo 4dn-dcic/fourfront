@@ -20,7 +20,7 @@ def dummy_static_section(testapp):
         "title": "Workflow Information",
         "body": "Some text to be rendered as a header"
     }
-    testapp.post_json('/static_section', static_section, status=201)
+    testapp.post_json('/static_section', static_section, status=[201, 409])
     testapp.post_json('/index', {'record': True})
 
 
