@@ -782,7 +782,7 @@ class File(Item):
     def open_data_url(self, request, accession, file_format, status=None):
         """ Computes the open data URL and checks if it exists. """
         fformat = get_item_or_none(request, file_format, frame='raw')  # no calc props needed
-        filename = "{}{}".format(accession, fformat)
+        filename = "{}{}".format(accession, fformat['file_format'])
         return self._open_data_url(status, filename)
 
     @classmethod
