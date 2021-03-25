@@ -1406,8 +1406,6 @@ def download(context, request):
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
-        if file_format is not None:
-            file_format_name = file_format.get('file_format')
 
     # Calculate bytes downloaded from Range header
     headers = None
