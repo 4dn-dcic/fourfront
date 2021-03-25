@@ -4,6 +4,8 @@ import pytest
 import tempfile
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
+from dcicutils.misc_utils import file_contents
+from dcicutils.qa_utils import MockBoto3, MockBotoS3Client
 from pyramid.httpexceptions import HTTPForbidden
 from unittest import mock
 from ..types.file import FileFastq, post_upload, external_creds
@@ -80,9 +82,22 @@ def fastq_json(award, experiment, lab, file_formats):
 
 
 @pytest.fixture
+def fastq_json_released(award, experiment, lab, file_formats):
+    return {
+        'accession': '4DNFIO67APU3',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'filename': 'test.fastq.gz',
+        'md5sum': '0123456789abcdef0123456789abcdef',
+        'status': 'released',
+    }
+
+
+@pytest.fixture
 def proc_file_json(award, experiment, lab, file_formats):
     return {
-        'accession': '4DNFIO67APU2',
+        'accession': '4DNFIO67APU4',
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': file_formats.get('pairs').get('uuid'),
@@ -258,6 +273,43 @@ def test_s3_filename_validation(testapp, fastq_uploading, file_formats):
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
     fastq_uploading['filename'] = 'test#file.fastq.gz'
     testapp.post_json('/file_fastq', fastq_uploading, status=422)
+
+
+def test_files_open_data_url_not_released(testapp, fastq_json):
+    """ Test S3 Open Data URL when a file has not been flagged as released """
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    resobj = res.json['@graph'][0]
+    # 1. check that initial download works
+    download_link = resobj['href']
+    direct_res = testapp.get(download_link, status=307)
+    # 2. check that the bucket in the redirect is the 4DN test bucket, not open data
+    non_open_data_bucket = 'test-wfout-bucket.s3.amazonaws.com'
+    assert non_open_data_bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
+
+
+def test_files_open_data_url_released_not_transferred(testapp, fastq_json_released):
+    """ Test S3 Open Data URL when a file has been released but not transferred to Open Data """
+    res = testapp.post_json('/file_fastq', fastq_json_released, status=201)
+    resobj = res.json['@graph'][0]
+    # 1. check that initial download works
+    download_link = resobj['href']
+    direct_res = testapp.get(download_link, status=307)
+    # 2. check that the bucket in the redirect is the 4DN test bucket, not open data
+    non_open_data_bucket = 'test-wfout-bucket.s3.amazonaws.com'
+    assert non_open_data_bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
+
+
+def test_files_open_data_url_released_and_transferred(testapp, fastq_json_released):
+    """ Test S3 Open Data URL when a file has been released and has been transferred to Open Data"""
+    with mock.patch('encoded.types.file.File._head_s3', return_value=None):
+        res = testapp.post_json('/file_fastq', fastq_json_released, status=201)
+        bucket = '4dn-open-data-public' # the Open Data bucket, not the 4DN test bucket
+        resobj = res.json['@graph'][0]
+        # 1. check that initial download works
+        download_link = resobj['href']
+        direct_res = testapp.get(download_link, status=307)
+        # 2. check that the bucket in the redirect is the open data bucket, not 4DN test
+        assert bucket in [i[1] for i in direct_res.headerlist if i[0] == 'Location'][0]
 
 
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):

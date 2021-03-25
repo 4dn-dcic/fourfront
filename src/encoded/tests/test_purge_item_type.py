@@ -8,7 +8,7 @@ from encoded.commands.purge_item_type import purge_item_type_from_storage
 notice_pytest_fixtures(app_settings, app, workbook)
 
 
-pytestmark = [pytest.mark.working, pytest.mark.workbook]
+pytestmark = [pytest.mark.working]
 
 
 @pytest.fixture
@@ -61,6 +61,7 @@ def test_purge_item_type_from_db_many(testapp, many_dummy_static_sections):
     testapp.get('/search/?type=StaticSection', status=404)
 
 
+@pytest.mark.workbook
 def test_purge_item_type_with_links_fails(testapp, workbook):
     """ Tries to remove 'lab', which should fail since it has links """
     testapp.post_json('/index', {'record': True})  # must index everything so individual links show up
