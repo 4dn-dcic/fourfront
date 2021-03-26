@@ -1,5 +1,10 @@
 import pytest
+from dcicutils.qa_utils import notice_pytest_fixtures
+from .workbook_fixtures import app_settings, app
 from encoded.commands.purge_item_type import purge_item_type_from_storage
+
+
+notice_pytest_fixtures(app_settings, app)
 
 
 pytestmark = [pytest.mark.working]
