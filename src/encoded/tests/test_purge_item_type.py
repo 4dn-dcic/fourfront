@@ -2,7 +2,7 @@ import pytest
 from ..commands.purge_item_type import purge_item_type_from_storage
 
 
-pytestmark = [pytest.mark.working]
+pytestmark = [pytest.mark.broken]
 
 
 @pytest.fixture
