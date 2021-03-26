@@ -1,11 +1,5 @@
 import pytest
-import time
-from dcicutils.qa_utils import notice_pytest_fixtures
-from .workbook_fixtures import app_settings, app, workbook
 from ..commands.purge_item_type import purge_item_type_from_storage
-
-
-notice_pytest_fixtures(app_settings, app, workbook)
 
 
 pytestmark = [pytest.mark.working]
@@ -20,7 +14,7 @@ def dummy_static_section(testapp):
         "title": "Workflow Information",
         "body": "Some text to be rendered as a header"
     }
-    testapp.post_json('/static_section', static_section, status=201)
+    testapp.post_json('/static_section', static_section, status=[201, 409])
     testapp.post_json('/index', {'record': True})
 
 
@@ -63,10 +57,18 @@ def test_purge_item_type_from_db_many(testapp, many_dummy_static_sections):
 
 # Just this one test is a workbook test, but note well that it does not modify the workbook.
 # It should just try and fail, so that should be OK for the workbook. -kmp 22-Mar-2021
-@pytest.mark.workbook
-def test_purge_item_type_with_links_fails(testapp, workbook):
-    """ Tries to remove 'lab', which should fail since it has links """
-    testapp.post_json('/index', {'record': True})  # must index everything so individual links show up
-    time.sleep(5)  # wait for indexing to catch up
-    assert not purge_item_type_from_storage(testapp, ['lab'])
-    testapp.post_json('/index', {'record': True})
+#
+# Skipped because workbook fixture here causes issues with test orderings
+#
+# import time
+# from dcicutils.qa_utils import notice_pytest_fixtures
+# from .workbook_fixtures import app_settings, app, workbook
+#
+# @pytest.mark.workbook
+# def test_purge_item_type_with_links_fails(testapp, workbook):
+#     """ Tries to remove 'lab', which should fail since it has links """
+#     testapp.post_json('/index', {'record': True})  # must index everything so individual links show up
+#     time.sleep(5)  # wait for indexing to catch up
+#     assert not purge_item_type_from_storage(testapp, ['lab'])
+#     testapp.post_json('/index', {'record': True})
+

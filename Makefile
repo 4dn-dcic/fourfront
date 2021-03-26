@@ -117,7 +117,7 @@ kill:  # kills back-end processes associated with the application. Use with care
 clean-python:
 	@echo -n "Are you sure? This will wipe all libraries installed on this virtualenv [y/N] " && read ans && [ $${ans:-N} = y ]
 	pip uninstall encoded
-	pip freeze | xargs pip uninstall -y
+	pip uninstall -y -r <(pip freeze)
 
 test:
 	make test-unit
