@@ -781,6 +781,85 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    def get_presigned_url_location(self, external, request, filename) -> str:
+        """ Opens an S3 boto3 client and returns a presigned url for the requested file to be downloaded"""
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if request.range:
+            param_get_object.update({'Range': request.headers.get('Range')})
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
+        return location
+
+    def get_open_data_url_or_presigned_url_location(self, external, request, filename, datastore_is_database) -> str:
+        """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
+            a presigned S3 URL to a 4DN bucket. """
+        open_data_url = None
+        if datastore_is_database:  # view model came from DB - must compute calc prop
+            open_data_url = self._open_data_url(self.properties['status'], filename=filename)
+        else:  # view model came from elasticsearch - calc props should be here
+            if hasattr(self.model, 'source'):
+                es_model_props = self.model.source['embedded']
+                open_data_url = es_model_props.get('open_data_url', None)
+            if not open_data_url:  # fallback to DB
+                open_data_url = self._open_data_url(self.properties['status'], filename=filename)
+        if open_data_url:
+            return open_data_url
+        else:
+            location = self.get_presigned_url_location(external, request, filename)
+            return location
+
+    @staticmethod
+    def _head_s3(client, bucket, key):
+        """ Helper for below method for mocking purposes. """
+        return client.head_object(Bucket=bucket, Key=key)
+
+    def _open_data_url(self, status, filename):
+        """ Helper for below method containing core functionality. """
+        if not filename:
+            return None
+        if status == 'released':  # TODO handle archived
+            open_data_bucket = '4dn-open-data-public'
+            if 'wfoutput' in self.get_bucket(self.registry):
+                bucket_type = 'wfoutput'
+            else:
+                bucket_type = 'files'
+            open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
+                bucket_type=bucket_type, uuid=self.uuid, filename=filename,
+            )
+            # Check if the file exists in the Open Data S3 bucket
+            client = boto3.client('s3')
+            try:
+                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
+                # Returning a valid S3 URL to the public url of the file
+                res = self._head_s3(client, open_data_bucket, open_data_key)
+                location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
+                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
+                )
+                return location
+            except ClientError:
+                return None
+        else:
+            return None
+
+    @calculated_property(schema={
+        "title": "Open Data URL",
+        "description": "Location of file on Open Data Bucket, if it exists",
+        "type": "string"
+    })
+    def open_data_url(self, request, accession, file_format, status=None):
+        """ Computes the open data URL and checks if it exists. """
+        fformat = get_item_or_none(request, file_format, frame='raw')  # no calc props needed
+        filename = "{}.{}".format(accession, fformat.get('standard_file_extension', ''))
+        return self._open_data_url(status, filename)
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
@@ -1271,13 +1350,108 @@ def is_file_to_download(properties, file_format, expected_filename=None):
         return filename
 
 
+def update_google_analytics(context, request, ga_config, filename, file_size_downloaded,
+                            file_at_id, lab, user_uuid, user_groups, file_experiment_type, file_type='other'):
+    """ Helper for @@download that updates GA in response to a download.
+    """
+    ga_cid = request.cookies.get("clientIdentifier")
+    if not ga_cid:  # Fallback, potentially can stop working as GA is updated
+        ga_cid = request.cookies.get("_ga")
+        if ga_cid:
+            ga_cid = ".".join(ga_cid.split(".")[2:])
+
+    ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host,
+                                                       ga_config["hostnameTrackerIDMapping"].get("default"))
+    if ga_tid is None:
+        raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
+
+    # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
+    # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
+    ga_payload = {
+        "v": 1,
+        "tid": ga_tid,
+        "t": "event",  # Hit type. Could also be event, transaction, pageview, etc.
+        # Override IP address. Else will send detail about EC2 server which not too useful.
+        "uip": request.remote_addr,
+        "ua": request.user_agent,
+        "dl": request.url,
+        "dt": filename,
+
+        # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
+        # if don't provided uid. While we still allow users to not be logged in,
+        # should at least be able to preserve/track their anon downloads..
+
+        # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
+        # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
+        # Unsure if groups under 1 session or not.
+        "cid": "555",
+        "an": "4DN Data Portal EC2 Server",  # App name, unsure if used yet
+        "ec": "Serverside File Download",  # Event Category
+        "ea": "Range Query" if request.range else "File Download",  # Event Action
+        "el": filename,  # Event Label
+        "ev": file_size_downloaded,  # Event Value
+        # Product fields
+        "pa": "purchase",
+        "ti": str(uuid4()),  # We need to send a unique transaction id along w. 'transactions' like purchases
+        "pr1id": file_at_id,  # Product ID/SKU
+        "pr1nm": filename,  # Product Name
+        "pr1br": lab.get("display_title"),  # Product Branch
+        "pr1qt": 1,  # Product Quantity
+        # Product Category from @type, e.g. "File/FileProcessed"
+        "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
+        # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
+        "pr1va": file_type
+        # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
+    }
+
+    # Custom dimensions
+    # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
+    if "name" in ga_config["dimensionNameMap"]:
+        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
+        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
+
+    if "experimentType" in ga_config["dimensionNameMap"]:
+        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+
+    if "filesize" in ga_config["metricNameMap"]:
+        ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+        ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+
+    if "downloads" in ga_config["metricNameMap"]:
+        ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+        ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+
+    # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
+    # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
+    if user_uuid:
+        ga_payload['uid'] = user_uuid
+
+    if user_groups:
+        groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.
+        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+
+    if ga_cid:
+        ga_payload['cid'] = ga_cid
+
+    # Catch error here
+    try:
+        resp = requests.post(
+            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
+            data=urllib.parse.urlencode(ga_payload),
+            timeout=5.0,
+            headers={'user-agent': ga_payload['ua']}
+        )
+    except Exception as e:
+        log.error('Exception encountered posting to GA: %s' % e)
+
+
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 @debug_log
 def download(context, request):
-    '''
-    Endpoint for handling /@@download/ URLs
-    '''
+    """ Endpoint for handling /@@download/ URLs """
     check_user_is_logged_in(request)
 
     # first check for restricted status
@@ -1292,19 +1466,10 @@ def download(context, request):
     user_groups = user_props.get('details', {}).get('groups', None)
     if user_groups:
         user_groups.sort()
-    # tracking_values = {
-    #     "user_agent"      : request.user_agent,
-    #     "remote_ip"       : request.remote_addr,
-    #     "user_uuid"       : user_uuid or 'anonymous',
-    #     "request_path"    : request.path_info,
-    #     "request_headers" : str(dict(request.headers))
-    # }
 
     # TODO:
     # if not user_uuid or file_size_downloaded < 25 * (1024**2): # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
     #     raise HTTPForbidden("Must login or provide access keys to download files larger than 5mb")
-
-    file_format_name = "Unknown"
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
@@ -1332,24 +1497,18 @@ def download(context, request):
                 found = True
                 properties = extra
                 external = context.propsheets.get('external' + eformat.get('uuid'))
-                if eformat is not None:
-                    file_format_name = eformat.get('file_format')
-                    # tracking_values['file_format'] = eformat.get('file_format')
                 break
         if not found:
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
-        if file_format is not None:
-            file_format_name = file_format.get('file_format')
-
-    file_experiment_type = get_file_experiment_type(request, context, properties)
-    file_at_id = context.jsonld_id(request)
-    file_size_downloaded = properties.get('file_size', 0)
 
     # Calculate bytes downloaded from Range header
+    headers = None
+    file_size_downloaded = properties.get('file_size', 0)
     if request.range:
         file_size_downloaded = 0
+        headers = {'Range': request.headers.get('Range')}
         # Assume range unit is bytes. Because there's no spec for others really, atm, afaik..
         if hasattr(request.range, "ranges"):
             for (range_start, range_end) in request.range.ranges:
@@ -1362,133 +1521,31 @@ def download(context, request):
                 (request.range.end or properties.get('file_size', 0)) -
                 (request.range.start or 0)
             )
+<<<<<<< HEAD
 
     # TODO: AWS Open Data Bucket URL Resolution should probably happen here
     #       Might be we need some additional metadata in *.ini?
+=======
+    request_datastore_is_database = (request.datastore == 'database')
+>>>>>>> master
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto3.client('s3')
-        param_get_object = {
-            'Bucket': external['bucket'],
-            'Key': external['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
-        }
-        if request.range:
-            param_get_object.update({'Range': request.headers.get('Range')})
-        location = conn.generate_presigned_url(
-            ClientMethod='get_object',
-            Params=param_get_object,
-            ExpiresIn=36*60*60
-        )
+        location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
+                                                                       request_datastore_is_database)
     else:
         raise ValueError(external.get('service'))
 
     # Analytics Stuff
     ga_config = request.registry.settings.get('ga_config')
+    file_experiment_type = get_file_experiment_type(request, context, properties)
+    file_at_id = context.jsonld_id(request)
 
     if ga_config:
+        update_google_analytics(context, request, ga_config, filename, file_size_downloaded, file_at_id, lab,
+                                user_uuid, user_groups, file_experiment_type, properties.get('file_type'))
 
-        ga_cid = request.cookies.get("clientIdentifier")
-        if not ga_cid:  # Fallback, potentially can stop working as GA is updated
-            ga_cid = request.cookies.get("_ga")
-            if ga_cid:
-                ga_cid = ".".join(ga_cid.split(".")[2:])
-
-        ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host, ga_config["hostnameTrackerIDMapping"].get("default"))
-        if ga_tid is None:
-            raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
-
-        # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
-        # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
-        ga_payload = {
-            "v": 1,
-            "tid": ga_tid,
-            "t": "event",                           # Hit type. Could also be event, transaction, pageview, etc.
-            # Override IP address. Else will send detail about EC2 server which not too useful.
-            "uip": request.remote_addr,
-            "ua": request.user_agent,
-            "dl": request.url,
-            "dt": filename,
-
-            # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
-            # if don't provided uid. While we still allow users to not be logged in,
-            # should at least be able to preserve/track their anon downloads..
-
-            # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
-            # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
-            # Unsure if groups under 1 session or not.
-            "cid": "555",
-            "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
-            "ec": "Serverside File Download",       # Event Category
-            "ea": "Range Query" if request.range else "File Download",  # Event Action
-            "el": filename,                         # Event Label
-            "ev": file_size_downloaded,             # Event Value
-            # Product fields
-            "pa": "purchase",
-            "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
-            "pr1id": file_at_id,                    # Product ID/SKU
-            "pr1nm": filename,                      # Product Name
-            "pr1br": lab.get("display_title"),     # Product Branch
-            "pr1qt": 1,                             # Product Quantity
-            # Product Category from @type, e.g. "File/FileProcessed"
-            "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
-            # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-            "pr1va": properties.get("file_type", "other")  # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
-        }
-
-        # Custom dimensions
-        # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
-        if "name" in ga_config["dimensionNameMap"]:
-            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
-            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
-
-        if "experimentType" in ga_config["dimensionNameMap"]:
-            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
-            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
-
-        if "filesize" in ga_config["metricNameMap"]:
-            ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
-            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
-
-        if "downloads" in ga_config["metricNameMap"]:
-            ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
-            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
-
-        # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
-        # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
-        if user_uuid:
-            ga_payload['uid'] = user_uuid
-
-        if user_groups:
-            groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.
-            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
-            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
-
-        if ga_cid:
-            ga_payload['cid'] = ga_cid
-
-        # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
-
-        #
-        # print('\n\n', ga_payload)
-
-        resp = requests.post(
-            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
-            data=urllib.parse.urlencode(ga_payload),
-            timeout=5.0,
-            headers={'user-agent': ga_payload['ua']}
-        )
-
-        # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-        # # create a tracking_item to track this download
-        # tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
-        #                  'download_tracking': tracking_values}
-        # try:
-        #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
-        # except Exception as e:
-        #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
-
+    # TODO does not handle range queries
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
         return {
@@ -1497,28 +1554,16 @@ def download(context, request):
             'expires': datetime.datetime.fromtimestamp(expires, pytz.utc).isoformat(),
         }
 
-    if 'Range' in request.headers:
-        try:
-            response_body = conn.get_object(**param_get_object)
-        except Exception as e:
-            raise e
-        response_dict = {
-            'body': response_body.get('Body').read(),
-            # status_code : 206 if partial, 200 if the ragne covers whole file
-            'status_code': response_body.get('ResponseMetadata').get('HTTPStatusCode'),
-            'accept_ranges': response_body.get('AcceptRanges'),
-            'content_length': response_body.get('ContentLength'),
-            'content_range': response_body.get('ContentRange')
-        }
-        return Response(**response_dict)
-
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
     if use_download_proxy:
         location = request.registry.settings.get('download_proxy', '') + str(location)
 
     # 307 redirect specifies to keep original method
-    raise HTTPTemporaryRedirect(location=location)
+    if headers is not None:  # forward Range header to open data, redundant for our buckets
+        raise HTTPTemporaryRedirect(location=location, headers=headers)
+    else:
+        raise HTTPTemporaryRedirect(location=location)
 
 
 def get_file_experiment_type(request, context, properties):
