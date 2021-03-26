@@ -333,8 +333,11 @@ class File(Item):
                 return obucket.get('title')
         return None
 
-    def _get_ds_cond_from_repset(self, repset):
-        return (repset.get('dataset_label', None), repset.get('condition', None))
+    def _get_ds_cond_lab_from_repset(self, request, repset):
+        elab = get_item_or_none(request, repset.get('lab'))
+        if elab:
+            elab = elab.get('display_title')
+        return (repset.get('dataset_label', None), repset.get('condition', None), elab)
 
     def _get_file_experiment_info(self, request, currinfo):
         """
@@ -346,6 +349,7 @@ class File(Item):
         expid = None
         repsetid = None
         rev_exps = self.experiments(request)
+
         if rev_exps:
             if len(rev_exps) != 1:
                 # most files with experiments revlinks linked to only one
@@ -370,9 +374,10 @@ class File(Item):
             if not rep_set_info:
                 return info
             # pieces of info to get from the repset if there is one
-            ds, c = self._get_ds_cond_from_repset(rep_set_info)
+            ds, c, el = self._get_ds_cond_lab_from_repset(request, rep_set_info)
             info['dataset'] = ds
             info['condition'] = c
+            info['experimental_lab'] = el
             expts_in_set = rep_set_info.get('experiments_in_set', [])
             if not expts_in_set:
                 return info
@@ -389,6 +394,11 @@ class File(Item):
             exp_info = get_item_or_none(request, expid)
             if not exp_info:  # sonmethings fishy - abort
                 return info
+            # check to see if we have experimental lab
+            if 'experimental_lab' not in info or info.get('experimental_lab') is None:
+                elab = get_item_or_none(request, exp_info.get('lab'))
+                if elab:
+                    info['experimental_lab'] = elab.get('display_title')
             exp_type = get_item_or_none(request, exp_info.get('experiment_type'))
             if exp_type is not None:
                 info['experiment_type'] = exp_type.get('title')
@@ -406,9 +416,11 @@ class File(Item):
                     repset = repset[0]
                     rep_set_info = get_item_or_none(request, repset)
                     if rep_set_info is not None:
-                        ds, c = self._get_ds_cond_from_repset(rep_set_info)
+                        ds, c, el = self._get_ds_cond_lab_from_repset(request, rep_set_info)
                         info['dataset'] = ds
                         info['condition'] = c
+                        if info.get('experimental_lab') is None:
+                            info['experimental_lab'] = el
                         rep_exps = rep_set_info.get('replicate_exps', [])
                         for rep in rep_exps:
                             if rep.get('replicate_exp') == expid:
@@ -436,6 +448,9 @@ class File(Item):
             "lab_name": {
                 "type": "string"
             },
+            "experimental_lab": {
+                "type": "string"
+            },
             "biosource_name": {
                 "type": "string"
             },
@@ -458,8 +473,8 @@ class File(Item):
     })
     def track_and_facet_info(self, request, biosource_name=None):
         props = self.upgrade_properties()
-        fields = ['experiment_type', 'assay_info', 'lab_name', 'dataset', 'condition',
-                  'biosource_name', 'replicate_info', 'experiment_bucket']
+        fields = ['experiment_type', 'assay_info', 'lab_name', 'experimental_lab', 'dataset',
+                  'condition', 'biosource_name', 'replicate_info', 'experiment_bucket']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
         track_info = {k: v for k, v in track_info.items() if v is not None}
@@ -469,19 +484,18 @@ class File(Item):
         if biosource_name and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
-        if len(track_info) != 8:  # if length==6 we have everything we need
-            if not (len(track_info) == 7 and 'lab_name' not in track_info):
+        if len(track_info) != len(fields):  # if track_info has same number of items as fields we have everything we need
+            if not (len(track_info) == len(fields) - 1 and 'lab_name' not in track_info):
                 # only if everything but lab exists can we avoid getting expt
                 einfo = self._get_file_experiment_info(request, track_info)
                 track_info.update({k: v for k, v in einfo.items() if k not in track_info})
-            # if 'experiment_type' not in track_info:
-                # avoid more unnecessary work if we don't have key piece
-                # return
 
+            # file lab_name is same as lab - we need this property to account for FileVistrack
+            # or any other file that are generated with override_ values
             if 'lab_name' not in track_info:
                 labid = props.get('lab')
                 lab = get_item_or_none(request, labid)
-                if lab is not None:
+                if lab:
                     track_info['lab_name'] = lab.get('display_title')
 
         track_title = self.generate_track_title(track_info, props)
