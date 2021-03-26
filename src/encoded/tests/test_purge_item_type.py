@@ -1,5 +1,11 @@
 import pytest
+
+from dcicutils.qa_utils import notice_pytest_fixtures
+from .test_indexing import app, app_settings  # es app without workbook
 from ..commands.purge_item_type import purge_item_type_from_storage
+
+
+notice_pytest_fixtures(app, app_settings)
 
 
 pytestmark = [pytest.mark.broken]
@@ -27,7 +33,7 @@ def many_dummy_static_sections(testapp):
         "body": "Some text to be rendered as a header"
     }
     paths = []
-    for i in range(6):  # arbitrarily defined
+    for i in range(2):  # arbitrarily defined, lowered for efficiency
         static_section_template['name'] = 'search-info-header.Workflow:%s' % i
         resp = testapp.post_json('/static_section', static_section_template, status=201).json
         paths.append(resp['@graph'][0]['@id'])
@@ -61,8 +67,7 @@ def test_purge_item_type_from_db_many(testapp, many_dummy_static_sections):
 # Skipped because workbook fixture here causes issues with test orderings
 #
 # import time
-# from dcicutils.qa_utils import notice_pytest_fixtures
-# from .workbook_fixtures import app_settings, app, workbook
+# from .workbook_fixtures import workbook
 #
 # @pytest.mark.workbook
 # def test_purge_item_type_with_links_fails(testapp, workbook):
