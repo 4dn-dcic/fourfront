@@ -1159,7 +1159,8 @@ class FileMicroscopy(ItemWithAttachment, File):
     embedded_list = File.embedded_list + [
         "experiments.@type",
         "experiments.imaging_paths.channel",
-        "experiments.imaging_paths.path",
+        "experiments.imaging_paths.path.imaging_rounds",
+        "experiments.imaging_paths.path.experiment_type",
         "experiments.files.microscope_settings.ch00_light_source_center_wl",
         "experiments.files.microscope_settings.ch01_light_source_center_wl",
         "experiments.files.microscope_settings.ch02_light_source_center_wl",

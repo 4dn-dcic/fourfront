@@ -321,10 +321,7 @@ class ExperimentSet(Item):
         'sample_image.attachment.md5sum',
         'sample_image.attachment.download',
         'sample_image.attachment.width',
-        'sample_image.attachment.height',
-
-        'imaging_paths.path.imaging_rounds',
-        'imaging_paths.path.experiment_type'
+        'sample_image.attachment.height'
     ]
 
     @calculated_property(schema={
@@ -392,7 +389,9 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded_list = ExperimentSet.embedded_list + [
-        "replicate_exps.replicate_exp.accession"
+        "replicate_exps.replicate_exp.accession",
+        'imaging_paths.path.imaging_rounds',
+        'imaging_paths.path.experiment_type'
     ]
 
     def _update(self, properties, sheets=None):
