@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 import { console, object, ajax, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { PackageLockLoader } from './../../../util/package-lock-loader';
@@ -63,7 +64,8 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'isValidating' : PropTypes.bool,
         'height' : PropTypes.number,
         'mountDelay' : PropTypes.number.isRequired,
-        'onViewConfigUpdated': PropTypes.func
+        'onViewConfigUpdated': PropTypes.func,
+        'scale1dTopTrack': PropTypes.bool.isRequired,
     };
 
     static defaultProps = {
@@ -74,12 +76,16 @@ export class HiGlassPlainContainer extends React.PureComponent {
         'viewConfig' : null,
         'mountDelay' : 500,
         'placeholder' : <HiGlassLoadingIndicator/>,
+        'scale1dTopTrack': false
     };
 
     constructor(props){
         super(props);
         this.correctTrackDimensions = this.correctTrackDimensions.bind(this);
         this.getHiGlassComponent = this.getHiGlassComponent.bind(this);
+        this.memoized = {
+            scaleHiGlassViewConfig: memoize(scaleHiGlassViewConfig)
+        };
 
         this.state = {
             'mounted' : false,
@@ -166,31 +172,80 @@ export class HiGlassPlainContainer extends React.PureComponent {
         return (this && this.hgcRef && this.hgcRef.current) || null;
     }
 
-    /**
-     * This returns the viewconfig currently stored in PlainContainer _state_.
-     * We should adjust this to instead return `JSON.parse(hgc.api.exportViewConfigAsString())`,
-     * most likely, to be of any use because HiGlassComponent keeps its own representation of the
-     * viewConfig.
-     *
-     * @todo Change to the above once needed. Don't rely on until then.
-     */
-    getCurrentViewConfig(){
-        const hgc = this.getHiGlassComponent();
-        const { state: { viewConfig = null } = {} } = hgc || {};
-        return viewConfig;
-    }
-
     render(){
+        const { viewConfig: originalViewConfig, height, scale1dTopTrack, ...passProps } = this.props;
+        const viewConfig = scale1dTopTrack ? this.memoized.scaleHiGlassViewConfig(originalViewConfig, height) : originalViewConfig;
         return (
             <PackageLockLoader>
-                <HiGlassPlainContainerBody {...this.props} {...this.state} ref={this.hgcRef} />
+                <HiGlassPlainContainerBody {...passProps} {...{ viewConfig, height }} {...this.state} ref={this.hgcRef} />
             </PackageLockLoader>
         );
     }
 }
 
+/**
+ * Dynamically scale the 1-dimensional top tracks in the Higlass viewconf.
+ * @param {*} originalViewConf Higlass view configuration. This is not modified.
+ * @param {*} targetHeight target height for the Higlass config, in pixels.
+ * @returns new viewConfig scaled to target height
+ */
+export function scaleHiGlassViewConfig(originalViewConf, targetHeight){
+    const viewConf = object.deepClone(originalViewConf);
 
+    // Check parameters.
+    if (!("views" in viewConf)) { return viewConf; }
+    if (targetHeight === null || targetHeight <= 0) { return viewConf; }
 
+    // Are there any views with 1D tracks? If not, stop
+    const has1DTracks = function(view) {
+        return (
+            "tracks" in view &&
+            "top" in view["tracks"] &&
+            view["tracks"]["top"].length > 0
+        );
+    };
+    if (!(_.some(viewConf["views"], has1DTracks))) {
+        return viewConf;
+    }
+
+    // Determine the height for each view. There may be so many views they must be on multiple rows.
+    const heightPerView = viewConf["views"] <= 2 ? targetHeight : (targetHeight / 2) | 0;
+
+    _.each(viewConf["views"], function(view){
+        if (!(has1DTracks(view))) { return; }
+
+        // 2D tracks scale automatically, so we will let it take about 2/3s of the total height.
+        let scaledHeightFor1DTracks = heightPerView;
+        if (
+            "tracks" in view &&
+            "center" in view["tracks"] &&
+            view["tracks"]["center"].length > 0
+        ) {
+            scaledHeightFor1DTracks = (heightPerView / 3) | 0;
+        }
+
+        const tracksEligibleForScaling = _.filter(view["tracks"]["top"], function(track) {
+            // Don't scale gene annotation tracks, they need to be completely visible
+            return (("height" in track) && track["type"] !== "horizontal-gene-annotations");
+        });
+
+        if (tracksEligibleForScaling.length === 0) { return; }
+
+        const sumOfOriginal1DTracks = _.reduce(
+            tracksEligibleForScaling,
+            function(memo, track) { return memo + track["height"];},
+            0
+        );
+        // Resize each 1D track to fit the given display height (round to the nearest integer so Higlass can use them)
+        _.each(
+            tracksEligibleForScaling,
+            function (track) {
+                track["height"] = (track["height"] * scaledHeightFor1DTracks / sumOfOriginal1DTracks) | 0;
+            }
+        );
+    });
+    return viewConf;
+}
 
 
 const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContainerBody(props, ref){
