@@ -12,6 +12,7 @@ import { SearchView as CommonSearchView } from '@hms-dbmi-bgm/shared-portal-comp
 import { AboveSearchViewTableControls } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/above-table-controls/AboveSearchViewTableControls';
 import { console, ajax, navigate, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { current_stands } from 'micro-meta-app-react/es/constants';
 
 import { columnExtensionMap } from './columnExtensionMap';
 import { Schemas } from './../util';
@@ -51,7 +52,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         this.handleModalConfirm = _.throttle(this.handleModalConfirm.bind(this), 3000);
         this.handleChangeMicroscopeName = this.handleChangeMicroscopeName.bind(this);
         this.handleChangeMicroscopeTier = this.handleChangeMicroscopeTier.bind(this);
-        // this.handleChangeMicroscopeValidationTier = this.handleChangeMicroscopeValidationTier.bind(this);
+        this.handleChangeMicroscopeStandType = this.handleChangeMicroscopeStandType.bind(this);
 
         this.memoized = {
             transformedFacets: memoize(transformedFacets)
@@ -60,8 +61,8 @@ export default class MicroscopySearchView extends React.PureComponent {
         this.state = {
             show: false,
             tier: 1,
-            // validationTier: 1,
             microscopeName: null,
+            standType: null,
             confirmLoading: false
         };
     }
@@ -69,7 +70,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     /** @todo Possibly move into own component instead of method, especially if state can move along with it. */
     createNewMicroscopeConfiguration() {
         const { context, currentAction } = this.props;
-        const { show, tier/*, validationTier*/, microscopeName, confirmLoading } = this.state;
+        const { show, tier, microscopeName, standType, confirmLoading } = this.state;
 
         let createNewVisible = false;
         // don't show during submission search "selecting existing"
@@ -87,12 +88,12 @@ export default class MicroscopySearchView extends React.PureComponent {
         const buttonProps = {
             'handleChangeMicroscopeTier': this.handleChangeMicroscopeTier,
             'startTier': 1,
-            'endTier': 5
+            'endTier': 3
         };
         const modalProps = {
-            tier/*, validationTier*/, show, confirmLoading, microscopeName,
+            tier, show, confirmLoading, microscopeName, standType,
             'handleChangeMicroscopeName': this.handleChangeMicroscopeName,
-            // 'handleChangeMicroscopeValidationTier': this.handleChangeMicroscopeValidationTier,
+            'handleChangeMicroscopeStandType': this.handleChangeMicroscopeStandType,
             'handleModalConfirm': this.handleModalConfirm,
             'handleModalCancel': this.handleModalCancel
         };
@@ -111,7 +112,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     handleModalConfirm() {
-        const { microscopeName, tier/*, validationTier*/ } = this.state;
+        const { microscopeName, tier, standType } = this.state;
 
         const fallbackCallback = (errResp, xhr) => {
             // Error callback
@@ -123,7 +124,8 @@ export default class MicroscopySearchView extends React.PureComponent {
             this.setState({ 'confirmLoading': false });
         };
 
-        // const microscope = { 'Name': microscopeName, 'Tier': tier, 'ValidationTier': tier/*validationTier*/ };
+        const stand = _.find(current_stands, (stand) => stand && stand.name && stand.name === standType);
+
         const microscope = {
             "Name": microscopeName,
             "Schema_ID": "Instrument.json",
@@ -133,7 +135,7 @@ export default class MicroscopySearchView extends React.PureComponent {
             "Version": "2.00.0",
             "MicroscopeStand": {
                 "Name": microscopeName,
-                "Schema_ID": "InvertedMicroscopeStand.json",
+                "Schema_ID": stand && stand.json ? stand.json + ".json" : null,
                 "ID": uuidv4(),
                 "Tier": tier,
                 "ValidationTier": tier,
@@ -191,9 +193,9 @@ export default class MicroscopySearchView extends React.PureComponent {
         });
     }
 
-    handleChangeMicroscopeValidationTier(eventKey) {
+    handleChangeMicroscopeStandType(eventKey) {
         this.setState({
-            validationTier: parseInt(eventKey)
+            standType: eventKey
         });
     }
 
@@ -234,8 +236,7 @@ const CreateNewConfigurationDropDownButton = React.memo(function (props) {
 });
 
 const CreateNewConfigurationModal = React.memo(function (props) {
-    const { tier/*, validationTier*/, show, confirmLoading, microscopeName, handleChangeMicroscopeName/*, handleChangeMicroscopeValidationTier*/, handleModalConfirm, handleModalCancel } = props;
-    // const validationTierOptions = _.range(1, tier + 1);
+    const { tier, standType, show, confirmLoading, microscopeName, handleChangeMicroscopeName, handleChangeMicroscopeStandType, handleModalConfirm, handleModalCancel } = props;
     return (
         <Modal className="microscopy-create-modal" show={show}>
             <Modal.Header>
@@ -250,24 +251,24 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                         </div>
                     </div>
                 </div>
-                {/* <div className="row">
+                <div className="row">
                     <div className="col-sm-12 col-md-12">
                         <div className="form-group">
-                            <label htmlFor="validation_tier">Validation Tier <span className="text-danger">*</span></label>
-                            <DropdownButton id="validation-tier-selector" onSelect={handleChangeMicroscopeValidationTier}
-                                title={'Tier ' + validationTier}>
-                                {validationTierOptions.map((opt, i) => (
-                                    <DropdownItem key={opt} eventKey={opt} data-key={opt}>
-                                        {'Tier ' + opt}
+                            <label htmlFor="validation_tier">Stand Type<span className="text-danger">*</span></label>
+                            <DropdownButton id="validation-stand-type-selector" onSelect={handleChangeMicroscopeStandType}
+                                title={standType || 'Select Stand Type'}>
+                                {current_stands.map((opt, i) => (
+                                    <DropdownItem key={opt.name} eventKey={opt.name} data-key={opt.name}>
+                                        {opt.name}
                                     </DropdownItem>
                                 ))}
                             </DropdownButton>
                         </div>
                     </div>
-                </div> */}
+                </div>
             </Modal.Body>
             <Modal.Footer>
-                <button type="button" onClick={handleModalConfirm} className="btn btn-success" disabled={!microscopeName}>
+                <button type="button" onClick={handleModalConfirm} className="btn btn-success" disabled={!microscopeName || !standType}>
                     <i className={"icon icon-fw icon-" + (confirmLoading ? 'circle-notch icon-spin fas' : 'clone far')} />Submit
                 </button>
                 <button type="button" onClick={handleModalCancel} className="btn btn-outline-warning">
