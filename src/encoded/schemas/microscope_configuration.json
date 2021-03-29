@@ -20,7 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/static_embeds" }
     ],
-    "mixinFacets" : [
+    "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
     ],
     "properties": {
@@ -33,32 +33,32 @@
         },
         "description": {
             "title": "Description",
-            "description" : "Description of microscope configuration.",
+            "description": "Description of microscope configuration.",
             "type": "string"
         },
         "status": {
             "title": "Status",
             "type": "string",
             "default": "draft",
-            "enum" : [
+            "enum": [
                 "released",
                 "released to project",
                 "released to lab",
                 "draft",
                 "deleted"
             ],
-            "lookup" : 20
+            "lookup": 20
         },
-        "microscope" : {
-            "type" : "object",
-            "title" : "Microscope",
+        "microscope": {
+            "type": "object",
+            "title": "Microscope",
             "required": [
                 "Tier",
                 "ValidationTier",
                 "Name"
             ],
             "additionalProperties": true,
-            "properties":{
+            "properties": {
                 "ID": {
                     "title": "ID",
                     "comment": "ID for the Microscope Configuration",
@@ -72,45 +72,52 @@
                 "Tier": {
                     "title": "Tier",
                     "description": "Configuration tier of microscope",
-                    "type" : "integer",
-                    "default" : 1,
-                    "enum" : [1, 2, 3, 4, 5]
+                    "type": "integer",
+                    "default": 1,
+                    "enum": [1, 2, 3]
                 },
                 "ValidationTier": {
                     "title": "Validation Tier",
                     "description": "Configuration validation tier of microscope",
-                    "type" : "integer",
-                    "default" : 1,
-                    "enum" : [1, 2, 3, 4, 5]
+                    "type": "integer",
+                    "default": 1,
+                    "enum": [1, 2, 3]
                 },
-                "Manufacturer": {
-                    "title": "Manufacturer",
-                    "description": "Manufacturer of microscope",
-                    "type" : "string"
-                },
-                "Model": {
-                    "title": "Model",
-                    "description": "Model of microscope",
-                    "type" : "string"
-                },
-                "SerialNumber": {
-                    "title": "Serial Number",
-                    "description": "Serial number of microscope",
-                    "type" : "string"
-                },
-                "Type": {
-                    "title": "Type",
-                    "description": "Type of microscope",
-                    "type" : "string",
-                    "enum": [
-                        "Upright",
-                        "Inverted",
-                        "Custom Made",
-                        "Dissection",
-                        "Electrophysiology",
-                        "Stereomicroscope",
-                        "Other"
-                    ]
+                "MicroscopeStand": {
+                    "type": "object",
+                    "title": "Microscope Stand",
+                    "additionalProperties": true,
+                    "properties": {
+                        "Manufacturer": {
+                            "title": "Manufacturer",
+                            "description": "Manufacturer of microscope",
+                            "type": "string"
+                        },
+                        "Model": {
+                            "title": "Model",
+                            "description": "Model of microscope",
+                            "type": "string"
+                        },
+                        "CatalogNumber": {
+                            "title": "Catalog Number",
+                            "description": "Catalog number of microscope",
+                            "type": "string"
+                        },
+                        "Type": {
+                            "title": "Type",
+                            "description": "Type of microscope",
+                            "type": "string",
+                            "enum": [
+                                "Upright",
+                                "Inverted",
+                                "Custom Made",
+                                "Dissection",
+                                "Electrophysiology",
+                                "Stereomicroscope",
+                                "Other"
+                            ]
+                        }
+                    }
                 }
             }
         },
@@ -129,34 +136,37 @@
             "linkTo": "Award"
         }
     },
-    "facets" : {
-        "microscope.Tier":{ 
+    "facets": {
+        "microscope.Tier": {
             "title": "Tier"
         },
-        "microscope.Manufacturer":{ 
+        "microscope.MicroscopeStand.Manufacturer": {
             "title": "Manufacturer"
         },
-        "microscope.Model":{ 
+        "microscope.MicroscopeStand.Model": {
             "title": "Model"
         },
-        "microscope.Type":{ 
+        "microscope.MicroscopeStand.Type": {
             "title": "Type"
         }
     },
-    "columns" : {
-        "submitted_by.display_title" : {
-            "title" : "Creator"
+    "columns": {
+        "submitted_by.display_title": {
+            "title": "Creator"
         },
-        "microscope.Tier":{ 
+        "microscope.Tier": {
             "title": "Tier"
         },
-        "microscope.Manufacturer":{ 
+        "microscope.MicroscopeStand.Manufacturer": {
             "title": "Manufacturer"
         },
-        "microscope.Model":{ 
+        "microscope.MicroscopeStand.Model":{
             "title": "Model"
         },
-        "microscope.Type":{ 
+        "microscope.MicroscopeStand.CatalogNumber":{
+            "title": "Catalog Num."
+        },
+        "microscope.MicroscopeStand.Type":{
             "title": "Type"
         }
     },

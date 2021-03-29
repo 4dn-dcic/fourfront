@@ -26,16 +26,16 @@ const microscopyColExtensionMap = {
     "microscope.Tier": {
         "widthMap": { "sm": 50, "md": 70, "lg": 80 }
     },
-    "microscope.Manufacturer": {
+    "microscope.MicroscopeStand.Manufacturer": {
         "widthMap": { "sm": 80, "md": 100, "lg": 120 }
     },
-    "microscope.Serial": {
+    "microscope.MicroscopeStand.CatalogNumber": {
         "widthMap": { "sm": 80, "md": 100, "lg": 120 }
     },
-    "microscope.Model": {
+    "microscope.MicroscopeStand.Model": {
         "widthMap": { "sm": 80, "md": 100, "lg": 120 }
     },
-    "microscope.Type": {
+    "microscope.MicroscopeStand.Type": {
         "widthMap": { "sm": 80, "md": 100, "lg": 120 }
     },
     "submitted_by.display_title": {
