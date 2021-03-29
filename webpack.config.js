@@ -235,7 +235,7 @@ module.exports = [
                 'aws-sdk': 'empty-module',
                 'package-lock.json': 'empty-module',
                 "statistics-page-components" : 'empty-module',
-                "4dn-microscopy-metadata-tool" : 'empty-module',
+                "micro-meta-app-react" : 'empty-module',
                 // Below - prevent some stuff in SPC from being bundled in.
                 // These keys are literally matched against the string values, not actual path contents, hence why is "../util/aws".. it exactly what within SPC/SubmissionView.js
                 // We can clean up and change to 'aws-utils' in here in future as well and alias it to spc/utils/aws. But this needs to be synchronized with SPC and 4DN.

@@ -143,7 +143,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
                 import(
                     /* webpackChunkName: "microscopy-metadata-bundle" */
-                    '4dn-microscopy-metadata-tool'
+                    'micro-meta-app-react'
                 ).then(({ default: MicroscopyMetadataToolImported }) =>{
                     MicroscopyMetadataTool = MicroscopyMetadataToolImported;
                     onComplete();
