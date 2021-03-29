@@ -7,6 +7,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
+name = "atomicwrites"
+version = "1.4.0"
+description = "Atomic file writes."
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
 name = "attrs"
 version = "20.3.0"
 description = "Classes Without Boilerplate"
@@ -46,14 +54,14 @@ wrapt = "*"
 
 [[package]]
 name = "awscli"
-version = "1.19.38"
+version = "1.19.39"
 description = "Universal Command Line Environment for AWS."
 category = "main"
 optional = false
 python-versions = ">= 2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [package.dependencies]
-botocore = "1.20.38"
+botocore = "1.20.39"
 colorama = ">=0.2.5,<0.4.4"
 docutils = ">=0.10,<0.16"
 PyYAML = ">=3.10,<5.5"
@@ -93,14 +101,14 @@ python-versions = "*"
 
 [[package]]
 name = "boto3"
-version = "1.17.38"
+version = "1.17.39"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
 [package.dependencies]
-botocore = ">=1.20.38,<1.21.0"
+botocore = ">=1.20.39,<1.21.0"
 jmespath = ">=0.7.1,<1.0.0"
 s3transfer = ">=0.3.0,<0.4.0"
 
@@ -379,7 +387,7 @@ xray = ["mypy-boto3-xray (==1.17.38.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.20.38"
+version = "1.20.39"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -933,6 +941,14 @@ docs = ["sphinx"]
 test = ["pytest (<5.4)", "pytest-cov"]
 
 [[package]]
+name = "more-itertools"
+version = "8.7.0"
+description = "More routines for operating on iterables, beyond itertools"
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "moto"
 version = "1.3.7"
 description = "A library that allows your python tests to easily mock out the boto library"
@@ -1037,6 +1053,20 @@ plaster = ">=0.5"
 testing = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "pluggy"
+version = "0.13.1"
+description = "plugin and hook calling mechanisms for python"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[package.dependencies]
+importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
+
+[package.extras]
+dev = ["pre-commit", "tox"]
+
+[[package]]
 name = "psutil"
 version = "5.8.0"
 description = "Cross-platform lib for process and system monitoring in Python."
@@ -1065,11 +1095,11 @@ python-versions = "*"
 
 [[package]]
 name = "py"
-version = "1.4.31"
+version = "1.10.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pyaml"
@@ -1240,35 +1270,58 @@ python-versions = "*"
 
 [[package]]
 name = "pytest"
-version = "2.9.2"
+version = "3.10.1"
 description = "pytest: simple powerful testing with Python"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
+atomicwrites = ">=1.0"
+attrs = ">=17.4.0"
 colorama = {version = "*", markers = "sys_platform == \"win32\""}
-py = ">=1.4.29"
+more-itertools = ">=4.0.0"
+pluggy = ">=0.7"
+py = ">=1.5.0"
+six = ">=1.10.0"
 
 [[package]]
 name = "pytest-cov"
-version = "2.2.1"
+version = "2.9.0"
 description = "Pytest plugin for measuring coverage."
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
 [package.dependencies]
-coverage = ">=3.7.1"
-pytest = ">=2.6.0"
+coverage = ">=4.4"
+pytest = ">=3.6"
+
+[package.extras]
+testing = ["fields", "hunter", "process-tests (==2.0.2)", "six", "pytest-xdist", "virtualenv"]
 
 [[package]]
 name = "pytest-exact-fixtures"
-version = "0.1"
+version = "0.3"
 description = "Parse queries in Lucene and Elasticsearch syntaxes"
 category = "dev"
 optional = false
 python-versions = "*"
+
+[package.dependencies]
+pytest = ">=3.3.0"
+
+[[package]]
+name = "pytest-forked"
+version = "1.3.0"
+description = "run tests in isolated forked subprocesses"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[package.dependencies]
+py = "*"
+pytest = ">=3.10"
 
 [[package]]
 name = "pytest-instafail"
@@ -1294,27 +1347,28 @@ pytest = ">=2.7"
 
 [[package]]
 name = "pytest-timeout"
-version = "1.0.0"
+version = "1.4.2"
 description = "py.test plugin to abort hanging tests"
 category = "dev"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-pytest = ">=2.8.0"
+pytest = ">=3.6.0"
 
 [[package]]
 name = "pytest-xdist"
-version = "1.14"
-description = "py.test xdist plugin for distributed testing and loop-on-failing modes"
+version = "1.27.0"
+description = "pytest xdist plugin for distributed testing and loop-on-failing modes"
 category = "dev"
 optional = false
-python-versions = "*"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [package.dependencies]
 execnet = ">=1.1"
-py = ">=1.4.22"
-pytest = ">=2.4.2"
+pytest = ">=3.6.0"
+pytest-forked = "*"
+six = "*"
 
 [[package]]
 name = "python-dateutil"
@@ -1406,7 +1460,7 @@ rdflib = ">=4.2"
 
 [[package]]
 name = "repoze.debug"
-version = "1.0.2"
+version = "1.1"
 description = "Forensic debugging WSGI middleware"
 category = "dev"
 optional = false
@@ -1416,8 +1470,8 @@ python-versions = "*"
 WebOb = "*"
 
 [package.extras]
-docs = ["webob", "sphinx"]
-testing = ["webob", "nose", "coverage"]
+docs = ["sphinx", "webob"]
+testing = ["webob", "coverage", "nose"]
 
 [[package]]
 name = "requests"
@@ -1887,12 +1941,16 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1,<3.7"
-content-hash = "b756305749b38100dd6b6ebcb007bdb98cd0a378f248190fe48f80b017b3c15a"
+content-hash = "711090327e57178ee8be5560f1ab51b74a61ef0dcc9d87a0e7d5e6a823d10ace"
 
 [metadata.files]
 apipkg = [
     {file = "apipkg-1.5-py2.py3-none-any.whl", hash = "sha256:58587dd4dc3daefad0487f6d9ae32b4542b185e1c36db6993290e7c41ca2b47c"},
     {file = "apipkg-1.5.tar.gz", hash = "sha256:37228cda29411948b422fae072f57e31d3396d2ee1c9783775980ee9c9990af6"},
+]
+atomicwrites = [
+    {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
+    {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
 ]
 attrs = [
     {file = "attrs-20.3.0-py2.py3-none-any.whl", hash = "sha256:31b2eced602aa8423c2aea9c76a724617ed67cf9513173fd3a4f03e3a929c7e6"},
@@ -1907,8 +1965,8 @@ aws-xray-sdk = [
     {file = "aws_xray_sdk-0.95-py2.py3-none-any.whl", hash = "sha256:72791618feb22eaff2e628462b0d58f398ce8c1bacfa989b7679817ab1fad60c"},
 ]
 awscli = [
-    {file = "awscli-1.19.38-py2.py3-none-any.whl", hash = "sha256:4f9a4fae79fe4a325d000433e1f45686a5eb9a20ee7b4c5a8ca669226df62fc6"},
-    {file = "awscli-1.19.38.tar.gz", hash = "sha256:a5cdf939af72968208516f8f4e63d51806c533dfac25a1e0894f29161a96402c"},
+    {file = "awscli-1.19.39-py2.py3-none-any.whl", hash = "sha256:55a4b686242e215bf2ce010b680e69f947ec07516c6bd8786e7fd9a0b6e16b49"},
+    {file = "awscli-1.19.39.tar.gz", hash = "sha256:a97f13850c2fc1ce701ae7794382aa3b6e2419daaf8b7a0aecaef53b969e25e4"},
 ]
 "backports.statistics" = [
     {file = "backports.statistics-0.1.0-py2.py3-none-any.whl", hash = "sha256:2732e003151620762ba3ea25b881b5ca0debe2fcbf41b32b6eaff5842a8b99d7"},
@@ -1924,16 +1982,16 @@ boto = [
     {file = "boto-2.49.0.tar.gz", hash = "sha256:ea0d3b40a2d852767be77ca343b58a9e3a4b00d9db440efb8da74b4e58025e5a"},
 ]
 boto3 = [
-    {file = "boto3-1.17.38-py2.py3-none-any.whl", hash = "sha256:f427d7f001f457bd2693411396897624a081d0d6a9f6c1fabf6ef565238f5282"},
-    {file = "boto3-1.17.38.tar.gz", hash = "sha256:d891964c43de16f0b43a8fa87ae786abfd4166222b5e53c1e1164514cde12073"},
+    {file = "boto3-1.17.39-py2.py3-none-any.whl", hash = "sha256:6ec718f5a75724f6117a47944a3b2dd79aef02ed75b356060cede74fb91e2616"},
+    {file = "boto3-1.17.39.tar.gz", hash = "sha256:b5814ff73b5b8fc8601c1b73b70675807f9ce64713562e183a08415a2516eed4"},
 ]
 boto3-stubs = [
     {file = "boto3-stubs-1.17.38.0.tar.gz", hash = "sha256:06ea5db09ba23a883b6c7328dc3e4f275f00fc82956c98440a0da1324eef0fde"},
     {file = "boto3_stubs-1.17.38.0-py3-none-any.whl", hash = "sha256:851f10e937631317cb4fe58a96f9d74891c243c952ef3e675cb3cdae60c26d00"},
 ]
 botocore = [
-    {file = "botocore-1.20.38-py2.py3-none-any.whl", hash = "sha256:6e6107109abad89d95c829b2c3c281d353113d4b54fcfeb65d71e58e8ebd77ed"},
-    {file = "botocore-1.20.38.tar.gz", hash = "sha256:da447f46d412749720ca08e19bf14487d35e23f2378f7245975e4f55af7570dd"},
+    {file = "botocore-1.20.39-py2.py3-none-any.whl", hash = "sha256:54587d3c9d0d98ac579681245ea36f547cd5048e2bb9212e5e7166a963bcb562"},
+    {file = "botocore-1.20.39.tar.gz", hash = "sha256:28506d23ffa9abf5666c2c909c7edc83a1112cd44fe74eb1a4960df561531e98"},
 ]
 certifi = [
     {file = "certifi-2020.12.5-py2.py3-none-any.whl", hash = "sha256:719a74fb9e33b9bd44cc7f3a8d94bc35e4049deebe19ba7d8e108280cfd59830"},
@@ -2197,6 +2255,10 @@ mock = [
     {file = "mock-4.0.3-py3-none-any.whl", hash = "sha256:122fcb64ee37cfad5b3f48d7a7d51875d7031aaf3d8be7c42e2bee25044eee62"},
     {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
 ]
+more-itertools = [
+    {file = "more-itertools-8.7.0.tar.gz", hash = "sha256:c5d6da9ca3ff65220c3bfd2a8db06d698f05d4d2b9be57e1deb2be5a45019713"},
+    {file = "more_itertools-8.7.0-py3-none-any.whl", hash = "sha256:5652a9ac72209ed7df8d9c15daf4e1aa0e3d2ccd3c87f8265a0673cd9cbc9ced"},
+]
 moto = [
     {file = "moto-1.3.7-py2.py3-none-any.whl", hash = "sha256:4df37936ff8d6a4b8229aab347a7b412cd2ca4823ff47bd1362ddfbc6c5e4ecf"},
     {file = "moto-1.3.7.tar.gz", hash = "sha256:129de2e04cb250d9f8b2c722ec152ed1b5426ef179b4ebb03e9ec36e6eb3fcc5"},
@@ -2255,6 +2317,10 @@ plaster = [
 plaster-pastedeploy = [
     {file = "plaster_pastedeploy-0.6-py2.py3-none-any.whl", hash = "sha256:71e29b0ab90df8343bca5f0debe4706f0f8147308a78922c8c26e8252809bce4"},
     {file = "plaster_pastedeploy-0.6.tar.gz", hash = "sha256:c231130cb86ae414084008fe1d1797db7e61dc5eaafb5e755de21387c27c6fae"},
+]
+pluggy = [
+    {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
+    {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
 ]
 psutil = [
     {file = "psutil-5.8.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:0066a82f7b1b37d334e68697faba68e5ad5e858279fd6351c8ca6024e8d6ba64"},
@@ -2336,8 +2402,8 @@ psycopg2-binary = [
     {file = "psycopg2_binary-2.7.7-cp37-cp37m-win_amd64.whl", hash = "sha256:348b49dd737ff74cfb5e663e18cb069b44c64f77ec0523b5794efafbfa7df0b8"},
 ]
 py = [
-    {file = "py-1.4.31-py2.py3-none-any.whl", hash = "sha256:4a3e4f3000c123835ac39cab5ccc510642153bc47bc1f13e2bbb53039540ae69"},
-    {file = "py-1.4.31.tar.gz", hash = "sha256:a6501963c725fc2554dabfece8ae9a8fb5e149c0ac0a42fd2b02c5c1c57fc114"},
+    {file = "py-1.10.0-py2.py3-none-any.whl", hash = "sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a"},
+    {file = "py-1.10.0.tar.gz", hash = "sha256:21b81bda15b66ef5e1a777a21c4dcd9c20ad3efd0b3f817e7a809035269e1bd3"},
 ]
 pyaml = [
     {file = "pyaml-20.4.0-py2.py3-none-any.whl", hash = "sha256:67081749a82b72c45e5f7f812ee3a14a03b3f5c25ff36ec3b290514f8c4c4b99"},
@@ -2439,15 +2505,20 @@ pyramid-translogger = [
     {file = "pyramid_translogger-0.1.tar.gz", hash = "sha256:0bae9a98a7ba62316917272d06c553fbb9116cbc561592b6ebfabcb335724589"},
 ]
 pytest = [
-    {file = "pytest-2.9.2-py2.py3-none-any.whl", hash = "sha256:ccc23b4aab3ef3e19e731de9baca73f3b1a7e610d9ec65b28c36a5a3305f0349"},
-    {file = "pytest-2.9.2.tar.gz", hash = "sha256:12c18abb9a09a5b2802dba75c7a2d7d6c8c0f1258abd8243e7688415d87ad1d8"},
+    {file = "pytest-3.10.1-py2.py3-none-any.whl", hash = "sha256:3f193df1cfe1d1609d4c583838bea3d532b18d6160fd3f55c9447fdca30848ec"},
+    {file = "pytest-3.10.1.tar.gz", hash = "sha256:e246cf173c01169b9617fc07264b7b1316e78d7a650055235d6d897bc80d9660"},
 ]
 pytest-cov = [
-    {file = "pytest-cov-2.2.1.tar.gz", hash = "sha256:a8b22e53e7f3b971454c35df99dffe21f4749f539491e935c55d3ff7e1b284fa"},
-    {file = "pytest_cov-2.2.1-py2.py3-none-any.whl", hash = "sha256:40bfd01002ceaf9e6c5d371d3c4d541d378a4214ea03e45f934980766a809384"},
+    {file = "pytest-cov-2.9.0.tar.gz", hash = "sha256:b6a814b8ed6247bd81ff47f038511b57fe1ce7f4cc25b9106f1a4b106f1d9322"},
+    {file = "pytest_cov-2.9.0-py2.py3-none-any.whl", hash = "sha256:c87dfd8465d865655a8213859f1b4749b43448b5fae465cb981e16d52a811424"},
 ]
 pytest-exact-fixtures = [
-    {file = "pytest_exact_fixtures-0.1.tar.gz", hash = "sha256:9f20b98260346fa9e62c86df8e1efc5405ae6559edf824240ef4a8f50f7305fd"},
+    {file = "pytest_exact_fixtures-0.3-py2.py3-none-any.whl", hash = "sha256:853436198b51026de937b06de60ab5276a6c924614e36193c60041140b66aec6"},
+    {file = "pytest_exact_fixtures-0.3.tar.gz", hash = "sha256:f3e93bbea59f74f0beb5bf71cd18048e2b478ad665e71c37a4f8b33f4ec72718"},
+]
+pytest-forked = [
+    {file = "pytest-forked-1.3.0.tar.gz", hash = "sha256:6aa9ac7e00ad1a539c41bec6d21011332de671e938c7637378ec9710204e37ca"},
+    {file = "pytest_forked-1.3.0-py2.py3-none-any.whl", hash = "sha256:dc4147784048e70ef5d437951728825a131b81714b398d5d52f17c7c144d8815"},
 ]
 pytest-instafail = [
     {file = "pytest-instafail-0.3.0.tar.gz", hash = "sha256:b4d5fc3ca81e530a8d0e15a7771dc14b06fc9a0930c4b3909a7f4527040572c3"},
@@ -2457,12 +2528,12 @@ pytest-mock = [
     {file = "pytest_mock-0.11.0-py2.py3-none-any.whl", hash = "sha256:5d109071ac1c6a5a883aece92c507b4562efce86054ab39c83a9f3554688289d"},
 ]
 pytest-timeout = [
-    {file = "pytest-timeout-1.0.0.tar.gz", hash = "sha256:1465096be73e16df1e15d1b1453692428a7e15b997d756bc565aee0d12798ce1"},
-    {file = "pytest_timeout-1.0.0-py2.py3-none-any.whl", hash = "sha256:d53665f3dad30de23b8377623a5ec9b6f489c4a70aa952c1860febc33dac3c88"},
+    {file = "pytest-timeout-1.4.2.tar.gz", hash = "sha256:20b3113cf6e4e80ce2d403b6fb56e9e1b871b510259206d40ff8d609f48bda76"},
+    {file = "pytest_timeout-1.4.2-py2.py3-none-any.whl", hash = "sha256:541d7aa19b9a6b4e475c759fd6073ef43d7cdc9a92d95644c260076eb257a063"},
 ]
 pytest-xdist = [
-    {file = "pytest-xdist-1.14.zip", hash = "sha256:4a5e1199122fa29e3017d8d189f59ccc5d82e841474ba2a1eec0e89606153623"},
-    {file = "pytest_xdist-1.14-py2.py3-none-any.whl", hash = "sha256:052f95dea01ccfc752f9f4828908bc6e16d4130ffc420b6e131019554a9957db"},
+    {file = "pytest-xdist-1.27.0.tar.gz", hash = "sha256:a96ed691705882560fa3fc95531fbd4c224896c827f4004817eb2dcac4ba41a2"},
+    {file = "pytest_xdist-1.27.0-py2.py3-none-any.whl", hash = "sha256:a64915be2b23235d6cec0992b8f59b791d64083756fbf13cf574fa5757085bc7"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.7.3.tar.gz", hash = "sha256:e27001de32f627c22380a688bcc43ce83504a7bc5da472209b4c70f02829f0b8"},
@@ -2515,7 +2586,8 @@ rdflib-jsonld = [
     {file = "rdflib-jsonld-0.3.tar.gz", hash = "sha256:944a1cf22a217bd78acacc183ea329848cba3f24d0cfb86541b42732cd412a88"},
 ]
 "repoze.debug" = [
-    {file = "repoze.debug-1.0.2.tar.gz", hash = "sha256:67a211638f7719977fda6d1442ef2f1aa14599e4da098db4fdfe23bdc98dde11"},
+    {file = "repoze.debug-1.1-py2-none-any.whl", hash = "sha256:1d90e5b088b167bcde13bdedfe2e34f15fe8a1f53103e406e49b7c11be4d994d"},
+    {file = "repoze.debug-1.1.tar.gz", hash = "sha256:f897fbb3a09499b0cee3fe2c5e4579ff04e5b0b87b1aad6098d242cbbf573000"},
 ]
 requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},
