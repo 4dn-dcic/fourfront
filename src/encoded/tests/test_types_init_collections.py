@@ -223,9 +223,9 @@ def vendor_data_alias(lab, award):
         'title': 'Wrong Alias Biochemical',
         'lab': lab['@id'],
         'award': award['@id'],
-        'aliases': ['my_lab:this_is_correct_one',
-                    'my_lab:this/is_wrong',
-                    'my_lab:this\is_wrong_too']}
+        'aliases': [r'my_lab:this_is_correct_one',
+                    r'my_lab:this/is_wrong',
+                    r'my_lab:this\is_wrong_too']}
 
 
 def test_vendor_alias_wrong_format(testapp, vendor_data_alias):
