@@ -16,9 +16,8 @@ from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
-from snovault.util import generate_indexer_namespace_for_testing
 from .. import main
-from .conftest_settings import make_app_settings_dictionary
+from .conftest_settings import make_app_settings_dictionary, INDEXER_NAMESPACE_FOR_TESTING
 
 
 # Done in pytest.ini now.
@@ -31,11 +30,13 @@ from .conftest_settings import make_app_settings_dictionary
 
 @pytest.fixture(autouse=True)
 def autouse_external_tx(external_tx):
+    notice_pytest_fixtures(external_tx)
     pass
 
 
 @pytest.fixture(scope='session')
-def app_settings(request, wsgi_server_host_port, conn, DBSession):
+def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We didn't choose the fixture name.
+    notice_pytest_fixtures(request, wsgi_server_host_port, conn, DBSession)
     settings = make_app_settings_dictionary()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
     # add some here for file testing
@@ -63,6 +64,7 @@ def pytest_configure():
 
 @pytest.yield_fixture
 def threadlocals(request, dummy_request, registry):
+    notice_pytest_fixtures(request, dummy_request, registry)
     threadlocal_manager.push({'request': dummy_request, 'registry': registry})
     yield dummy_request
     threadlocal_manager.pop()
@@ -99,8 +101,7 @@ def dummy_request(root, registry, app):
 
 @pytest.fixture(scope='session')
 def app(app_settings):
-    """WSGI application level functional testing.
-    """
+    """ WSGI application level functional testing. """
     return main({}, **app_settings)
 
 

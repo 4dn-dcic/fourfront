@@ -3,10 +3,11 @@ import webtest
 
 from unittest import mock
 
-from ..tests import datafixtures
+from ..tests import conftest_settings
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
+# in cgap these are marked broken -kmp 24-Feb-2021
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema, pytest.mark.indexing]
 
 
 @pytest.yield_fixture(scope='session')
@@ -100,16 +101,22 @@ def test_fixtures2(minitestdata2, testapp):
 
 
 def test_order_complete(app, conn):
+    order_source_module = conftest_settings
     # TODO: This could use a doc string or comment. -kent & eric 29-Jun-2020
-    print("original datafixtures.ORDER =", datafixtures.ORDER)
-    print("original len(datafixtures.ORDER) =", len(datafixtures.ORDER))
-    assert "access_key" not in datafixtures.ORDER
-    order_for_testing = datafixtures.ORDER + ["access_key"]
-    with mock.patch.object(datafixtures, "ORDER", order_for_testing):
-        print("mocked datafixtures.ORDER =", datafixtures.ORDER)
-        print("len(mocked datafixtures.ORDER) =", len(datafixtures.ORDER))
-        assert "access_key" in datafixtures.ORDER
-        ORDER = datafixtures.ORDER
+    print("original order_source_module.ORDER =", order_source_module.ORDER)
+    print("original len(order_source_module.ORDER) =", len(order_source_module.ORDER))
+    assert "access_key" not in order_source_module.ORDER
+    print("confirmed: 'access_key' is NOT in ORDER")
+    order_for_testing = order_source_module.ORDER + ["access_key"]
+    assert order_source_module.ORDER is not order_for_testing
+    assert len(order_for_testing) == len(order_source_module.ORDER) + 1
+    with mock.patch.object(order_source_module, "ORDER", order_for_testing):
+        print("=" * 24, "binding ORDER to add 'access_key'", "=" * 24)
+        print("mocked order_source_module.ORDER =", order_source_module.ORDER)
+        print("len(mocked order_source_module.ORDER) =", len(order_source_module.ORDER))
+        assert "access_key" in order_source_module.ORDER
+        print("confirmed: 'access_key' IS in ORDER")
+        patched_order = order_source_module.ORDER
         environ = {
             'HTTP_ACCEPT': 'application/json',
             'REMOTE_USER': 'TEST',
@@ -117,22 +124,25 @@ def test_order_complete(app, conn):
         testapp = webtest.TestApp(app, environ)
         master_types = []
         profiles = testapp.get('/profiles/?frame=raw').json
+        print("constructing master_types from /profiles/?frame=raw")
         for a_type in profiles:
             if profiles[a_type].get('id') and profiles[a_type]['isAbstract'] is False:
                 schema_name = profiles[a_type]['id'].split('/')[-1][:-5]
                 master_types.append(schema_name)
-        print(ORDER)
-        print(master_types)
-        print(len(ORDER))
-        print(len(master_types))
+        print("patched_order=", patched_order)
+        print("master_types=", master_types)
+        print("len(patched_order)=", len(patched_order))
+        print("len(master_types)=", len(master_types))
 
-        missing_types = [i for i in master_types if i not in ORDER]
-        extra_types = [i for i in ORDER if i not in master_types]
-        print(missing_types)
-        print(extra_types)
+        missing_types = [i for i in master_types if i not in patched_order]
+        extra_types = [i for i in patched_order if i not in master_types]
+        print("missing_types=", missing_types)
+        print("extra_types=", extra_types)
 
         assert missing_types == []
         assert extra_types == []
-    print("restored datafixtures.ORDER =", datafixtures.ORDER)
-    print("restored len(datafixtures.ORDER) =", len(datafixtures.ORDER))
-    assert "access_key" not in datafixtures.ORDER
+        print("=" * 24, "exiting bound context for ORDER", "=" * 24)
+    print("restored order_source_module.ORDER =", order_source_module.ORDER)
+    print("restored len(order_source_module.ORDER) =", len(order_source_module.ORDER))
+    assert "access_key" not in order_source_module.ORDER
+    print("confirmed: 'access_key' is NOT in ORDER")
