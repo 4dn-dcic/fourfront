@@ -1,5 +1,4 @@
 import pytest
-#import webtest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
 from .workbook_fixtures import workbook, app_settings, app
@@ -8,10 +7,6 @@ from ..util import workbook_lookup
 notice_pytest_fixtures(workbook, app_settings, app)
 
 pytestmark = [pytest.mark.working, pytest.mark.workbook, pytest.mark.indexing]
-
-
-def wait_for_index(testapp):
-    testapp.post_json("/index", {"record": False})
 
 
 @pytest.fixture
@@ -34,8 +29,8 @@ def static_help_page_deleted():
 
 
 def test_get_help_page(workbook, testapp, static_help_page_default):
+    notice_pytest_fixtures(workbook, testapp, static_help_page_default)
     testapp = testapp
-    wait_for_index(testapp)
     help_page_url = "/" + static_help_page_default['name']
     res = testapp.get(help_page_url, status=200)
     assert res.json['@id'] == help_page_url
@@ -49,15 +44,14 @@ def test_get_help_page(workbook, testapp, static_help_page_default):
 
 
 def test_get_help_page_draft(workbook, anonhtmltestapp, htmltestapp, static_help_page_draft):
-
-    wait_for_index(htmltestapp)
+    notice_pytest_fixtures(workbook, anonhtmltestapp, htmltestapp, static_help_page_draft)
     help_page_url = "/" + static_help_page_draft['name']
     anonhtmltestapp.get(help_page_url, status=403)
     htmltestapp.get(help_page_url, status=200)
 
 
 def test_get_help_page_deleted(workbook, anonhtmltestapp, htmltestapp, static_help_page_deleted):
-    wait_for_index(htmltestapp)
+    notice_pytest_fixtures(workbook, anonhtmltestapp, htmltestapp, static_help_page_deleted)
     help_page_url = "/" + static_help_page_deleted['name']
     anonhtmltestapp.get(help_page_url, status=403)
     htmltestapp.get(help_page_url, status=200)  # Why 200 and not 404? -kmp 23-Feb-2021
@@ -65,8 +59,8 @@ def test_get_help_page_deleted(workbook, anonhtmltestapp, htmltestapp, static_he
 
 def test_get_help_page_no_access(workbook, anontestapp, testapp, anonhtmltestapp, htmltestapp,
                                  static_help_page_default, static_help_page_draft, static_help_page_deleted):
-    notice_pytest_fixtures(workbook)
-    wait_for_index(testapp)
+    notice_pytest_fixtures(workbook, anontestapp, testapp, anonhtmltestapp, htmltestapp,
+                           static_help_page_default, static_help_page_draft, static_help_page_deleted)
     success = True
     for app_name, testapp, role in [("anon_es", anontestapp, 'anon'),
                                     ("es", testapp, 'system'),
@@ -90,8 +84,11 @@ def test_get_help_page_no_access(workbook, anontestapp, testapp, anonhtmltestapp
 
 
 def check_page_unique_name(testapp, conflicting_page, page_to_patch):
-    wait_for_index(testapp)
-    # POST again with same name and expect validation error
+    """
+    Tries to post and patch page_to_patch but expects to get a 422 error because of a conflict with conflicting_page.
+    Since under normal circumstances no change will occur, it is considered safe to do as part of workbook tests.
+    """
+
     conflicting_document = {'name': conflicting_page['name']}
     conflict_message = "%s already exists with name '%s'" % (conflicting_page['uuid'], conflicting_page['name'])
 
@@ -103,9 +100,11 @@ def check_page_unique_name(testapp, conflicting_page, page_to_patch):
 
     # Test that POST of a new page with the same name as an existing page is not allowed.
     check_conflict(testapp.post_json('/page', conflicting_document, status=422))
+
     # Also test PATCH of an existing page with the same name as another existing page is not allowed.
     page_to_patch_uuid_url = '/' + page_to_patch['uuid']
     check_conflict(testapp.patch_json(page_to_patch_uuid_url, conflicting_document, status=422))
+
     actual_page_to_patch = testapp.get(page_to_patch_uuid_url).maybe_follow().json
     check_conflict(testapp.patch_json(actual_page_to_patch['@id'], conflicting_document, status=422))
 
