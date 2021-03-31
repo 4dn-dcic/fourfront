@@ -183,6 +183,7 @@ class Experiment(Item):
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
         "other_processed_files.files.notes_to_tsv",
+        "other_processed_files.files.open_data_url",
 
         "reference_files.accession",
         "reference_files.file_type_detailed",
