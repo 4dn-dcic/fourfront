@@ -73,6 +73,7 @@ def app(app_settings, request):
 
 
 # explicitly specify now (invalidation scope tests don't need this)
+@pytest.yield_fixture
 def setup_and_teardown(app):
     """
     Run create mapping and purge queue before tests and clear out the
