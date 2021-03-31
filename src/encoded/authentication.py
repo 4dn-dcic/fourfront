@@ -565,7 +565,9 @@ def create_unauthorized_user(context, request):
     if not recaptcha_resp:
         raise LoginDenied()
 
-    email = request._auth0_authenticated  # equal to: jwt_info['email'].lower()
+    email = "<no auth0 authenticated e-mail supplied>"
+    if hasattr(request, "_auth0_authenticated"):       
+        email = request._auth0_authenticated # equal to: jwt_info['email'].lower()
     user_props = request.json
     user_props_email = user_props.get("email", "<no e-mail supplied>").lower()
     if user_props_email != email:
