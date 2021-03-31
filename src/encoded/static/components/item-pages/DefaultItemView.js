@@ -491,7 +491,8 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
 
     if (!attachmentHref || !isAttachmentImage(filename)) return <EmbeddedItemWithAttachment {...props} />;
 
-    const linkProps = (imageSrc === linkHref) ? { target: '_blank', rel: 'noreferrer' } : {};
+    const openInNewWindow = (imageSrc === linkHref);
+    const linkProps = openInNewWindow ? { target: '_blank', rel: 'noreferrer' } : {};
 
     const imageElem = (
         <a href={linkHref} className="image-wrapper" {...linkProps}>
@@ -507,6 +508,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
                 { fileMicroscopyID && <a href={fileMicroscopyID}>View File Item - { item.microscopy_file.accession }</a> }
+                { !fileMicroscopyID && openInNewWindow && <a href={linkToItem} data-tip="View image item details">View Image Item</a> }
             </div>
         </div>
     );
