@@ -60,36 +60,35 @@ TSV_MAPPING = OrderedDict([
     ('md5sum',                      (FILE,      ['md5sum'], True)),
     ('File Type',                   (FILE,      ['file_type'], True)),
     ('File Format',                 (FILE,      ['file_format.display_title'], True)),
-   #('Experiment Title',            (EXP,       ['display_title'], True)),
-    ('Experiment Type',             (EXP,       ['experiment_type.display_title'], True)),
+    #('Experiment Type',             (EXP,       ['experiment_type.display_title'], True)),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'], True)),
     ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'], True)),
-    ('Condition',                   (EXP_SET,   ['condition'], True)),
-    ('Dataset',                     (EXP_SET,   ['dataset_label'], True)),
+    #('Condition',                   (EXP_SET,   ['condition'], True)),
+    #('Dataset',                     (EXP_SET,   ['dataset_label'], True)),
 
-    ('Biosource',                   (EXP,       ['biosample.biosource_summary'], True)),
+    #('Biosource',                   (EXP,       ['biosample.biosource_summary'], True)),
     ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'], True)),
     ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'], True)),
-    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'], True)),
-   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'], True)),
+    #('Assay Details',               (EXP,       ['experiment_categorizer.combined'], True)),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'], False)),
     ('Related File',                (FILE,      ['related_files.file.accession'], False)),
     ('Paired End',                  (FILE,      ['paired_end'], True)),
     ('Set Status',                  (EXP_SET,   ['status'], True)),
     ('File Status',                 (FILE,      ['status'], True)),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'], True)),
-    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'], True)),
-    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'], True)),
-    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'], True)),
-    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'], True)),
-    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
-    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'], True)), #do not remove trailing whitespace of the key
-    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'], True)),
+    ('Experiment Type ',            (FILE,      ['track_and_facet_info.experiment_type'], True)), #do not remove trailing whitespace of the key
+    ('Replicate Info',              (FILE,      ['track_and_facet_info.replicate_info'], True)),
+    ('Assay Details ',              (FILE,      ['track_and_facet_info.assay_info'], True)), #do not remove trailing whitespace of the key
+    ('Biosource ',                  (FILE,      ['track_and_facet_info.biosource_name'], True)), #do not remove trailing whitespace of the key
+    ('Condition ',                  (FILE,      ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
+    ('Dataset ',                    (FILE,      ['track_and_facet_info.dataset'], True)), #do not remove trailing whitespace of the key
+    ('In Experiment As',            (FILE,      ['track_and_facet_info.experiment_bucket'], True)),
     ('Project',                     (EXP_SET,   ['award.project'], True)),
-    ('Generating Lab',              (FILE,      ['lab.display_title'], True)),
+    ('Generating Lab',              (FILE,      ['track_and_facet_info.lab_name'], True)),
+    ('Experimental Lab',            (FILE,      ['track_and_facet_info.experimental_lab'], True)),
     ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'], True)),
     ('Notes',                       (FILE,      ['notes_to_tsv'], True)),
-    ('URL',                         (FILE,      ['open_data_url'], True)),
+    ('Open Data URL',               (FILE,      ['open_data_url'], True)),
 
 
 

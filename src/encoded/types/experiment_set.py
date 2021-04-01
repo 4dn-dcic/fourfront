@@ -180,6 +180,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.open_data_url",
         "experiments_in_set.files.contributing_labs.display_title",
         "experiments_in_set.files.lab.display_title",
+        "experiments_in_set.files.track_and_facet_info.*",
 
         "experiments_in_set.files.related_files.relationship_type",
         "experiments_in_set.files.related_files.file.accession",
@@ -218,11 +219,12 @@ class ExperimentSet(Item):
         # "processed_files.quality_metric.Sequence length",
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
+        "processed_files.quality_metric.Total reads",
+        "processed_files.quality_metric.qc_list.value.Total reads",
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.notes_to_tsv",
         "processed_files.open_data_url",
-        "processed_files.quality_metric.Total reads",
-        "processed_files.quality_metric.qc_list.value.Total reads",
+        "processed_files.track_and_facet_info.*",
 
         "experiments_in_set.processed_files.href",
         "experiments_in_set.processed_files.accession",
@@ -263,7 +265,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.open_data_url",
         "experiments_in_set.processed_files.contributing_labs.display_title",
         "experiments_in_set.processed_files.lab.display_title",
-        # "experiments_in_set.processed_files.@type"
+        "experiments_in_set.processed_files.track_and_facet_info.*",
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
@@ -282,6 +284,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.open_data_url",
         "other_processed_files.files.contributing_labs.display_title",
         "other_processed_files.files.lab.display_title",
+        "other_processed_files.files.track_and_facet_info.*",
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -305,6 +308,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.open_data_url",
         "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
         "experiments_in_set.other_processed_files.files.lab.display_title",
+        "experiments_in_set.other_processed_files.files.track_and_facet_info.*",
 
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
