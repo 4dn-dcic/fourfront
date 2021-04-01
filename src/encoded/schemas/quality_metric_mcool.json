@@ -29,7 +29,7 @@
         },
         "Failed Balancing": {
             "title": "Failed Balancing",
-            "type": "list",
+            "type": "array",
             "qc_order": 1
         }
     },

@@ -526,6 +526,7 @@ def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
 
     return qc_summary if qc_summary else None
 
+
 @collection(
     name='quality-metrics-mcool',
     properties={
