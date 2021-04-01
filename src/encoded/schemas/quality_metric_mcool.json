@@ -30,8 +30,9 @@
         "Failed Balancing": {
             "title": "Failed Balancing",
             "type": "array",
-            "qc_order": 1
-        }
+            "qc_order": 1,
+            "items": { "type": "string"}
+          }
     },
     "facets": {
         "overall_quality_status": {
