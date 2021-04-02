@@ -80,8 +80,8 @@ TSV_MAPPING = OrderedDict([
     ('Replicate Info',              (FILE,      ['track_and_facet_info.replicate_info'], True)),
     ('Assay Details ',              (FILE,      ['track_and_facet_info.assay_info'], True)), #do not remove trailing whitespace of the key
     ('Biosource ',                  (FILE,      ['track_and_facet_info.biosource_name'], True)), #do not remove trailing whitespace of the key
-    ('Condition ',                  (FILE,      ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
     ('Dataset ',                    (FILE,      ['track_and_facet_info.dataset'], True)), #do not remove trailing whitespace of the key
+    ('Condition ',                  (FILE,      ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
     ('In Experiment As',            (FILE,      ['track_and_facet_info.experiment_bucket'], True)),
     ('Project',                     (EXP_SET,   ['award.project'], True)),
     ('Generating Lab',              (FILE,      ['track_and_facet_info.lab_name'], True)),
