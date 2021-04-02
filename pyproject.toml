@@ -198,4 +198,3 @@ memlimit = "encoded.memlimit:filter_app"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
-
