@@ -31,30 +31,38 @@ class ImagingPath(Item):
         # create a summary for the imaging paths
         # example Chromosomes targeted by DAPI
         # example Protein:Actin_Human targeted by Atto647N-labeled phalloidin
-        # example Protein:Myoglobin_Human targeted by GFP-labeled Goat Secondary Antibody (with Human Globin Antibody)
+        # example Protein:Myoglobin_Human targeted by Human Globin Antibody (with GFP-labeled Goat Secondary Antibody)
         # example GRCh38:1:1000000 targeted by RFP-labeled BAC
-        title = ""
+
         if target:
             targets = []
             for a_target in target:
                 target_title = request.embed(a_target, '@@object').get('display_title')
                 targets.append(target_title)
-            targets_title = ", ".join(targets)
-            title = targets_title
-        if labels:
-            labels_title = ",".join(labels)
-            if title:
-                title = title + " targeted by " + labels_title
-            else:
-                title = labels_title
-        if labeled_probe:
-            if labels:
-                title = title + "-labeled " + labeled_probe
-            elif title:
-                title = title + " targeted by " + labeled_probe
+            target = ", ".join(targets)
         if other_probes:
-            mediators_title = ", ".join(other_probes)
-            title = title + " (with {})".format(mediators_title)
+            other_probes = ", ".join(other_probes)
+        if labels:
+            labels = ",".join(labels)
+
+        labels_title = ""
+        if labels and labeled_probe:
+            labels_title = labels + "-labeled " + labeled_probe
+        elif labels or labeled_probe:
+            labels_title = labels or labeled_probe
+
+        probes_title = ""
+        if other_probes and labels_title:
+            probes_title = other_probes + " (with {})".format(labels_title)
+        elif other_probes or labels_title:
+            probes_title = other_probes or labels_title
+
+        title = ""
+        if target and probes_title:
+            title = target + " targeted by " + probes_title
+        elif target or probes_title:
+            title = target or probes_title
+
         if title:
             return title
         else:
