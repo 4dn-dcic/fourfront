@@ -539,3 +539,19 @@ class QualityMetricMcool(QualityMetric):
     item_type = 'quality_metric_mcool'
     schema = load_schema('encoded:schemas/quality_metric_mcool.json')
     embedded_list = QualityMetric.embedded_list
+
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc = self.properties
+        qc_summary = []
+        val = ''
+        if qc.get("Failed Balancing") == 'None':
+            val = qc.get("Failed Balancing")
+        else:
+            items = qc.get("Failed Balancing")
+            val = ';'.join(items)
+
+        qc_summary.append({"title": "Failed Balancing",
+                           "value": val),
+                           "numberType": "string"})
+        return qc_summary
