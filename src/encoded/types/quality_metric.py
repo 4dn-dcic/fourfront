@@ -552,6 +552,6 @@ class QualityMetricMcool(QualityMetric):
             val = ';'.join(items)
 
         qc_summary.append({"title": "Failed Balancing",
-                           "value": val),
+                           "value": val,
                            "numberType": "string"})
         return qc_summary
