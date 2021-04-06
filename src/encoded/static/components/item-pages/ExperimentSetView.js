@@ -186,8 +186,16 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 
 
 const OverviewHeading = React.memo(function OverviewHeading(props){
-    const { context, schemas } = props;
-    const tips = object.tipsFromSchema(schemas, context);
+    const { context: propContext, schemas } = props;
+    const tips = object.tipsFromSchema(schemas, propContext);
+
+    let context = null;
+    if (context && context.imaging_paths && Array.isArray(context.imaging_paths)) {
+        context = _.clone(propContext);
+        context.imaging_paths = _.chain(context.imaging_paths).sortBy((item) => item.channel).sortBy((item) => item.path && item.path.imaging_rounds).value();
+    } else {
+        context = propContext;
+    }
     const commonProps = { 'result' : context, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
     return (
         <OverviewHeadingContainer {...props}>
