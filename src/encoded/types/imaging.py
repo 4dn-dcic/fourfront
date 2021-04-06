@@ -27,7 +27,9 @@ class ImagingPath(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, request, target=None, labeled_probe=None, other_probes=None, labels=None):
+    def display_title(self, request, target=None, labels=None,
+                      labeled_probe=None, secondary_antibody=None,
+                      other_probes=[], primary_antibodies=[]):
         # create a summary for the imaging paths
         # example Chromosomes targeted by DAPI
         # example Protein:Actin_Human targeted by Atto647N-labeled phalloidin
@@ -40,16 +42,30 @@ class ImagingPath(Item):
                 target_title = request.embed(a_target, '@@object').get('display_title')
                 targets.append(target_title)
             target = ", ".join(targets)
+
+        secondary_probes = []
+        if labeled_probe:
+            secondary_probes.append(labeled_probe)
+        if secondary_antibody:
+            secondary_probes.append(request.embed(secondary_antibody, '@@object').get('antibody_name'))
+        if secondary_probes:
+            secondary_probes = ", ".join(secondary_probes)
+
+        if primary_antibodies:
+            for ab in primary_antibodies:
+                antibody = request.embed(ab, '@@object').get('antibody_name')
+                other_probes.append(antibody)
         if other_probes:
             other_probes = ", ".join(other_probes)
+
         if labels:
             labels = ",".join(labels)
 
         labels_title = ""
-        if labels and labeled_probe:
-            labels_title = labels + "-labeled " + labeled_probe
-        elif labels or labeled_probe:
-            labels_title = labels or labeled_probe
+        if labels and secondary_probes:
+            labels_title = labels + "-labeled " + secondary_probes
+        elif labels or secondary_probes:
+            labels_title = labels or secondary_probes
 
         probes_title = ""
         if other_probes and labels_title:
