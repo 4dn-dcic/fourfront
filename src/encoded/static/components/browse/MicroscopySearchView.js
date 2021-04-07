@@ -29,7 +29,7 @@ const microscopyColExtensionMap = {
     "microscope.MicroscopeStand.Manufacturer": {
         "widthMap": { "sm": 80, "md": 100, "lg": 120 }
     },
-    "microscope.MicroscopeStand.CatalogNumber": {
+    "microscope.MicroscopeStand.Origin": {
         "widthMap": { "sm": 80, "md": 100, "lg": 120 }
     },
     "microscope.MicroscopeStand.Model": {
@@ -51,6 +51,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         this.handleModalCancel = this.handleModalCancel.bind(this);
         this.handleModalConfirm = _.throttle(this.handleModalConfirm.bind(this), 3000);
         this.handleChangeMicroscopeName = this.handleChangeMicroscopeName.bind(this);
+        this.handleChangeDescription = this.handleChangeDescription.bind(this);
         this.handleChangeMicroscopeTier = this.handleChangeMicroscopeTier.bind(this);
         this.handleChangeMicroscopeStandType = this.handleChangeMicroscopeStandType.bind(this);
 
@@ -62,6 +63,7 @@ export default class MicroscopySearchView extends React.PureComponent {
             show: false,
             tier: 1,
             microscopeName: null,
+            description: null,
             standType: null,
             confirmLoading: false
         };
@@ -70,7 +72,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     /** @todo Possibly move into own component instead of method, especially if state can move along with it. */
     createNewMicroscopeConfiguration() {
         const { context, currentAction } = this.props;
-        const { show, tier, microscopeName, standType, confirmLoading } = this.state;
+        const { show, tier, microscopeName, description, standType, confirmLoading } = this.state;
 
         let createNewVisible = false;
         // don't show during submission search "selecting existing"
@@ -91,8 +93,9 @@ export default class MicroscopySearchView extends React.PureComponent {
             'endTier': 3
         };
         const modalProps = {
-            tier, show, confirmLoading, microscopeName, standType,
+            tier, show, confirmLoading, microscopeName, description, standType,
             'handleChangeMicroscopeName': this.handleChangeMicroscopeName,
+            'handleChangeDescription': this.handleChangeDescription,
             'handleChangeMicroscopeStandType': this.handleChangeMicroscopeStandType,
             'handleModalConfirm': this.handleModalConfirm,
             'handleModalCancel': this.handleModalCancel
@@ -112,7 +115,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     handleModalConfirm() {
-        const { microscopeName, tier, standType } = this.state;
+        const { microscopeName, description, tier, standType } = this.state;
 
         const fallbackCallback = (errResp, xhr) => {
             // Error callback
@@ -139,7 +142,8 @@ export default class MicroscopySearchView extends React.PureComponent {
                 "ID": uuidv4(),
                 "Tier": tier,
                 "ValidationTier": tier,
-                "Version": "2.00.0"
+                "Version": "2.00.0",
+                "Description": description
             },
             "components": [],
             "linkedFields": null
@@ -147,7 +151,7 @@ export default class MicroscopySearchView extends React.PureComponent {
 
         const payload = {
             'title': microscopeName,
-            'description': '',
+            'description': description,
             'microscope': microscope,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
@@ -184,6 +188,10 @@ export default class MicroscopySearchView extends React.PureComponent {
 
     handleChangeMicroscopeName(evt) {
         this.setState({ 'microscopeName': evt.target.value });
+    }
+
+    handleChangeDescription(evt) {
+        this.setState({ 'description': evt.target.value });
     }
 
     handleChangeMicroscopeTier(eventKey) {
@@ -236,7 +244,7 @@ const CreateNewConfigurationDropDownButton = React.memo(function (props) {
 });
 
 const CreateNewConfigurationModal = React.memo(function (props) {
-    const { tier, standType, show, confirmLoading, microscopeName, handleChangeMicroscopeName, handleChangeMicroscopeStandType, handleModalConfirm, handleModalCancel } = props;
+    const { tier, standType, show, confirmLoading, microscopeName, description, handleChangeMicroscopeName, handleChangeMicroscopeStandType, handleChangeDescription, handleModalConfirm, handleModalCancel } = props;
     return (
         <Modal className="microscopy-create-modal" show={show}>
             <Modal.Header>
@@ -247,7 +255,7 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                     <div className="col-sm-12 col-md-12">
                         <div className="form-group">
                             <label htmlFor="microscope_name">Microscope Name <span className="text-danger">*</span></label>
-                            <input type="text" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
+                            <input type="text" className="form-control" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
                         </div>
                     </div>
                 </div>
@@ -263,6 +271,14 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                                     </DropdownItem>
                                 ))}
                             </DropdownButton>
+                        </div>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-12 col-md-12">
+                        <div className="form-group">
+                            <label htmlFor="microscope_name">Description</label>
+                            <input type="text" className="form-control" style={{ width: "100%" }} value={description} onChange={handleChangeDescription} placeholder="microscope configuration description" />
                         </div>
                     </div>
                 </div>

@@ -2060,7 +2060,9 @@ $badge-item-min-height: 90px;
 
 /* override default editable field css for HiGlass Views */
 .higlass-editable-page-title.editable-field-entry.editing,
-.higlass-item-page-heading .editable-field-entry.editing {
+.higlass-item-page-heading .editable-field-entry.editing,
+.micro-meta-editable-page-title.editable-field-entry.editing,
+.micro-meta-item-page-heading .editable-field-entry.editing {
 	.input-text {
 		width: 100% !important;
 	}

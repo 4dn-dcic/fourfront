@@ -10,6 +10,7 @@ import { JWT, console, object, layout, ajax, navigate, WindowEventDelegator } fr
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 
 import { ItemFileAttachment } from './components/ItemFileAttachment';
+import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { ConfirmModal } from './HiGlassViewConfigView';
@@ -17,6 +18,20 @@ import { timingSafeEqual } from 'crypto';
 
 
 export default class MicroscopeConfigurationView extends DefaultItemView {
+
+    itemHeader() {
+        const itemActionsDescriptions = {
+            'edit': 'Edit the properties of this Item.',
+        };
+
+        return (
+            <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
+                <TopRow itemActionsDescriptions={itemActionsDescriptions} typeInfoVisible={false} />
+                <MiddleRow isInlineEditable className="micro-meta-item-page-heading" />
+                <BottomRow />
+            </ItemHeaderWrapper>
+        );
+    }
 
     getTabViewContents(){
         const initTabs = [];
