@@ -166,7 +166,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
         }
     },
     'track_and_facet_info.experimental_lab': {
-        'render': function (result, props) {
+        'render' : function (result, props) {
             const {
                 track_and_facet_info: { experimental_lab } = {},
                 lab: { display_title: labTitle } = {},
@@ -178,7 +178,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
                 return labDisplayTitleRenderFxn(...arguments);
             } else {
                 return (
-                    <span className="value">{experimental_lab}</span>
+                    <span className="value">{ experimental_lab }</span>
                 );
             }
         }
