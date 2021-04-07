@@ -565,9 +565,9 @@ export class OverViewBodyItem extends React.PureComponent {
                 <div className="imaging-path-item-wrapper row">
                     <div className="index-num col-1 text-monospace text-500"><small>{ channel }</small></div>
                     <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div>
-                    <div className={"imaging-path col-3"}>{ object.itemUtil.generateLink(experiment_type, true) }</div>
-                    <div className={"imaging-path col-" + (matchingFile ? '3' : '5')}>{ object.itemUtil.generateLink(path, true) }</div>
-                    { matchingFile ? <div className="microscope-setting col-2 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                    <div className={"imaging-path col-3"}>{ object.itemUtil.generateLink(experiment_type, true) || '-' }</div>
+                    <div className={"imaging-path col-" + (matchingFile ? '4' : '5')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    { matchingFile ? <div className="microscope-setting col-1 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
         },
