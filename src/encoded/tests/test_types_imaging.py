@@ -59,6 +59,14 @@ def test_imgpath_displaytitle_antibodies(testapp, img_path_blank, prot_bio_featu
     assert res['display_title'] == 'RAD21 protein targeted by other probe, RAD21 antibody (with AF 647-labeled imaging probe, anti-mouse antibody)'
 
 
+def test_imgpath_displaytitle_duplicate_label_on_secondary_ab(testapp, img_path_blank, prot_bio_feature, s_antibody):
+    labeled_sec_ab = testapp.patch_json(s_antibody['@id'], {'antibody_name': 'anti-mouse AF 647'}).json['@graph'][0]
+    res = testapp.patch_json(img_path_blank['@id'], {'target': [prot_bio_feature['@id']],
+                                                     'secondary_antibody': labeled_sec_ab['@id'],
+                                                     'labels': ['AF 647']}).json['@graph'][0]
+    assert res['display_title'] == 'RAD21 protein targeted by anti-mouse AF 647'
+
+
 def test_imgpath_displaytitle_labels_only(testapp, img_path_blank):
     res = testapp.patch_json(img_path_blank['@id'], {'labels': ['GFP', 'RFP']}).json['@graph'][0]
     assert res['display_title'] == 'GFP,RFP'
