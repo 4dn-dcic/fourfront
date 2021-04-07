@@ -112,6 +112,7 @@ export class MicroMetaTabView extends React.PureComponent {
         this.cloneButton = this.cloneButton.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
+        this.handleZoomInOutChange = this.handleZoomInOutChange.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000);
         this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
@@ -128,7 +129,8 @@ export class MicroMetaTabView extends React.PureComponent {
             'addFileLoading'        : false,
             'modal'                 : null,
             'containerOffsetLeft'   : 0,
-            'containerOffsetTop'    : 0
+            'containerOffsetTop'    : 0,
+            'scalingFactor'         : 1
         };
 
         this.microMetaToolRef = React.createRef();
@@ -402,7 +404,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
         if (!session || !editPermission) return null; // TODO: Remove and implement for anon users. Eventually.
 
-        const btnProps  = {
+        const btnProps = {
             'onSelect'      : this.handleStatusChange,
             //'onClick'       : context.status === 'released' ? null : this.handleStatusChangeToRelease,
             'variant'       : context.status === 'released' ? 'outline-dark' : 'info',
@@ -435,7 +437,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const { saveLoading, mounted } = this.state;
         const tooltip = "Save the current view shown below to this display";
 
-        const editPermission  = this.havePermissionToEdit();
+        const editPermission = this.havePermissionToEdit();
 
         return (
             <button type="button" onClick={this.handleSave} disabled={!mounted || !editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
@@ -455,6 +457,32 @@ export class MicroMetaTabView extends React.PureComponent {
                 <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Clone
             </button>
         );
+    }
+
+    zoomInOutControl(){
+        const { scalingFactor = 0.5 } = this.state;
+        const valueScalingFactor = Math.round(scalingFactor * 100);
+        return (
+            <div className="micro-meta-zoom">
+                <div className="mr-2">Zoom ({valueScalingFactor}%)</div>
+                <div style={{ paddingTop: '5px' }}>
+                    <input type="range" min="0" max="100" value={valueScalingFactor} onChange={this.handleZoomInOutChange} style={{ cursor: 'pointer' }} />
+                </div>
+            </div>
+        );
+    }
+
+    handleZoomInOutChange(e){
+        const round = (number, decimalPlaces) => {
+            const factorOfTen = Math.pow(10, decimalPlaces);
+            return Math.round(number * factorOfTen) / factorOfTen;
+        };
+
+        const value = e.target.value;
+        const scalingFactor = round(value / 100, 2);
+        console.log('xxx value:', value);
+        console.log('xxx scalingFactor:', scalingFactor);
+        this.setState({ 'scalingFactor': scalingFactor });
     }
 
     /**
@@ -541,11 +569,11 @@ export class MicroMetaTabView extends React.PureComponent {
 
     render(){
         const { schemas, isFullscreen, context, windowWidth, windowHeight } = this.props;
-        const { mounted, modal, containerOffsetLeft, containerOffsetTop } = this.state;
+        const { mounted, modal, containerOffsetLeft, containerOffsetTop, scalingFactor } = this.state;
         // const tips = object.tipsFromSchema(schemas, context);
         // const result = context;
         const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
-        const height = Math.max(800, windowHeight /2);
+        const height = Math.max(800, windowHeight / 2);
 
         if (!mounted){
             return (
@@ -566,7 +594,7 @@ export class MicroMetaTabView extends React.PureComponent {
             //loadedMicroscopeConfiguration: { ... },
             imagesPathSVG,
             imagesPathPNG,
-            scalingFactor: 1,
+            scalingFactor,
             key: "4dn-micrometa-app",
             onLoadSchema: function (complete) {
                 // Maybe some UI to select something...
@@ -625,6 +653,7 @@ export class MicroMetaTabView extends React.PureComponent {
                         <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>
+                {this.zoomInOutControl()}
                 {modal}
             </div>
         );
