@@ -56,12 +56,15 @@ class ImagingPath(Item):
         if secondary_probes:
             secondary_probes = ", ".join(secondary_probes)
 
+        primary_probes = []
+        if other_probes:
+            primary_probes.extend(other_probes)
         if primary_antibodies:
             for ab in primary_antibodies:
                 antibody = request.embed(ab, '@@object').get('antibody_name')
-                other_probes.append(antibody)
-        if other_probes:
-            other_probes = ", ".join(other_probes)
+                primary_probes.append(antibody)
+        if primary_probes:
+            primary_probes = ", ".join(primary_probes)
 
         if labels:
             labels = ",".join(labels)
@@ -73,10 +76,10 @@ class ImagingPath(Item):
             labels_title = labels or secondary_probes
 
         probes_title = ""
-        if other_probes and labels_title:
-            probes_title = other_probes + " (with {})".format(labels_title)
-        elif other_probes or labels_title:
-            probes_title = other_probes or labels_title
+        if primary_probes and labels_title:
+            probes_title = primary_probes + " (with {})".format(labels_title)
+        elif primary_probes or labels_title:
+            probes_title = primary_probes or labels_title
 
         title = ""
         if target and probes_title:
