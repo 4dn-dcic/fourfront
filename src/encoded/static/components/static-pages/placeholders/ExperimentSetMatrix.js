@@ -157,7 +157,8 @@ export class ExperimentSetMatrix extends React.PureComponent {
         'headerPadding': PropTypes.number,
         'headerColumnsOrder': PropTypes.arrayOf(PropTypes.string),
         'titleMap': PropTypes.object,
-        'columnSubGroupingOrder': PropTypes.arrayOf(PropTypes.string)
+        'columnSubGroupingOrder': PropTypes.arrayOf(PropTypes.string),
+        'additionalData': PropTypes.object
     }
 
     static convertResult(result, dataSource, fieldChangeMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField){
@@ -206,7 +207,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
         const { sectionKeys } = props;
         if (sectionKeys && Array.isArray(sectionKeys) && sectionKeys.length !== _.uniq(sectionKeys)) {
             //validate prop keys with respect to sectionKeys, log if any missing.
-            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionStyle'];
+            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionStyle', 'additionalData'];
             _.each(propKeys, (key) => {
                 const diff = _.difference(sectionKeys, _.keys(props[key]));
                 if (diff.length > 0) {
@@ -314,7 +315,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
     render() {
         const {
             sectionKeys, queries, groupingProperties, columnGrouping, headerFor, sectionStyle,
-            fieldChangeMap, valueChangeMap
+            fieldChangeMap, valueChangeMap, additionalData
         } = this.props;
 
         const isLoading = _.any(
@@ -358,6 +359,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                                         fieldChangeMap={fieldChangeMap[key]}
                                         valueChangeMap={valueChangeMap[key]}
                                         columnGrouping={columnGrouping[key]}
+                                        additionalData={additionalData[key]}
                                         duplicateHeaders={false}
                                         columnSubGrouping="state"
                                         rowLabelListingProportion={rowLabelListingProportion}
@@ -380,10 +382,21 @@ export class ExperimentSetMatrix extends React.PureComponent {
 
 class VisualBody extends React.PureComponent {
 
-    static blockRenderedContents(data){
+    static blockRenderedContents(data, blockProps) {
+        const { additionalData } = blockProps;
         var count = 0;
         if (Array.isArray(data)) {
-            count = data.length;
+            if (additionalData !==null) {
+                const experimentTypes = additionalData[data[0].cell_type];
+                var experimentItem = _.find(experimentTypes, function (item) { return item.experimentType == data[0].experiment_type; });
+                if (typeof experimentItem !== 'undefined') {
+                    count = data.length + experimentItem.count;
+                }
+                else { count = data.length; }
+            }
+            else {
+                count = data.length;
+            }
         } else if (data) {
             count = 1;
         }
@@ -451,11 +464,24 @@ class VisualBody extends React.PureComponent {
      */
     blockPopover(data, blockProps, parentGrouping){
         const { queryUrl, fieldChangeMap, valueChangeMap, titleMap, groupingProperties, columnGrouping } = this.props;
-        const { depth } = blockProps;
+        const { depth, additionalData } = blockProps;
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
+        let totalData;
+        let title = 'Experiment Sets';
 
-        if (!isGroup && Array.isArray(data)){
+        if (additionalData !== null) {
+            const experimentTypes = additionalData[data[0].cell_type];
+            var experimentItem = _.find(experimentTypes, function (item) { return item.experimentType == data[0].experiment_type; });
+            if (typeof experimentItem !== 'undefined') {
+                totalData=data.length;
+                // totalData = data.length + experimentItem.count;
+                title+=' - Planned '+experimentItem.count;
+            }
+            else { totalData = data.length; }
+        }
+
+        if (!isGroup && Array.isArray(data)) {
             data = data[0];
         }
 
@@ -568,7 +594,7 @@ class VisualBody extends React.PureComponent {
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                 { isGroup ?
                     <div className="inner">
-                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{totalData}</b> {title}</h5>
                         <hr className="mt-0 mb-1"/>
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
                         { makeSearchButton() }
@@ -585,10 +611,10 @@ class VisualBody extends React.PureComponent {
     }
 
     render(){
-        const { results } = this.props;
+        const { results, additionalData } = this.props;
         return (
-            <StackedBlockVisual data={results} checkCollapsibility
-                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding',
+            <StackedBlockVisual data={results} additionalData={additionalData} checkCollapsibility
+                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding', 'additionalData',
                     'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder', 'rowLabelListingProportion')}
                 blockPopover={this.blockPopover}
                 blockClassName={this.blockClassName}

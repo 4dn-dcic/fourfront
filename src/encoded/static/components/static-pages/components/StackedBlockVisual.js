@@ -76,6 +76,7 @@ export class StackedBlockVisual extends React.PureComponent {
     static defaultProps = {
         'groupingProperties' : ['grant_type', 'center_name',  'lab_name'],
         'columnGrouping' : null,
+        'additionalData':null,
         'blockHeight' : 28,
         'blockVerticalSpacing' : 2,
         'blockHorizontalSpacing' : 2,
@@ -384,7 +385,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
         const commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
-            'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover');
+            'groupedDataIndices', 'headerColumnsOrder', 'columnGrouping', 'blockPopover', 'additionalData');
         const width = (props.blockHeight + (props.blockHorizontalSpacing * 2)) + 1;
         const containerGroupStyle = {
             'width'         : width, // Width for each column
@@ -519,7 +520,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     render(){
         const {
             groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, headerColumnsOrder,
-            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding, rowLabelListingProportion
+            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding, rowLabelListingProportion, additionalData
         } = this.props;
         const { open } = this.state;
 
