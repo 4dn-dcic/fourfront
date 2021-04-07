@@ -171,10 +171,10 @@
             "linkTo": "ExperimentType"
         },
         "override_display_title": {
-            "title": "Title",
+            "title": "Override Display Title",
             "type": "string",
             "permission": "import_items",
-            "internal_comment": "Value overrides the calculated display_title",
+            "comment": "Value overrides the calculated display_title",
             "lookup": 900
         }
     },
