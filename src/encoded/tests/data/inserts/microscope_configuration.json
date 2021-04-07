@@ -13,7 +13,7 @@
             "Manufacturer": "Biomedical Imaging Group",
             "Type": "Inverted",
             "SerialNumber": "Custom built on the basis of a Olympus IX-71 Microscope Body; Body SerialNumber = IX711F3",
-            "ValidationTier": 5,
+            "ValidationTier": 3,
             "components": [
                 {
                     "ResolutionUnit": "nm",
@@ -49,7 +49,7 @@
                 {
                     "Name": "New LightGuide",
                     "ID": "7e28febf-1d95-4428-9c11-d30c89a20b1d",
-                    "Tier": 4,
+                    "Tier": 3,
                     "Schema_ID": "LightGuide.json",
                     "Version": "1.06.5",
                     "PositionX": 1314,
@@ -67,7 +67,7 @@
                     "ID": "3944e561-e964-4537-8e38-e4702cfb90c8",
                     "Height": 27.95,
                     "Width": 1196.65,
-                    "Tier": 4,
+                    "Tier": 3,
                     "Schema_ID": "MicroscopeTable.json",
                     "LotNumber": "NA",
                     "PositionX": 519,
@@ -1362,7 +1362,7 @@
                     "Schema_ID": "RelayLens.json"
                 }
             ],
-            "Tier": 5,
+            "Tier": 3,
             "Schema_ID": "Microscope.json",
             "LotNumber": "NA",
             "Name": "TESM_MMA_el_91719",

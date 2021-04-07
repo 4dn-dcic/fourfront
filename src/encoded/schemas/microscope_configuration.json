@@ -9,16 +9,10 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
-        { "$ref": "mixins.json#/release_dates" },
-        { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/tags" },
-        { "$ref": "mixins.json#/dbxrefs" },
-        { "$ref": "mixins.json#/static_embeds" }
+        { "$ref": "user_content.json#/properties" }
     ],
     "mixinFacets": [
         { "$ref": "mixins.json#/facets_common" }
@@ -27,27 +21,13 @@
         "schema_version": {
             "default": "1"
         },
-        "title": {
-            "title": "Title",
-            "type": "string"
-        },
-        "description": {
-            "title": "Description",
-            "description": "Description of microscope configuration.",
-            "type": "string"
-        },
-        "status": {
-            "title": "Status",
+        "name": {
+            "title": "Unique Identifier",
+            "description": "Unique name or ID of this display.",
             "type": "string",
-            "default": "draft",
-            "enum": [
-                "released",
-                "released to project",
-                "released to lab",
-                "draft",
-                "deleted"
-            ],
-            "lookup": 20
+            "uniqueKey": "user_content:name",
+            "lookup" : 1,
+            "exclude_from": ["submit4dn","FFedit-create"]
         },
         "microscope": {
             "type": "object",
@@ -88,6 +68,11 @@
                     "title": "Microscope Stand",
                     "additionalProperties": true,
                     "properties": {
+                        "Description": {
+                            "title": "Description",
+                            "description": "Description of microscope",
+                            "type": "string"
+                        },
                         "Manufacturer": {
                             "title": "Manufacturer",
                             "description": "Manufacturer of microscope",
@@ -96,11 +81,6 @@
                         "Model": {
                             "title": "Model",
                             "description": "Model of microscope",
-                            "type": "string"
-                        },
-                        "CatalogNumber": {
-                            "title": "Catalog Number",
-                            "description": "Catalog number of microscope",
                             "type": "string"
                         },
                         "Type": {
@@ -116,6 +96,11 @@
                                 "Stereomicroscope",
                                 "Other"
                             ]
+                        },
+                        "Origin": {
+                            "title": "Origin",
+                            "description": "Origin of microscope",
+                            "type": "string"
                         }
                     }
                 }
@@ -148,12 +133,12 @@
         },
         "microscope.MicroscopeStand.Type": {
             "title": "Type"
+        },
+        "microscope.MicroscopeStand.Origin": {
+            "title": "Origin"
         }
     },
     "columns": {
-        "submitted_by.display_title": {
-            "title": "Creator"
-        },
         "microscope.Tier": {
             "title": "Tier"
         },
@@ -163,11 +148,18 @@
         "microscope.MicroscopeStand.Model":{
             "title": "Model"
         },
-        "microscope.MicroscopeStand.CatalogNumber":{
-            "title": "Catalog Num."
-        },
         "microscope.MicroscopeStand.Type":{
             "title": "Type"
+        },
+        "microscope.MicroscopeStand.Origin":{
+            "title": "Origin"
+        },
+        "description": {
+            "title": "Description",
+            "default_hidden": true
+        },
+        "submitted_by.display_title": {
+            "title": "Creator"
         }
     },
     "excludedColumns" : ["lab.display_title"]
