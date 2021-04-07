@@ -169,6 +169,13 @@
             "lookup": 100,
             "description": "If multi-modal imaging, a controlled term specifying the type of imaging experiment for this path (e.g. RNA MERFISH, DNA seqFISH)",
             "linkTo": "ExperimentType"
+        },
+        "override_display_title": {
+            "title": "Title",
+            "type": "string",
+            "permission": "import_items",
+            "internal_comment": "Value overrides the calculated display_title",
+            "lookup": 900
         }
     },
     "facets": {

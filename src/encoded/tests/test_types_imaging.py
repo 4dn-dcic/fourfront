@@ -50,6 +50,9 @@ def test_imgpath_displaytitle(testapp, img_path_blank, prot_bio_feature):
                              {'other_probes': ['intermediate probe 1', 'other probe 2']}).json['@graph'][0]
     assert res['display_title'] == ('RAD21 protein targeted by intermediate probe 1, '
                                     'other probe 2 (with GFP,RFP-labeled imaging probe)')
+    res = testapp.patch_json(img_path_blank['@id'],
+                             {'override_display_title': 'Custom title'}).json['@graph'][0]
+    assert res['display_title'] == 'Custom title'
 
 
 def test_imgpath_displaytitle_antibodies(testapp, img_path_blank, prot_bio_feature, p_antibody, s_antibody):

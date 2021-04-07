@@ -29,7 +29,12 @@ class ImagingPath(Item):
     })
     def display_title(self, request, target=None, labels=None,
                       labeled_probe=None, secondary_antibody=None,
-                      other_probes=[], primary_antibodies=[]):
+                      other_probes=[], primary_antibodies=[],
+                      override_display_title=None):
+
+        if override_display_title:
+            return override_display_title
+
         # create a summary for the imaging paths
         # example Chromosomes targeted by DAPI
         # example Protein:Actin_Human targeted by Atto647N-labeled phalloidin
