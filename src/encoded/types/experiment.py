@@ -52,6 +52,13 @@ EXP_CATEGORIZER_SCHEMA = {
 }
 
 
+def _build_experiment_embedded_list():
+    """ Helper function intended to be used to create the embedded list for experiment.
+        All types should implement a function like this going forward.
+    """
+    pass
+
+
 @abstract_collection(
     name='experiments',
     unique_key='accession',
@@ -61,7 +68,13 @@ EXP_CATEGORIZER_SCHEMA = {
         'description': 'Listing of all types of experiments.',
     })
 class Experiment(Item):
-    """The main experiment class."""
+    """The main experiment class.
+
+        As a special reminder on this item, which is a "parent type" item, that when you linkTo this and
+        embed fields from it, you are picking up default_embeds (display_title) and must embed ALL possible
+        fields that could impact it by analyzing the child types.
+    """
+    # TODO: Review embeds of this item for correctness. - Will 1/26/2021
     item_type = 'experiment'
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
@@ -70,92 +83,168 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
     aggregated_items = {
-        "badges": [
-            "messages",
-            "badge.commendation",
-            "badge.warning",
-            "badge.uuid",
-            "badge.@id",
-            "badge.badge_icon",
-            "badge.description"
+        'badges': [
+            'messages',
+            'badge.commendation',
+            'badge.warning',
+            'badge.uuid',
+            'badge.@id',
+            'badge.badge_icon',
+            'badge.description'
         ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        "badges.badge.title",
-        "badges.badge.commendation",
-        "badges.badge.warning",
-        "badges.badge.badge_classification",
-        "badges.badge.description",
-        "badges.badge.badge_icon",
-        "badges.messages",
-        "experiment_sets.experimentset_type",
-        "experiment_sets.@type",
-        "experiment_sets.accession",
-        # "experiment_type.display_title",
-        "produced_in_pub.title",
-        "produced_in_pub.abstract",
-        "produced_in_pub.journal",
-        "produced_in_pub.authors",
-        "produced_in_pub.short_attribution",
-        "produced_in_pub.date_published",
-        "publications_of_exp.title",
-        "publications_of_exp.abstract",
-        "publications_of_exp.journal",
-        "publications_of_exp.authors",
-        "publications_of_exp.short_attribution",
-        "publications_of_exp.date_published",
-        "biosample.accession",
-        "biosample.modifications_summary",
-        "biosample.treatments_summary",
-        "biosample.biosource_summary",
-        "biosample.biosample_type",
-        "biosample.biosource.biosource_type",
-        "biosample.biosource.cell_line.slim_terms",
-        "biosample.biosource.cell_line.synonyms",
-        "biosample.biosource.tissue.slim_terms",
-        "biosample.biosource.tissue.synonyms",
-        "biosample.biosource.individual.organism.name",
-        "biosample.modifications.modification_type",
-        "biosample.modifications.display_title",
-        "biosample.treatments.treatment_type",
-        "biosample.treatments.display_title",
-        "biosample.badges.badge.title",
-        "biosample.badges.badge.commendation",
-        "biosample.badges.badge.warning",
-        "biosample.badges.badge.badge_classification",
-        "biosample.badges.badge.description",
-        "biosample.badges.badge.badge_icon",
-        "biosample.badges.messages",
+        # Badge linkTo
+        'badges.badge.title',
+        'badges.badge.commendation',
+        'badges.badge.warning',
+        'badges.badge.badge_classification',
+        'badges.badge.description',
+        'badges.badge.badge_icon',
+        'badges.messages',
 
-        "experiment_type.experiment_category",
-        "experiment_type.assay_subclass_short",
+        # ExperimentSet linkTo
+        'experiment_sets.experimentset_type',
+        'experiment_sets.@type',
+        'experiment_sets.accession',
 
-        "files.href",
-        "files.accession",
-        "files.uuid",
-        "files.file_size",
-        "files.upload_key",
-        "files.file_format",
-        "files.file_classification",
-        "files.file_type_detailed",
-        "files.paired_end",
-        "files.external_references.*",
-        # "files.badges.badge.title",
-        # "files.badges.badge.commendation",
-        # "files.badges.badge.warning",
-        # "files.badges.badge.badge_classification",
-        # "files.badges.badge.description",
-        # "files.badges.badge.badge_icon",
-        # "files.badges.messages",
-        "files.quality_metric.Total Sequences",
-        "files.quality_metric.Sequence length",
-        "files.quality_metric.url",
-        "files.quality_metric.overall_quality_status",
-        "files.quality_metric.quality_metric_summary.*",
-        "files.notes_to_tsv",
-        "files.open_data_url",
-        "files.track_and_facet_info.*",
+        # Publication linkTo
+        'produced_in_pub.ID',
+        'produced_in_pub.title',
+        'produced_in_pub.abstract',
+        'produced_in_pub.journal',
+        'produced_in_pub.authors',
+        'produced_in_pub.short_attribution',
+        'produced_in_pub.date_published',
 
+        # Publication linkTo
+        'publications_of_exp.ID',
+        'publications_of_exp.title',
+        'publications_of_exp.abstract',
+        'publications_of_exp.journal',
+        'publications_of_exp.authors',
+        'publications_of_exp.short_attribution',
+        'publications_of_exp.date_published',
+
+        # Biosample linkTo
+        'biosample.accession',
+        'biosample.modifications_summary',  # XXX: investigate these calc props for needed embeds
+        'biosample.treatments_summary',
+        'biosample.biosource_summary',
+        'biosample.biosample_type',
+
+        # Biosouce linkTo (lots)
+        'biosample.biosource.*',
+
+        # OntologyTerm linkTo
+        'biosample.biosource.cell_line.slim_terms',
+        'biosample.biosource.cell_line.synonyms',
+        'biosample.biosource.cell_line.preferred_name',
+        'biosample.biosource.cell_line.term_name',
+        'biosample.biosource.cell_line.term_id',
+
+        # OntologyTerm linkTo
+        'biosample.biosource.tissue.slim_terms',
+        'biosample.biosource.tissue.synonyms',
+        'biosample.biosource.tissue.preferred_name',
+        'biosample.biosource.tissue.term_name',
+        'biosample.biosource.tissue.term_id',
+
+        # Organism linkTo
+        'biosample.biosource.individual.organism.name',
+        'biosample.biosource.individual.organism.scientific_name',
+
+        # Modification linkTo
+        'biosample.modifications.modification_type',
+        'biosample.modifications.genomic_change',
+        'biosample.modifications.override_modification_name',
+        'biosample.modifications.description',
+
+        # BioFeature linkTo
+        'biosample.modifications.target_of_mod.feature_type',
+        'biosample.modifications.target_of_mod.preferred_label',
+        'biosample.modifications.target_of_mod.cellular_structure',
+        'biosample.modifications.target_of_mod.organism_name',
+        'biosample.modifications.target_of_mod.relevant_genes',
+        'biosample.modifications.target_of_mod.feature_mods',
+        'biosample.modifications.target_of_mod.genome_location',
+
+        # Treatment linkTo
+        'biosample.treatments.treatment_type',
+        'biosample.treatments.description',
+        'biosample.treatments.chemical',
+        'biosample.treatments.biological_agent',
+        'biosample.treatments.duration',
+        'biosample.treatments.duration_units',
+        'biosample.treatments.concentration',
+        'biosample.treatments.concentration_units',
+        'biosample.treatments.temperature',
+
+        # Construct linkTo
+        'biosample.treatments.constructs.name',
+
+        # Badge linkTo
+        'biosample.badges.badge.title',
+        'biosample.badges.badge.commendation',
+        'biosample.badges.badge.warning',
+        'biosample.badges.badge.badge_classification',
+        'biosample.badges.badge.description',
+        'biosample.badges.badge.badge_icon',
+        'biosample.badges.messages',
+
+        # ExperimentType linkTo
+        'experiment_type.title',
+        'experiment_type.experiment_category',
+        'experiment_type.assay_subclass_short',
+
+        # Files linkTo
+        'files.href',
+        'files.accession',
+        'files.uuid',
+        'files.file_size',
+        'files.upload_key',
+        'files.file_classification',
+        'files.file_type_detailed',
+        'files.paired_end',
+        'files.external_references.*',
+
+        # FileFormat linkTo
+        'files.file_format.file_format',
+
+        # QualityMetric linkTo
+        'files.quality_metric.Total Sequences',
+        'files.quality_metric.Sequence length',
+        'files.quality_metric.url',
+        'files.quality_metric.overall_quality_status',
+        'files.quality_metric.quality_metric_summary.*',
+
+        # FileProcessed linkTo
+        'processed_files.href',
+        'processed_files.accession',
+        'processed_files.uuid',
+        'processed_files.file_size',
+        'processed_files.upload_key',
+        'processed_files.file_classification',
+        'processed_files.file_type_detailed',
+        'processed_files.external_references.*',
+
+        # FileFormat linkTo
+        'processed_files.file_format.file_format',
+
+        # QualityMetric linkTo
+        'processed_files.quality_metric.url',
+        'processed_files.quality_metric.overall_quality_status',
+        'processed_files.quality_metric.quality_metric_summary.*',
+        'processed_files.quality_metric.Total reads',
+        'processed_files.quality_metric.qc_list.value.Total reads',
+
+        # Object
+        'other_processed_files.title',
+        'other_processed_files.description',
+        'other_processed_files.type',
+        'other_processed_files.files.notes_to_tsv',
+
+        # File linkTo
         "processed_files.href",
         "processed_files.accession",
         "processed_files.uuid",
@@ -175,23 +264,31 @@ class Experiment(Item):
         "processed_files.track_and_facet_info.*",
 
         "other_processed_files.files.href",
-        "other_processed_files.title",
-        "other_processed_files.description",
-        "other_processed_files.type",
         "other_processed_files.files.file_type_detailed",
-        "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.status",
-        "other_processed_files.files.last_modified.date_modified",
-        "other_processed_files.files.quality_metric.url",
-        "other_processed_files.files.quality_metric.overall_quality_status",
-        "other_processed_files.files.quality_metric.quality_metric_summary.*",
+        "other_processed_files.files.notes_to_tsv",
         "other_processed_files.files.notes_to_tsv",
         "other_processed_files.files.open_data_url",
         "other_processed_files.files.track_and_facet_info.*",
+        "other_processed_files.files.quality_metric.url",
+        "other_processed_files.files.quality_metric.overall_quality_status",
+        "other_processed_files.files.quality_metric.quality_metric_summary.*",
 
+        # FileFormat linkTo
+        "other_processed_files.files.file_format.file_format",
+
+        # last modification (since just time, no invalidation)
+        "other_processed_files.files.last_modified.date_modified",
+
+        # QualityMetric linkTo
+        'other_processed_files.files.quality_metric.url',
+        'other_processed_files.files.quality_metric.overall_quality_status',
+        'other_processed_files.files.quality_metric.quality_metric_summary.*',
+
+        # FileReference linkTo
         "reference_files.accession",
         "reference_files.file_type_detailed",
         "reference_files.file_size",
@@ -395,7 +492,10 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
-    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name"]
+    embedded_list = Experiment.embedded_list + [
+        # Enzyme linkTo
+        'digestion_enzyme.name'
+    ]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -434,9 +534,36 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
-                                                "targeted_regions.target.display_title",
-                                                "targeted_regions.oligo_file.href"]
+    embedded_list = Experiment.embedded_list + [
+        # Enzyme linkTo
+        'digestion_enzyme.name',
+
+        # Biofeature linkTo
+        'targeted_regions.target.feature_type',
+        'targeted_regions.target.preferred_label',
+        'targeted_regions.target.cellular_structure',
+        'targeted_regions.target.organism_name',
+
+        # GenomicRegion linkTo
+        'targeted_regions.target.genome_location.genome_assembly',
+        'targeted_regions.target.genome_location.location_description',
+        'targeted_regions.target.genome_location.start_coordinate',
+        'targeted_regions.target.genome_location.end_coordinate',
+        'targeted_regions.target.genome_location.chromosome',
+
+        # Object
+        'targeted_regions.target.feature_mods.mod_type',
+        'targeted_regions.target.feature_mods.mod_position',
+
+        # Gene linkTo
+        'targeted_regions.target.relevant_genes.geneid',
+        'targeted_regions.target.relevant_genes.preferred_symbol',
+
+        # File linkTo
+        'targeted_regions.oligo_file.file_format.*',
+        'targeted_regions.oligo_file.accession',
+        'targeted_regions.oligo_file.href',
+    ]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -768,15 +895,21 @@ class ExperimentMic(Experiment):
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
     embedded_list = Experiment.embedded_list + [
-        "files.microscope_settings.ch00_light_source_center_wl",
-        "files.microscope_settings.ch01_light_source_center_wl",
-        "files.microscope_settings.ch02_light_source_center_wl",
-        "files.microscope_settings.ch03_light_source_center_wl",
-        "files.microscope_settings.ch00_lasers_diodes",
-        "files.microscope_settings.ch01_lasers_diodes",
-        "files.microscope_settings.ch02_lasers_diodes",
-        "files.microscope_settings.ch03_lasers_diodes",
+        # Files linkTo
+        'files.accession',  # detect display_title diff
 
+        # MicroscopeSettings linkTo
+        'files.microscope_settings.ch00_light_source_center_wl',
+        'files.microscope_settings.ch01_light_source_center_wl',
+        'files.microscope_settings.ch02_light_source_center_wl',
+        'files.microscope_settings.ch03_light_source_center_wl',
+        'files.microscope_settings.ch00_lasers_diodes',
+        'files.microscope_settings.ch01_lasers_diodes',
+        'files.microscope_settings.ch02_lasers_diodes',
+        'files.microscope_settings.ch03_lasers_diodes',
+
+        # Image linkTo
+        'sample_image.title',
         'sample_image.caption',
         'sample_image.microscopy_file.accession',
         'sample_image.microscopy_file.omerolink',

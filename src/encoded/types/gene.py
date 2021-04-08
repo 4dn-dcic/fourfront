@@ -88,7 +88,11 @@ class Gene(Item):
     item_type = 'gene'
     name_key = 'geneid'
     schema = load_schema('encoded:schemas/gene.json')
-    embedded_list = lab_award_attribution_embed_list + ["organism.scientific_name"]
+    embedded_list = lab_award_attribution_embed_list + [
+        # Organism embed
+        'organism.scientific_name',
+        'organism.name'
+    ]
 
     def _update(self, properties, sheets=None):
         # fetch info from ncbi gene based on id provided

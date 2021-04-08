@@ -25,7 +25,7 @@ from snovault.elasticsearch.create_mapping import (
     compare_against_existing_mapping
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
-from snovault.elasticsearch.indexer_utils import get_namespaced_index
+from snovault.elasticsearch.indexer_utils import get_namespaced_index, compute_invalidation_scope
 from sqlalchemy import MetaData, func
 from timeit import default_timer as timer
 from unittest import mock
@@ -40,7 +40,7 @@ from .test_permissions import wrangler, wrangler_testapp
 notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
 
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)]
+pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 
 POSTGRES_MAJOR_VERSION_EXPECTED = 11
@@ -72,7 +72,8 @@ def app(app_settings, request):
     DBSession.bind.pool.dispose()
 
 
-@pytest.yield_fixture(autouse=True)
+# explicitly specify now (invalidation scope tests don't need this)
+@pytest.yield_fixture
 def setup_and_teardown(app):
     """
     Run create mapping and purge queue before tests and clear out the
@@ -101,7 +102,8 @@ def setup_and_teardown(app):
 
 
 @pytest.mark.slow
-def test_indexing_simple(app, testapp, indexer_testapp):
+@pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
+def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
     es = app.registry['elasticsearch']
     namespaced_ppp = get_namespaced_index(app, 'testing_post_put_patch')
     doc_count = es.count(index=namespaced_ppp, doc_type='testing_post_put_patch').get('count')
@@ -144,7 +146,8 @@ def test_indexing_simple(app, testapp, indexer_testapp):
     assert testing_ppp_settings['settings']['index']['number_of_shards'] == '1'
 
 
-def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
+@pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
+def test_create_mapping_on_indexing(setup_and_teardown, app, testapp, registry, elasticsearch):
     """
     Test overall create_mapping functionality using app.
     Do this by checking es directly before and after running mapping.
@@ -173,7 +176,8 @@ def test_create_mapping_on_indexing(app, testapp, registry, elasticsearch):
 
 @pytest.mark.broken  # Doesn't work on GitHub Actions
 @pytest.mark.skip
-def test_file_processed_detailed(app, testapp, indexer_testapp, award, lab, file_formats):
+@pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
+def test_file_processed_detailed(setup_and_teardown, app, testapp, indexer_testapp, award, lab, file_formats):
     # post file_processed
     item = {
         'award': award['uuid'],
@@ -233,7 +237,8 @@ def test_file_processed_detailed(app, testapp, indexer_testapp, award, lab, file
     assert found_rel_sid > found_fp_sid  # sid of related file is greater
 
 
-def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_formats):
+@pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
+def test_real_validation_error(setup_and_teardown, app, indexer_testapp, testapp, lab, award, file_formats):
     """
     Create an item (file-processed) with a validation error and index,
     to ensure that validation errors work
@@ -287,7 +292,7 @@ def test_real_validation_error(app, indexer_testapp, testapp, lab, award, file_f
 
 # @pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
-def test_load_and_index_perf_data(testapp, indexer_testapp):
+def test_load_and_index_perf_data(setup_and_teardown, testapp, indexer_testapp):
     '''
     ~~ CURRENTLY NOT WORKING ~~
 
@@ -348,7 +353,8 @@ def test_load_and_index_perf_data(testapp, indexer_testapp):
     # assert False
 
 
-def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
+@pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
+def test_permissions_database_applies_permissions(setup_and_teardown, award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
     """ Tests that anontestapp gets view denied when using datastore=database """
     file_item_body = {
         'award': award['uuid'],
@@ -367,3 +373,144 @@ def test_permissions_database_applies_permissions(award, lab, file_formats, wran
     assert res['file_format'] == {'error': 'no view permissions'}
     res = anontestapp.get('/' + item_id + '?datastore=database').json
     assert res['file_format'] == {'error': 'no view permissions'}
+
+
+class TestInvalidationScopeViewFourfront:
+    """ Integrated testing of invalidation scope - requires ES component, so in this file. """
+    DEFAULT_SCOPE = ['status', 'uuid']  # --> this is what you get if there is nothing
+
+    class MockedRequest:
+        def __init__(self, registry, source_type, target_type):
+            self.registry = registry
+            self.json = {
+                'source_type': source_type,
+                'target_type': target_type
+            }
+
+    @pytest.mark.parametrize('source_type, target_type, invalidated', [
+        # Test WorkflowRun
+        ('FileProcessed', 'WorkflowRunAwsem',
+            DEFAULT_SCOPE + ['accession', 'file_format', 'filename', 'file_size']
+         ),
+        ('Software', 'WorkflowRunAwsem',
+            DEFAULT_SCOPE + ['name', 'title', 'version', 'source_url']
+         ),
+        ('Workflow', 'WorkflowRunAwsem',
+            DEFAULT_SCOPE + ['category', 'experiment_types', 'app_name', 'title']
+         ),
+        ('WorkflowRunAwsem', 'FileProcessed',  # no link
+            DEFAULT_SCOPE
+         ),
+        # Test FileProcessed
+        ('Enzyme', 'FileProcessed',  # embeds 'name'
+            DEFAULT_SCOPE + ['name']
+         ),
+        ('ExperimentType', 'FileProcessed',  # embeds 'title'
+            DEFAULT_SCOPE + ['title']
+         ),
+        ('ExperimentSet', 'FileProcessed',  # embeds 'title'
+            DEFAULT_SCOPE + ['accession', 'experimentset_type']
+         ),
+        ('Biosample', 'FileProcessed',  # embeds 'accession' + calc props (not detected)
+            DEFAULT_SCOPE + ['accession']
+         ),
+        ('Biosource', 'FileProcessed',
+            DEFAULT_SCOPE + ['biosource_type', 'cell_line_tier', 'override_biosource_name']
+         ),
+        ('BioFeature', 'FileProcessed',
+            DEFAULT_SCOPE + ['preferred_label', 'feature_type', 'organism_name', 'genome_location',
+                             'relevant_genes', 'cellular_structure']
+         ),
+        ('OntologyTerm', 'FileProcessed',
+            DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name']
+         ),
+        ('Organism', 'FileProcessed',
+            DEFAULT_SCOPE + ['name', 'scientific_name']
+         ),
+        ('Modification', 'FileProcessed',
+            DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'override_modification_name']
+         ),
+        # Test ExperimentSet
+        ('FileProcessed', 'ExperimentSet',
+            DEFAULT_SCOPE + ['accession', 'description', 'file_format', 'file_type', 'file_classification',
+                             'md5sum', 'file_size', 'notes_to_tsv', 'higlass_uid',
+                             'genome_assembly']
+         ),
+        ('User', 'ExperimentSet',
+            DEFAULT_SCOPE + ['email', 'first_name', 'last_name', 'preferred_email',
+                             'job_title', 'timezone']
+         ),
+        ('Badge', 'ExperimentSet',
+            DEFAULT_SCOPE + ['title', 'badge_classification', 'badge_icon', 'description']
+         ),
+        ('TreatmentAgent', 'ExperimentSet',
+            DEFAULT_SCOPE + ['treatment_type', 'description', 'chemical', 'biological_agent',
+                             'duration', 'duration_units', 'concentration', 'concentration_units',
+                             'temperature']
+         ),
+        ('OntologyTerm', 'ExperimentSet',
+            DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name', 'slim_terms', 'synonyms']
+         ),
+        ('Organism', 'ExperimentSet',
+            DEFAULT_SCOPE + ['name']
+         ),
+        ('Modification', 'ExperimentSet',
+            DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'override_modification_name']
+         ),
+        ('BioFeature', 'ExperimentSet',
+            DEFAULT_SCOPE + ['feature_type', 'preferred_label', 'cellular_structure', 'organism_name', 'relevant_genes',
+                             'genome_location']
+         ),
+        ('Biosample', 'ExperimentSet',
+            DEFAULT_SCOPE + ['accession']  # XXX: this embeds calc props that are not fully reflected IMO - Will 3/31/21
+         ),
+        ('Biosource', 'ExperimentSet',
+            DEFAULT_SCOPE + ['biosource_type', 'cell_line_tier', 'override_biosource_name']
+         ),
+        ('Construct', 'ExperimentSet',
+            DEFAULT_SCOPE + ['name']
+         ),
+        ('Enzyme', 'ExperimentSet',
+            DEFAULT_SCOPE + ['name']
+         ),
+        ('FileProcessed', 'ExperimentSet',
+            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description',
+                             'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
+         ),
+        ('FileReference', 'ExperimentSet',
+         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description',
+                          'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
+         ),
+        ('FileFormat', 'ExperimentSet',
+            DEFAULT_SCOPE + ['file_format']
+         ),
+        ('QualityMetricFastqc', 'ExperimentSet',
+            DEFAULT_SCOPE + ['Sequence length', 'Total Sequences', 'overall_quality_status', 'url']
+         ),
+        ('QualityMetricMargi', 'ExperimentSet',
+            DEFAULT_SCOPE + ['overall_quality_status', 'url']
+         ),
+        ('QualityMetricBamqc', 'ExperimentSet',
+            DEFAULT_SCOPE + ['overall_quality_status', 'url']
+         ),
+    ])
+    def test_invalidation_scope_view_parametrized(self, indexer_testapp, source_type, target_type, invalidated):
+        """ Just call the route function - test some basic interactions.
+            In this test, the source_type is the type on which we simulate a modification and target type is
+            the type we are simulating an invalidation on. In all cases uuid and status will trigger invalidation
+            if a linkTo exists, so those fields are always returned as part of the invalidation scope (even when no
+            link exists).
+        """
+        req = self.MockedRequest(indexer_testapp.app.registry, source_type, target_type)
+        scope = compute_invalidation_scope(None, req)
+        assert sorted(scope['Invalidated']) == sorted(invalidated)
+
+    # @pytest.mark.broken
+    # @pytest.mark.parametrize('source_type, target_type, invalidated', [
+    #     # Put test here
+    # ])
+    # def test_invalidation_scope_view_parametrized_broken(self, indexer_testapp, source_type, target_type, invalidated):
+    #     """ Collect error cases on this test when found. """
+    #     req = self.MockedRequest(indexer_testapp.app.registry, source_type, target_type)
+    #     scope = compute_invalidation_scope(None, req)
+    #     assert sorted(scope['Invalidated']) == sorted(invalidated)
