@@ -566,7 +566,7 @@ export class OverViewBodyItem extends React.PureComponent {
                     <div className="index-num col-1 text-monospace text-500"><small>{ channel }</small></div>
                     <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div>
                     <div className={"imaging-path col-3"}>{ object.itemUtil.generateLink(experiment_type, true) || '-' }</div>
-                    <div className={"imaging-path col-" + (matchingFile ? '4' : '5')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    <div className={"imaging-path col-" + (matchingFile ? '5' : '6')}>{ object.itemUtil.generateLink(path, true) }</div>
                     { matchingFile ? <div className="microscope-setting col-1 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
@@ -577,7 +577,7 @@ export class OverViewBodyItem extends React.PureComponent {
                     <div className={"imaging-path col-1"}>{ 'Channel' }</div>
                     <div className={"imaging-path col-2"}>{ 'Imaging Rounds' }</div>
                     <div className={"imaging-path col-3"}>{ 'Experiment Type' }</div>
-                    <div className={"imaging-path col-5"}>{ 'Path' }</div>
+                    <div className={"imaging-path col-6"}>{ 'Path' }</div>
                 </div>
             );
         }

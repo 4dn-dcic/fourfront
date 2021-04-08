@@ -190,9 +190,10 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
     const tips = object.tipsFromSchema(schemas, propContext);
 
     let context = null;
-    if (context && context.imaging_paths && Array.isArray(context.imaging_paths) && context.imaging_paths.length > 0) {
+    //reorder imaging_paths by channel and imaging_rounds
+    if (propContext && propContext.imaging_paths && Array.isArray(propContext.imaging_paths) && propContext.imaging_paths.length > 0) {
         context = _.clone(propContext);
-        context.imaging_paths = _.chain(context.imaging_paths).sortBy((item) => item.channel).sortBy((item) => item.path && item.path.imaging_rounds).value();
+        context.imaging_paths = _.chain(context.imaging_paths).sortBy((item) => item.path && item.path.imaging_rounds).sortBy((item) => item.channel).value();
     } else {
         context = propContext;
     }
