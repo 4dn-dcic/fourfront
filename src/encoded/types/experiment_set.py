@@ -225,6 +225,10 @@ class ExperimentSet(Item):
         "experiments_in_set.files.status",
         "experiments_in_set.files.notes_to_tsv",
         "experiments_in_set.files.external_references.*",
+        "experiments_in_set.files.open_data_url",
+        "experiments_in_set.files.contributing_labs.display_title",
+        "experiments_in_set.files.lab.display_title",
+        "experiments_in_set.files.track_and_facet_info.*",
 
         # FileFormat linkTo
         "experiments_in_set.files.file_format.file_format",
@@ -308,8 +312,13 @@ class ExperimentSet(Item):
         "processed_files.quality_metric.url",
         "processed_files.quality_metric.overall_quality_status",
         "processed_files.quality_metric.quality_metric_summary.*",
+
         "processed_files.quality_metric.Total reads",
         "processed_files.quality_metric.qc_list.value.Total reads",
+        "processed_files.quality_metric.quality_metric_summary.*",
+        "processed_files.notes_to_tsv",
+        "processed_files.open_data_url",
+        "processed_files.track_and_facet_info.*",
 
         # FileProcessed linkTo
         "experiments_in_set.processed_files.href",
@@ -357,6 +366,11 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.last_modified.date_modified",
         "experiments_in_set.processed_files.contributing_labs.name",
         "experiments_in_set.processed_files.lab.name",
+        "experiments_in_set.processed_files.notes_to_tsv",
+        "experiments_in_set.processed_files.open_data_url",
+        "experiments_in_set.processed_files.contributing_labs.display_title",
+        "experiments_in_set.processed_files.lab.display_title",
+        "experiments_in_set.processed_files.track_and_facet_info.*",
 
         "other_processed_files.files.accession",
         "other_processed_files.files.file_type_detailed",
@@ -367,6 +381,10 @@ class ExperimentSet(Item):
         "other_processed_files.files.href",
         "other_processed_files.files.status",
         "other_processed_files.files.md5sum",
+        "other_processed_files.files.open_data_url",
+        "other_processed_files.files.contributing_labs.display_title",
+        "other_processed_files.files.lab.display_title",
+        "other_processed_files.files.track_and_facet_info.*",
 
         "other_processed_files.files.last_modified.date_modified",
 
@@ -379,6 +397,7 @@ class ExperimentSet(Item):
         "other_processed_files.files.contributing_labs.name",
         "other_processed_files.files.lab.name",
 
+        # higlass view config linkTO
         "other_processed_files.higlass_view_config.description",
         "other_processed_files.higlass_view_config.last_modified.date_modified",
 
@@ -398,6 +417,10 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
+        "experiments_in_set.other_processed_files.files.open_data_url",
+        "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
+        "experiments_in_set.other_processed_files.files.lab.display_title",
+        "experiments_in_set.other_processed_files.files.track_and_facet_info.*",
 
         # FileFormat linkTo
         "experiments_in_set.other_processed_files.files.file_format.file_format",
@@ -406,6 +429,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.contributing_labs.name",
         "experiments_in_set.other_processed_files.files.lab.name",
 
+        # File linkTo
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
         "experiments_in_set.reference_files.file_type_detailed",
