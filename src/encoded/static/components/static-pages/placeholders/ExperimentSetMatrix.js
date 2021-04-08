@@ -387,8 +387,8 @@ class VisualBody extends React.PureComponent {
         var count = 0;
         if (Array.isArray(data)) {
             if (additionalData !==null) {
-                const experimentTypes = additionalData[data[0].cell_type];
-                var experimentItem = _.find(experimentTypes, function (item) { return item.experimentType == data[0].experiment_type; });
+                const experimentTypes= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
+                var experimentItem = _.find(experimentTypes, function (item) { return item.experiment_type == data[0].experiment_type; });
                 if (typeof experimentItem !== 'undefined') {
                     count = data.length + experimentItem.count;
                 }
@@ -470,9 +470,9 @@ class VisualBody extends React.PureComponent {
         let totalData;
         let title = 'Experiment Sets';
 
-        if (additionalData !== null) {
-            const experimentTypes = additionalData[data[0].cell_type];
-            var experimentItem = _.find(experimentTypes, function (item) { return item.experimentType == data[0].experiment_type; });
+        if (additionalData !==null) {
+            const experimentTypes= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
+            var experimentItem = _.find(experimentTypes, function (item) { return item.experiment_type == data[0].experiment_type; });
             if (typeof experimentItem !== 'undefined') {
                 totalData=data.length;
                 // totalData = data.length + experimentItem.count;
