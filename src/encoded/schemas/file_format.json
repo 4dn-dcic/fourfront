@@ -31,6 +31,17 @@
                 "deleted"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "file_format": {
             "title": "File Format",
             "type": "string",
