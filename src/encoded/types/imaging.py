@@ -6,6 +6,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    get_item_or_none,
     lab_award_attribution_embed_list
 )
 
@@ -44,7 +45,7 @@ class ImagingPath(Item):
         if target:
             targets = []
             for a_target in target:
-                target_title = request.embed(a_target, '@@object').get('display_title')
+                target_title = get_item_or_none(request, a_target, 'bio_feature').get('display_title')
                 targets.append(target_title)
             target = ", ".join(targets)
 
@@ -52,7 +53,7 @@ class ImagingPath(Item):
         if labeled_probe:
             labeled_probes.append(labeled_probe)
         if secondary_antibody:
-            labeled_probes.append(request.embed(secondary_antibody, '@@object').get('antibody_name'))
+            labeled_probes.append(get_item_or_none(request, secondary_antibody, 'antibody').get('antibody_name'))
         if labeled_probes:
             labeled_probes = ", ".join(labeled_probes)
 
@@ -61,7 +62,7 @@ class ImagingPath(Item):
             primary_probes.extend(other_probes)
         if primary_antibodies:
             for ab in primary_antibodies:
-                antibody = request.embed(ab, '@@object').get('antibody_name')
+                antibody = get_item_or_none(request, ab, 'antibody').get('antibody_name')
                 primary_probes.append(antibody)
         if primary_probes:
             primary_probes = ", ".join(primary_probes)
