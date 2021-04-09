@@ -147,22 +147,29 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             }
         }
     },
-    'track_and_facet_info.lab_name' : {
-        'render' : function(result, props){
+    'track_and_facet_info.lab_name': {
+        'render': function (result, props) {
             const {
                 track_and_facet_info: { lab_name } = {},
-                lab : { display_title: labTitle } = {},
-                contributing_labs
+                lab: { display_title: labTitle } = {},
+                contributing_labs = []
             } = result;
+
             if (!lab_name) return null;
-            if ((lab_name && labTitle && lab_name === labTitle) || (contributing_labs && _.contains(_.pluck(contributing_labs, 'display_title'), labTitle))) {
+            if (labTitle && lab_name === labTitle) {
                 // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
                 return labDisplayTitleRenderFxn(...arguments);
-            } else {
-                return (
-                    <span className="value">{ lab_name }</span>
-                );
             }
+            if (typeof contributing_labs !== 'undefined') {
+                const contributingLabFound = contributing_labs.find(function ({ display_title: contributingLabTitle }) {
+                    return contributingLabTitle === lab_name;
+                });
+                if (contributingLabFound) {
+                    return labDisplayTitleRenderFxn({ ...result, "lab": contributingLabFound }, props);
+                }
+            }
+
+            return <span className="value">{lab_name}</span>;
         }
     },
     'track_and_facet_info.experimental_lab': {
@@ -173,14 +180,20 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
                 contributing_labs
             } = result;
             if (!experimental_lab) return null;
-            if ((experimental_lab && labTitle && experimental_lab === labTitle) || (contributing_labs && _.contains(_.pluck(contributing_labs, 'display_title'), labTitle))) {
-                // If same exact experimental lab name as our lab.display_title, then we just use lab render method to get link to lab.
+            if (labTitle && experimental_lab === labTitle) {
+                // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
                 return labDisplayTitleRenderFxn(...arguments);
-            } else {
-                return (
-                    <span className="value">{ experimental_lab }</span>
-                );
             }
+            if (typeof contributing_labs !== 'undefined') {
+                const contributingLabFound = contributing_labs.find(function ({ display_title: contributingLabTitle }) {
+                    return contributingLabTitle === experimental_lab;
+                });
+                if (contributingLabFound) {
+                    return labDisplayTitleRenderFxn({ ...result, "lab": contributingLabFound }, props);
+                }
+            }
+
+            return <span className="value">{experimental_lab}</span>;
         }
     },
     'public_release' : {
