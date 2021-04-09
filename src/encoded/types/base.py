@@ -385,6 +385,12 @@ class Item(snovault.Item):
                             grps.append(group)
                     for g in grps:
                         del roles[g]
+
+        # this is for access to item specific view group
+        if 'viewable_by' in properties:
+            for vg in properties.get('viewable_by', [])
+            roles['viewing_group.{}'.format(vg)] = 'role.viewing_group_member'
+
         # This emulates __ac_local_roles__ of User.py (role.owner)
         if 'submitted_by' in properties:
             submitter = 'userid.%s' % properties['submitted_by']
