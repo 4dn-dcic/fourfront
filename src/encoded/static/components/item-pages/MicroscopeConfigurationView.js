@@ -43,54 +43,9 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 }
 
 
-/**
- * @todo:
- * Make these be instance methods of MicroMetaTabView _or_ some other
- * component(s) & implement logic.
- * It might be useful to split into 2 components - 1 to handle logic &
- * render/clone out props.children with those functions, and
- * 1 to handle the view, but uncertain.
- */
-
-/**
- * Likely won't change much, maybe just to use own `ajax.load`
- * instead of window.fetch. Can probably be kept as a static standalone
- * function for re-usability.
- */
-function onLoadSchema(complete) {
-    /*
-    ajax.load(
-        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchema.json",
-        (res)=>{
-            console.log("RES", res);
-        },
-        "GET",
-        null,
-        null,
-        { },
-        ["Content-Type", "Accept", "X-Requested-With"]
-    );
-    */
-    ///*
-    window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
-    window
-        .fetch(
-            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaV5.json"
-        )
-        .then(function(resp) {
-            console.log(resp);
-            return resp.text();
-        })
-        .then(function(respText) {
-            var schema = JSON.parse(respText);
-            complete(schema);
-        });
-    // */
-}
-
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/schemasV5_images/svg/";
-const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/schemasV5_images/png/";
+const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/images/svg/";
+const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/images/png/";
 
 let MicroscopyMetadataTool = null;
 
@@ -480,8 +435,6 @@ export class MicroMetaTabView extends React.PureComponent {
 
         const value = e.target.value;
         const scalingFactor = round(value / 100, 2);
-        console.log('xxx value:', value);
-        console.log('xxx scalingFactor:', scalingFactor);
         this.setState({ 'scalingFactor': scalingFactor });
     }
 
@@ -588,7 +541,6 @@ export class MicroMetaTabView extends React.PureComponent {
             containerOffsetLeft,
             containerOffsetTop,
             //onLoadMicroscopes,
-            // onLoadSchema,
             onSaveMicroscope: this.onSaveMicroscope,
             //visualizeImmediately: true,
             //loadedMicroscopeConfiguration: { ... },
@@ -596,13 +548,22 @@ export class MicroMetaTabView extends React.PureComponent {
             imagesPathPNG,
             scalingFactor,
             key: "4dn-micrometa-app",
+            isCreatingNewMicroscope: true,
+            isLoadingMicroscope: false,
+            isLoadingSettings: false,
+            isLoadingImage: false,
+            is4DNPortal: true,
+            hasImport: true,
+            onReturnToMicroscopeList: function () {
+                navigate('/microscope-configurations/');
+            },
             onLoadSchema: function (complete) {
                 // Maybe some UI to select something...
                 // Not all browsers have `window.fetch`, used for demoing purposes.
                 // Also, window.fetch requires HTTP so we getting this from GitHub... lol
                 window
                     .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaV5.json"
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
                     )
                     .then(function (resp) {
                         console.log(resp);
@@ -619,7 +580,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 // Also, window.fetch requires HTTP so we getting this from GitHub... lol
                 window
                     .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/dimensionsV2/MicroscopeDimensions.json"
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/dimensions/MicroscopeDimensions.json"
                     )
                     .then(function (resp) {
                         console.log(resp);

@@ -135,14 +135,14 @@ export default class MicroscopySearchView extends React.PureComponent {
             "ID": uuidv4(),
             "Tier": tier,
             "ValidationTier": tier,
-            "Version": "2.00.0",
+            "ModelVersion": "2.00.0",
             "MicroscopeStand": {
                 "Name": microscopeName,
                 "Schema_ID": stand && stand.json ? stand.json + ".json" : null,
                 "ID": uuidv4(),
                 "Tier": tier,
                 "ValidationTier": tier,
-                "Version": "2.00.0",
+                "ModelVersion": "2.00.0",
                 "Description": description
             },
             "components": [],
