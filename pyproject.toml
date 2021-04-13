@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "2.6.5"
+version = "3.0.1"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -42,7 +42,7 @@ botocore = "^1.20.15"
 certifi = ">=2020.11.8"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault = "4.6.0"
+dcicsnovault = "4.7.2"
 dcicutils = "^1.11.0"
 docutils = "0.12"
 elasticsearch = "6.8.1"
@@ -198,4 +198,3 @@ memlimit = "encoded.memlimit:filter_app"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
-
