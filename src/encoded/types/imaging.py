@@ -9,6 +9,31 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_imaging_embedded_list():
+    """ Helper function intended to be used to create the embedded list for imaging path.
+        All types should implement a function like this going forward.
+    """
+    bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='target',
+                                                                    t='bio_feature')
+    return (
+            Item.embedded_list + lab_award_attribution_embed_list + bio_feature_embeds + [
+                # Antibody linkTo - primary_antibodies and secondary_antibody
+                'primary_antibodies.antibody_name',  # display_title uses this
+                'primary_antibodies.antibody_product_no',
+                'secondary_antibody.antibody_name',  # display_title uses this
+                'secondary_antibody.antibody_product_no'
+
+                # FileReference linkTo
+                'file_reference.accession',
+                'file_reference.file_format.standard_file_extension'
+
+                # ExperimentType linkTo
+                'experiment_type.title'
+            ]
+    )
 
 
 @collection(
@@ -21,7 +46,7 @@ class ImagingPath(Item):
     """Imaging Path class."""
     item_type = 'imaging_path'
     schema = load_schema('encoded:schemas/imaging_path.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    embedded_list = _build_imaging_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",
