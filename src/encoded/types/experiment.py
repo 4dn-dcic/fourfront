@@ -30,6 +30,7 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
 
 EXP_CATEGORIZER_SCHEMA = {
     "title": "Categorizer",
@@ -269,7 +270,6 @@ class Experiment(Item):
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.status",
-        "other_processed_files.files.notes_to_tsv",
         "other_processed_files.files.notes_to_tsv",
         "other_processed_files.files.open_data_url",
         "other_processed_files.files.track_and_facet_info.*",
@@ -883,18 +883,18 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
-@collection(
-    name='experiments-mic',
-    unique_key='accession',
-    properties={
-        'title': 'Microscopy Experiments',
-        'description': 'Listing of Microscopy Experiments',
-    })
-class ExperimentMic(Experiment):
-    """The experiment class for Microscopy experiments."""
-    item_type = 'experiment_mic'
-    schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded_list = Experiment.embedded_list + [
+def _build_experiment_mic_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentMic.
+        All types should implement a function like this going forward.
+    """
+    imaging_path_embeds = DependencyEmbedder.embed_for_type(
+        base_path='imaging_paths.path',
+        t='imaging_path',
+        additional_embeds=['imaging_rounds', 'experiment_type.title'])
+    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='imaging_paths.path.target',
+        t='bio_feature')
+    return (Experiment.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
         # Files linkTo
         'files.accession',  # detect display_title diff
 
@@ -903,10 +903,12 @@ class ExperimentMic(Experiment):
         'files.microscope_settings.ch01_light_source_center_wl',
         'files.microscope_settings.ch02_light_source_center_wl',
         'files.microscope_settings.ch03_light_source_center_wl',
+        'files.microscope_settings.ch04_light_source_center_wl',
         'files.microscope_settings.ch00_lasers_diodes',
         'files.microscope_settings.ch01_lasers_diodes',
         'files.microscope_settings.ch02_lasers_diodes',
         'files.microscope_settings.ch03_lasers_diodes',
+        'files.microscope_settings.ch04_lasers_diodes',
 
         # Image linkTo
         'sample_image.title',
@@ -919,10 +921,23 @@ class ExperimentMic(Experiment):
         'sample_image.attachment.download',
         'sample_image.attachment.width',
         'sample_image.attachment.height',
+        ]
+    )
 
-        'imaging_paths.path.imaging_rounds',
-        'imaging_paths.path.experiment_type'
-    ]
+
+@collection(
+    name='experiments-mic',
+    unique_key='accession',
+    properties={
+        'title': 'Microscopy Experiments',
+        'description': 'Listing of Microscopy Experiments',
+    })
+class ExperimentMic(Experiment):
+    """The experiment class for Microscopy experiments."""
+    item_type = 'experiment_mic'
+    schema = load_schema('encoded:schemas/experiment_mic.json')
+
+    embedded_list = _build_experiment_mic_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
