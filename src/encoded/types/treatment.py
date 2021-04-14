@@ -29,6 +29,16 @@ class Treatment(Item):
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
 
+def _build_treatments_agent_embedded_list():
+    """ Helper function intended to be used to create the embedded list for treatments_agent.
+        All types should implement a function like this going forward.
+    """
+    return Treatment.embedded_list + [
+        # Construct linkTo
+        'constructs.name'
+    ]
+
+
 @collection(
     name='treatments-agent',
     properties={
@@ -40,7 +50,7 @@ class TreatmentAgent(Treatment):
 
     item_type = 'treatment_agent'
     schema = load_schema('encoded:schemas/treatment_agent.json')
-    embedded_list = Treatment.embedded_list + ['constructs.name']
+    embedded_list = _build_treatments_agent_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -82,6 +92,21 @@ class TreatmentAgent(Treatment):
         return disp_title
 
 
+def _build_treatments_rnai_embedded_list():
+    """ Helper function intended to be used to create the embedded list for treatments_rnai.
+        All types should implement a function like this going forward.
+    """
+    return Treatment.embedded_list + [
+        # Vendor linkTo
+        'rnai_vendor.name',
+        'rnai_vendor.title',
+
+        # Construct linkTo
+        'constructs.designed_to_target',
+        'constructs.name',
+    ]
+
+
 @collection(
     name='treatments-rnai',
     properties={
@@ -93,10 +118,7 @@ class TreatmentRnai(Treatment):
 
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
-    embedded_list = Treatment.embedded_list + [
-        'rnai_vendor.name',
-        'constructs.designed_to_target',
-    ]
+    embedded_list = _build_treatments_rnai_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",
