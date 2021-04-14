@@ -24,14 +24,14 @@ def _build_imaging_embedded_list():
                 'primary_antibodies.antibody_name',  # display_title uses this
                 'primary_antibodies.antibody_product_no',
                 'secondary_antibody.antibody_name',  # display_title uses this
-                'secondary_antibody.antibody_product_no'
+                'secondary_antibody.antibody_product_no',
 
                 # FileReference linkTo
                 'file_reference.accession',
-                'file_reference.file_format.standard_file_extension'
+                'file_reference.file_format.standard_file_extension',
 
                 # ExperimentType linkTo
-                'experiment_type.title'
+                'experiment_type.title',
             ]
     )
 
