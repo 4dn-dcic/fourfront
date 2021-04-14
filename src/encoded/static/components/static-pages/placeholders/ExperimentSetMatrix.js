@@ -391,10 +391,9 @@ class VisualBody extends React.PureComponent {
                 const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
                 const additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] === data[0][groupingProperties[0]]; });
                 if (additionalItem) {
-                    if (data && data[0].count) {
+                    if (data[0].count) {
                         count = additionalItem.count;
-                    }
-                    else {
+                    } else {
                         count = data.length + additionalItem.count;
                     }
                 }
