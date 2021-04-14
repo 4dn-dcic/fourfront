@@ -67,22 +67,6 @@ export function sumPropertyFromList(objList, property){
         throw new Error('Not an array');
     }
 }
-
-
-export function groupByRowMain(objList, propertiesList){
-    var maxDepth = (propertiesList || []).length - 1;
-
-    return (function doGroup(list, depth){
-        var groupedLists = _.groupBy(list, propertiesList[depth]);
-        if (depth < maxDepth){
-            _.keys(groupedLists).forEach(function(k){
-                groupedLists[k] = doGroup(groupedLists[k], depth + 1);
-            });
-        }
-        return groupedLists;
-    })(objList, 0);
-
-}
 export class StackedBlockVisual extends React.PureComponent {
 
     static defaultProps = {
@@ -308,24 +292,24 @@ export class StackedBlockVisual extends React.PureComponent {
         const { data : propData, groupingProperties, columnGrouping, additionalData } = this.props;
         const { mounted } = this.state;
         if (!mounted) return null;
-
+        if (additionalData) {
+            _.each(additionalData, (additionalItem) => {
+                var dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] ===additionalItem[groupingProperties[0]] ; });
+                if (!dataItem) {
+                    propData.push(additionalItem);
+                }
+            });
+        }
         const data = extendListObjectsWithIndex(propData);
-        const nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
-        const mainRows=groupByRowMain(additionalData,groupingProperties);
-        // nestedData = _.extend(nestedData, {
-        //     "APlanned Experiment":
-        //     {
-        //         "CUT&Tag2": [
-        //             {
-        //                 "experimentType": "CUT&Tag2",
-        //                 "count": 5,
-        //                 "cell_type": "H1-hESC",
-        //                 "data_source": "4DN"
-        //             },
-        //         ],
-        //     }
-        // });
-        console.log('xxxx nestedTable',nestedData);
+        let nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
+        const rowMain=groupByMultiple(additionalData, groupingProperties);
+        const plannedRowMain = _.difference(_.keys(rowMain), _.keys(nestedData));
+        if (plannedRowMain) {
+            _.each(plannedRowMain, (itemMain) => {
+                nestedData = _.extend(nestedData,
+                    { [itemMain]: rowMain[itemMain] });
+            });
+        }
         let columnGroups = null;
         if (typeof columnGrouping === 'string'){
             columnGroups = _.groupBy(data, columnGrouping);

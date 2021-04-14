@@ -383,14 +383,16 @@ export class ExperimentSetMatrix extends React.PureComponent {
 class VisualBody extends React.PureComponent {
 
     static blockRenderedContents(data, blockProps) {
-        const { additionalData } = blockProps;
+        const { additionalData, groupingProperties } = blockProps;
         var count = 0;
         if (Array.isArray(data)) {
             if (additionalData !==null) {
-                const experimentTypes= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
-                var experimentItem = _.find(experimentTypes, function (item) { return item.experiment_type == data[0].experiment_type; });
-                if (typeof experimentItem !== 'undefined') {
-                    count = data.length + experimentItem.count;
+                const additionalItems= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
+                var additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] == data[0][groupingProperties[0]]; });
+                if (typeof additionalItem !== 'undefined') {
+                    if (data && data[0].count) { count = additionalItem.count; } else {
+                        count = data.length + additionalItem.count;
+                    }
                 }
                 else { count = data.length; }
             }
@@ -471,12 +473,11 @@ class VisualBody extends React.PureComponent {
         let title = 'Experiment Sets';
 
         if (additionalData !==null) {
-            const experimentTypes= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
-            var experimentItem = _.find(experimentTypes, function (item) { return item.experiment_type == data[0].experiment_type; });
-            if (typeof experimentItem !== 'undefined') {
+            const additionalItems= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
+            var additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] == data[0][groupingProperties[0]]; });
+            if (typeof additionalItem !== 'undefined') {
                 totalData=data.length;
-                // totalData = data.length + experimentItem.count;
-                title+=' - Planned '+experimentItem.count;
+                title+=' - Planned '+additionalItem.count;
             }
             else { totalData = data.length; }
         }
