@@ -276,23 +276,42 @@ def indexer_testapp(app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, 'INDEXER')
 
 
+@pytest.fixture
+def iwg_member(testapp):
+    item = {
+        'first_name': 'IWG',
+        'last_name': 'Member',
+        'email': 'iwgmember@example.org',
+        'viewing_groups': ['IWG'],
+        'status': 'current'
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
+@pytest.fixture
+def arbitrary_group_member_testapp(iwg_member, app, external_tx, zsa_savepoints):
+    # app for arbitrary viewing_group member
+    return remote_user_testapp(app, iwg_member['uuid'])
+
+
 def test_arbitrary_viewing_group_can_view_item_w_viewable_by(
-        wrangler_testapp, remc_member_testapp, lab, award, remc_submitter):
+        testapp, arbitrary_group_member_testapp, lab, award, iwg_member):
     bs_item = {
         'biosource_type': 'primary cell',
         'lab': lab['@id'],
         'award': award['@id'],
-        'status': 'in review by lab'
+        'status': 'submission in progress'
     }
-    import pdb; pdb.set_trace()
-    # post the item - the award has the 4DN viewing group and nothing related to remc
-    bsres = wrangler_testapp.post_json('/biosource', bs_item, status=201).json['@graph'][0]
+    # post the item - the award has the 4DN viewing group and nothing related to IWG
+    bsres = testapp.post_json('/biosource', bs_item, status=201).json['@graph'][0]
     # the remc testapp should not be able to get this item
-    remc_member_testapp.get(bsres['@id'], status=403)
+    arbitrary_group_member_testapp.get(bsres['@id'], status=403)
     # now add viewable by property to the item
-    n4_bs = wrangler_testapp.patch_json(bsres['@id'], {'viewable_by': ['Not 4DN']}, status=200).json['@graph'][0]
+    n4_bs = testapp.patch_json(bsres['@id'], {'viewable_by': ['IWG']}, status=200).json['@graph'][0]
     # now we can get it
-    remc_member_testapp.get(n4_bs['@id'], status=200)
+    arbitrary_group_member_testapp.get(n4_bs['@id'], status=200)
 
 
 def test_wrangler_post_non_lab_collection(wrangler_testapp):
@@ -713,17 +732,18 @@ def test_labmember_cannot_patch_submitter_file(file_item, submitter_testapp, wra
 
 
 # person with shared award tests
-# award member would need to have viewing_group set to have the ...project ones work
 def test_awardmember_cannot_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['deleted', 'released to project', 'submission in progress', 'planned']
+    statuses = ['deleted']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         award_viewer_testapp.get(res.json['@graph'][0]['@id'], status=403)
 
 
+# people who share the same award should be able to view items that have yet to be released generally
 def test_awardmember_can_view_submitter_item(ind_human_item, submitter_testapp, wrangler_testapp, award_viewer_testapp):
-    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab', 'pre-release']
+    statuses = ['current', 'released', 'revoked', 'archived', 'in review by lab', 'pre-release',
+                'released to project', 'submission in progress', 'planned']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
@@ -1070,7 +1090,6 @@ def test_4dn_can_view_nofic_released_to_project(
     eset_item['award'] = nofic_award['@id']
     eset_item['status'] = 'released to project'
     res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
-    import pdb; pdb.set_trace()
     viewing_group_member_testapp.get(res1['@id'], status=200)
 
 
