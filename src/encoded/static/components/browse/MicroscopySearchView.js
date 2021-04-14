@@ -54,25 +54,28 @@ export default class MicroscopySearchView extends React.PureComponent {
         this.handleChangeDescription = this.handleChangeDescription.bind(this);
         this.handleChangeMicroscopeTier = this.handleChangeMicroscopeTier.bind(this);
         this.handleChangeMicroscopeStandType = this.handleChangeMicroscopeStandType.bind(this);
+        this.handleImportFromFile = this.handleImportFromFile.bind(this);
 
         this.memoized = {
             transformedFacets: memoize(transformedFacets)
         };
 
         this.state = {
-            show: false,
+            showCreateConfModal: false,
             tier: 1,
             microscopeName: null,
             description: null,
             standType: null,
-            confirmLoading: false
+            importFromFile: false,
+            fileContent: null,
+            confirmLoading: false,
         };
     }
 
     /** @todo Possibly move into own component instead of method, especially if state can move along with it. */
     createNewMicroscopeConfiguration() {
         const { context, currentAction } = this.props;
-        const { show, tier, microscopeName, description, standType, confirmLoading } = this.state;
+        const { showCreateConfModal, tier, microscopeName, description, standType, importFromFile, fileContent, confirmLoading } = this.state;
 
         let createNewVisible = false;
         // don't show during submission search "selecting existing"
@@ -93,10 +96,11 @@ export default class MicroscopySearchView extends React.PureComponent {
             'endTier': 3
         };
         const modalProps = {
-            tier, show, confirmLoading, microscopeName, description, standType,
+            tier, showCreateConfModal, microscopeName, description, standType, importFromFile, fileContent, confirmLoading,
             'handleChangeMicroscopeName': this.handleChangeMicroscopeName,
             'handleChangeDescription': this.handleChangeDescription,
             'handleChangeMicroscopeStandType': this.handleChangeMicroscopeStandType,
+            'handleImportFromFile': this.handleImportFromFile,
             'handleModalConfirm': this.handleModalConfirm,
             'handleModalCancel': this.handleModalCancel
         };
@@ -111,7 +115,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     handleModalCancel(evt) {
-        this.setState({ 'show': null });
+        this.setState({ showCreateConfModal: null });
     }
 
     handleModalConfirm() {
@@ -165,7 +169,7 @@ export default class MicroscopySearchView extends React.PureComponent {
                 ajax.load(
                     '/microscope-configurations/',
                     (resp) => { // We're likely to get a status code of 201 - Created.
-                        this.setState({ 'confirmLoading': false, 'show': false }, () => {
+                        this.setState({ 'confirmLoading': false, 'showCreateConfModal': false }, () => {
                             const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
                             // Redirect the user to the new Microscope display.
                             navigate(newItemHref, {}, (resp) => {
@@ -195,16 +199,50 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     handleChangeMicroscopeTier(eventKey) {
-        this.setState({
-            show: true,
-            tier: parseInt(eventKey)
-        });
+        if (eventKey !== 'import-from-file') {
+            this.setState({
+                microscopeName: null,
+                description: null,
+                showCreateConfModal: true,
+                tier: parseInt(eventKey),
+                importFromFile: false
+            });
+        } else {
+            this.setState({
+                microscopeName: null,
+                description: null,
+                showCreateConfModal: true,
+                tier: -1,
+                importFromFile: true
+            });
+        }
     }
 
     handleChangeMicroscopeStandType(eventKey) {
         this.setState({
             standType: eventKey
         });
+    }
+
+    handleImportFromFile(eventKey) {
+        const { files } = eventKey.target;
+
+        const reader = new window.FileReader();
+        reader.readAsText(files[0]);
+        reader.onloadend = function (e) {
+            if (e.target.result) {
+                const fileContent = e.target.result;
+                this.setState({
+                    fileContent: fileContent
+                });
+            } else {
+                this.setState({
+                    fileContent: null
+                });
+                alert('ERROR: There was a problem reading the given file. Please try again.');
+                return;
+            }
+        }.bind(this);
     }
 
     render() {
@@ -239,52 +277,73 @@ const CreateNewConfigurationDropDownButton = React.memo(function (props) {
                     {'Tier ' + opt}
                 </DropdownItem>
             ))}
+            <DropdownItem key="import-from-file" eventKey="import-from-file" data-key="import-from-file">
+                {'Import from file'}
+            </DropdownItem>
         </DropdownButton>
     );
 });
 
 const CreateNewConfigurationModal = React.memo(function (props) {
-    const { tier, standType, show, confirmLoading, microscopeName, description, handleChangeMicroscopeName, handleChangeMicroscopeStandType, handleChangeDescription, handleModalConfirm, handleModalCancel } = props;
+    const {
+        tier, standType, showCreateConfModal, microscopeName,
+        description, importFromFile, fileContent, confirmLoading,
+        handleChangeMicroscopeName, handleChangeMicroscopeStandType, handleChangeDescription, handleImportFromFile,
+        handleModalConfirm, handleModalCancel } = props;
+
+    const isSubmittable = importFromFile ? (microscopeName && fileContent) : (microscopeName && standType);
+
     return (
-        <Modal className="microscopy-create-modal" show={show}>
+        <Modal className="microscopy-create-modal" show={showCreateConfModal}>
             <Modal.Header>
-                <Modal.Title>New Microscope - Tier {tier} </Modal.Title>
+                <Modal.Title>{importFromFile ? 'Import from file' : 'New Microscope - Tier ' + tier} </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div className="row">
                     <div className="col-sm-12 col-md-12">
                         <div className="form-group">
                             <label htmlFor="microscope_name">Microscope Name <span className="text-danger">*</span></label>
-                            <input type="text" className="form-control" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
+                            <input id="microscope_name" type="text" className="form-control" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
                         </div>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-sm-12 col-md-12">
-                        <div className="form-group">
-                            <label htmlFor="validation_tier">Stand Type<span className="text-danger">*</span></label>
-                            <DropdownButton id="validation-stand-type-selector" onSelect={handleChangeMicroscopeStandType}
-                                title={standType || 'Select Stand Type'}>
-                                {current_stands.map((opt, i) => (
-                                    <DropdownItem key={opt.name} eventKey={opt.name} data-key={opt.name}>
-                                        {opt.name}
-                                    </DropdownItem>
-                                ))}
-                            </DropdownButton>
+                {!importFromFile ? (
+                    <div className="row">
+                        <div className="col-sm-12 col-md-12">
+                            <div className="form-group">
+                                <label htmlFor="validation_tier">Stand Type<span className="text-danger">*</span></label>
+                                <DropdownButton id="validation_tier" onSelect={handleChangeMicroscopeStandType}
+                                    title={standType || 'Select Stand Type'}>
+                                    {current_stands.map((opt, i) => (
+                                        <DropdownItem key={opt.name} eventKey={opt.name} data-key={opt.name}>
+                                            {opt.name}
+                                        </DropdownItem>
+                                    ))}
+                                </DropdownButton>
+                            </div>
                         </div>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-sm-12 col-md-12">
-                        <div className="form-group">
-                            <label htmlFor="microscope_name">Description</label>
-                            <input type="text" className="form-control" style={{ width: "100%" }} value={description} onChange={handleChangeDescription} placeholder="microscope configuration description" />
+                    </div>) : null}
+                {!importFromFile ? (
+                    <div className="row">
+                        <div className="col-sm-12 col-md-12">
+                            <div className="form-group">
+                                <label htmlFor="microscope_description">Description</label>
+                                <input id="microscope_description" type="text" className="form-control" style={{ width: "100%" }} value={description} onChange={handleChangeDescription} placeholder="microscope configuration description" />
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </div>) : null}
+                {importFromFile ? (
+                    <div className="row">
+                        <div className="col-sm-12 col-md-12">
+                            <div className="form-group">
+                                <label htmlFor="import_file">Browse File</label>
+                                <input id="import_file" type="file" className="form-control" style={{ width: "100%" }} onChange={handleImportFromFile} accept=".json" />
+                            </div>
+                        </div>
+                    </div>) : null}
             </Modal.Body>
             <Modal.Footer>
-                <button type="button" onClick={handleModalConfirm} className="btn btn-success" disabled={!microscopeName || !standType}>
+                <button type="button" onClick={handleModalConfirm} className="btn btn-success" disabled={!isSubmittable}>
                     <i className={"icon icon-fw icon-" + (confirmLoading ? 'circle-notch icon-spin fas' : 'clone far')} />Submit
                 </button>
                 <button type="button" onClick={handleModalCancel} className="btn btn-outline-warning">
