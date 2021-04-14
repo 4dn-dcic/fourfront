@@ -74,7 +74,7 @@ export class StackedBlockVisual extends React.PureComponent {
     static defaultProps = {
         'groupingProperties' : ['grant_type', 'center_name',  'lab_name'],
         'columnGrouping' : null,
-        'additionalData':null,
+        'additionalData' : null,
         'blockHeight' : 28,
         'blockVerticalSpacing' : 2,
         'blockHorizontalSpacing' : 2,
@@ -296,7 +296,7 @@ export class StackedBlockVisual extends React.PureComponent {
         if (!mounted) return null;
         if (additionalData) {
             _.each(additionalData, (additionalItem) => {
-                var dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]  ; });
+                const dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]  ; });
                 if (!dataItem) {
                     propData.push(additionalItem);
                 }
@@ -304,7 +304,7 @@ export class StackedBlockVisual extends React.PureComponent {
         }
         const data = extendListObjectsWithIndex(propData);
         let nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
-        const rowMain=groupByMultiple(additionalData, groupingProperties);
+        const rowMain = groupByMultiple(additionalData, groupingProperties);
         const plannedRowMain = _.difference(_.keys(rowMain), _.keys(nestedData));
         if (plannedRowMain) {
             _.each(plannedRowMain, (itemMain) => {

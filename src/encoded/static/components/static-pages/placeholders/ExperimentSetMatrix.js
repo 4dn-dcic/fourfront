@@ -348,7 +348,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                             const url = queries[key] && queries[key].url;
                             const className =  (sectionStyle && sectionStyle[key] && sectionStyle[key]['sectionClassName']) || "col-md-4";
                             const rowLabelListingProportion = (sectionStyle && sectionStyle[key] && sectionStyle[key]['rowLabelListingProportion']) || "balanced";
-                            const additional= (additionalData && additionalData[key] );
+                            const additional = (additionalData && additionalData[key] );
                             return (
                                 <div className={'col-12 ' + className}>
                                     {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
@@ -384,13 +384,13 @@ export class ExperimentSetMatrix extends React.PureComponent {
 class VisualBody extends React.PureComponent {
 
     static blockRenderedContents(data, blockProps){
-        const { additionalData, groupingProperties } = blockProps;
+        const { additionalData, groupingProperties, columnGrouping } = blockProps;
         var count = 0;
         if (Array.isArray(data)){
-            if (typeof additionalData !== 'undefined') {
-                const additionalItems= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
-                var additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] == data[0][groupingProperties[0]]; });
-                if (typeof additionalItem !== 'undefined') {
+            if (additionalData) {
+                const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
+                const additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] === data[0][groupingProperties[0]]; });
+                if (additionalItem) {
                     if (data && data[0].count) {
                         count = additionalItem.count;
                     }
@@ -476,12 +476,12 @@ class VisualBody extends React.PureComponent {
         let totalData;
         let title = 'Experiment Sets';
 
-        if (typeof additionalData !== 'undefined'){
-            const additionalItems= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
-            var additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] == data[0][groupingProperties[0]]; });
-            if (typeof additionalItem !== 'undefined') {
-                totalData=data.length;
-                title+=' - Planned '+additionalItem.count;
+        if (additionalData){
+            const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
+            const additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] === data[0][groupingProperties[0]]; });
+            if (additionalItem) {
+                totalData = data.length;
+                title = title.concat(' - Planned ' + additionalItem.count);
             }
             else { totalData = data.length; }
         }
@@ -616,9 +616,9 @@ class VisualBody extends React.PureComponent {
     }
 
     render(){
-        const { results, additionalData } = this.props;
+        const { results } = this.props;
         return (
-            <StackedBlockVisual data={results} additionalData={additionalData} checkCollapsibility
+            <StackedBlockVisual data={results} checkCollapsibility
                 {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding', 'additionalData',
                     'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder', 'rowLabelListingProportion')}
                 blockPopover={this.blockPopover}
