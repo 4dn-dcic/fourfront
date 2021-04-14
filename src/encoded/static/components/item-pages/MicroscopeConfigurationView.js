@@ -538,6 +538,8 @@ export class MicroMetaTabView extends React.PureComponent {
             );
         }
 
+        window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
         const passProps = {
             width, height,
             containerOffsetLeft,
@@ -557,9 +559,6 @@ export class MicroMetaTabView extends React.PureComponent {
                 navigate('/microscope-configurations/');
             },
             onLoadSchema: function (complete) {
-                // Maybe some UI to select something...
-                // Not all browsers have `window.fetch`, used for demoing purposes.
-                // Also, window.fetch requires HTTP so we getting this from GitHub... lol
                 window
                     .fetch(
                         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
@@ -574,9 +573,6 @@ export class MicroMetaTabView extends React.PureComponent {
                     });
             },
             onLoadDimensions: function (complete) {
-                // Maybe some UI to select something...
-                // Not all browsers have `window.fetch`, used for demoing purposes.
-                // Also, window.fetch requires HTTP so we getting this from GitHub... lol
                 window
                     .fetch(
                         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/dimensions/MicroscopeDimensions.json"

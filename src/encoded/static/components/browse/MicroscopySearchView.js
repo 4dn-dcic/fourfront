@@ -43,6 +43,8 @@ const microscopyColExtensionMap = {
     }
 };
 
+let microMetaDependencies = null;
+
 export default class MicroscopySearchView extends React.PureComponent {
 
     constructor(props) {
@@ -61,6 +63,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         };
 
         this.state = {
+            mounted: false,
             showCreateConfModal: false,
             tier: 1,
             microscopeName: null,
@@ -72,10 +75,49 @@ export default class MicroscopySearchView extends React.PureComponent {
         };
     }
 
+    componentDidMount(){
+
+        const onComplete = () => {
+            this.setState({ mounted: true });
+        };
+
+        if (!microMetaDependencies) {
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
+            setTimeout(()=>{
+                // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
+                // @see https://webpack.js.org/api/module-methods/#requireensure
+
+                import(
+                    /* webpackChunkName: "micrometa-dependencies" */
+                    'micrometa-dependencies'
+                ).then((loadedDeps) => {
+                    microMetaDependencies = loadedDeps;
+                    return;
+                }).then(() => {
+                    window
+                        .fetch(
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
+                        )
+                        .then(function (resp) {
+                            return resp.text();
+                        })
+                        .then(function (respText) {
+                            microMetaDependencies.schemas = JSON.parse(respText);
+                            onComplete();
+                        });
+                });
+
+            });
+        } else {
+            onComplete();
+        }
+    }
+
     /** @todo Possibly move into own component instead of method, especially if state can move along with it. */
     createNewMicroscopeConfiguration() {
         const { context, currentAction } = this.props;
-        const { showCreateConfModal, tier, microscopeName, description, standType, importFromFile, fileContent, confirmLoading } = this.state;
+        const { mounted, showCreateConfModal, tier, microscopeName, description, standType, importFromFile, fileContent, confirmLoading } = this.state;
 
         let createNewVisible = false;
         // don't show during submission search "selecting existing"
@@ -107,7 +149,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         return (
             <React.Fragment>
                 <div className="d-inline-block ml-1">
-                    <CreateNewConfigurationDropDownButton {...buttonProps} />
+                    <CreateNewConfigurationDropDownButton {...buttonProps} disabled={!mounted} />
                 </div>
                 <CreateNewConfigurationModal {...modalProps} />
             </React.Fragment>
@@ -119,7 +161,8 @@ export default class MicroscopySearchView extends React.PureComponent {
     }
 
     handleModalConfirm() {
-        const { microscopeName, description, tier, standType } = this.state;
+        const { microscopeName, description, tier, standType, importFromFile, fileContent } = this.state;
+        const { microMetaAppVersion } = microMetaDependencies;
 
         const fallbackCallback = (errResp, xhr) => {
             // Error callback
@@ -133,13 +176,14 @@ export default class MicroscopySearchView extends React.PureComponent {
 
         const stand = _.find(current_stands, (stand) => stand && stand.name && stand.name === standType);
 
-        const microscope = {
+        const microscope = !importFromFile ? {
             "Name": microscopeName,
             "Schema_ID": "Instrument.json",
             "ID": uuidv4(),
             "Tier": tier,
             "ValidationTier": tier,
             "ModelVersion": "2.00.0",
+            "AppVersion": microMetaAppVersion || null,
             "MicroscopeStand": {
                 "Name": microscopeName,
                 "Schema_ID": stand && stand.json ? stand.json + ".json" : null,
@@ -151,11 +195,11 @@ export default class MicroscopySearchView extends React.PureComponent {
             },
             "components": [],
             "linkedFields": null
-        };
+        } : fileContent;
 
         const payload = {
             'title': microscopeName,
-            'description': description,
+            'description': description || '',
             'microscope': microscope,
             // We don't include other properties and let them come from schema default values.
             // For example, default status is 'draft', which will be used.
@@ -226,12 +270,24 @@ export default class MicroscopySearchView extends React.PureComponent {
 
     handleImportFromFile(eventKey) {
         const { files } = eventKey.target;
+        const { validateMicroMetaMicroscope, schemas: microMetaSchemas } = microMetaDependencies;
 
         const reader = new window.FileReader();
         reader.readAsText(files[0]);
         reader.onloadend = function (e) {
             if (e.target.result) {
-                const fileContent = e.target.result;
+                const str = e.target.result;
+                let fileContent = JSON.parse(str);
+
+                console.log('import - microscope:', fileContent);
+                console.log('import - schemas:', microMetaSchemas);
+
+                const isValid = validateMicroMetaMicroscope(fileContent, microMetaSchemas, true);
+                if (!isValid) {
+                    alert('ERROR: Microscope is invalid! Please try again.');
+                    fileContent = null;
+                }
+
                 this.setState({
                     fileContent: fileContent
                 });
@@ -267,11 +323,11 @@ export default class MicroscopySearchView extends React.PureComponent {
 
 
 const CreateNewConfigurationDropDownButton = React.memo(function (props) {
-    const { handleChangeMicroscopeTier, startTier, endTier } = props;
+    const { handleChangeMicroscopeTier, startTier, endTier, disabled } = props;
     const tierOptions = _.range(startTier, endTier + 1);
     return (
         <DropdownButton id="tier-selector" onSelect={handleChangeMicroscopeTier}
-            title="Create New Configuration" size="xs">
+            title="Create New Configuration" size="xs" disabled={disabled}>
             {tierOptions.map((opt, i) => (
                 <DropdownItem key={opt} eventKey={opt} data-key={opt}>
                     {'Tier ' + opt}
