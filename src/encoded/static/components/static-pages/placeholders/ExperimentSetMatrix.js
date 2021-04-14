@@ -348,6 +348,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                             const url = queries[key] && queries[key].url;
                             const className =  (sectionStyle && sectionStyle[key] && sectionStyle[key]['sectionClassName']) || "col-md-4";
                             const rowLabelListingProportion = (sectionStyle && sectionStyle[key] && sectionStyle[key]['rowLabelListingProportion']) || "balanced";
+                            const additional= (additionalData && additionalData[key] );
                             return (
                                 <div className={'col-12 ' + className}>
                                     {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
@@ -359,7 +360,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                                         fieldChangeMap={fieldChangeMap[key]}
                                         valueChangeMap={valueChangeMap[key]}
                                         columnGrouping={columnGrouping[key]}
-                                        additionalData={additionalData[key]}
+                                        additionalData={additional}
                                         duplicateHeaders={false}
                                         columnSubGrouping="state"
                                         rowLabelListingProportion={rowLabelListingProportion}
@@ -382,15 +383,18 @@ export class ExperimentSetMatrix extends React.PureComponent {
 
 class VisualBody extends React.PureComponent {
 
-    static blockRenderedContents(data, blockProps) {
+    static blockRenderedContents(data, blockProps){
         const { additionalData, groupingProperties } = blockProps;
         var count = 0;
-        if (Array.isArray(data)) {
-            if (additionalData !==null) {
+        if (Array.isArray(data)){
+            if (typeof additionalData !== 'undefined') {
                 const additionalItems= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
                 var additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] == data[0][groupingProperties[0]]; });
                 if (typeof additionalItem !== 'undefined') {
-                    if (data && data[0].count) { count = additionalItem.count; } else {
+                    if (data && data[0].count) {
+                        count = additionalItem.count;
+                    }
+                    else {
                         count = data.length + additionalItem.count;
                     }
                 }
@@ -472,7 +476,7 @@ class VisualBody extends React.PureComponent {
         let totalData;
         let title = 'Experiment Sets';
 
-        if (additionalData !==null) {
+        if (typeof additionalData !== 'undefined'){
             const additionalItems= _.filter(additionalData, function(item){ return item.cell_type ==data[0].cell_type; });
             var additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] == data[0][groupingProperties[0]]; });
             if (typeof additionalItem !== 'undefined') {

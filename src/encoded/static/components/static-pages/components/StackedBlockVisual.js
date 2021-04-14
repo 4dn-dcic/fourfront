@@ -10,7 +10,6 @@ import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/compo
 
 export function groupByMultiple(objList, propertiesList){
     var maxDepth = (propertiesList || []).length - 1;
-
     return (function doGroup(list, depth){
         var groupedLists = _.groupBy(list, propertiesList[depth]);
         if (depth < maxDepth){
@@ -67,6 +66,9 @@ export function sumPropertyFromList(objList, property){
         throw new Error('Not an array');
     }
 }
+
+
+
 export class StackedBlockVisual extends React.PureComponent {
 
     static defaultProps = {
@@ -294,7 +296,7 @@ export class StackedBlockVisual extends React.PureComponent {
         if (!mounted) return null;
         if (additionalData) {
             _.each(additionalData, (additionalItem) => {
-                var dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] ===additionalItem[groupingProperties[0]] ; });
+                var dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]  ; });
                 if (!dataItem) {
                     propData.push(additionalItem);
                 }
