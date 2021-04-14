@@ -1,34 +1,19 @@
 """
 The type file for the collection Pages.  Which is used for static pages on the portal
 """
-from urllib.parse import (
-    urlparse,
-    urlencode
-)
+
+from dcicutils.misc_utils import filtered_warnings
 from pyramid.httpexceptions import ( # 301-307 redirect code response
     HTTPMovedPermanently,
     HTTPFound,
     HTTPSeeOther,
     HTTPTemporaryRedirect
 )
-from pyramid.view import (
-    view_config,
-)
-from snovault import (
-    collection,
-    load_schema,
-    COLLECTIONS,
-    CONNECTION
-)
-from ..search import get_iterable_search_results
-from .base import (
-    Item,
-    ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
-)
-from .user_content import (
-    StaticSection
-)
+from pyramid.view import view_config
+from snovault import collection, load_schema, COLLECTIONS, CONNECTION
+from snovault.crud_views import collection_add, item_edit
 from snovault.resource_views import item_view_page
+from snovault.util import debug_log
 from snovault.validators import (
     validate_item_content_post,
     validate_item_content_put,
@@ -38,11 +23,10 @@ from snovault.validators import (
     no_validate_item_content_put,
     no_validate_item_content_patch
 )
-from snovault.crud_views import (
-    collection_add,
-    item_edit,
-)
-from snovault.util import debug_log
+from urllib.parse import urlparse, urlencode
+from ..search import get_iterable_search_results
+from .base import Item, ALLOW_CURRENT, DELETED, ALLOW_LAB_SUBMITTER_EDIT, ALLOW_VIEWING_GROUP_VIEW, ONLY_ADMIN_VIEW
+from .user_content import StaticSection
 
 
 def get_pyramid_http_exception_for_redirect_code(code):
@@ -165,14 +149,25 @@ def is_static_page(info, request):
 
 
 def includeme(config):
-    config.add_route(
-        'staticpage',
-        '/*subpath',
-        custom_predicates=[is_static_page],
-        request_method="GET"
-    )
+    with filtered_warnings("ignore", category=DeprecationWarning):
+        config.add_route(
+            'staticpage',
+            '/*subpath',
+            # TODO: Replace custom_predicates=[is_static_page] with something more modern.
+            # The custom_predicates needs to be rewritten.
+            # Although there is a complex rewrite using .add_route_predicate,
+            # the simpler case of just using .add_static_view may bypass a lot of complexity.
+            # But this needs more study to get right. For now this code will work and
+            # we're just going to suppress the warning.  -kmp 16-May-2020
+            # Refs:
+            #  - https://stackoverflow.com/questions/30102767/custom-route-predicates-in-pyramid
+            #  - https://docs.pylonsproject.org/projects/pyramid/en/latest/_modules/pyramid/config/routes.html
+            #  - https://docs.pylonsproject.org/projects/pyramid/en/master/narr/hooks.html#view-and-route-predicates
+            #  - https://docs.pylonsproject.org/projects/pyramid/en/latest/api/config.html
+            custom_predicates=[is_static_page],
+            request_method="GET"
+        )
     config.add_view(static_page, route_name='staticpage')
-
 
 
 @collection(
@@ -186,13 +181,18 @@ class Page(Item):
     """Links to StaticSections"""
     item_type = 'page'
     schema = load_schema('encoded:schemas/page.json')
-    embedded_list = ['content.*']
+    embedded_list = [
+        # StaticSection linkTo
+        'content.*'
+    ]
 
     STATUS_ACL = StaticSection.STATUS_ACL
 
     class Collection(Item.Collection):
         pass
 
+
+# XXX: Unclear what/why the intended effect is here... - Will 2/10/21
 for field in ['display_title', 'name', 'description', 'content.name']:
     Page.embedded_list = Page.embedded_list + [
         'children.' + field, 'children.children.' + field, 'children.children.children.' + field
@@ -200,6 +200,7 @@ for field in ['display_title', 'name', 'description', 'content.name']:
 
 
 #### Must add validators for add/edit since 'name' path is now lookup_key, not unique_key
+
 
 def validate_unique_page_name(context, request):
     '''validator to ensure page 'name' lookup_key is unique

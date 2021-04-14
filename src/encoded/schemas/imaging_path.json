@@ -78,7 +78,37 @@
             "internal_comment": "Link to a label database through ontologies",
             "items": {
                 "title": "Label",
-                "type": "string"
+                "type": "string",
+                "suggested_enum": [
+                    "Alexa Fluor 488",
+                    "Alexa Fluor 568",
+                    "Alexa Fluor 594",
+                    "Alexa Fluor 647",
+                    "Alexa Fluor 700",
+                    "Alexa Fluor 750",
+                    "ATTO 565",
+                    "ATTO 633",
+                    "ATTO 647N",
+                    "Cy3",
+                    "Cy5",
+                    "DAPI",
+                    "eGFP",
+                    "dTomato"
+                ],
+                "ignored_enum": [
+                    "CF568",
+                    "JF549",
+                    "PAJF549",
+                    "PAJF646",
+                    "429/470nm fluorophore",
+                    "495/517nm fluorophore",
+                    "505/515nm fluorophore",
+                    "547/565nm fluorophore",
+                    "mKate2",
+                    "mTagBFP2",
+                    "NEB-SNAP-Cell_647",
+                    "DyLight650"
+                ]
             }
         },
         "other_probes": {
@@ -91,22 +121,40 @@
                 "type": "string"
             }
         },
+        "imaging_rounds": {
+            "title": "Imaging Rounds",
+            "description": "Number (or range) of imaging round for sequential hybridization",
+            "comment": "Use 1-N for imaging of hybridization steps 1-N, or 0 for imaging of pre-hybridized probes",
+            "type": "string",
+            "pattern": "^[0-9]+(?:\\-[0-9]+)?$",
+            "lookup": 80
+        },
         "file_reference": {
             "title": "Supporting Files",
             "description": "Files associated with the imaging path (ex. probe sequences)",
             "type": "array",
-            "lookup": 80,
+            "lookup": 90,
             "items": {
                 "title": "File",
                 "description": "File metadata.",
                 "type": "string",
                 "linkTo": "FileReference"
             }
+        },
+        "experiment_type": {
+            "title": "Experiment Type",
+            "type": "string",
+            "lookup": 100,
+            "description": "If multi-modal imaging, a controlled term specifying the type of imaging experiment for this path (e.g. RNA MERFISH, DNA seqFISH)",
+            "linkTo": "ExperimentType"
         }
     },
     "facets": {
         "type_labeled_probe": {
             "title": "Probe Type"
+        },
+        "labels": {
+            "title": "Labels"
         }
     },
     "columns": {

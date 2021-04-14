@@ -1,28 +1,32 @@
-'''py.test fixtures for Pyramid.
+"""py.test fixtures for Pyramid.
 
 http://pyramid.readthedocs.org/en/latest/narr/testing.html
-'''
+"""
+
+import datetime as datetime_module
 import logging
+import os
+import pkg_resources
 import pytest
 import webtest
-import os
-import tempfile
-import subprocess
-import time
 
+from dcicutils.qa_utils import notice_pytest_fixtures
 from pyramid.request import apply_request_extensions
-from pyramid.testing import DummyRequest, setUp, tearDown
+from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
-from snovault.elasticsearch import ELASTIC_SEARCH
+from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
+from snovault.util import generate_indexer_namespace_for_testing
 from .. import main
 from .conftest_settings import make_app_settings_dictionary
 
 
-pytest_plugins = [
-    'encoded.tests.datafixtures',
-    'snovault.tests.serverfixtures',
-]
+# Done in pytest.ini now.
+#
+# pytest_plugins = [
+#     'encoded.tests.datafixtures',
+#     'snovault.tests.serverfixtures',
+# ]
 
 
 @pytest.fixture(autouse=True)
@@ -55,36 +59,6 @@ def pytest_configure():
             return True
 
     logging.getLogger('sqlalchemy.engine.base.Engine').addFilter(Shorten())
-
-
-@pytest.yield_fixture
-def config():
-    # From https://docs.pylonsproject.org/projects/pyramid/en/latest/api/testing.html#pyramid.testing.setUp
-    # setUp:
-    #   Set Pyramid registry and request thread locals for the duration of a single unit test.
-    #   Use this function in the setUp method of a unittest test case which directly or indirectly uses:
-    #     * any method of the pyramid.config.Configurator object returned by this function.
-    #     * the pyramid.threadlocal.get_current_registry() or pyramid.threadlocal.get_current_request() functions.
-    # tearDown:
-    #   Undo the effects of pyramid.testing.setUp(). Use this function in the tearDown method of a unit test
-    #   that uses pyramid.testing.setUp() in its setUp method.
-    #
-    # The recommended use with unittest can be found here:
-    # https://docs.pylonsproject.org/projects/pyramid/en/latest/narr/testing.html#test-set-up-and-tear-down
-    #   class MyTest(unittest.TestCase):
-    #     def setUp(self):
-    #       self.config = testing.setUp()
-    #     def tearDown(self):
-    #       testing.tearDown()
-    # This is the approximate equivalent in pyTest:
-
-    # TODO: Reonsider whether this setup/teardown is being done correctly
-    #  Then again, this fixture might not be used at all. I inserted this here and it didn't fail the tests:
-    #     raise Exception("fixture config used")
-    #  -kmp 28-Jun-2020
-    the_config = setUp()
-    yield the_config
-    tearDown()
 
 
 @pytest.yield_fixture
@@ -125,8 +99,8 @@ def dummy_request(root, registry, app):
 
 @pytest.fixture(scope='session')
 def app(app_settings):
-    '''WSGI application level functional testing.
-    '''
+    """WSGI application level functional testing.
+    """
     return main({}, **app_settings)
 
 
@@ -234,51 +208,4 @@ def wsgi_app(wsgi_server):
     """TestApp for WSGI server."""
     return webtest.TestApp(wsgi_server)
 
-
-def _check_server_is_up(output):
-    """ Polls the given output file to detect
-
-        :args output: file to which server is piping out
-        :returns: True if server is up, False if failed
-    """
-    tries = 5
-    while tries > 0:
-        output.seek(0)  # should be first thing to be output.
-        out = output.read()
-        if 'Running' in out.decode('utf-8'):
-            return True
-        tries -= 1
-        time.sleep(1)  # give it a sec
-    return False
-
-
-@pytest.yield_fixture(scope='session', autouse=True)
-def start_moto_server_sqs():
-    """
-    Spins off a moto server running sqs, yields to the tests and cleans up.
-    """
-    delete_sqs_url = 'SQS_URL' not in os.environ
-    old_sqs_url = os.environ.get('SQS_URL', None)
-    server_output = tempfile.TemporaryFile()
-    server = None
-    try:
-        try:
-            os.environ['SQS_URL'] = 'http://localhost:3000'  # must exists globally because of MPIndexer
-            server_args = ['moto_server', 'sqs', '-p3000']
-            server = subprocess.Popen(server_args, stdout=server_output, stderr=server_output)
-            assert _check_server_is_up(server_output)
-        except AssertionError:
-            raise AssertionError('Could not get moto server up')
-        except Exception as e:
-            raise Exception('Encountered an exception bringing up the server: %s' % str(e))
-
-        yield  # run tests
-
-    finally:
-        if delete_sqs_url:
-            del os.environ['SQS_URL']
-        else:
-            os.environ['SQS_URL'] = old_sqs_url
-        if server:
-            server.terminate()
 

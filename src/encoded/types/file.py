@@ -63,13 +63,14 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
-from ..utils import check_user_is_logged_in
+from ..util import check_user_is_logged_in
 
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
 
 log = structlog.getLogger(__name__)
 
+# XXX: Need expanding to cover display_title
 file_workflow_run_embeds = [
     'workflow_run_inputs.workflow.title',
     'workflow_run_inputs.input_files.workflow_argument_name',
@@ -117,8 +118,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
             ]
         }
         # boto.set_stream_logger('boto3')
-        conn = boto3.client('sts', aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-                            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"))
+        conn = boto3.client('sts')
         token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
@@ -180,14 +180,24 @@ class FileSetCalibration(FileSet):
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
     embedded_list = Item.embedded_list + [
+        # User linkTo
+        'files_in_set.submitted_by.first_name',
+        'files_in_set.submitted_by.last_name',
         'files_in_set.submitted_by.job_title',
+
+        # Lab linkTo
         'files_in_set.lab.title',
+        'files_in_set.lab.name',
+
+        # File linkTo
         'files_in_set.accession',
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
+        'files_in_set.file_classification',
+
+        # FileFormat linkTo
         'files_in_set.file_format.file_format',
-        'files_in_set.file_classification'
     ]
 
 
@@ -205,14 +215,24 @@ class FileSetMicroscopeQc(ItemWithAttachment, FileSet):
     schema = load_schema('encoded:schemas/file_set_microscope_qc.json')
     name_key = 'accession'
     embedded_list = Item.embedded_list + [
+        # User linkTo
+        'files_in_set.submitted_by.first_name',
+        'files_in_set.submitted_by.last_name',
         'files_in_set.submitted_by.job_title',
+
+        # Lab linkTo
         'files_in_set.lab.title',
+        'files_in_set.lab.name',
+
+        # File linkTo
         'files_in_set.accession',
         'files_in_set.href',
         'files_in_set.file_size',
         'files_in_set.upload_key',
+        'files_in_set.file_classification',
+
+        # FileFormat linkTo
         'files_in_set.file_format.file_format',
-        'files_in_set.file_classification'
     ]
 
 
@@ -229,31 +249,85 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
+
+    # TODO: embed file_format
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # 'experiments.display_title',
+        # XXX: Experiment linkTo
         'experiments.accession',
-        'experiments.experiment_type.display_title',
+
+        # ExperimentType linkTo
+        'experiments.experiment_type.title',
+
+        # ExperimentSet linkTo
         'experiments.experiment_sets.accession',
         'experiments.experiment_sets.experimentset_type',
         'experiments.experiment_sets.@type',
-        'experiments.biosample.biosource.display_title',
-        'experiments.biosample.biosource.biosource_type',
-        'experiments.biosample.biosource_summary',
+
+        # Enzyme linkTo
+        'experiments.digestion_enzyme.name',
+
+        # Standard embed
+        'experiments.last_modified.date_modified',
+
+        # Biosample linkTo
+        'experiments.biosample.accession',
+        'experiments.biosample.biosource_summary',  # REQUIRES additional embeds #1
         'experiments.biosample.modifications_summary',
         'experiments.biosample.treatments_summary',
+
+        # Biosource linkTo
+        'experiments.biosample.biosource.biosource_type',
+        'experiments.biosample.biosource.cell_line_tier',
+        'experiments.biosample.biosource.override_biosource_name',
+        'experiments.biosample.cell_culture_details.in_vitro_differentiated',  # needed for calc prop #1
+
+        # OntologyTerm linkTo
+        'experiments.biosample.biosource.cell_line.preferred_name',
+        'experiments.biosample.biosource.cell_line.term_name',
+        'experiments.biosample.biosource.cell_line.term_id',
+
+        # OntologyTerm linkTo
+        'experiments.biosample.biosource.tissue.preferred_name',
+        'experiments.biosample.biosource.tissue.term_name',
+        'experiments.biosample.biosource.tissue.term_id',
+
+        # Modification linkTo
+        'experiments.biosample.biosource.modifications.modification_type',
+        'experiments.biosample.biosource.modifications.genomic_change',
+        'experiments.biosample.biosource.modifications.override_modification_name',
+
+        # BioFeature linkTo
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_type',
+        'experiments.biosample.biosource.modifications.target_of_mod.preferred_label',
+        'experiments.biosample.biosource.modifications.target_of_mod.cellular_structure',
+        'experiments.biosample.biosource.modifications.target_of_mod.organism_name',
+        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods',
+        'experiments.biosample.biosource.modifications.target_of_mod.genome_location',
+
+        # Organism linkTo
         'experiments.biosample.biosource.individual.organism.name',
-        'experiments.digestion_enzyme.name',
-        'experiments.last_modified.date_modified',
+        'experiments.biosample.biosource.individual.organism.scientific_name',
+
+        # FileFormat linkTo
         'file_format.file_format',
+
+        # File linkTo
         'related_files.relationship_type',
         'related_files.file.accession',
-        'quality_metric.display_title',
+
+        # QualityMetric linkTo
+        'quality_metric.url',
         'quality_metric.@type',
-        'quality_metric.qc_list.qc_type',
-        'quality_metric.qc_list.value.display_title',
-        'quality_metric.qc_list.value.@type',
-        'quality_metric.quality_metric_summary.*',
         'quality_metric.Total reads',
+
+        # Calc prop depends on qc_list
+        'quality_metric.quality_metric_summary.*',
+
+        # QualityMetric linkTo
+        'quality_metric.qc_list.qc_type',
+        'quality_metric.qc_list.value.url',
+        'quality_metric.qc_list.value.@type',
         'quality_metric.qc_list.value.Total reads'
     ]
     name_key = 'accession'
@@ -280,6 +354,7 @@ class File(Item):
         "type": "string"
     })
     def display_title(self, request, file_format, accession=None, external_accession=None):
+        # TODO: refactor to use file_format embed
         accession = accession or external_accession
         file_format_item = get_item_or_none(request, file_format, 'file-formats')
         try:
@@ -333,8 +408,11 @@ class File(Item):
                 return obucket.get('title')
         return None
 
-    def _get_ds_cond_from_repset(self, repset):
-        return (repset.get('dataset_label', None), repset.get('condition', None))
+    def _get_ds_cond_lab_from_repset(self, request, repset):
+        elab = get_item_or_none(request, repset.get('lab'))
+        if elab:
+            elab = elab.get('display_title')
+        return (repset.get('dataset_label', None), repset.get('condition', None), elab)
 
     def _get_file_experiment_info(self, request, currinfo):
         """
@@ -346,6 +424,7 @@ class File(Item):
         expid = None
         repsetid = None
         rev_exps = self.experiments(request)
+
         if rev_exps:
             if len(rev_exps) != 1:
                 # most files with experiments revlinks linked to only one
@@ -370,9 +449,10 @@ class File(Item):
             if not rep_set_info:
                 return info
             # pieces of info to get from the repset if there is one
-            ds, c = self._get_ds_cond_from_repset(rep_set_info)
+            ds, c, el = self._get_ds_cond_lab_from_repset(request, rep_set_info)
             info['dataset'] = ds
             info['condition'] = c
+            info['experimental_lab'] = el
             expts_in_set = rep_set_info.get('experiments_in_set', [])
             if not expts_in_set:
                 return info
@@ -389,6 +469,11 @@ class File(Item):
             exp_info = get_item_or_none(request, expid)
             if not exp_info:  # sonmethings fishy - abort
                 return info
+            # check to see if we have experimental lab
+            if 'experimental_lab' not in info or info.get('experimental_lab') is None:
+                elab = get_item_or_none(request, exp_info.get('lab'))
+                if elab:
+                    info['experimental_lab'] = elab.get('display_title')
             exp_type = get_item_or_none(request, exp_info.get('experiment_type'))
             if exp_type is not None:
                 info['experiment_type'] = exp_type.get('title')
@@ -406,9 +491,11 @@ class File(Item):
                     repset = repset[0]
                     rep_set_info = get_item_or_none(request, repset)
                     if rep_set_info is not None:
-                        ds, c = self._get_ds_cond_from_repset(rep_set_info)
+                        ds, c, el = self._get_ds_cond_lab_from_repset(request, rep_set_info)
                         info['dataset'] = ds
                         info['condition'] = c
+                        if info.get('experimental_lab') is None:
+                            info['experimental_lab'] = el
                         rep_exps = rep_set_info.get('replicate_exps', [])
                         for rep in rep_exps:
                             if rep.get('replicate_exp') == expid:
@@ -436,6 +523,9 @@ class File(Item):
             "lab_name": {
                 "type": "string"
             },
+            "experimental_lab": {
+                "type": "string"
+            },
             "biosource_name": {
                 "type": "string"
             },
@@ -458,8 +548,8 @@ class File(Item):
     })
     def track_and_facet_info(self, request, biosource_name=None):
         props = self.upgrade_properties()
-        fields = ['experiment_type', 'assay_info', 'lab_name', 'dataset', 'condition',
-                  'biosource_name', 'replicate_info', 'experiment_bucket']
+        fields = ['experiment_type', 'assay_info', 'lab_name', 'experimental_lab', 'dataset',
+                  'condition', 'biosource_name', 'replicate_info', 'experiment_bucket']
         # look for existing _props
         track_info = {field: props.get('override_' + field) for field in fields}
         track_info = {k: v for k, v in track_info.items() if v is not None}
@@ -469,19 +559,18 @@ class File(Item):
         if biosource_name and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
-        if len(track_info) != 8:  # if length==6 we have everything we need
-            if not (len(track_info) == 7 and 'lab_name' not in track_info):
+        if len(track_info) != len(fields):  # if track_info has same number of items as fields we have everything we need
+            if not (len(track_info) == len(fields) - 1 and 'lab_name' not in track_info):
                 # only if everything but lab exists can we avoid getting expt
                 einfo = self._get_file_experiment_info(request, track_info)
                 track_info.update({k: v for k, v in einfo.items() if k not in track_info})
-            # if 'experiment_type' not in track_info:
-                # avoid more unnecessary work if we don't have key piece
-                # return
 
+            # file lab_name is same as lab - we need this property to account for FileVistrack
+            # or any other file that are generated with override_ values
             if 'lab_name' not in track_info:
                 labid = props.get('lab')
                 lab = get_item_or_none(request, labid)
-                if lab is not None:
+                if lab:
                     track_info['lab_name'] = lab.get('display_title')
 
         track_title = self.generate_track_title(track_info, props)
@@ -706,6 +795,85 @@ class File(Item):
                 extras.append(extra)
             return extras
 
+    def get_presigned_url_location(self, external, request, filename) -> str:
+        """ Opens an S3 boto3 client and returns a presigned url for the requested file to be downloaded"""
+        conn = boto3.client('s3')
+        param_get_object = {
+            'Bucket': external['bucket'],
+            'Key': external['key'],
+            'ResponseContentDisposition': "attachment; filename=" + filename
+        }
+        if request.range:
+            param_get_object.update({'Range': request.headers.get('Range')})
+        location = conn.generate_presigned_url(
+            ClientMethod='get_object',
+            Params=param_get_object,
+            ExpiresIn=36*60*60
+        )
+        return location
+
+    def get_open_data_url_or_presigned_url_location(self, external, request, filename, datastore_is_database) -> str:
+        """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
+            a presigned S3 URL to a 4DN bucket. """
+        open_data_url = None
+        if datastore_is_database:  # view model came from DB - must compute calc prop
+            open_data_url = self._open_data_url(self.properties['status'], filename=filename)
+        else:  # view model came from elasticsearch - calc props should be here
+            if hasattr(self.model, 'source'):
+                es_model_props = self.model.source['embedded']
+                open_data_url = es_model_props.get('open_data_url', None)
+            if not open_data_url:  # fallback to DB
+                open_data_url = self._open_data_url(self.properties['status'], filename=filename)
+        if open_data_url:
+            return open_data_url
+        else:
+            location = self.get_presigned_url_location(external, request, filename)
+            return location
+
+    @staticmethod
+    def _head_s3(client, bucket, key):
+        """ Helper for below method for mocking purposes. """
+        return client.head_object(Bucket=bucket, Key=key)
+
+    def _open_data_url(self, status, filename):
+        """ Helper for below method containing core functionality. """
+        if not filename:
+            return None
+        if status == 'released':  # TODO handle archived
+            open_data_bucket = '4dn-open-data-public'
+            if 'wfoutput' in self.get_bucket(self.registry):
+                bucket_type = 'wfoutput'
+            else:
+                bucket_type = 'files'
+            open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
+                bucket_type=bucket_type, uuid=self.uuid, filename=filename,
+            )
+            # Check if the file exists in the Open Data S3 bucket
+            client = boto3.client('s3')
+            try:
+                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
+                # Returning a valid S3 URL to the public url of the file
+                res = self._head_s3(client, open_data_bucket, open_data_key)
+                location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
+                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
+                )
+                return location
+            except ClientError:
+                return None
+        else:
+            return None
+
+    @calculated_property(schema={
+        "title": "Open Data URL",
+        "description": "Location of file on Open Data Bucket, if it exists",
+        "type": "string"
+    })
+    def open_data_url(self, request, accession, file_format, status=None):
+        """ Computes the open data URL and checks if it exists. """
+        fformat = get_item_or_none(request, file_format, frame='raw')  # no calc props needed
+        filename = "{}.{}".format(accession, fformat.get('standard_file_extension', ''))
+        return self._open_data_url(status, filename)
+
     @classmethod
     def get_bucket(cls, registry):
         return registry.settings['file_upload_bucket']
@@ -769,10 +937,11 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds + [
-        "quality_metric.overall_quality_status",
-        "quality_metric.Total Sequences",
-        "quality_metric.Sequence length",
-        "quality_metric.url"
+        # QualityMetric linkTo
+        'quality_metric.overall_quality_status',
+        'quality_metric.Total Sequences',
+        'quality_metric.Sequence length',
+        'quality_metric.url'
     ]
     name_key = 'accession'
     rev = dict(File.rev, **{
@@ -819,8 +988,11 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded_list = File.embedded_list + file_workflow_run_embeds_processed + [
+        # ExperimentSet linkTo
         'experiment_sets.accession',
         'experiment_sets.last_modified.date_modified',
+
+        # QualityMetric linkTo
         "quality_metric.Total reads",
         "quality_metric.Trans reads",
         "quality_metric.Cis reads (>20kb)",
@@ -1064,9 +1236,26 @@ class FileMicroscopy(ItemWithAttachment, File):
     item_type = 'file_microscopy'
     schema = load_schema('encoded:schemas/file_microscopy.json')
     embedded_list = File.embedded_list + [
+        # Experiment linkTo
+        "experiments.accession",
         "experiments.@type",
+
+        # ImagingPath linkTo
         "experiments.imaging_paths.channel",
-        "experiments.imaging_paths.path",
+        "experiments.imaging_paths.path.labeled_probe",
+        "experiments.imaging_paths.path.other_probes",
+        "experiments.imaging_paths.path.labels",
+
+        # BioFeature linkTo
+        "experiments.imaging_paths.path.target.feature_type",
+        "experiments.imaging_paths.path.target.preferred_label",
+        "experiments.imaging_paths.path.target.cellular_structure",
+        "experiments.imaging_paths.path.target.organism_name",
+        "experiments.imaging_paths.path.target.relevant_genes",
+        "experiments.imaging_paths.path.target.feature_mods",
+        "experiments.imaging_paths.path.target.genome_location",
+
+        # Microscope linkTo
         "experiments.files.microscope_settings.ch00_light_source_center_wl",
         "experiments.files.microscope_settings.ch01_light_source_center_wl",
         "experiments.files.microscope_settings.ch02_light_source_center_wl",
@@ -1175,13 +1364,108 @@ def is_file_to_download(properties, file_format, expected_filename=None):
         return filename
 
 
+def update_google_analytics(context, request, ga_config, filename, file_size_downloaded,
+                            file_at_id, lab, user_uuid, user_groups, file_experiment_type, file_type='other'):
+    """ Helper for @@download that updates GA in response to a download.
+    """
+    ga_cid = request.cookies.get("clientIdentifier")
+    if not ga_cid:  # Fallback, potentially can stop working as GA is updated
+        ga_cid = request.cookies.get("_ga")
+        if ga_cid:
+            ga_cid = ".".join(ga_cid.split(".")[2:])
+
+    ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host,
+                                                       ga_config["hostnameTrackerIDMapping"].get("default"))
+    if ga_tid is None:
+        raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
+
+    # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
+    # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
+    ga_payload = {
+        "v": 1,
+        "tid": ga_tid,
+        "t": "event",  # Hit type. Could also be event, transaction, pageview, etc.
+        # Override IP address. Else will send detail about EC2 server which not too useful.
+        "uip": request.remote_addr,
+        "ua": request.user_agent,
+        "dl": request.url,
+        "dt": filename,
+
+        # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
+        # if don't provided uid. While we still allow users to not be logged in,
+        # should at least be able to preserve/track their anon downloads..
+
+        # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
+        # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
+        # Unsure if groups under 1 session or not.
+        "cid": "555",
+        "an": "4DN Data Portal EC2 Server",  # App name, unsure if used yet
+        "ec": "Serverside File Download",  # Event Category
+        "ea": "Range Query" if request.range else "File Download",  # Event Action
+        "el": filename,  # Event Label
+        "ev": file_size_downloaded,  # Event Value
+        # Product fields
+        "pa": "purchase",
+        "ti": str(uuid4()),  # We need to send a unique transaction id along w. 'transactions' like purchases
+        "pr1id": file_at_id,  # Product ID/SKU
+        "pr1nm": filename,  # Product Name
+        "pr1br": lab.get("display_title"),  # Product Branch
+        "pr1qt": 1,  # Product Quantity
+        # Product Category from @type, e.g. "File/FileProcessed"
+        "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
+        # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
+        "pr1va": file_type
+        # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
+    }
+
+    # Custom dimensions
+    # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
+    if "name" in ga_config["dimensionNameMap"]:
+        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
+        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
+
+    if "experimentType" in ga_config["dimensionNameMap"]:
+        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
+
+    if "filesize" in ga_config["metricNameMap"]:
+        ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+        ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
+
+    if "downloads" in ga_config["metricNameMap"]:
+        ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+        ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
+
+    # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
+    # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
+    if user_uuid:
+        ga_payload['uid'] = user_uuid
+
+    if user_groups:
+        groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.
+        ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+        ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
+
+    if ga_cid:
+        ga_payload['cid'] = ga_cid
+
+    # Catch error here
+    try:
+        resp = requests.post(
+            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
+            data=urllib.parse.urlencode(ga_payload),
+            timeout=5.0,
+            headers={'user-agent': ga_payload['ua']}
+        )
+    except Exception as e:
+        log.error('Exception encountered posting to GA: %s' % e)
+
+
 @view_config(name='download', context=File, request_method='GET',
              permission='view', subpath_segments=[0, 1])
 @debug_log
 def download(context, request):
-    '''
-    Endpoint for handling /@@download/ URLs
-    '''
+    """ Endpoint for handling /@@download/ URLs """
     check_user_is_logged_in(request)
 
     # first check for restricted status
@@ -1196,19 +1480,10 @@ def download(context, request):
     user_groups = user_props.get('details', {}).get('groups', None)
     if user_groups:
         user_groups.sort()
-    # tracking_values = {
-    #     "user_agent"      : request.user_agent,
-    #     "remote_ip"       : request.remote_addr,
-    #     "user_uuid"       : user_uuid or 'anonymous',
-    #     "request_path"    : request.path_info,
-    #     "request_headers" : str(dict(request.headers))
-    # }
 
     # TODO:
     # if not user_uuid or file_size_downloaded < 25 * (1024**2): # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
     #     raise HTTPForbidden("Must login or provide access keys to download files larger than 5mb")
-
-    file_format_name = "Unknown"
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
     try:
@@ -1236,24 +1511,18 @@ def download(context, request):
                 found = True
                 properties = extra
                 external = context.propsheets.get('external' + eformat.get('uuid'))
-                if eformat is not None:
-                    file_format_name = eformat.get('file_format')
-                    # tracking_values['file_format'] = eformat.get('file_format')
                 break
         if not found:
             raise HTTPNotFound(_filename)
     else:
         external = context.propsheets.get('external', {})
-        if file_format is not None:
-            file_format_name = file_format.get('file_format')
-
-    file_experiment_type = get_file_experiment_type(request, context, properties)
-    file_at_id = context.jsonld_id(request)
-    file_size_downloaded = properties.get('file_size', 0)
 
     # Calculate bytes downloaded from Range header
+    headers = None
+    file_size_downloaded = properties.get('file_size', 0)
     if request.range:
         file_size_downloaded = 0
+        headers = {'Range': request.headers.get('Range')}
         # Assume range unit is bytes. Because there's no spec for others really, atm, afaik..
         if hasattr(request.range, "ranges"):
             for (range_start, range_end) in request.range.ranges:
@@ -1267,130 +1536,25 @@ def download(context, request):
                 (request.range.start or 0)
             )
 
+    request_datastore_is_database = (request.datastore == 'database')
     if not external:
         external = context.build_external_creds(request.registry, context.uuid, properties)
     if external.get('service') == 's3':
-        conn = boto3.client('s3')
-        param_get_object = {
-            'Bucket': external['bucket'],
-            'Key': external['key'],
-            'ResponseContentDisposition': "attachment; filename=" + filename
-        }
-        if request.range:
-            param_get_object.update({'Range': request.headers.get('Range')})
-        location = conn.generate_presigned_url(
-            ClientMethod='get_object',
-            Params=param_get_object,
-            ExpiresIn=36*60*60
-        )
+        location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
+                                                                       request_datastore_is_database)
     else:
         raise ValueError(external.get('service'))
 
     # Analytics Stuff
     ga_config = request.registry.settings.get('ga_config')
+    file_experiment_type = get_file_experiment_type(request, context, properties)
+    file_at_id = context.jsonld_id(request)
 
     if ga_config:
+        update_google_analytics(context, request, ga_config, filename, file_size_downloaded, file_at_id, lab,
+                                user_uuid, user_groups, file_experiment_type, properties.get('file_type'))
 
-        ga_cid = request.cookies.get("clientIdentifier")
-        if not ga_cid:  # Fallback, potentially can stop working as GA is updated
-            ga_cid = request.cookies.get("_ga")
-            if ga_cid:
-                ga_cid = ".".join(ga_cid.split(".")[2:])
-
-        ga_tid = ga_config["hostnameTrackerIDMapping"].get(request.host, ga_config["hostnameTrackerIDMapping"].get("default"))
-        if ga_tid is None:
-            raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
-
-        # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
-        # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
-        ga_payload = {
-            "v": 1,
-            "tid": ga_tid,
-            "t": "event",                           # Hit type. Could also be event, transaction, pageview, etc.
-            # Override IP address. Else will send detail about EC2 server which not too useful.
-            "uip": request.remote_addr,
-            "ua": request.user_agent,
-            "dl": request.url,
-            "dt": filename,
-
-            # This cid below is a ~ random ID/number (?). Used as fallback, since one is required
-            # if don't provided uid. While we still allow users to not be logged in,
-            # should at least be able to preserve/track their anon downloads..
-
-            # '555' is in examples and seemed to be referred to as example for anonymous sessions in some Google doc.
-            # But not 100% sure and wasn't explicitly stated to be "555 for anonymous sessions" aside from usage in example.
-            # Unsure if groups under 1 session or not.
-            "cid": "555",
-            "an": "4DN Data Portal EC2 Server",     # App name, unsure if used yet
-            "ec": "Serverside File Download",       # Event Category
-            "ea": "Range Query" if request.range else "File Download",  # Event Action
-            "el": filename,                         # Event Label
-            "ev": file_size_downloaded,             # Event Value
-            # Product fields
-            "pa": "purchase",
-            "ti": str(uuid4()),                     # We need to send a unique transaction id along w. 'transactions' like purchases
-            "pr1id": file_at_id,                    # Product ID/SKU
-            "pr1nm": filename,                      # Product Name
-            "pr1br": lab.get("display_title"),     # Product Branch
-            "pr1qt": 1,                             # Product Quantity
-            # Product Category from @type, e.g. "File/FileProcessed"
-            "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
-            # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
-            "pr1va": properties.get("file_type", "other")  # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
-        }
-
-        # Custom dimensions
-        # See https://developers.google.com/analytics/devguides/collection/protocol/v1/parameters#pr_cm_
-        if "name" in ga_config["dimensionNameMap"]:
-            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["name"])] = filename
-            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["name"])] = filename
-
-        if "experimentType" in ga_config["dimensionNameMap"]:
-            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
-            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["experimentType"])] = file_experiment_type or None
-
-        if "filesize" in ga_config["metricNameMap"]:
-            ga_payload["metric" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
-            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["filesize"])] = file_size_downloaded
-
-        if "downloads" in ga_config["metricNameMap"]:
-            ga_payload["metric" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
-            ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
-
-        # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
-        # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
-        if user_uuid:
-            ga_payload['uid'] = user_uuid
-
-        if user_groups:
-            groups_json = json.dumps(user_groups, separators=(',', ':'))  # Compcact JSON; aligns w. what's passed from JS.
-            ga_payload["dimension" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
-            ga_payload["pr1cd" + str(ga_config["dimensionNameMap"]["userGroups"])] = groups_json
-
-        if ga_cid:
-            ga_payload['cid'] = ga_cid
-
-        # TODO: WE SHOULD WRAP IN TRY/EXCEPT BLOCK RE: NETWORK?
-
-        #
-        # print('\n\n', ga_payload)
-
-        resp = requests.post(
-            "https://ssl.google-analytics.com/collect?z=" + str(datetime.datetime.utcnow().timestamp()),
-            data=urllib.parse.urlencode(ga_payload),
-            timeout=5.0,
-            headers={'user-agent': ga_payload['ua']}
-        )
-
-        # tracking_values['experiment_type'] = get_file_experiment_type(request, context, properties)
-        # # create a tracking_item to track this download
-        # tracking_item = {'status': 'in review by lab', 'tracking_type': 'download_tracking',
-        #                  'download_tracking': tracking_values}
-        # try:
-        #     TrackingItem.create_and_commit(request, tracking_item, clean_headers=True)
-        # except Exception as e:
-        #     log.error('Cannot create TrackingItem on download of %s' % context.uuid, error=str(e))
-
+    # TODO does not handle range queries
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
         return {
@@ -1399,28 +1563,16 @@ def download(context, request):
             'expires': datetime.datetime.fromtimestamp(expires, pytz.utc).isoformat(),
         }
 
-    if 'Range' in request.headers:
-        try:
-            response_body = conn.get_object(**param_get_object)
-        except Exception as e:
-            raise e
-        response_dict = {
-            'body': response_body.get('Body').read(),
-            # status_code : 206 if partial, 200 if the ragne covers whole file
-            'status_code': response_body.get('ResponseMetadata').get('HTTPStatusCode'),
-            'accept_ranges': response_body.get('AcceptRanges'),
-            'content_length': response_body.get('ContentLength'),
-            'content_range': response_body.get('ContentRange')
-        }
-        return Response(**response_dict)
-
     # We don't use X-Accel-Redirect here so that client behaviour is similar for
     # both aws and non-aws users.
     if use_download_proxy:
         location = request.registry.settings.get('download_proxy', '') + str(location)
 
     # 307 redirect specifies to keep original method
-    raise HTTPTemporaryRedirect(location=location)
+    if headers is not None:  # forward Range header to open data, redundant for our buckets
+        raise HTTPTemporaryRedirect(location=location, headers=headers)
+    else:
+        raise HTTPTemporaryRedirect(location=location)
 
 
 def get_file_experiment_type(request, context, properties):

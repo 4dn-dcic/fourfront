@@ -54,7 +54,7 @@ QC_SUMMARY_SCHEMA = {
     }
 }
 
-"""OVERALL QAULITY SCORE INFO
+"""OVERALL QUALITY SCORE INFO
 All QC objects come with a field 'overall_quality_status', which is by default set to 'PASS'
 For some qc object we don't have a current protocol to judge the overall quality based on the
 fields in the qc item.
@@ -73,7 +73,15 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded_list = ['award.project', 'quality_metrics.overall_quality_status']
+    embedded_list = [
+        # Award linkTo
+        'award.project',
+        'award.name',
+
+        # QualityMetric linkTo
+        'quality_metrics.overall_quality_status',
+        'quality_metrics.url'
+    ]
 
 
 @abstract_collection(
@@ -98,7 +106,7 @@ class QualityMetric(Item):
         'description': 'Listing of FastQC Quality Metrics',
     })
 class QualityMetricFastqc(QualityMetric):
-    """Subclass of quality matrics for fastq files."""
+    """Subclass of quality metrics for fastq files."""
 
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
@@ -112,7 +120,7 @@ class QualityMetricFastqc(QualityMetric):
         'description': 'Listing of Bam Check Quality Metrics'
     })
 class QualityMetricBamcheck(QualityMetric):
-    """Subclass of quality matrics for bam files."""
+    """Subclass of quality metrics for bam files."""
 
     item_type = 'quality_metric_bamcheck'
     schema = load_schema('encoded:schemas/quality_metric_bamcheck.json')
@@ -139,7 +147,7 @@ class QualityMetricBamcheck(QualityMetric):
         'description': 'Listing of BamQC Quality Metrics',
     })
 class QualityMetricBamqc(QualityMetric):
-    """Subclass of quality matrics for bam files."""
+    """Subclass of quality metrics for bam files."""
 
     item_type = 'quality_metric_bamqc'
     schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
@@ -218,7 +226,7 @@ class QualityMetricBamqc(QualityMetric):
         'description': 'Listing of PairsQC Quality Metrics',
     })
 class QualityMetricPairsqc(QualityMetric):
-    """Subclass of quality matrics for pairs files."""
+    """Subclass of quality metrics for pairs files."""
 
     item_type = 'quality_metric_pairsqc'
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
@@ -268,11 +276,39 @@ class QualityMetricPairsqc(QualityMetric):
         'description': 'Listing of Dedup QC Quality Metrics for Repli-seq',
     })
 class QualityMetricDedupqcRepliseq(QualityMetric):
-    """Subclass of quality matrics for repli-seq dedup."""
+    """Subclass of quality metrics for repli-seq dedup."""
 
     item_type = 'quality_metric_dedupqc_repliseq'
     schema = load_schema('encoded:schemas/quality_metric_dedupqc_repliseq.json')
     embedded_list = QualityMetric.embedded_list
+
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc = self.properties
+        qc_summary = []
+
+        if 'Total aligned' not in qc:
+            return
+
+        def percent(numVal):
+            '''convert to percentage of Total Aligned'''
+            return round((numVal / qc.get('Total aligned')) * 100 * 1000) / 1000
+
+        def million(numVal):
+            return str(round(numVal / 10000) / 100) + "m"
+
+        def tooltip(numVal):
+            return "Percent of total aligned reads (=%s)" % million(numVal)
+
+        qc_summary.append({"title": "Total Aligned",
+                           "value": str(qc.get("Total aligned")),
+                           "numberType": "integer"})
+        qc_summary.append({"title": "Removed Duplicates",
+                           "value": str(percent(qc.get("Number of removed duplicates"))),
+                           "tooltip": tooltip(qc.get("Number of removed duplicates")),
+                           "numberType": "percent"})
+
+        return qc_summary
 
 
 @collection(
@@ -282,7 +318,7 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for ChIP-seq',
     })
 class QualityMetricChipseq(QualityMetric):
-    """Subclass of quality matrics for chip-seq"""
+    """Subclass of quality metrics for chip-seq"""
 
     item_type = 'quality_metric_chipseq'
     schema = load_schema('encoded:schemas/quality_metric_chipseq.json')
@@ -300,7 +336,7 @@ class QualityMetricChipseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for ATAC-seq',
     })
 class QualityMetricAtacseq(QualityMetric):
-    """Subclass of quality matrics for atac-seq"""
+    """Subclass of quality metrics for atac-seq"""
 
     item_type = 'quality_metric_atacseq'
     schema = load_schema('encoded:schemas/quality_metric_atacseq.json')
@@ -318,7 +354,7 @@ class QualityMetricAtacseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for RNA-seq',
     })
 class QualityMetricRnaseq(QualityMetric):
-    """Subclass of quality matrics for rna-seq"""
+    """Subclass of quality metrics for rna-seq"""
 
     item_type = 'quality_metric_rnaseq'
     schema = load_schema('encoded:schemas/quality_metric_rnaseq.json')
@@ -359,7 +395,7 @@ class QualityMetricRnaseq(QualityMetric):
         'description': 'Listing of QC Quality Metrics for RNA-seq MAD QC',
     })
 class QualityMetricRnaseqMadqc(QualityMetric):
-    """Subclass of quality matrics for rna-seq MAD QC"""
+    """Subclass of quality metrics for rna-seq MAD QC"""
 
     item_type = 'quality_metric_rnaseq_madqc'
     schema = load_schema('encoded:schemas/quality_metric_rnaseq_madqc.json')
@@ -373,7 +409,7 @@ class QualityMetricRnaseqMadqc(QualityMetric):
         'description': 'Listing of QC Quality Metrics for MARGI.',
     })
 class QualityMetricMargi(QualityMetric):
-    """Subclass of quality matrics for MARGI"""
+    """Subclass of quality metrics for MARGI"""
 
     item_type = 'quality_metric_margi'
     schema = load_schema('encoded:schemas/quality_metric_margi.json')
@@ -423,7 +459,7 @@ class QualityMetricMargi(QualityMetric):
         'description': 'Listing of QC Quality Metrics for Workflow Run.',
     })
 class QualityMetricWorkflowrun(QualityMetric):
-    """Subclass of quality matrics for Workflow run"""
+    """Subclass of quality metrics for Workflow run"""
 
     item_type = 'quality_metric_workflowrun'
     schema = load_schema('encoded:schemas/quality_metric_workflowrun.json')
@@ -437,7 +473,7 @@ class QualityMetricWorkflowrun(QualityMetric):
         'description': 'Listing of QC Quality Metrics for QC List.',
     })
 class QualityMetricQclist(QualityMetric):
-    """Subclass of quality matrics for QCList"""
+    """Subclass of quality metrics for QCList"""
     item_type = 'quality_metric_qclist'
     schema = load_schema('encoded:schemas/quality_metric_qclist.json')
     embedded_list = QualityMetric.embedded_list + [

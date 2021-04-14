@@ -70,27 +70,28 @@ describe('Biosample create page', function () {
             // Delete item biosample data.
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
                 console.log('DELETING', testItemURL);
-                cy.window().then(function (w) {
-                    const token = w.fourfront.JWT.get();
-                    cy.request({
-                        method: "DELETE",
-                        url: testItemURL,
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            "Content-Type": "application/json",
-                            "Accept": "application/json"
-                        }
-                    }).end().request({
-                        method: "PATCH",
-                        url: testItemURL,
-                        headers: {
-                            'Authorization': 'Bearer ' + token,
-                            "Content-Type": "application/json",
-                            "Accept": "application/json"
-                        },
-                        body: JSON.stringify({ "tags": ["deleted_by_cypress_test"] })
+                cy.getCookie('jwtToken')
+                    .then((cookie) => {
+                        const token = cookie.value;
+                        cy.request({
+                            method: "DELETE",
+                            url: testItemURL,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            }
+                        }).end().request({
+                            method: "PATCH",
+                            url: testItemURL,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify({ "tags": ["deleted_by_cypress_test"] })
+                        });
                     });
-                });
             });
 
             // Empty the array now that we're done.

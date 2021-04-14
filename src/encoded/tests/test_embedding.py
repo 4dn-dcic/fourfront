@@ -46,20 +46,26 @@ def test_linked_uuids_object(content, dummy_request, threadlocals):
     dummy_request._indexing_view = True
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@object')
     # only object visited here is the source itself, hence one _linked_uuid
-    assert dummy_request._linked_uuids == {'16157204-8c8f-4672-a1a4-14f4b8021fcd'}
+    assert dummy_request._linked_uuids == {('16157204-8c8f-4672-a1a4-14f4b8021fcd', 'TestingLinkSource')}
 
 
 def test_linked_uuids_embedded(content, dummy_request, threadlocals):
     # needed to track _linked_uuids
     dummy_request._indexing_view = True
     dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@embedded')
-    assert dummy_request._linked_uuids == {'16157204-8c8f-4672-a1a4-14f4b8021fcd', '775795d3-4410-4114-836b-8eeecf1d0c2f'}
+    assert dummy_request._linked_uuids == {
+        ('16157204-8c8f-4672-a1a4-14f4b8021fcd', 'TestingLinkSource'),
+        ('775795d3-4410-4114-836b-8eeecf1d0c2f', 'TestingLinkTarget')
+    }
 
 
 def test_target_rev_linked_uuids_indexing_view(content, dummy_request, threadlocals):
     res_target = dummy_request.embed('/testing-link-targets/', targets[0]['uuid'], '@@index-data', as_user='INDEXER')
     # should have the itself and the rev link to source in the _linked_uuids
-    assert dummy_request._linked_uuids == {'16157204-8c8f-4672-a1a4-14f4b8021fcd', '775795d3-4410-4114-836b-8eeecf1d0c2f'}
+    assert dummy_request._linked_uuids == {
+        ('16157204-8c8f-4672-a1a4-14f4b8021fcd', 'TestingLinkSource'),
+        ('775795d3-4410-4114-836b-8eeecf1d0c2f', 'TestingLinkTarget')
+    }
     assert res_target['rev_link_names'] == {'reverse': [sources[0]['uuid']]}
     assert res_target['rev_linked_to_me'] == []
 
@@ -67,7 +73,10 @@ def test_target_rev_linked_uuids_indexing_view(content, dummy_request, threadloc
 def test_source_rev_linked_uuids_indexing_view(content, dummy_request, threadlocals):
     res_target = dummy_request.embed('/testing-link-sources/', sources[0]['uuid'], '@@index-data', as_user='INDEXER')
     # should have the itself and the rev link to source in the _linked_uuids
-    assert dummy_request._linked_uuids == {'16157204-8c8f-4672-a1a4-14f4b8021fcd', '775795d3-4410-4114-836b-8eeecf1d0c2f'}
+    assert dummy_request._linked_uuids == {
+        ('16157204-8c8f-4672-a1a4-14f4b8021fcd', 'TestingLinkSource'),
+        ('775795d3-4410-4114-836b-8eeecf1d0c2f', 'TestingLinkTarget')
+    }
     assert res_target['rev_link_names'] == {}
     assert res_target['rev_linked_to_me'] == ['775795d3-4410-4114-836b-8eeecf1d0c2f']
 
@@ -78,13 +87,13 @@ def test_linked_uuids_experiment(experiment, lab, award, human_biosample, human_
     dummy_request.embed(experiment['@id'], '@@embedded', fields_to_embed=to_embed)
     linked_uuids = dummy_request._linked_uuids
     # starting item is not in linked_uuids
-    assert experiment['uuid'] in linked_uuids
-    assert lab['uuid'] in linked_uuids
-    assert award['uuid'] in linked_uuids
+    assert (experiment['uuid'], experiment['@type'][0]) in linked_uuids
+    assert (lab['uuid'], lab['@type'][0]) in linked_uuids
+    assert (award['uuid'], award['@type'][0]) in linked_uuids
     # biosample is added because of biosample.biosource
-    assert human_biosample['uuid'] in linked_uuids
-    assert human_biosource['uuid'] in linked_uuids
-    assert mboI['uuid'] in linked_uuids
+    assert (human_biosample['uuid'], human_biosample['@type'][0]) in linked_uuids
+    assert (human_biosource['uuid'], human_biosource['@type'][0]) in linked_uuids
+    assert (mboI['uuid'], mboI['@type'][0]) in linked_uuids
 
 
 @pytest.mark.parametrize('item_type', ORDER)

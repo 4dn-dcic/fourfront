@@ -10,6 +10,19 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_bio_feature_embedded_list():
+    """ Helper function intended to be used to create the embedded list for bio_feature.
+        All types should implement a function like this going forward.
+    """
+    feature_type_embeds = DependencyEmbedder.embed_for_type(base_path='feature_type', t='ontology_term',
+                                                            additional_embeds=['synonyms'])
+    gene_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='relevant_genes', t='gene')
+    genome_location_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='genome_location',
+                                                                        t='genomic_region')
+    return Item.embedded_list + lab_award_attribution_embed_list + feature_type_embeds + gene_embeds + genome_location_embeds
 
 
 @collection(
@@ -23,9 +36,7 @@ class BioFeature(Item):
 
     item_type = 'bio_feature'
     schema = load_schema('encoded:schemas/bio_feature.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'feature_type.preferred_name',
-    ]
+    embedded_list = _build_bio_feature_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -38,7 +49,7 @@ class BioFeature(Item):
         featstr = ''
         modstr = ''
         orgstr = ''
-        if organism_name and organism_name != 'human':
+        if organism_name and organism_name not in ['human', 'unspecified']:
             orgstr = organism_name
         if preferred_label:
             if orgstr:

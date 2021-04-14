@@ -42,7 +42,11 @@ class Individual(Item):
     item_type = 'individual'
     base_types = ['Individual'] + Item.base_types
     schema = load_schema('encoded:schemas/individual.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + ['organism.name']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
+        # Organism linkTo
+        'organism.name',
+        'organism.scientific_name'
+    ]
     name_key = 'accession'
 
     class Collection(Item.Collection):
@@ -91,7 +95,11 @@ class IndividualMouse(Individual):
 
     item_type = 'individual_mouse'
     schema = load_schema('encoded:schemas/individual_mouse.json')
-    embedded_list = Individual.embedded_list + ['mouse_vendor.name']
+    embedded_list = Individual.embedded_list + [
+        # Vendor linkTo
+        'mouse_vendor.name',
+        'mouse_vendor.title'
+    ]
 
 
 @collection(
@@ -106,7 +114,11 @@ class IndividualFly(Individual):
 
     item_type = 'individual_fly'
     schema = load_schema('encoded:schemas/individual_fly.json')
-    embedded_list = Individual.embedded_list + ['fly_vendor.name']
+    embedded_list = Individual.embedded_list + [
+        # Vendor linkTo
+        'fly_vendor.name',
+        'fly_vendor.title'
+    ]
 
 
 @collection(
@@ -121,7 +133,11 @@ class IndividualChicken(Individual):
 
     item_type = 'individual_chicken'
     schema = load_schema('encoded:schemas/individual_chicken.json')
-    embedded_list = Individual.embedded_list + ['chicken_vendor.name']
+    embedded_list = Individual.embedded_list + [
+        # Vendor linkTo
+        'chicken_vendor.name',
+        'chicken_vendor.title'
+    ]
 
 
 @collection(
@@ -136,7 +152,10 @@ class IndividualZebrafish(Individual):
 
     item_type = 'individual_zebrafish'
     schema = load_schema('encoded:schemas/individual_zebrafish.json')
-    embedded_list = Individual.embedded_list + ['zebrafish_vendor.name']
+    embedded_list = Individual.embedded_list + [
+        'zebrafish_vendor.name',
+        'zebrafish_vendor.title'
+    ]
 
 
 # validator for individual relations - same species

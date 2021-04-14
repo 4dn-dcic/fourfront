@@ -190,17 +190,27 @@ static_content_embed_list = [
 lab_award_attribution_embed_list = [
     "award.project",
     "award.center_title",
-    "lab.city",
-    "lab.state",
-    "lab.country",
-    "lab.postal_code",
-    "lab.city",
-    "lab.display_title",
-    "lab.url",
-    "lab.correspondence",                                # Not a real linkTo - temp workaround
-    "contributing_labs.correspondence",                  # Not a real linkTo - temp workaround
-    "submitted_by.timezone",
-    "submitted_by.job_title"
+    "award.name",  # used in center_title calc prop
+    "award.center",  # used in center_title calc prop
+    "award.description",  # used in center_title calc prop
+    "award.pi.last_name",  # used in center_title calc prop
+    "lab.title",
+    "lab.correspondence",  # Not a real linkTo - temp workaround
+    "lab.pi.first_name",  # this and next used in above calcprop
+    "lab.pi.last_name",
+    "lab.pi.contact_email",
+    "lab.pi.preferred_email",
+    "lab.pi.email",
+    "contributing_labs.correspondence",  # Not a real linkTo - temp workaround
+    "contributing_labs.pi.first_name",
+    "contributing_labs.pi.last_name",
+    "contributing_labs.pi.contact_email",
+    "contributing_labs.pi.preferred_email",
+    "contributing_labs.pi.email",
+    "submitted_by.job_title",  # XXX: Is this right? below comment suggests no...
+    "submitted_by.first_name",  # this and next used in above calcprop
+    "submitted_by.last_name",
+    "submitted_by.timezone",  # is this used in attribution or elsewhere on item pages so should be included?
 ]
 
 

@@ -30,7 +30,7 @@ def test_imgpath_displaytitle(testapp, img_path_blank, prot_bio_feature):
     res = testapp.patch_json(img_path_blank['@id'], {'labeled_probe': 'secondary antibody'}).json['@graph'][0]
     assert res['display_title'] == 'RAD21 protein targeted by GFP,RFP-labeled secondary antibody'
     res = testapp.patch_json(img_path_blank['@id'], {'other_probes': ['primary Ab 1', 'primary Ab 2']}).json['@graph'][0]
-    assert res['display_title'] == 'RAD21 protein targeted by GFP,RFP-labeled secondary antibody (with primary Ab 1, primary Ab 2)'
+    assert res['display_title'] == 'RAD21 protein targeted by primary Ab 1, primary Ab 2 (with GFP,RFP-labeled secondary antibody)'
 
 
 def test_imgpath_displaytitle_labels_only(testapp, img_path_blank):

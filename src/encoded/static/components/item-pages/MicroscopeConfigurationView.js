@@ -6,7 +6,7 @@ import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Dropdown from 'react-bootstrap/esm/Dropdown';
 
-import { JWT, console, object, layout, ajax, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { JWT, console, object, layout, ajax, navigate, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 
 import { ItemFileAttachment } from './components/ItemFileAttachment';
@@ -60,7 +60,7 @@ function onLoadSchema(complete) {
     window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
     window
         .fetch(
-            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaV4.json"
+            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/old/fullSchemaV4.json"
         )
         .then(function(resp) {
             console.log(resp);
@@ -74,8 +74,8 @@ function onLoadSchema(complete) {
 }
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/schemasV4_images/svg/";
-const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/schemasV4_images/png/";
+const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/old/schemasV4_images/svg/";
+const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/old/schemasV4_images/png/";
 
 let MicroscopyMetadataTool = null;
 
@@ -131,7 +131,7 @@ export class MicroMetaTabView extends React.PureComponent {
     componentDidMount(){
 
         const onComplete = () => {
-            window.addEventListener("scroll", this.updateContainerOffsets);
+            WindowEventDelegator.addHandler("scroll", this.updateContainerOffsets);
             this.updateContainerOffsets();
             this.setState({ mounted: true });
         };
@@ -156,7 +156,7 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     componentWillUnmount(){
-        window.removeEventListener("scroll", this.updateContainerOffsets);
+        WindowEventDelegator.removeHandler("scroll", this.updateContainerOffsets);
     }
 
     updateContainerOffsets(){
@@ -559,7 +559,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 // Also, window.fetch requires HTTP so we getting this from GitHub... lol
                 window
                     .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/fullSchemaV4.json"
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/old/fullSchemaV4.json"
                     )
                     .then(function (resp) {
                         console.log(resp);
@@ -576,7 +576,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 // Also, window.fetch requires HTTP so we getting this from GitHub... lol
                 window
                     .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/dimensions/MicroscopeDimensions.json"
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/old/dimensions/MicroscopeDimensions.json"
                     )
                     .then(function (resp) {
                         console.log(resp);

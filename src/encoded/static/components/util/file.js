@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
+import { onLoginNavItemClick } from './../navigation/components/LoginNavItem';
 import { productsAddToCart, productsCheckout, event, eventObjectFromCtx } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/analytics';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 import { FileDownloadButtonAuto as FileDownloadButtonAutoOriginal } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
@@ -69,12 +70,15 @@ export function FileDownloadButtonAuto(props){
     const { result, context = null, session = false } = props;
     const onClick = useMemo(function(){
         return function(evt){
-            return downloadFileButtonClick(result, context);
+            if (session){
+                return downloadFileButtonClick(result, context);
+            } else {
+                return onLoginNavItemClick(evt);
+            }
         };
-    }, [result, context]);
-    const disabled = !session;
-    const tooltip = disabled ? 'Log in or create an account to download this file' : null;
-    return <FileDownloadButtonAutoOriginal {...props} onClick={onClick} disabled={disabled} tooltip={tooltip} />;
+    }, [result, context, session]);
+    const tooltip = !session ? 'Log in or create an account to download this file' : null;
+    return <FileDownloadButtonAutoOriginal {...props} onClick={onClick} tooltip={tooltip} />;
 }
 FileDownloadButtonAuto.defaultProps = {
     'canDownloadStatuses' : [

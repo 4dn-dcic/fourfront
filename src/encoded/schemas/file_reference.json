@@ -52,6 +52,8 @@
                 "repeats",
                 "spike-in",
                 "darkmap",
+                "target genes",
+                "target regions",
                 "other"
             ]
         },

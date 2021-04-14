@@ -5,25 +5,21 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import Modal from 'react-bootstrap/esm/Modal';
 
-import { JWT, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import UserRegistrationForm from './../../forms/UserRegistrationForm';
 
 
 
 export const UserRegistrationModal = React.memo(function UserRegistrationModal(props){
-    const { schemas, onRegistrationCancel, showLock, onRegistrationComplete } = props;
+    const { schemas, onRegistrationCancel, showLock, unverifiedUserEmail, onRegistrationComplete } = props;
 
-    const token = JWT.get();
-    // N.B. Signature is not verified here. Signature only gets verified by authentication endpoint.
-    const decodedToken = token && JWT.decode(token);
-    const unverifiedEmail = decodedToken && decodedToken.email;
     function onExitLinkClick(e){
         e.preventDefault();
         onRegistrationCancel();
         showLock();
     }
 
-    if (!unverifiedEmail){
+    if (!unverifiedUserEmail){
         // Error (maybe if user manually cleared cookies or localStorage... idk)
         return (
             <Modal show onHide={onRegistrationCancel}>
@@ -37,7 +33,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
         );
     }
 
-    const isEmailAGmail = unverifiedEmail.slice(-10) === "@gmail.com";
+    const isEmailAGmail = unverifiedUserEmail.slice(-10) === "@gmail.com";
     function onGoogleLinkClick(e){
         e.preventDefault();
         analytics.event('Authentication', 'CreateGoogleAccountLinkClick', { eventLabel : "None" });
@@ -46,7 +42,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
     const formHeading = (
         <div className="mb-3">
             <h4 className="text-400 mb-2 mt-05">
-                You have never logged in as <span className="text-600">{ unverifiedEmail }</span> before.
+                You have never logged in as <span className="text-600">{unverifiedUserEmail}</span> before.
             </h4>
             <ul>
                 <li>
@@ -72,7 +68,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
                 <Modal.Title>Registration</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <UserRegistrationForm heading={formHeading} schemas={schemas} jwtToken={token}
+                <UserRegistrationForm heading={formHeading} schemas={schemas} unverifiedUserEmail={unverifiedUserEmail}
                     onComplete={onRegistrationComplete} onCancel={onRegistrationCancel} />
             </Modal.Body>
         </Modal>
@@ -81,7 +77,7 @@ export const UserRegistrationModal = React.memo(function UserRegistrationModal(p
 UserRegistrationModal.propTypes = {
     'schemas'               : PropTypes.object,
     'isLoading'             : PropTypes.bool,
-    'isRegistrationModalVisible' : PropTypes.bool,
+    'unverifiedUserEmail'   : PropTypes.string,
     'showLock'              : PropTypes.func,
     'onRegistrationCancel'  : PropTypes.func,
     'onRegistrationComplete': PropTypes.func

@@ -24,6 +24,46 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_biosource_embedded_list():
+    """ Helper function intended to be used to create the embedded list for biosource.
+        All types should implement a function like this going forward.
+    """
+    modification_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications', t='modification')
+    modification_target_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications.target_of_mod',
+                                                                            t='bio_feature')
+    tissue_embeds = DependencyEmbedder.embed_for_type(base_path='tissue', t='ontology_term',
+                                                      additional_embeds=['synonyms'])
+    tissue_slim_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='tissue.slim_terms', t='ontology_term')
+    cell_line_embeds = DependencyEmbedder.embed_for_type(base_path='cell_line', t='ontology_term',
+                                                         additional_embeds=['synonyms'])
+    cell_line_slim_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='cell_line.slim_terms',
+                                                                       t='ontology_term')
+    sop_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='SOP_cell_line', t='protocol')
+    return (
+            Item.embedded_list + lab_award_attribution_embed_list + modification_embeds + modification_target_embeds +
+            tissue_embeds + tissue_slim_embeds + cell_line_embeds + cell_line_slim_embeds + sop_embeds + [
+                # Individual linkTo
+                'individual.accession',
+                'individual.age',
+                'individual.age_units',
+                'individual.sex',
+                'individual.life_stage',
+                'individual.mouse_life_stage',
+                'individual.mouse_strain',
+                'individual.ethnicity',
+                'individual.health_status',
+
+                # Organism linkTo
+                'individual.organism.name',
+                'individual.organism.scientific_name',
+
+                # Ontology linkTo
+                'tissue.source_ontologies.ontology_name',
+            ]
+    )
 
 
 @collection(
@@ -39,31 +79,7 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        "individual.age",
-        "individual.age_units",
-        "individual.sex",
-        "individual.organism.name",
-        "individual.life_stage",
-        "individual.mouse_life_stage",
-        "individual.mouse_strain",
-        "individual.ethnicity",
-        "individual.health_status",
-        "modifications.modification_type",
-        "tissue.term_name",
-        "tissue.preferred_name",
-        "tissue.slim_terms",
-        "tissue.synonyms",
-        "tissue.source_ontologies.ontology_name",
-        "cell_line.term_name",
-        "cell_line.preferred_name",
-        "cell_line.slim_terms",
-        "cell_line.synonyms",
-        'SOP_cell_line.attachment.href',
-        'SOP_cell_line.attachment.type',
-        'SOP_cell_line.attachment.md5sum',
-        'SOP_cell_line.description'
-    ]
+    embedded_list = _build_biosource_embedded_list()
 
     @calculated_property(schema={
         "title": "Biosource name",
