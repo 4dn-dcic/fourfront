@@ -47,7 +47,7 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/images/svg/";
 const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/images/png/";
 
-let MicroscopyMetadataTool = null;
+let microMetaDependencies = null;
 
 export class MicroMetaTabView extends React.PureComponent {
 
@@ -108,16 +108,18 @@ export class MicroMetaTabView extends React.PureComponent {
             this.setState({ mounted: true });
         };
 
-        if (!MicroscopyMetadataTool) {
+        if (!microMetaDependencies) {
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
             setTimeout(()=>{
                 // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
                 // @see https://webpack.js.org/api/module-methods/#requireensure
 
                 import(
-                    /* webpackChunkName: "microscopy-metadata-bundle" */
-                    'micro-meta-app-react'
-                ).then(({ default: MicroscopyMetadataToolImported }) =>{
-                    MicroscopyMetadataTool = MicroscopyMetadataToolImported;
+                    /* webpackChunkName: "micrometa-dependencies" */
+                    'micrometa-dependencies'
+                ).then((loadedDeps) =>{
+                    microMetaDependencies = loadedDeps;
                     onComplete();
                 });
 
@@ -521,10 +523,10 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     render(){
-        const { schemas, isFullscreen, context, windowWidth, windowHeight } = this.props;
+        const { isFullscreen, context, windowWidth, windowHeight } = this.props;
         const { mounted, modal, containerOffsetLeft, containerOffsetTop, scalingFactor } = this.state;
-        // const tips = object.tipsFromSchema(schemas, context);
-        // const result = context;
+        const { MicroMetaAppReact } = microMetaDependencies || {};
+
         const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
         const height = Math.max(800, windowHeight / 2);
 
@@ -540,10 +542,7 @@ export class MicroMetaTabView extends React.PureComponent {
             width, height,
             containerOffsetLeft,
             containerOffsetTop,
-            //onLoadMicroscopes,
             onSaveMicroscope: this.onSaveMicroscope,
-            //visualizeImmediately: true,
-            //loadedMicroscopeConfiguration: { ... },
             imagesPathSVG,
             imagesPathPNG,
             scalingFactor,
@@ -611,7 +610,7 @@ export class MicroMetaTabView extends React.PureComponent {
                 <hr className="tab-section-title-horiz-divider" />
                 <div className="microscope-tab-view-contents">
                     <div className="micrometa-container" ref={this.containerElemRef} style={{ height : height + 20 }}>
-                        <MicroscopyMetadataTool {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
+                        <MicroMetaAppReact {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>
                 {this.zoomInOutControl()}
