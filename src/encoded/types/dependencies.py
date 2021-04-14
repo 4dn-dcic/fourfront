@@ -106,9 +106,7 @@ class DependencyEmbedder:
             'other_probes',
             'labeled_probe',
             'primary_antibodies.antibody_name',
-            'primary_antibodies.antibody_product_no',
             'secondary_antibody.antibody_name',
-            'secondary_antibody.antibody_product_no',
             'override_display_title'
         ],
 

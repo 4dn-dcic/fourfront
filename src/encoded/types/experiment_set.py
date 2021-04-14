@@ -521,6 +521,8 @@ class ExperimentSetReplicate(ExperimentSet):
     name_key = "accession"
     embedded_list = ExperimentSet.embedded_list + [
         "experiments_in_set.imaging_paths.path.*",  # imaging_paths calc prop
+        "experiments_in_set.imaging_paths.path.primary_antibodies.antibody_name",
+        "experiments_in_set.imaging_paths.path.secondary_antibody.antibody_name",
         "replicate_exps.replicate_exp.accession"
     ]
 
