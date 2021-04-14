@@ -63,6 +63,7 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
 from ..util import check_user_is_logged_in
 
 
@@ -1224,6 +1225,38 @@ class FileCalibration(ItemWithAttachment, File):
     name_key = 'accession'
 
 
+def _build_file_microscopy_embedded_list():
+    """ Helper function intended to be used to create the embedded list for FileMicroscopy.
+        All types should implement a function like this going forward.
+    """
+    imaging_path_embeds = DependencyEmbedder.embed_for_type(
+        base_path='experiments.imaging_paths.path',
+        t='imaging_path',
+        additional_embeds=['imaging_rounds', 'experiment_type.title'])
+    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='experiments.imaging_paths.path.target',
+        t='bio_feature')
+    return (File.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+        # Experiment linkTo
+        'experiments.accession',
+        'experiments.@type',
+        'experiments.imaging_paths.channel',
+
+        # Microscope linkTo
+        'experiments.files.microscope_settings.ch00_light_source_center_wl',
+        'experiments.files.microscope_settings.ch01_light_source_center_wl',
+        'experiments.files.microscope_settings.ch02_light_source_center_wl',
+        'experiments.files.microscope_settings.ch03_light_source_center_wl',
+        'experiments.files.microscope_settings.ch04_light_source_center_wl',
+        'experiments.files.microscope_settings.ch00_lasers_diodes',
+        'experiments.files.microscope_settings.ch01_lasers_diodes',
+        'experiments.files.microscope_settings.ch02_lasers_diodes',
+        'experiments.files.microscope_settings.ch03_lasers_diodes',
+        'experiments.files.microscope_settings.ch04_lasers_diodes',
+        ]
+    )
+
+
 @collection(
     name='files-microscopy',
     unique_key='accession',
@@ -1235,36 +1268,7 @@ class FileMicroscopy(ItemWithAttachment, File):
     """Collection for individual microscopy files."""
     item_type = 'file_microscopy'
     schema = load_schema('encoded:schemas/file_microscopy.json')
-    embedded_list = File.embedded_list + [
-        # Experiment linkTo
-        "experiments.accession",
-        "experiments.@type",
-
-        # ImagingPath linkTo
-        "experiments.imaging_paths.channel",
-        "experiments.imaging_paths.path.labeled_probe",
-        "experiments.imaging_paths.path.other_probes",
-        "experiments.imaging_paths.path.labels",
-
-        # BioFeature linkTo
-        "experiments.imaging_paths.path.target.feature_type",
-        "experiments.imaging_paths.path.target.preferred_label",
-        "experiments.imaging_paths.path.target.cellular_structure",
-        "experiments.imaging_paths.path.target.organism_name",
-        "experiments.imaging_paths.path.target.relevant_genes",
-        "experiments.imaging_paths.path.target.feature_mods",
-        "experiments.imaging_paths.path.target.genome_location",
-
-        # Microscope linkTo
-        "experiments.files.microscope_settings.ch00_light_source_center_wl",
-        "experiments.files.microscope_settings.ch01_light_source_center_wl",
-        "experiments.files.microscope_settings.ch02_light_source_center_wl",
-        "experiments.files.microscope_settings.ch03_light_source_center_wl",
-        "experiments.files.microscope_settings.ch00_lasers_diodes",
-        "experiments.files.microscope_settings.ch01_lasers_diodes",
-        "experiments.files.microscope_settings.ch02_lasers_diodes",
-        "experiments.files.microscope_settings.ch03_lasers_diodes"
-    ]
+    embedded_list = _build_file_microscopy_embedded_list()
     name_key = 'accession'
 
 
