@@ -276,6 +276,25 @@ def indexer_testapp(app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, 'INDEXER')
 
 
+def test_arbitrary_viewing_group_can_view_item_w_viewable_by(
+        wrangler_testapp, remc_member_testapp, lab, award, remc_submitter):
+    bs_item = {
+        'biosource_type': 'primary cell',
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'status': 'in review by lab'
+    }
+    import pdb; pdb.set_trace()
+    # post the item - the award has the 4DN viewing group and nothing related to remc
+    bsres = wrangler_testapp.post_json('/biosource', bs_item, status=201).json['@graph'][0]
+    # the remc testapp should not be able to get this item
+    remc_member_testapp.get(bsres['@id'], status=403)
+    # now add viewable by property to the item
+    n4_bs = wrangler_testapp.patch_json(bsres['@id'], {'viewable_by': ['Not 4DN']}, status=200).json['@graph'][0]
+    # now we can get it
+    remc_member_testapp.get(n4_bs['@id'], status=200)
+
+
 def test_wrangler_post_non_lab_collection(wrangler_testapp):
     item = {
         'name': 'human',
@@ -1051,6 +1070,7 @@ def test_4dn_can_view_nofic_released_to_project(
     eset_item['award'] = nofic_award['@id']
     eset_item['status'] = 'released to project'
     res1 = wrangler_testapp.post_json('/experiment_set', eset_item).json['@graph'][0]
+    import pdb; pdb.set_trace()
     viewing_group_member_testapp.get(res1['@id'], status=200)
 
 
