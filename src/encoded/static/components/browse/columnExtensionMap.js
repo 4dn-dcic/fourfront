@@ -14,8 +14,8 @@ const { Item, ColumnDefinition } = typedefs;
 export const DEFAULT_WIDTH_MAP = { 'lg' : 200, 'md' : 180, 'sm' : 120, 'xs' : 120 };
 
 /** Is reused in a couple of places */
-function labDisplayTitleRenderFxn(result, props){
-    const { lab, submitted_by : { display_title : submitterTitle } = {} } = result;
+function LabColumn(props){
+    const { lab, submitterTitle } = props;
     if (!lab) return null;
     const labLink = <a href={object.atIdFromObject(lab)}>{ lab.display_title }</a>;
     if (!submitterTitle){
@@ -23,7 +23,7 @@ function labDisplayTitleRenderFxn(result, props){
     }
     return (
         <span className="text-truncate">
-            <i className="icon icon-fw icon-user far user-icon" data-html data-tip={'<small>Submitted by</small> ' + result.submitted_by.display_title} />
+            <i className="icon icon-fw icon-user far user-icon" data-html data-tip={'<small>Submitted by</small> ' + submitterTitle} />
             { labLink }
         </span>
     );
@@ -55,7 +55,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 160 },
-        'render' : labDisplayTitleRenderFxn
+        'render' : LabColumn
     },
     'source_experiment_sets.@id' : {
         'title' : "Source",
@@ -152,20 +152,21 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             const {
                 track_and_facet_info: { lab_name } = {},
                 lab: { display_title: labTitle } = {},
-                contributing_labs = []
+                submitted_by : { display_title : submitterTitle } = {},
+                contributing_labs = [],
             } = result;
 
             if (!lab_name) return null;
             if (labTitle && lab_name === labTitle) {
                 // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
-                return labDisplayTitleRenderFxn(...arguments);
+                return <LabColumn lab={result.lab} submitterTitle={submitterTitle}></LabColumn>;
             }
             if (typeof contributing_labs !== 'undefined') {
                 const contributingLabFound = contributing_labs.find(function ({ display_title: contributingLabTitle }) {
                     return contributingLabTitle === lab_name;
                 });
                 if (contributingLabFound) {
-                    return labDisplayTitleRenderFxn({ ...result, "lab": contributingLabFound }, props);
+                    return <LabColumn lab={contributingLabFound} submitterTitle={submitterTitle}></LabColumn>;
                 }
             }
 
@@ -177,19 +178,20 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             const {
                 track_and_facet_info: { experimental_lab } = {},
                 lab: { display_title: labTitle } = {},
-                contributing_labs
+                submitted_by: { display_title: submitterTitle } = {},
+                contributing_labs = [],
             } = result;
             if (!experimental_lab) return null;
             if (labTitle && experimental_lab === labTitle) {
                 // If same exact lab name as our lab.display_title, then we just use lab render method to get link to lab.
-                return labDisplayTitleRenderFxn(...arguments);
+                return <LabColumn lab={result.lab} submitterTitle={submitterTitle}></LabColumn>;
             }
-            if (typeof contributing_labs !== 'undefined') {
+            if (contributing_labs) {
                 const contributingLabFound = contributing_labs.find(function ({ display_title: contributingLabTitle }) {
                     return contributingLabTitle === experimental_lab;
                 });
                 if (contributingLabFound) {
-                    return labDisplayTitleRenderFxn({ ...result, "lab": contributingLabFound }, props);
+                    return <LabColumn lab={contributingLabFound} submitterTitle={submitterTitle}></LabColumn>;
                 }
             }
 
