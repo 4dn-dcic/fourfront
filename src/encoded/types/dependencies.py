@@ -24,6 +24,7 @@ class DependencyEmbedder:
     PROTOCOL = 'protocol'
     GENE = 'gene'
     GENOMIC_REGION = 'genomic_region'
+    IMAGING_PATH = 'imaging_path'
 
     EMBED_MAPPER = {
         BIO_FEATURE: [
@@ -99,6 +100,14 @@ class DependencyEmbedder:
             'start_coordinate',
             'end_coordinate',
             'chromosome'
+        ],
+        IMAGING_PATH: [
+            # requires also target (BioFeature linkTo)
+            'other_probes',
+            'labeled_probe',
+            'primary_antibodies.antibody_name',
+            'secondary_antibody.antibody_name',
+            'override_display_title'
         ],
 
     }
