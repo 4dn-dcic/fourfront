@@ -394,7 +394,12 @@ class VisualBody extends React.PureComponent {
                 });
                 if (additionalItem) {
                     if (data[0].count) {
-                        count = additionalItem.count;
+                        if (data.length > 1) {
+                            _.each(data, (item) => { count += item.count; });
+                        }
+                        else {
+                            count = additionalItem.count;
+                        }
                     } else {
                         count = data.length + additionalItem.count;
                     }
@@ -480,8 +485,7 @@ class VisualBody extends React.PureComponent {
         if (additionalData){
             const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
             const additionalItem = _.find(additionalItems, function (item) {
-                return item[groupingProperties[0]] === data[0][groupingProperties[0]
-                    && item[groupingProperties[1]] === data[0][groupingProperties[1]] && item[columnGrouping] === data[0][columnGrouping]];
+                return item[groupingProperties[0]] === data[0][groupingProperties[0]] && item[groupingProperties[1]] === data[0][groupingProperties[1]] && item[columnGrouping] === data[0].cell_type;
             });
             if (additionalItem) {
                 totalData = data.length;
