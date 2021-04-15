@@ -379,7 +379,9 @@ class Item(snovault.Item):
                             roles['viewing_group.4DN'] = 'role.viewing_group_member'
                     # else leave the NOFIC viewing group role in place
                 elif (status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties)) or (status == 'pre-release'):
-                    # view should be restricted to lab members
+                    # for these statuses view should be restricted to lab members so all viewing_groups are removed
+                    # unless in the case of planned and submission in progress it is a joint analysis tagged dataset
+                    # or NOFIC group dealt with in the above if
                     grps = []
                     for group, role in roles.items():
                         if role == 'role.viewing_group_member':
@@ -387,13 +389,6 @@ class Item(snovault.Item):
                     for g in grps:
                         del roles[g]
 
-        # in order to allow arbitrary item-specific viewing group view
-        # these 2 statuses map to allow viewing_groups to view but for these stati
-        # we don't want award based or other adding
-        # if status in ['pre-release', 'submission in progress']:
-        #    for role in roles:
-        #        if role.startswith('viewing_group.'):
-        #            del (roles[role])
         # this is for access to item specific view group
         if 'viewable_by' in properties:
             viewers = properties.get('viewable_by', [])

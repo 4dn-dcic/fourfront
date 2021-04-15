@@ -296,22 +296,43 @@ def arbitrary_group_member_testapp(iwg_member, app, external_tx, zsa_savepoints)
     return remote_user_testapp(app, iwg_member['uuid'])
 
 
-def test_arbitrary_viewing_group_can_view_item_w_viewable_by(
-        testapp, arbitrary_group_member_testapp, lab, award, iwg_member):
-    bs_item = {
+@pytest.fixture
+def bs_item(lab, award):
+    return {
         'biosource_type': 'primary cell',
         'lab': lab['@id'],
         'award': award['@id'],
         'status': 'submission in progress'
     }
+
+
+vg_test_stati = ['planned', 'submission in progress', 'pre-release']
+
+
+@pytest.mark.parametrize('status', vg_test_stati)
+def test_arbitrary_viewing_group_can_view_item_w_viewable_by(
+        testapp, arbitrary_group_member_testapp, bs_item, iwg_member, status):
     # post the item - the award has the 4DN viewing group and nothing related to IWG
     bsres = testapp.post_json('/biosource', bs_item, status=201).json['@graph'][0]
-    # the remc testapp should not be able to get this item
+    # the vg testapp should not be able to get this item
     arbitrary_group_member_testapp.get(bsres['@id'], status=403)
     # now add viewable by property to the item
-    n4_bs = testapp.patch_json(bsres['@id'], {'viewable_by': ['IWG']}, status=200).json['@graph'][0]
-    # now we can get it
-    arbitrary_group_member_testapp.get(n4_bs['@id'], status=200)
+    vgres = testapp.patch_json(bsres['@id'], {'viewable_by': ['IWG'], "status": status}, status=200)
+    # now should be able to get for each of the statuses
+    arbitrary_group_member_testapp.get(vgres.json['@graph'][0]['@id'], status=200)
+
+
+@pytest.mark.parametrize('status', vg_test_stati)
+def test_user_w_vg_cannot_view_item_w_vg_from_award(
+        testapp, remc_member_testapp, remc_award, bs_item, status):
+    """ For stati - planned, submission in progress, and pre-release - test that an item
+        does not have viewing_group prinicipal added via the award so the item cannot be
+        viewed - this tests for an arbitrary viewing_group, there are other tests for the
+        special handling of NOFIC and JA items, this test is not for those special cases
+    """
+    bs_item['award'] = remc_award['@id']  # iwg award has 'not 4DN' vg as does the remc_submitter in the remc app
+    res = testapp.post_json('/biosource', bs_item, status=201).json['@graph'][0]
+    remc_member_testapp.get(res['@id'], status=403)
 
 
 def test_wrangler_post_non_lab_collection(wrangler_testapp):
