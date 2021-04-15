@@ -823,6 +823,8 @@ class File(Item):
             if hasattr(self.model, 'source'):
                 es_model_props = self.model.source['embedded']
                 open_data_url = es_model_props.get('open_data_url', None)
+                if filename not in open_data_url:  # we requested an extra_file, so recompute with correct filename
+                    open_data_url = self._open_data_url(self.properties['status'], filename=filename)
             if not open_data_url:  # fallback to DB
                 open_data_url = self._open_data_url(self.properties['status'], filename=filename)
         if open_data_url:
@@ -840,7 +842,7 @@ class File(Item):
         """ Helper for below method containing core functionality. """
         if not filename:
             return None
-        if status == 'released':  # TODO handle archived
+        if status in ['released', 'archived']:
             open_data_bucket = '4dn-open-data-public'
             if 'wfoutput' in self.get_bucket(self.registry):
                 bucket_type = 'wfoutput'
@@ -852,9 +854,9 @@ class File(Item):
             # Check if the file exists in the Open Data S3 bucket
             client = boto3.client('s3')
             try:
-                # If the file exists in the Open Data S3 bucket, client.head_object will succeed
+                # If the file exists in the Open Data S3 bucket, client.head_object will succeed (not throw ClientError)
                 # Returning a valid S3 URL to the public url of the file
-                res = self._head_s3(client, open_data_bucket, open_data_key)
+                self._head_s3(client, open_data_bucket, open_data_key)
                 location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
                     open_data_bucket=open_data_bucket, open_data_key=open_data_key,
                 )
