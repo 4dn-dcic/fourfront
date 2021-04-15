@@ -388,8 +388,10 @@ class VisualBody extends React.PureComponent {
         var count = 0;
         if (Array.isArray(data)){
             if (additionalData) {
-                const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
-                const additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] === data[0][groupingProperties[0]]; });
+                const additionalItems = _.filter(additionalData, function (item) { return item.columnGrouping === data[0].columnGrouping; });
+                const additionalItem = _.find(additionalItems, function (item) {
+                    return item[groupingProperties[0]] === data[0][groupingProperties[0]] && item[groupingProperties[1]] === data[0][groupingProperties[1]] && item[columnGrouping] === data[0].cell_type;
+                });
                 if (additionalItem) {
                     if (data[0].count) {
                         count = additionalItem.count;
@@ -477,7 +479,10 @@ class VisualBody extends React.PureComponent {
 
         if (additionalData){
             const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
-            const additionalItem = _.find(additionalItems, function (item) { return item[groupingProperties[0]] === data[0][groupingProperties[0]]; });
+            const additionalItem = _.find(additionalItems, function (item) {
+                return item[groupingProperties[0]] === data[0][groupingProperties[0]
+                    && item[groupingProperties[1]] === data[0][groupingProperties[1]] && item[columnGrouping] === data[0][columnGrouping]];
+            });
             if (additionalItem) {
                 totalData = data.length;
                 title = title.concat(' - Planned ' + additionalItem.count);
