@@ -564,7 +564,6 @@ export class MicroMetaTabView extends React.PureComponent {
                         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
                     )
                     .then(function (resp) {
-                        console.log(resp);
                         return resp.text();
                     })
                     .then(function (respText) {
@@ -578,17 +577,12 @@ export class MicroMetaTabView extends React.PureComponent {
                         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/dimensions/MicroscopeDimensions.json"
                     )
                     .then(function (resp) {
-                        console.log(resp);
                         return resp.text();
                     })
                     .then(function (respText) {
                         var dimensions = JSON.parse(respText);
                         complete(dimensions);
                     });
-            },
-            onLoadMicroscopes: function (complete) {
-                const microscopesDB = {};
-                complete(microscopesDB);
             }
         };
 

@@ -86,16 +86,7 @@
                         "Type": {
                             "title": "Type",
                             "description": "Type of microscope",
-                            "type": "string",
-                            "enum": [
-                                "Upright",
-                                "Inverted",
-                                "Custom Made",
-                                "Dissection",
-                                "Electrophysiology",
-                                "Stereomicroscope",
-                                "Other"
-                            ]
+                            "type": "string"
                         },
                         "Origin": {
                             "title": "Origin",

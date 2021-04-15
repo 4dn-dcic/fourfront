@@ -70,7 +70,7 @@ export default class MicroscopySearchView extends React.PureComponent {
             description: null,
             standType: null,
             importFromFile: false,
-            fileContent: null,
+            fileContent: {},
             confirmLoading: false,
         };
     }
@@ -271,6 +271,7 @@ export default class MicroscopySearchView extends React.PureComponent {
     handleImportFromFile(eventKey) {
         const { files } = eventKey.target;
         const { validateMicroMetaMicroscope, schemas: microMetaSchemas } = microMetaDependencies;
+        const { microscopeName } = this.state;
 
         const reader = new window.FileReader();
         reader.readAsText(files[0]);
@@ -289,7 +290,8 @@ export default class MicroscopySearchView extends React.PureComponent {
                 }
 
                 this.setState({
-                    fileContent: fileContent
+                    fileContent: fileContent,
+                    microscopeName: (fileContent && fileContent.Name) || microscopeName
                 });
             } else {
                 this.setState({
@@ -347,7 +349,13 @@ const CreateNewConfigurationModal = React.memo(function (props) {
         handleChangeMicroscopeName, handleChangeMicroscopeStandType, handleChangeDescription, handleImportFromFile,
         handleModalConfirm, handleModalCancel } = props;
 
-    const isSubmittable = importFromFile ? (microscopeName && fileContent) : (microscopeName && standType);
+    const isSubmittable = importFromFile ? (microscopeName && fileContent && !_.isEmpty(fileContent)) : (microscopeName && standType);
+    let fileClassName = 'form-control w-100';
+    if (!fileContent) {
+        fileClassName += ' has-error';
+    } else if (!_.isEmpty(fileContent)) {
+        fileClassName += ' has-success';
+    }
 
     return (
         <Modal className="microscopy-create-modal" show={showCreateConfModal}>
@@ -355,11 +363,20 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                 <Modal.Title>{importFromFile ? 'Import from file' : 'New Microscope - Tier ' + tier} </Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                {importFromFile ? (
+                    <div className="row">
+                        <div className="col-sm-12 col-md-12">
+                            <div className="form-group">
+                                <label htmlFor="import_file">Browse File <span className="text-danger">*</span></label>
+                                <input id="import_file" type="file" className={fileClassName} onChange={handleImportFromFile} accept=".json" />
+                            </div>
+                        </div>
+                    </div>) : null}
                 <div className="row">
                     <div className="col-sm-12 col-md-12">
                         <div className="form-group">
                             <label htmlFor="microscope_name">Microscope Name <span className="text-danger">*</span></label>
-                            <input id="microscope_name" type="text" className="form-control" style={{ width: "100%" }} value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
+                            <input id="microscope_name" type="text" className="form-control w-100" value={microscopeName} onChange={handleChangeMicroscopeName} placeholder="required field, e.g. 4DN Microscope" />
                         </div>
                     </div>
                 </div>
@@ -384,16 +401,7 @@ const CreateNewConfigurationModal = React.memo(function (props) {
                         <div className="col-sm-12 col-md-12">
                             <div className="form-group">
                                 <label htmlFor="microscope_description">Description</label>
-                                <input id="microscope_description" type="text" className="form-control" style={{ width: "100%" }} value={description} onChange={handleChangeDescription} placeholder="microscope configuration description" />
-                            </div>
-                        </div>
-                    </div>) : null}
-                {importFromFile ? (
-                    <div className="row">
-                        <div className="col-sm-12 col-md-12">
-                            <div className="form-group">
-                                <label htmlFor="import_file">Browse File</label>
-                                <input id="import_file" type="file" className="form-control" style={{ width: "100%" }} onChange={handleImportFromFile} accept=".json" />
+                                <input id="microscope_description" type="text" className="form-control w-100" value={description} onChange={handleChangeDescription} placeholder="microscope configuration description" />
                             </div>
                         </div>
                     </div>) : null}
