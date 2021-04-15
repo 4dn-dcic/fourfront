@@ -49,9 +49,18 @@
         },
         "labeled_probe": {
             "title": "Probe with the Label",
-            "description": "Antibodies/Primers/Chemicals that carry the label",
+            "description": "Primers/Chemicals that carry the label",
+            "comment": "If an antibody, use preferably secondary_antibody",
             "type": "string",
             "lookup": 50
+        },
+        "secondary_antibody": {
+            "title": "Antibody with the Label",
+            "description": "Antibody that carry the label",
+            "comment": "Equivalent to labeled_probe, but specific for antibody",
+            "type": "string",
+            "linkTo": "Antibody",
+            "lookup": 51
         },
         "type_labeled_probe": {
             "title": "Type of Labeled Probe",
@@ -113,12 +122,25 @@
         },
         "other_probes": {
             "title": "Mediators of Target Labeling",
-            "description": "Antibodies/Primers/Chemicals used for labeling the target",
+            "description": "Primers/Chemicals used for labeling the target",
+            "comment": "If an antibody, use preferably primary_antibodies",
             "type": "array",
             "lookup": 70,
             "items": {
                 "title": "Targets for labelling",
                 "type": "string"
+            }
+        },
+        "primary_antibodies": {
+            "title": "Primary Antibodies",
+            "description": "Antibodies used for labeling the target",
+            "comment": "Equivalent to other_probes, but specific for antibodies",
+            "type": "array",
+            "lookup": 71,
+            "items": {
+                "title": "Targets for labelling",
+                "type": "string",
+                "linkTo": "Antibody"
             }
         },
         "imaging_rounds": {
@@ -147,6 +169,13 @@
             "lookup": 100,
             "description": "If multi-modal imaging, a controlled term specifying the type of imaging experiment for this path (e.g. RNA MERFISH, DNA seqFISH)",
             "linkTo": "ExperimentType"
+        },
+        "override_display_title": {
+            "title": "Override Display Title",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "Value overrides the calculated display_title",
+            "lookup": 900
         }
     },
     "facets": {
