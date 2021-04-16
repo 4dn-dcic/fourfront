@@ -306,7 +306,7 @@ export class StackedBlockVisual extends React.PureComponent {
         let nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
         const rowMain = groupByMultiple(additionalData, groupingProperties);
         const plannedRowMain = _.difference(_.keys(rowMain), _.keys(nestedData));
-        if (plannedRowMain) {
+        if (plannedRowMain && plannedRowMain.length > 0){
             _.each(plannedRowMain, (itemMain) => {
                 nestedData = _.extend(nestedData,
                     { [itemMain]: rowMain[itemMain] });

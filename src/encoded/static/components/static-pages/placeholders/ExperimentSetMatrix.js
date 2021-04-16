@@ -386,25 +386,26 @@ class VisualBody extends React.PureComponent {
     static blockRenderedContents(data, blockProps){
         const { additionalData, groupingProperties, columnGrouping } = blockProps;
         var count = 0;
+        var withinPlannedDataCount=0;
         if (Array.isArray(data)){
             if (additionalData) {
-                const additionalItems = _.filter(additionalData, function (item) { return item.columnGrouping === data[0].columnGrouping; });
-                const additionalItem = _.find(additionalItems, function (item) {
-                    return item[groupingProperties[0]] === data[0][groupingProperties[0]] && item[groupingProperties[1]] === data[0][groupingProperties[1]] && item[columnGrouping] === data[0].cell_type;
-                });
-                if (additionalItem) {
-                    if (data[0].count) {
-                        if (data.length > 1) {
-                            _.each(data, (item) => { count += item.count; });
+                const dataInAddItem = _.filter(data, function (item) { return typeof item.count === 'undefined'; });
+                const additionalItems = _.filter(data, function (item) { return typeof item.count !== 'undefined'; });
+                const additionalDataCount = _.reduce(additionalItems, function (m, v) {
+                    return m + v.count;
+                }, 0);
+                if (dataInAddItem.length > 0) {
+                    _.each(additionalData, (additionalItem) => {
+                        const dataItem = _.find(dataInAddItem, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
+                        if (typeof dataItem !=='undefined') {
+                            withinPlannedDataCount += additionalItem.count;
                         }
-                        else {
-                            count = additionalItem.count;
-                        }
-                    } else {
-                        count = data.length + additionalItem.count;
-                    }
+                    });
                 }
-                else { count = data.length; }
+                if (additionalItems.length > 0) {
+                    count = additionalDataCount + (data.length - additionalItems.length) + withinPlannedDataCount;
+                }
+                else { count = data.length + withinPlannedDataCount; }
             }
             else {
                 count = data.length;
@@ -455,7 +456,12 @@ class VisualBody extends React.PureComponent {
             for (i = 0; i < statePrioritizationForGroups.length; i++){
                 stateToTest = statePrioritizationForGroups[i];
                 if ( _.any(data, { 'state' : stateToTest }) ){
-                    submissionState = stateToTest;
+                    if (typeof data[0].count !== 'undefined') {
+                        submissionState = 'additional-data';
+                    }
+                    else {
+                        submissionState = stateToTest;
+                    }
                     break;
                 }
             }
@@ -480,16 +486,28 @@ class VisualBody extends React.PureComponent {
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
         let totalData;
+        var totalPlannedData=0;
         let title = 'Experiment Sets';
-
         if (additionalData){
-            const additionalItems = _.filter(additionalData, function(item){ return item.columnGrouping === data[0].columnGrouping; });
-            const additionalItem = _.find(additionalItems, function (item) {
-                return item[groupingProperties[0]] === data[0][groupingProperties[0]] && item[groupingProperties[1]] === data[0][groupingProperties[1]] && item[columnGrouping] === data[0].cell_type;
-            });
-            if (additionalItem) {
-                totalData = data.length;
-                title = title.concat(' - Planned ' + additionalItem.count);
+
+            const dataInAddItem = _.filter(data, function (item) { return typeof item.count === 'undefined'; });
+            const additionalItems = _.filter(data, function (item) { return typeof item.count !== 'undefined'; });
+            totalPlannedData = _.reduce(additionalItems, function (m, v) {
+                return m + v.count;
+            }, 0);
+            if (dataInAddItem.length > 0){
+                _.each(additionalData, (additionalItem) => {
+                    const dataItem = _.find(dataInAddItem, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
+                    if (typeof dataItem !=='undefined') {
+                        totalPlannedData += additionalItem.count;
+                    }
+                });
+            }
+            if (dataInAddItem){
+                totalData =(data.length - additionalItems.length);
+                if (totalPlannedData > 0){
+                    title = title.concat(' - Planned ' + totalPlannedData);
+                }
             }
             else { totalData = data.length; }
         }
@@ -610,12 +628,12 @@ class VisualBody extends React.PureComponent {
                         <h5 className="text-400 mt-08 mb-15 text-center"><b>{totalData}</b> {title}</h5>
                         <hr className="mt-0 mb-1"/>
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSearchButton() }
+                        { totalData === 0 && totalPlannedData > 0 ? null : makeSingleItemButton() }
                     </div>
                     :
                     <div className="inner">
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSingleItemButton() }
+                        { totalData === 0 && totalPlannedData > 0 ? null : makeSingleItemButton() }
                     </div>
                 }
             </Popover>
