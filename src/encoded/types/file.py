@@ -822,7 +822,7 @@ class File(Item):
         else:  # view model came from elasticsearch - calc props should be here
             if hasattr(self.model, 'source'):
                 es_model_props = self.model.source['embedded']
-                open_data_url = es_model_props.get('open_data_url', None)
+                open_data_url = es_model_props.get('open_data_url', '')
                 if filename not in open_data_url:  # we requested an extra_file, so recompute with correct filename
                     open_data_url = self._open_data_url(self.properties['status'], filename=filename)
             if not open_data_url:  # fallback to DB
