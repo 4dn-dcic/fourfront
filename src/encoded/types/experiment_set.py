@@ -518,9 +518,11 @@ def _build_experiment_set_replicate_embedded_list():
     imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
         base_path='imaging_paths.path.target',
         t='bio_feature')
-    return (ExperimentSet.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
-        'replicate_exps.replicate_exp.accession',
-    ]
+    return (
+            ExperimentSet.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+                'replicate_exps.replicate_exp.accession',
+            ]
+    )
 
 
 @collection(
