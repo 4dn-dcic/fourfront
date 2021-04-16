@@ -119,10 +119,32 @@ export class MicroMetaTabView extends React.PureComponent {
                     /* webpackChunkName: "micrometa-dependencies" */
                     'micrometa-dependencies'
                 ).then((loadedDeps) =>{
-                    microMetaDependencies = loadedDeps;
-                    onComplete();
-                });
+                    const tempMicroMetaDependencies = loadedDeps;
 
+                    window
+                        .fetch(
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
+                        )
+                        .then(function (resp) {
+                            return resp.text();
+                        })
+                        .then(function (respText) {
+                            tempMicroMetaDependencies.schemas = JSON.parse(respText);
+
+                            window
+                                .fetch(
+                                    "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/dimensions/MicroscopeDimensions.json"
+                                )
+                                .then(function (resp) {
+                                    return resp.text();
+                                })
+                                .then(function (respText) {
+                                    tempMicroMetaDependencies.dimensions = JSON.parse(respText);
+                                    microMetaDependencies = tempMicroMetaDependencies;
+                                    onComplete();
+                                });
+                        });
+                });
             });
         } else {
             onComplete();
@@ -559,30 +581,10 @@ export class MicroMetaTabView extends React.PureComponent {
                 navigate('/microscope-configurations/');
             },
             onLoadSchema: function (complete) {
-                window
-                    .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
-                    )
-                    .then(function (resp) {
-                        return resp.text();
-                    })
-                    .then(function (respText) {
-                        var schema = JSON.parse(respText);
-                        complete(schema);
-                    });
+                complete(microMetaDependencies.schemas);
             },
             onLoadDimensions: function (complete) {
-                window
-                    .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/dimensions/MicroscopeDimensions.json"
-                    )
-                    .then(function (resp) {
-                        return resp.text();
-                    })
-                    .then(function (respText) {
-                        var dimensions = JSON.parse(respText);
-                        complete(dimensions);
-                    });
+                complete(microMetaDependencies.dimensions);
             }
         };
 

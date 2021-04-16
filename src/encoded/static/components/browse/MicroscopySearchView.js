@@ -92,9 +92,7 @@ export default class MicroscopySearchView extends React.PureComponent {
                     /* webpackChunkName: "micrometa-dependencies" */
                     'micrometa-dependencies'
                 ).then((loadedDeps) => {
-                    microMetaDependencies = loadedDeps;
-                    return;
-                }).then(() => {
+                    const tempMicroMetaDependencies = loadedDeps;
                     window
                         .fetch(
                             "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
@@ -103,11 +101,12 @@ export default class MicroscopySearchView extends React.PureComponent {
                             return resp.text();
                         })
                         .then(function (respText) {
-                            microMetaDependencies.schemas = JSON.parse(respText);
+                            tempMicroMetaDependencies.schemas = JSON.parse(respText);
+                            microMetaDependencies = tempMicroMetaDependencies;
+
                             onComplete();
                         });
                 });
-
             });
         } else {
             onComplete();
