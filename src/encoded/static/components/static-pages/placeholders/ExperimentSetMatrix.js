@@ -487,7 +487,7 @@ class VisualBody extends React.PureComponent {
         let aggrData;
         let totalData;
         var totalPlannedData=0;
-        let title = 'Experiment Sets';
+        let title = 'Experiment Set(s)';
         if (additionalData){
 
             const dataInAddItem = _.filter(data, function (item) { return typeof item.count === 'undefined'; });
@@ -505,8 +505,11 @@ class VisualBody extends React.PureComponent {
             }
             if (dataInAddItem){
                 totalData =(data.length - additionalItems.length);
-                if (totalPlannedData > 0){
-                    title = title.concat(' - Planned ' + totalPlannedData);
+                if ((totalPlannedData > 0) && (totalData === 0)) {
+                    title =(totalPlannedData+' - Planned Experiment Set(s)');
+                }
+                else if((totalPlannedData > 0) && (totalData > 0)){
+                    title = title.concat(' ( ' + totalPlannedData + ' - Planned)');
                 }
             }
             else { totalData = data.length; }
@@ -566,7 +569,7 @@ class VisualBody extends React.PureComponent {
 
         const data_source = aggrData.data_source;
 
-        function makeSearchButton(){
+        function makeSearchButton(disabled=false){
             const currentFilteringProperties = groupingProperties.slice(0, depth + 1).concat([columnGrouping]);
             const currentFilteringPropertiesVals = _.object(
                 _.map(currentFilteringProperties, function(property){
@@ -592,18 +595,18 @@ class VisualBody extends React.PureComponent {
             const linkHref = url.format(hrefParts);
 
             return (
-                <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                <Button disabled={disabled} href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
             );
         }
 
-        function makeSingleItemButton() {
+        function makeSingleItemButton(disabled=false) {
             let path = object.itemUtil.atId(data);
             const hrefParts = url.parse(queryUrl, true);
             if (hrefParts && hrefParts.hostname && hrefParts.protocol) {
                 path = hrefParts.protocol + "//" + hrefParts.hostname + path;
             }// else will be abs path relative to current domain.
             return (
-                <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                <Button disabled={disabled} href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
             );
         }
 
@@ -620,20 +623,22 @@ class VisualBody extends React.PureComponent {
             delete keyValsToShow.sub_cat;
             delete keyValsToShow.sub_cat_title;
         }
-
+        const experimentSetViewButtonDisabled = (totalData === 0 && totalPlannedData > 0) || false;
         return (
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                 { isGroup ?
                     <div className="inner">
-                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{totalData}</b> {title}</h5>
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{totalData > 0 ? totalData :null}</b> {title}</h5>
                         <hr className="mt-0 mb-1"/>
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { totalData === 0 && totalPlannedData > 0 ? null : makeSingleItemButton() }
+                        { makeSearchButton(experimentSetViewButtonDisabled) }
                     </div>
                     :
                     <div className="inner">
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ totalData > 0 ? totalData :null }</b> { title }</h5>
+                        <hr className="mt-0 mb-1" />
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { totalData === 0 && totalPlannedData > 0 ? null : makeSingleItemButton() }
+                        { makeSingleItemButton(experimentSetViewButtonDisabled) }
                     </div>
                 }
             </Popover>
