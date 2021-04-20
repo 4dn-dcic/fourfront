@@ -390,14 +390,14 @@ class VisualBody extends React.PureComponent {
         if (Array.isArray(data)){
             if (additionalData) {
                 //only filters the values from the database
-                const dataItems = _.filter(data, function (item) { return typeof item.additionalDataCount === 'undefined'; });
+                const dataItems = _.filter(data, function (item) { return typeof item.additional_data_count === 'undefined'; });
 
                 //only filters the values from the additional data
-                const additionalItems = _.filter(data, function (item) { return typeof item.additionalDataCount !== 'undefined'; });
+                const additionalItems = _.filter(data, function (item) { return typeof item.additional_data_count !== 'undefined'; });
 
                 //sums the values in the additional filtered data
                 const newRowAdditionalDataCount = _.reduce(additionalItems, function (m, v) {
-                    return m + v.additionalDataCount;
+                    return m + v.additional_data_count;
                 }, 0);
 
                 if (dataItems.length > 0) {
@@ -406,7 +406,7 @@ class VisualBody extends React.PureComponent {
                         // The feature here is the data grouped or single according to the + button and - button. That's why we use + = additionalItem.additionalDataCount to calculate their total values.
                         const dataItem = _.find(dataItems, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
                         if (typeof dataItem !== 'undefined') {
-                            additionalTotalDataCount += additionalItem.additionalDataCount;
+                            additionalTotalDataCount += additionalItem.additional_data_count;
                         }
                     });
                 }
@@ -468,7 +468,7 @@ class VisualBody extends React.PureComponent {
             for (i = 0; i < statePrioritizationForGroups.length; i++){
                 stateToTest = statePrioritizationForGroups[i];
                 if ( _.any(data, { 'state' : stateToTest }) ){
-                    if (typeof data[0].additionalDataCount !== 'undefined') {
+                    if (typeof data[0].additional_data_count !== 'undefined') {
                         submissionState = 'additional-data';
                     }
                     else {
@@ -502,16 +502,16 @@ class VisualBody extends React.PureComponent {
         let title = 'Experiment Set(s)';
         if (additionalData){
 
-            const dataItems = _.filter(data, function (item) { return typeof item.additionalDataCount === 'undefined'; });
-            const additionalItems = _.filter(data, function (item) { return typeof item.additionalDataCount !== 'undefined'; });
+            const dataItems = _.filter(data, function (item) { return typeof item.additional_data_count === 'undefined'; });
+            const additionalItems = _.filter(data, function (item) { return typeof item.additional_data_count !== 'undefined'; });
             additionalDataTotalCount = _.reduce(additionalItems, function (m, v) {
-                return m + v.additionalDataCount;
+                return m + v.additional_data_count;
             }, 0);
             if (dataItems.length > 0){
                 _.each(additionalData, (additionalItem) => {
                     const dataItem = _.find(dataItems, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
                     if (typeof dataItem !=='undefined') {
-                        additionalDataTotalCount += additionalItem.additionalDataCount;
+                        additionalDataTotalCount += additionalItem.additional_data_count;
                     }
                 });
             }
