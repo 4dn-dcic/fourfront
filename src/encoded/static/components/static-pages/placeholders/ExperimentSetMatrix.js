@@ -386,42 +386,8 @@ class VisualBody extends React.PureComponent {
     static blockRenderedContents(data, blockProps){
         const { additionalData, groupingProperties, columnGrouping } = blockProps;
         var count = 0;
-        var additionalTotalDataCount=0;
-        if (Array.isArray(data)){
-            if (additionalData) {
-                //only filters the values from the database
-                const dataItems = _.filter(data, function (item) { return typeof item.additional_data_count === 'undefined'; });
-
-                //only filters the values from the additional data
-                const additionalItems = _.filter(data, function (item) { return typeof item.additional_data_count !== 'undefined'; });
-
-                //sums the values in the additional filtered data
-                const newRowAdditionalDataCount = _.reduce(additionalItems, function (m, v) {
-                    return m + v.additional_data_count;
-                }, 0);
-
-                if (dataItems.length > 0) {
-                    _.each(additionalData, (additionalItem) => {
-                        // checks if the value defined as additional data is the same as the value in the database. If it is the same, we calculate the sum of the current value and the additional value.
-                        // The feature here is the data grouped or single according to the + button and - button. That's why we use + = additionalItem.additionalDataCount to calculate their total values.
-                        const dataItem = _.find(dataItems, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
-                        if (typeof dataItem !== 'undefined') {
-                            additionalTotalDataCount += additionalItem.additional_data_count;
-                        }
-                    });
-                }
-                if (additionalItems.length > 0) {
-                    // data.length is used for values from database. However, additionalTotalDataCount is used for additional data.
-                    // The following procedure is used to calculate numbers correctly.
-                    // newRowAdditionalDataCount = A new unique row field will be opened and we give its total value.
-                    //data.length - additionalItems.length  If the  operation is a new field, the result will be 0. If it is added to an existing value, it will be greater than 0.
-                    count = newRowAdditionalDataCount + (data.length - additionalItems.length) + additionalTotalDataCount;
-                }
-                else { count = data.length + additionalTotalDataCount; }
-            }
-            else {
-                count = data.length;
-            }
+        if (Array.isArray(data)) {
+            count = data.length;
         } else if (data) {
             count = 1;
         }
@@ -468,11 +434,12 @@ class VisualBody extends React.PureComponent {
             for (i = 0; i < statePrioritizationForGroups.length; i++){
                 stateToTest = statePrioritizationForGroups[i];
                 if ( _.any(data, { 'state' : stateToTest }) ){
-                    if (typeof data[0].additional_data_count !== 'undefined') {
-                        submissionState = 'additional-data';
+                    const anyNonAdditionalFound = _.any(data, function (item) { return item.is_additional_data !== true; });
+                    if (anyNonAdditionalFound) {
+                        submissionState = stateToTest;
                     }
                     else {
-                        submissionState = stateToTest;
+                        submissionState = 'additional-data';
                     }
                     break;
                 }
@@ -494,40 +461,11 @@ class VisualBody extends React.PureComponent {
      */
     blockPopover(data, blockProps, parentGrouping){
         const { queryUrl, fieldChangeMap, valueChangeMap, titleMap, groupingProperties, columnGrouping } = this.props;
-        const { depth, additionalData } = blockProps;
+        const { depth } = blockProps;
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
-        let totalData;
-        var additionalDataTotalCount=0;
-        let title = 'Experiment Set(s)';
-        if (additionalData){
 
-            const dataItems = _.filter(data, function (item) { return typeof item.additional_data_count === 'undefined'; });
-            const additionalItems = _.filter(data, function (item) { return typeof item.additional_data_count !== 'undefined'; });
-            additionalDataTotalCount = _.reduce(additionalItems, function (m, v) {
-                return m + v.additional_data_count;
-            }, 0);
-            if (dataItems.length > 0){
-                _.each(additionalData, (additionalItem) => {
-                    const dataItem = _.find(dataItems, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
-                    if (typeof dataItem !=='undefined') {
-                        additionalDataTotalCount += additionalItem.additional_data_count;
-                    }
-                });
-            }
-            if (dataItems){
-                totalData =(data.length - additionalItems.length);
-                if ((additionalDataTotalCount > 0) && (totalData === 0)) {
-                    title =(additionalDataTotalCount + ' - Planned Experiment Set(s)');
-                }
-                else if((additionalDataTotalCount > 0) && (totalData > 0)){
-                    title = title.concat(' ( ' + additionalDataTotalCount + ' - Planned)');
-                }
-            }
-            else { totalData = data.length; }
-        }
-
-        if (!isGroup && Array.isArray(data)) {
+        if (!isGroup && Array.isArray(data)){
             data = data[0];
         }
 
@@ -581,7 +519,7 @@ class VisualBody extends React.PureComponent {
 
         const data_source = aggrData.data_source;
 
-        function makeSearchButton(disabled=false){
+        function makeSearchButton(){
             const currentFilteringProperties = groupingProperties.slice(0, depth + 1).concat([columnGrouping]);
             const currentFilteringPropertiesVals = _.object(
                 _.map(currentFilteringProperties, function(property){
@@ -607,18 +545,18 @@ class VisualBody extends React.PureComponent {
             const linkHref = url.format(hrefParts);
 
             return (
-                <Button disabled={disabled} href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
             );
         }
 
-        function makeSingleItemButton(disabled=false) {
+        function makeSingleItemButton() {
             let path = object.itemUtil.atId(data);
             const hrefParts = url.parse(queryUrl, true);
             if (hrefParts && hrefParts.hostname && hrefParts.protocol) {
                 path = hrefParts.protocol + "//" + hrefParts.hostname + path;
             }// else will be abs path relative to current domain.
             return (
-                <Button disabled={disabled} href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
             );
         }
 
@@ -635,22 +573,30 @@ class VisualBody extends React.PureComponent {
             delete keyValsToShow.sub_cat;
             delete keyValsToShow.sub_cat_title;
         }
-        const experimentSetViewButtonDisabled = (totalData === 0 && additionalDataTotalCount > 0) || false;
+        let title;
+        const additionalItems = _.filter(data, function (item) { return item.is_additional_data === true; });
+        const onlyNonAdditionalItemsCount = data.length - additionalItems.length;
+        if (additionalItems.length > 0 && onlyNonAdditionalItemsCount > 0) {
+            title = data.length + ' Experiment Set(s) ( ' + additionalItems.length + ' - Planned)';
+        }
+        else {
+            title = (additionalItems.length + ' - Planned Experiment Set(s)');
+        }
         return (
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                 { isGroup ?
                     <div className="inner">
-                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{totalData > 0 ? totalData :null}</b> {title}</h5>
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ title }</b></h5>
                         <hr className="mt-0 mb-1"/>
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSearchButton(experimentSetViewButtonDisabled) }
+                        { makeSearchButton() }
                     </div>
                     :
                     <div className="inner">
-                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ totalData > 0 ? totalData :null }</b> { title }</h5>
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{title}</b></h5>
                         <hr className="mt-0 mb-1" />
-                        { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSingleItemButton(experimentSetViewButtonDisabled) }
+                        {StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props)}
+                        {makeSingleItemButton()}
                     </div>
                 }
             </Popover>

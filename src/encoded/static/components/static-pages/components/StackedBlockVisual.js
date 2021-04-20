@@ -2,7 +2,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'underscore';
+import _, { clone } from 'underscore';
 import memoize from 'memoize-one';
 import OverlayTrigger from 'react-bootstrap/esm/OverlayTrigger';
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -294,28 +294,20 @@ export class StackedBlockVisual extends React.PureComponent {
         const { data : propData, groupingProperties, columnGrouping, additionalData } = this.props;
         const { mounted } = this.state;
         if (!mounted) return null;
+        let tempData = [].concat(propData);
         if (additionalData) {
             // AdditionalData values corresponding to the keys. It is compared with the values coming from the database.
             // If it is a new field, we add it into the data with a push operation.
-            _.each(additionalData, (additionalItem) => {
-                const dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
-                if (!dataItem) {
-                    propData.push(additionalItem);
-                }
+            _.each(additionalData, (item) => {
+                const cloned = _.clone(item);
+                delete cloned.count;
+                cloned.is_additional_data = true;
+                const appendedData = _.times(item.count, function (n) { return _.clone(cloned); });
+                tempData = tempData.concat(appendedData);
             });
         }
-        const data = extendListObjectsWithIndex(propData);
-        let nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
-        // It provides the grouping of the additionalData value with the nestedData value created by grouping the data from the database.
-        // It is configured as key: value with the indexes of additional data in the same format into the indexed data.
-        const nestedAdditionalData = groupByMultiple(additionalData, groupingProperties);
-        const rowKeys = _.difference(_.keys(nestedAdditionalData), _.keys(nestedData));
-        if (rowKeys && rowKeys.length > 0) {
-            _.each(rowKeys, (itemRow) => {
-                nestedData = _.extend(nestedData,
-                    { [itemRow]: nestedAdditionalData[itemRow] });
-            });
-        }
+        const data = extendListObjectsWithIndex(tempData);
+        const nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
         let columnGroups = null;
         if (typeof columnGrouping === 'string'){
             columnGroups = _.groupBy(data, columnGrouping);
