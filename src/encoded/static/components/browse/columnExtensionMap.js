@@ -55,7 +55,14 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     'lab.display_title' : {
         'title' : "Lab",
         'widthMap' : { 'lg' : 200, 'md' : 180, 'sm' : 160 },
-        'render' : LabColumn
+        'render' : function(result, props){
+            const { lab, submitted_by : { display_title : submitterTitle } = {} } = result;
+            if (lab) {
+                return <LabColumn {...{ lab, submitterTitle }} />;
+            }
+            return null;
+        }
+
     },
     'source_experiment_sets.@id' : {
         'title' : "Source",
