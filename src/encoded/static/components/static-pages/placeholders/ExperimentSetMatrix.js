@@ -386,26 +386,38 @@ class VisualBody extends React.PureComponent {
     static blockRenderedContents(data, blockProps){
         const { additionalData, groupingProperties, columnGrouping } = blockProps;
         var count = 0;
-        var withinPlannedDataCount=0;
+        var additionalTotalDataCount=0;
         if (Array.isArray(data)){
             if (additionalData) {
-                const dataInAddItem = _.filter(data, function (item) { return typeof item.count === 'undefined'; });
-                const additionalItems = _.filter(data, function (item) { return typeof item.count !== 'undefined'; });
-                const additionalDataCount = _.reduce(additionalItems, function (m, v) {
-                    return m + v.count;
+                //only filters the values from the database
+                const dataItems = _.filter(data, function (item) { return typeof item.additionalDataCount === 'undefined'; });
+
+                //only filters the values from the additional data
+                const additionalItems = _.filter(data, function (item) { return typeof item.additionalDataCount !== 'undefined'; });
+
+                //sums the values in the additional filtered data
+                const newRowAdditionalDataCount = _.reduce(additionalItems, function (m, v) {
+                    return m + v.additionalDataCount;
                 }, 0);
-                if (dataInAddItem.length > 0) {
+
+                if (dataItems.length > 0) {
                     _.each(additionalData, (additionalItem) => {
-                        const dataItem = _.find(dataInAddItem, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
-                        if (typeof dataItem !=='undefined') {
-                            withinPlannedDataCount += additionalItem.count;
+                        // checks if the value defined as additional data is the same as the value in the database. If it is the same, we calculate the sum of the current value and the additional value.
+                        // The feature here is the data grouped or single according to the + button and - button. That's why we use + = additionalItem.additionalDataCount to calculate their total values.
+                        const dataItem = _.find(dataItems, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
+                        if (typeof dataItem !== 'undefined') {
+                            additionalTotalDataCount += additionalItem.additionalDataCount;
                         }
                     });
                 }
                 if (additionalItems.length > 0) {
-                    count = additionalDataCount + (data.length - additionalItems.length) + withinPlannedDataCount;
+                    // data.length is used for values from database. However, additionalTotalDataCount is used for additional data.
+                    // The following procedure is used to calculate numbers correctly.
+                    // newRowAdditionalDataCount = A new unique row field will be opened and we give its total value.
+                    //data.length - additionalItems.length  If the  operation is a new field, the result will be 0. If it is added to an existing value, it will be greater than 0.
+                    count = newRowAdditionalDataCount + (data.length - additionalItems.length) + additionalTotalDataCount;
                 }
-                else { count = data.length + withinPlannedDataCount; }
+                else { count = data.length + additionalTotalDataCount; }
             }
             else {
                 count = data.length;
@@ -456,7 +468,7 @@ class VisualBody extends React.PureComponent {
             for (i = 0; i < statePrioritizationForGroups.length; i++){
                 stateToTest = statePrioritizationForGroups[i];
                 if ( _.any(data, { 'state' : stateToTest }) ){
-                    if (typeof data[0].count !== 'undefined') {
+                    if (typeof data[0].additionalDataCount !== 'undefined') {
                         submissionState = 'additional-data';
                     }
                     else {
@@ -486,30 +498,30 @@ class VisualBody extends React.PureComponent {
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
         let totalData;
-        var totalPlannedData=0;
+        var additionalDataTotalCount=0;
         let title = 'Experiment Set(s)';
         if (additionalData){
 
-            const dataInAddItem = _.filter(data, function (item) { return typeof item.count === 'undefined'; });
-            const additionalItems = _.filter(data, function (item) { return typeof item.count !== 'undefined'; });
-            totalPlannedData = _.reduce(additionalItems, function (m, v) {
-                return m + v.count;
+            const dataItems = _.filter(data, function (item) { return typeof item.additionalDataCount === 'undefined'; });
+            const additionalItems = _.filter(data, function (item) { return typeof item.additionalDataCount !== 'undefined'; });
+            additionalDataTotalCount = _.reduce(additionalItems, function (m, v) {
+                return m + v.additionalDataCount;
             }, 0);
-            if (dataInAddItem.length > 0){
+            if (dataItems.length > 0){
                 _.each(additionalData, (additionalItem) => {
-                    const dataItem = _.find(dataInAddItem, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
+                    const dataItem = _.find(dataItems, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
                     if (typeof dataItem !=='undefined') {
-                        totalPlannedData += additionalItem.count;
+                        additionalDataTotalCount += additionalItem.additionalDataCount;
                     }
                 });
             }
-            if (dataInAddItem){
+            if (dataItems){
                 totalData =(data.length - additionalItems.length);
-                if ((totalPlannedData > 0) && (totalData === 0)) {
-                    title =(totalPlannedData+' - Planned Experiment Set(s)');
+                if ((additionalDataTotalCount > 0) && (totalData === 0)) {
+                    title =(additionalDataTotalCount + ' - Planned Experiment Set(s)');
                 }
-                else if((totalPlannedData > 0) && (totalData > 0)){
-                    title = title.concat(' ( ' + totalPlannedData + ' - Planned)');
+                else if((additionalDataTotalCount > 0) && (totalData > 0)){
+                    title = title.concat(' ( ' + additionalDataTotalCount + ' - Planned)');
                 }
             }
             else { totalData = data.length; }
@@ -623,7 +635,7 @@ class VisualBody extends React.PureComponent {
             delete keyValsToShow.sub_cat;
             delete keyValsToShow.sub_cat_title;
         }
-        const experimentSetViewButtonDisabled = (totalData === 0 && totalPlannedData > 0) || false;
+        const experimentSetViewButtonDisabled = (totalData === 0 && additionalDataTotalCount > 0) || false;
         return (
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                 { isGroup ?

@@ -295,8 +295,10 @@ export class StackedBlockVisual extends React.PureComponent {
         const { mounted } = this.state;
         if (!mounted) return null;
         if (additionalData) {
+            // AdditionalData values corresponding to the keys. It is compared with the values coming from the database.
+            // If it is a new field, we add it into the data with a push operation.
             _.each(additionalData, (additionalItem) => {
-                const dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]  ; });
+                const dataItem = _.find(propData, function (item) { return item[groupingProperties[0]] === additionalItem[groupingProperties[0]] && item[groupingProperties[1]] === additionalItem[groupingProperties[1]] && item[columnGrouping] === additionalItem[columnGrouping]; });
                 if (!dataItem) {
                     propData.push(additionalItem);
                 }
@@ -304,12 +306,14 @@ export class StackedBlockVisual extends React.PureComponent {
         }
         const data = extendListObjectsWithIndex(propData);
         let nestedData = groupByMultiple(data, groupingProperties); // { 'Grant1' : { Lab1: { PI1: [...], PI2: [...] }, Lab2: {} } }
-        const rowMain = groupByMultiple(additionalData, groupingProperties);
-        const plannedRowMain = _.difference(_.keys(rowMain), _.keys(nestedData));
-        if (plannedRowMain && plannedRowMain.length > 0){
-            _.each(plannedRowMain, (itemMain) => {
+        // It provides the grouping of the additionalData value with the nestedData value created by grouping the data from the database.
+        // It is configured as key: value with the indexes of additional data in the same format into the indexed data.
+        const nestedAdditionalData = groupByMultiple(additionalData, groupingProperties);
+        const rowKeys = _.difference(_.keys(nestedAdditionalData), _.keys(nestedData));
+        if (rowKeys && rowKeys.length > 0) {
+            _.each(rowKeys, (itemRow) => {
                 nestedData = _.extend(nestedData,
-                    { [itemMain]: rowMain[itemMain] });
+                    { [itemRow]: nestedAdditionalData[itemRow] });
             });
         }
         let columnGroups = null;
