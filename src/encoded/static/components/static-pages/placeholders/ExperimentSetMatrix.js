@@ -519,7 +519,7 @@ class VisualBody extends React.PureComponent {
 
         const data_source = aggrData.data_source;
 
-        function makeSearchButton(){
+        function makeSearchButton(disabled=false){
             const currentFilteringProperties = groupingProperties.slice(0, depth + 1).concat([columnGrouping]);
             const currentFilteringPropertiesVals = _.object(
                 _.map(currentFilteringProperties, function(property){
@@ -545,18 +545,18 @@ class VisualBody extends React.PureComponent {
             const linkHref = url.format(hrefParts);
 
             return (
-                <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                <Button disabled={disabled} href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
             );
         }
 
-        function makeSingleItemButton() {
+        function makeSingleItemButton(disabled=false) {
             let path = object.itemUtil.atId(data);
             const hrefParts = url.parse(queryUrl, true);
             if (hrefParts && hrefParts.hostname && hrefParts.protocol) {
                 path = hrefParts.protocol + "//" + hrefParts.hostname + path;
             }// else will be abs path relative to current domain.
             return (
-                <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                <Button disabled={disabled} href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
             );
         }
 
@@ -582,6 +582,7 @@ class VisualBody extends React.PureComponent {
         else {
             title = (additionalItems.length + ' - Planned Experiment Set(s)');
         }
+        const experimentSetViewButtonDisabled = (onlyNonAdditionalItemsCount === 0 && additionalItems.length > 0) || false;
         return (
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                 { isGroup ?
@@ -589,14 +590,14 @@ class VisualBody extends React.PureComponent {
                         <h5 className="text-400 mt-08 mb-15 text-center"><b>{ title }</b></h5>
                         <hr className="mt-0 mb-1"/>
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSearchButton() }
+                        { makeSearchButton(experimentSetViewButtonDisabled) }
                     </div>
                     :
                     <div className="inner">
                         <h5 className="text-400 mt-08 mb-15 text-center"><b>{title}</b></h5>
                         <hr className="mt-0 mb-1" />
                         {StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props)}
-                        {makeSingleItemButton()}
+                        {makeSingleItemButton(experimentSetViewButtonDisabled)}
                     </div>
                 }
             </Popover>
