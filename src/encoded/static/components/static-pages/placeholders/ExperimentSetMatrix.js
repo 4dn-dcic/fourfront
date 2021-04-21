@@ -579,8 +579,15 @@ class VisualBody extends React.PureComponent {
         if (additionalItems.length > 0 && onlyNonAdditionalItemsCount > 0) {
             title = data.length + ' Experiment Set(s) ( ' + additionalItems.length + ' - Planned)';
         }
+        else if (additionalItems.length === 0 && onlyNonAdditionalItemsCount > 0) {
+            title = data.length + ' Experiment Set(s)';
+        }
         else {
-            title = (additionalItems.length + ' - Planned Experiment Set(s)');
+            if ((typeof data === 'object' && additionalItems.length === 0))
+            { title = 1 + ' Experiment Set(s)'; }
+            else {
+                title = (additionalItems.length + ' - Planned Experiment Set(s)');
+            }
         }
         const experimentSetViewButtonDisabled = (onlyNonAdditionalItemsCount === 0 && additionalItems.length > 0) || false;
         return (
