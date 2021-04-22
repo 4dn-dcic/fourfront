@@ -94,7 +94,8 @@ $search-results-above-results-row-height: 40px;
 		}
 	}
 	&[data-field="lab.display_title"],
-	&[data-field="track_and_facet_info.lab_name"]{
+	&[data-field="track_and_facet_info.lab_name"],
+	&[data-field="track_and_facet_info.experimental_lab"]{
 		> .inner {
 			text-align: left;
 		}
