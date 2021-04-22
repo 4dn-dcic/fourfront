@@ -44,16 +44,7 @@ def _build_treatments_agent_embedded_list():
     """ Helper function intended to be used to create the embedded list for treatments_agent.
         All types should implement a function like this going forward.
     """
-    return Treatment.embedded_list + [
-        'treatment_type',
-        'chemical',
-        'biological_agent',
-        'duration',
-        'duration_units',
-        'concentration',
-        'concentration_units',
-        'temperature',
-    ]
+    return Treatment.embedded_list
 
 
 @collection(
