@@ -20,8 +20,9 @@ def _build_biosample_embedded_list():
                                                                      t='modification')
     mod_bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications.target_of_mod',
                                                                         t='bio_feature')
-    treatments_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='treatments',
-                                                                   t='treatment')
+    treatments_embeds = DependencyEmbedder.embed_for_type(base_path='treatments',
+                                                          t='treatment',
+                                                          additional_embeds=['treatment_type'])
     biosource_cell_line_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.cell_line',
                                                                    t='ontology_term',
                                                                    additional_embeds=['synonyms'])
