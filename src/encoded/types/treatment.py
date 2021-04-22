@@ -12,6 +12,17 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_treatments_embedded_list():
+    """ Helper function intended to be used to create the embedded list for treatments.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + lab_award_attribution_embed_list + [
+        # Construct linkTo
+        'constructs.name'
+    ]
 
 
 @abstract_collection(
@@ -26,7 +37,7 @@ class Treatment(Item):
     item_type = 'treatment'
     base_types = ['Treatment'] + Item.base_types
     schema = load_schema('encoded:schemas/treatment.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    embedded_list = _build_treatments_embedded_list()
 
 
 def _build_treatments_agent_embedded_list():
@@ -34,8 +45,14 @@ def _build_treatments_agent_embedded_list():
         All types should implement a function like this going forward.
     """
     return Treatment.embedded_list + [
-        # Construct linkTo
-        'constructs.name'
+        'treatment_type',
+        'chemical',
+        'biological_agent',
+        'duration',
+        'duration_units',
+        'concentration',
+        'concentration_units',
+        'temperature',
     ]
 
 
@@ -96,14 +113,11 @@ def _build_treatments_rnai_embedded_list():
     """ Helper function intended to be used to create the embedded list for treatments_rnai.
         All types should implement a function like this going forward.
     """
-    return Treatment.embedded_list + [
+    bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='target',
+                                                                    t='bio_feature')
+    return Treatment.embedded_list + bio_feature_embeds + [
         # Vendor linkTo
-        'rnai_vendor.name',
         'rnai_vendor.title',
-
-        # Construct linkTo
-        'constructs.designed_to_target',
-        'constructs.name',
     ]
 
 
