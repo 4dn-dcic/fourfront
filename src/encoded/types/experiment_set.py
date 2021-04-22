@@ -29,6 +29,7 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
 import datetime
 
 
@@ -506,6 +507,24 @@ class ExperimentSet(Item):
             return len(experiments_in_set)
 
 
+def _build_experiment_set_replicate_embedded_list():
+    """ Helper function intended to be used to create the embedded list for Replicate Experiment Sets.
+        All types should implement a function like this going forward.
+    """
+    imaging_path_embeds = DependencyEmbedder.embed_for_type(
+        base_path='imaging_paths.path',
+        t='imaging_path',
+        additional_embeds=['imaging_rounds', 'experiment_type.title'])
+    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='imaging_paths.path.target',
+        t='bio_feature')
+    return (
+            ExperimentSet.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+                'replicate_exps.replicate_exp.accession',
+            ]
+    )
+
+
 @collection(
     name='experiment-set-replicates',
     unique_key='accession',
@@ -519,9 +538,7 @@ class ExperimentSetReplicate(ExperimentSet):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded_list = ExperimentSet.embedded_list + [
-        "replicate_exps.replicate_exp.accession"
-    ]
+    embedded_list = _build_experiment_set_replicate_embedded_list()
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties.get('replicate_exps', [])]
