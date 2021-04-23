@@ -507,7 +507,7 @@ test = ["pytest (>=6.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pret
 
 [[package]]
 name = "dcicsnovault"
-version = "4.7.2"
+version = "4.7.4.1b0"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
@@ -515,7 +515,6 @@ python-versions = ">=3.6,<3.7"
 
 [package.dependencies]
 aws_requests_auth = ">=0.4.1,<0.5.0"
-awscli = ">=1.15.42,<2.0.0"
 "backports.statistics" = "0.1.0"
 boto3 = ">=1.7.42,<2.0.0"
 dcicutils = ">=1.8.3,<2.0.0"
@@ -526,7 +525,6 @@ html5lib = "0.9999999"
 humanfriendly = ">=1.44.5,<2.0.0"
 jsonschema_serialize_fork = "2.1.1"
 keepalive = "0.5"
-loremipsum = "1.0.5"
 MarkupSafe = ">=0.23,<1"
 netaddr = ">=0.7.18,<1"
 passlib = ">=1.6.5,<2.0.0"
@@ -546,12 +544,10 @@ pytz = ">=2020.1"
 PyYAML = ">=5.1,<5.3"
 rdflib = ">=4.2.2,<5.0.0"
 rdflib-jsonld = ">=0.3.0,<1.0.0"
-rfc3987 = ">=1.3.6,<2.0.0"
 rutter = ">=0.2,<1"
 simplejson = "3.17.0"
 SPARQLWrapper = ">=1.7.6,<2.0.0"
 SQLAlchemy = "1.3.16"
-strict-rfc3339 = ">=0.7,<1"
 structlog = ">=18.1.0,<20"
 subprocess_middleware = ">=0.3,<1"
 transaction = ">=2.4.0,<3.0.0"
@@ -907,7 +903,7 @@ python-versions = "*"
 name = "loremipsum"
 version = "1.0.5"
 description = "A Lorem Ipsum text generator"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1552,14 +1548,6 @@ python-versions = "*"
 idna2008 = ["idna"]
 
 [[package]]
-name = "rfc3987"
-version = "1.3.8"
-description = "Parsing and validation of URIs (RFC 3986) and IRIs (RFC 3987)"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "rsa"
 version = "3.3"
 description = "Pure-Python RSA implementation"
@@ -1685,14 +1673,6 @@ postgresql_pg8000 = ["pg8000"]
 postgresql_psycopg2binary = ["psycopg2-binary"]
 postgresql_psycopg2cffi = ["psycopg2cffi"]
 pymysql = ["pymysql"]
-
-[[package]]
-name = "strict-rfc3339"
-version = "0.7"
-description = "Strict, simple, lightweight RFC3339 functions"
-category = "main"
-optional = false
-python-versions = "*"
 
 [[package]]
 name = "structlog"
@@ -1985,7 +1965,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1,<3.7"
-content-hash = "05dcb9cb3202d250fac14d63abd1ce1edf5305dbf501a6fa5f0122ec54878e2f"
+content-hash = "2e503b0a5ba0d03538aab4aac9a46722fd4f3e6247e89b285c7cae926ba73c90"
 
 [metadata.files]
 apipkg = [
@@ -2168,8 +2148,8 @@ cryptography = [
     {file = "cryptography-3.4.7.tar.gz", hash = "sha256:3d10de8116d25649631977cb37da6cbdd2d6fa0e0281d014a5b7d337255ca713"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-4.7.2-py3-none-any.whl", hash = "sha256:0a85f81828ecb8f58db759e6006d1baff9307a0980c882df411aa4e4974a3d49"},
-    {file = "dcicsnovault-4.7.2.tar.gz", hash = "sha256:efec82fc266b0a1619322a4d3be17d4ba58a706d6a5c15fcdf972b1a9b0d0280"},
+    {file = "dcicsnovault-4.7.4.1b0-py3-none-any.whl", hash = "sha256:c263e6a9e1195178873dd67a6d80500f1d5a147339b3116bccb105ab71180113"},
+    {file = "dcicsnovault-4.7.4.1b0.tar.gz", hash = "sha256:646026a8749b666696a1c394cf396285e89461401e82b17567fbba2090b8217e"},
 ]
 dcicutils = [
     {file = "dcicutils-1.12.0-py3-none-any.whl", hash = "sha256:c3f5e4601d306f8e3634d7359ff1735dad2b38bc4e8b91eeb370ab2b3eaebcbe"},
@@ -2657,10 +2637,6 @@ rfc3986 = [
     {file = "rfc3986-1.4.0-py2.py3-none-any.whl", hash = "sha256:af9147e9aceda37c91a05f4deb128d4b4b49d6b199775fd2d2927768abdc8f50"},
     {file = "rfc3986-1.4.0.tar.gz", hash = "sha256:112398da31a3344dc25dbf477d8df6cb34f9278a94fee2625d89e4514be8bb9d"},
 ]
-rfc3987 = [
-    {file = "rfc3987-1.3.8-py2.py3-none-any.whl", hash = "sha256:10702b1e51e5658843460b189b185c0366d2cf4cff716f13111b0ea9fd2dce53"},
-    {file = "rfc3987-1.3.8.tar.gz", hash = "sha256:d3c4d257a560d544e9826b38bc81db676890c79ab9d7ac92b39c7a253d5ca733"},
-]
 rsa = [
     {file = "rsa-3.3-py2.py3-none-any.whl", hash = "sha256:928fdb62edfff5c9860f932f76aea7c94bfbcd3f0e7acf6dd64ccd19a597e9c7"},
     {file = "rsa-3.3.tar.gz", hash = "sha256:03f3d9bebad06681771016b8752a40b12f615ff32363c7aa19b3798e73ccd615"},
@@ -2745,9 +2721,6 @@ sqlalchemy = [
     {file = "SQLAlchemy-1.3.16-cp38-cp38-win32.whl", hash = "sha256:3e625e283eecc15aee5b1ef77203bfb542563fa4a9aa622c7643c7b55438ff49"},
     {file = "SQLAlchemy-1.3.16-cp38-cp38-win_amd64.whl", hash = "sha256:7d98e0785c4cd7ae30b4a451416db71f5724a1839025544b4edbd92e00b91f0f"},
     {file = "SQLAlchemy-1.3.16.tar.gz", hash = "sha256:7224e126c00b8178dfd227bc337ba5e754b197a3867d33b9f30dc0208f773d70"},
-]
-strict-rfc3339 = [
-    {file = "strict-rfc3339-0.7.tar.gz", hash = "sha256:5cad17bedfc3af57b399db0fed32771f18fc54bbd917e85546088607ac5e1277"},
 ]
 structlog = [
     {file = "structlog-19.2.0-py2.py3-none-any.whl", hash = "sha256:6640e6690fc31d5949bc614c1a630464d3aaa625284aeb7c6e486c3010d73e12"},
