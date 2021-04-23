@@ -434,13 +434,15 @@ class VisualBody extends React.PureComponent {
             for (i = 0; i < statePrioritizationForGroups.length; i++){
                 stateToTest = statePrioritizationForGroups[i];
                 if ( _.any(data, { 'state' : stateToTest }) ){
-                    const anyNonAdditionalFound = _.any(data, function (item) { return item.is_additional_data !== true; });
-                    if (anyNonAdditionalFound) {
-                        submissionState = stateToTest;
-                    }
-                    else {
-                        submissionState = 'additional-data';
-                    }
+                    //comment out this code to set additional data’s style explicitly
+                    /*     const anyNonAdditionalFound = _.any(data, function (item) { return item.is_additional_data !== true; });
+                        if (anyNonAdditionalFound) {
+                            submissionState = stateToTest;
+                        }
+                        else {
+                            submissionState = 'additional-data';
+                        } */
+                    submissionState = stateToTest;
                     break;
                 }
             }
