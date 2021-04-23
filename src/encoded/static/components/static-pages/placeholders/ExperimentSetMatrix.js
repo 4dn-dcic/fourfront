@@ -157,7 +157,8 @@ export class ExperimentSetMatrix extends React.PureComponent {
         'headerPadding': PropTypes.number,
         'headerColumnsOrder': PropTypes.arrayOf(PropTypes.string),
         'titleMap': PropTypes.object,
-        'columnSubGroupingOrder': PropTypes.arrayOf(PropTypes.string)
+        'columnSubGroupingOrder': PropTypes.arrayOf(PropTypes.string),
+        'additionalData': PropTypes.object
     }
 
     static convertResult(result, dataSource, fieldChangeMap, valueChangeMap, statusStateTitleMap, fallbackNameForBlankField){
@@ -206,7 +207,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
         const { sectionKeys } = props;
         if (sectionKeys && Array.isArray(sectionKeys) && sectionKeys.length !== _.uniq(sectionKeys)) {
             //validate prop keys with respect to sectionKeys, log if any missing.
-            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionStyle'];
+            const propKeys = ['queries', 'valueChangeMap', 'fieldChangeMap', 'groupingProperties', 'columnGrouping', 'headerFor', 'sectionStyle', 'additionalData'];
             _.each(propKeys, (key) => {
                 const diff = _.difference(sectionKeys, _.keys(props[key]));
                 if (diff.length > 0) {
@@ -314,7 +315,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
     render() {
         const {
             sectionKeys, queries, groupingProperties, columnGrouping, headerFor, sectionStyle,
-            fieldChangeMap, valueChangeMap
+            fieldChangeMap, valueChangeMap, additionalData
         } = this.props;
 
         const isLoading = _.any(
@@ -347,6 +348,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                             const url = queries[key] && queries[key].url;
                             const className =  (sectionStyle && sectionStyle[key] && sectionStyle[key]['sectionClassName']) || "col-md-4";
                             const rowLabelListingProportion = (sectionStyle && sectionStyle[key] && sectionStyle[key]['rowLabelListingProportion']) || "balanced";
+                            const additional = (additionalData && additionalData[key] );
                             return (
                                 <div className={'col-12 ' + className}>
                                     {(headerFor && headerFor[key]) || (<h3 className="mt-2 mb-0 text-300">{key}</h3>)}
@@ -358,6 +360,7 @@ export class ExperimentSetMatrix extends React.PureComponent {
                                         fieldChangeMap={fieldChangeMap[key]}
                                         valueChangeMap={valueChangeMap[key]}
                                         columnGrouping={columnGrouping[key]}
+                                        additionalData={additional}
                                         duplicateHeaders={false}
                                         columnSubGrouping="state"
                                         rowLabelListingProportion={rowLabelListingProportion}
@@ -380,7 +383,8 @@ export class ExperimentSetMatrix extends React.PureComponent {
 
 class VisualBody extends React.PureComponent {
 
-    static blockRenderedContents(data){
+    static blockRenderedContents(data, blockProps){
+        const { additionalData, groupingProperties, columnGrouping } = blockProps;
         var count = 0;
         if (Array.isArray(data)) {
             count = data.length;
@@ -430,6 +434,14 @@ class VisualBody extends React.PureComponent {
             for (i = 0; i < statePrioritizationForGroups.length; i++){
                 stateToTest = statePrioritizationForGroups[i];
                 if ( _.any(data, { 'state' : stateToTest }) ){
+                    //comment out this code to set additional data’s style explicitly
+                    // const anyNonAdditionalFound = _.any(data, function (item) { return item.is_additional_data !== true; });
+                    // if (anyNonAdditionalFound) {
+                    //     submissionState = stateToTest;
+                    // }
+                    // else {
+                    //     submissionState = 'additional-data';
+                    // }
                     submissionState = stateToTest;
                     break;
                 }
@@ -509,7 +521,7 @@ class VisualBody extends React.PureComponent {
 
         const data_source = aggrData.data_source;
 
-        function makeSearchButton(){
+        function makeSearchButton(disabled=false){
             const currentFilteringProperties = groupingProperties.slice(0, depth + 1).concat([columnGrouping]);
             const currentFilteringPropertiesVals = _.object(
                 _.map(currentFilteringProperties, function(property){
@@ -535,18 +547,18 @@ class VisualBody extends React.PureComponent {
             const linkHref = url.format(hrefParts);
 
             return (
-                <Button href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
+                <Button disabled={disabled} href={linkHref} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Sets</Button>
             );
         }
 
-        function makeSingleItemButton() {
+        function makeSingleItemButton(disabled=false) {
             let path = object.itemUtil.atId(data);
             const hrefParts = url.parse(queryUrl, true);
             if (hrefParts && hrefParts.hostname && hrefParts.protocol) {
                 path = hrefParts.protocol + "//" + hrefParts.hostname + path;
             }// else will be abs path relative to current domain.
             return (
-                <Button href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
+                <Button disabled={disabled} href={path} target="_blank" bsStyle="primary" className="btn-block mt-1">View Experiment Set</Button>
             );
         }
 
@@ -563,20 +575,38 @@ class VisualBody extends React.PureComponent {
             delete keyValsToShow.sub_cat;
             delete keyValsToShow.sub_cat_title;
         }
-
+        let title;
+        const additionalItems = _.filter(data, function (item) { return item.is_additional_data === true; });
+        const onlyNonAdditionalItemsCount = data.length - additionalItems.length;
+        if (additionalItems.length > 0 && onlyNonAdditionalItemsCount > 0) {
+            title = data.length + ' Experiment Set(s) ( ' + additionalItems.length + ' - Planned)';
+        }
+        else if (additionalItems.length === 0 && onlyNonAdditionalItemsCount > 0) {
+            title = data.length + ' Experiment Set(s)';
+        }
+        else {
+            if ((typeof data === 'object' && additionalItems.length === 0))
+            { title = 1 + ' Experiment Set(s)'; }
+            else {
+                title = (additionalItems.length + ' - Planned Experiment Set(s)');
+            }
+        }
+        const experimentSetViewButtonDisabled = (onlyNonAdditionalItemsCount === 0 && additionalItems.length > 0) || false;
         return (
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
                 { isGroup ?
                     <div className="inner">
-                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ data.length }</b> Experiment Sets</h5>
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{ title }</b></h5>
                         <hr className="mt-0 mb-1"/>
                         { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSearchButton() }
+                        { makeSearchButton(experimentSetViewButtonDisabled) }
                     </div>
                     :
                     <div className="inner">
-                        { StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props) }
-                        { makeSingleItemButton() }
+                        <h5 className="text-400 mt-08 mb-15 text-center"><b>{title}</b></h5>
+                        <hr className="mt-0 mb-1" />
+                        {StackedBlockVisual.generatePopoverRowsFromJSON(keyValsToShow, this.props)}
+                        {makeSingleItemButton(experimentSetViewButtonDisabled)}
                     </div>
                 }
             </Popover>
@@ -588,7 +618,7 @@ class VisualBody extends React.PureComponent {
         const { results } = this.props;
         return (
             <StackedBlockVisual data={results} checkCollapsibility
-                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding',
+                {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding', 'additionalData',
                     'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder', 'rowLabelListingProportion')}
                 blockPopover={this.blockPopover}
                 blockClassName={this.blockClassName}
