@@ -49,6 +49,17 @@
             ],
             "lookup" : 20
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "microscope" : {
             "type" : "object",
             "title" : "Microscope",
@@ -130,16 +141,16 @@
         }
     },
     "facets" : {
-        "microscope.Tier":{ 
+        "microscope.Tier":{
             "title": "Tier"
         },
-        "microscope.Manufacturer":{ 
+        "microscope.Manufacturer":{
             "title": "Manufacturer"
         },
-        "microscope.Model":{ 
+        "microscope.Model":{
             "title": "Model"
         },
-        "microscope.Type":{ 
+        "microscope.Type":{
             "title": "Type"
         }
     },
@@ -147,16 +158,16 @@
         "submitted_by.display_title" : {
             "title" : "Creator"
         },
-        "microscope.Tier":{ 
+        "microscope.Tier":{
             "title": "Tier"
         },
-        "microscope.Manufacturer":{ 
+        "microscope.Manufacturer":{
             "title": "Manufacturer"
         },
-        "microscope.Model":{ 
+        "microscope.Model":{
             "title": "Model"
         },
-        "microscope.Type":{ 
+        "microscope.Type":{
             "title": "Type"
         }
     },
