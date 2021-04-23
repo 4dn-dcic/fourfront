@@ -173,7 +173,8 @@ def security_tween_factory(handler, registry):
                     value=None,
                     domain=request_domain,
                     max_age=0,
-                    path='/'
+                    path='/',
+                    overwrite=True
                 )  # = Same as response.delete_cookie(..)
                 response.status_code = 401
                 response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
