@@ -80,13 +80,19 @@
         }
     },
     "facets": {
-        "antibody_vendor" : {
-            "title" : "Vendor"
+        "antibody_vendor.display_title" : {
+            "title": "Vendor"
+        },
+        "antibody_target.display_title": {
+            "title": "Target"
         }
     },
     "columns": {
         "antibody_vendor": {
             "title": "Vendor"
+        },
+        "antibody_target.display_title": {
+            "title": "Target"
         }
     }
 }
