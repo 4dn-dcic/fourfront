@@ -54,15 +54,10 @@ export class BigDropdownPageLoader extends React.PureComponent {
                     this.setState({ 'menuTree' : null, 'isLoadingMenuTree' : false });
                 }
             }, 'GET', (resp)=>{
-                if (resp && resp.name){
-                    if (!resp.code){
-                        this.setState({ 'menuTree': resp, 'isLoadingMenuTree': false });
-                    }
-                    else{
-                        this.setState({ 'menuTree': null, 'isLoadingMenuTree': false });
-                    }
-                }
-                else {
+                if (resp && resp.name && !resp.code) {
+                    //workaround for 401 errors, https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+                    this.setState({ 'menuTree': resp, 'isLoadingMenuTree': false });
+                } else {
                     this.setState({ 'menuTree': null, 'isLoadingMenuTree': false });
                 }
             });
