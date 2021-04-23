@@ -29,6 +29,17 @@
                 "inactive"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "name": {
             "title": "Name",
             "description": "A short unique name for the lab, use lower cased and hyphen delimited PI name and lab(e.g. john-doe-lab).",
