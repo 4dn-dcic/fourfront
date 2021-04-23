@@ -29,6 +29,17 @@
             ],
             "lookup" : 55
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "name": {
             "title": "Path Name",
             "comment": "Unique route/pathname of this page.",
