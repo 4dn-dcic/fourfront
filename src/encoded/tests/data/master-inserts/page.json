@@ -457,7 +457,7 @@
         "title": "4DN Joint Analysis Portal",
         "content": [
             "joint-analysis-data-plans.legend",
-            "joint-analysis-data-plans.matrix",
+            "experiment-set-data-plans.matrix",
             "joint-analysis-data-plans.release-updates",
             "joint-analysis-data-plans.higlass"
         ],
