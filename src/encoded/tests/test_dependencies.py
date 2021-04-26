@@ -9,7 +9,15 @@ class TestDependencyEmbedder:
 
     @pytest.mark.parametrize('base_path, t, expected', [
         ('treatment', 'treatment', [
+            'treatment.treatment_type',
+            'treatment.chemical',
+            'treatment.biological_agent',
             'treatment.constructs.name',
+            'treatment.duration',
+            'treatment.duration_units',
+            'treatment.concentration',
+            'treatment.concentration_units',
+            'treatment.temperature',
             'treatment.target.feature_type.term_id',
             'treatment.target.feature_type.term_name',
             'treatment.target.feature_type.preferred_name',
@@ -26,7 +34,15 @@ class TestDependencyEmbedder:
             'treatment.target.genome_location.chromosome',
         ]),
         ('experiment_set.treatment', 'treatment', [
+            'experiment_set.treatment.treatment_type',
+            'experiment_set.treatment.chemical',
+            'experiment_set.treatment.biological_agent',
             'experiment_set.treatment.constructs.name',
+            'experiment_set.treatment.duration',
+            'experiment_set.treatment.duration_units',
+            'experiment_set.treatment.concentration',
+            'experiment_set.treatment.concentration_units',
+            'experiment_set.treatment.temperature',
             'experiment_set.treatment.target.feature_type.term_id',
             'experiment_set.treatment.target.feature_type.term_name',
             'experiment_set.treatment.target.feature_type.preferred_name',
