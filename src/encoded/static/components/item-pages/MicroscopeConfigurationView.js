@@ -44,8 +44,8 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/images/svg/";
-const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/images/png/";
+const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/images/svg/";
+const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/images/png/";
 
 let microMetaDependencies = null;
 
@@ -560,7 +560,7 @@ export class MicroMetaTabView extends React.PureComponent {
             onLoadSchema: function (complete) {
                 window
                     .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/fullSchema.json"
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
                     )
                     .then(function (resp) {
                         return resp.text();
@@ -573,7 +573,7 @@ export class MicroMetaTabView extends React.PureComponent {
             onLoadDimensions: function (complete) {
                 window
                     .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-00/dimensions/MicroscopeDimensions.json"
+                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/dimensions/MicroscopeDimensions.json"
                     )
                     .then(function (resp) {
                         return resp.text();
