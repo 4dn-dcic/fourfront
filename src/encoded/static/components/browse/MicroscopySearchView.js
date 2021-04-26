@@ -161,7 +161,7 @@ export default class MicroscopySearchView extends React.PureComponent {
 
     handleModalConfirm() {
         const { microscopeName, description, tier, standType, importFromFile, fileContent } = this.state;
-        const { microMetaAppVersion } = microMetaDependencies;
+        const { microMetaAppVersion, schemas = [] } = microMetaDependencies;
 
         const fallbackCallback = (errResp, xhr) => {
             // Error callback
@@ -174,6 +174,14 @@ export default class MicroscopySearchView extends React.PureComponent {
         };
 
         const stand = _.find(current_stands, (stand) => stand && stand.name && stand.name === standType);
+        const standJson = stand && stand.json ? stand.json + ".json" : null;
+        let modelVersion = '2.01.0'; //fallback
+        if (schemas && Array.isArray(schemas) && schemas.length > 0) {
+            const schema = _.find(schemas, (item) => item && item.ID && item.ID === standJson);
+            if (schema && schema.modelVersion) {
+                modelVersion = schema.modelVersion;
+            }
+        }
 
         const microscope = !importFromFile ? {
             "Name": microscopeName,
@@ -181,15 +189,15 @@ export default class MicroscopySearchView extends React.PureComponent {
             "ID": uuidv4(),
             "Tier": tier,
             "ValidationTier": tier,
-            "ModelVersion": "2.00.0",
+            "ModelVersion": modelVersion,
             "AppVersion": microMetaAppVersion || null,
             "MicroscopeStand": {
                 "Name": microscopeName,
-                "Schema_ID": stand && stand.json ? stand.json + ".json" : null,
+                "Schema_ID": standJson,
                 "ID": uuidv4(),
                 "Tier": tier,
                 "ValidationTier": tier,
-                "ModelVersion": "2.00.0",
+                "ModelVersion": modelVersion,
                 "Description": description
             },
             "components": [],
