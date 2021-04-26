@@ -42,6 +42,17 @@
             ],
             "lookup" : 20
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "description": {
             "title": "Description",
             "type": "string",

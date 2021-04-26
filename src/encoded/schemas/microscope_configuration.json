@@ -29,9 +29,20 @@
             "lookup" : 1,
             "exclude_from": ["submit4dn","FFedit-create"]
         },
-        "microscope": {
-            "type": "object",
-            "title": "Microscope",
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
+        "microscope" : {
+            "type" : "object",
+            "title" : "Microscope",
             "required": [
                 "Tier",
                 "ValidationTier",
