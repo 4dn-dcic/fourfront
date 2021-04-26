@@ -467,6 +467,8 @@ class VisualBody extends React.PureComponent {
         const isGroup = (Array.isArray(data) && data.length > 1) || false;
         let aggrData;
 
+        const additionalItems = _.filter(data, function (item) { return item.is_additional_data === true; });
+
         if (!isGroup && Array.isArray(data)){
             data = data[0];
         }
@@ -575,22 +577,19 @@ class VisualBody extends React.PureComponent {
             delete keyValsToShow.sub_cat;
             delete keyValsToShow.sub_cat_title;
         }
+
+        // format title by experiment set counts
         let title;
-        const additionalItems = _.filter(data, function (item) { return item.is_additional_data === true; });
-        const onlyNonAdditionalItemsCount = data.length - additionalItems.length;
-        if (additionalItems.length > 0 && onlyNonAdditionalItemsCount > 0) {
-            title = data.length + ' Experiment Set(s) ( ' + additionalItems.length + ' - Planned)';
+        const dataLength = Array.isArray(data) ? data.length : 1;
+        const onlyNonAdditionalItemsCount = dataLength - additionalItems.length;
+        if (onlyNonAdditionalItemsCount > 0 && additionalItems.length > 0) {
+            title = `${dataLength} Experiment Set(s) (${additionalItems.length} - Planned)`;
+        } else if (onlyNonAdditionalItemsCount > 0 && additionalItems.length === 0) {
+            title = `${dataLength} Experiment Set(s)`;
+        } else if (onlyNonAdditionalItemsCount === 0 && additionalItems.length > 0) {
+            title = `${additionalItems.length} - Planned Experiment Set(s)`;
         }
-        else if (additionalItems.length === 0 && onlyNonAdditionalItemsCount > 0) {
-            title = data.length + ' Experiment Set(s)';
-        }
-        else {
-            if ((typeof data === 'object' && additionalItems.length === 0))
-            { title = 1 + ' Experiment Set(s)'; }
-            else {
-                title = (additionalItems.length + ' - Planned Experiment Set(s)');
-            }
-        }
+
         const experimentSetViewButtonDisabled = (onlyNonAdditionalItemsCount === 0 && additionalItems.length > 0) || false;
         return (
             <Popover id="jap-popover" title={popoverTitle} style={{ maxWidth : 540, width: '100%' }}>
