@@ -352,9 +352,9 @@ def get_syndef_terms_as_uri(ontology, termtype, as_rdf=True):
         if as_rdf=False.
     """
     sdterms = ontology.get(termtype)
-    uris = [term['term_url'] for term in sdterms if term is not None]
+    uris = [term.get('term_url') for term in sdterms if term is not None]
     if as_rdf:
-        uris = [convert2namespace(uri) for uri in uris]
+        uris = [convert2namespace(uri) for uri in uris if uri]
     return uris
 
 
