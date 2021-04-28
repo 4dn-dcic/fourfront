@@ -25,6 +25,7 @@ class DependencyEmbedder:
     GENE = 'gene'
     GENOMIC_REGION = 'genomic_region'
     IMAGING_PATH = 'imaging_path'
+    ANTIBODY = 'antibody'
 
     EMBED_MAPPER = {
         BIO_FEATURE: [
@@ -115,11 +116,17 @@ class DependencyEmbedder:
             'labeled_probe',
             'primary_antibodies.antibody_name',
             'primary_antibodies.antibody_product_no',
+            'primary_antibodies.antibody_vendor.title',
             'secondary_antibody.antibody_name',
             'secondary_antibody.antibody_product_no',
+            'secondary_antibody.antibody_vendor.title',
             'override_display_title'
         ],
-
+        ANTIBODY: [
+            'antibody_name',
+            'antibody_product_no',
+            'antibody_vendor.title',
+        ],
     }
 
     @classmethod
