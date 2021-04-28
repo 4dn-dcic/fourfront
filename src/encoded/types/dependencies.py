@@ -63,7 +63,15 @@ class DependencyEmbedder:
             'target_of_mod.genome_location.chromosome',
         ],
         TREATMENT: [
+            'treatment_type',
+            'chemical',
+            'biological_agent',
             'constructs.name',
+            'duration',
+            'duration_units',
+            'concentration',
+            'concentration_units',
+            'temperature',
             'target.feature_type.term_id',
             'target.feature_type.term_name',
             'target.feature_type.preferred_name',
@@ -82,6 +90,7 @@ class DependencyEmbedder:
         ONTOLOGY_TERM: [
             'term_id',
             'term_name',
+            'term_url',
             'preferred_name',
         ],
         PROTOCOL: [
