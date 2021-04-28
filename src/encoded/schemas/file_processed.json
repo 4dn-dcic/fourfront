@@ -91,6 +91,7 @@
                 "stripe calls"
             ],
             "ignored_enum": [
+                "chromatin traces - bio data",
                 "contact list-combined",
                 "contact list-replicate",
                 "image mask-cell",
