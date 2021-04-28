@@ -171,7 +171,7 @@ def security_tween_factory(handler, registry):
                 response.set_cookie(
                     name='jwtToken',
                     value=None,
-                    domain=request_domain,
+                    domain=request.domain,
                     max_age=0,
                     path='/',
                     overwrite=True
