@@ -531,12 +531,11 @@ export class OverViewBodyItem extends React.PureComponent {
             if (!treatment || !treatment.display_title || !object.atIdFromObject(treatment)){
                 return null;
             }
-            const treatmentType = treatment.treatment_type ? (<div>{`(${treatment.treatment_type})`}</div>) : null;
             return (
                 <div key={object.atIdFromObject(treatment)} >
                     { wrapperElementType === 'div' && typeof index === 'number' ? (index + 1) + '. ' : null }
                     { object.itemUtil.generateLink(treatment, true) }
-                    { treatmentType }
+                    <div>({ treatment.treatment_type })</div>
                 </div>
             );
         },
