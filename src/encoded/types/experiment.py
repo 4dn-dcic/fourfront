@@ -942,10 +942,7 @@ def _build_experiment_mic_embedded_list():
         base_path='imaging_paths.path',
         t='imaging_path',
         additional_embeds=['imaging_rounds', 'experiment_type.title'])
-    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
-        base_path='imaging_paths.path.target',
-        t='bio_feature')
-    return (Experiment.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+    return (Experiment.embedded_list + imaging_path_embeds + [
         # Files linkTo
         'files.accession',  # detect display_title diff
 
