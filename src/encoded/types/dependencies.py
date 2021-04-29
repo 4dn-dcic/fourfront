@@ -34,7 +34,6 @@ class DependencyEmbedder:
     GENE = 'gene'
     GENOMIC_REGION = 'genomic_region'
     IMAGING_PATH = 'imaging_path'
-    ANTIBODY = 'antibody'
 
     EMBED_MAPPER = {
         ANTIBODY: {
