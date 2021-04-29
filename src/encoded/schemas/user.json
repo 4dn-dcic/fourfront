@@ -63,7 +63,7 @@
             "permission": "import_items",
             "items": {
                 "type": "string",
-                "enum": [
+                "suggested_enum": [
                     "4DN",
                     "Not 4DN",
                     "NOFIC",

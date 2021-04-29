@@ -133,6 +133,14 @@ $fa-font-family: 'Font Awesome 5 Free';
             background-color: darken($color: rgb(190, 190, 190), $amount: 10) !important;
         }
 	}
+    &.cellType-additional-data {
+        background-color:#e29302 !important;
+        &.hoverable:hover,
+        &.clickable:active,
+        &.clickable:focus {
+            background-color: darken($color: #e29302, $amount: 10) !important;
+        }
+	}
 	&.cellType-internal-release {
         //background-color: #b3d4b1 !important;
         background-color: #66c560 !important;

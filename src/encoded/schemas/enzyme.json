@@ -99,7 +99,7 @@
         }
     },
     "facets": {
-        "enzyme_source": {
+        "enzyme_source.title": {
             "title": "Source"
         }
     },
