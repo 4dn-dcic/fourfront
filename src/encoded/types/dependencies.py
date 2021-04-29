@@ -91,6 +91,7 @@ class DependencyEmbedder:
         ONTOLOGY_TERM: [
             'term_id',
             'term_name',
+            'term_url',
             'preferred_name',
         ],
         PROTOCOL: [

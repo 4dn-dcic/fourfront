@@ -272,17 +272,18 @@ class FourfrontRoot(Root):
         except KeyError: # Can be caused by 404 / Not Found during indexing
             return []
 
-    @calculated_property(schema={
-        "title": "Announcements",
-        "type": "array"
-    }, category="page")
-    def announcements(self, request):
-        '''Returns list of latest announcements'''
-        user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
-        try:
-            return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=user).get('@graph', [])
-        except KeyError: # Can be caused by 404 / Not Found during indexing
-            return []
+    # It is no longer used at the moment, replaced by Twitter feed. 
+    # @calculated_property(schema={
+    #     "title": "Announcements",
+    #     "type": "array"
+    # }, category="page")
+    # def announcements(self, request):
+    #     '''Returns list of latest announcements'''
+    #     user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
+    #     try:
+    #         return request.embed('/search/?type=StaticSection&section_type=Announcement&sort=-date_created', as_user=user).get('@graph', [])
+    #     except KeyError: # Can be caused by 404 / Not Found during indexing
+    #         return []
 
     @calculated_property(schema={
         "title": "Application version",
