@@ -16,13 +16,16 @@ class DependencyEmbedderError(Exception):
 
 
 class DependencyEmbedder:
-    """ Utility class intended to be used to produce the embedded list necessary for a default embed
+    """ Utility class intended to be used to produce the embedded list necessary for a general default embed
         of a given type. This class is intended to be used by calling the `embed_defaults_for_type` method.
-        Note that the type mappings are specified in EMBED_MAPPER and that 'compound' embeds are
-        specified verbosely ie: bio_feature embeds an ontology_term
+        Note that the type mappings are specified in EMBED_MAPPER and that top level properties have None value
+        while linked embeds can be specified by adding the type as the value - if non-default fields need to be
+        embedded in the EMBED_MAPPER they must be fully specified separately and if you want to build an embed
+        list that include additional non-default properties use `embed_for_type` and use `additional_embeds` parameter
     """
 
     # Note that these match item_type field in the type definition!
+    ANTIBODY = 'antibody'
     BIO_FEATURE = 'bio_feature'
     MODIFICATION = 'modification'
     TREATMENT = 'treatment'
@@ -33,6 +36,10 @@ class DependencyEmbedder:
     IMAGING_PATH = 'imaging_path'
 
     EMBED_MAPPER = {
+        ANTIBODY: {
+            'antibody_name': None,
+            'antibody_product_no': None,
+        },
         BIO_FEATURE: {
             'preferred_label': None,
             'cellular_structure': None,
@@ -87,11 +94,10 @@ class DependencyEmbedder:
             # requires also target (BioFeature linkTo)
             'other_probes': None,
             'labeled_probe': None,
-            'primary_antibodies.antibody_name': None,
-            'primary_antibodies.antibody_product_no': None,
-            'secondary_antibody.antibody_name': None,
-            'secondary_antibody.antibody_product_no': None,
+            'primary_antibodies': ANTIBODY,
+            'secondary_antibody': ANTIBODY,
             'override_display_title': None,
+            'target': BIO_FEATURE,
         },
 
     }
@@ -111,7 +117,7 @@ class DependencyEmbedder:
             if not ev:
                 embed_list.append('.'.join([base_path, ef]))
             else:
-                embed_list.extend(_build_embed_mapper_embedded(ef, ev))
+                embed_list.extend(['.'.join([base_path, e]) for e in _build_embed_mapper_embedded(ef, ev)])
         return embed_list
 
     @classmethod
