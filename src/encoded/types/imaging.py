@@ -18,14 +18,14 @@ def _build_imaging_embedded_list():
     """
     bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='target',
                                                                     t='bio_feature')
+    primary_ab_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='primary_antibodies',
+                                                                   t='antibody')
+    secondary_ab_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='secondary_antibody',
+                                                                     t='antibody')
     return (
-            Item.embedded_list + lab_award_attribution_embed_list + bio_feature_embeds + [
-                # Antibody linkTo - primary_antibodies and secondary_antibody
-                'primary_antibodies.antibody_name',  # display_title uses this
-                'primary_antibodies.antibody_product_no',
-                'secondary_antibody.antibody_name',  # display_title uses this
-                'secondary_antibody.antibody_product_no',
-
+            Item.embedded_list + lab_award_attribution_embed_list + bio_feature_embeds +
+                primary_ab_embeds + secondary_ab_embeds +
+            [
                 # FileReference linkTo
                 'file_reference.accession',
                 'file_reference.file_format.standard_file_extension',
