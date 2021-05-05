@@ -356,7 +356,7 @@ export class StackedBlockVisual extends React.PureComponent {
                 if (typeof sortField !== 'undefined') {
                     const sortedKeys = [];
                     _.map(leftAxisKeys, (k) =>
-                        sortedKeys.push(StackedBlockGroupedRow.sorterBlock(nestedData[k], columnGroups, k, sortField))
+                        sortedKeys.push(StackedBlockGroupedRow.sortBlock(nestedData[k], columnGroups, k, sortField))
                     );
 
                     if (sorting === 'asc') {
@@ -586,9 +586,9 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     //The function of creating sorting according to the total values of the data
     //As a result, objects in the array are created. (groupingKey, count)
     //For example ('groupingKey' :dataBinding, 'count': 146)
-    static sorterBlock = memoize(function (data, groupedDataIndices, groupingKey, sortField) {
-        let allChildBlocks = null;
+    static sortBlock = memoize(function (data, groupedDataIndices, groupingKey, sortField) {
 
+        let allChildBlocks = null;
         if (Array.isArray(data)) {
             allChildBlocks = data;
         } else {
@@ -596,10 +596,9 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         }
 
         const groupedDataIndicesPairs = (groupedDataIndices && _.pairs(groupedDataIndices)) || [];
-        let blocksByColumnGroup;
 
         if (groupedDataIndicesPairs.length > 0) {
-            blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function ([columnKey, listOfIndicesForGroup]) {
+            const blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function ([columnKey, listOfIndicesForGroup]) {
                 return [
                     columnKey,
                     _.filter(_.map(allChildBlocks, function (blockData) {
@@ -612,6 +611,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             }));
             return { 'groupingKey': groupingKey, 'count': blocksByColumnGroup[sortField].length };
         }
+
+        return null;
     });
 
     render(){
