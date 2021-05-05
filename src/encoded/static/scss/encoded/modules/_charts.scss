@@ -1475,14 +1475,14 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 color: #111;
             }
             div > span.column-sort-icon {
-                color: rgba(0,0,0,0.1);
+                color: rgba(0, 0, 0, 0.1);
                 &:hover, &:active, &:focus {
-                    color: rgba(0,0,0,1);
+                    color: rgba(0, 0, 0, 1);
                     cursor: pointer;
                 }
                 &.active {
-                    color: rgba(0,0,0,1);
-                    text-shadow: 0 0 0 $search-results-header-text-color;
+                    color: rgba(0, 0, 0, 1);
+                    text-shadow: 0 0 0 #000;
                 }
             }
         }

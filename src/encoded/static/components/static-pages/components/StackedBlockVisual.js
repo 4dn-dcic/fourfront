@@ -248,9 +248,10 @@ export class StackedBlockVisual extends React.PureComponent {
     constructor(props){
         super(props);
         this.renderContents = this.renderContents.bind(this);
-        this.sorterClick = _.throttle(this.sorterClick.bind(this), 250);
+        this.handleSorterClick = _.throttle(this.handleSorterClick.bind(this), 250);
         var state = {
             'sorting' : 'both',
+            'sortField': null,
             'mounted' : true
         };
 
@@ -290,23 +291,33 @@ export class StackedBlockVisual extends React.PureComponent {
     componentWillUnmount(){
         this.setState({ 'mounted' : false });
     }
-    sorterClick(evt) {
+
+    handleSorterClick(evt){
         evt.stopPropagation();
-        const { sorting } = this.state;
+        const { sorting, sortField } = this.state;
+
+        const newSortField = evt.currentTarget.dataset.index;
+
         let nextSort;
-        switch (sorting) {
-            case "desc":
-                nextSort = "both";
-                break;
-            case "asc":
-                nextSort = "desc";
-                break;
-            case "both":
-                nextSort = "asc";
-                break;
+        if (newSortField === sortField || sortField === null) {
+            switch (sorting) {
+                case "desc":
+                    nextSort = "asc";
+                    break;
+                case "asc":
+                    nextSort = "both";
+                    break;
+                case "both":
+                    nextSort = "desc";
+                    break;
+            }
+        } else {
+            nextSort = "desc";
         }
-        this.setState({ "sorting": nextSort, "sortField": evt.currentTarget.dataset.index, "mounted": true });
+
+        this.setState({ "sorting": nextSort, "sortField": newSortField, "mounted": true });
     }
+
     renderContents(){
         const { data : propData, groupingProperties, columnGrouping, additionalData } = this.props;
         const { mounted, sorting, sortField } = this.state;
@@ -338,40 +349,37 @@ export class StackedBlockVisual extends React.PureComponent {
         }
 
         if (!Array.isArray(nestedData) && nestedData) {
-            var leftAxisKeys = _.keys(nestedData);
-            var newSortKeys=[];
-            if ((sorting !== 'both') && (typeof sortField !== 'undefined')){
-                let sorter;
+            let leftAxisKeys = _.keys(nestedData);
 
-                //Number sorted data (Count)
+            //sort by counts
+            if ((sorting !== 'both') && (typeof sortField !== 'undefined')) {
+                const sortedKeys = [];
                 _.map(leftAxisKeys, (k) =>
-                    newSortKeys.push(StackedBlockGroupedRow.sorterBlock(nestedData[k], columnGroups, k, sortField))
+                    sortedKeys.push(StackedBlockGroupedRow.sorterBlock(nestedData[k], columnGroups, k, sortField))
                 );
-                if (sorting === 'asc'){
-                    sorter = newSortKeys.sort((a, b) => parseFloat(a.count) - parseFloat(b.count));
-                }
-                else {
-                    sorter = newSortKeys.sort((a, b) => parseFloat(b.count) - parseFloat(a.count));
 
+                if (sorting === 'asc') {
+                    sortedKeys.sort((a, b) => a.count - b.count);
+                } else if (sorting === 'desc') {
+                    sortedKeys.sort((a, b) => b.count - a.count);
                 }
-                //Getting the keys of the sorted data.
-                leftAxisKeys = _.map(sorter, (key) =>
+                //get sorted data keys
+                leftAxisKeys = _.map(sortedKeys, (key) =>
                     key['groupingKey']
                 );
-            } else {
-                //Alphabetic sorted
+            } else { //sort by row labels
                 if (sorting === 'asc') {
                     leftAxisKeys.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-                }
-                else if (sorting === 'desc') {
+                } else if (sorting === 'desc') {
                     leftAxisKeys.sort((a, b) => b.toLowerCase().localeCompare(a.toLowerCase()));
+                } else {
+                    leftAxisKeys.sort();
                 }
-                //Default Alphabetic sorted
-                else { leftAxisKeys.sort(); }
             }
+
             return _.map(leftAxisKeys, (k, idx) =>
                 <StackedBlockGroupedRow {...this.props} groupedDataIndices={columnGroups} parentState={this.state} data={nestedData[k]}
-                    key={k} group={k} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} sorterOnclick={this.sorterClick} sorting={sorting} sortField={sortField} />
+                    key={k} group={k} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} onSorterClick={this.handleSorterClick} sorting={sorting} sortField={sortField} />
             );
         } else {
             // TODO: Render ... plain blocks w/o left column?
@@ -607,7 +615,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         const {
             groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, headerColumnsOrder,
             data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding, rowLabelListingProportion, additionalData,
-            sorterOnclick, sorting, sortField, sortable } = this.props;
+            onSorterClick, sorting, sortField } = this.props;
         const { open } = this.state;
 
         let groupingPropertyTitle = null;
@@ -628,17 +636,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             toggleIcon = <i className="icon icon-fw" />;
         }
 
-        //Alphabetic sorting icon settings
-        let sortIcon;
-        if (sortable){
-            if ((sorting === "desc") &&(!sortField)){
-                sortIcon = <SortIconDesc />;
-            }
-            else if ((sorting === "asc")&&(!sortField)){
-                sortIcon = <SortIconAsc />;
-            }
-            else { sortIcon = <SortIconBoth />; }
-        }
         let header = null;
         if (depth === 0 && groupedDataIndices && ((open && duplicateHeaders) || index === 0)){
             const columnWidth = (blockHeight + (blockHorizontalSpacing * 2)) + 1;
@@ -647,34 +644,47 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             if (Array.isArray(headerColumnsOrder)){
                 columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, headerColumnsOrder);
             }
+
+            //sort row label
+            let labelSortIcon;
+            if ((sorting === "desc") && !sortField) {
+                labelSortIcon = <SortIconDesc />;
+            } else if ((sorting === "asc") && !sortField) {
+                labelSortIcon = <SortIconAsc />;
+            } else {
+                labelSortIcon = <SortIconBoth />;
+            }
+            const labelSortIconClassName = 'column-sort-icon' + (['asc', 'desc'].indexOf(sorting) > -1 && !sortField ? ' active' : '');
+
             header = (
                 <div className="header-for-viz">
-                    <div className="column-group-header" style={{ marginBlockStart:'24px' }} onClick={sorterOnclick.bind()}>
+                    <div className="column-group-header" style={{ marginBlockStart:'24px' }} onClick={onSorterClick}>
                         <div className="column-group-header">
-                            <span style={{ 'marginLeft': '-75px' }} className={"column-sort-icon" + (['asc', 'desc'].indexOf(sorting) > -1 && !sortField ? ' active' : '')} data-html="true">{sortIcon}</span>
+                            <span style={{ 'marginLeft': '-75px' }} className={labelSortIconClassName} data-html="true">{labelSortIcon}</span>
                         </div>
                     </div>
-                    { columnKeys.map(function(k){
-                        //Number sorting icon settings
-                        let sortIcon;
-                        if (sortable){
-                            if ((sorting === "desc") && (k === sortField)){
-                                sortIcon = <SortIconDesc />;
-                            }
-                            else if ((sorting === "asc") && (k === sortField)){
-                                sortIcon = <SortIconAsc />;
-                            }
-                            else { sortIcon = <SortIconBoth />; }
+                    { columnKeys.map(function(columnKey){
+                        //sort order icons
+                        let countSortIcon;
+                        if ((sorting === 'desc') && (columnKey === sortField)) {
+                            countSortIcon = <SortIconDesc />;
+                        } else if ((sorting === 'asc') && (columnKey === sortField)) {
+                            countSortIcon = <SortIconAsc />;
+                        } else {
+                            countSortIcon = <SortIconBoth />;
                         }
+
+                        const countSortIconClassName = 'column-sort-icon' + (['asc', 'desc'].indexOf(sorting) > -1 && columnKey === sortField ? ' active' : '');
+
                         return (
-                            <div key={k} className="column-group-header" style={headerItemStyle}>
+                            <div key={'col-' + columnKey} className="column-group-header" style={headerItemStyle}>
                                 <div className="inner">
-                                    <span>{ k }</span>
+                                    <span>{ columnKey }</span>
                                 </div>
                                 <span>
                                     <div className="column-group-header">
-                                        <div data-index={k} onClick={sorterOnclick.bind()}>
-                                            <span className={"column-sort-icon" + (['asc', 'desc'].indexOf(sorting)  > -1 && k===sortField ? ' active' : '')}>{sortIcon}</span>
+                                        <div data-index={columnKey} onClick={onSorterClick}>
+                                            <span className={countSortIconClassName}>{countSortIcon}</span>
                                         </div>
                                     </div>
                                 </span>

@@ -361,7 +361,6 @@ export class ExperimentSetMatrix extends React.PureComponent {
                                         valueChangeMap={valueChangeMap[key]}
                                         columnGrouping={columnGrouping[key]}
                                         additionalData={additional}
-                                        sortable={true}
                                         duplicateHeaders={false}
                                         columnSubGrouping="state"
                                         rowLabelListingProportion={rowLabelListingProportion}
@@ -619,7 +618,7 @@ class VisualBody extends React.PureComponent {
         return (
             <StackedBlockVisual data={results} checkCollapsibility
                 {..._.pick(this.props, 'groupingProperties', 'columnGrouping', 'titleMap', 'headerPadding', 'additionalData',
-                    'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder', 'rowLabelListingProportion', 'sortable')}
+                    'columnSubGrouping', 'defaultDepthsOpen', 'duplicateHeaders', 'headerColumnsOrder', 'columnSubGroupingOrder', 'rowLabelListingProportion')}
                 blockPopover={this.blockPopover}
                 blockClassName={this.blockClassName}
                 blockRenderedContents={VisualBody.blockRenderedContents}
