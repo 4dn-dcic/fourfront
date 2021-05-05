@@ -250,7 +250,7 @@ export class StackedBlockVisual extends React.PureComponent {
         this.renderContents = this.renderContents.bind(this);
         this.sorterClick = _.throttle(this.sorterClick.bind(this), 250);
         var state = {
-            'sorting' : null,
+            'sorting' : 'both',
             'mounted' : true
         };
 
@@ -296,13 +296,13 @@ export class StackedBlockVisual extends React.PureComponent {
         let nextSort;
         switch (sorting) {
             case "desc":
-                nextSort = "asc";
+                nextSort = "both";
                 break;
             case "asc":
                 nextSort = "desc";
                 break;
-            default:
-                nextSort="asc";
+            case "both":
+                nextSort = "asc";
                 break;
         }
         this.setState({ "sorting": nextSort, "sortField": evt.currentTarget.dataset.index, "mounted": true });
@@ -340,7 +340,7 @@ export class StackedBlockVisual extends React.PureComponent {
         if (!Array.isArray(nestedData) && nestedData) {
             var leftAxisKeys = _.keys(nestedData);
             var newSortKeys=[];
-            if ((sorting !== null) && (typeof sortField !== 'undefined')){
+            if ((sorting !== 'both') && (typeof sortField !== 'undefined')){
                 let sorter;
 
                 //Number sorted data (Count)
