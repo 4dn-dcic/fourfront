@@ -351,30 +351,33 @@ export class StackedBlockVisual extends React.PureComponent {
         if (!Array.isArray(nestedData) && nestedData) {
             let leftAxisKeys = _.keys(nestedData);
 
-            //sort by counts
-            if ((sorting !== 'both') && (typeof sortField !== 'undefined')) {
-                const sortedKeys = [];
-                _.map(leftAxisKeys, (k) =>
-                    sortedKeys.push(StackedBlockGroupedRow.sorterBlock(nestedData[k], columnGroups, k, sortField))
-                );
+            if (sorting !== 'both') {
+                //sort by counts
+                if (typeof sortField !== 'undefined') {
+                    const sortedKeys = [];
+                    _.map(leftAxisKeys, (k) =>
+                        sortedKeys.push(StackedBlockGroupedRow.sorterBlock(nestedData[k], columnGroups, k, sortField))
+                    );
 
-                if (sorting === 'asc') {
-                    sortedKeys.sort((a, b) => a.count - b.count);
-                } else if (sorting === 'desc') {
-                    sortedKeys.sort((a, b) => b.count - a.count);
+                    if (sorting === 'asc') {
+                        sortedKeys.sort((a, b) => a.count - b.count);
+                    } else if (sorting === 'desc') {
+                        sortedKeys.sort((a, b) => b.count - a.count);
+                    }
+
+                    //get sorted data keys
+                    leftAxisKeys = _.map(sortedKeys, (key) =>
+                        key['groupingKey']
+                    );
+                } else { //sort by row labels
+                    if (sorting === 'asc') {
+                        leftAxisKeys.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+                    } else if (sorting === 'desc') {
+                        leftAxisKeys.sort((a, b) => b.toLowerCase().localeCompare(a.toLowerCase()));
+                    }
                 }
-                //get sorted data keys
-                leftAxisKeys = _.map(sortedKeys, (key) =>
-                    key['groupingKey']
-                );
-            } else { //sort by row labels
-                if (sorting === 'asc') {
-                    leftAxisKeys.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-                } else if (sorting === 'desc') {
-                    leftAxisKeys.sort((a, b) => b.toLowerCase().localeCompare(a.toLowerCase()));
-                } else {
-                    leftAxisKeys.sort();
-                }
+            } else {
+                leftAxisKeys.sort();
             }
 
             return _.map(leftAxisKeys, (k, idx) =>
