@@ -649,22 +649,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                 columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, headerColumnsOrder);
             }
 
-            //sort row label
-            let labelSortIcon;
-            if ((sorting === "desc") && !sortField) {
-                labelSortIcon = <SortIconDesc />;
-            } else if ((sorting === "asc") && !sortField) {
-                labelSortIcon = <SortIconAsc />;
-            } else {
-                labelSortIcon = <SortIconBoth />;
-            }
-            const labelSortIconClassName = 'column-sort-icon' + (['asc', 'desc'].indexOf(sorting) > -1 && !sortField ? ' active' : '');
-
             header = (
                 <div className="header-for-viz">
-                    <div className="column-group-header" style={{ marginTop: '24px' }} onClick={onSorterClick}>
-                        <span style={{ 'marginLeft': '-75px' }} className={labelSortIconClassName}>{labelSortIcon}</span>
-                    </div>
                     { columnKeys.map(function(columnKey){
                         //sort order icons
                         let countSortIcon;
@@ -702,7 +688,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         let labelSectionStyle = null;
         let listSectionStyle = null;
         if (depth === 0 && index === 0){ // Add padding-top to first 1 to align w/ top padding.
-            labelSectionStyle = { 'paddingTop' : Math.max(0, headerPadding + 78 - rowHeight) };
+            labelSectionStyle = { 'paddingTop' : Math.max(0, headerPadding + 56 - rowHeight) };
             listSectionStyle = { 'paddingTop' : headerPadding };
         }
 
@@ -714,10 +700,26 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             labelClassName = "col-6", listingClassName = "col-6";
         }
 
+        //sort row label
+        let labelSortIcon;
+        if ((sorting === "desc") && !sortField) {
+            labelSortIcon = <SortIconDesc />;
+        } else if ((sorting === "asc") && !sortField) {
+            labelSortIcon = <SortIconAsc />;
+        } else {
+            labelSortIcon = <SortIconBoth />;
+        }
+        const labelSortIconClassName = 'column-sort-icon' + (['asc', 'desc'].indexOf(sorting) > -1 && !sortField ? ' active' : '');
+
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
                 <div className="row grouping-row">
                     <div className={"col label-section " + labelClassName} style={labelSectionStyle}>
+                        {index === 0 ? (
+                            <div className="text-right" onClick={onSorterClick}>
+                                <span className={labelSortIconClassName}>{labelSortIcon}</span>
+                            </div>
+                        ) : null}
                         <div className="label-container" style={{ 'minHeight' : rowHeight }}>
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
