@@ -662,10 +662,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
 
             header = (
                 <div className="header-for-viz">
-                    <div className="column-group-header" style={{ marginBlockStart:'24px' }} onClick={onSorterClick}>
-                        <div className="column-group-header">
-                            <span style={{ 'marginLeft': '-75px' }} className={labelSortIconClassName} data-html="true">{labelSortIcon}</span>
-                        </div>
+                    <div className="column-group-header" style={{ marginTop: '24px' }} onClick={onSorterClick}>
+                        <span style={{ 'marginLeft': '-75px' }} className={labelSortIconClassName}>{labelSortIcon}</span>
                     </div>
                     { columnKeys.map(function(columnKey){
                         //sort order icons
@@ -683,15 +681,11 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         return (
                             <div key={'col-' + columnKey} className="column-group-header" style={headerItemStyle}>
                                 <div className="inner">
-                                    <span>{ columnKey }</span>
+                                    <span>{columnKey}</span>
                                 </div>
-                                <span>
-                                    <div className="column-group-header">
-                                        <div data-index={columnKey} onClick={onSorterClick}>
-                                            <span className={countSortIconClassName}>{countSortIcon}</span>
-                                        </div>
-                                    </div>
-                                </span>
+                                <div data-index={columnKey} onClick={onSorterClick}>
+                                    <span className={countSortIconClassName}>{countSortIcon}</span>
+                                </div>
                             </div>
                         );
                     }) }
