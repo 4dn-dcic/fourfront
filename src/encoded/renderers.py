@@ -166,14 +166,13 @@ def security_tween_factory(handler, registry):
                 # Especially for initial document requests by browser, but also desired for AJAX and other requests,
                 # unset jwtToken cookie so initial client-side React render has App(instance).state.session = false
                 # to be synced w/ server-side
-                request_parts = urlparse(request.referrer)
-                request_domain = request_parts.hostname
                 response.set_cookie(
                     name='jwtToken',
                     value=None,
-                    domain=request_domain,
+                    domain=request.domain,
                     max_age=0,
-                    path='/'
+                    path='/',
+                    overwrite=True
                 )  # = Same as response.delete_cookie(..)
                 response.status_code = 401
                 response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
