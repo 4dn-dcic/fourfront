@@ -715,7 +715,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
                 <div className="row grouping-row">
                     <div className={"col label-section " + labelClassName} style={labelSectionStyle}>
-                        {index === 0 ? (
+                        {(index === 0 && depth === 0) ? (
                             <div className="text-right" onClick={onSorterClick}>
                                 <span className={labelSortIconClassName}>{labelSortIcon}</span>
                             </div>
