@@ -444,10 +444,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
             });
-            //console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
         }
-
-        //console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
 
         const commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
@@ -471,8 +468,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             // If columns exist, distribute these blocks by column!
             // Otherwise (else statement @ end) we'll probably just stack em left-to-right.
 
-            //console.log('TEsT',allChildBlocksPerChildGroup);
-
             if (allChildBlocksPerChildGroup){
                 // Generate block per each child or child group when nothing else to regroup by.
 
@@ -490,8 +485,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                             } else return null;
                         }), function(block){ return block !== null; })];
                 }));
-
-                //console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
 
                 columnKeys = _.keys(blocksByColumnGroup);
                 if (Array.isArray(props.headerColumnsOrder)){
@@ -531,8 +524,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                 inner = _.map(columnKeys, function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
 
-                    //console.log('BFG-1', blocksForGroup);
-
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string' && props.depth <= (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
@@ -543,7 +534,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         }
                     }
 
-                    //console.log('BFG-2', blocksForGroup);
                     return (
                         <div className="block-container-group" style={containerGroupStyle}
                             key={k} data-block-count={blocksForGroup.length} data-group-key={k}>
