@@ -9,6 +9,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    get_item_or_none,
     lab_award_attribution_embed_list
 )
 from .dependencies import DependencyEmbedder
@@ -56,7 +57,12 @@ class Antibody(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, antibody_name, antibody_product_no=None):
+    def display_title(self, request, antibody_name, antibody_product_no=None, antibody_vendor=None):
+        antibody_details = []
+        if antibody_vendor:
+            antibody_details.append(get_item_or_none(request, antibody_vendor, 'vendor').get('display_title'))
         if antibody_product_no:
-            antibody_name += ' ({})'.format(antibody_product_no)
+            antibody_details.append(antibody_product_no)
+        if antibody_details:
+            antibody_name += ' ({})'.format(', '.join(antibody_details))
         return antibody_name

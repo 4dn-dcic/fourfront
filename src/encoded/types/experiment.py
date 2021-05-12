@@ -613,6 +613,18 @@ class ExperimentCaptureC(Experiment):
         return super(ExperimentCaptureC, self).experiment_categorizer(request, experiment_type, digestion_enzyme)
 
 
+def _build_experiment_repliseq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentRepliseq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-repliseq',
     unique_key='accession',
@@ -624,7 +636,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repli-seq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_repliseq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -706,6 +718,18 @@ class ExperimentAtacseq(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
+def _build_experiment_chiapet_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentChiapet.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-chiapet',
     unique_key='accession',
@@ -718,7 +742,7 @@ class ExperimentChiapet(Experiment):
 
     item_type = 'experiment_chiapet'
     schema = load_schema('encoded:schemas/experiment_chiapet.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_chiapet_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -795,6 +819,18 @@ class ExperimentDamid(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
+def _build_experiment_seq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentSeq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-seq',
     unique_key='accession',
@@ -807,7 +843,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_seq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -839,6 +875,21 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
+def _build_experiment_tsaseq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentTsaseq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    secondary_antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='secondary_antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds + secondary_antibody_embeds
+    )
+
+
 @collection(
     name='experiments-tsaseq',
     unique_key='accession',
@@ -851,7 +902,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
 
     item_type = 'experiment_tsaseq'
     schema = load_schema('encoded:schemas/experiment_tsaseq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_tsaseq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -891,10 +942,7 @@ def _build_experiment_mic_embedded_list():
         base_path='imaging_paths.path',
         t='imaging_path',
         additional_embeds=['imaging_rounds', 'experiment_type.title'])
-    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
-        base_path='imaging_paths.path.target',
-        t='bio_feature')
-    return (Experiment.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+    return (Experiment.embedded_list + imaging_path_embeds + [
         # Files linkTo
         'files.accession',  # detect display_title diff
 

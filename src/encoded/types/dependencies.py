@@ -5,18 +5,27 @@
 """
 
 
+def _build_embed_mapper_embedded(base_path, t, additions=None):
+    if additions:
+        return embed_for_type(base_path=base_path, t=t, additional_embeds=additions)
+    return DependencyEmbedder.embed_defaults_for_type(base_path=base_path, t=t)
+
+
 class DependencyEmbedderError(Exception):
     pass
 
 
 class DependencyEmbedder:
-    """ Utility class intended to be used to produce the embedded list necessary for a default embed
+    """ Utility class intended to be used to produce the embedded list necessary for a general default embed
         of a given type. This class is intended to be used by calling the `embed_defaults_for_type` method.
-        Note that the type mappings are specified in EMBED_MAPPER and that 'compound' embeds are
-        specified verbosely ie: bio_feature embeds an ontology_term
+        Note that the type mappings are specified in EMBED_MAPPER and that top level properties have None value
+        while linked embeds can be specified by adding the type as the value - if non-default fields need to be
+        embedded in the EMBED_MAPPER they must be fully specified separately and if you want to build an embed
+        list that include additional non-default properties use `embed_for_type` and use `additional_embeds` parameter
     """
 
     # Note that these match item_type field in the type definition!
+    ANTIBODY = 'antibody'
     BIO_FEATURE = 'bio_feature'
     MODIFICATION = 'modification'
     TREATMENT = 'treatment'
@@ -27,90 +36,69 @@ class DependencyEmbedder:
     IMAGING_PATH = 'imaging_path'
 
     EMBED_MAPPER = {
-        BIO_FEATURE: [
-            'feature_type.term_id',
-            'feature_type.term_name',
-            'feature_type.preferred_name',
-            'preferred_label',
-            'cellular_structure',
-            'organism_name',
-            'relevant_genes.geneid',
-            'relevant_genes.preferred_symbol',
-            'feature_mods',
-            'genome_location.genome_assembly',
-            'genome_location.location_description',
-            'genome_location.start_coordinate',
-            'genome_location.end_coordinate',
-            'genome_location.chromosome',
-        ],
-        MODIFICATION: [
-            'modification_type',
-            'genomic_change',
-            'override_modification_name',
-            'target_of_mod.feature_type.term_id',
-            'target_of_mod.feature_type.term_name',
-            'target_of_mod.feature_type.preferred_name',
-            'target_of_mod.preferred_label',
-            'target_of_mod.cellular_structure',
-            'target_of_mod.organism_name',
-            'target_of_mod.relevant_genes.geneid',
-            'target_of_mod.relevant_genes.preferred_symbol',
-            'target_of_mod.feature_mods',
-            'target_of_mod.genome_location.genome_assembly',
-            'target_of_mod.genome_location.location_description',
-            'target_of_mod.genome_location.start_coordinate',
-            'target_of_mod.genome_location.end_coordinate',
-            'target_of_mod.genome_location.chromosome',
-        ],
-        TREATMENT: [
-            'constructs.name',
-            'target.feature_type.term_id',
-            'target.feature_type.term_name',
-            'target.feature_type.preferred_name',
-            'target.preferred_label',
-            'target.cellular_structure',
-            'target.organism_name',
-            'target.relevant_genes.geneid',
-            'target.relevant_genes.preferred_symbol',
-            'target.feature_mods',
-            'target.genome_location.genome_assembly',
-            'target.genome_location.location_description',
-            'target.genome_location.start_coordinate',
-            'target.genome_location.end_coordinate',
-            'target.genome_location.chromosome',
-        ],
-        ONTOLOGY_TERM: [
-            'term_id',
-            'term_name',
-            'preferred_name',
-        ],
-        PROTOCOL: [
-            'protocol_type',
-            'title',
-            'attachment',
-            'date_created',
-        ],
-        GENE: [
-            'geneid',
-            'preferred_symbol'
-        ],
-        GENOMIC_REGION: [
-            'genome_assembly',
-            'location_description',
-            'start_coordinate',
-            'end_coordinate',
-            'chromosome'
-        ],
-        IMAGING_PATH: [
-            # requires also target (BioFeature linkTo)
-            'other_probes',
-            'labeled_probe',
-            'primary_antibodies.antibody_name',
-            'primary_antibodies.antibody_product_no',
-            'secondary_antibody.antibody_name',
-            'secondary_antibody.antibody_product_no',
-            'override_display_title'
-        ],
+        ANTIBODY: {
+            'antibody_name': None,
+            'antibody_product_no': None,
+            'antibody_vendor.title': None,
+        },
+        BIO_FEATURE: {
+            'preferred_label': None,
+            'cellular_structure': None,
+            'organism_name': None,
+            'feature_mods': None,
+            'feature_type': ONTOLOGY_TERM,
+            'relevant_genes': GENE,
+            'genome_location': GENOMIC_REGION,
+        },
+        MODIFICATION: {
+            'modification_type': None,
+            'genomic_change': None,
+            'override_modification_name': None,
+            'target_of_mod': BIO_FEATURE,
+        },
+        TREATMENT: {
+            'treatment_type': None,
+            'chemical': None,
+            'biological_agent': None,
+            'constructs.name': None,
+            'duration': None,
+            'duration_units': None,
+            'concentration': None,
+            'concentration_units': None,
+            'temperature': None,
+            'target': BIO_FEATURE
+        },
+        ONTOLOGY_TERM: {
+            'term_id': None,
+            'term_name': None,
+            'term_url': None,
+            'preferred_name': None,
+        },
+        PROTOCOL: {
+            'protocol_type': None,
+            'title': None,
+            'attachment': None,
+            'date_created': None,
+        },
+        GENE: {
+            'geneid': None,
+            'preferred_symbol': None,
+        },
+        GENOMIC_REGION: {
+            'genome_assembly': None,
+            'location_description': None,
+            'start_coordinate': None,
+            'end_coordinate': None,
+            'chromosome': None,
+        },
+        IMAGING_PATH: {
+            'other_probes': None,
+            'labeled_probe': None,
+            'primary_antibodies': ANTIBODY,
+            'secondary_antibody': ANTIBODY,
+            'override_display_title': None,
+            'target': BIO_FEATURE,
+        },
 
     }
 
@@ -124,7 +112,13 @@ class DependencyEmbedder:
         """
         if t not in cls.EMBED_MAPPER:
             raise DependencyEmbedderError('Type %s is not mapped! Types mapped: %s' % (t, cls.EMBED_MAPPER.keys()))
-        return ['.'.join([base_path, e]) for e in cls.EMBED_MAPPER[t]]
+        embed_list = []
+        for ef, ev in cls.EMBED_MAPPER[t].items():
+            if not ev:
+                embed_list.append('.'.join([base_path, ef]))
+            else:
+                embed_list.extend(['.'.join([base_path, e]) for e in _build_embed_mapper_embedded(ef, ev)])
+        return embed_list
 
     @classmethod
     def embed_for_type(cls, *, base_path, t, additional_embeds: list):
