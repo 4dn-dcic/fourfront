@@ -248,9 +248,14 @@ export class StackedBlockVisual extends React.PureComponent {
     constructor(props){
         super(props);
         this.renderContents = this.renderContents.bind(this);
-
+        this.handleSorterClick = _.throttle(this.handleSorterClick.bind(this), 250);
         var state = {
+            'sorting' : 'both',
+            'sortField': null,
             'mounted' : true
+        };
+        this.memoized = {
+            sortBlock: memoize(StackedBlockGroupedRow.sortBlock)
         };
 
         /*
@@ -290,9 +295,35 @@ export class StackedBlockVisual extends React.PureComponent {
         this.setState({ 'mounted' : false });
     }
 
+    handleSorterClick(evt){
+        evt.stopPropagation();
+        const { sorting, sortField } = this.state;
+
+        const newSortField = evt.currentTarget.dataset.index;
+
+        let nextSort;
+        if (newSortField === sortField || sortField === null) {
+            switch (sorting) {
+                case "desc":
+                    nextSort = "asc";
+                    break;
+                case "asc":
+                    nextSort = "both";
+                    break;
+                case "both":
+                    nextSort = "desc";
+                    break;
+            }
+        } else {
+            nextSort = "desc";
+        }
+
+        this.setState({ "sorting": nextSort, "sortField": newSortField, "mounted": true });
+    }
+
     renderContents(){
         const { data : propData, groupingProperties, columnGrouping, additionalData } = this.props;
-        const { mounted } = this.state;
+        const { mounted, sorting, sortField } = this.state;
         if (!mounted) return null;
         let tempData = [].concat(propData);
         if (additionalData) {
@@ -321,11 +352,40 @@ export class StackedBlockVisual extends React.PureComponent {
         }
 
         if (!Array.isArray(nestedData) && nestedData) {
-            var leftAxisKeys = _.keys(nestedData);
-            leftAxisKeys.sort();
+            let leftAxisKeys = _.keys(nestedData);
+
+            if (sorting !== 'both') {
+                //sort by counts
+                if (typeof sortField !== 'undefined') {
+                    const sortedKeys = [];
+                    _.map(leftAxisKeys, (k) =>
+                        sortedKeys.push(this.memoized.sortBlock(nestedData[k], columnGroups, k, sortField))
+                    );
+
+                    if (sorting === 'asc') {
+                        sortedKeys.sort((a, b) => a.count - b.count);
+                    } else if (sorting === 'desc') {
+                        sortedKeys.sort((a, b) => b.count - a.count);
+                    }
+
+                    //get sorted data keys
+                    leftAxisKeys = _.map(sortedKeys, (key) =>
+                        key['groupingKey']
+                    );
+                } else { //sort by row labels
+                    if (sorting === 'asc') {
+                        leftAxisKeys.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+                    } else if (sorting === 'desc') {
+                        leftAxisKeys.sort((a, b) => b.toLowerCase().localeCompare(a.toLowerCase()));
+                    }
+                }
+            } else {
+                leftAxisKeys.sort();
+            }
+
             return _.map(leftAxisKeys, (k, idx) =>
                 <StackedBlockGroupedRow {...this.props} groupedDataIndices={columnGroups} parentState={this.state} data={nestedData[k]}
-                    key={k} group={k} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} />
+                    key={k} group={k} depth={0} index={idx} toggleGroupingOpen={this.toggleGroupingOpen} onSorterClick={this.handleSorterClick} sorting={sorting} sortField={sortField} />
             );
         } else {
             // TODO: Render ... plain blocks w/o left column?
@@ -371,6 +431,38 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         return orderedList.concat( _.keys(o)); // Incl remaining keys.
     }
 
+    /**
+     * returns {groupingKey, count}. count is sorted fields column group length.
+     */
+    static sortBlock (data, groupedDataIndices, groupingKey, sortField) {
+
+        let allChildBlocks = null;
+        if (Array.isArray(data)) {
+            allChildBlocks = data;
+        } else {
+            allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
+        }
+
+        const groupedDataIndicesPairs = (groupedDataIndices && _.pairs(groupedDataIndices)) || [];
+
+        if (groupedDataIndicesPairs.length > 0) {
+            const blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function ([columnKey, listOfIndicesForGroup]) {
+                return [
+                    columnKey,
+                    _.filter(_.map(allChildBlocks, function (blockData) {
+                        if (listOfIndicesForGroup.indexOf(blockData.index) > -1) {
+                            return blockData;
+                        } else {
+                            return null;
+                        }
+                    }), function (block) { return block !== null; })];
+            }));
+            return { 'groupingKey': groupingKey, 'count': blocksByColumnGroup[sortField].length };
+        }
+
+        return null;
+    }
+
     /** @todo Convert to functional memoized React component */
     static collapsedChildBlocks = memoize(function(data, props){
 
@@ -387,10 +479,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             allChildBlocksPerChildGroup = _.map(_.pairs(data), function(pair){
                 return [pair[0], StackedBlockGroupedRow.flattenChildBlocks(pair[1])];
             });
-            //console.log('TESTING COLLAPSE', data, allChildBlocksPerChildGroup)
         }
-
-        //console.log('ALLCHILDBLOCKS', data, allChildBlocksPerChildGroup, allChildBlocks, props)
 
         const commonProps = _.pick(props, 'blockHeight', 'blockHorizontalSpacing', 'blockVerticalSpacing',
             'groupingProperties', 'depth', 'titleMap', 'blockClassName', 'blockRenderedContents',
@@ -414,8 +503,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             // If columns exist, distribute these blocks by column!
             // Otherwise (else statement @ end) we'll probably just stack em left-to-right.
 
-            //console.log('TEsT',allChildBlocksPerChildGroup);
-
             if (allChildBlocksPerChildGroup){
                 // Generate block per each child or child group when nothing else to regroup by.
 
@@ -433,8 +520,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                             } else return null;
                         }), function(block){ return block !== null; })];
                 }));
-
-                //console.log('BLOCKSBYCOLGROUP', blocksByColumnGroup);
 
                 columnKeys = _.keys(blocksByColumnGroup);
                 if (Array.isArray(props.headerColumnsOrder)){
@@ -474,8 +559,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                 inner = _.map(columnKeys, function(k){
                     var blocksForGroup = blocksByColumnGroup[k];
 
-                    //console.log('BFG-1', blocksForGroup);
-
                     // If we have columnSubGrouping (we should, if we reached this comment, b/c otherwise we do the allChildBlocksPerGroup clause), we group these into smaller blocks/groups.
                     if (typeof props.columnSubGrouping === 'string' && props.depth <= (props.groupingProperties.length - 1)){
                         blocksForGroup = _.pairs(_.groupBy(blocksForGroup, props.columnSubGrouping));
@@ -486,7 +569,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
                         }
                     }
 
-                    //console.log('BFG-2', blocksForGroup);
                     return (
                         <div className="block-container-group" style={containerGroupStyle}
                             key={k} data-block-count={blocksForGroup.length} data-group-key={k}>
@@ -529,8 +611,8 @@ export class StackedBlockGroupedRow extends React.PureComponent {
     render(){
         const {
             groupingProperties, depth, titleMap, group, blockHeight, blockVerticalSpacing, blockHorizontalSpacing, headerColumnsOrder,
-            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding, rowLabelListingProportion, additionalData
-        } = this.props;
+            data, groupedDataIndices, index, duplicateHeaders, showGroupingPropertyTitles, checkCollapsibility, headerPadding, rowLabelListingProportion, additionalData,
+            onSorterClick, sorting, sortField } = this.props;
         const { open } = this.state;
 
         let groupingPropertyTitle = null;
@@ -559,13 +641,29 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             if (Array.isArray(headerColumnsOrder)){
                 columnKeys = StackedBlockGroupedRow.sortByArray(columnKeys, headerColumnsOrder);
             }
+
             header = (
                 <div className="header-for-viz">
-                    { columnKeys.map(function(k){
+                    { columnKeys.map(function(columnKey){
+                        //sort order icons
+                        let countSortIcon;
+                        if ((sorting === 'desc') && (columnKey === sortField)) {
+                            countSortIcon = <SortIconDesc />;
+                        } else if ((sorting === 'asc') && (columnKey === sortField)) {
+                            countSortIcon = <SortIconAsc />;
+                        } else {
+                            countSortIcon = <SortIconBoth />;
+                        }
+
+                        const countSortIconClassName = 'column-sort-icon' + (['asc', 'desc'].indexOf(sorting) > -1 && columnKey === sortField ? ' active' : '');
+
                         return (
-                            <div key={k} className="column-group-header" style={headerItemStyle}>
+                            <div key={'col-' + columnKey} className="column-group-header" style={headerItemStyle}>
                                 <div className="inner">
-                                    <span>{ k }</span>
+                                    <span>{columnKey}</span>
+                                </div>
+                                <div data-index={columnKey} onClick={onSorterClick}>
+                                    <span className={countSortIconClassName}>{countSortIcon}</span>
                                 </div>
                             </div>
                         );
@@ -583,7 +681,7 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         let labelSectionStyle = null;
         let listSectionStyle = null;
         if (depth === 0 && index === 0){ // Add padding-top to first 1 to align w/ top padding.
-            labelSectionStyle = { 'paddingTop' : Math.max(0, headerPadding + 55 - rowHeight) };
+            labelSectionStyle = { 'paddingTop' : Math.max(0, headerPadding + 56 - rowHeight) };
             listSectionStyle = { 'paddingTop' : headerPadding };
         }
 
@@ -595,10 +693,26 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             labelClassName = "col-6", listingClassName = "col-6";
         }
 
+        //sort row label
+        let labelSortIcon;
+        if ((sorting === "desc") && !sortField) {
+            labelSortIcon = <SortIconDesc />;
+        } else if ((sorting === "asc") && !sortField) {
+            labelSortIcon = <SortIconAsc />;
+        } else {
+            labelSortIcon = <SortIconBoth />;
+        }
+        const labelSortIconClassName = 'column-sort-icon' + (['asc', 'desc'].indexOf(sorting) > -1 && !sortField ? ' active' : '');
+
         return (
             <div className={className} data-max-blocks-vertical={maxBlocksInRow}>
                 <div className="row grouping-row">
                     <div className={"col label-section " + labelClassName} style={labelSectionStyle}>
+                        {(index === 0 && depth === 0) ? (
+                            <div className="text-right" onClick={onSorterClick}>
+                                <span className={labelSortIconClassName}>{labelSortIcon}</span>
+                            </div>
+                        ) : null}
                         <div className="label-container" style={{ 'minHeight' : rowHeight }}>
                             { groupingPropertyTitle && showGroupingPropertyTitles ?
                                 <small className="text-400 mb-0 mt-0">{ groupingPropertyTitle }</small>
@@ -673,5 +787,29 @@ const Block = React.memo(function Block(props){
     return blockElem;
 });
 
+
+
+function FaIcon(props) {
+    const { icon, iconClass } = props;
+    const className = `fas icon ${icon} ${iconClass}`;
+    return (
+        <i className={className} align="right" />
+    );
+}
+function SortIconDesc(props) {
+    return (
+        <FaIcon icon="icon-sort-down" iconClass="align-text-top" />
+    );
+}
+function SortIconAsc(props) {
+    return (
+        <FaIcon icon="icon-sort-up" iconClass="align-bottom" />
+    );
+}
+function SortIconBoth(props) {
+    return (
+        <FaIcon icon="icon-sort-down" iconClass="align-text-top" />
+    );
+}
 
 StackedBlockVisual.Row = StackedBlockGroupedRow;
