@@ -581,11 +581,8 @@ class QualityMetricMcool(QualityMetric):
         qc = self.properties
         qc_summary = []
         val = ''
-        if qc.get("Failed Balancing") == 'None':
-            val = qc.get("Failed Balancing")
-        else:
-            items = qc.get("Failed Balancing")
-            val = ';'.join(items)
+        qc_val = qc.get("Failed Balancing")
+        val = ';'.join(qc_val)
 
         qc_summary.append({"title": "Failed Balancing",
                            "value": val,
