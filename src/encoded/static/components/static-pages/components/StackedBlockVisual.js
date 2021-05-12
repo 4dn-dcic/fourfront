@@ -254,6 +254,9 @@ export class StackedBlockVisual extends React.PureComponent {
             'sortField': null,
             'mounted' : true
         };
+        this.memoized = {
+            sortBlock: memoize(StackedBlockGroupedRow.sortBlock)
+        };
 
         /*
         var maxCollapsibleDepth = props.groupingProperties.length - 1;
@@ -356,7 +359,7 @@ export class StackedBlockVisual extends React.PureComponent {
                 if (typeof sortField !== 'undefined') {
                     const sortedKeys = [];
                     _.map(leftAxisKeys, (k) =>
-                        sortedKeys.push(StackedBlockGroupedRow.sortBlock(nestedData[k], columnGroups, k, sortField))
+                        sortedKeys.push(this.memoized.sortBlock(nestedData[k], columnGroups, k, sortField))
                     );
 
                     if (sorting === 'asc') {
@@ -426,6 +429,38 @@ export class StackedBlockGroupedRow extends React.PureComponent {
         }
 
         return orderedList.concat( _.keys(o)); // Incl remaining keys.
+    }
+
+    /**
+     * returns {groupingKey, count}. count is sorted fields column group length.
+     */
+    static sortBlock (data, groupedDataIndices, groupingKey, sortField) {
+
+        let allChildBlocks = null;
+        if (Array.isArray(data)) {
+            allChildBlocks = data;
+        } else {
+            allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
+        }
+
+        const groupedDataIndicesPairs = (groupedDataIndices && _.pairs(groupedDataIndices)) || [];
+
+        if (groupedDataIndicesPairs.length > 0) {
+            const blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function ([columnKey, listOfIndicesForGroup]) {
+                return [
+                    columnKey,
+                    _.filter(_.map(allChildBlocks, function (blockData) {
+                        if (listOfIndicesForGroup.indexOf(blockData.index) > -1) {
+                            return blockData;
+                        } else {
+                            return null;
+                        }
+                    }), function (block) { return block !== null; })];
+            }));
+            return { 'groupingKey': groupingKey, 'count': blocksByColumnGroup[sortField].length };
+        }
+
+        return null;
     }
 
     /** @todo Convert to functional memoized React component */
@@ -572,38 +607,6 @@ export class StackedBlockGroupedRow extends React.PureComponent {
             return { "open" : !open };
         });
     }
-
-    //The function of creating sorting according to the total values of the data
-    //As a result, objects in the array are created. (groupingKey, count)
-    //For example ('groupingKey' :dataBinding, 'count': 146)
-    static sortBlock = memoize(function (data, groupedDataIndices, groupingKey, sortField) {
-
-        let allChildBlocks = null;
-        if (Array.isArray(data)) {
-            allChildBlocks = data;
-        } else {
-            allChildBlocks = StackedBlockGroupedRow.flattenChildBlocks(data);
-        }
-
-        const groupedDataIndicesPairs = (groupedDataIndices && _.pairs(groupedDataIndices)) || [];
-
-        if (groupedDataIndicesPairs.length > 0) {
-            const blocksByColumnGroup = _.object(_.map(groupedDataIndicesPairs, function ([columnKey, listOfIndicesForGroup]) {
-                return [
-                    columnKey,
-                    _.filter(_.map(allChildBlocks, function (blockData) {
-                        if (listOfIndicesForGroup.indexOf(blockData.index) > -1) {
-                            return blockData;
-                        } else {
-                            return null;
-                        }
-                    }), function (block) { return block !== null; })];
-            }));
-            return { 'groupingKey': groupingKey, 'count': blocksByColumnGroup[sortField].length };
-        }
-
-        return null;
-    });
 
     render(){
         const {
