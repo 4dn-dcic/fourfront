@@ -14,7 +14,7 @@ import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './co
 import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { ConfirmModal } from './HiGlassViewConfigView';
-import { timingSafeEqual } from 'crypto';
+import { onLoginNavItemClick } from './../navigation/components/LoginNavItem';
 
 
 export default class MicroscopeConfigurationView extends DefaultItemView {
@@ -72,6 +72,7 @@ export class MicroMetaTabView extends React.PureComponent {
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000);
         this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
         this.handleStatusChange = this.handleStatusChange.bind(this);
+        this.handleLoginModalConfirm = this.handleLoginModalConfirm.bind(this);
         this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
         this.updateContainerOffsets = _.debounce(this.updateContainerOffsets.bind(this), 500);
@@ -447,6 +448,12 @@ export class MicroMetaTabView extends React.PureComponent {
         setTimeout(toggleFullScreen, 0, !isFullscreen);
     }
 
+    handleLoginModalConfirm() {
+        this.setState(function () {
+            return { 'modal': null };
+        }, onLoginNavItemClick);
+    }
+
     /** @todo make into functional component or move to this components render method */
     fullscreenButton(){
         const { isFullscreen, toggleFullScreen } = this.props;
@@ -461,12 +468,33 @@ export class MicroMetaTabView extends React.PureComponent {
     }
 
     onSaveMicroscope(microscope, complete) {
-        const { href, context } = this.props;
+        const { href, context, session } = this.props;
         const { modal } = this.state;
 
         if (!this.havePermissionToEdit()) {
             // I guess would also get caught in ajax error callback.
-            throw new Error('No edit permissions.');
+            // throw new Error('No edit permissions.');
+            if (!session) {
+                this.setState({
+                    'modal': (
+                        <ConfirmModal handleConfirm={this.handleLoginModalConfirm} handleCancel={this.handleModalCancel}
+                            confirmButtonText="Login" modalTitle="Login Required">
+                            Log in or create an account to save this configuration.
+                        </ConfirmModal>
+                    )
+                });
+            } else {
+                this.setState({
+                    'modal': (
+                        <ConfirmModal handleCancel={this.handleModalCancel}
+                            cancelButtonText="Close" confirmButtonVisible={false} modalTitle="Permission Denied">
+                            Access was denied to save this configuration.
+                        </ConfirmModal>
+                    )
+                });
+            }
+
+            return;
         }
 
         if (modal == null && context.status && typeof context.status === 'string' &&
@@ -602,7 +630,7 @@ export class MicroMetaTabView extends React.PureComponent {
                         <MicroMetaAppReact {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
                     </div>
                 </div>
-                {this.zoomInOutControl()}
+                {/* {this.zoomInOutControl()} */}
                 {modal}
             </div>
         );
