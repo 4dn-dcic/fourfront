@@ -555,7 +555,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const { MicroMetaAppReact } = microMetaDependencies || {};
 
         const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
-        const height = Math.max(800, windowHeight / 2);
+        const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
         if (!mounted){
             return (
