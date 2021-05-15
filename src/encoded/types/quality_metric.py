@@ -54,7 +54,7 @@ QC_SUMMARY_SCHEMA = {
     }
 }
 
-"""OVERALL QAULITY SCORE INFO
+"""OVERALL QUALITY SCORE INFO
 All QC objects come with a field 'overall_quality_status', which is by default set to 'PASS'
 For some qc object we don't have a current protocol to judge the overall quality based on the
 fields in the qc item.
@@ -73,7 +73,15 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded_list = ['award.project', 'quality_metrics.overall_quality_status']
+    embedded_list = [
+        # Award linkTo
+        'award.project',
+        'award.name',
+
+        # QualityMetric linkTo
+        'quality_metrics.overall_quality_status',
+        'quality_metrics.url'
+    ]
 
 
 @abstract_collection(

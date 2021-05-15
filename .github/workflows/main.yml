@@ -43,8 +43,11 @@ jobs:
 
       - name: Install/Link Postgres
         run: |
-          sudo apt update -yq
-          sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-common postgresql-11 postgresql-client-11
+          sudo apt-get install curl ca-certificates gnupg
+          curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          sudo apt-get update
+          sudo apt-get install postgresql-11 postgresql-client-11
           echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
           sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
       - name: Install Deps
@@ -72,7 +75,7 @@ jobs:
         run: |
           npm test
           make travis-test-npm
-          
+
       - name: Cleanup (NPM)
         if: ${{ always() && matrix.test_type == 'NPM' }}
         env:
@@ -88,7 +91,7 @@ jobs:
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
           # Until the next version of snovault, the following two are prudent. We can remove them soon. -kmp 9-Mar-2021
           poetry run wipe-test-indices $TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
-          poetry run wipe-test-indices ff-test-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices ff-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
       - name: QA (UNIT)
         if: ${{ matrix.test_type == 'UNIT' }}
@@ -100,7 +103,7 @@ jobs:
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
           make travis-test-unit
-          
+
       - name: Cleanup (UNIT)
         if: ${{ always() && matrix.test_type == 'UNIT' }}
         env:
@@ -113,4 +116,4 @@ jobs:
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
           # Until the next version of snovault, the following two are prudent. We can remove them soon. -kmp 9-Mar-2021
           poetry run wipe-test-indices $TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
-          poetry run wipe-test-indices ff-test-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices cgap-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443

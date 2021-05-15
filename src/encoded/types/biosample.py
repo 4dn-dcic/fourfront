@@ -9,6 +9,70 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_biosample_embedded_list():
+    """ Helper function intended to be used to create the embedded list for biosample.
+        All types should implement a function like this going forward.
+    """
+    modification_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications',
+                                                                     t='modification')
+    mod_bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='modifications.target_of_mod',
+                                                                        t='bio_feature')
+    treatments_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='treatments',
+                                                                   t='treatment')
+    biosource_cell_line_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.cell_line',
+                                                                   t='ontology_term',
+                                                                   additional_embeds=['synonyms'])
+    biosource_tissue_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.tissue',
+                                                                t='ontology_term',
+                                                                additional_embeds=['synonyms'])
+    biosource_tissue_slim_embeds = DependencyEmbedder.embed_for_type(base_path='biosource.tissue.slim_terms',
+                                                                     t='ontology_term',
+                                                                     additional_embeds=['synonyms'])
+    cell_culture_details_embeds = DependencyEmbedder.embed_for_type(base_path='cell_culture_details.tissue',
+                                                                    t='ontology_term',
+                                                                    additional_embeds=['synonyms'])
+    cell_culture_details_tissue_embeds = DependencyEmbedder.embed_for_type(
+        base_path='cell_culture_details.tissue.slim_terms',
+        t='ontology_term',
+        additional_embeds=['synonyms'])
+    biosample_protocols_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='biosample_protocols',
+                                                                            t='protocol')
+    return (
+        Item.embedded_list + lab_award_attribution_embed_list + modification_embeds + mod_bio_feature_embeds
+        + treatments_embeds + biosource_cell_line_embeds + biosource_tissue_embeds + biosource_tissue_slim_embeds
+        + cell_culture_details_embeds + cell_culture_details_tissue_embeds + biosample_protocols_embeds + [
+            # Badge linkTo
+            'badges.badge.title',
+            'badges.badge.commendation',
+            'badges.badge.warning',
+            'badges.badge.badge_classification',
+            'badges.badge.description',
+            'badges.badge.badge_icon',
+            'badges.messages',
+
+            # Biosource linkTo - many calc prop dependencies
+            'biosource.*',
+            'biosource.individual.sex',
+            'biosource.individual.organism.name',
+            'biosource.biosource_vendor.name',  # display_title uses this
+
+            # BiosampleCellCulture linkTo + Image linkTo
+            'cell_culture_details.*',
+            'cell_culture_details.morphology_image.caption',
+            'cell_culture_details.morphology_image.attachment.href',
+            'cell_culture_details.morphology_image.attachment.type',
+            'cell_culture_details.morphology_image.attachment.md5sum',
+            'cell_culture_details.morphology_image.attachment.download',
+            'cell_culture_details.morphology_image.attachment.width',
+            'cell_culture_details.morphology_image.attachment.height',
+
+            # Construct linkTo
+            'treatments.constructs.name',
+        ]
+    )
 
 
 @collection(
@@ -34,44 +98,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             "badge.description"
         ]
     }
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'badges.badge.title',
-        'badges.badge.commendation',
-        'badges.badge.warning',
-        'badges.badge.badge_classification',
-        'badges.badge.description',
-        'badges.badge.badge_icon',
-        'badges.messages',
-        'biosource.biosource_type',
-        'biosource.individual.sex',
-        'biosource.individual.organism.name',
-        'biosource.biosource_vendor.name',
-        "biosource.cell_line.slim_terms",
-        "biosource.cell_line.synonyms",
-        "biosource.cell_line_tier",
-        "biosource.tissue.slim_terms",
-        "biosource.tissue.synonyms",
-        'cell_culture_details.*',
-        'cell_culture_details.morphology_image.caption',
-        'cell_culture_details.morphology_image.attachment.href',
-        'cell_culture_details.morphology_image.attachment.type',
-        'cell_culture_details.morphology_image.attachment.md5sum',
-        'cell_culture_details.morphology_image.attachment.download',
-        'cell_culture_details.morphology_image.attachment.width',
-        'cell_culture_details.morphology_image.attachment.height',
-        'cell_culture_details.tissue.term_name',
-        'cell_culture_details.tissue.preferred_name',
-        'modifications.modification_type',
-        'modifications.description',
-        'treatments.treatment_type',
-        'treatments.description',
-        'treatments.constructs.expression_products.relevant_genes',
-        'treatments.constructs.expression_products.feature_mods.mod_type',
-        'biosample_protocols.attachment.href',
-        'biosample_protocols.attachment.type',
-        'biosample_protocols.attachment.md5sum',
-        'biosample_protocols.description'
-    ]
+    embedded_list = _build_biosample_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -80,6 +107,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "type": "string",
     })
     def modifications_summary(self, request, modifications=None):
+        """ Requires modifications.modification_name (display_title embeds) """
         if modifications:
             ret_str = ''
             for mod in modifications:
@@ -111,12 +139,13 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "type": "string",
     })
     def treatments_summary(self, request, treatments=None):
+        """ Just relies on display title, which should be properly embedded. """
         if treatments:
             treat_list = []
             for tmt in treatments:
                 treat_props = get_item_or_none(request, tmt, 'treatments')
                 treat_list.append(treat_props.get('display_title'))
-            return ' and '.join(sorted([t for t in treat_list if t]))
+            return ' and '.join([t for t in treat_list if t])
         return 'None'
 
     @calculated_property(schema={
@@ -185,6 +214,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         "type": "string",
     })
     def biosource_summary(self, request, biosource, cell_culture_details=None):
+        """ XXX: This field, if embedded, needs embeds adjusted. """
         ret_str = ''
         for bios in biosource:
             bios_props = get_item_or_none(request, bios, 'biosources')
@@ -219,7 +249,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             return 'mixed sample'
         elif len(biosource_types) < 1:  # pragma: no cover
             # shouldn't happen so raise an exception
-            raise "Biosource always needs type - why can't we find it"
+            raise Exception("Biosource has no types: %s" % biosource_types)
 
         # we've got a single type of biosource
         if cell_culture_details:  # this is now an array but just check the first

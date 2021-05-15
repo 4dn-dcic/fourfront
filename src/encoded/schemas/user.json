@@ -63,7 +63,7 @@
             "permission": "import_items",
             "items": {
                 "type": "string",
-                "enum": [
+                "suggested_enum": [
                     "4DN",
                     "Not 4DN",
                     "NOFIC",
@@ -120,7 +120,9 @@
                 "NIH Official",
                 "Lab Manager",
                 "Principal Investigator (Collaborator)",
+                "Collaborator",
                 "External Scientific Adviser",
+                "External Program Consultant",
                 "Project Coordinator / Manager",
                 "Principal Investigator (4DN Grantee)"
             ]

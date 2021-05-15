@@ -57,6 +57,7 @@ ALLOW_EVERYONE_VIEW = [
 
 ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
+    (Allow, 'role.award_member', 'view')
 ] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_VIEW = [
@@ -190,17 +191,27 @@ static_content_embed_list = [
 lab_award_attribution_embed_list = [
     "award.project",
     "award.center_title",
-    "lab.city",
-    "lab.state",
-    "lab.country",
-    "lab.postal_code",
-    "lab.city",
-    "lab.display_title",
-    "lab.url",
-    "lab.correspondence",                                # Not a real linkTo - temp workaround
-    "contributing_labs.correspondence",                  # Not a real linkTo - temp workaround
-    "submitted_by.timezone",
-    "submitted_by.job_title"
+    "award.name",  # used in center_title calc prop
+    "award.center",  # used in center_title calc prop
+    "award.description",  # used in center_title calc prop
+    "award.pi.last_name",  # used in center_title calc prop
+    "lab.title",
+    "lab.correspondence",  # Not a real linkTo - temp workaround
+    "lab.pi.first_name",  # this and next used in above calcprop
+    "lab.pi.last_name",
+    "lab.pi.contact_email",
+    "lab.pi.preferred_email",
+    "lab.pi.email",
+    "contributing_labs.correspondence",  # Not a real linkTo - temp workaround
+    "contributing_labs.pi.first_name",
+    "contributing_labs.pi.last_name",
+    "contributing_labs.pi.contact_email",
+    "contributing_labs.pi.preferred_email",
+    "contributing_labs.pi.email",
+    "submitted_by.job_title",  # XXX: Is this right? below comment suggests no...
+    "submitted_by.first_name",  # this and next used in above calcprop
+    "submitted_by.last_name",
+    "submitted_by.timezone",  # is this used in attribution or elsewhere on item pages so should be included?
 ]
 
 
@@ -298,7 +309,7 @@ class Item(snovault.Item):
         # publication
         'published': ALLOW_CURRENT,
         # experiment sets
-        'pre-release': ALLOW_LAB_VIEW_ADMIN_EDIT
+        'pre-release': ALLOW_VIEWING_GROUP_VIEW,
     }
 
     # Items of these statuses are filtered out from rev links
@@ -339,6 +350,7 @@ class Item(snovault.Item):
 
         roles = {}
         properties = self.upgrade_properties()
+        status = properties.get('status')
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
             roles[lab_submitters] = 'role.lab_submitter'
@@ -357,7 +369,6 @@ class Item(snovault.Item):
                 award_group_members = 'award.%s' % properties['award']
                 roles[award_group_members] = 'role.award_member'
 
-                status = properties.get('status')
                 # need to add 4DN viewing_group to NOFIC items that are rel2proj
                 # or are JA and planned or in progress
                 if viewing_group == 'NOFIC':
@@ -367,14 +378,23 @@ class Item(snovault.Item):
                         if _is_joint_analysis(properties):
                             roles['viewing_group.4DN'] = 'role.viewing_group_member'
                     # else leave the NOFIC viewing group role in place
-                elif status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties):
-                    # view should be restricted to lab members only so remove viewing_group roles
+                elif (status in ['planned', 'submission in progress'] and not _is_joint_analysis(properties)) or (status == 'pre-release'):
+                    # for these statuses view should be restricted to lab members so all viewing_groups are removed
+                    # unless in the case of planned and submission in progress it is a joint analysis tagged dataset
+                    # or NOFIC group dealt with in the above if
                     grps = []
                     for group, role in roles.items():
                         if role == 'role.viewing_group_member':
                             grps.append(group)
                     for g in grps:
                         del roles[g]
+
+        # this is for access to item specific view group
+        if 'viewable_by' in properties:
+            viewers = properties.get('viewable_by', [])
+            for vg in viewers:
+                roles['viewing_group.{}'.format(vg)] = 'role.viewing_group_member'
+
         # This emulates __ac_local_roles__ of User.py (role.owner)
         if 'submitted_by' in properties:
             submitter = 'userid.%s' % properties['submitted_by']

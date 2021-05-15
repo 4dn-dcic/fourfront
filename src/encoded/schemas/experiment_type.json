@@ -30,6 +30,17 @@
                 "deleted"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "title": {
             "title": "Experiment Type",
             "description": "The display name for the experiment type",
@@ -101,6 +112,7 @@
                 "Context-dependent Reporter Expression",
                 "Scanning Electron Microscopy",
                 "Transmission Electron Microscopy",
+                "Chromatin Tracing",
                 "Synthetic Condensation"
             ]
         },
