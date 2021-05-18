@@ -32,7 +32,13 @@
             "type": "array",
             "qc_order": 1,
             "items": { "type": "string"}
-          }
+          },
+          "Resolutions in File": {
+              "title": "Resolutions in File",
+              "type": "array",
+              "qc_order": 2,
+              "items": { "type": "string"}
+            }
     },
     "facets": {
         "overall_quality_status": {
