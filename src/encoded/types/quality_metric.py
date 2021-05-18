@@ -586,5 +586,6 @@ class QualityMetricMcool(QualityMetric):
 
         qc_summary.append({"title": "Failed Balancing",
                            "value": val,
+                           "tooltip": 'Resolutions where balancing failed',
                            "numberType": "string"})
         return qc_summary
