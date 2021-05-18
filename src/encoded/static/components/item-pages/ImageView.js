@@ -22,6 +22,7 @@ const ImageViewOverview = React.memo(function ImageViewOverview({ context, schem
     const tips = object.tipsFromSchema(schemas, context);
     const { microscopy_file = {} } = context;
 
+    const linkToItem = object.itemUtil.atId(microscopy_file);
     let thumbnailSrc = typeof microscopy_file.thumbnail === 'string' && microscopy_file.thumbnail;
     let thumbnailLink = null;
 
@@ -34,7 +35,13 @@ const ImageViewOverview = React.memo(function ImageViewOverview({ context, schem
     return (
         <div>
             <div className="row overview-blocks">
-                {thumbnailLink ? <div className="col-md-4">{thumbnailLink}</div> : null}
+                {thumbnailLink ? (
+                    <div className="embedded-item-with-attachment is-image col-md-4">
+                        <div className="inner">
+                            {thumbnailLink}
+                            {linkToItem ? <a href={linkToItem} data-tip="View microscopy file details" className="mt-1">View File Item - {microscopy_file.accession}</a> : null}
+                        </div>
+                    </div>) : null}
                 <ItemFileAttachment context={context} tips={tips} wrapInColumn={"col-12 col-md-6"} includeTitle btnSize="lg" itemType="Image" />
             </div>
         </div>
