@@ -20,7 +20,10 @@ export default class ImageView extends DefaultItemView {
 
 const ImageViewOverview = React.memo(function ImageViewOverview({ context, schemas }){
     const tips = object.tipsFromSchema(schemas, context);
-    const { microscopy_file = {} } = context;
+    const {
+        microscopy_file = {},
+        attachment: { 'href': attachmentHref = null, 'caption': attachmentCaption = null } = {}
+    } = context;
 
     const linkToItem = object.itemUtil.atId(microscopy_file);
     let thumbnailSrc = typeof microscopy_file.thumbnail === 'string' && microscopy_file.thumbnail;
@@ -31,7 +34,15 @@ const ImageViewOverview = React.memo(function ImageViewOverview({ context, schem
         thumbnailLink = (
             <img className="embedded-item-image image-wrapper d-inline-block img-thumbnail" src={thumbnailSrc} alt="OMERO Thumbnail" />
         );
+    } else {
+        const imageItemAtId = object.itemUtil.atId(context);
+        if (imageItemAtId && attachmentHref) {
+            thumbnailLink = (
+                <img className="embedded-item-image image-wrapper d-inline-block img-thumbnail" src={imageItemAtId + attachmentHref} alt={attachmentCaption || "Image Thumbnail"} />
+            );
+        }
     }
+
     return (
         <div>
             <div className="row overview-blocks">
