@@ -101,11 +101,24 @@ function FileViewOverview (props) {
         experimentSets && experimentSets.length > 0 ?
             '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
             : null;
+    const { track_and_facet_info: { experiment_bucket = null } = {} } = context || {};
+
+    let targetTabKey = null;
+    if (experiment_bucket && typeof experiment_bucket === 'string') {
+        if (experiment_bucket === 'raw file') {
+            targetTabKey = 'raw-files';
+        } else if (experiment_bucket === 'processed file') {
+            targetTabKey = 'processed-files';
+        } else {
+            targetTabKey = 'supplementary-files';
+        }
+    }
     const expSetTableProps = {
         searchHref,
         facets: null,
         defaultOpenIndices: [0],
-        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />
+        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />,
+        targetTabKey
     };
     return (
         <div>
