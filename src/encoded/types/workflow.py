@@ -1023,15 +1023,15 @@ def run_workflow(context, request):
         res = aws_lambda.invoke(FunctionName=TIBANNA_WORKFLOW_STATUS_LAMBDA_FUNCTION,
                                 Payload=json.dumps({'executionArn': arn}))
         res_decode = res['Payload'].read().decode()
-        res_dict = json.loads(res_decode)
-        if res_dict['status'] == 'RUNNING':
+        status_res_dict = json.loads(res_decode)
+        if status_res_dict['status'] == 'RUNNING':
             break
         sleep(2)
 
-    if res_dict['status'] == 'FAILED':
+    if status_res_dict['status'] == 'FAILED':
         # get error from execution and sent a 422 response
         sfn = boto3.client('stepfunctions', region_name='us-east-1')
-        hist = sfn.get_execution_history(executionArn=res_dict['executionArn'], reverseOrder=True)
+        hist = sfn.get_execution_history(executionArn=status_res_dict['executionArn'], reverseOrder=True)
         for event in hist['events']:
             if event.get('type') == 'ExecutionFailed':
                 raise HTTPUnprocessableEntity(str(event['executionFailedEventDetails']))
