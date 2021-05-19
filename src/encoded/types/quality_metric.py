@@ -561,3 +561,44 @@ def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
                            "numberType": "integer"})
 
     return qc_summary if qc_summary else None
+
+
+@collection(
+    name='quality-metrics-mcool',
+    properties={
+        'title': 'QC Quality metrics for mcool files',
+        'description': 'Listing of QC Quality Metrics for mcool files.',
+    })
+class QualityMetricMcool(QualityMetric):
+    """Subclass of quality matrics for mcool files"""
+
+    item_type = 'quality_metric_mcool'
+    schema = load_schema('encoded:schemas/quality_metric_mcool.json')
+    embedded_list = QualityMetric.embedded_list
+
+    def _update(self, properties, sheets=None):
+        balancing_info = properties.get('Failed Balancing')
+        resolutions = properties.get('Resolutions in File')
+        overall = 'PASS'
+
+        if balancing_info[0] != 'None':
+            overall = 'WARN'
+        elif len(balancing_info) == len(resolutions):
+            overall = 'FAIL'
+        # set name based on what is entered into title
+        properties['overall_quality_status'] = overall
+        super(QualityMetricMcool, self)._update(properties, sheets)
+
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc = self.properties
+        qc_summary = []
+        val = ''
+        qc_val = qc.get("Failed Balancing")
+        val = '; '.join(qc_val)
+
+        qc_summary.append({"title": "Failed Balancing",
+                           "value": val,
+                           "tooltip": 'Resolutions where balancing failed',
+                           "numberType": "string"})
+        return qc_summary
