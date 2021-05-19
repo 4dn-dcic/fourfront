@@ -155,6 +155,17 @@ export class FileOverviewHeading extends React.PureComponent {
     static fileSizeTitleRenderFxn(field, value){
         return <span className="text-400"><i className="icon icon-fw icon-hdd far"/> { Schemas.Term.toName(field, value) }</span>;
     }
+    static fileClassificationRenderFxn(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+        const classification = Schemas.Term.toName(field, value);
+        const { track_and_facet_info: { experiment_bucket = null } = {} } = fullObject || {};
+        const isSupplementary  = experiment_bucket &&  typeof experiment_bucket === 'string' && experiment_bucket != 'raw file' && experiment_bucket != 'processed file';
+        return (
+            <React.Fragment>
+                {classification}
+                {isSupplementary ? <br /> : null}
+                {isSupplementary ? '(Supplementary)' : null}
+            </React.Fragment>);
+    }
 
     constructor(props){
         super(props);
@@ -186,7 +197,8 @@ export class FileOverviewHeading extends React.PureComponent {
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property="file_format" fallbackTitle="File Format" />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property="file_type" fallbackTitle="File Type" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification" fallbackTitle="General Classification" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification"
+                            fallbackTitle="General Classification" titleRenderFxn={FileOverviewHeading.fileClassificationRenderFxn} />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
                             fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
                     </OverviewHeadingContainer>
