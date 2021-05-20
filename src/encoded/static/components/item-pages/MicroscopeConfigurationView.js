@@ -76,6 +76,7 @@ export class MicroMetaTabView extends React.PureComponent {
         this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
         this.updateContainerOffsets = _.debounce(this.updateContainerOffsets.bind(this), 500);
+        this.generateNewTitle = this.generateNewTitle.bind(this);
 
         this.state = {
             'mounted'               : false,
@@ -196,52 +197,8 @@ export class MicroMetaTabView extends React.PureComponent {
             throw new Error('Could not get current configuration.');
         }
 
-        // Generate a new title and description based on the current display.
-        const userDetails = JWT.getUserDetails();
-        let userFirstName = "Unknown";
-
-        if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
-
-        const microConfTitleAppendStr = " - " + userFirstName + "'s copy";
+        const microConfTitle = this.generateNewTitle();
         const microConfDesc = context.description;
-        let microConfTitle = context.display_title + microConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
-
-        // Check if our title already has " - user's copy" substring and if so,
-        // increment an appended counter instead of re-adding the substring.
-        if (context.display_title.indexOf(microConfTitleAppendStr) > -1) {
-            const regexCheck = new RegExp('(' + microConfTitleAppendStr + ')\\s\\(\\d+\\)');
-            const regexMatches = context.display_title.match(regexCheck);
-
-            if (regexMatches && regexMatches.length === 2) {
-                // regexMatches[0] ==> " - user's copy (int)"
-                // regexMatches[1] ==> " - user's copy"
-                let copyCount = parseInt(
-                    regexMatches[0].replace(regexMatches[1], '')
-                        .trim()
-                        .replace('(', '')
-                        .replace(')', '')
-                );
-
-                copyCount++;
-                microConfTitle = (
-                    context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
-                    + microConfTitleAppendStr + ' (' + copyCount + ')'  // Add new count
-                );
-            } else {
-                // Our title already has " - user's copy" substring, but not an " (int)"
-                microConfTitle = context.display_title + ' (2)';
-            }
-        }
-
-        const fallbackCallback = (errResp, xhr) => {
-            // Error callback
-            Alerts.queue({
-                'title': "Failed to save configuration.",
-                'message': "Sorry, can you try to save again?",
-                'style': 'danger'
-            });
-            this.setState({ 'cloneLoading': false });
-        };
 
         microscope.Name = microConfTitle;
         microscope.ID = ''; //remove old microscope's ID to be re-set in backend
@@ -277,12 +234,62 @@ export class MicroMetaTabView extends React.PureComponent {
                         });
                     },
                     'POST',
-                    fallbackCallback,
+                    () => {
+                        // Error callback
+                        Alerts.queue({
+                            'title': "Failed to save configuration.",
+                            'message': "Sorry, can you try to save again?",
+                            'style': 'danger'
+                        });
+                        this.setState({ 'cloneLoading': false });
+                    },
                     JSON.stringify(payload)
                 );
             }
         );
+    }
+    /**
+     * Generate a new title and description based on the current display.
+     */
+    generateNewTitle(){
+        const { context } = this.props;
 
+        const userDetails = JWT.getUserDetails();
+        let userFirstName = "Unknown";
+
+        if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) userFirstName = userDetails.first_name;
+
+        const microConfTitleAppendStr = " - " + userFirstName + "'s copy";
+        let microConfTitle = context.display_title + microConfTitleAppendStr; // Default, used if title does not already have " - [this user]'s copy" substring.
+
+        // Check if our title already has " - user's copy" substring and if so,
+        // increment an appended counter instead of re-adding the substring.
+        if (context.display_title.indexOf(microConfTitleAppendStr) > -1) {
+            const regexCheck = new RegExp('(' + microConfTitleAppendStr + ')\\s\\(\\d+\\)');
+            const regexMatches = context.display_title.match(regexCheck);
+
+            if (regexMatches && regexMatches.length === 2) {
+                // regexMatches[0] ==> " - user's copy (int)"
+                // regexMatches[1] ==> " - user's copy"
+                let copyCount = parseInt(
+                    regexMatches[0].replace(regexMatches[1], '')
+                        .trim()
+                        .replace('(', '')
+                        .replace(')', '')
+                );
+
+                copyCount++;
+                microConfTitle = (
+                    context.display_title.replace(regexMatches[0], '') // Remove old " - user's copy (int)" substr
+                    + microConfTitleAppendStr + ' (' + copyCount + ')'  // Add new count
+                );
+            } else {
+                // Our title already has " - user's copy" substring, but not an " (int)"
+                microConfTitle = context.display_title + ' (2)';
+            }
+        }
+
+        return microConfTitle;
     }
 
     /**
@@ -493,6 +500,75 @@ export class MicroMetaTabView extends React.PureComponent {
                     )
                 });
             }
+
+            return;
+        }
+
+        //determine save or save as clicked
+        //todo: It would be better if this information provided from micrometa api
+        const mtc = this.getMicroscopyMetadataToolComponent();
+        if (!mtc || !mtc.api) {
+            throw new Error('Could not get API.');
+        }
+        const microscopeStr = mtc.api.exportMicroscopeConfString();
+        const microscopeOrig = microscopeStr && JSON.parse(microscopeStr);
+
+        //save as
+        if (microscopeOrig.ID !== microscope.ID) {
+            const microConfTitle = this.generateNewTitle();
+            const microConfDesc = context.description;
+
+            microscope.Name = microConfTitle;
+
+            const payload = {
+                'title': microConfTitle,
+                'description': microConfDesc,
+                'microscope': microscope,
+                // We don't include other properties and let them come from schema default values.
+                // For example, default status is 'draft', which will be used.
+                // Lab and award do not carry over as current user might be from different lab.
+            };
+
+            // Try to POST/PUT a new viewconf.
+            this.setState(
+                { 'cloneLoading': true },
+                () => {
+                    ajax.load(
+                        '/microscope-configurations/',
+                        (resp) => { // We're likely to get a status code of 201 - Created.
+                            this.setState({ 'cloneLoading': false }, () => {
+                                const newItemHref = object.itemUtil.atId(resp['@graph'][0]);
+
+                                // Redirect the user to the new Microscope display.
+                                navigate(newItemHref, {}, (resp) => {
+                                    // Show alert on new Item page
+                                    Alerts.queue({
+                                        'title': "Saved " + microConfTitle,
+                                        'message': "Saved new display.",
+                                        'style': 'success'
+                                    });
+                                });
+                            });
+                        },
+                        'POST',
+                        () => {
+                            // Error callback
+                            Alerts.queue({
+                                'title': "Failed to save configuration.",
+                                'message': "Sorry, can you try to save again?",
+                                'style': 'danger'
+                            });
+                            this.setState({ 'cloneLoading': false });
+                        },
+                        JSON.stringify(payload)
+                    );
+                }
+            );
+            if (complete) {
+                complete(microscope.Name);
+            }
+
+            console.log('SAVE AS CLICKED: microscope.ID:', microscope.ID, ', microscopeOrig.ID:', microscopeOrig.ID);
 
             return;
         }
