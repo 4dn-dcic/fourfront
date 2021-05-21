@@ -131,7 +131,7 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
             if (!attachment) return null;
             const { href: attachHref = '' } = attachment;
             return (
-                <a href={object.itemUtil.atId(result) + attachHref} className="btn btn-xs btn-primary" data-tip="Download attached file" disabled={attachHref.length === 0}>
+                <a href={object.itemUtil.atId(result) + attachHref} className="btn btn-xs btn-primary" data-tip="Download attached file" disabled={attachHref.length === 0} target="_blank" rel="noreferrer">
                     <i className="icon icon-fw icon-file-pdf far" />
                 </a>
             );
