@@ -217,6 +217,25 @@ class QCMetricFromEmbed extends React.PureComponent {
                         });
                     }
                 }
+            } else if (schemaItem.type === 'array' && schemaItem.items && schemaItem.items && schemaItem.items.type && ['string', 'number', 'boolean'].indexOf(schemaItem.items.type) > -1) {
+                subQCRows = _.map(value, function (val, index) {
+                    return (
+                        <div className="overview-list-element">
+                            <div className="row">
+                                <div className="col-4 text-right">
+                                    <object.TooltipInfoIconContainerAuto
+                                        elementType="h5" fallbackTitle={(index + 1) + "."}
+                                        className="mb-0 mt-02 text-break" />
+                                </div>
+                                <div className="col-8">
+                                    <div className="inner value">
+                                        {val}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                });
             }
         //qc_list is a special case. we do workaround to just display links to listed QCs.
         } else if (qcProperty === 'qc_list') {
@@ -227,7 +246,7 @@ class QCMetricFromEmbed extends React.PureComponent {
                         <div className="row">
                             <div className="col-4 text-right">
                                 <object.TooltipInfoIconContainerAuto
-                                    elementType="h5" fallbackTitle={index + 1}
+                                    elementType="h5" fallbackTitle={(index + 1) + "."}
                                     className="mb-0 mt-02 text-break" />
                             </div>
                             <div className="col-8">
