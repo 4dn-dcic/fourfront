@@ -4,6 +4,7 @@ import boto3
 import transaction
 
 from mimetypes import guess_type
+from urllib.parse import quote
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
@@ -21,12 +22,14 @@ from snovault import (
 from .base import (
     Item,
     set_namekey_from_title,
+    lab_award_attribution_embed_list,
     ALLOW_OWNER_EDIT,
     ALLOW_CURRENT,
     DELETED,
     ONLY_ADMIN_VIEW,
     ALLOW_LAB_SUBMITTER_EDIT
 )
+from .dependencies import DependencyEmbedder
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import (
@@ -43,6 +46,17 @@ def includeme(config):
     config.scan()
 
 
+def _build_analysis_step_embedded_list():
+    """ Helper function intended to be used to create the embedded list for analysis_step.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + [
+        'software_used.name',
+        'software_used.title',
+        'qa_stats_generated.attachment'
+    ]
+
+
 @collection(
     name='analysis-steps',
     unique_key='analysis_step:name',
@@ -55,7 +69,18 @@ class AnalysisStep(Item):
 
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded_list = Item.embedded_list + ['software_used.*', 'qa_stats_generated.*']
+    embedded_list = _build_analysis_step_embedded_list()
+
+
+def _build_biosample_cell_culture_embedded_list():
+    """ Helper function intended to be used to create the embedded list for biosample_cell_culture.
+        All types should implement a function like this going forward.
+    """
+    protocols_additional_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='protocols_additional',
+                                                                             t='protocol')
+    authentication_protocols_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='authentication_protocols',
+                                                                                 t='protocol')
+    return Item.embedded_list + protocols_additional_embeds + authentication_protocols_embeds
 
 
 @collection(
@@ -69,6 +94,19 @@ class BiosampleCellCulture(Item):
 
     item_type = 'biosample_cell_culture'
     schema = load_schema('encoded:schemas/biosample_cell_culture.json')
+    embedded_list = _build_biosample_cell_culture_embedded_list()
+
+
+def _build_construct_embedded_list():
+    """ Helper function intended to be used to create the embedded list for construct.
+        All types should implement a function like this going forward.
+    """
+    expression_products_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='expression_products',
+                                                                            t='bio_feature')
+    return Item.embedded_list + expression_products_embeds + [
+        # Vendor linkTo
+        'construct_vendor.title'
+    ]
 
 
 @collection(
@@ -82,6 +120,7 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
+    embedded_list = _build_construct_embedded_list()
 
 
 @collection(
@@ -158,7 +197,7 @@ def get_s3_presigned_url(download_meta, filename):
     param_get_object = {
         'Bucket': download_meta['bucket'],
         'Key': download_meta['key'],
-        'ResponseContentDisposition': "inline; filename=" + filename
+        'ResponseContentDisposition': "inline; filename=" + quote(filename)
     }
     location = conn.generate_presigned_url(
         ClientMethod='get_object',
@@ -181,7 +220,28 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded_list = Item.embedded_list + ['enzyme_source.title']
+    embedded_list = Item.embedded_list + [
+        'enzyme_source.title',
+
+        # Enzyme linkTo
+        'mixed_enzymes.name'
+    ]
+
+
+def _build_experiment_type_embedded_list():
+    """ Helper function intended to be used to create the embedded list for experiment_type.
+        All types should implement a function like this going forward.
+    """
+    sop_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='sop', t='protocol')
+    other_protocol_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='other_protocols', t='protocol')
+    controlled_term_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='controlled_term', t='ontology_term')
+    return Item.embedded_list + sop_embeds + other_protocol_embeds + controlled_term_embeds + [
+        # Publication linkTo
+        'reference_pubs.short_attribution',
+        'reference_pubs.authors',
+        'reference_pubs.date_published',
+        'reference_pubs.journal',
+    ]
 
 
 @collection(
@@ -199,14 +259,7 @@ class ExperimentType(Item):
     item_type = 'experiment_type'
     schema = load_schema('encoded:schemas/experiment_type.json')
     name_key = 'experiment_name'
-
-    embedded_list = Item.embedded_list + [
-        "sop.description",
-        "reference_pubs.short_attribution",
-        "reference_pubs.authors",
-        "reference_pubs.date_published",
-        "reference_pubs.journal"
-    ]
+    embedded_list = _build_experiment_type_embedded_list()
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
@@ -228,6 +281,9 @@ class FileFormat(Item, ItemWithAttachment):
     item_type = 'file_format'
     schema = load_schema('encoded:schemas/file_format.json')
     name_key = 'file_format'
+    embedded_list = Item.embedded_list + [
+        'extrafile_formats.file_format'
+    ]
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -402,7 +458,7 @@ class Vendor(Item):
     item_type = 'vendor'
     schema = load_schema('encoded:schemas/vendor.json')
     name_key = 'name'
-    embedded_list = Item.embedded_list + ['award.project']
+    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title

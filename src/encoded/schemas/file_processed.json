@@ -46,7 +46,9 @@
                 "balanced normalized contact matrix",
                 "boundaries",
                 "calibration",
+                "cells table - scalar",
                 "chromatin states",
+                "chromatin traces",
                 "clustering metrics",
                 "compartments",
                 "contact list",
@@ -89,6 +91,7 @@
                 "stripe calls"
             ],
             "ignored_enum": [
+                "chromatin traces - bio data",
                 "contact list-combined",
                 "contact list-replicate",
                 "image mask-cell",

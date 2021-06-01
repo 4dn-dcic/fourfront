@@ -101,11 +101,24 @@ function FileViewOverview (props) {
         experimentSets && experimentSets.length > 0 ?
             '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
             : null;
+    const { track_and_facet_info: { experiment_bucket = null } = {} } = context || {};
+
+    let targetTabKey = null;
+    if (experiment_bucket && typeof experiment_bucket === 'string') {
+        if (experiment_bucket === 'raw file') {
+            targetTabKey = 'raw-files';
+        } else if (experiment_bucket === 'processed file') {
+            targetTabKey = 'processed-files';
+        } else {
+            targetTabKey = 'supplementary-files';
+        }
+    }
     const expSetTableProps = {
         searchHref,
         facets: null,
         defaultOpenIndices: [0],
-        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />
+        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />,
+        targetTabKey
     };
     return (
         <div>
@@ -155,6 +168,17 @@ export class FileOverviewHeading extends React.PureComponent {
     static fileSizeTitleRenderFxn(field, value){
         return <span className="text-400"><i className="icon icon-fw icon-hdd far"/> { Schemas.Term.toName(field, value) }</span>;
     }
+    static fileClassificationRenderFxn(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+        const classification = Schemas.Term.toName(field, value);
+        const { track_and_facet_info: { experiment_bucket = null } = {} } = fullObject || {};
+        const isSupplementary  = experiment_bucket &&  typeof experiment_bucket === 'string' && experiment_bucket != 'raw file' && experiment_bucket != 'processed file';
+        return (
+            <React.Fragment>
+                {classification}
+                {isSupplementary ? <br /> : null}
+                {isSupplementary ? '(Supplementary)' : null}
+            </React.Fragment>);
+    }
 
     constructor(props){
         super(props);
@@ -186,7 +210,8 @@ export class FileOverviewHeading extends React.PureComponent {
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property="file_format" fallbackTitle="File Format" />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property="file_type" fallbackTitle="File Type" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification" fallbackTitle="General Classification" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification"
+                            fallbackTitle="General Classification" titleRenderFxn={FileOverviewHeading.fileClassificationRenderFxn} />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
                             fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
                     </OverviewHeadingContainer>
@@ -228,9 +253,9 @@ export class ExternalVisualizationButtons extends React.PureComponent {
     renderJuiceboxBtn(fileHref){
         const btnHref = "http://aidenlab.org/juicebox/?hicUrl=" + fileHref;
         return (
-            <button type="button" href={btnHref} className="btn btn-primary mr-05" tagret="_blank">
+            <a href={btnHref} className="btn btn-primary mr-05" target="_blank" rel="noreferrer noopener">
                 <span className="text-400">Visualize with</span> JuiceBox&nbsp;&nbsp;<i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
-            </button>
+            </a>
         );
     }
 
@@ -255,10 +280,10 @@ export class ExternalVisualizationButtons extends React.PureComponent {
 
         const btnHref = "http://epigenomegateway.wustl.edu/browser/?genome=" + genome + "&hicUrl=" + fileHref;
         return (
-            <button type="button" href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
+            <a href={btnHref} target="_blank" rel="noreferrer noopener" className="btn btn-primary">
                 <span className="text-400 ml-05">Visualize with</span> Epigenome Browser&nbsp;&nbsp;
                 <i className="icon icon-fw icon-external-link-alt text-small fas align-baseline"/>
-            </button>
+            </a>
         );
     }
 

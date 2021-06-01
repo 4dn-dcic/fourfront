@@ -1475,7 +1475,21 @@ $workflow-node-color-type-global-context: #ffb3b3;
                 color: #111;
             }
         }
+        
         //border-bottom: 1px solid #eee;
+    }
+
+    .header-for-viz .column-group-header span.column-sort-icon,
+    .label-section span.column-sort-icon {
+        color: rgba(0, 0, 0, 0.1);
+        &:hover, &:active, &:focus {
+            color: rgba(0, 0, 0, 1);
+            cursor: pointer;
+        }
+        &.active {
+            color: rgba(0, 0, 0, 1);
+            text-shadow: 0 0 0 #000;
+        }
     }
 
     .blocks-container {

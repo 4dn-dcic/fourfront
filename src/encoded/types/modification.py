@@ -9,6 +9,26 @@ from .base import (
     lab_award_attribution_embed_list
 )
 
+def _build_modification_embedded_list():
+    """ Helper function intended to be used to create the embedded list for modification.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + lab_award_attribution_embed_list + [
+        # Construct linkTo
+        'constructs.name',
+        'constructs.construct_type',
+        'constructs.tags',
+        'constructs.designed_to_target',
+
+        # GenomicRegion linkTo
+        'modified_regions.aliases',
+        'modified_regions.genome_assembly',
+        'modified_regions.location_description',
+        'modified_regions.start_coordinate',
+        'modified_regions.end_coordinate',
+        'modified_regions.chromosome',
+    ]
+
 
 @collection(
     name='modifications',
@@ -21,12 +41,7 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        'constructs.construct_type',
-        'constructs.tags',
-        'constructs.designed_to_target',
-        'modified_regions.aliases',
-    ]
+    embedded_list = _build_modification_embedded_list()
 
     @calculated_property(schema={
         "title": "Modification name",

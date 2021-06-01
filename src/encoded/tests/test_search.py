@@ -11,7 +11,7 @@ from snovault.util import add_default_embeds
 from ..commands.run_upgrader_on_inserts import get_inserts
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .workbook_fixtures import app_settings, app, workbook
-# from ..utils import customized_delay_rerun
+# from ..util import customized_delay_rerun
 
 
 pytestmark = [
@@ -106,8 +106,6 @@ def test_search_with_embedding(workbook, testapp):
     assert test_json['biosource'][0]['biosource_type'] == 'immortalized cell line'
     # this specific linked should be embedded ('biosource.biosource_vendor')
     assert isinstance(test_json['biosource'][0]['biosource_vendor'], dict)
-    # this specific field was not embedded and should not be present
-    assert 'description' not in test_json['biosource'][0]
     # since lab.awards was not specifically embedded, the field should not exist
     assert test_json['lab'].get('awards') is None
 
@@ -430,7 +428,7 @@ def test_default_schema_and_non_schema_facets(workbook, testapp, registry):
     schema = type_info.schema
     embeds = add_default_embeds(test_type, registry[TYPES], type_info.embedded_list, schema)
     # we're looking for this specific facet, which is not in the schema
-    assert 'biosource.biosource_type' in embeds
+    assert 'biosource.*' in embeds
     res = testapp.get('/search/?type=Biosample&biosource.biosource_type=immortalized+cell+line').json
     assert 'facets' in res
     facet_fields = [ facet['field'] for facet in res['facets'] ]
@@ -718,7 +716,7 @@ class TestSearchHiddenAndAdditionalFacets:
     """ Encapsulates tests meant for testing behavior associated with default_hidden, hidden
         and additional_facets
     """
-    DEFAULT_FACETS = ['first_name', 'status', 'type', 'validation_errors.name']
+    DEFAULT_FACETS = ['first_name', 'status', 'type']
     DEFAULT_HIDDEN_FACETS = ['last_name', 'sid']
     ADDITIONAL_FACETS = ['unfaceted_string', 'unfaceted_integer']
     DISABLED_FACETS = ['disabled_string', 'disabled_integer']

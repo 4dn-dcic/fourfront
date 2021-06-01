@@ -212,6 +212,17 @@
                 "restricted"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "quality_metric": {
             "type": "string",
             "title": "Quality Metric",
@@ -220,10 +231,16 @@
             "linkTo": "QualityMetric"
         },
         "override_lab_name": {
-            "description": "The lab that did the experiment if not the attributed Lab from whence this file",
+            "description": "The lab that generated the file",
             "type": "string",
             "permission": "import_items",
             "comment": "value will be used to populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
+        },
+        "override_experimental_lab": {
+            "description": "The lab that experiment or experiment set to which this file is associated",
+            "type": "string",
+            "permission": "import_items",
+            "comment": "value will be used populate the calculated property value of the same name w/o underscore (in this case in track_and_facet_info calcprop)"
         },
         "override_experiment_type": {
             "description": "The type of experiment to which this file is associated",
@@ -307,6 +324,9 @@
         "track_and_facet_info.lab_name": {
             "title": "Generating Lab"
         },
+        "track_and_facet_info.experimental_lab": {
+            "title": "Experimental Lab"
+        },
         "file_size" : {
             "title" : "File Size",
             "description" : "Filter using range of size of the file",
@@ -366,6 +386,9 @@
         },
         "track_and_facet_info.lab_name": {
             "title": "Generating Lab"
+        },
+        "track_and_facet_info.experimental_lab": {
+            "title": "Experimental Lab"
         },
         "file_size" : {
             "title" : "File Size"

@@ -29,12 +29,13 @@ from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
 from snovault.elasticsearch import APP_FACTORY
+from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 # from snovault.json_renderer import json_renderer
 # from sqlalchemy import engine_from_config
 # from webob.cookies import JSONSerializer
 
 from .loadxl import load_all
-from .utils import find_other_in_pair
+from .util import find_other_in_pair
 
 
 if sys.version_info.major < 3:
@@ -159,6 +160,8 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+    # enable invalidation scope
+    settings[INVALIDATION_SCOPE_ENABLED] = True
 
     # set mirrored Elasticsearch location (for staging and production servers)
     mirror = get_mirror_env_from_context(settings)

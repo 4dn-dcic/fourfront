@@ -279,7 +279,7 @@ class PublicationExperimentSets extends React.PureComponent {
                 "produced_in_pub.display_title=" + encodeURIComponent(display_title)
             ),
             title: <SearchTableTitle title="Experiment Set" titleSuffix="Produced In Publication" headerElement="h4" externalSearchLinkVisible />,
-            hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"],
+            hideFacets: ["type", "validation_errors.name", "produced_in_pub.display_title", "publications_of_set.display_title", "experimentset_type"],
             facets: exp_sets_prod_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
         };
         const usedTableProps = {
@@ -288,7 +288,7 @@ class PublicationExperimentSets extends React.PureComponent {
                 "pubs_using.display_title=" + encodeURIComponent(display_title)
             ),
             title: <SearchTableTitle title="Experiment Set" titleSuffix="Used In Publication" headerElement="h4" externalSearchLinkVisible />,
-            hideFacets: ["type", "validation_errors.name", "publications_of_set.display_title", "experimentset_type"],
+            hideFacets: ["type", "validation_errors.name", "pubs_using.display_title", "publications_of_set.display_title", "experimentset_type"],
             facets: exp_sets_used_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
         };
         const totalExperimentSets = exp_sets_used_in_pub.length + exp_sets_prod_in_pub.length;
