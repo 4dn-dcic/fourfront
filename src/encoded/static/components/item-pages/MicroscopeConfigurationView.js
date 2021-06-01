@@ -87,11 +87,15 @@ export class MicroMetaTabView extends React.PureComponent {
             'modal'                 : null,
             'containerOffsetLeft'   : 0,
             'containerOffsetTop'    : 0,
-            'scalingFactor'         : 1
+            'scalingFactor'         : 0.70
         };
 
         this.microMetaToolRef = React.createRef();
         this.containerElemRef = React.createRef();
+
+        //force the page display in full screen
+        const { toggleFullScreen } = props;
+        setTimeout(toggleFullScreen, 0, true);
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -658,6 +662,7 @@ export class MicroMetaTabView extends React.PureComponent {
             isLoadingImage: false,
             is4DNPortal: true,
             hasImport: true,
+            isToolbarHidden: true,
             onReturnToMicroscopeList: function () {
                 navigate('/microscope-configurations/');
             },
@@ -695,8 +700,8 @@ export class MicroMetaTabView extends React.PureComponent {
                     <span>4DN MicroMeta</span>
                     <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
-                        {this.saveButton()}
-                        {this.cloneButton()}
+                        {/* {this.saveButton()}
+                        {this.cloneButton()} */}
                         {this.statusChangeButton()}
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
