@@ -10,7 +10,7 @@
         <li key="2"><code>{'headerElement="any header tag e.g. h1, h2 ..."'}</code> - headerElement is optional, you can completely exclude it by not defining <code>headerElement</code> prop at all. Default value is <code>h3</code>, other possible/recommended values are <code>h1</code>, <code>h2</code>, <code>h3</code>, <code>h4</code>, <code>h5</code> or <code>h6</code>.</li>
     </ul>
     <h3>Examples</h3>
-    <p><code>HiGlassEmbeddedInstance</code> grabs <code>title</code>, <code>description</code> and <code>collapsible</code> fields from HiGlass View Config item. If HiGlass View Config item is collapsible then HiGlassEmbeddedInstance renders it in a collapsible panel and the opposite is also true.</p>
+    <p><code>HiGlassEmbeddedInstance</code> grabs <code>title</code>, <code>description</code> and <code>collapsible</code> fields from HiGlass View Config item. If HiGlass View Config item is collapsible then HiGlassEmbeddedInstance renders it in a collapsible panel.</p>
     <h4 className="mt-3">1. Non-collapsible</h4>
     <pre className="border rounded px-3 py-2">{'<HiGlassEmbeddedInstance uuid="00000000-1111-0000-1111-000000000001" key="higlass-instance-1"/>'}</pre>
     <p>This generates the following display:</p>
