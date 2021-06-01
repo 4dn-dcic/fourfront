@@ -58,7 +58,8 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             aboveTableComponent,
             aboveFacetListComponent,
             filterFacetFxn, hideFacets,
-            filterColumnFxn, hideColumns
+            filterColumnFxn, hideColumns,
+            targetTabKey,
         } = this.props;
         const { totalCount } = this.state;
 
@@ -74,6 +75,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             aboveTableComponent, aboveFacetListComponent,
             filterFacetFxn, hideFacets,
             filterColumnFxn, hideColumns,
+            targetTabKey,
             onLoad: this.getCountCallback,
             termTransformFxn: Term.toName
         };

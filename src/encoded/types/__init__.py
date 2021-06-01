@@ -4,6 +4,7 @@ import boto3
 import transaction
 
 from mimetypes import guess_type
+from urllib.parse import quote
 from snovault.attachment import ItemWithAttachment
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
@@ -196,7 +197,7 @@ def get_s3_presigned_url(download_meta, filename):
     param_get_object = {
         'Bucket': download_meta['bucket'],
         'Key': download_meta['key'],
-        'ResponseContentDisposition': "inline; filename=" + filename
+        'ResponseContentDisposition': "inline; filename=" + quote(filename)
     }
     location = conn.generate_presigned_url(
         ClientMethod='get_object',
