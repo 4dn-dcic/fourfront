@@ -726,6 +726,9 @@ def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_
 def microscopy_w_splitpath(testapp, repliseq_info, exp_types,
                            imaging_path_1, imaging_path_3,
                            basic_region_bio_feature, genomic_region_bio_feature):
+    '''Sometimes a (group of) target(s) is split into different imaging paths,
+    e.g. due to multiplexing. If text is formatted as follows, the split group
+    will be found and replaced with the sum'''
     repliseq_info['experiment_type'] = exp_types['fish']['@id']
     img_path1 = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
     img_path3 = {'path': imaging_path_3['@id'], 'channel': 'ch03'}
@@ -778,6 +781,8 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
 
 
 def test_experiment_categorizer_4_mic_w_split_path(testapp, microscopy_w_splitpath):
+    '''Sometimes a (group of) target(s) is split into different imaging paths,
+    e.g. due to multiplexing. Sum the split targets and return only one string.'''
     assert microscopy_w_splitpath['experiment_categorizer']['value'] == '37 TADs on chr19'
 
 
