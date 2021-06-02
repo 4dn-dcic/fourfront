@@ -1025,7 +1025,7 @@ class ExperimentMic(Experiment):
                 for target in path_targets:
                     # check if target starts with numbers, e.g. '50 TADs', '40 TADs'
                     # sum them if there are more: '90 TADs'
-                    split_target = re.split(r'(^[0-9]+)([^0-9].*)', target)
+                    split_target = re.split(r'(^[0-9]+)', target, maxsplit=1)
                     if len(split_target) > 1:
                         t_num, t_name = split_target[1:3]
                         sum_targets[t_name] = sum_targets.setdefault(t_name, 0) + int(t_num)
