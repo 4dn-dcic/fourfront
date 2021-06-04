@@ -12,7 +12,6 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/status"} ,
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
@@ -37,6 +36,30 @@
             "title": "Description",
             "description" : "Description of microscope configuration.",
             "type": "string"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "draft",
+            "enum" : [
+                "released",
+                "released to project",
+                "released to lab",
+                "draft",
+                "deleted"
+            ],
+            "lookup" : 20
+        },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
         },
         "microscope" : {
             "type" : "object",
