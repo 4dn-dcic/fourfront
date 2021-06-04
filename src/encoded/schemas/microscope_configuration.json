@@ -40,11 +40,11 @@
         "status": {
             "title": "Status",
             "type": "string",
+            "permission": "import_items",
             "default": "draft",
             "enum" : [
                 "released",
                 "released to project",
-                "released to lab",
                 "draft",
                 "deleted"
             ],

@@ -11,7 +11,6 @@ from .base import (
     ALLOW_OWNER_EDIT,
     ALLOW_CURRENT,
     DELETED,
-    ONLY_ADMIN_VIEW,
     ALLOW_LAB_SUBMITTER_EDIT,
     ALLOW_VIEWING_GROUP_VIEW,
     ALLOW_ANY_USER_ADD
@@ -30,11 +29,10 @@ class MicroscopeConfiguration(Item):
     item_type = 'microscope_configuration'
     schema = load_schema('encoded:schemas/microscope_configuration.json')
     STATUS_ACL = {
-        'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
-        'deleted'               : ALLOW_OWNER_EDIT + DELETED,
-        'draft'                 : ALLOW_OWNER_EDIT + ONLY_ADMIN_VIEW,
-        'released to lab'       : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
-        'released to project'   : ALLOW_OWNER_EDIT + ALLOW_VIEWING_GROUP_VIEW
+        'released'              : ALLOW_CURRENT,
+        'deleted'               : DELETED,
+        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
+        'released to project'   : ALLOW_VIEWING_GROUP_VIEW
     }
 
     def _update(self, properties, sheets=None):
