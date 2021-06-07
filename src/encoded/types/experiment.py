@@ -1,6 +1,7 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
 import itertools
+import re
 
 from snovault import (
     abstract_collection,
@@ -1014,12 +1015,25 @@ class ExperimentMic(Experiment):
         if imaging_paths:
             path_targets = []
             for pathobj in imaging_paths:
-                path = request.embed('/', pathobj['path'], '@@object')
+                path = get_item_or_none(request, pathobj['path'], 'imaging_path')
                 for target in path.get('target', []):
-                    summ = request.embed('/', target, '@@object')['display_title']
+                    summ = get_item_or_none(request, target, 'bio_feature')['display_title']
                     path_targets.append(summ)
             if path_targets:
-                value = ', '.join(list(set(path_targets)))
+                value = []
+                sum_targets = {}
+                for target in path_targets:
+                    # check if target starts with numbers, e.g. '50 TADs', '40 TADs'
+                    # sum them if there are more: '90 TADs'
+                    split_target = re.split(r'(^[0-9]+)', target, maxsplit=1)
+                    if len(split_target) > 1:
+                        t_num, t_name = split_target[1:3]
+                        sum_targets[t_name] = sum_targets.setdefault(t_name, 0) + int(t_num)
+                    elif target not in value:
+                        value.append(target)
+                if sum_targets:
+                    value = [str(n) + t for t, n in sum_targets.items()] + value
+                value = ', '.join(value)
                 return {
                     'field': 'Target',
                     'value': value,
