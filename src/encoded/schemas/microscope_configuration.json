@@ -5,6 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["microscope"],
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -28,6 +29,19 @@
             "uniqueKey": "user_content:name",
             "lookup" : 1,
             "exclude_from": ["submit4dn","FFedit-create"]
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "permission": "import_items",
+            "default": "draft",
+            "enum" : [
+                "released",
+                "released to project",
+                "draft",
+                "deleted"
+            ],
+            "lookup" : 20
         },
         "viewable_by": {
             "title": "Viewable By",

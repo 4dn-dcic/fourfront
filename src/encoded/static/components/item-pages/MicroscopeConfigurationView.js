@@ -391,7 +391,7 @@ export class MicroMetaTabView extends React.PureComponent {
             <DropdownButton {...btnProps}>
                 <StatusMenuItem eventKey="released" context={context}>Visible by Everyone</StatusMenuItem>
                 <StatusMenuItem eventKey="released to project" context={context}>Visible by Network</StatusMenuItem>
-                <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem>
+                {/* <StatusMenuItem eventKey="released to lab" context={context}>Visible by Lab</StatusMenuItem> */}
                 <StatusMenuItem eventKey="draft" context={context}>Private</StatusMenuItem>
                 <Dropdown.Divider />
                 <StatusMenuItem eventKey="deleted" context={context}>Delete</StatusMenuItem>
