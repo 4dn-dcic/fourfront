@@ -101,7 +101,8 @@
                 "read counts (minus)",
                 "read counts (plus)",
                 "reads-combined",
-                "spt results, submitter format"
+                "spt results, submitter format",
+                "filtered feature-barcode matrices"
             ]
         },
         "file_classification": {
