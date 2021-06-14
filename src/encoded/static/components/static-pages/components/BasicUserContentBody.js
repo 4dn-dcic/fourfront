@@ -129,8 +129,6 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     renderInnerBody() {
         const { context, itemType, href, windowWidth } = this.props;
-        const { open } = this.state;
-        const isHiGlass = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
