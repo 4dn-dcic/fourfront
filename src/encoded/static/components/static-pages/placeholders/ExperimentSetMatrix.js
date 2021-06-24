@@ -14,7 +14,7 @@ import { StackedBlockVisual } from './../components';
 export class ExperimentSetMatrix extends React.PureComponent {
 
     static defaultProps = {
-        "sectionKeys": ["4DN", 'ENCODE'],
+        "sectionKeys": ["4DN", "ENCODE"],
         "queries": {
             "4DN": {
                 "url": "/browse/?experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=HFFc6+%28Tier+1%29&experiments_in_set.biosample.biosource_summary=H1-hESC+%28Tier+1%29+differentiated+to+definitive+endoderm&experimentset_type=replicate&type=ExperimentSetReplicate&award.project=4DN&limit=all",
@@ -295,9 +295,9 @@ export class ExperimentSetMatrix extends React.PureComponent {
                     if (typeof req_url !== 'string' || !req_url) return;
 
                     // For testing
-                    if (window && window.location.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
-                        req_url = 'https://data.4dnucleome.org' + req_url;
-                    }
+                    // if (window && window.location.href.indexOf('localhost') > -1 && req_url.indexOf('http') === -1) {
+                    //     req_url = 'https://data.4dnucleome.org' + req_url;
+                    // }
 
                     if (Array.isArray(req_url_fields) && req_url_fields.length > 0) {
                         _.forEach(req_url_fields, function (f) {
