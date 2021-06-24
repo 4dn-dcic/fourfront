@@ -198,10 +198,11 @@ export default class MicroscopySearchView extends React.PureComponent {
                 "Tier": tier,
                 "ValidationTier": tier,
                 "ModelVersion": modelVersion,
-                "Description": description
+                "Description": description || ''
             },
             "components": [],
-            "linkedFields": null
+            "linkedFields": null,
+            "ScalingFactor": 0.70
         } : fileContent;
 
         const payload = {

@@ -94,8 +94,8 @@ export class MicroMetaTabView extends React.PureComponent {
         this.containerElemRef = React.createRef();
 
         //force the page display in full screen
-        const { toggleFullScreen } = props;
-        setTimeout(toggleFullScreen, 0, true);
+        // const { toggleFullScreen } = props;
+        // setTimeout(toggleFullScreen, 0, true);
     }
 
     componentDidUpdate(pastProps, pastState){
@@ -471,7 +471,7 @@ export class MicroMetaTabView extends React.PureComponent {
         if(typeof isFullscreen === 'boolean' && typeof toggleFullScreen === 'function'){
             return (
                 <button type="button" className="btn btn-outline-dark" onClick={this.handleFullscreenToggle} data-tip={!isFullscreen ? 'Expand to full screen' : null}>
-                    <i className={"icon icon-fw fas icon-" + (!isFullscreen ? 'expand' : 'compress')}/>
+                    <i className={"icon icon-fw fas icon-" + (!isFullscreen ? 'expand' : 'compress')}/>{!isFullscreen ? ' Full Screen' : ' Exit Full Screen'}
                 </button>
             );
         }
@@ -666,7 +666,7 @@ export class MicroMetaTabView extends React.PureComponent {
             onReturnToMicroscopeList: function () {
                 navigate('/microscope-configurations/');
             },
-            onLoadSchema: function (complete) {
+            onLoadSchema: function (complete, resolve) {
                 window
                     .fetch(
                         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
@@ -676,10 +676,10 @@ export class MicroMetaTabView extends React.PureComponent {
                     })
                     .then(function (respText) {
                         const schema = JSON.parse(respText);
-                        complete(schema);
+                        complete(schema, resolve);
                     });
             },
-            onLoadDimensions: function (complete) {
+            onLoadDimensions: function (complete, resolve) {
                 window
                     .fetch(
                         "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/dimensions/MicroscopeDimensions.json"
@@ -689,7 +689,7 @@ export class MicroMetaTabView extends React.PureComponent {
                     })
                     .then(function (respText) {
                         const dimensions = JSON.parse(respText);
-                        complete(dimensions);
+                        complete(dimensions, resolve);
                     });
             }
         };
@@ -701,8 +701,8 @@ export class MicroMetaTabView extends React.PureComponent {
                     <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}
                         constantButtons={this.fullscreenButton()} collapseButtonTitle={this.collapseButtonTitle}>
                         {/* {this.saveButton()}
-                        {this.cloneButton()} */}
-                        {this.statusChangeButton()}
+                        {this.cloneButton()}
+                        {this.statusChangeButton()} */}
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
                 <hr className="tab-section-title-horiz-divider" />
