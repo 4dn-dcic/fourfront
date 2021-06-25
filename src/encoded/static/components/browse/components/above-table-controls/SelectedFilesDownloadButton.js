@@ -168,19 +168,16 @@ class SelectedFilesDownloadModal extends React.PureComponent {
             return selectedFiles[accessionTripleString];
         });
         const extData = { list: analytics.hrefToListName(window && window.location.href) };
-        analytics.productsAddToCart(fileList, extData);
-        analytics.event("SelectedFilesDownloadModal", "Mounted", {
-            ...analytics.eventObjectFromCtx(context),
-            eventValue: fileCountUnique || fileList.length || 0
-        });
+        // analytics.productsAddToCart(fileList, extData);
+        // analytics.event("SelectedFilesDownloadModal", "Mounted", {
+        //     ...analytics.eventObjectFromCtx(context),
+        //     eventValue: fileCountUnique || fileList.length || 0
+        // });
     }
 
     handleAcceptDisclaimer(){
         const { context, fileCountUnique } = this.props;
-        analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", {
-            ...analytics.eventObjectFromCtx(context),
-            eventValue: fileCountUnique
-        });
+
         this.setState({ 'disclaimerAccepted' : true });
     }
 
@@ -309,11 +306,12 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                     option: "Metadata.tsv Download"
                 };
                 analytics.productsCheckout(fileList, extData);
-                analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
-                    ...analytics.eventObjectFromCtx(context),
-                    eventLabel: JSON.stringify([...filenameAccessions].sort()),
-                    eventValue: filenameAccessions.size || 0
-                });
+                //crashes due to too many files
+                // analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
+                //     ...analytics.eventObjectFromCtx(context),
+                //     eventLabel: JSON.stringify([...filenameAccessions].sort()),
+                //     eventValue: filenameAccessions.size || 0
+                // });
             }, 0);
         }
 

@@ -266,7 +266,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 { this.renderHeader() }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
-                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} analyticsImpressionOnMount />
+                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} collapseShowMoreLimit={100} collapseItemsIncrement={100} analyticsImpressionOnMount />
                 </div>
             </div>
         );
