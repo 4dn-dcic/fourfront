@@ -168,11 +168,11 @@ class SelectedFilesDownloadModal extends React.PureComponent {
             return selectedFiles[accessionTripleString];
         });
         const extData = { list: analytics.hrefToListName(window && window.location.href) };
-        // analytics.productsAddToCart(fileList, extData);
-        // analytics.event("SelectedFilesDownloadModal", "Mounted", {
-        //     ...analytics.eventObjectFromCtx(context),
-        //     eventValue: fileCountUnique || fileList.length || 0
-        // });
+        analytics.productsAddToCart(fileList, extData);
+        analytics.event("SelectedFilesDownloadModal", "Mounted", {
+            ...analytics.eventObjectFromCtx(context),
+            eventValue: fileCountUnique || fileList.length || 0
+        });
     }
 
     handleAcceptDisclaimer(){
