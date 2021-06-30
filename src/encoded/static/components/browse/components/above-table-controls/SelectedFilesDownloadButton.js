@@ -177,7 +177,10 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
     handleAcceptDisclaimer(){
         const { context, fileCountUnique } = this.props;
-
+        analytics.event("SelectedFilesDownloadModal", "Accepted Disclaimer", {
+            ...analytics.eventObjectFromCtx(context),
+            eventValue: fileCountUnique
+        });
         this.setState({ 'disclaimerAccepted' : true });
     }
 
