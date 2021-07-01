@@ -309,12 +309,11 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
                     option: "Metadata.tsv Download"
                 };
                 analytics.productsCheckout(fileList, extData);
-                //crashes due to too many files
-                // analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
-                //     ...analytics.eventObjectFromCtx(context),
-                //     eventLabel: JSON.stringify([...filenameAccessions].sort()),
-                //     eventValue: filenameAccessions.size || 0
-                // });
+                analytics.event("SelectedFilesDownloadModal", "Download metadata.tsv Button Pressed", {
+                    ...analytics.eventObjectFromCtx(context),
+                    eventLabel: JSON.stringify([...filenameAccessions].sort()),
+                    eventValue: filenameAccessions.size || 0
+                });
             }, 0);
         }
 
