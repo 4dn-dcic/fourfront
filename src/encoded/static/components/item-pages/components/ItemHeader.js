@@ -291,7 +291,7 @@ export class MiddleRow extends React.Component {
                 isInlineEditable={isInlineEditable}
                 dimensions={{
                     'paddingWidth': 0,
-                    'paddingHeight': 22, // Padding-top + border-top
+                    'paddingHeight': 42, // Padding-top + border-top
                     'buttonWidth': 30,
                     'initialHeight': 42
                 }}
