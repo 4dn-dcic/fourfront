@@ -9,7 +9,7 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions } from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions, sentryDsn } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
@@ -24,6 +24,7 @@ import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import { PageTitleSection } from './PageTitle';
 
+import * as Sentry from "@sentry/react";
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
 
@@ -221,6 +222,20 @@ export default class App extends React.PureComponent {
                     initialHref: windowHref
                 }
             );
+        }
+
+        //Load up sentry io
+        const dsn=sentryDsn(href);
+        if (dsn) {
+            Sentry.init({
+                dsn: dsn,
+                integrations: [new Integrations.BrowserTracing()],
+
+                // Set tracesSampleRate to 1.0 to capture 100%
+                // of transactions for performance monitoring.
+                // We recommend adjusting this value in production
+                tracesSampleRate: 1.0,
+            });
         }
 
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
@@ -1216,18 +1231,24 @@ class ContentRenderer extends React.PureComponent {
         if (canonical === "about:blank"){   // first case is fallback
             content = null;
         } else if (status) {                // error catching
-            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
+            content = <Sentry.ErrorBoundary showDialog><ErrorPage currRoute={routeLeaf} status={status}/></Sentry.ErrorBoundary>;
         } else if (context) {               // What should occur (success)
 
             var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
+                content = (
+                    <Sentry.ErrorBoundary showDialog>
+                        <ErrorPage status={null} />
+                    </Sentry.ErrorBoundary>);
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
                 const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
-                    content = <ErrorPage status="forbidden" />;
+                    content =(
+                        <Sentry.ErrorBoundary showDialog>
+                            <ErrorPage status="forbidden" />
+                        </Sentry.ErrorBoundary>);
                 }
             }
 
@@ -1238,7 +1259,11 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return <ContentErrorBoundary canonical={canonical} href={href}>{ content }</ContentErrorBoundary>;
+        return (
+            <Sentry.ErrorBoundary showDialog>
+                <ContentErrorBoundary canonical={canonical} href={href}>{content}
+                </ContentErrorBoundary>
+            </Sentry.ErrorBoundary>);
     }
 }
 
@@ -1732,13 +1757,15 @@ class BodyElement extends React.PureComponent {
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
-
-                            <ContentErrorBoundary canonical={canonical} href={href}>
-                                <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
-                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
-                                    overlaysContainer } } />
-                            </ContentErrorBoundary>
-
+                            <Sentry.ErrorBoundary showDialog>
+                                <ContentErrorBoundary canonical={canonical} href={href}>
+                                    <ContentRenderer { ...this.props } { ...{
+                                        windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                        registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
+                                        overlaysContainer
+                                    }} />
+                                </ContentErrorBoundary>
+                            </Sentry.ErrorBoundary>
                             <div id="layout-footer"/>
                         </div>
                         {!isSelectPage ? <Footer version={context.app_version} /> : null}

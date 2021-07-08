@@ -13,7 +13,7 @@ import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 import { navigate, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
-
+import * as Sentry from "@sentry/react";
 
 /** This file/component is specific to 4DN portal */
 
@@ -91,7 +91,10 @@ export class TabbedView extends React.PureComponent {
                 tab={<span className="tab" data-tab-key={key}>{ tab }</span>}
                 placeholder={placeholder || <TabPlaceHolder/> }
                 disabled={disabled} style={style}>
-                <TabErrorBoundary tabKey={key}>{ content }</TabErrorBoundary>
+                <Sentry.ErrorBoundary>
+                    <TabErrorBoundary tabKey={key}>{content}
+                    </TabErrorBoundary>
+                </Sentry.ErrorBoundary>
             </Tabs.TabPane>
         );
     }
