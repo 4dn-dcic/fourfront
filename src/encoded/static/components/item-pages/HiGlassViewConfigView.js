@@ -973,18 +973,15 @@ function HiGlassFileDetailPane(props) {
         if (item.track === 'top' || item.track === 'bottom') {
             width = (item.width) ? (item.width || '-') : "-";
             height =
-                <FieldSet context={item}
-                    schemas={schemas} href={href}>
-                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible={true}>
-                    </EditableField>
+                <FieldSet context={item} schemas={schemas} href={href}>
+                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible />
                 </FieldSet>;
         }
         else if (item.track === 'left' || item.track === 'right') {
             height = (item.height) ? (item.height || '-') : "-";
             width =
-                <FieldSet context={item}>
-                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible={true}>
-                    </EditableField>
+                <FieldSet context={item} schemas={schemas} href={href}>
+                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible />
                 </FieldSet>;
         }
         return (
@@ -1001,8 +998,7 @@ function HiGlassFileDetailPane(props) {
                         }}
                         windowWidth={windowWidth}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible={true}>
-                        </EditableField>
+                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible />
                     </FieldSet>
                 </td>
             </tr>);

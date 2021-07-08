@@ -234,12 +234,14 @@ class MicroscopeConfiguration(UserContent):
     }
 
     def _update(self, properties, sheets=None):
-        '''set microscope ID if empty
-        '''
         if properties.get('microscope'):
             microscope = properties.get('microscope')
+            # set microscope ID if empty
             if not microscope.get('ID'):
                 microscope['ID'] = str(uuid4())
+            # always sync item's description to microscope's description
+            microscopeDesc = microscope.get('Description', '')
+            properties['description'] = microscopeDesc
         super(MicroscopeConfiguration, self)._update(properties, sheets)
 
     @calculated_property(schema={

@@ -27,7 +27,7 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
         return (
             <ItemHeaderWrapper {..._.pick(this.props, 'context', 'href', 'schemas', 'windowWidth')}>
                 <TopRow itemActionsDescriptions={itemActionsDescriptions} typeInfoVisible={false} />
-                <MiddleRow isInlineEditable className="micro-meta-item-page-heading" />
+                <MiddleRow isInlineEditable={false} className="micro-meta-item-page-heading" />
                 <BottomRow />
             </ItemHeaderWrapper>
         );
@@ -594,6 +594,7 @@ export class MicroMetaTabView extends React.PureComponent {
         // We're updating this object's microscope.
         const payload = {
             'title': microscope.Name,
+            'description': microscope.Description || '',
             'microscope': microscope
         };
 
