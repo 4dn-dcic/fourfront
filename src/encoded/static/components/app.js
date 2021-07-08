@@ -1232,12 +1232,12 @@ class ContentRenderer extends React.PureComponent {
             var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
-                content =<ErrorPage status={null}/>;
+                content = <ErrorPage status={null}/>;
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
                 const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
-                    content =<ErrorPage status="forbidden" />;
+                    content = <ErrorPage status="forbidden" />;
                 }
             }
 
@@ -1248,9 +1248,7 @@ class ContentRenderer extends React.PureComponent {
             throw new Error('No context is available. Some error somewhere.');
         }
 
-        return (
-            <ContentErrorBoundary canonical={canonical} href={href}>{content}
-            </ContentErrorBoundary>);
+        return <ContentErrorBoundary canonical={canonical} href={href}>{ content }</ContentErrorBoundary>;
     }
 }
 
@@ -1744,13 +1742,13 @@ class BodyElement extends React.PureComponent {
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
+
                             <ContentErrorBoundary canonical={canonical} href={href}>
-                                <ContentRenderer {...this.props} {...{
-                                    windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                <ContentRenderer { ...this.props } { ...{ windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
                                     registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
-                                    overlaysContainer
-                                }} />
+                                    overlaysContainer } } />
                             </ContentErrorBoundary>
+
                             <div id="layout-footer"/>
                         </div>
                         {!isSelectPage ? <Footer version={context.app_version} /> : null}
