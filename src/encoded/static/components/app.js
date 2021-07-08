@@ -1795,7 +1795,7 @@ class ContentErrorBoundary extends React.Component {
     componentDidCatch(err, info){
         const { href } = this.props;
         this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
-            errorReporting.captureException('Client Error - ' + href + ': ' + err);
+            errorReporting.captureException('Client Error - ' + href + ': ' + err,errorReporting.levels.Error);
             analytics.exception('Client Error - ' + href + ': ' + err, true);
         });
     }
