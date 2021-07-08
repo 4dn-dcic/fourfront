@@ -16,7 +16,7 @@ import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator, errorReporting } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -24,7 +24,6 @@ import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import { PageTitleSection } from './PageTitle';
 
-import * as Sentry from "@sentry/react";
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
 
@@ -225,17 +224,13 @@ export default class App extends React.PureComponent {
         }
 
         //Load up sentry io
-        const dsn=sentryDsn(href);
+        const dsn = sentryDsn(href);
         if (dsn) {
-            Sentry.init({
-                dsn: dsn,
-                integrations: [new Integrations.BrowserTracing()],
-
-                // Set tracesSampleRate to 1.0 to capture 100%
-                // of transactions for performance monitoring.
-                // We recommend adjusting this value in production
-                tracesSampleRate: 1.0,
-            });
+            errorReporting.initializeSentry(
+                dsn,
+                {
+                }
+            );
         }
 
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
@@ -1231,24 +1226,18 @@ class ContentRenderer extends React.PureComponent {
         if (canonical === "about:blank"){   // first case is fallback
             content = null;
         } else if (status) {                // error catching
-            content = <Sentry.ErrorBoundary showDialog><ErrorPage currRoute={routeLeaf} status={status}/></Sentry.ErrorBoundary>;
+            content = <ErrorPage currRoute={routeLeaf} status={status}/>;
         } else if (context) {               // What should occur (success)
 
             var ContentView = (contentViews || globalContentViews).lookup(context, currentAction);
 
             if (!ContentView){ // Handle the case where context is not loaded correctly
-                content = (
-                    <Sentry.ErrorBoundary showDialog>
-                        <ErrorPage status={null} />
-                    </Sentry.ErrorBoundary>);
+                content =<ErrorPage status={null}/>;
             } else if (currentAction && _.contains(['edit', 'add', 'create'], currentAction)) { // Handle content edit + create action permissions
                 const contextActionNames = _.filter(_.pluck((context && context.actions) || [], 'name'));
                 // see if desired actions is not allowed for current user
                 if (!_.contains(contextActionNames, currentAction)){
-                    content =(
-                        <Sentry.ErrorBoundary showDialog>
-                            <ErrorPage status="forbidden" />
-                        </Sentry.ErrorBoundary>);
+                    content =<ErrorPage status="forbidden" />;
                 }
             }
 
@@ -1260,10 +1249,8 @@ class ContentRenderer extends React.PureComponent {
         }
 
         return (
-            <Sentry.ErrorBoundary showDialog>
-                <ContentErrorBoundary canonical={canonical} href={href}>{content}
-                </ContentErrorBoundary>
-            </Sentry.ErrorBoundary>);
+            <ContentErrorBoundary canonical={canonical} href={href}>{content}
+            </ContentErrorBoundary>);
     }
 }
 
@@ -1757,15 +1744,13 @@ class BodyElement extends React.PureComponent {
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
                                     {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
                             </div>
-                            <Sentry.ErrorBoundary showDialog>
-                                <ContentErrorBoundary canonical={canonical} href={href}>
-                                    <ContentRenderer { ...this.props } { ...{
-                                        windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
-                                        registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
-                                        overlaysContainer
-                                    }} />
-                                </ContentErrorBoundary>
-                            </Sentry.ErrorBoundary>
+                            <ContentErrorBoundary canonical={canonical} href={href}>
+                                <ContentRenderer {...this.props} {...{
+                                    windowWidth, windowHeight, navigate, registerWindowOnResizeHandler,
+                                    registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen, isFullscreen,
+                                    overlaysContainer
+                                }} />
+                            </ContentErrorBoundary>
                             <div id="layout-footer"/>
                         </div>
                         {!isSelectPage ? <Footer version={context.app_version} /> : null}
@@ -1812,6 +1797,7 @@ class ContentErrorBoundary extends React.Component {
     componentDidCatch(err, info){
         const { href } = this.props;
         this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
+            errorReporting.captureException('Client Error - ' + href + ': ' + err);
             analytics.exception('Client Error - ' + href + ': ' + err, true);
         });
     }

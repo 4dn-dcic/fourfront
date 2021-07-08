@@ -10,10 +10,9 @@ import Tabs from 'rc-tabs';
 import TabContent from 'rc-tabs/lib/TabContent';
 import ScrollableInkTabBar from 'rc-tabs/lib/ScrollableInkTabBar';
 
-import { navigate, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { navigate, analytics, memoizedUrlParse, errorReporting } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { UserContentBodyList } from './../../static-pages/components/UserContentBodyList';
 import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
-import * as Sentry from "@sentry/react";
 
 /** This file/component is specific to 4DN portal */
 
@@ -88,13 +87,11 @@ export class TabbedView extends React.PureComponent {
                 key={key || tabIndex}
                 data-tab-key={key}
                 id={'tab:' + key}
-                tab={<span className="tab" data-tab-key={key}>{ tab }</span>}
-                placeholder={placeholder || <TabPlaceHolder/> }
+                tab={<span className="tab" data-tab-key={key}>{tab}</span>}
+                placeholder={placeholder || <TabPlaceHolder />}
                 disabled={disabled} style={style}>
-                <Sentry.ErrorBoundary>
-                    <TabErrorBoundary tabKey={key}>{content}
-                    </TabErrorBoundary>
-                </Sentry.ErrorBoundary>
+                <TabErrorBoundary tabKey={key}>{content}
+                </TabErrorBoundary>
             </Tabs.TabPane>
         );
     }
@@ -368,6 +365,7 @@ class TabErrorBoundary extends React.Component {
         this.setState({ 'hasError': true, 'errorInfo': info }, () => {
             // `window` is only available when we're mounted / client-side.
             const href = (window && window.location.href) || "(Unknown URL)";
+            errorReporting.captureException('Client Error - ' + href + ' (#' + tabKey + '): ' + err);
             analytics.exception('Client Error - ' + href + ' (#' + tabKey + '): ' + err, true);
         });
     }
