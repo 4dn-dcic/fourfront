@@ -226,7 +226,7 @@ export default class App extends React.PureComponent {
         //Load up sentry io
         const dsn = sentryDsn(href);
         if (dsn) {
-            errorReporting.initializeSentry(
+            logger.initializeSentry(
                 dsn,
                 {
                 }
