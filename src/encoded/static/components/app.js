@@ -16,7 +16,7 @@ import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator, errorReporting } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -1795,7 +1795,7 @@ class ContentErrorBoundary extends React.Component {
     componentDidCatch(err, info){
         const { href } = this.props;
         this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
-            errorReporting.captureException('Client Error - ' + href + ': ' + err,errorReporting.levels.Error);
+            logger.error('Client Error - ' + href + ': ' + err);
             analytics.exception('Client Error - ' + href + ': ' + err, true);
         });
     }
