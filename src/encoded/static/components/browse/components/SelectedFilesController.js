@@ -62,6 +62,7 @@ export class SelectedFilesController extends React.PureComponent {
             _.forEach(_.keys(initiallySelectedFiles), function(key){
                 const parts = key.split('~');
                 if (parts.length !== 3){
+                    logger.error('If supply an object as initiallySelectedFiles, it must have stringified accession triples as keys.');
                     throw new Error('If supply an object as initiallySelectedFiles, it must have stringified accession triples as keys.');
                 }
             });
@@ -139,6 +140,7 @@ export class SelectedFilesController extends React.PureComponent {
     selectFile(accessionTriple, fileItem = null){
         const { context, analyticsAddFilesToCart = false } = this.props;
         function error(){
+            logger.error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
         const newlyAddedFileItems = [];
@@ -190,6 +192,7 @@ export class SelectedFilesController extends React.PureComponent {
     unselectFile(accessionTriple){
         const { context, analyticsAddFilesToCart = false } = this.props;
         function error(){
+            logger.error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
             throw new Error("Supplied accessionTriple is not a string or array of strings/arrays:", accessionTriple);
         }
 
@@ -278,12 +281,14 @@ export class SelectedFilesController extends React.PureComponent {
         if (Array.isArray(children)){
             return React.Children.map(children, function(child){
                 if (!React.isValidElement(child)){
+                    logger.error('SelectedFilesController expects props.children[] to be valid React component instances.');
                     throw new Error('SelectedFilesController expects props.children[] to be valid React component instances.');
                 }
                 return React.cloneElement(child, propsToPass);
             });
         } else {
             if (!React.isValidElement(children)){
+                logger.error('SelectedFilesController expects props.children to be a valid React component instance.');
                 throw new Error('SelectedFilesController expects props.children to be a valid React component instance.');
             }
             return React.cloneElement(children, propsToPass);

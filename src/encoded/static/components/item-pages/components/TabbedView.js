@@ -258,7 +258,7 @@ export class TabbedView extends React.PureComponent {
         if (typeof tabsInstance.setActiveKey === 'function'){
             return tabsInstance.setActiveKey(nextKey);
         } else {
-            console.error('Manually setting active tab key not currently supported...');
+            logger.error('Manually setting active tab key not currently supported...');
             return false;
         }
     }
@@ -278,7 +278,7 @@ export class TabbedView extends React.PureComponent {
         const foundContent = Array.isArray(allContentObjs) && _.findWhere(allContentObjs, { 'key' : hash });
 
         if (!foundContent){
-            console.error('Could not find', hash);
+            logger.error('Could not find', hash);
             return false;
         }
 

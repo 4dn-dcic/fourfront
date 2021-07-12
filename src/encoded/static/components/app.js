@@ -391,7 +391,7 @@ export default class App extends React.PureComponent {
         // Handle list of values, e.g. if `currentAction=selection&currentAction=selection&currentAction=edit` or something is in URL.
         // We should __not__ get an array here and is glitch, but if so, lets fallback and choose _1st_ non-null item.
         if (Array.isArray(action)){
-            console.error("Received unexpected list for `currentAction` URI param", action);
+            logger.error("Received unexpected list for `currentAction` URI param", action);
             action = _.filter(action);
             action = (action.length > 0 ? action[0] : null);
         }
