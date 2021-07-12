@@ -675,7 +675,7 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
     }
 
     const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
-    const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps, expsNotAssociatedWithAnyFiles);
+    const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps || [], expsNotAssociatedWithAnyFiles);
     const experimentBlock = expsWithReplicateExps.map((exp) => {
         const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
             if (col.render && typeof col.render === 'function') { return col.render(exp); }
