@@ -261,7 +261,7 @@ export class ItemPageTable extends React.Component {
 
         if (!useWidth || isNaN(useWidth)){
             logger.error("Make sure width or windowWidth is passed in through props.");
-            throw new Error();
+            throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
         columnDefinitions = this.memoized.scaleColumnDefinitionWidths(

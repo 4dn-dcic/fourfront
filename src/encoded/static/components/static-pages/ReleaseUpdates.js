@@ -168,7 +168,6 @@ class SingleUpdate extends React.Component {
             logger.error('No experiments in set (?)');
             if (!isServerSide()){
                 logger.error('Release Updates - No experiments in set ' + ((item && item.primary_id && item.primary_id['@id']) || '(unknown)') );
-                analytics.exception('Release Updates - No experiments in set ' + ((item && item.primary_id && item.primary_id['@id']) || '(unknown)') );
             }
             return null;
         }

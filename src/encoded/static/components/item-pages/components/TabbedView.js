@@ -87,11 +87,10 @@ export class TabbedView extends React.PureComponent {
                 key={key || tabIndex}
                 data-tab-key={key}
                 id={'tab:' + key}
-                tab={<span className="tab" data-tab-key={key}>{tab}</span>}
+                tab={<span className="tab" data-tab-key={key}>{ tab }</span>}
                 placeholder={placeholder || <TabPlaceHolder />}
                 disabled={disabled} style={style}>
-                <TabErrorBoundary tabKey={key}>{content}
-                </TabErrorBoundary>
+                <TabErrorBoundary tabKey={key}>{ content }</TabErrorBoundary>
             </Tabs.TabPane>
         );
     }
@@ -366,7 +365,6 @@ class TabErrorBoundary extends React.Component {
             // `window` is only available when we're mounted / client-side.
             const href = (window && window.location.href) || "(Unknown URL)";
             logger.error( 'Client Error - ' + href + ' (#' + tabKey + '): ' + err);
-            analytics.exception('Client Error - ' + href + ' (#' + tabKey + '): ' + err, true);
         });
     }
 

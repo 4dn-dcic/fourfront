@@ -351,9 +351,8 @@ const aggregationsToChartData = {
             commonParsingFxn.countsToTotals(combinedAggList);
             combinedAggList.forEach(function(comboBucket){ // Calculate diff from totals-to-date.
                 if (comboBucket.total < comboBucket.children[1].total){
-                    logger.error('Public release count be higher than project release count!!!!', comboBucket.date, comboBucket);
-                    // TODO: Trigger an e-mail alert to wranglers from Google Analytics UI if below exception occurs.
-                    analytics.exception("StatisticsPage: Public release total is higher than project release total at date " + comboBucket.date);
+                    // TODO: Trigger an e-mail alert to wranglers from Sentry UI if below exception occurs.
+                    logger.error("StatisticsPage: Public release total is higher than project release total at date " + comboBucket.date, comboBucket);
                 }
                 comboBucket.children[0].total -= comboBucket.children[1].total;
             });

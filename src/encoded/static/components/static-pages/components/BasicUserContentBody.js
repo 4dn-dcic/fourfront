@@ -25,8 +25,7 @@ export class BasicUserContentBody extends React.PureComponent {
                 var storeState = store && store.getState();
                 href = storeState && storeState.href;
             }
-            logger.error('Client Error - ' + href + ': ' + err, false);
-            analytics.exception('Client Error - ' + href + ': ' + err, false);
+            logger.error('Client Error - ' + href + ': ' + err);
         });
     }
 

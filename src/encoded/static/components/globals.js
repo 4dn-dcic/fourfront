@@ -60,13 +60,13 @@ const getGoogleAnalyticsTrackingID = memoize(function(href){
     return analyticsConfigurationOptions.hostnameTrackerIDMapping.default || null;
 });
 
-const sentryDsn= memoize(function(href){
-    if (!href && !isServerSide()){
+const sentryDsn = memoize(function (href) {
+    if (!href && !isServerSide()) {
         href = window.location.href;
     }
     const { host } = url.parse(href);
     const hostnames = Object.keys(sentryConfigurationOptions.hostnameDNSMapping);
-    for (var i = 0; i < hostnames.length; i++){
+    for (var i = 0; i < hostnames.length; i++) {
         if (host.indexOf(hostnames[i]) > -1) {
             return sentryConfigurationOptions.hostnameDNSMapping[hostnames[i]];
         }

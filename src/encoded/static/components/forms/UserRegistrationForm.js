@@ -183,8 +183,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     // If validation failure, set / show status message, return;
                     // Else If unknown failure:
                     this.setState({ 'registrationStatus' : 'network-failure' });
-                    logger.error("Registration Error - Error on post to /create-unauthorized-user.", true);
-                    analytics.exception("Registration Error - Error on post to /create-unauthorized-user.", true);
+                    logger.error("Registration Error - Error on post to /create-unauthorized-user.");
                 },
                 JSON.stringify(formData)
             );
