@@ -2,6 +2,8 @@
 
 describe('Deployment/CI Search View Tests', function () {
 
+    var testItemsToDelete = [];
+
     context('/search/?type=Item', function () {
 
         before(function(){ // beforeAll
@@ -87,9 +89,68 @@ describe('Deployment/CI Search View Tests', function () {
                 .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                     expect($searchResultElems.length).to.be.greaterThan(0);
                 }).end()
-                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration");
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration").click().end().wait(1000).get('a.dropdown-item').contains('Tier 1').click().end();
+
+            // Submit create microscope data name
+            const identifier = ("mc-test-" + new Date().getTime());
+            cy.get('.modal-dialog input#microscope_name.form-control').focus().type(identifier).wait(100).end();
+
+            // Submit create microscope description
+            const description = ("add new microscope testing");
+            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(description).wait(100).end();
+
+            // Submit create microscope select stand type
+            cy.get('button#validation_tier.dropdown-toggle.btn.btn-primary').contains('Select Stand Type').click().end().wait(1000)
+                .get('a.dropdown-item').contains('Inverted').click().end().wait(1000);
+
+            //Create microscope submit button
+            cy.get('button.btn.btn-success').contains('Submit').click().end().wait(1000);
+
+            // Queue for deletion in subsequent test.
+            cy.get('script[data-prop-name=context]').then(function($context){
+                const context = $context.text();
+                const contextData = JSON.parse(context);
+                const atId = contextData['@id'];
+                console.log('DELETING atId',atId);
+                testItemsToDelete.push(atId);//Test microscope data @id
+            });
         });
 
+        it('Microscope delete data', function () {
+
+            // Log in _as admin_.
+            cy.visit('/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+
+            // Delete item microscope data.
+            cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
+                console.log('DELETING', testItemURL);
+                cy.getCookie('jwtToken')
+                    .then((cookie) => {
+                        const token = cookie.value;
+                        cy.request({
+                            method: "DELETE",
+                            url: testItemURL,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            }
+                        }).end().request({
+                            method: "PATCH",
+                            url: testItemURL,
+                            headers: {
+                                'Authorization': 'Bearer ' + token,
+                                "Content-Type": "application/json",
+                                "Accept": "application/json"
+                            },
+                            body: JSON.stringify({ "tags": ["deleted_by_cypress_test"] })
+                        });
+                    });
+            });
+
+            // Empty the array now that we're done.
+            testItemsToDelete = [];
+        });
     });
 
     context('Search Box in Navigation', function(){
