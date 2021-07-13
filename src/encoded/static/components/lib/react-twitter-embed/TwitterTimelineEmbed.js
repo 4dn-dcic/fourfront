@@ -15,7 +15,7 @@ let hasScriptBeenLoaded = false;
 export default class TwitterTimelineEmbed extends React.PureComponent {
 
     static defaultProps = {
-        twitterJSURL: "https://platform.twitter.com/widgets.js";
+        twitterJSURL: "https://platform.twitter.com/widgets.js"
     };
 
     constructor(props) {
