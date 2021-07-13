@@ -182,6 +182,7 @@ module.exports = [
             ...resolve,
             alias: {
                 'higlass-dependencies': path.resolve(__dirname, "./src/encoded/static/components/item-pages/components/HiGlass/higlass-dependencies.js"),
+                'micrometa-dependencies': path.resolve(__dirname, "./src/encoded/static/components/item-pages/components/MicroMeta/micrometa-dependencies.js"),
                 'package-lock.json': path.resolve(__dirname, "./package-lock.json"),
                 "statistics-page-components" : path.resolve(__dirname, "./src/encoded/static/components/static-pages/components/StatisticsPageViewBody"),
             },
@@ -235,7 +236,7 @@ module.exports = [
                 'aws-sdk': 'empty-module',
                 'package-lock.json': 'empty-module',
                 "statistics-page-components" : 'empty-module',
-                "4dn-microscopy-metadata-tool" : 'empty-module',
+                "micrometa-dependencies" : 'empty-module',
                 // Below - prevent some stuff in SPC from being bundled in.
                 // These keys are literally matched against the string values, not actual path contents, hence why is "../util/aws".. it exactly what within SPC/SubmissionView.js
                 // We can clean up and change to 'aws-utils' in here in future as well and alias it to spc/utils/aws. But this needs to be synchronized with SPC and 4DN.
