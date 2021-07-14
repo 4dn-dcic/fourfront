@@ -213,7 +213,7 @@ class ExperimentSet(Item):
         #     ExperimentSet.embedded_list.append("experiments_in_set.processed_files." + f) ...
 
         # File linkTo
-        "experiments_in_set.files"
+        "experiments_in_set.files",
         "experiments_in_set.files.href",
         "experiments_in_set.files.accession",
         "experiments_in_set.files.uuid",
