@@ -116,10 +116,36 @@ describe('Deployment/CI Search View Tests', function () {
             });
         });
 
+        it('Created microscope tier number and stand matches',function (){
+            //Edit microscope
+            cy.get('div.micrometa-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
+
+            //Tier matches
+            cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Tier').should('have.value', '1');
+
+            //Stand matches
+            cy.get('li#react-tabs-2').contains('InvertedMicroscopeStand');
+
+            //Edit popup cancel
+            cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Description').should('have.value', 'add new microscope testing')
+                .get('div#microscopy-app-overlays-container div div div div button.btn.btn.btn-primary.btn-lg').contains('Cancel').click().end();
+        });
+
+        it('Can clone new microscope draft views', function () {
+            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+
+            //Clone microscope data
+            cy.get("div.dropup button#dropdown-basic-button.dropdown-toggle.btn.btn-dark.btn-lg div").contains('Save').click().wait(1000).end()
+
+                //Clone success save message
+                // eslint-disable-next-line no-useless-escape
+                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('.alert div').should('contain.text', 'Saved new display.').end();
+        });
+
         it('Microscope delete data', function () {
 
             // Log in _as admin_.
-            cy.visit('/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
 
             // Delete item microscope data.
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
