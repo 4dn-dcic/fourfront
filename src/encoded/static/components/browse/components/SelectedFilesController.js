@@ -35,7 +35,7 @@ export function fileCountWithDuplicates(selectedFiles){
 export class SelectedFilesController extends React.PureComponent {
 
     /** Utility function to extract out the relevant props passed in by `SelectedFilesController` out of a props object. */
-    static pick(props){ return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles'); }
+    static pick(props){ return _.pick(props, 'selectedFiles', 'selectFile', 'unselectFile', 'resetSelectedFiles', 'incrementalExpandLimit', 'incrementalExpandStep'); }
 
     static listToObject(selectedFilesList){
         return _.object(_.map(
