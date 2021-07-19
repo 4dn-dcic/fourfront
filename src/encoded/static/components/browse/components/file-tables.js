@@ -504,7 +504,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showNotesColumns, href, preventExpand } = this.props;
+        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showNotesColumns, href, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
 
         const allRawFiles = exp.files || [];
 
@@ -594,7 +594,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle }} title={listTitle} className={contentsClassName}>
+                <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }} title={listTitle} className={contentsClassName}>
                     { contents }
                 </StackedBlockList>
             </StackedBlock>
@@ -602,7 +602,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
-        const { collapseLimit = 3, collapseShow = 2, experimentSet, preventExpand = false } = this.props;
+        const { collapseLimit = 3, collapseShow = 2, experimentSet, preventExpand = false, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
         const [ { biosample } ] = expsWithBiosample; // From first exp, grab out biosample (all exps should have same 1).
         const bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
@@ -629,7 +629,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                         <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
                         : <span className="name-title">{ biosampleTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle }}>
+                <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }}>
                     { _.map(expsWithBiosample, this.renderExperimentBlock) }
                 </StackedBlockList>
             </StackedBlock>

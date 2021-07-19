@@ -266,7 +266,8 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 { this.renderHeader() }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
-                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} analyticsImpressionOnMount />
+                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7}
+                        incrementalExpandLimit={100} incrementalExpandStep={100} analyticsImpressionOnMount />
                 </div>
             </div>
         );
@@ -574,7 +575,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     static tableProps(sectionProps){
         return _.extend(
             _.pick(sectionProps, 'files', 'windowWidth', 'href'),
-            { 'collapseLimit' : 10, 'collapseShow' : 7, 'analyticsImpressionOnMount': true },
+            { 'collapseLimit': 10, 'collapseShow': 7, 'incrementalExpandLimit': 100, 'incrementalExpandStep': 100, 'analyticsImpressionOnMount': true },
             SelectedFilesController.pick(sectionProps)
         );
     }
