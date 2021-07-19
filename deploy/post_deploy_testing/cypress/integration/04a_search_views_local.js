@@ -4,6 +4,17 @@ describe('Deployment/CI Search View Tests', function () {
 
     var testItemsToDelete = [];
 
+    function deletedItems() {
+        // get response and store atId (to delete item at the end of test)
+        cy.get('script[data-prop-name=context]').then(function ($context) {
+            const context = $context.text();
+            const contextData = JSON.parse(context);
+            const atId = contextData['@id'];
+            console.log('DELETING atId', atId);
+            testItemsToDelete.push(atId);
+        });
+    }
+
     context('/search/?type=Item', function () {
 
         before(function(){ // beforeAll
@@ -115,13 +126,7 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('button.btn.btn-success').contains('Submit').click().end().wait(1000);
 
             // get response and store atId (to delete item at the end of test)
-            cy.get('script[data-prop-name=context]').then(function($context){
-                const context = $context.text();
-                const contextData = JSON.parse(context);
-                const atId = contextData['@id'];
-                console.log('DELETING atId',atId);
-                testItemsToDelete.push(atId);
-            });
+            deletedItems();
         });
 
         it('Verify created microscope\'s tier number and stand matches', function (){
@@ -147,7 +152,9 @@ describe('Deployment/CI Search View Tests', function () {
 
                 //Clone success save message
                 // eslint-disable-next-line no-useless-escape
-                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('.alert div').should('contain.text', 'Saved new display.').end();
+                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('h4.alert-heading.mt-0.mb-05').should('contain.text', "4dn's copy").end().wait(1000);
+            // get response and store atId (to delete item at the end of test)
+            deletedItems();
         });
 
         it('Delete microscope configuration', function () {
