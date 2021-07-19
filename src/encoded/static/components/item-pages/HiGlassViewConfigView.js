@@ -973,18 +973,15 @@ function HiGlassFileDetailPane(props) {
         if (item.track === 'top' || item.track === 'bottom') {
             width = (item.width) ? (item.width || '-') : "-";
             height =
-                <FieldSet context={item}
-                    schemas={schemas} href={href}>
-                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible={true}>
-                    </EditableField>
+                <FieldSet context={item} schemas={schemas} href={href}>
+                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible />
                 </FieldSet>;
         }
         else if (item.track === 'left' || item.track === 'right') {
             height = (item.height) ? (item.height || '-') : "-";
             width =
-                <FieldSet context={item}>
-                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible={true}>
-                    </EditableField>
+                <FieldSet context={item} schemas={schemas} href={href}>
+                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible />
                 </FieldSet>;
         }
         return (
@@ -1001,8 +998,7 @@ function HiGlassFileDetailPane(props) {
                         }}
                         windowWidth={windowWidth}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible={true}>
-                        </EditableField>
+                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible />
                     </FieldSet>
                 </td>
             </tr>);
@@ -1131,10 +1127,12 @@ function StatusMenuItem(props){
  * TODO: this component can be moved to another file for generic use in portal.
  */
 export const ConfirmModal = React.memo(function (props) {
-    const { handleConfirm, handleCancel, modalTitle, confirmButtonText = "OK", cancelButtonText = "Cancel" } = props;
+    const { handleConfirm, handleCancel, modalTitle, confirmButtonText = "OK", cancelButtonText = "Cancel", confirmButtonVisible = true, cancelButtonVisible=true } = props;
     const confirmButtonEl = useRef(null);
     useEffect(() => {
-        confirmButtonEl.current.focus();
+        if (confirmButtonEl && confirmButtonEl.current) {
+            confirmButtonEl.current.focus();
+        }
     }, []);
     return (
         <Modal show onHide={handleCancel}>
@@ -1145,19 +1143,29 @@ export const ConfirmModal = React.memo(function (props) {
                 {props.children || ''}
             </Modal.Body>
             <Modal.Footer>
-                <button type="button" onClick={handleConfirm} className="btn btn-success" ref={confirmButtonEl}>
-                    <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
-                </button>
-                <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
-                    <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
-                </button>
+                {confirmButtonVisible ?
+                    <button type="button" onClick={handleConfirm} className="btn btn-success" ref={confirmButtonEl}>
+                        <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
+                    </button> : null}
+                {cancelButtonVisible ?
+                    <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
+                        <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
+                    </button> : null}
             </Modal.Footer>
         </Modal>);
 });
-ConfirmModal.PropTypes = {
+ConfirmModal.propTypes = {
     'handleConfirm': PropTypes.func.isRequired,
     'handleCancel': PropTypes.func.isRequired,
     'modalTitle': PropTypes.string,
     'confirmButtonText': PropTypes.string,
-    'cancelButtonText': PropTypes.string
+    'cancelButtonText': PropTypes.string,
+    'confirmButtonVisible': PropTypes.bool,
+    'cancelButtonVisible': PropTypes.bool
+};
+ConfirmModal.defaultProps = {
+    'confirmButtonText': 'OK',
+    'cancelButtonText': 'Cancel',
+    'confirmButtonVisible': true,
+    'cancelButtonVisible': true
 };
