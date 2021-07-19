@@ -82,56 +82,64 @@ describe('Deployment/CI Search View Tests', function () {
 
         // TODO test facets
 
-        it('Can add new Microsope Configurations', function(){
+        // it('/microscope-configurations/ should redirect to /search/?type=MicroscopeConfiguration', function(){
+        //     cy.visit('/microscope-configurations/').location('search').should('include', 'type=MicroscopeConfiguration').end()
+        //         .location('pathname').should('include', '/search/');
+        // });
+        let microscopeDescription;
+        const standType = "Inverted";
+
+        it('Can add new tier-1 Microsope Configuration', function(){
 
             cy.login4DN({ 'email' : '4dndcic@gmail.com', 'useEnvToken' : false }).end()
                 .visit('/search/?type=MicroscopeConfiguration').end()
                 .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                     expect($searchResultElems.length).to.be.greaterThan(0);
                 }).end()
-                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration").click().end().wait(1000).get('a.dropdown-item').contains('Tier 1').click().end();
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration").click().end().wait(1000)
+                .get('a.dropdown-item').contains('Tier 1').click().end();
 
-            // Submit create microscope data name
+            // set microscope conf. name
             const identifier = ("mc-test-" + new Date().getTime());
             cy.get('.modal-dialog input#microscope_name.form-control').focus().type(identifier).wait(100).end();
 
-            // Submit create microscope description
-            const description = ("add new microscope testing");
-            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(description).wait(100).end();
+            // set microscope conf. description
+            microscopeDescription = "tier-1 microscope conf. description";
+            cy.get('.modal-dialog input#microscope_description.form-control').focus().type(microscopeDescription).wait(100).end();
 
-            // Submit create microscope select stand type
+            // set microscope conf. stand type
             cy.get('button#validation_tier.dropdown-toggle.btn.btn-primary').contains('Select Stand Type').click().end().wait(1000)
-                .get('a.dropdown-item').contains('Inverted').click().end().wait(1000);
+                .get('a.dropdown-item').contains(standType).click().end().wait(1000);
 
-            //Create microscope submit button
+            // submit new microscope conf. creation
             cy.get('button.btn.btn-success').contains('Submit').click().end().wait(1000);
 
-            // Queue for deletion in subsequent test.
+            // get response and store atId (to delete item at the end of test)
             cy.get('script[data-prop-name=context]').then(function($context){
                 const context = $context.text();
                 const contextData = JSON.parse(context);
                 const atId = contextData['@id'];
                 console.log('DELETING atId',atId);
-                testItemsToDelete.push(atId);//Test microscope data @id
+                testItemsToDelete.push(atId);
             });
         });
 
-        it('Created microscope tier number and stand matches',function (){
-            //Edit microscope
+        it('Verify created microscope\'s tier number and stand matches', function (){
+            //Click edit buttton
             cy.get('div.micrometa-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
 
-            //Tier matches
+            //Verify tier is 1
             cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Tier').should('have.value', '1');
 
-            //Stand matches
-            cy.get('li#react-tabs-2').contains('InvertedMicroscopeStand');
+            //Verify stand
+            cy.get('li#react-tabs-2').contains(standType + 'MicroscopeStand');
 
             //Edit popup cancel
-            cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Description').should('have.value', 'add new microscope testing')
+            cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Description').should('have.value', microscopeDescription)
                 .get('div#microscopy-app-overlays-container div div div div button.btn.btn.btn-primary.btn-lg').contains('Cancel').click().end();
         });
 
-        it('Can clone new microscope draft views', function () {
+        it('Can save as microscope configuration', function () {
             cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Clone microscope data
@@ -142,12 +150,12 @@ describe('Deployment/CI Search View Tests', function () {
                 .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('.alert div').should('contain.text', 'Saved new display.').end();
         });
 
-        it('Microscope delete data', function () {
+        it('Delete microscope configuration', function () {
 
             // Log in _as admin_.
             cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
 
-            // Delete item microscope data.
+            // Delete microscope configuration
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
                 console.log('DELETING', testItemURL);
                 cy.getCookie('jwtToken')
