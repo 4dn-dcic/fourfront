@@ -4,8 +4,7 @@ describe('Deployment/CI Search View Tests', function () {
 
     var testItemsToDelete = [];
 
-    function deletedItems() {
-        // get response and store atId (to delete item at the end of test)
+    function addAtIdToDeletedItems() {
         cy.get('script[data-prop-name=context]').then(function ($context) {
             const context = $context.text();
             const contextData = JSON.parse(context);
@@ -126,7 +125,7 @@ describe('Deployment/CI Search View Tests', function () {
             cy.get('button.btn.btn-success').contains('Submit').click().end().wait(1000);
 
             // get response and store atId (to delete item at the end of test)
-            deletedItems();
+            addAtIdToDeletedItems();
         });
 
         it('Verify created microscope\'s tier number and stand matches', function (){
@@ -149,12 +148,12 @@ describe('Deployment/CI Search View Tests', function () {
 
             //Clone microscope data
             cy.get("div.dropup button#dropdown-basic-button.dropdown-toggle.btn.btn-dark.btn-lg div").contains('Save').click().wait(1000).end()
-
                 //Clone success save message
                 // eslint-disable-next-line no-useless-escape
-                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('h4.alert-heading.mt-0.mb-05').should('contain.text', "4dn's copy").end().wait(1000);
+                .get("a#Save\\ as\\ new\\ microscope.dropdown-item").click().wait(1000).get('h4.alert-heading.mt-0.mb-05').should('contain.text', "'s copy").end().wait(1000);
+
             // get response and store atId (to delete item at the end of test)
-            deletedItems();
+            addAtIdToDeletedItems();
         });
 
         it('Delete microscope configuration', function () {
