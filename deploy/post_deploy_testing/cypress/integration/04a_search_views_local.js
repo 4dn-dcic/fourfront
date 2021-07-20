@@ -5,7 +5,7 @@ describe('Deployment/CI Search View Tests', function () {
     var testItemsToDelete = [];
 
     function addAtIdToDeletedItems() {
-        cy.get('script[data-prop-name=context]').then(function ($context) {
+        cy.get('script[data-prop-name=context]').wait(1000).then(function ($context) {
             const context = $context.text();
             const contextData = JSON.parse(context);
             const atId = contextData['@id'];
