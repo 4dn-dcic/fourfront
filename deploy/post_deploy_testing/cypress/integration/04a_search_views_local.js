@@ -99,7 +99,7 @@ describe('Deployment/CI Search View Tests', function () {
         let microscopeDescription;
         const standType = "Inverted";
 
-        it('Can add new tier-1 Microsope Configuration', function(){
+        it('Can add new tier-1 microscope configuration', function(){
 
             cy.login4DN({ 'email' : '4dndcic@gmail.com', 'useEnvToken' : false }).end()
                 .visit('/search/?type=MicroscopeConfiguration').end()
