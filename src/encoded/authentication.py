@@ -224,7 +224,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             auth0_secret = registry.settings.get('auth0.secret')
             if auth0_client and auth0_secret:
                 # leeway accounts for clock drift between us and auth0
-                payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
+                payload = jwt.decode(token, auth0_secret,
                                      algorithms=JWT_DECODING_ALGORITHMS,
                                      audience=auth0_client, leeway=30)
                 if 'email' in payload and payload.get('email_verified') is True:
@@ -489,7 +489,7 @@ def impersonate_user(context, request):
 
     id_token = jwt.encode(
         jwt_contents,
-        b64decode(auth0_secret, '-_'),
+        auth0_secret,
         algorithm=JWT_ENCODING_ALGORITHM
 	)
 
@@ -557,7 +557,7 @@ def create_unauthorized_user(context, request):
         raise LoginDenied()
 
     email = "<no auth0 authenticated e-mail supplied>"
-    if hasattr(request, "_auth0_authenticated"):       
+    if hasattr(request, "_auth0_authenticated"):
         email = request._auth0_authenticated # equal to: jwt_info['email'].lower()
     user_props = request.json
     user_props_email = user_props.get("email", "<no e-mail supplied>").lower()
