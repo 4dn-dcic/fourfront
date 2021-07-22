@@ -83,13 +83,6 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
     return (
         <div className="info-area">
 
-            { staticContent.length > 0 ?
-                <div>
-                    <UserContentBodyList contents={staticContent} />
-                    <hr className="mt-1 mb-2" />
-                </div>
-                : null }
-
             { produced_in_pub || publications_of_set.length > 0 ?
                 <div>
                     <Publications context={context} />
@@ -113,6 +106,13 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
                     : null }
 
             </div>
+
+            { staticContent.length > 0 ?
+                <div className="mt-2">
+                    <hr />
+                    <UserContentBodyList contents={staticContent} />
+                </div>
+                : null}
 
             <ItemFooterRow {...{ context, schemas, width }} />
         </div>
