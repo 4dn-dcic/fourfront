@@ -759,7 +759,8 @@ class File(Item):
     def upload_key(self, request):
         properties = self.properties
         external = self.propsheets.get('external', {})
-        if not external:
+        extkey = external.get('key')
+        if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
             except ClientError:
@@ -882,19 +883,23 @@ class File(Item):
         return registry.settings['file_upload_bucket']
 
     @classmethod
-    def build_external_creds(cls, registry, uuid, properties):
-        bucket = cls.get_bucket(registry)
+    def build_key(cls, registry, uuid, properties):
         fformat = properties.get('file_format')
         if fformat.startswith('/file-formats/'):
             fformat = fformat[len('/file-formats/'):-1]
-        prop_format = registry['collections']['FileFormat'].get(fformat)
-        try:
-            file_extension = prop_format.properties['standard_file_extension']
-        except KeyError:
-            raise Exception('File format not in list of supported file types')
-        key = '{uuid}/{accession}.{file_extension}'.format(
-            file_extension=file_extension, uuid=uuid,
-            accession=properties.get('accession'))
+            prop_format = registry['collections']['FileFormat'].get(fformat)
+            try:
+                file_extension = prop_format.properties['standard_file_extension']
+            except KeyError:
+                raise Exception('File format not in list of supported file types')
+            return '{uuid}/{accession}.{file_extension}'.format(
+                file_extension=file_extension, uuid=uuid,
+                accession=properties.get('accession'))
+
+    @classmethod
+    def build_external_creds(cls, registry, uuid, properties):
+        bucket = cls.get_bucket(registry)
+        key = cls.build_key(registry, uuid, properties)
 
         # remove the path from the file name and only take first 32 chars
         fname = properties.get('filename')
