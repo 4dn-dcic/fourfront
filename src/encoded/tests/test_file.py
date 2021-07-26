@@ -240,6 +240,16 @@ def test_files_aws_credentials_change_filename(testapp, fastq_uploading, file_fo
     assert res_put.json['@graph'][0]['href'].endswith('tiff')
 
 
+# def test_upload_key_modified_when_extcreds_no_match_key(testapp, fastq_uploading, file_formats):
+#     import pdb; pdb.set_trace()
+#     fastq_uploading['filename'] = 'test.zip'
+#     fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')
+#     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
+#     resobj = res.json['@graph'][0]
+#     with mock.patch.object('encoded.types.file.File', 'propsheets', return_value={'external': {'a': 1}}):
+#         pres = testapp.patch_json(resobj.get('@id'), {}, status=200)
+
+
 def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading, file_formats):
     fastq_uploading['filename'] = 'test.zip'
     fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')

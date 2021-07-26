@@ -887,14 +887,14 @@ class File(Item):
         fformat = properties.get('file_format')
         if fformat.startswith('/file-formats/'):
             fformat = fformat[len('/file-formats/'):-1]
-            prop_format = registry['collections']['FileFormat'].get(fformat)
-            try:
-                file_extension = prop_format.properties['standard_file_extension']
-            except KeyError:
-                raise Exception('File format not in list of supported file types')
-            return '{uuid}/{accession}.{file_extension}'.format(
-                file_extension=file_extension, uuid=uuid,
-                accession=properties.get('accession'))
+        prop_format = registry['collections']['FileFormat'].get(fformat)
+        try:
+            file_extension = prop_format.properties['standard_file_extension']
+        except KeyError:
+            raise Exception('File format not in list of supported file types')
+        return '{uuid}/{accession}.{file_extension}'.format(
+            file_extension=file_extension, uuid=uuid,
+            accession=properties.get('accession'))
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
