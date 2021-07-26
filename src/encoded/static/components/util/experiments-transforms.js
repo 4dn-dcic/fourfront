@@ -459,7 +459,9 @@ export function flattenFileSetsToFilesIfNoFilesForEachExperiment(experiments){
 export function groupExperimentsByBiosampleRepNo(experiments){
     return _(experiments || []).chain()
         .groupBy(function(exp){
-            return exp.biosample.bio_rep_no;
+            // if experimentset_type is not replicate then experiments lack bio_rep_no
+            // so as fallback case we also group by @id
+            return exp.biosample.bio_rep_no || exp.biosample['@id'];
         })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
         .pairs()    // Creates [['1', [expObjWBiosample1-1, expObjWBiosample1-2]], ['2', [expObjWBiosample2-1, expObjWBiosample2-2]], ...]
         .sortBy(function(expSet){ return parseInt(expSet[0]); }) // Sort outer list (biosamples) by bio_rep_no
