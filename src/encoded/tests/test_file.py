@@ -136,9 +136,21 @@ def test_restricted_no_download(testapp, fastq_json):
     download_link = resobj['href']
     testapp.get(download_link, status=307)
     # fail download of restricted file (although with a 200 status?)
-    testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
     testapp.get(download_link, status=403)
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
+
+
+def test_upload_key_updated_on_accession_change(testapp, proc_file_json):
+    newacc = '4DNFINNNNNNN'
+    fext = 'pairs.gz'
+    res = testapp.post_json('/file_processed', proc_file_json, status=201)
+    resobj = res.json['@graph'][0]
+    s3 = boto3.client('s3')
+    s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
+    pres = testapp.patch_json(resobj['@id'], {'accession': newacc}, status=200)
+    presobj = pres.json['@graph'][0]
+    assert resobj['upload_key'] != presobj['upload_key']
+    assert presobj['upload_key'].endswith("{}.{}".format(newacc, fext))
 
 
 def test_extra_files_stuff(testapp, proc_file_json, file_formats):
@@ -238,16 +250,6 @@ def test_files_aws_credentials_change_filename(testapp, fastq_uploading, file_fo
     assert resobj['href'].endswith('zip')
     assert res_put.json['@graph'][0]['upload_credentials']['key'].endswith('tiff')
     assert res_put.json['@graph'][0]['href'].endswith('tiff')
-
-
-# def test_upload_key_modified_when_extcreds_no_match_key(testapp, fastq_uploading, file_formats):
-#     import pdb; pdb.set_trace()
-#     fastq_uploading['filename'] = 'test.zip'
-#     fastq_uploading['file_format'] = file_formats.get('zip').get('uuid')
-#     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
-#     resobj = res.json['@graph'][0]
-#     with mock.patch.object('encoded.types.file.File', 'propsheets', return_value={'external': {'a': 1}}):
-#         pres = testapp.patch_json(resobj.get('@id'), {}, status=200)
 
 
 def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading, file_formats):
