@@ -135,6 +135,7 @@ def test_restricted_no_download(testapp, fastq_json):
     s3.put_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'], Body=str.encode(''))
     download_link = resobj['href']
     testapp.get(download_link, status=307)
+    testapp.patch_json(resobj['@id'], {'status': 'restricted'}, status=200)
     # fail download of restricted file (although with a 200 status?)
     testapp.get(download_link, status=403)
     s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
@@ -151,6 +152,7 @@ def test_upload_key_updated_on_accession_change(testapp, proc_file_json):
     presobj = pres.json['@graph'][0]
     assert resobj['upload_key'] != presobj['upload_key']
     assert presobj['upload_key'].endswith("{}.{}".format(newacc, fext))
+    s3.delete_object(Bucket='test-wfout-bucket', Key=resobj['upload_key'])
 
 
 def test_extra_files_stuff(testapp, proc_file_json, file_formats):
