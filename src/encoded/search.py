@@ -111,7 +111,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     prepared_terms = prepare_search_term(request)
 
     schemas = [types[item_type].schema for item_type in doc_types]
-
+    
     # set ES index based on doc_type (one type per index)
     # if doc_type is item, search all indexes by setting es_index to None
     # If multiple, search all specified
@@ -139,7 +139,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, string_query = build_query(search, prepared_terms, source_fields)
 
     ### Set sort order
-    search = set_sort_order(request, search, prepared_terms, types, doc_types, result)
+    search = set_sort_order(request, search, prepared_terms, types, doc_types, result, schemas)
     # TODO: implement BOOST here?
 
     ### Set filters
@@ -622,7 +622,7 @@ def build_query(search, prepared_terms, source_fields):
     return search, string_query
 
 
-def set_sort_order(request, search, search_term, types, doc_types, result):
+def set_sort_order(request, search, search_term, types, doc_types, result, schemas):
     """
     sets sort order for elasticsearch results
     example: /search/?type=Biosource&sort=display_title
@@ -686,9 +686,18 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     if requested_sorts:
         for rs in requested_sorts:
             add_to_sort_dict(rs)
+    else:
+        for schema in schemas:
+            if 'default_sort_fields' in schema:           
+                for fields in schema['default_sort_fields']:
+                    order=fields['order']
+                    fieldName=fields['field_name']
+                    if order and order == 'desc':
+                        fieldName='-'+fieldName
+                    add_to_sort_dict(fieldName)
 
     text_search = search_term.get('q')
-
+    
     # Otherwise we use a default sort only when there's no text search to be ranked
     if not sort and (text_search == '*' or not text_search):
         # If searching for a single type, look for sort options in its schema

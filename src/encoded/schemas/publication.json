@@ -194,5 +194,15 @@
         "award.project" : {
             "title" : "Project"
         }
-    }
+    },
+    "default_sort_fields": [
+        {
+            "field_name":"date_published", 
+            "order":"desc"
+         },
+         { 
+            "field_name":"display_title",
+            "order":"desc"
+          }
+       ]
 }
