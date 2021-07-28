@@ -111,7 +111,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     prepared_terms = prepare_search_term(request)
 
     schemas = [types[item_type].schema for item_type in doc_types]
-    
+
     # set ES index based on doc_type (one type per index)
     # if doc_type is item, search all indexes by setting es_index to None
     # If multiple, search all specified
@@ -687,6 +687,18 @@ def set_sort_order(request, search, search_term, types, doc_types, result, schem
         for rs in requested_sorts:
             add_to_sort_dict(rs)
     else:
+        # check default sort fields defined in the schema
+        # example definition:
+        # "default_sort_fields": [
+        #     {
+        #         "field_name": "date_published",
+        #         "order": "desc"
+        #     },
+        #     {
+        #         "field_name": "display_title",
+        #         "order": "asc"
+        #     }
+        # ]
         for schema in schemas:
             if 'default_sort_fields' in schema:
                 for fields in schema['default_sort_fields']:
@@ -697,7 +709,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result, schem
                     add_to_sort_dict(fieldName)
 
     text_search = search_term.get('q')
-    
+
     # Otherwise we use a default sort only when there's no text search to be ranked
     if not sort and (text_search == '*' or not text_search):
         # If searching for a single type, look for sort options in its schema
