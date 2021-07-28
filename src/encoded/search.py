@@ -688,12 +688,12 @@ def set_sort_order(request, search, search_term, types, doc_types, result, schem
             add_to_sort_dict(rs)
     else:
         for schema in schemas:
-            if 'default_sort_fields' in schema:           
+            if 'default_sort_fields' in schema:
                 for fields in schema['default_sort_fields']:
-                    order=fields['order']
-                    fieldName=fields['field_name']
+                    order = fields.get('order','')
+                    fieldName = fields.get('field_name','')
                     if order and order == 'desc':
-                        fieldName='-'+fieldName
+                        fieldName = '-' + fieldName
                     add_to_sort_dict(fieldName)
 
     text_search = search_term.get('q')
