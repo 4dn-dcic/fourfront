@@ -7,7 +7,7 @@ import memoize from 'memoize-one';
 
 import Collapse from 'react-bootstrap/esm/Collapse';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
-import { console, object, isServerSide, layout, commonFileUtil, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, isServerSide, layout, commonFileUtil, schemaTransforms, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas, typedefs } from './../util';
 
 import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
@@ -266,7 +266,8 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 { this.renderHeader() }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
-                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} analyticsImpressionOnMount />
+                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7}
+                        incrementalExpandLimit={100} incrementalExpandStep={100} analyticsImpressionOnMount />
                 </div>
             </div>
         );
@@ -574,7 +575,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     static tableProps(sectionProps){
         return _.extend(
             _.pick(sectionProps, 'files', 'windowWidth', 'href'),
-            { 'collapseLimit' : 10, 'collapseShow' : 7, 'analyticsImpressionOnMount': true },
+            { 'collapseLimit': 10, 'collapseShow': 7, 'incrementalExpandLimit': 100, 'incrementalExpandStep': 100, 'analyticsImpressionOnMount': true },
             SelectedFilesController.pick(sectionProps)
         );
     }
@@ -946,7 +947,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
                         return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b');
                     });
                     if (duplicateExistingFile){
-                        console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
+                        logger.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
                         // TODO send to analytics?
                     } else {
                         collectionsByTitle[title].files.push(f);

@@ -42,7 +42,7 @@ const HTTPForbiddenView =  React.memo(function HTTPForbiddenView(props){
             <h2 className="text-400">Access was denied to this resource.</h2>
             <div className="content fourDN-content">
                 <p>
-                If you have an account, please try logging in or return to the <a href="/">homepage</a>. <br/> For instructions on how to set up an account, please visit the help page for <a href="/help/account-creation">Creating an Account</a>.
+                    If you have an account, please try logging in or return to the <a href="/">homepage</a>. <br /> For instructions on how to set up an account, please visit the help page for <a href="/help/account-creation">Creating an Account</a>.
                 </p>
             </div>
         </div>

@@ -137,11 +137,7 @@
             "description": "Type of fiducial label used for drift correction during sequential imaging",
             "type": "string",
             "lookup": 69,
-            "use_for": ["sequential imaging"],
-            "suggested_enum": [
-                "beads",
-                "oligos"
-            ]
+            "use_for": ["sequential imaging"]
         }
     },
     "columns": {
