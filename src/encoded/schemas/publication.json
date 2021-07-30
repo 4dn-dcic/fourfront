@@ -183,10 +183,12 @@
     },
     "columns": {
         "date_published": {
-            "title": "Year"
+            "title": "Year",
+            "initial_sort": "desc"
         },
         "journal": {
-            "title": "Journal"
+            "title": "Journal",
+            "initial_sort": "asc"
         },
         "number_of_experiment_sets": {
             "title": "# Experiment Sets"
