@@ -78,8 +78,8 @@ export class MicroMetaTabView extends React.PureComponent {
         this.microMetaToolRef = React.createRef();
 
         //force the page display in full screen
-        const { toggleFullScreen } = props;
-        setTimeout(toggleFullScreen, 0, true);
+        // const { toggleFullScreen } = props;
+        // setTimeout(toggleFullScreen, 0, true);
     }
 
     getMicroscopyMetadataToolComponent(){
