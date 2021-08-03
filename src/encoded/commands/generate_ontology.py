@@ -1030,9 +1030,18 @@ def main():
             terms, v, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, simple=args.simple)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
-                    result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
-                    release = result._content.decode('utf-8').split('</li>\n  <li>')[-1]
-                    v = release[release.index('>') + 1: release.index('</a>')].rstrip('/')
+                    owl = requests.get('http://purl.obolibrary.org/obo/uberon.owl', headers={"Range": "bytes=0-2000"})
+                    if 'versionIRI' in owl.text:
+                        idx = owl.text.index('versionIRI')
+                        vline = owl.text[idx:idx+150]
+                        if 'releases'in vline:
+                            vline = vline.split('/')
+                            v = vline[vline.index('releases')+1]
+                        else:
+                            # looks for date string in versionIRI line
+                            match = re.search('(20)?([0-9]{2})-[0-9]{2}-(20)?[0-9]{2}', vline)
+                            if match:
+                                v = match.group()
                 except Exception:
                     print('Unable to fetch Uberon version')
             if v and v != ontology.get('current_ontology_version', ''):
