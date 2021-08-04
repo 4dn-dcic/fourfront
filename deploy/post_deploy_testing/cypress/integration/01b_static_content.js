@@ -103,7 +103,9 @@ describe('Static Page & Content Tests', function () {
         cy.get(helpNavBarItemSelectorStr).click().then(()=>{
 
             // Get all links to _level 2_ static pages. Exclude directory pages for now. Do directory pages in later test.
-            cy.get('.big-dropdown-menu.is-open a.level-2-title').then(($listItems)=>{
+            // Randomly selects 5 links out of all items listed from the Help dropdown menu. If one of those randomly selected links is
+            // Contact Us then the test fails since Contact Us page lacks content to be tested.
+            cy.get('.big-dropdown-menu.is-open a.level-2-title').filter(':not([href="/help/about/contact-us"])').then(($listItems)=>{
 
                 console.log($listItems);
                 const listItemsTotalCount = $listItems.length;
