@@ -1620,32 +1620,37 @@ def build_table_columns(request, schemas, doc_types):
                     for prop in schema_columns[name]:
                         columns[name][prop] = schema_columns[name][prop]
                 # Add description from field schema, if none otherwise.
-                if not columns[name].get('description'):
+                if not columns[name].get('description') or not columns[name].get('type'):
                     field_schema = schema_for_field(name, request, doc_types)
                     if field_schema:
-                        if field_schema.get('description') is not None:
+                        if not columns[name].get('description') and field_schema.get('description') is not None:
                             columns[name]['description'] = field_schema['description']
+                        if not columns[name].get('type') and field_schema.get('type') is not None:
+                            columns[name]['type'] = field_schema['type']
 
     # Add status column, if not present, at end.
     if 'status' not in columns:
         columns['status'] = {
             "title"             : "Status",
             "default_hidden"    : True,
-            "order"             : 501
+            "order"             : 501,
+            "type"              : "string"
         }
     # Add created date column, if not present, at end.
     if 'date_created' not in columns:
         columns['date_created'] = {
             "title"             : "Date Created",
             "default_hidden"    : True,
-            "order"             : 510
+            "order"             : 510,
+            "type"              : "date"
         }
     # Add modified date column, if not present, at end.   
     if 'last_modified.date_modified' not in columns:
         columns['last_modified.date_modified'] = {
             "title"             : "Date Modified",
             "default_hidden"    : True,
-            "order"             : 520
+            "order"             : 520,
+            "type"              : "date"
         }
     return columns
 
