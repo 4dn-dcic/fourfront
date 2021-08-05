@@ -212,8 +212,7 @@
         "number_of_experiments" : {
             "title" : "# of Experiments",
             "colTitle" : "Exps",
-            "default_hidden" : true,
-            "initial_sort": "desc"
+            "default_hidden" : true
         },
         "number_of_files" : {
             "title" : "# of Files",
@@ -227,8 +226,7 @@
                 "lg" : 140,
                 "md" : 140,
                 "sm" : 120
-            },
-            "initial_sort": "asc"
+            }
         },
         "experiments_in_set.biosample.biosource_summary": {
             "title" : "Biosample",
