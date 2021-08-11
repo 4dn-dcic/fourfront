@@ -7,6 +7,7 @@ import { object, analytics, isServerSide, logger } from '@hms-dbmi-bgm/shared-po
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
+import { MicroMetaAjaxLoadContainer, isMicroscopeConfigurationItem } from './../../item-pages/components/MicroMeta';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
 
@@ -38,6 +39,8 @@ export class BasicUserContentBody extends React.PureComponent {
             return 'StaticSection';
         } else if (isHiglassViewConfigItem(context)){ // Func internally checks context['@type'].indexOf('HiglassViewConfig') > -1 also
             return 'HiglassViewConfig';
+        } else if (isMicroscopeConfigurationItem(context)){ // Func internally checks context['@type'].indexOf('MicroscopeConfiguration') > -1 also
+            return 'MicroscopeConfiguration';
         } else {
             // TODO: Case for JupyterNotebook (?) and/or yet-to-be-created ones.
             throw new Error('Unsupported Item type.');
@@ -64,6 +67,12 @@ export class BasicUserContentBody extends React.PureComponent {
                 <React.Fragment>
                     <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
                     <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} scale1dTopTrack={false} />
+                </React.Fragment>
+            );
+        } else if (itemType === 'MicroscopeConfiguration') {
+            return (
+                <React.Fragment>
+                    <MicroMetaAjaxLoadContainer {..._.omit(this.props, 'context', 'microscopeItem')} microscopeItem={context} height={800} />
                 </React.Fragment>
             );
         } else {
