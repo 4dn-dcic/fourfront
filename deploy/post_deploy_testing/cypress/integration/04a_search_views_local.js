@@ -130,7 +130,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Verify created microscope\'s tier number and stand matches', function (){
             //Click edit buttton
-            cy.get('div.micrometa-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
+            cy.get('div.micro-meta-app-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
 
             //Verify tier is 1
             cy.get('div.form-group div.mb-0.form-group input#rjsfPrefix_Tier').should('have.value', '1');
