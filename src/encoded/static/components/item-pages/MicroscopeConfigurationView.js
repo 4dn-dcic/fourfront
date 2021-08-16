@@ -549,7 +549,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
         return (
-            <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={"tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : ' overflow-hidden')}>
                 <h3 className="tab-section-title">
                     <span>4DN MicroMeta</span>
                     <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}
