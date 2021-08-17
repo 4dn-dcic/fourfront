@@ -26,7 +26,17 @@ const publicationColExtensionMap = {
         'minColumnWidth' : 200,
         "render" : function(result, props){
             return <PublicationSearchResultTitle {...props} {...{ result }} />;
-        }
+        },
+        "sort_fields": [
+            {
+                "field": "title",
+                "title": "Publication Title"
+            },
+            {
+                "field": "authors",
+                "title": "Author Name"
+            }
+        ]
     },
     "date_published" : {
         "widthMap" : { "sm" : 60, "md" : 60, "lg" : 60 },
