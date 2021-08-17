@@ -545,7 +545,7 @@ export class MicroMetaTabView extends React.PureComponent {
         const { isFullscreen, context, windowWidth, windowHeight } = this.props;
         const { modal } = this.state;
 
-        const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
+        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
         return (
@@ -559,9 +559,9 @@ export class MicroMetaTabView extends React.PureComponent {
                         {this.statusChangeButton()} */}
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
-                <hr className="tab-section-title-horiz-divider" />
+                {/* <hr className="tab-section-title-horiz-divider" /> */}
                 <div className="microscope-tab-view-contents">
-                    <div className="micrometa-container-container" style={{ height : height + 20 }}>
+                    <div className="micrometa-container-container" style={{ height }}>
                         <MicroMetaPlainContainer {..._.omit(this.props, 'context', 'microscope')}
                             {...{ width, height, onSaveMicroscope: this.onSaveMicroscope, microscopeConfig: context.microscope }}
                             ref={this.microMetaToolRef} zoomVisible={false} />
