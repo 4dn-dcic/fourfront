@@ -6,10 +6,10 @@ import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Dropdown from 'react-bootstrap/esm/Dropdown';
 
-import { JWT, console, object, layout, ajax, navigate, WindowEventDelegator, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { JWT, console, object, layout, ajax, navigate, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 
-import { ItemFileAttachment } from './components/ItemFileAttachment';
+import { MicroMetaPlainContainer } from './components/MicroMeta/MicroMetaPlainContainer';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
@@ -42,20 +42,12 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
 
 }
 
-
-/** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/images/svg/";
-const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/images/png/";
-
-let microMetaDependencies = null;
-
 export class MicroMetaTabView extends React.PureComponent {
 
     static getTabObject(props, width) {
         return {
             'tab' : <span><i className="icon icon-microscope fas icon-fw"/> MicroMeta</span>,
             'key' : 'micrometa',
-            //'disabled' : !Array.isArray(context.experiments),
             'content' : <MicroMetaTabView {...props} width={width} />
         };
     }
@@ -67,7 +59,6 @@ export class MicroMetaTabView extends React.PureComponent {
         this.cloneButton = this.cloneButton.bind(this);
         this.havePermissionToEdit = this.havePermissionToEdit.bind(this);
         this.handleFullscreenToggle = this.handleFullscreenToggle.bind(this);
-        this.handleZoomInOutChange = this.handleZoomInOutChange.bind(this);
         this.handleSave = _.throttle(this.handleSave.bind(this), 3000);
         this.handleClone = _.throttle(this.handleClone.bind(this), 3000);
         this.handleModalCancel = _.throttle(this.handleModalCancel.bind(this), 3000);
@@ -75,85 +66,24 @@ export class MicroMetaTabView extends React.PureComponent {
         this.handleLoginModalConfirm = this.handleLoginModalConfirm.bind(this);
         this.onSaveMicroscope = this.onSaveMicroscope.bind(this);
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
-        this.updateContainerOffsets = _.debounce(this.updateContainerOffsets.bind(this), 500);
         this.generateNewTitle = this.generateNewTitle.bind(this);
 
         this.state = {
-            'mounted'               : false,
             'saveLoading'           : false,
             'cloneLoading'          : false,
             'releaseLoading'        : false,
-            'addFileLoading'        : false,
-            'modal'                 : null,
-            'containerOffsetLeft'   : 0,
-            'containerOffsetTop'    : 0,
-            'scalingFactor'         : 0.70
+            'modal'                 : null
         };
 
         this.microMetaToolRef = React.createRef();
-        this.containerElemRef = React.createRef();
 
         //force the page display in full screen
         // const { toggleFullScreen } = props;
         // setTimeout(toggleFullScreen, 0, true);
     }
 
-    componentDidUpdate(pastProps, pastState){
-        const { isFullscreen, windowWidth, windowHeight } = this.props;
-        const { mounted } = this.state;
-        if (mounted && (isFullscreen !== pastProps.isFullscreen || windowWidth !== pastProps.windowWidth || windowHeight !== pastProps.windowHeight)) {
-            setTimeout(this.updateContainerOffsets, 500); // Allow time for browser to repaint
-        }
-    }
-
-    componentDidMount(){
-
-        const onComplete = () => {
-            WindowEventDelegator.addHandler("scroll", this.updateContainerOffsets);
-            this.updateContainerOffsets();
-            this.setState({ mounted: true });
-        };
-
-        if (!microMetaDependencies) {
-            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
-
-            setTimeout(()=>{
-                // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
-                // @see https://webpack.js.org/api/module-methods/#requireensure
-
-                import(
-                    /* webpackChunkName: "micrometa-dependencies" */
-                    'micrometa-dependencies'
-                ).then((loadedDeps) =>{
-                    microMetaDependencies = loadedDeps;
-                    onComplete();
-                });
-            });
-        } else {
-            onComplete();
-        }
-    }
-
-    componentWillUnmount(){
-        WindowEventDelegator.removeHandler("scroll", this.updateContainerOffsets);
-    }
-
-    updateContainerOffsets(){
-        const containerElem = this.containerElemRef.current;
-        if (!containerElem) {
-            logger.error("Couldn't get container elem");
-            throw new Error("Couldn't get container elem");
-        }
-        // Relative to window/viewport, not document.
-        const boundingRect = containerElem.getBoundingClientRect();
-        this.setState({
-            containerOffsetTop: boundingRect.top,
-            containerOffsetLeft: boundingRect.left
-        });
-    }
-
     getMicroscopyMetadataToolComponent(){
-        return (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current) || null;
+        return (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
     }
 
     havePermissionToEdit(){
@@ -319,7 +249,6 @@ export class MicroMetaTabView extends React.PureComponent {
         evt.preventDefault();
 
         const { context, href } = this.props;
-        const mtc = this.getMicroscopyMetadataToolComponent();
         const confTitle = context.title || context.display_title;
 
         // If the view config has already been released, just copy the URL to the clipboard and return.
@@ -407,14 +336,13 @@ export class MicroMetaTabView extends React.PureComponent {
 
     /** @todo make into functional component or move to this components render method */
     saveButton(){
-        const { session, context } = this.props;
-        const { saveLoading, mounted } = this.state;
+        const { saveLoading } = this.state;
         const tooltip = "Save the current view shown below to this display";
 
         const editPermission = this.havePermissionToEdit();
 
         return (
-            <button type="button" onClick={this.handleSave} disabled={!mounted || !editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleSave} disabled={!editPermission || saveLoading} className="btn btn-success" key="savebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (saveLoading ? 'circle-notch icon-spin fas' : 'save fas')}/>&nbsp; Save
             </button>
         );
@@ -423,38 +351,14 @@ export class MicroMetaTabView extends React.PureComponent {
     /** @todo make into functional component or move to this components render method */
     cloneButton(){
         const { session } = this.props;
-        const { cloneLoading, mounted } = this.state;
+        const { cloneLoading } = this.state;
         const tooltip = "Create your own new Microscope Configuration based off of this one";
 
         return (
-            <button type="button" onClick={this.handleClone} disabled={!mounted || !session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
+            <button type="button" onClick={this.handleClone} disabled={!session || cloneLoading} className="btn btn-success" key="clonebtn" data-tip={tooltip}>
                 <i className={"icon icon-fw icon-" + (cloneLoading ? 'circle-notch icon-spin fas' : 'clone far')}/>&nbsp; Clone
             </button>
         );
-    }
-
-    zoomInOutControl(){
-        const { scalingFactor = 0.5 } = this.state;
-        const valueScalingFactor = Math.round(scalingFactor * 100);
-        return (
-            <div className="micro-meta-zoom">
-                <div className="mr-2">Zoom ({valueScalingFactor}%)</div>
-                <div style={{ paddingTop: '5px' }}>
-                    <input type="range" min="0" max="100" value={valueScalingFactor} onChange={this.handleZoomInOutChange} style={{ cursor: 'pointer' }} />
-                </div>
-            </div>
-        );
-    }
-
-    handleZoomInOutChange(e){
-        const round = (number, decimalPlaces) => {
-            const factorOfTen = Math.pow(10, decimalPlaces);
-            return Math.round(number * factorOfTen) / factorOfTen;
-        };
-
-        const value = e.target.value;
-        const scalingFactor = round(value / 100, 2);
-        this.setState({ 'scalingFactor': scalingFactor });
     }
 
     /**
@@ -639,71 +543,13 @@ export class MicroMetaTabView extends React.PureComponent {
 
     render(){
         const { isFullscreen, context, windowWidth, windowHeight } = this.props;
-        const { mounted, modal, containerOffsetLeft, containerOffsetTop, scalingFactor } = this.state;
-        const { MicroMetaAppReact } = microMetaDependencies || {};
+        const { modal } = this.state;
 
-        const width = isFullscreen ? windowWidth : layout.gridContainerWidth(windowWidth);
+        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
-        if (!mounted){
-            return (
-                <div className="container text-center">
-                    <i className="icon icon-spin icon-circle-notch fas text-larger mt-5"/>
-                </div>
-            );
-        }
-
-        window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
-
-        const passProps = {
-            width, height,
-            containerOffsetLeft,
-            containerOffsetTop,
-            onSaveMicroscope: this.onSaveMicroscope,
-            imagesPathSVG,
-            imagesPathPNG,
-            scalingFactor,
-            key: "4dn-micrometa-app",
-            isCreatingNewMicroscope: true,
-            isLoadingMicroscope: false,
-            isLoadingSettings: false,
-            isLoadingImage: false,
-            is4DNPortal: true,
-            hasImport: true,
-            isToolbarHidden: true,
-            onReturnToMicroscopeList: function () {
-                navigate('/microscope-configurations/');
-            },
-            onLoadSchema: function (complete, resolve) {
-                window
-                    .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
-                    )
-                    .then(function (resp) {
-                        return resp.text();
-                    })
-                    .then(function (respText) {
-                        const schema = JSON.parse(respText);
-                        complete(schema, resolve);
-                    });
-            },
-            onLoadDimensions: function (complete, resolve) {
-                window
-                    .fetch(
-                        "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/dimensions/MicroscopeDimensions.json"
-                    )
-                    .then(function (resp) {
-                        return resp.text();
-                    })
-                    .then(function (respText) {
-                        const dimensions = JSON.parse(respText);
-                        complete(dimensions, resolve);
-                    });
-            }
-        };
-
         return (
-            <div className={"overflow-hidden tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : '')}>
+            <div className={"tabview-container-fullscreen-capable" + (isFullscreen ? ' full-screen-view' : ' overflow-hidden')}>
                 <h3 className="tab-section-title">
                     <span>4DN MicroMeta</span>
                     <CollapsibleItemViewButtonToolbar windowWidth={windowWidth}
@@ -713,13 +559,14 @@ export class MicroMetaTabView extends React.PureComponent {
                         {this.statusChangeButton()} */}
                     </CollapsibleItemViewButtonToolbar>
                 </h3>
-                <hr className="tab-section-title-horiz-divider" />
+                {/* <hr className="tab-section-title-horiz-divider" /> */}
                 <div className="microscope-tab-view-contents">
-                    <div className="micrometa-container" ref={this.containerElemRef} style={{ height : height + 20 }}>
-                        <MicroMetaAppReact {...passProps} microscope={context.microscope} ref={this.microMetaToolRef} />
+                    <div className="micrometa-container-container" style={{ height }}>
+                        <MicroMetaPlainContainer {..._.omit(this.props, 'context', 'microscope')}
+                            {...{ width, height, onSaveMicroscope: this.onSaveMicroscope, microscopeConfig: context.microscope }}
+                            ref={this.microMetaToolRef} zoomVisible={false} />
                     </div>
                 </div>
-                {/* {this.zoomInOutControl()} */}
                 {modal}
             </div>
         );

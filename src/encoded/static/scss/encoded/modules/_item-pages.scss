@@ -2058,6 +2058,13 @@ $badge-item-min-height: 90px;
 	}
 }
 
+// .micro-meta-app-wrapper {
+// 	.micro-meta-app-instance {
+// 		transition: opacity 1s;
+// 		opacity: 0;
+// 	}
+// }
+
 /* override default editable field css for HiGlass Views */
 .higlass-editable-page-title.editable-field-entry.editing,
 .higlass-item-page-heading .editable-field-entry.editing,
@@ -2066,6 +2073,9 @@ $badge-item-min-height: 90px;
 	.input-text {
 		width: 100% !important;
 	}
+}
+.full-screen-view .micrometa-container-container {
+	padding-left: 17px;
 }
 .micro-meta-zoom {
 	height: 30px;
