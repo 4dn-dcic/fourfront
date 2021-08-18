@@ -9,7 +9,7 @@ from dcicutils.s3_utils import s3Utils
 
 
 
-pytestmark = [pytest.mark.working, pytest.mark.unit]
+pytestmark = [pytest.mark.working, pytest.mark.integrated]
 
 
 S3_UTILS_BUCKET_VAR_DATA = [
