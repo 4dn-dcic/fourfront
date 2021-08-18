@@ -182,6 +182,19 @@
         }
     },
     "columns": {
+        "display_title": {
+            "title": "Title",
+            "sort_fields": [
+                {
+                    "field": "title",
+                    "title": "Publication Title"
+                },
+                {
+                    "field": "authors",
+                    "title": "Author Name"
+                }
+            ]
+        },
         "date_published": {
             "title": "Year"
         },
