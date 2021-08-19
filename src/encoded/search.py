@@ -1593,7 +1593,8 @@ def build_table_columns(request, schemas, doc_types):
     # Add title column, at beginning always
     columns['display_title'] = {
         "title" : "Title",
-        "order" : -100
+        "order" : -100,
+        "type": "string"
     }
 
     # Add type column if any abstract types in search
