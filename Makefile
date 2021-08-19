@@ -20,6 +20,9 @@ clean-npm-caches:
 clean-node-modules:
 	rm -rf node_modules
 
+clear-poetry-cache:  # clear poetry/pypi cache. for user to do explicitly, never automatic
+	poetry cache clear pypi --all
+
 aws-ip-ranges:
 	curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json
 
