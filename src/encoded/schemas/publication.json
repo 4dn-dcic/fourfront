@@ -187,11 +187,13 @@
             "sort_fields": [
                 {
                     "field": "title",
-                    "title": "Publication Title"
+                    "title": "Publication Title",
+                    "initial_sort": "asc"
                 },
                 {
-                    "field": "authors",
-                    "title": "Author Name"
+                    "field": "display_title",
+                    "title": "Author Name",
+                    "initial_sort": "asc"
                 }
             ]
         },
