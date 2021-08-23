@@ -1605,6 +1605,7 @@ def build_table_columns(request, schemas, doc_types):
             "colTitle" : "Type",
             "order" : -80,
             "description" : "Type or category of Item",
+            "type": "string"
             # Alternative below, if we want type column to be available but hidden by default in selection mode:
             # "default_hidden": request.normalized_params.get('currentAction') == 'selection'
         }
@@ -1620,7 +1621,7 @@ def build_table_columns(request, schemas, doc_types):
                     # If @type or display_title etc. column defined in schema, then override defaults.
                     for prop in schema_columns[name]:
                         columns[name][prop] = schema_columns[name][prop]
-                # Add description from field schema, if none otherwise.
+                # Add description and data type from field schema, if none otherwise.
                 if not columns[name].get('description') or not columns[name].get('type'):
                     field_schema = schema_for_field(name, request, doc_types)
                     if field_schema:
@@ -1628,6 +1629,14 @@ def build_table_columns(request, schemas, doc_types):
                             columns[name]['description'] = field_schema['description']
                         if not columns[name].get('type') and field_schema.get('type') is not None:
                             columns[name]['type'] = field_schema['type']
+                # iterate through sort_fields and set data type from schema if not already defined            
+                if 'sort_fields' in columns[name]:
+                    sort_fields = columns[name].get('sort_fields')
+                    for sort_field in sort_fields:
+                        if not sort_field.get('type') and sort_field.get('field') is not None:
+                            sort_field_schema = schema_for_field(sort_field.get('field'), request, doc_types)
+                            if sort_field_schema.get('type') is not None:
+                                sort_field['type'] = sort_field_schema.get('type')
 
     # Add status column, if not present, at end.
     if 'status' not in columns:
