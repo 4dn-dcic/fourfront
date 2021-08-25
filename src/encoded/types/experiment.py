@@ -209,6 +209,10 @@ class Experiment(Item):
         'files.file_type_detailed',
         'files.paired_end',
         'files.external_references.*',
+        'files.related_files.relationship_type',
+        'files.related_files.file.accession',
+        'files.related_files.file.paired_end',
+        'files.related_files.file.file_type',
 
         # FileFormat linkTo
         'files.file_format.file_format',
