@@ -10,7 +10,7 @@ import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 
-import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse, logger, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
@@ -325,6 +325,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         switch (expSetType){
             case 'replicate':
             case 'custom':
+            case 'experiment':
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
@@ -347,8 +348,9 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
-    static staticColumnHeaders(columnHeaders, experimentSet){
-        return _.map(RawFilesStackedTable.builtInHeaders(experimentSet.experimentset_type), function(staticCol){
+    static staticColumnHeaders(columnHeaders, expOrExpSet){
+        const expSetType = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expOrExpSet.experimentset_type : 'experiment';
+        return _.map(RawFilesStackedTable.builtInHeaders(expSetType), function(staticCol){
             return _.extend(
                 _.clone(staticCol),
                 _.findWhere(columnHeaders, { 'title' : staticCol.title }) || {}
@@ -357,9 +359,10 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
-    static customColumnHeaders(columnHeaders, experimentSet){
+    static customColumnHeaders(columnHeaders, expOrExpSet){
+        const expSetType = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expOrExpSet.experimentset_type : 'experiment';
         return _.filter(columnHeaders, function(col){
-            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(experimentSet.experimentset_type), 'title'), col.title);
+            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(expSetType), 'title'), col.title);
         });
     }
 
@@ -370,13 +373,13 @@ export class RawFilesStackedTable extends React.PureComponent {
      * @see fileUtil.filterFilesWithEmbeddedMetricItem
      *
      * @param {boolean} showMetricColumns - Skips check for quality_metric and returns column if true.
-     * @param {ExperimentSet} experimentSet - ExperimentSet Item.
+     * @param {ExperimentSet} expOrExpSet - Experiment or ExperimentSet Item.
      */
-    static metricColumnHeaders(showMetricColumns, experimentSet){
+    static metricColumnHeaders(showMetricColumns, expOrExpSet){
+        const allFiles = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
-        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || commonFileUtil.filterFilesWithEmbeddedMetricItem(
-            expFxn.allFilesFromExperimentSet(experimentSet, false), true
-        ) ? true : false;
+        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) ||
+            commonFileUtil.filterFilesWithEmbeddedMetricItem(allFiles, true) ? true : false;
 
         if (!showMetricColumns) return null;
 
@@ -389,13 +392,12 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Or if param `showNotesColumns` is set to true;
      *
      * @param {*} showNotesColumns - Skips check for notes_to_tsv and returns column if true.
-     * @param {*} experimentSet - ExperimentSet Item.
+     * @param {*} expOrExpSet - Experiment or ExperimentSet Item.
      */
-    static notesColumnHeaders(showNotesColumns, experimentSet) {
+    static notesColumnHeaders(showNotesColumns, expOrExpSet) {
+        const allFiles = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
         // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
-        showNotesColumns =
-            (typeof showNotesColumns === 'boolean' && showNotesColumns) ||
-                _.any(expFxn.allFilesFromExperimentSet(experimentSet, false), (f) => f.notes_to_tsv) ? true : false;
+        showNotesColumns = (typeof showNotesColumns === 'boolean' && showNotesColumns) || _.any(allFiles, (f) => f.notes_to_tsv) ? true : false;
 
         if (!showNotesColumns) return null;
 
@@ -404,11 +406,16 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
 
-    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, showNotesColumns, experimentSet){
-        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSet) || [])
-            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSet) || [])
-            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || [])
-            .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, experimentSet) || []);
+    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, showNotesColumns, expOrExpSet){
+        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, expOrExpSet) || []);
+    });
+
+    static isExperimentSet = memoize(function (expOrExpSet) {
+        const itemType = schemaTransforms.getItemType(expOrExpSet);
+        return itemType && itemType.indexOf('ExperimentSet') >= 0;
     });
 
     static propTypes = {
@@ -471,8 +478,14 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     analyticsImpression(){
-        const { experimentSet } = this.props;
-        const { allRawFiles, experimentsGroupedByBiosample } = this.memoized.groupedData(experimentSet);
+        const { experimentSet, experiment: propExperiment } = this.props;
+        let experimentsGroupedByBiosample;
+        if (experimentSet) {
+            ({ experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet));
+        } else {
+            const experiment = _.extend({}, propExperiment, { tech_rep_no: 'N/A', bio_rep_no: 'N/A', from_experiment_set: { 'accession': 'NONE' } });
+            experimentsGroupedByBiosample = [[experiment]];
+        }
 
         const biosamples = [];
         let exps = [];
@@ -514,7 +527,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
-        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, showNotesColumns, experimentSet),
+        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, showNotesColumns, experimentSet || exp),
             contentsClassName   = 'files',
             contents            = [];
 
@@ -523,7 +536,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             contents = contents.concat(_.map(fileGroups, function(group, j){
                 // Ensure can be converted to accessionTriple
                 group = _.map(group, function(f){
-                    return fileUtil.extendFile(f, exp, experimentSet);
+                    return fileUtil.extendFile(f, exp, experimentSet || { accession: 'NONE' });
                 });
                 // Find relation/group type(s)
                 const relationshipTypes = new Set(_.pluck(_.flatten(_.pluck(group, 'related_files'), true), 'relationship_type'));
@@ -544,7 +557,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         // Add in remaining unpaired files, if any.
         if (haveUngroupedFiles){
             contents = contents.concat(_.map(ungroupedFiles, function(file, j){
-                const extendedFile = fileUtil.extendFile(file, exp, experimentSet);
+                const extendedFile = fileUtil.extendFile(file, exp, experimentSet || { accession: 'NONE' });
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
@@ -584,7 +597,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         );
 
 
-        const showMoreExtTitle = preventExpand ? (
+        const showMoreExtTitle = preventExpand && experimentSet ? (
             <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
         ) : null;
 
@@ -653,8 +666,17 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Much of styling/layouting is defined in CSS.
      */
     render(){
-        const { experimentSet, columnHeaders: propColHeaders, showMetricsColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
-        const { experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet);
+        const { experimentSet, experiment: propExperiment, columnHeaders: propColHeaders, showMetricsColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
+        let experimentsGroupedByBiosample, allRawFiles, experiment;
+        if (experimentSet) {
+            ({ experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet));
+        } else {
+            experiment = _.extend({}, propExperiment, { tech_rep_no: 'N/A', bio_rep_no: 'N/A', from_experiment_set: { 'accession': 'NONE' } });
+            experimentsGroupedByBiosample = [[experiment]];
+            allRawFiles = _.map(experiment.files, function (f) {
+                return _.extend({}, f, { 'from_experiment': f.from_experiment || experiment });
+            });
+        }
 
         const appendCountStr = experimentsGroupedByBiosample.length > 5 ?
             'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments' : null;
@@ -668,7 +690,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             </React.Fragment>
         );
 
-        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, showNotesColumns, experimentSet);
+        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, showNotesColumns, experimentSet || experiment);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
@@ -934,10 +956,10 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
     }
 
     render(){
-        const { columnHeaders, showMetricColumns, experimentSet } = this.props;
+        const { columnHeaders, showMetricColumns, experimentSet, experiment } = this.props;
         let extendedPropColHeaders = columnHeaders;
 
-        const origMetricHeaders = RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet);
+        const origMetricHeaders = RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet || experiment);
         if (Array.isArray(origMetricHeaders) && origMetricHeaders.length > 0){
             extendedPropColHeaders = columnHeaders.slice().concat([
                 {

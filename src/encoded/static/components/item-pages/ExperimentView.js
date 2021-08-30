@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
@@ -13,6 +13,9 @@ import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTab
 import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import { Publications } from './components/Publications';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
+import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
+import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
+import { RawFilesStackedTableExtendedColumns } from './../browse/components/file-tables';
 
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -33,7 +36,13 @@ export default class ExperimentView extends WorkflowRunTracingView {
             if (rf.error && !object.itemUtil.atId(rf)) return false;
             return true;
         });
-    })
+    });
+
+    /** Preserve selected files if href changes (due to `#tab-id`), unlike the default setting for BrowseView. */
+    static resetSelectedFilesCheck(nextProps, pastProps){
+        if (nextProps.context !== pastProps.context) return true;
+        return false;
+    }
 
     static defaultOpenIndices = [0];
 
@@ -41,6 +50,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         super(props);
         this.shouldGraphExist = this.shouldGraphExist.bind(this);
         this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
+        this.allFilesFromExperiment = memoize(expFxn.allFilesFromExperiment);
 
         /**
          * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
@@ -56,12 +66,17 @@ export default class ExperimentView extends WorkflowRunTracingView {
     }
 
     getFilesTabs(){
-        const { context } = this.props;
+        const { context, schemas, windowWidth, href, session, mounted } = this.props;
         const width = this.getTabViewWidth();
         const tabs = [];
 
         const rawFilesWithViewPermissions = ExperimentView.rawFilesWithViewPermissions(context);
-        const rawFilesLen = (rawFilesWithViewPermissions && rawFilesWithViewPermissions.length) || 0;
+        const extendedExp = _.extend(context, { from_experiment_set: { accession: 'NONE' } });
+        const rawFiles = this.allFilesFromExperiment(extendedExp, false, false);
+        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
+
+        const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
+        const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
 
         if (rawFilesLen > 0) {
             tabs.push({
@@ -72,12 +87,19 @@ export default class ExperimentView extends WorkflowRunTracingView {
                     </span>
                 ),
                 key : 'raw-files',
-                content : <RawFilesTableSection
-                    files={rawFilesWithViewPermissions}
-                    width={width}
-                    {..._.pick(this.props, 'context', 'schemas')}
-                    {...this.state}
-                />
+                content : (
+                    <React.Fragment>
+                        <RawFilesTableSection
+                            files={rawFilesWithViewPermissions}
+                            width={width}
+                            {..._.pick(this.props, 'context', 'schemas')}
+                            {...this.state}
+                        />
+                        <hr />
+                        <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
+                            <ExperimentRawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
+                        </SelectedFilesController>
+                    </React.Fragment>)
             });
         }
 
@@ -318,6 +340,50 @@ const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
         </div>
     );
 });
+
+export class ExperimentRawFilesStackedTableSection extends React.PureComponent {
+
+    static selectedFilesUniqueCount = memoize(uniqueFileCount);
+
+    renderHeader(){
+        const { context, files, selectedFiles, session } = this.props;
+        const selectedFilesUniqueCount = ExperimentRawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
+        const fileCount = files.length;
+        const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
+
+        return (
+            <h3 className="tab-section-title">
+                <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
+                { selectedFiles ? // Make sure data structure is present (even if empty)
+                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
+                            id="exp-raw-files-download-files-btn" analyticsAddFilesToCart>
+                            <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
+                            <span className="d-none d-sm-inline">Download </span>
+                            <span className="count-to-download-integer">{ selectedFilesUniqueCount }</span>
+                            <span className="d-none d-sm-inline text-400"> Raw Files</span>
+                        </SelectedFilesDownloadButton>
+                    </div>
+                    : null }
+            </h3>
+        );
+    }
+
+    render(){
+        const { context, files } = this.props;
+        const anyFilesWithMetrics = !!(commonFileUtil.filterFilesWithEmbeddedMetricItem(files, true));
+        return (
+            <div className="overflow-hidden">
+                { this.renderHeader() }
+                <div className="exp-table-container">
+                    <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
+                        experiment={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7}
+                        incrementalExpandLimit={100} incrementalExpandStep={100} analyticsImpressionOnMount />
+                </div>
+            </div>
+        );
+    }
+}
 
 const ProcessedFilesTableSection = React.memo(function ProcessedFilesTableSection(props){
     const { files, context, schemas } = props;
