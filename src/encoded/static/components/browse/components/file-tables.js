@@ -10,7 +10,7 @@ import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 
-import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse, logger, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse, logger, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
@@ -479,12 +479,15 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     analyticsImpression(){
         const { experimentSet, experiment: propExperiment } = this.props;
-        let experimentsGroupedByBiosample;
+        let experimentsGroupedByBiosample, allRawFiles;
         if (experimentSet) {
             ({ experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet));
         } else {
             const experiment = _.extend({}, propExperiment, { tech_rep_no: 'N/A', bio_rep_no: 'N/A', from_experiment_set: { 'accession': 'NONE' } });
             experimentsGroupedByBiosample = [[experiment]];
+            allRawFiles = _.map(experiment.files, function (f) {
+                return _.extend({}, f, { 'from_experiment': f.from_experiment || experiment });
+            });
         }
 
         const biosamples = [];
@@ -998,3 +1001,212 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
     }
 }
 
+export class QCMetricsTable extends React.PureComponent {
+
+    static qcSummaryItemTitleTooltipsByTitle(fileGroup) {
+        const tooltipsByTitle = {};
+        fileGroup.forEach(function ({ title: qmsTitle, quality_metric_summary: { title_tooltip = null } = {} }) {
+            if (typeof tooltipsByTitle[qmsTitle] === "string") {
+                return; // skip/continue; already found a tooltip_title for this qms title.
+            }
+            if (title_tooltip && typeof title_tooltip === "string") {
+                tooltipsByTitle[qmsTitle] = title_tooltip;
+            }
+        });
+        return tooltipsByTitle;
+    }
+
+    static renderForFileColValue(file) {
+        const fileAtId = file && object.atIdFromObject(file);
+        let fileTitleString;
+        if (file.accession) {
+            fileTitleString = file.accession;
+        }
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0, 5) === '4DNFI') {
+                fileTitleString = idParts[1];
+            }
+        }
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
+        }
+        return (
+            <React.Fragment>
+                <div>{Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true)}</div>
+                <a className="text-500 name-title" href={fileAtId}>
+                    {fileTitleString}
+                </a>
+            </React.Fragment>);
+    }
+
+    static generateAlignedColumnHeaders(fileGroups) {
+        return fileGroups.map(function (fileGroup) {
+            const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
+            const columnHeaders = [ // Static / present-for-each-table headers
+                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
+            ].concat(fileGroup[0].quality_metric.quality_metric_summary.map(function (qmsObj, qmsIndex) { // Dynamic Headers
+                const { title, title_tooltip } = qmsObj;
+                // title tooltip: if missing in the first item then try to get it from the first valid one in array
+                return {
+                    columnClass: 'file-detail',
+                    title,
+                    title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
+                    initialWidth: 80,
+                    render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
+                        const qmsItem = file.quality_metric.quality_metric_summary[qmsIndex];
+                        const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                        return <span className="d-inline-block" data-tip={tooltip}>{value}</span>;
+                    }
+                };
+            }));
+
+            // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
+            const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
+                return f && f.quality_metric && f.quality_metric.url;
+            });
+
+            if (anyFilesWithMetricURL) {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
+            } else {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
+            }
+            return columnHeaders;
+        });
+    }
+
+    /**
+     * commonFileUtil.groupFilesByQCSummaryTitles function is wrapped to allow
+     * custom sorting by QC schema's qc_order and @type Atacseq or Chipseq specific QCS items
+     */
+    static groupFilesByQCSummaryTitles(filesWithMetrics, schemas) {
+        let filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+
+        const comparerFunc = (filesA, filesB) => {
+            const [fileA] = filesA; //assumption: 1st file's QC is adequate to define order
+            const [fileB] = filesB; //assumption: 1st file's QC is adequate to define order
+
+            let orderA, orderB;
+            if (schemas) {
+                const itemTypeA = schemaTransforms.getItemType(fileA.quality_metric);
+                if (itemTypeA && schemas[itemTypeA]) {
+                    const { qc_order } = schemas[itemTypeA];
+                    if (typeof qc_order === 'number') {
+                        orderA = qc_order;
+                    }
+                }
+                const itemTypeB = schemaTransforms.getItemType(fileB.quality_metric);
+                if (itemTypeB && schemas[itemTypeB]) {
+                    const { qc_order } = schemas[itemTypeB];
+                    if (typeof qc_order === 'number') {
+                        orderB = qc_order;
+                    }
+                }
+            }
+
+            if (orderA && orderB && orderA !== orderB) {
+                return orderA - orderB;
+            }
+
+            //custom comparison for @type Atacseq or Chipseq specific QCS items
+            if (_.any(fileA.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return -1;
+            } else if (_.any(fileB.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return 1;
+            }
+
+            return 0;
+        };
+
+        if (filesByTitles) {
+            filesByTitles = filesByTitles.slice();
+            filesByTitles.sort(comparerFunc);
+        }
+
+        return filesByTitles;
+    }
+
+    static defaultProps = {
+        heading: (
+            <h3 className="tab-section-title mt-12">
+                <span>Quality Metrics</span>
+            </h3>
+        )
+    };
+
+    constructor(props) {
+        super(props);
+        this.memoized = {
+            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
+            groupFilesByQCSummaryTitles: memoize(QCMetricsTable.groupFilesByQCSummaryTitles),
+            generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
+        };
+    }
+
+    render() {
+        const { width, files, windowWidth, href, heading, schemas } = this.props;
+        const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
+        const filesWithMetricsLen = filesWithMetrics.length;
+
+        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
+
+        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics, schemas);
+        const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
+        const commonTableProps = {
+            width, windowWidth, href,
+            collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
+            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics",
+            showNotesColumns: 'never'
+        };
+
+        return (
+            <div className="row">
+                <div className="exp-table-container col-12">
+                    {heading}
+                    {filesByTitles.map(function (fileGroup, i) {
+                        return (
+                            <ProcessedFilesStackedTable {...commonTableProps} key={i} files={fileGroup} columnHeaders={columnHeadersForFileGroups[i]} />
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+}
+
+export function QCMetricFromSummary(props){
+    const { title } = props;
+    const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
+
+    return (
+        <div className="overview-list-element">
+            <div className="row">
+                <div className="col-4 text-right">
+                    <h5 className="mb-0 mt-02">{ title }</h5>
+                </div>
+                <div className="col-8">
+                    <div className="inner value">
+                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
+                        { value }
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }){
+    // We expect these values to always be strings or undefined which are passed by value (not reference).\
+    // Hence we use var instead of const and safely overwrite them.
+    if (numberType === 'percent'){
+        value += '%';
+    } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
+        value = parseFloat(value);
+        if (!tooltip && value >= 1000) {
+            tooltip = valueTransforms.decorateNumberWithCommas(value);
+        }
+        value = valueTransforms.roundLargeNumber(value);
+    }
+    return { value, tooltip };
+};

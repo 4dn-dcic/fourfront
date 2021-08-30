@@ -15,7 +15,7 @@ import { Publications } from './components/Publications';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
-import { RawFilesStackedTableExtendedColumns } from './../browse/components/file-tables';
+import { ProcessedFilesStackedTable, RawFilesStackedTableExtendedColumns, QCMetricsTable } from './../browse/components/file-tables';
 
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -51,6 +51,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         this.shouldGraphExist = this.shouldGraphExist.bind(this);
         this.isNodeCurrentContext = this.isNodeCurrentContext.bind(this);
         this.allFilesFromExperiment = memoize(expFxn.allFilesFromExperiment);
+        this.allProcessedFilesFromExperiments = memoize(expFxn.allProcessedFilesFromExperiments);
 
         /**
          * Explicit self-assignment to remind that we inherit the following properties from WorkfowRunTracingView:
@@ -104,7 +105,10 @@ export default class ExperimentView extends WorkflowRunTracingView {
         }
 
         const processedFilesWithViewPermissions = ExperimentView.processedFilesWithViewPermissions(context);
-        const processedFilesLen = (processedFilesWithViewPermissions && processedFilesWithViewPermissions.length) || 0;
+        // const processedFilesLen = (processedFilesWithViewPermissions && processedFilesWithViewPermissions.length) || 0;
+
+        const processedFiles = this.allProcessedFilesFromExperiments([extendedExp]);
+        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
 
         if (processedFilesLen > 0) {
             tabs.push({
@@ -115,12 +119,19 @@ export default class ExperimentView extends WorkflowRunTracingView {
                     </span>
                 ),
                 key : 'processed-files',
-                content : <ProcessedFilesTableSection
-                    files={processedFilesWithViewPermissions}
-                    width={width}
-                    {..._.pick(this.props, 'context', 'schemas')}
-                    {...this.state}
-                />
+                content: (
+                    <React.Fragment>
+                        <ProcessedFilesTableSection
+                            files={processedFilesWithViewPermissions}
+                            width={width}
+                            {..._.pick(this.props, 'context', 'schemas')}
+                            {...this.state}
+                        />
+                        <hr />
+                        <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
+                            <ExperimentProcessedFilesStackedTableSection {...propsForTableSections} files={processedFiles} />
+                        </SelectedFilesController>
+                    </React.Fragment>)
             });
         }
 
@@ -341,7 +352,7 @@ const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
     );
 });
 
-export class ExperimentRawFilesStackedTableSection extends React.PureComponent {
+class ExperimentRawFilesStackedTableSection extends React.PureComponent {
 
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
@@ -400,3 +411,93 @@ const ProcessedFilesTableSection = React.memo(function ProcessedFilesTableSectio
         </div>
     );
 });
+
+class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
+
+    /**
+     * Searches the context for HiGlass static_content, and returns the HiGlassItem (except the viewconfig).
+     *
+     * @param {object} context - Object that has static_content.
+     * @return {object} Returns the HiGlassItem in the context (or null if it doesn't)
+     */
+    static getHiglassItemFromProcessedFiles = memoize(function(context){
+        if (!Array.isArray(context.static_content)){
+            return null;
+        }
+
+        // Return the first appearance of a HiglassViewConfig Item located at "tab:processed-files"
+        const higlassTab = _.find(context.static_content, function(section){
+            return section.location === "tab:processed-files" && isHiglassViewConfigItem(section.content);
+        });
+
+        return (higlassTab ? higlassTab.content : null);
+    });
+
+    static tableProps(sectionProps){
+        return _.extend(
+            _.pick(sectionProps, 'files', 'windowWidth', 'href'),
+            { 'collapseLimit': 10, 'collapseShow': 7, 'incrementalExpandLimit': 100, 'incrementalExpandStep': 100, 'analyticsImpressionOnMount': true },
+            SelectedFilesController.pick(sectionProps)
+        );
+    }
+
+    static selectedFilesUniqueCount = memoize(uniqueFileCount);
+
+    constructor(props){
+        super(props);
+        _.bindAll(this, 'renderHeader', 'renderTopRow', 'renderProcessedFilesTableAsRightPanel');
+    }
+
+    renderHeader(){
+        const { context, files, selectedFiles, session } = this.props;
+
+        const selectedFilesUniqueCount = ExperimentProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
+        const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
+        return (
+            <h3 className="tab-section-title">
+                <span>
+                    <span className="text-400">{files.length}</span> Processed Files
+                </span>
+                {selectedFiles ? // Make sure data structure is present (even if empty)
+                    <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
+                        <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
+                            id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
+                            <i className="icon icon-download icon-fw fas mr-07 align-baseline" />
+                            <span className="d-none d-sm-inline">Download </span>
+                            <span className="count-to-download-integer">{selectedFilesUniqueCount}</span>
+                            <span className="d-none d-sm-inline text-400"> Processed Files</span>
+                        </SelectedFilesDownloadButton>
+                    </div>
+                    : null}
+            </h3>
+        );
+    }
+
+    renderProcessedFilesTableAsRightPanel(rightPanelWidth, resetDivider, leftPanelCollapsed){
+        return <ProcessedFilesStackedTable {...ExperimentProcessedFilesStackedTableSection.tableProps(this.props)} width={Math.max(rightPanelWidth, 320)} key="p-table" />;
+    }
+
+    renderTopRow(){
+        const { mounted, width, context, windowWidth, selectedFiles } = this.props;
+
+        const higlassItem = ExperimentProcessedFilesStackedTableSection.getHiglassItemFromProcessedFiles(context);
+
+        if (higlassItem && object.itemUtil.atId(higlassItem)){
+            // selectedFiles passed in to re-render panel if changes.
+            return <HiGlassAdjustableWidthRow {...{ width, mounted, windowWidth, higlassItem, selectedFiles }} renderRightPanel={this.renderProcessedFilesTableAsRightPanel} />;
+        } else {
+            return <ProcessedFilesStackedTable {...ExperimentProcessedFilesStackedTableSection.tableProps(this.props)} width={width} key="p-table"/>;
+        }
+    }
+
+    render(){
+        const { context, session, files, selectedFiles } = this.props;
+        return (
+            <div className="processed-files-table-section exp-table-section">
+                {this.renderHeader()}
+                {this.renderTopRow()}
+                <QCMetricsTable {...this.props} />
+            </div>
+        );
+    }
+}
