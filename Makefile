@@ -143,6 +143,18 @@ travis-test-unit:  # Note this does the 'indexing' tests
 update:  # updates dependencies
 	poetry update
 
+build-docker-local:
+	docker-compose build
+
+build-docker-local-clean:
+	docker-compose build --no-cache
+
+deploy-docker-local:
+	docker-compose up -V
+
+deploy-docker-local-daemon:
+	docker-compose up -d -V
+
 help:
 	@make info
 
