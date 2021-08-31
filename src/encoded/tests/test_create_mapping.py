@@ -293,7 +293,6 @@ def test_run_create_mapping_with_upgrader(mock_add_uuids, testapp, workbook):
     app = testapp.app
     type_to_upgrade = "Biosample"
 
-    import pdb; pdb.set_trace()
     search_query = "/search/?type=" + type_to_upgrade + "&frame=object"
     search = testapp.get(search_query, status=200).json["@graph"]
     item_type_uuids = sorted([x["uuid"] for x in search])
