@@ -90,13 +90,13 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 key : 'raw-files',
                 content : (
                     <React.Fragment>
-                        <RawFilesTableSection
+                        {/* <RawFilesTableSection
                             files={rawFilesWithViewPermissions}
                             width={width}
                             {..._.pick(this.props, 'context', 'schemas')}
                             {...this.state}
                         />
-                        <hr />
+                        <hr /> */}
                         <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
                             <ExperimentRawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
                         </SelectedFilesController>
@@ -121,13 +121,13 @@ export default class ExperimentView extends WorkflowRunTracingView {
                 key : 'processed-files',
                 content: (
                     <React.Fragment>
-                        <ProcessedFilesTableSection
+                        {/* <ProcessedFilesTableSection
                             files={processedFilesWithViewPermissions}
                             width={width}
                             {..._.pick(this.props, 'context', 'schemas')}
                             {...this.state}
                         />
-                        <hr />
+                        <hr /> */}
                         <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
                             <ExperimentProcessedFilesStackedTableSection {...propsForTableSections} files={processedFiles} />
                         </SelectedFilesController>
@@ -305,7 +305,7 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-12 col-md-9 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
-                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={3} collapseShow={2} />
 
         </OverviewHeadingContainer>
     );
