@@ -122,7 +122,7 @@ class Bar extends React.PureComponent {
     }
 
     /**
-     * Double check sum of bar parts and report an Exception to Google Analytics if doesn't match.
+     * Double check sum of bar parts and report an Exception to Sentryio if doesn't match.
      * Do this in a setTimeout because it doesn't affect rendering or site UI.
      */
     verifyCounts(){
@@ -232,7 +232,7 @@ export class ViewContainer extends React.Component {
     }
 
     /**
-     * Double check sum of bar parts and report an Exception to Google Analytics if doesn't match.
+     * Double check sum of bar parts and report an Exception to Sentryio if doesn't match.
      * Do this in a setTimeout because it doesn't affect rendering or site UI.
      */
     verifyCounts(){
@@ -245,7 +245,10 @@ export class ViewContainer extends React.Component {
             var combinedChildrenCount = _.reduce(bars, function(sum, bar){
                 return sum + bar.count;
             }, 0);
-            if (combinedChildrenCount && totalCount !== combinedChildrenCount){
+            var barAggregateTypeCount= _.reduce(bars, function(sum, bar){
+                return sum + bar[aggregateType];
+            }, 0);
+            if (combinedChildrenCount && barAggregateTypeCount !== combinedChildrenCount){
                 var errorMsg = (
                     "Data Error: 1 or more ExperimentSets was counted multiple times for 'group by' field '" +
                     bars[0].field + "'."
