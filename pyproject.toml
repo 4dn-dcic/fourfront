@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "3.2.7"
+version = "3.2.9"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -41,7 +41,7 @@ botocore = "1.20.39"  # "^1.20.39"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault = "4.7.5"
+dcicsnovault = "4.8.4"
 dcicutils = "^1.15.0"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"
