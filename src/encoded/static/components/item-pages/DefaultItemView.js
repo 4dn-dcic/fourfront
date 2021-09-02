@@ -688,7 +688,7 @@ export class OverViewBodyItem extends React.PureComponent {
 
         if (Array.isArray(resultPropertyValue)){
             let viewMoreButton = null;
-            if (collapseLimit && collapseShow && (resultPropertyValue.length > collapseLimit) && (collapseLimit >= collapseShow)) {
+            if (collapseLimit && collapseShow && (resultPropertyValue.length >= collapseLimit) && (collapseLimit >= collapseShow)) {
                 const collapsibleChildren = collapsed ? resultPropertyValue.slice(collapseShow) : resultPropertyValue;
                 resultPropertyValue = collapsed ? resultPropertyValue.slice(0, collapseShow) : resultPropertyValue;
                 viewMoreButton = (
