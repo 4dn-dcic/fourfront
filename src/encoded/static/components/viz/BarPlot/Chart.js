@@ -79,7 +79,7 @@ export function genChartBarDims(
                         'width'     : barWidth,
                         'height'    : barHeight
                     },
-                    'experiment_sets' :termObj.total && termObj.total.experiment_sets,
+                    'experiment_sets' : termObj.total && termObj.total.experiment_sets,
                     'experiments' : termObj.total && termObj.total.experiments,
                     'files'     : termObj.total && termObj.total.files
                 };
