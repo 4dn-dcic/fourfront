@@ -71,13 +71,33 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const width = this.getTabViewWidth();
         const tabs = [];
 
-        const rawFilesWithViewPermissions = ExperimentView.rawFilesWithViewPermissions(context);
         const extendedExp = _.extend(context, { from_experiment_set: { accession: 'NONE' } });
-        const rawFiles = this.allFilesFromExperiment(extendedExp, false, false);
-        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
-
+        
         const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
         const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
+
+        const processedFiles = this.allProcessedFilesFromExperiments([extendedExp]);
+        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
+
+        if (processedFilesLen > 0) {
+            tabs.push({
+                tab: (
+                    <span>
+                        <i className="icon icon-microchip fas icon-fw" />
+                        {processedFilesLen + " Processed File" + (processedFilesLen === 1 ? "" : "s")}
+                    </span>
+                ),
+                key: 'processed-files',
+                content: (
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
+                        <ExperimentProcessedFilesStackedTableSection {...propsForTableSections} files={processedFiles} />
+                    </SelectedFilesController>
+                )
+            });
+        }
+
+        const rawFiles = this.allFilesFromExperiment(extendedExp, false, false);
+        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
 
         if (rawFilesLen > 0) {
             tabs.push({
@@ -88,50 +108,11 @@ export default class ExperimentView extends WorkflowRunTracingView {
                     </span>
                 ),
                 key : 'raw-files',
-                content : (
-                    <React.Fragment>
-                        {/* <RawFilesTableSection
-                            files={rawFilesWithViewPermissions}
-                            width={width}
-                            {..._.pick(this.props, 'context', 'schemas')}
-                            {...this.state}
-                        />
-                        <hr /> */}
-                        <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
-                            <ExperimentRawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
-                        </SelectedFilesController>
-                    </React.Fragment>)
-            });
-        }
-
-        const processedFilesWithViewPermissions = ExperimentView.processedFilesWithViewPermissions(context);
-        // const processedFilesLen = (processedFilesWithViewPermissions && processedFilesWithViewPermissions.length) || 0;
-
-        const processedFiles = this.allProcessedFilesFromExperiments([extendedExp]);
-        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
-
-        if (processedFilesLen > 0) {
-            tabs.push({
-                tab : (
-                    <span>
-                        <i className="icon icon-microchip fas icon-fw"/>
-                        { processedFilesLen + " Processed File" + (processedFilesLen === 1 ? "" : "s") }
-                    </span>
-                ),
-                key : 'processed-files',
                 content: (
-                    <React.Fragment>
-                        {/* <ProcessedFilesTableSection
-                            files={processedFilesWithViewPermissions}
-                            width={width}
-                            {..._.pick(this.props, 'context', 'schemas')}
-                            {...this.state}
-                        />
-                        <hr /> */}
-                        <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
-                            <ExperimentProcessedFilesStackedTableSection {...propsForTableSections} files={processedFiles} />
-                        </SelectedFilesController>
-                    </React.Fragment>)
+                    <SelectedFilesController resetSelectedFilesCheck={ExperimentView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
+                        <ExperimentRawFilesStackedTableSection {...propsForTableSections} files={rawFiles} />
+                    </SelectedFilesController>
+                )
             });
         }
 
@@ -165,6 +146,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const width = this.getTabViewWidth();
         const initTabs = [];
 
+        // ExpSets
         if (accession && parentExpSetsExistForExp(context)){ // 'Experiment Sets' tab, if any parent exp-sets.
 
             initTabs.push(ExperimentSetsTableTabView.getTabObject({
@@ -176,7 +158,9 @@ export default class ExperimentView extends WorkflowRunTracingView {
             }));
 
         }
-
+        // Raw/Processed/Supplementary Files
+        initTabs.push(...this.getFilesTabs());
+        // Graph
         if (this.shouldGraphExist()){
             initTabs.push(FileViewGraphSection.getTabObject(
                 _.extend({}, this.props, { 'isNodeCurrentContext' : this.isNodeCurrentContext }),
@@ -186,7 +170,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
             ));
         }
 
-        return initTabs.concat(this.getFilesTabs()).concat(this.getCommonTabs());
+        return initTabs.concat(this.getCommonTabs());
     }
 
     /**

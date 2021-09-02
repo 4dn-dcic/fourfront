@@ -135,16 +135,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
             });
         }
 
-        // Graph Section Tab
-        if (this.shouldGraphExist()){
-            tabs.push(FileViewGraphSection.getTabObject(
-                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
-                this.state,
-                this.handleToggleAllRuns,
-                width
-            ));
-        }
-
         // Supplementary Files Tab
         if (ExperimentSetView.shouldShowSupplementaryFilesTabView(context)){
             //const referenceFiles = SupplementaryFilesTabView.allReferenceFiles(context) || [];
@@ -160,6 +150,16 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     </SelectedFilesController>
                 )
             });
+        }
+
+        // Graph Section Tab
+        if (this.shouldGraphExist()){
+            tabs.push(FileViewGraphSection.getTabObject(
+                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
+                this.state,
+                this.handleToggleAllRuns,
+                width
+            ));
         }
 
         return _.map(tabs.concat(this.getCommonTabs()), function(tabObj){
