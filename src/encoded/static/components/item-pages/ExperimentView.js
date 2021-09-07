@@ -71,7 +71,7 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const width = this.getTabViewWidth();
         const tabs = [];
 
-        const extendedExp = _.extend(context, { from_experiment_set: { accession: 'NONE' } });
+        const extendedExp = _.extend({ from_experiment_set: { accession: 'NONE' } }, context);
         
         const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
         const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
