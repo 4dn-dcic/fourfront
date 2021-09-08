@@ -269,6 +269,7 @@ class Experiment(Item):
         "processed_files.open_data_url",
         "processed_files.track_and_facet_info.*",
 
+        "other_processed_files.files.accession",
         "other_processed_files.files.href",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_size",

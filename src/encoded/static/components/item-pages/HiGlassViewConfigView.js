@@ -17,6 +17,9 @@ import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/compon
 import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
+import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
+import { EmbeddedHiglassActions } from './../static-pages/components';
+import { AdjustableDividerRow } from './components/AdjustableDividerRow';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
@@ -1128,6 +1131,105 @@ function StatusMenuItem(props){
             </span>
         </DropdownItem>
     );
+}
+
+
+ export class HiGlassAdjustableWidthRow extends React.PureComponent {
+
+    static propTypes = {
+        'width' : PropTypes.number.isRequired,
+        'mounted' : PropTypes.bool.isRequired,
+        'renderRightPanel' : PropTypes.func,
+        'windowWidth' : PropTypes.number.isRequired,
+        'higlassItem' : PropTypes.object,
+        'minOpenHeight' : PropTypes.number,
+        'maxOpenHeight' : PropTypes.number,
+        'renderLeftPanelPlaceholder' : PropTypes.func,
+        'leftPanelCollapseHeight' : PropTypes.number,
+        'leftPanelCollapseWidth' : PropTypes.number,
+        'leftPanelDefaultCollapsed' : PropTypes.bool
+    };
+
+    static defaultProps = {
+        'minOpenHeight' : 300,
+        'maxOpenHeight' : 800
+    };
+
+    constructor(props){
+        super(props);
+        _.bindAll(this, 'correctHiGlassTrackDimensions', 'renderLeftPanel');
+        this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions, 100);
+        this.higlassContainerRef = React.createRef();
+    }
+
+    componentDidUpdate(pastProps){
+        const { width } = this.props;
+        if (pastProps.width !== width){
+            this.correctHiGlassTrackDimensions();
+        }
+    }
+
+    /**
+     * This is required because HiGlass doesn't always update all of own tracks' widths (always updates header, tho)
+     */
+    correctHiGlassTrackDimensions(){
+        var internalHiGlassComponent = this.higlassContainerRef.current && this.higlassContainerRef.current.getHiGlassComponent();
+        if (!internalHiGlassComponent) {
+            console.warn('Internal HiGlass Component not accessible.');
+            return;
+        }
+        setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
+    }
+
+    renderLeftPanel(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight){
+        const { renderLeftPanelPlaceholder, leftPanelCollapseHeight, higlassItem, minOpenHeight, maxOpenHeight } = this.props;
+        if (collapsed){
+            var useHeight = leftPanelCollapseHeight || rightPanelHeight || minOpenHeight;
+            if (typeof renderLeftPanelPlaceholder === 'function'){
+                return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
+            } else {
+                return (
+                    <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
+                        data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
+                        <i className="icon icon-fw fas icon-tv"/>
+                    </h5>
+                );
+            }
+        } else {
+            return (
+                <React.Fragment>
+                    <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
+                    <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
+                </React.Fragment>
+            );
+        }
+    }
+
+    render(){
+        const { mounted, minOpenHeight, leftPanelCollapseWidth, windowWidth } = this.props;
+
+        // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
+        if (!mounted) {
+            return (
+                <div className="adjustable-divider-row text-center py-5">
+                    <div className="text-center my-5">
+                        <i className="icon icon-spin icon-circle-notch fas text-secondary icon-2x"/>
+                    </div>
+                </div>
+            );
+        }
+
+        // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
+        const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
+        const rgs = layout.responsiveGridState(windowWidth);
+        const leftPanelDefaultWidth = rgs === 'xl' ? 400 : 300;
+
+        return (
+            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel" leftPanelDefaultWidth={leftPanelDefaultWidth}
+                leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
+                renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
+        );
+    }
 }
 
 
