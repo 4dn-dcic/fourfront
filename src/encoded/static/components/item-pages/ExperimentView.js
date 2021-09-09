@@ -15,6 +15,7 @@ import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTab
 import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import { Publications } from './components/Publications';
 import { HiGlassAdjustableWidthRow } from './HiGlassViewConfigView';
+import { isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
@@ -76,7 +77,8 @@ export default class ExperimentView extends WorkflowRunTracingView {
     }
 
     getFilesTabs(){
-        const { context, schemas, windowWidth, href, session, mounted } = this.props;
+        const { context, schemas, windowWidth, href, session } = this.props;
+        const { mounted } = this.state;
         const width = this.getTabViewWidth();
         const tabs = [];
 
@@ -687,9 +689,9 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
     }
 
     /**
-     * Combines files from ExperimentSet.other_processed_files and ExperimentSet.experiments_in_set.other_processed_files.
+     * Combines files from Experiment.other_processed_files
      *
-     * @param {ExperimentSet} context - JSON response from server for this endpoint/page depicting an ExperimentSet.
+     * @param {Experiment} context - JSON response from server for this endpoint/page depicting an Experiment.
      * @returns {{ files: File[], title: string, type: string, description: string }[]} List of uniqued-by-title viewable collections.
      */
     static combinedOtherProcessedFiles = memoize(function(context){
