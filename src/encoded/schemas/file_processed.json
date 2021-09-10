@@ -95,6 +95,7 @@
                 "chromatin traces - bio data",
                 "contact list-combined",
                 "contact list-replicate",
+                "directory tree",
                 "image mask-cell",
                 "image mask-cytoplasm",
                 "image mask-nucleus",
@@ -102,6 +103,7 @@
                 "read counts (minus)",
                 "read counts (plus)",
                 "reads-combined",
+                "readme",
                 "spt results, submitter format",
                 "filtered feature-barcode matrices"
             ]
