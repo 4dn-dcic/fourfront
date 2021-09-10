@@ -294,6 +294,10 @@ class Experiment(Item):
         'other_processed_files.files.quality_metric.overall_quality_status',
         'other_processed_files.files.quality_metric.quality_metric_summary.*',
 
+        # higlass view config linkTO
+        "other_processed_files.higlass_view_config.description",
+        "other_processed_files.higlass_view_config.last_modified.date_modified",
+
         # FileReference linkTo
         "reference_files.accession",
         "reference_files.file_type_detailed",
