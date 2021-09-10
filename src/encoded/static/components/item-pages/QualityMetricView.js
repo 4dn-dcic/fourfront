@@ -6,6 +6,7 @@ import memoize from 'memoize-one';
 import { console, object, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import DefaultItemView, { WrapInColumn } from './DefaultItemView';
+import { QCMetricFromSummary } from './../browse/components/file-tables';
 import { Schemas } from './../util';
 
 
@@ -291,41 +292,6 @@ class QCMetricFromEmbed extends React.PureComponent {
         );
     }
 }
-
-export function QCMetricFromSummary(props){
-    const { title } = props;
-    const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
-
-    return (
-        <div className="overview-list-element">
-            <div className="row">
-                <div className="col-4 text-right">
-                    <h5 className="mb-0 mt-02">{ title }</h5>
-                </div>
-                <div className="col-8">
-                    <div className="inner value">
-                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
-                        { value }
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }){
-    // We expect these values to always be strings or undefined which are passed by value (not reference).\
-    // Hence we use var instead of const and safely overwrite them.
-    if (numberType === 'percent'){
-        value += '%';
-    } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
-        value = parseFloat(value);
-        if (!tooltip && value >= 1000) {
-            tooltip = valueTransforms.decorateNumberWithCommas(value);
-        }
-        value = valueTransforms.roundLargeNumber(value);
-    }
-    return { value, tooltip };
-};
 
 export class QualityControlResults extends React.PureComponent {
 
