@@ -81,7 +81,7 @@ export function genChartBarDims(
                     },
                     'experiment_sets' : termObj.experiment_sets,
                     'experiments' : termObj.experiments,
-                    'files'     : termObj.files,
+                    'files'     : termObj.files
                 };
                 if (typeof termObj.field === 'string') {
                     barNode.bars = genBarData(termObj, { 'height' : barHeight }, barNode);

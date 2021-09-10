@@ -241,7 +241,7 @@ export class ViewContainer extends React.Component {
 
         if (!totalCount || !bars) return;
 
-        setTimeout(()=>{            
+        setTimeout(()=>{
             // warning-level message for console
             const combinedChildrenCount = _.reduce(bars, function(sum, bar){
                 return sum + bar.count;
@@ -249,7 +249,7 @@ export class ViewContainer extends React.Component {
             if (combinedChildrenCount && totalCount !== combinedChildrenCount){
                 const warnMsg = (
                     "Data Warning: 1 or more " + aggregateType + " was counted multiple times for 'group by' field '" +
-                    bars[0].field + "'."
+                    bars[0].field + "' (" + totalCount + " vs " + combinedChildrenCount + ")"
                 );
                 console.warn(warnMsg);
             }
@@ -260,7 +260,7 @@ export class ViewContainer extends React.Component {
             if (combinedChildrenCount && barAggregateTypeCount !== combinedChildrenCount){
                 const errorMsg = (
                     "Data Error: bar.count totals and bar['" + aggregateType + "'] totals are not matching for '" +
-                    bars[0].field + "'."
+                    bars[0].field + "' (" + barAggregateTypeCount + " vs " + combinedChildrenCount + ")"
                 );
                 logger.error(errorMsg);
             }
