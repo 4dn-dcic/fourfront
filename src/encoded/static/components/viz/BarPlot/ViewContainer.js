@@ -254,10 +254,13 @@ export class ViewContainer extends React.Component {
                 console.warn(warnMsg);
             }
             // error-level message for sentry.io 
-            const barAggregateTypeCount= _.reduce(bars, function(sum, bar){
-                return sum + (bar[aggregateType] || 0);
+            const barAggregateTypeCount = _.reduce(bars, function (sum, bar) {
+                if (bar.bars && Array.isArray(bar.bars)) {
+                    _.forEach(bar.bars, (b) => { sum = sum + (b[aggregateType] || 0) });
+                }
+                return sum;
             }, 0);
-            if (combinedChildrenCount && barAggregateTypeCount !== combinedChildrenCount){
+            if (combinedChildrenCount && barAggregateTypeCount && barAggregateTypeCount !== combinedChildrenCount) {
                 const errorMsg = (
                     "Data Error: bar.count totals and bar['" + aggregateType + "'] totals are not matching for '" +
                     bars[0].field + "' (" + barAggregateTypeCount + " vs " + combinedChildrenCount + ")"
