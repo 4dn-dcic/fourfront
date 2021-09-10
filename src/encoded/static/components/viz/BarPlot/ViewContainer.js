@@ -241,7 +241,7 @@ export class ViewContainer extends React.Component {
 
         if (!totalCount || !bars) return;
 
-        setTimeout(()=>{
+        setTimeout(()=>{            
             // warning-level message for console
             const combinedChildrenCount = _.reduce(bars, function(sum, bar){
                 return sum + bar.count;
