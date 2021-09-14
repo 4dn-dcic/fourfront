@@ -378,7 +378,8 @@ def metadata_tsv(context, request):
             if ',' not in experiment_accession:
                 return get_val(experiment_accession)
             else:
-                return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
+                vals = [ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ]
+                return ', '.join(filter(None, vals))
         return None
 
     def should_file_row_object_be_included(column_vals_dict):
