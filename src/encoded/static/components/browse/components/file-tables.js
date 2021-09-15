@@ -503,7 +503,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             analytics.impressionListOfItems(biosamples, null, "RawFilesStackedTable");
             analytics.impressionListOfItems(exps, null, "RawFilesStackedTable");
             analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable");
-            analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet.display_title });
+            analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet ? experimentSet.display_title : propExperiment.display_title });
         }, 250);
     }
 
