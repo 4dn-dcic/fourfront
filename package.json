@@ -5,7 +5,7 @@
     "test": "jest",
     "build": "node --max-old-space-size=2048 ./node_modules/.bin/gulp build",
     "build-scss": "gulp build-scss",
-    "watch-scss": "gulp build-scss-dev && node-sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --recursive --output-style expanded",
+    "watch-scss": "gulp build-scss-dev && sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --style expanded",
     "dev-analyzed": "gulp dev-analyzed --preserve-symlinks",
     "dev-quick": "gulp dev-quick --preserve-symlinks",
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
