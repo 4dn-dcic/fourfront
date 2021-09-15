@@ -145,6 +145,7 @@ h4.tab-section-title {
 		.rc-tabs-tab-prev {
 
 			display: none;
+			transition: none;
 
 			&.rc-tabs-tab-arrow-show {
 				display: block;
