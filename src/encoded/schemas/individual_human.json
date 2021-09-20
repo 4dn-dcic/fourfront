@@ -59,9 +59,9 @@
         },
         "protected_data": {
             "title": "Protected Data",
-            "description": "A flag to indicate whether consent to publish sequence files from this individual is not available. If true, fastq and bam files are subject to restricted access.",
+            "description": "A flag to indicate whether fastq and bam files from this individual are subject to restricted access. If false, patient has given consent to release sequencing data.",
             "type": "boolean",
-            "default": false,
+            "default": true,
             "lookup": 50
         },
         "organism": {
