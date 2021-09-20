@@ -21,20 +21,20 @@ services:
   # to test any search APIs
   # To connect use:
   # elasticsearch.server = es:9200
-  #  es:
-  #    build: ./elasticsearch
-  #    container_name: es1
-  #    environment:
-  #      - node.name=es01
-  #      - cluster.name=es-docker-cluster
-  #      - bootstrap.memory_lock=true
-  #      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-  #    ulimits:
-  #      memlock:
-  #        soft: -1
-  #        hard: -1
-  #    ports:
-  #      - "9200:9200"
+#  es:
+#    build: ./deploy/docker/elasticsearch
+#    container_name: es1
+#    environment:
+#      - node.name=es01
+#      - cluster.name=es-docker-cluster
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    ports:
+#      - "9200:9200"
 
   # Main Application Component
   # Options:
@@ -54,7 +54,7 @@ services:
       LOAD: "true"  # default: load the inserts (comment this out after first run)
       application_type: "local"  # use local entrypoint
       ENCODED_VERSION: "local"
-      FOURFRONT_ENV_NAME: "fourfront-docker-will-test"  # XXX: update me
+      FOURFRONT_ENV_NAME: "ffdkr"  # XXX: update me
     ports:
       - "8000:8000"  # nginx proxy port (note application traffic is not forwarded)
     depends_on:

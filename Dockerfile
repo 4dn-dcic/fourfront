@@ -5,7 +5,7 @@
 
 # Debian Buster with Python 3.6.13
 # Note image is updated from cgap-portal
-FROM python@sha256:763c90065dee4c17295733634ada49cb45635aef73c1f681ccf11975c325042e
+FROM python@sha256:8273b05f13fac06c1f3bfa14611f92ea50984279bea5d2bcf3b3be7598e28137
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -25,7 +25,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
   POETRY_VERSION=1.1.4 \
-  NODE_VERSION=12.22.1
+  NODE_VERSION=12.22.6
 
 # Install nginx, base system
 COPY deploy/docker/production/install_nginx.sh /
@@ -33,7 +33,7 @@ RUN bash /install_nginx.sh && \
     apt-get update && \
     apt-get install -y curl vim emacs postgresql-client net-tools ca-certificates
 
-# Configure CGAP User (nginx)
+# Configure Fourfront User (nginx)
 WORKDIR /home/nginx/.nvm
 
 # Install Node
@@ -74,6 +74,12 @@ COPY package.json .
 COPY package-lock.json .
 RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/bin/python
 
+# Build front-end
+COPY *.js .
+COPY src/encoded/static .
+RUN npm run build && \
+    npm run build-scss
+
 # Copy over the rest of the code
 COPY . .
 
@@ -81,10 +87,6 @@ COPY . .
 RUN poetry install && \
     python setup_eb.py develop && \
     make fix-dist-info
-
-# Build front-end
-RUN npm run build && \
-    npm run build-scss
 
 # Misc
 RUN make aws-ip-ranges && \
@@ -132,11 +134,10 @@ RUN chmod +x entrypoint.bash
 RUN chmod +x entrypoint_deployment.bash
 RUN chmod +x entrypoint_deployment.bash
 RUN chmod +x entrypoint_indexer.bash
-RUN chmod +x entrypoint_ingester.bash
 RUN chmod +x assume_identity.py
 EXPOSE 8000
 
 # Container does not run as root
 USER nginx
 
-ENTRYPOINT ["/home/nginx/cgap-portal/entrypoint.bash"]
+ENTRYPOINT ["/home/nginx/fourfront/entrypoint.bash"]
