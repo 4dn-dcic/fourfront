@@ -152,6 +152,9 @@ class Experiment(Item):
         'biosample.biosource.tissue.term_name',
         'biosample.biosource.tissue.term_id',
 
+        # Individual linkTo
+        'biosample.biosource.individual.protected_data',
+
         # Organism linkTo
         'biosample.biosource.individual.organism.name',
         'biosample.biosource.individual.organism.scientific_name',
