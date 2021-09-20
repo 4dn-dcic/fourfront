@@ -551,7 +551,7 @@ test = ["pytest (>=6.0)", "pytest-cov", "pytest-subtests", "pytest-xdist", "pret
 
 [[package]]
 name = "dcicsnovault"
-version = "4.8.4"
+version = "4.8.5"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
@@ -568,7 +568,6 @@ futures = ">=3.1.1,<4.0.0"
 html5lib = "0.9999999"
 humanfriendly = ">=1.44.5,<2.0.0"
 jsonschema_serialize_fork = "2.1.1"
-keepalive = "0.5"
 MarkupSafe = ">=0.23,<1"
 netaddr = ">=0.7.18,<1"
 passlib = ">=1.6.5,<2.0.0"
@@ -2020,7 +2019,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1,<3.7"
-content-hash = "2e971380cd0f7cd575bde704dca67b1fb2d03500514e6f0fe4ef37f3aa6be46a"
+content-hash = "bae4cb5103853c8039454723d562b9f5bdec7a61cdc8bfad30051d6b248964c0"
 
 [metadata.files]
 apipkg = [
@@ -2224,8 +2223,8 @@ cryptography = [
     {file = "cryptography-3.4.8.tar.gz", hash = "sha256:94cc5ed4ceaefcbe5bf38c8fba6a21fc1d365bb8fb826ea1688e3370b2e24a1c"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-4.8.4-py3-none-any.whl", hash = "sha256:f9de3b29381cc631da7c0146b55a694cef9398bea985678e8eb1b2cf3d78c9ff"},
-    {file = "dcicsnovault-4.8.4.tar.gz", hash = "sha256:1cc3aeadfc191422bc550afc4f10b2d24f170d291185053a6690c96d1da5950c"},
+    {file = "dcicsnovault-4.8.5-py3-none-any.whl", hash = "sha256:16f38cf4d1af5b0c7294b9b9c35ffb4f5759b72593d1207cba4acf987e6bfd90"},
+    {file = "dcicsnovault-4.8.5.tar.gz", hash = "sha256:f48f637229127401d699f21b33c20c16862c1ed9f2ba9fe8ec7b2232a75ea96e"},
 ]
 dcicutils = [
     {file = "dcicutils-1.20.0-py3-none-any.whl", hash = "sha256:4330e56d1ca534ee4b3956213e821e17615df12ea36b48f02df85696fd06a028"},
