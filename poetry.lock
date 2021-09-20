@@ -2020,7 +2020,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1,<3.7"
-content-hash = "e2971b1d96a3dc0e1a5bb3864f77ac5a6d72489a46e903a180b2920517347849"
+content-hash = "2e971380cd0f7cd575bde704dca67b1fb2d03500514e6f0fe4ef37f3aa6be46a"
 
 [metadata.files]
 apipkg = [
