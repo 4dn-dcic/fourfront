@@ -12,16 +12,28 @@ import { expFxn } from './../../util';
 // These are used often by other components which consume/display selected file counts.
 
 /** Used and memoized in views which have multiple sets of selectedFiles */
-export function uniqueFileCount(selectedFiles){
-    if (!selectedFiles || typeof selectedFiles !== 'object' || Array.isArray(selectedFiles)){
-        logger.error("selectedFiles not in proper form or is non-existent", selectedFiles);
+export function uniqueFileCount(files) {
+    if (!files || (typeof files !== 'object' && !Array.isArray(files))) {
+        logger.error("files not in proper form (object/array) or is non-existent", files);
         return 0;
     }
-    return _.uniq(_.pluck(_.values(selectedFiles), 'accession')).length;
+    if (typeof files === 'object') {
+        return _.uniq(_.pluck(_.values(files), 'accession')).length;
+    } else { //array
+        return _.uniq(_.pluck(files, 'accession')).length;
+    }
 }
 
-export function fileCountWithDuplicates(selectedFiles){
-    return _.keys(selectedFiles).length;
+export function fileCountWithDuplicates(files){
+    if (!files || (typeof files !== 'object' && !Array.isArray(files))) {
+        logger.error("files not in proper form (object/array) or is non-existent", files);
+        return 0;
+    }
+    if (typeof files === 'object') {
+        return _.keys(files).length;
+    } else { //array
+        return files.length;
+    }
 }
 
 

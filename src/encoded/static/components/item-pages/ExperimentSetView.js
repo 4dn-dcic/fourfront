@@ -97,9 +97,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         //context = SET; // Use for testing along with _testing_data
 
         const processedFiles = this.allProcessedFilesFromExperimentSet(context);
-        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
+        const processedFilesUniqeLen = (processedFiles && processedFiles.length && ProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
         const rawFiles = this.allFilesFromExperimentSet(context, false);
-        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
+        const rawFilesUniqueLen = (rawFiles && rawFiles.length && RawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
         const width = this.getTabViewWidth();
 
         const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
@@ -108,9 +108,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         var tabs = [];
 
         // Processed Files Table Tab
-        if (processedFilesLen > 0){
+        if (processedFilesUniqeLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-microchip fas icon-fw"/>{ ' ' + processedFilesLen + " Processed File" + (processedFilesLen > 1 ? 's' : '') }</span>,
+                tab : <span><i className="icon icon-microchip fas icon-fw"/>{ ' ' + processedFilesUniqeLen + " Processed File" + (processedFilesUniqeLen > 1 ? 's' : '') }</span>,
                 key : 'processed-files',
                 content : (
                     <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
@@ -121,9 +121,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         // Raw files tab, if have experiments with raw files
-        if (rawFilesLen > 0){
+        if (rawFilesUniqueLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-leaf fas icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
+                tab : <span><i className="icon icon-leaf fas icon-fw"/>{ ' ' + rawFilesUniqueLen + " Raw File" + (rawFilesUniqueLen > 1 ? 's' : '') }</span>,
                 key : 'raw-files',
                 content : (
                     <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
@@ -229,17 +229,18 @@ const expCategorizerTitleRenderFxn = memoize(function(field, val, allowJX = true
 
 export class RawFilesStackedTableSection extends React.PureComponent {
 
+    static allFilesUniqueCount = memoize(uniqueFileCount);
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
         const { context, files, selectedFiles, session } = this.props;
+        const allFilesUniqueCount = RawFilesStackedTableSection.allFilesUniqueCount(files);
         const selectedFilesUniqueCount = RawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
-        const fileCount = files.length;
         const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
 
         return (
             <h3 className="tab-section-title">
-                <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
+                <span className="text-400">{ allFilesUniqueCount }</span>{ ' Raw File' + (allFilesUniqueCount !== 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
@@ -300,6 +301,7 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
         );
     }
 
+    static allFilesUniqueCount = memoize(uniqueFileCount);
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     constructor(props){
@@ -363,12 +365,13 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 }
 
 const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context, session }){
+    const allFilesUniqueCount = ProcessedFilesStackedTableSection.allFilesUniqueCount(files);
     const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
     const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
     return (
         <h3 className="tab-section-title">
             <span>
-                <span className="text-400">{ files.length }</span> Processed Files
+                <span className="text-400">{ allFilesUniqueCount }</span> { 'Processed File' + (allFilesUniqueCount !== 1 ? 's' : '') }
             </span>
             { selectedFiles ? // Make sure data structure is present (even if empty)
                 <div className="download-button-container pull-right" style={{ marginTop : -10 }}>

@@ -88,14 +88,14 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
 
         const processedFiles = this.allProcessedFilesFromExperiments([extendedExp]);
-        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
+        const processedFilesUniqueLen = (processedFiles && processedFiles.length && ExperimentProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
 
-        if (processedFilesLen > 0) {
+        if (processedFilesUniqueLen > 0) {
             tabs.push({
                 tab: (
                     <span>
                         <i className="icon icon-microchip fas icon-fw" />
-                        {processedFilesLen + " Processed File" + (processedFilesLen === 1 ? "" : "s")}
+                        {processedFilesUniqueLen + " Processed File" + (processedFilesUniqueLen === 1 ? "" : "s")}
                     </span>
                 ),
                 key: 'processed-files',
@@ -108,14 +108,14 @@ export default class ExperimentView extends WorkflowRunTracingView {
         }
 
         const rawFiles = this.allFilesFromExperiment(extendedExp, false, false);
-        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
+        const rawFilesUniqueLen = (rawFiles && rawFiles.length && ExperimentRawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
 
-        if (rawFilesLen > 0) {
+        if (rawFilesUniqueLen > 0) {
             tabs.push({
                 tab : (
                     <span>
                         <i className="icon icon-leaf fas icon-fw"/>
-                        { rawFilesLen + " Raw File" + (rawFilesLen === 1 ? "" : "s") }
+                        { rawFilesUniqueLen + " Raw File" + (rawFilesUniqueLen === 1 ? "" : "s") }
                     </span>
                 ),
                 key : 'raw-files',
@@ -319,60 +319,20 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
     );
 });
 
-
-const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
-    const { files, context, width, schemas } = props;
-    const { uuid: expUUID } = context || {};
-    const columns = _.clone(SimpleFilesTable.defaultProps.columns);
-
-    columns['related_files'] = {
-        'title' : 'Relations',
-        'minColumnWidth' : 120,
-        'render' : function(result, columnDefinition, props, width){
-            var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
-                var link = object.atIdFromObject(fContainer.file);
-                var title = typeof fContainer.file.accession === 'string' ? <span className="text-monospace">{fContainer.file.accession}</span> : fContainer.file.display_title;
-                return <span key={link || i}>{ fContainer.relationship_type } { link ? <a href={link}>{ title }</a> : title }</span>;
-            });
-            return related_files;
-        }
-    };
-
-    // Add column for paired end if any files have one.
-    if (_.any(files, function(f) { return typeof f.paired_end !== 'undefined'; })){
-        columns['paired_end'] = {
-            "title" : 'End',
-            'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 },
-            'minColumnWidth' : 30
-        };
-    }
-
-    // Get all files which have expUUID in experiments.uuid[] excluding reference and processed files.
-    const searchHref = `/search/?type=File&experiments.uuid=${encodeURIComponent(expUUID)}&type%21=FileProcessed&type%21=FileReference`;
-
-    return (
-        <div className="raw-files-table-section">
-            <h3 className="tab-section-title">
-                <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
-            </h3>
-            <EmbeddedItemSearchTable {...{ searchHref, schemas, columns, width }} facets={null} />
-        </div>
-    );
-});
-
 class ExperimentRawFilesStackedTableSection extends React.PureComponent {
 
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
+    static allFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
         const { context, files, selectedFiles, session } = this.props;
+        const allFilesUniqueCount = ExperimentRawFilesStackedTableSection.allFilesUniqueCount(files);
         const selectedFilesUniqueCount = ExperimentRawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
-        const fileCount = files.length;
         const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
 
         return (
             <h3 className="tab-section-title">
-                <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
+                <span className="text-400">{ allFilesUniqueCount }</span>{ ' Raw File' + (allFilesUniqueCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
@@ -404,22 +364,6 @@ class ExperimentRawFilesStackedTableSection extends React.PureComponent {
     }
 }
 
-const ProcessedFilesTableSection = React.memo(function ProcessedFilesTableSection(props){
-    const { files, context, schemas } = props;
-    //const { uuid: expUUID } = context;
-    const fileUrls = _.map(files, object.itemUtil.atId);
-    //const searchHref = `/search/?type=FileProcessed&experiments.uuid=${encodeURIComponent(expUUID)}`;
-    return (
-        <div className="processed-files-table-section">
-            <h3 className="tab-section-title">
-                <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
-            </h3>
-            {/* <EmbeddedItemSearchTable {...{ searchHref, schemas }} facets={null} /> */}
-            <SimpleFilesTableLoaded {..._.pick(props, 'schemas', 'width')} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
-        </div>
-    );
-});
-
 class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
@@ -449,6 +393,7 @@ class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
         );
     }
 
+    static allFilesUniqueCount = memoize(uniqueFileCount);
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     constructor(props){
@@ -459,12 +404,13 @@ class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
     renderHeader(){
         const { context, files, selectedFiles, session } = this.props;
 
+        const allFilesUniqueCount = ExperimentProcessedFilesStackedTableSection.allFilesUniqueCount(files);
         const selectedFilesUniqueCount = ExperimentProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
         const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
         return (
             <h3 className="tab-section-title">
                 <span>
-                    <span className="text-400">{files.length}</span> Processed Files
+                    <span className="text-400">{allFilesUniqueCount}</span> Processed Files
                 </span>
                 {selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
