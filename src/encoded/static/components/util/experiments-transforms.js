@@ -100,10 +100,11 @@ export function fileToAccessionTriple(file, hasExperiment = true, toString = fal
  * properties, into a list of strings which represent them.
  *
  * @param {File[]} files                        Files which to convert to accession triples. Must have 'from_experiment' properties (provided by other funcs).
+ * @param {boolean} hasExperiment
  * @param {boolean|string} [toString=false]     Whether to concatanate resulting accession items into strings delimited by a tilde (`~`). If string is supplied, it is used as delimiter instead.
  * @returns {string[]} List of arrays or strings in form of EXPSETACCESSION~EXPACESSION~FILEACCESSION. EXPACESSION may be "NONE".
  */
-export function filesToAccessionTriples(files,hasExperiment = true, toString = false){
+export function filesToAccessionTriples(files, hasExperiment = true, toString = false){
     return _.map(files || [], function(file){
         return fileToAccessionTriple(file, hasExperiment, toString);
     });

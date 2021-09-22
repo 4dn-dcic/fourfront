@@ -145,6 +145,7 @@ h4.tab-section-title {
 		.rc-tabs-tab-prev {
 
 			display: none;
+			transition: none;
 
 			&.rc-tabs-tab-arrow-show {
 				display: block;
@@ -1626,6 +1627,10 @@ $badge-item-min-height: 90px;
 					}
 				}
 
+				div.view-more-button {
+					font-size: 0.9rem;
+					padding-left: 10px;
+				}
 			}
 		}
 	}
@@ -1806,7 +1811,6 @@ $badge-item-min-height: 90px;
 			padding-left: 16px;
 			padding-right: 16px;
 			body:not(.is-full-screen) & {
-				@include make-max-widths-container-width();
 				@include media-breakpoint-up(md) {
 					padding-left: 0;
 					padding-right: 0;

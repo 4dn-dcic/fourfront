@@ -306,6 +306,9 @@ class File(Item):
         'experiments.biosample.biosource.modifications.target_of_mod.feature_mods',
         'experiments.biosample.biosource.modifications.target_of_mod.genome_location',
 
+        # Individual linkTo
+        'experiments.biosample.biosource.individual.protected_data',
+
         # Organism linkTo
         'experiments.biosample.biosource.individual.organism.name',
         'experiments.biosample.biosource.individual.organism.scientific_name',

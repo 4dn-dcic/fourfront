@@ -43,7 +43,9 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 
 configure:  # does any pre-requisite installs
 	pip install --upgrade pip
-	pip install poetry==1.1.4  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
+	pip install poetry==1.1.9  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
+	pip install setuptools==57.5.0  # this version allows 2to3, any later will break -wrr 20-Sept-2021
+	poetry config virtualenvs.create false --local  # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
 build:  # builds
 	make configure
