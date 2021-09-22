@@ -254,10 +254,9 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
     const { dependencies: { higlass : { version: higlassVersionUsed = null } = {} } = {} } = packageLockJson || {};
     const { HiGlassComponent } = higlassDependencies || {};
 
-    let placeholderStyle = {};
     let hiGlassInstance = null;
+    const placeholderStyle = { width: width || null };
     if (isValidating || !mounted){
-        placeholderStyle = { width: width || null };
         if (typeof height === 'number' && height >= 140){
             placeholderStyle.height = height;
             placeholderStyle.paddingTop = (height / 2) - 40;
