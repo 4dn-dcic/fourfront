@@ -71,19 +71,27 @@ const resolve = {
     //    path.resolve(__dirname, '..', 'node_modules'),
     //    'node_modules'
     //]
+    alias: {}
 };
+
+// Common alias, hopefully is fix for duplicate versions of React
+// on npm version 7+ and can supersede `./setup-npm-links-for-local-development.js`.
+// @see https://blog.maximeheckel.com/posts/duplicate-dependencies-npm-link/
+spcPackageJson = require("@hms-dbmi-bgm/shared-portal-components/package.json");
+spcPeerDependencies = spcPackageJson.peerDependencies || {};
+Object.keys(spcPeerDependencies).forEach(function(packageName) {
+    resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+});
+
+// Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
+// once update to higlass version w.o. react-bootstrap dependency.
+delete resolve.alias["react-bootstrap"];
 
 const optimization = {
     usedExports: true,
     minimize: mode === "production",
     minimizer: [
-        //new UglifyJsPlugin({
-        //    parallel: true,
-        //    sourceMap: true
-        //})
         new TerserPlugin({
-            // This was causing problems in other areas, maybe it will fix our deploy problems? -kmp 2-Mar-2021
-            // parallel: true,
             parallel: false,
             sourceMap: true,
             terserOptions:{
@@ -115,6 +123,10 @@ serverPlugins.push(new webpack.DefinePlugin({
     'BUILDTYPE' : JSON.stringify(env)
 }));
 
+// From https://github.com/jsdom/jsdom/issues/3042
+serverPlugins.push(
+    new webpack.IgnorePlugin(/canvas/, /jsdom$/)
+);
 
 if (env === 'development'){
     // Skip for `npm run dev-quick` (`env === "quick"`) since takes a while
@@ -172,7 +184,10 @@ module.exports = [
         //     dns: "empty",
         // },
         externals: [
-            { 'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}' }
+            {
+                'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}',
+                'jsdom': '{JSDOM:{}}'
+            }
         ],
         module: {
             rules: rules
@@ -181,6 +196,7 @@ module.exports = [
         resolve: {
             ...resolve,
             alias: {
+                ...resolve.alias,
                 'higlass-dependencies': path.resolve(__dirname, "./src/encoded/static/components/item-pages/components/HiGlass/higlass-dependencies.js"),
                 'micrometa-dependencies': path.resolve(__dirname, "./src/encoded/static/components/item-pages/components/MicroMeta/micrometa-dependencies.js"),
                 'package-lock.json': path.resolve(__dirname, "./package-lock.json"),
