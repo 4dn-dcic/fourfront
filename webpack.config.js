@@ -83,6 +83,10 @@ Object.keys(spcPeerDependencies).forEach(function(packageName) {
     resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
 });
 
+// Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
+// once update to higlass version w.o. react-bootstrap dependency.
+delete resolve.alias["react-bootstrap"];
+
 const optimization = {
     usedExports: true,
     minimize: mode === "production",
