@@ -313,7 +313,7 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-12 col-md-9 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
-                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={3} collapseShow={2} />
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={5} collapseShow={4} />
 
         </OverviewHeadingContainer>
     );

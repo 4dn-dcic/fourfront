@@ -206,7 +206,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-sm-6 col-md-9" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
-                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={3} collapseShow={2} hideIfNoValue />
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={5} collapseShow={4} hideIfNoValue />
 
         </OverviewHeadingContainer>
     );
