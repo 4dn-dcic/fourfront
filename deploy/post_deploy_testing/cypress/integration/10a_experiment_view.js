@@ -43,7 +43,7 @@ describe('Browse Views - Files Selection', function () {
                 .end();
         });
 
-        it.skip('Can change to sort by date_created -- ascending', function () {
+        it('Can change to sort by date_created -- ascending', function () {
 
             cy.scrollTo(0, 500)
                 .get('.search-headers-row .search-headers-column-block[data-field="date_created"] .column-sort-icon')
