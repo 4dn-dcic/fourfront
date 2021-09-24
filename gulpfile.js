@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const PluginError = require('plugin-error');
 const log = require('fancy-log');
 const webpack = require('webpack');
-const sass = require('node-sass');
+const sass = require('sass');
 const fs = require('fs');
 
 
@@ -249,7 +249,7 @@ function watchMicroscopyMetadataTool(done){
 }
 
 
-// TODO: Just use command-line `node-sass` ?
+// TODO: Just use command-line `sass` ?
 
 const cssOutputLocation = './src/encoded/static/css/style.css';
 const sourceMapLocation = "./src/encoded/static/css/style.css.map";
