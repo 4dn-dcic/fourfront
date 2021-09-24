@@ -1,5 +1,5 @@
-import json
-import os
+# import json
+# import os
 import pytest
 import requests
 
@@ -8,11 +8,10 @@ from dcicutils.misc_utils import find_association
 from dcicutils.s3_utils import s3Utils
 
 
-
 pytestmark = [pytest.mark.working, pytest.mark.integrated]
 
 
-S3_UTILS_BUCKET_VAR_DATA = [
+_S3_UTILS_BUCKET_VAR_DATA = [
     {
         'attribute': 'sys_bucket',
         'health_key': 'system_bucket',
@@ -55,7 +54,47 @@ S3_UTILS_BUCKET_VAR_DATA = [
         'template': 'TIBANNA_OUTPUT_BUCKET_TEMPLATE',
         'recent': True,
     },
-]    
+    {
+        'attribute': 'tibanna_cwl_bucket',
+        'health_key': 'tibanna_cwl_bucket',
+        'description': "The 'tibanna-cwl' bucket",
+        'template': 'TIBANNA_CWL_BUCKET_TEMPLATE',
+        'recent': True,
+    },
+]
+
+
+def _health_page(*, url):
+    return requests.get(url+"/health?format=json").json()
+
+
+def _apply_s3_bucket_name_template(template, arg):
+    if '%' in template:
+        return template % arg
+    else:
+        return template
+
+
+_PRD_URL = "https://data.4dnucleome.org"
+_STG_URL = "http://staging.4dnucleome.org"
+
+
+def _test_stg_or_prd(*, me, my_twin, env_from_beanstalk, s3utils):
+    assert s3utils.url == me
+    mirror_env = get_standard_mirror_env(env_from_beanstalk)
+    mirror_s = s3Utils(env=mirror_env)
+    assert mirror_s.url == my_twin
+    mirror_health = _health_page(url=mirror_s.url)
+    assert mirror_health['beanstalk_env'] == mirror_env
+    assert get_standard_mirror_env(mirror_env) == env_from_beanstalk
+
+
+def _test_data(*, env_from_beanstalk, s3utils):
+    _test_stg_or_prd(me=_PRD_URL, my_twin=_STG_URL, env_from_beanstalk=env_from_beanstalk, s3utils=s3utils)
+
+
+def _test_staging(*, env_from_beanstalk, s3utils):
+    _test_stg_or_prd(me=_STG_URL, my_twin=_PRD_URL, env_from_beanstalk=env_from_beanstalk, s3utils=s3utils)
 
 
 @pytest.mark.parametrize('env', [None, 'fourfront-mastertest', 'fourfront-green', 'fourfront-blue', 'data', 'staging'])
@@ -72,13 +111,7 @@ def test_s3_utils_bare(env):
     # This is probably the same everywhere. It doesn't need to vary.
     assert s.ACCESS_KEYS_S3_KEY == 'access_key_admin'
 
-    def apply_template(template, arg):
-        if '%' in template:
-            return template % arg
-        else:
-            return template
-
-    for datum in S3_UTILS_BUCKET_VAR_DATA:
+    for datum in _S3_UTILS_BUCKET_VAR_DATA:
 
         attr_name = datum['attribute']
         template_name = datum['template']
@@ -87,23 +120,27 @@ def test_s3_utils_bare(env):
         # e.g., for env=None, assert s.sys_bucket == 'elasticbeanstalk-None-system'
         #   but for env='fourfront-mastertest', assert s.sys_bucket == 'elasticbeanstalk-fourfront-mastertest-system'
         if hasattr(s, attr_name) and hasattr(s, template_name):
-            assert getattr(s, attr_name) == apply_template(getattr(s, template_name), get_bucket_env(env))
+            assert getattr(s, attr_name) == _apply_s3_bucket_name_template(getattr(s, template_name),
+                                                                           get_bucket_env(env))
         else:
             assert datum['recent'], f"Problem with: {datum}"
 
-    if s.url is not '':
+    # As of dcicutils 2.3.0 or 2.3.1 (there was a bug fix in the initial patch),
+    # the .url is expected to always be set for beanstalk environments, even ones
+    # that are not stg/prd. But it's still the case that you can call s3Utils(env=None)
+    # and get back an object that has some things filled even though the bucket names
+    # are nonsensical and the env is None.
 
-        assert is_stg_or_prd_env(env)
+    if env:
 
-        def health_page(url):
-            return requests.get(s.url+"/health?format=json").json()
+        assert s.url is not ''
 
-        health = health_page(s.url)
+        health = _health_page(url=s.url)
 
         for k, v in health.items():
             if k.endswith("bucket"):
                 print(f"Considering health page key {k}...")
-                entry = find_association(S3_UTILS_BUCKET_VAR_DATA, health_key=k)
+                entry = find_association(_S3_UTILS_BUCKET_VAR_DATA, health_key=k)
                 assert entry, f"No entry for health key {k}."
                 if v:
                     assert getattr(s, entry['attribute']) == v
@@ -111,31 +148,17 @@ def test_s3_utils_bare(env):
                 else:
                     print("No health page value.")
 
-        beanstalk_env = health['beanstalk_env']
+        env_from_beanstalk = health['beanstalk_env']
 
-        prd_url = "https://data.4dnucleome.org"
-        stg_url = "http://staging.4dnucleome.org"
+        if is_stg_or_prd_env(env):
 
-        def test_stg_or_prd(me, my_twin):
-            assert s.url == me
-            mirror_s = s3Utils(env=get_standard_mirror_env(beanstalk_env))
-            assert mirror_s.url == my_twin
-            mirror_health = health_page(mirror_s.url)
-            assert mirror_health['beanstalk_env'] == beanstalk_env
-
-        def test_data():
-            test_stg_or_prd(prd_url, stg_url)
-
-        def test_staging():
-            test_stg_or_prd(stg_url, prd_url)
-
-        if env == 'data':
-            test_data()
-        elif env == 'staging':
-            test_staging()
-        else:
-            assert beanstalk_env == env
-            if s.url == prd_url:
-                test_data()
-            else:
-                test_staging()
+            if env == 'data':
+                _test_data(env_from_beanstalk=env_from_beanstalk, s3utils=s)
+            elif env == 'staging':
+                _test_staging(env_from_beanstalk=env_from_beanstalk, s3utils=s)
+            elif is_stg_or_prd_env(env):
+                assert env_from_beanstalk == env
+                if s.url == _PRD_URL:
+                    _test_data(env_from_beanstalk=env_from_beanstalk, s3utils=s)
+                else:
+                    _test_staging(env_from_beanstalk=env_from_beanstalk, s3utils=s)
