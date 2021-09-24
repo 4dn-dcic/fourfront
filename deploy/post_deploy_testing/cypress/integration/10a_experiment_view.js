@@ -56,7 +56,7 @@ describe('Browse Views - Files Selection', function () {
         it('Visit experiment page and total count match', function () {
             const currIDs = [];
             const tabKeys = [];
-            cy.visit('/experiments-hi-c/4DNEX8M8ALDF/').wait(100).end();
+            cy.visit('/experiments-hi-c/4DNEXOA4DNR8/').wait(100).end();
 
             cy.window().then(function (w) {
                 let currPagePath = "/";
@@ -79,7 +79,7 @@ describe('Browse Views - Files Selection', function () {
                             cy.get("h3.tab-section-title, h4.tab-section-title").first().then(function ($tabTitle) {
                                 currTabTitle = $tabTitle.text();
                             }).end().get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function ($tab) {
-                                const tabKey = $tab.children('span.tab').attr('data-tab-key');
+                                const tabKey = $tab.children('span.tab').attr('data-tab-key');                                
                                 return cy.wrap($tab).click({ 'force': true }).end()
                                     .wait(200)
                                     .get('.rc-tabs-content .rc-tabs-tabpane-active')
@@ -92,31 +92,34 @@ describe('Browse Views - Files Selection', function () {
                                     }).end()
                                     .root().should('not.contain', "client-side error")
                                     .end()
-                                    .get('h1.page-title').should('not.be.empty').end()
-                                    .get('div.rc-tabs span[data-tab-key="raw-files"]').should('contain', 'Raw Files').
-
-                                    get("h3.tab-section-title, h4.tab-section-title").first().then(function ($tabTitle) {
-                                        let currTabTitle = null;
-
-                                        currTabTitle = $tabTitle.text();
-                                        console.log('xxxx cur', currTabTitle);
-                                    }).end().get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function ($tab) {
+                                    .get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
                                         const tabKey = $tab.children('span.tab').attr('data-tab-key');
-                                        let tabFileCount = null;
-                                        let downloadFileCount = null;
-                                        if ((tabKey === 'raw-files') || (tabKey === 'processed-files')) {
-                                            return cy.wrap($tab).click({ 'force': true }).end()
-                                                .wait(200)
+                                        debugger
+                                            let tabFileCount = null;
+                                            let downloadFileCount = null;                                      
+                                            if ((tabKey === 'raw-files') || (tabKey === 'processed-files')) {
+                                                return cy.wrap($tab).click({ 'force': true }).end()
+                                                    .wait(200)
+                                                    .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                                                    .get("span.count-to-download-integer").first().then(function ($downloadCountFile) {
+                                                        downloadFileCount = $downloadCountFile.text();
+                                                    }).get(tabKey === 'processed-files' ? '.processed-files-table-section.exp-table-section h3.tab-section-title .text-400' : ".rc-tabs-tabpane.rc-tabs-tabpane-active .overflow-hidden h3.tab-section-title .text-400").first().then(function ($tabFileCount) {
+                                                        tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
+                                                    }).end()
+    
+                                            }
+                                            else if(tabKey==='supplementary-files'){                                           
+                                                cy.get('.heading-block.col-file.has-checkbox input.file-header-select-checkbox').first().click({ 'force': true }).end().wait(300)
                                                 .get('.rc-tabs-content .rc-tabs-tabpane-active')
                                                 .get("span.count-to-download-integer").first().then(function ($downloadCountFile) {
                                                     downloadFileCount = $downloadCountFile.text();
                                                 }).get(tabKey === 'processed-files' ? '.processed-files-table-section.exp-table-section h3.tab-section-title .text-400' : ".rc-tabs-tabpane.rc-tabs-tabpane-active .overflow-hidden h3.tab-section-title .text-400").first().then(function ($tabFileCount) {
                                                     tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
                                                 }).end()
-
-                                        }
-                                    }).end();
-                            }).end();
+                                            }
+                                       
+                                }).end();
+                                })
 
                         }
                     });
