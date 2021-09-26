@@ -553,13 +553,13 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
         'defaultOpen' : true,
         'columnHeaders' : (function(){
             const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
-            colHeaders.push({
-                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
-                render : function(file, field, detailIndex, fileEntryBlockProps){
-                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
-                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
-                }
-            });
+            // colHeaders.push({
+            //     columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
+            //     render : function(file, field, detailIndex, fileEntryBlockProps){
+            //         const capitalizedStatus = Schemas.Term.toName("status", file.status);
+            //         return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
+            //     }
+            // });
             return colHeaders;
         })()
     };
@@ -567,7 +567,35 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
+        this.collectionStatus = memoize(SupplementaryFilesOPFCollection.collectionStatus);
         this.state = { 'open' : props.defaultOpen };
+    }
+
+    renderStatusIndicator(){
+        const { files } = this.props;
+        const status = this.collectionStatus(files);
+        if (!status) return null;
+
+        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
+        if (typeof status === 'string'){
+            const capitalizedStatus = Schemas.Term.toName("status", status);
+            return (
+                <div data-tip={"Status for all files is " + capitalizedStatus} className={outerClsName}>
+                    <i className="item-status-indicator-dot mr-07" data-status={status} />
+                    { capitalizedStatus }
+                </div>
+            );
+        } else {
+            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
+            return (
+                <div data-tip={"All files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
+                    <span className="indicators-collection d-inline-block mr-05">
+                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
+                    </span>
+                    Multiple
+                </div>
+            );
+        }
     }
 
     toggleOpen(e){
@@ -583,6 +611,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
         const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
+                { this.renderStatusIndicator() }
                 <h4 className="mb-15">
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
