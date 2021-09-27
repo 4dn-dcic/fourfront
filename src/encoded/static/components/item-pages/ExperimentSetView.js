@@ -450,8 +450,29 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         return null;
     }
 
+    static appendStatusColumnForMultipleStatus(columnHeaders, files) {
+        const status = SupplementaryFilesOPFCollection.collectionStatus(files);
+
+        if (Array.isArray(columnHeaders) && Array.isArray(status) && !_.any(columnHeaders, (colHeader) => colHeader.field === 'status')) {
+            const colHeaders = SupplementaryFilesOPFCollection.defaultProps.columnHeaders.slice();
+            colHeaders.push({
+                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field: "status",
+                render: function (file, field, detailIndex, fileEntryBlockProps) {
+                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
+                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
+                }
+            });
+            return { status, columnHeaders: colHeaders };
+        }
+        return { status, columnHeaders };
+    }
+
     static defaultProps = {
-        'defaultOpen' : false
+        'defaultOpen' : false,
+        'columnHeaders' : (function(){
+            const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
+            return colHeaders;
+        })()
     };
 
     constructor(props){
@@ -459,7 +480,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
         // Usually have >1 SupplementaryFilesOPFCollection on page so we memoize at instance level not class level.
-        this.collectionStatus = memoize(SupplementaryFilesOPFCollection.collectionStatus);
+        this.appendStatusColumnForMultipleStatus = memoize(SupplementaryFilesOPFCollection.appendStatusColumnForMultipleStatus);
 
         this.state = {
             'open' : props.defaultOpen
@@ -473,17 +494,16 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     renderFilesTable(width, resetDividerFxn, leftPanelCollapsed){
-        const { collection, href } = this.props;
+        const { collection, href, columnHeaders: propColumnHeaders } = this.props;
+        const { files } = collection;
+        const { columnHeaders } = this.appendStatusColumnForMultipleStatus(propColumnHeaders, files);
         const passProps = _.extend({ width, href }, SelectedFilesController.pick(this.props));
         return (
-            <ProcessedFilesStackedTable {...passProps} files={collection.files} collapseLongLists analyticsImpressionOnMount />
+            <ProcessedFilesStackedTable {...passProps} files={collection.files} columnHeaders={columnHeaders} collapseLongLists analyticsImpressionOnMount />
         );
     }
 
-    renderStatusIndicator(){
-        const { collection } = this.props;
-        const { files, description } = collection;
-        const status = this.collectionStatus(files);
+    renderStatusIndicator(status){
         if (!status) return null;
 
         const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
@@ -509,7 +529,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     render(){
-        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles, columnHeaders: propColumnHeaders } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         const qcMetricsHeading = (
@@ -518,9 +538,11 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             </h4>
         );
 
+        const { status } = this.appendStatusColumnForMultipleStatus(propColumnHeaders, files);
+
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
-                { this.renderStatusIndicator() }
+                { this.renderStatusIndicator(status) }
                 <h4>
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -553,13 +575,6 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
         'defaultOpen' : true,
         'columnHeaders' : (function(){
             const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
-            // colHeaders.push({
-            //     columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
-            //     render : function(file, field, detailIndex, fileEntryBlockProps){
-            //         const capitalizedStatus = Schemas.Term.toName("status", file.status);
-            //         return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
-            //     }
-            // });
             return colHeaders;
         })()
     };
@@ -567,13 +582,11 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
-        this.collectionStatus = memoize(SupplementaryFilesOPFCollection.collectionStatus);
+        this.appendStatusColumnForMultipleStatus = memoize(SupplementaryFilesOPFCollection.appendStatusColumnForMultipleStatus);
         this.state = { 'open' : props.defaultOpen };
     }
 
-    renderStatusIndicator(){
-        const { files } = this.props;
-        const status = this.collectionStatus(files);
+    renderStatusIndicator(status){
         if (!status) return null;
 
         const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
@@ -605,13 +618,14 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     }
 
     render(){
-        const { files, width, href, columnHeaders } = this.props;
+        const { files, width, href, columnHeaders: propColumnHeaders } = this.props;
         const { open } = this.state;
         const filesLen = files.length;
         const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
+        const { status, columnHeaders } = this.appendStatusColumnForMultipleStatus(propColumnHeaders, files);
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
-                { this.renderStatusIndicator() }
+                { this.renderStatusIndicator(status) }
                 <h4 className="mb-15">
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
