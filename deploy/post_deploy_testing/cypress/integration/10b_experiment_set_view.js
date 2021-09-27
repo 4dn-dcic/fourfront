@@ -1,10 +1,11 @@
 
-describe('Experiment Views - Files Selection', function () {
+describe('Experiment Set Views - Files Selection', function () {
 
     context('Ensure "Select All Files" & related features are functional.', function () {
 
         before(function () {
-            cy.visit('/search/?type=Experiment&files.accession%21=No+value&processed_files.accession%21=Novalue&other_processed_files.files.accession%21=Novalue&reference_files.accession%21=Novalue');
+            cy.visit('/search/?type=ExperimentSet&experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value');
+
         });
 
         it("Can add column for date_created to results table", function () {
@@ -53,9 +54,9 @@ describe('Experiment Views - Files Selection', function () {
                 .should('have.class', 'icon-sort-up').end();
         });
 
-        it('Visit experiment page and total count match', function () {
+        it('Visit experiment set page and total count match', function () {
 
-            cy.visit('/experiments-mic/4DNEXCET3RFY/').wait(100).end();
+            cy.visit('/experiment-set-replicates/4DNES265ETYQ/').wait(100).end();
 
             cy.window().then(function (w) {
                 let currPagePath = "/";
@@ -106,16 +107,16 @@ describe('Experiment Views - Files Selection', function () {
                                                 }).end();
 
                                         }
-                                        else if (tabKey === 'supplementary-files') {
-                                            return cy.get('.rc-tabs-tabpane.rc-tabs-tabpane-active .reference-files-section.supplementary-files-section-part .stacked-block-table-outer-container .stacked-block-table.mounted.fade-in.expset-processed-files .headers.stacked-block-table-headers .heading-block.col-file.has-checkbox .file-header-select-checkbox').first().click({ 'force': true }).end().wait(1000)
-                                                .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                                                .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
-                                                    downloadFileCount = $downloadCountFile.text();
-                                                }).get(".processed-files-table-section h3.tab-section-title .small").first().invoke('text').then(function ($tabFileCount) {
-                                                    const fileCount = $tabFileCount.split(' ')[2]
-                                                    tabFileCount = fileCount; cy.expect(downloadFileCount).equal(tabFileCount);
-                                                }).end();
-                                        }
+                                        // else if (tabKey === 'supplementary-files') {
+                                        //     return cy.get('.rc-tabs-tabpane.rc-tabs-tabpane-active .reference-files-section.supplementary-files-section-part .stacked-block-table-outer-container .stacked-block-table.mounted.fade-in.expset-processed-files .headers.stacked-block-table-headers .heading-block.col-file.has-checkbox .file-header-select-checkbox').first().click({ 'force': true }).end().wait(1000)
+                                        //         .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                                        //         .get(".rc-tabs-tabpane.rc-tabs-tabpane-active .processed-files-table-section .count-to-download-integer").first().then(function ($downloadCountFile) {
+                                        //             downloadFileCount = $downloadCountFile.text();
+                                        //         }).get(".processed-files-table-section h3.tab-section-title .small").first().invoke('text').then(function ($tabFileCount) {
+                                        //             const fileCount = $tabFileCount.split(' ')[2]
+                                        //             tabFileCount = fileCount; cy.expect(downloadFileCount).equal(tabFileCount);
+                                        //         }).end();
+                                        // }
 
                                     }).end();
                             }).end();
