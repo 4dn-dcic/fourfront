@@ -122,8 +122,8 @@ describe('Browse Views - Files Selection', function () {
                                 }).end();
 
                         }
-                    });
-            });
+                    }).end();
+            }).end();
 
         });
     });
