@@ -121,7 +121,6 @@ describe('Experiment Set Views - Files Selection', function () {
                                     }).end();
                             }).end();
                         }
-
                     }).end();
             }).end();
 
