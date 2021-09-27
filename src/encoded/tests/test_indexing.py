@@ -474,11 +474,11 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name']
          ),
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description',
+            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
                              'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
          ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description',
+         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
                           'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
          ),
         ('FileFormat', 'ExperimentSet',
