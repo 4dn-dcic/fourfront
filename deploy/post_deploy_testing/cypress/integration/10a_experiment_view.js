@@ -94,7 +94,6 @@ describe('Browse Views - Files Selection', function () {
                                     .end()
                                     .get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
                                         const tabKey = $tab.children('span.tab').attr('data-tab-key');
-                                        debugger
                                             let tabFileCount = null;
                                             let downloadFileCount = null;                                      
                                             if ((tabKey === 'raw-files') || (tabKey === 'processed-files')) {
@@ -105,21 +104,22 @@ describe('Browse Views - Files Selection', function () {
                                                         downloadFileCount = $downloadCountFile.text();
                                                     }).get(tabKey === 'processed-files' ? '.processed-files-table-section.exp-table-section h3.tab-section-title .text-400' : ".rc-tabs-tabpane.rc-tabs-tabpane-active .overflow-hidden h3.tab-section-title .text-400").first().then(function ($tabFileCount) {
                                                         tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
-                                                    }).end()
+                                                    }).end();
     
                                             }
                                             else if(tabKey==='supplementary-files'){                                           
                                                 cy.get('.heading-block.col-file.has-checkbox input.file-header-select-checkbox').first().click({ 'force': true }).end().wait(300)
                                                 .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                                                .get("span.count-to-download-integer").first().then(function ($downloadCountFile) {
+                                                .get(".processed-files-table-section .count-to-download-integer").first().then(function ($downloadCountFile) {
                                                     downloadFileCount = $downloadCountFile.text();
-                                                }).get(tabKey === 'processed-files' ? '.processed-files-table-section.exp-table-section h3.tab-section-title .text-400' : ".rc-tabs-tabpane.rc-tabs-tabpane-active .overflow-hidden h3.tab-section-title .text-400").first().then(function ($tabFileCount) {
-                                                    tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
-                                                }).end()
+                                                }).get(".processed-files-table-section h3.tab-section-title .small").first().invoke('text').then(function ($tabFileCount) {
+                                                    const fileCount = $tabFileCount.split(' ')[2]
+                                                    tabFileCount = fileCount; cy.expect(downloadFileCount).equal(tabFileCount);
+                                                }).end();
                                             }
                                        
                                 }).end();
-                                })
+                                }).end();
 
                         }
                     });
