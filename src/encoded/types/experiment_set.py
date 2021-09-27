@@ -93,6 +93,7 @@ class ExperimentSet(Item):
         "experiments_in_set.@type",
         "experiments_in_set.accession",
         "experiments_in_set.status",
+        "experiments_in_set.dbxrefs",
         "experiments_in_set.external_references.*",
 
         # ExperimentType linkTo
@@ -226,6 +227,7 @@ class ExperimentSet(Item):
         "experiments_in_set.files.paired_end",
         "experiments_in_set.files.status",
         "experiments_in_set.files.notes_to_tsv",
+        "experiments_in_set.files.dbxrefs",
         "experiments_in_set.files.external_references.*",
         "experiments_in_set.files.open_data_url",
         "experiments_in_set.files.contributing_labs.display_title",
@@ -285,6 +287,7 @@ class ExperimentSet(Item):
         "processed_files.file_type",
         "processed_files.file_type_detailed",
         "processed_files.status",
+        "processed_files.dbxrefs",
         "processed_files.external_references.*",
         "processed_files.md5sum",
         "processed_files.higlass_uid",
@@ -333,6 +336,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.file_type",
         "experiments_in_set.processed_files.file_type_detailed",
         "experiments_in_set.processed_files.status",
+        "experiments_in_set.processed_files.dbxrefs",
         "experiments_in_set.processed_files.external_references.*",
         "experiments_in_set.processed_files.md5sum",
         "experiments_in_set.processed_files.higlass_uid",
