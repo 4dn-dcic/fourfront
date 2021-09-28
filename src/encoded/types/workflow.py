@@ -743,6 +743,7 @@ def _build_workflow_run_embedded_list():
         'output_files.value.@type',
         'output_files.value.@id',
         'output_files.value.file_size',
+        'output_files.value.open_data_url',
         'output_files.value.quality_metric.url',
         'output_files.value.quality_metric.overall_quality_status',
         'output_files.value.status',
