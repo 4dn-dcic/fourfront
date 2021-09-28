@@ -162,6 +162,11 @@
                 "type": "string"
             }
         },
+        "workflow_engine": {
+            "title": "Workflow engine",
+            "description": "Optional name of the workflow engine, e.g. caper for WDL",
+            "type": "string"
+        },
         "workflow_language": {
             "title": "Workflow language",
             "description": "Language used to describe workflow, either CWL or WDL",
