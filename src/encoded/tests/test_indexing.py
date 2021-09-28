@@ -434,7 +434,7 @@ class TestInvalidationScopeViewFourfront:
         ('FileProcessed', 'ExperimentSet',
             DEFAULT_SCOPE + ['accession', 'description', 'file_format', 'file_type', 'file_classification',
                              'md5sum', 'file_size', 'notes_to_tsv', 'higlass_uid',
-                             'genome_assembly']
+                             'genome_assembly', 'dbxrefs']
          ),
         ('User', 'ExperimentSet',
             DEFAULT_SCOPE + ['email', 'first_name', 'last_name', 'preferred_email',
@@ -474,11 +474,11 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name']
          ),
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description',
+            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
                              'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
          ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description',
+         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
                           'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
          ),
         ('FileFormat', 'ExperimentSet',
