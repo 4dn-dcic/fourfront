@@ -527,7 +527,7 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
         const status = ExperimentSupplementaryFilesOPFCollection.collectionStatus(files);
 
         if (Array.isArray(columnHeaders) && Array.isArray(status) && !_.any(columnHeaders, (colHeader) => colHeader.field === 'status')) {
-            const colHeaders = SupplementaryFilesOPFCollection.defaultProps.columnHeaders.slice();
+            const colHeaders = ExperimentSupplementaryFilesOPFCollection.defaultProps.columnHeaders.slice();
             colHeaders.push({
                 columnClass: 'file-detail', title: 'Status', initialWidth: 30, field: "status",
                 render: function (file, field, detailIndex, fileEntryBlockProps) {
