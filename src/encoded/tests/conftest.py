@@ -39,8 +39,7 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We 
 
 
 # INDEXER_NAMESPACE_FOR_TESTING is defined in src/encoded/tests/workbook_fixtures.py
-    return settings
-
+# (In CGAP it would be defined here, and maybe in the future it will be for Fourfront, too.)
 
 def pytest_configure():
     logging.basicConfig(format='%(message)s')
