@@ -1,9 +1,12 @@
 import json
 import pytest
+import time
+import webtest
 
-from dcicutils.misc_utils import Retry
-from dcicutils.qa_utils import notice_pytest_fixtures
+
 from datetime import datetime, timedelta
+from dcicutils.misc_utils import Retry, ignored, local_attrs
+from dcicutils.qa_utils import notice_pytest_fixtures
 from snovault import TYPES, COLLECTIONS
 from snovault.elasticsearch import create_mapping
 from snovault.elasticsearch.indexer_utils import get_namespaced_index
@@ -543,10 +546,63 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
     assert len(res.json['@graph']) == 0
 
 
-@Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
-def check_item_type(client, item_type):
-    # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
-    return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
+class ItemTypeChecker:
+
+    @staticmethod
+    @Retry.retry_allowed('ItemTypeCheckerf.check_item_type', wait_seconds=1, retries_allowed=5)
+    def check_item_type(client, item_type, deleted=False):
+        # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
+        #
+        # We retry a lot of times because it's still fast if things are working quickly, but if it's
+        # slow it's better to wait than fail the test. Slowness is not what we're trying to check for here.
+        # And even if it's slow for one item, that same wait time will help others have time to catch up,
+        # so it shouldn't be slow for others. At least that's the theory. -kmp 27-Jan-2021
+        extra = "&status=deleted" if deleted else ""
+        return client.get('/%s?limit=all%s' % (item_type, extra), status=[200, 301]).follow()
+
+
+    CONSIDER_DELETED = True
+    DELETED_SEEN = {}
+
+    @classmethod
+    def reset_deleted(cls):
+        cls.DELETED_SEEN = {}
+
+    @classmethod
+    def deleted_seen(cls):
+        total_deleted = 0
+        for item_type, item_deleted_count in cls.DELETED_SEEN.items():
+            ignored(item_type)
+            total_deleted += item_deleted_count
+        return total_deleted
+
+    @classmethod
+    def get_all_items_of_type(cls, client, item_type):
+        if cls.CONSIDER_DELETED:
+            try:
+                res = cls.check_item_type(client, item_type)
+                items_not_deleted = res.json.get('@graph', [])
+            except webtest.AppError:
+                items_not_deleted = []
+            try:
+                res = cls.check_item_type(client, item_type, deleted=True)
+                items_deleted = res.json.get('@graph', [])
+            except webtest.AppError:
+                items_deleted = []
+            if items_deleted:
+                cls.DELETED_SEEN[item_type] = items_deleted
+            else:
+                cls.DELETED_SEEN.pop(item_type, None)  # delete entry if present but we want it empty
+            return items_not_deleted + items_deleted
+        else:
+            res = cls.check_item_type(client, item_type)
+            items_not_deleted = res.json.get('@graph', [])
+            return items_not_deleted
+
+# @Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
+# def check_item_type(client, item_type):
+#     # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
+#     return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
 
 
 @pytest.mark.flaky
@@ -554,16 +610,45 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     create_mapping.run(app, sync_index=True)
-    # check counts and ensure they're equal
-    testapp_counts = testapp.get('/counts')
-    split_counts = testapp_counts.json['db_es_total'].split()
-    assert(int(split_counts[1]) == int(split_counts[3]))  # 2nd is db, 4th is es
+    # re_index = False
+    # time.sleep(3)  # Give SQS and/or indexer a chance for things to subside
+    # indexer_status = testapp.get("/indexer_status?format=json").json
+    # for k, v in indexer_status.items():
+    #     if isinstance(v, int) and v > 0:
+    #         if k.startswith("dlq"):
+    #             raise AssertionError(f"DLQ is not empty: {indexer_status}")
+    #         else:
+    #             re_index = True
+    # if re_index:
+    #     testapp.post_json('/index', {})
+    retried = False
+    while True:
+        # check counts and ensure they're equal
+        testapp_counts = testapp.get('/counts')
+        # e.g., {"db_es_total": "DB: 748 ES: 748 ", ...}
+        db_es_total = testapp_counts.json['db_es_total']
+        split_counts = db_es_total.split()
+        db_total = int(split_counts[1])
+        es_total = int(split_counts[3])
+        if db_total == es_total or retried:
+            print("Counts are not aligned, but we've tried once already.")
+            break
+        retried = True
+        print("Posting /index anew because counts are not aligned")
+        # import pdb; pdb.set_trace()
+        testapp.post_json('/index', {})
+   # e.g., {..., "db_es_compare": {"AnalysisStep": "DB: 26 ES: 26 ", ...}, ...}
     for item_name, item_counts in testapp_counts.json['db_es_compare'].items():
+        print("item_name=", item_name, "item_counts=", item_counts)
         # make sure counts for each item match ES counts
         split_item_counts = item_counts.split()
         db_item_count = int(split_item_counts[1])
         es_item_count = int(split_item_counts[3])
-        assert db_item_count == es_item_count
+        try:
+            assert db_item_count == es_item_count
+        except Exception as e:
+            print(f"indexer namespace={app.registry.settings['indexer.namespace']!r}")
+            import pdb; pdb.set_trace()
 
         # check ES counts directly. Must skip abstract collections
         # must change counts result ("ItemName") to item_type format
@@ -576,8 +661,10 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         if es_item_count == 0:
             continue
         # check items in search result individually
-        res = check_item_type(client=testapp, item_type=item_type)
-        for item_res in res.json.get('@graph', []):
+        search_url = '/%s?limit=all' % item_type
+        print("search_url=", search_url)
+        items = ItemTypeChecker.get_all_items_of_type(client=testapp, item_type=item_type)
+        for item_res in items:
             index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                     id=item_res['uuid'])['_source']
             # make sure that the linked_uuids match the embedded data
@@ -596,7 +683,49 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
                 html_res = htmltestapp.get(item_res['@id'])
                 assert html_res.body.startswith(b'<!DOCTYPE html>')
             except Exception as e:
+                ignored(e)
                 pass
+    if ItemTypeChecker.CONSIDER_DELETED:
+        print(f"(CONSIDER_DELETED) Items deleted = {ItemTypeChecker.DELETED_SEEN}")
+        print(f"db_total={db_total} es_total={es_total} deleted_seen={ItemTypeChecker.deleted_seen()}")
+        assert(db_total == es_total + ItemTypeChecker.deleted_seen())  # 2nd is db, 4th is es
+    else:
+        print(f"(not CONSIDER_DELETED) db_total={db_total} es_total={es_total} deleted_seen={ItemTypeChecker.deleted_seen()}")
+        assert(db_total == es_total)  # 2nd is db, 4th is es
+
+@pytest.mark.manual
+@pytest.mark.skip
+def test_index_data_workbook_after_posting_deleted_page_c4_570(workbook, testapp, html_testapp):
+    """
+    Regression test for C4-570.
+
+    This test takes a long time to run since it runs a long-running test three different ways.
+    This test must be invoked manually. 'make test' and 'make travis-test' will skip it because it's marked manual.
+    See details at https://hms-dbmi.atlassian.net/browse/C4-570
+    """
+
+    # Running the test this way should work fine
+    test_index_data_workbook(workbook, testapp, html_testapp)
+
+    # But now let's add a deleted page.
+    # test_index_data_workbook will fail if preceded by anything that makes a deleted page
+    testapp.post_json('/pages/',
+                      {
+                          "name": "help/user-guide/sample-deleted-page",
+                          "title": "Sample Deleted Page",
+                          "content": [],
+                          "uuid": "db807a0f-2e76-4c77-a6bb-313a9c174252",
+                          "status": "deleted"
+                      },
+                      status=201)
+
+    # This test will now protect itself against failure.
+    test_index_data_workbook(workbook, testapp, html_testapp)
+
+    # And we can see that if we hadn't protected ourselves against failure, this would reliably fail.
+    with pytest.raises(webtest.AppError):
+        with local_attrs(ItemTypeChecker, CONSIDER_DELETED=False):
+            test_index_data_workbook(workbook, testapp, html_testapp)
 
 
 ######################################
