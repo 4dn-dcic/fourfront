@@ -610,17 +610,6 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct
     create_mapping.run(app, sync_index=True)
-    # re_index = False
-    # time.sleep(3)  # Give SQS and/or indexer a chance for things to subside
-    # indexer_status = testapp.get("/indexer_status?format=json").json
-    # for k, v in indexer_status.items():
-    #     if isinstance(v, int) and v > 0:
-    #         if k.startswith("dlq"):
-    #             raise AssertionError(f"DLQ is not empty: {indexer_status}")
-    #         else:
-    #             re_index = True
-    # if re_index:
-    #     testapp.post_json('/index', {})
     retried = False
     while True:
         # check counts and ensure they're equal
