@@ -450,6 +450,12 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         return null;
     }
 
+    /**
+     * append status column to columnHeaders if it is not included already and there are multiple status found in files
+     * @param {*} columnHeaders 
+     * @param {*} files 
+     * @returns object of { status, columnHeaders }. status field is string if all files have the same status otherwise string[]
+     */
     static getStatusAndColHeaders(columnHeaders, files) {
         const status = SupplementaryFilesOPFCollection.collectionStatus(files);
 
