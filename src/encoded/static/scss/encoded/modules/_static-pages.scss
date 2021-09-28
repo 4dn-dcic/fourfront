@@ -1141,6 +1141,29 @@ $carousel-height : 240px;
 
 
 /*********************************************
+ *** About Page ***
+ *********************************************/
+
+.help-entry.static-section-entry {
+    img.person-image-small {
+        width: 90px;
+        height: 110px;
+        margin-right: 10px;
+        float: left;
+        -webkit-border-radius: 10%;
+        -moz-border-radius: 10%;
+        -ms-border-radius: 10%;
+        border-radius: 10%;
+        -webkit-filter: grayscale(25%);
+        -moz-filter: grayscale(25%);
+        filter: grayscale(25%);
+    }
+    .team-member-entry {
+        margin-bottom: 80px;
+    }
+}
+
+/*********************************************
  *** Temporary NOFIC Matrices Side by Side ***
  *********************************************/
 
