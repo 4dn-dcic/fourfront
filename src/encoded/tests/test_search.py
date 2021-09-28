@@ -1,6 +1,5 @@
 import json
 import pytest
-import time
 import webtest
 
 
@@ -22,11 +21,11 @@ pytestmark = [
     pytest.mark.schema,
     # pytest.mark.indexing,
     pytest.mark.workbook,
-    #pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
+    # pytest.mark.flaky(rerun_filter=customized_delay_rerun(sleep_seconds=10))
 ]
 
 
-### IMPORTANT
+# == IMPORTANT ==
 # uses the inserts in ./data/workbook_inserts
 # design your tests accordingly
 notice_pytest_fixtures(app_settings, app, workbook)
@@ -47,8 +46,9 @@ def recursively_find_uuids(json, uuids):
 
 
 def test_search_view(workbook, testapp):
+    notice_pytest_fixtures(workbook)
     res = testapp.get('/search/?type=Item').json
-    assert res['@type'] == ['ItemSearchResults','Search']
+    assert res['@type'] == ['ItemSearchResults', 'Search']
     assert res['@id'] == '/search/?type=Item'
     assert res['@context'] == '/terms/'
     assert res['notification'] == 'Success'
@@ -60,6 +60,7 @@ def test_search_view(workbook, testapp):
 
 
 def test_search_with_no_query(workbook, testapp):
+    notice_pytest_fixtures(workbook, testapp)
     # using /search/ (with no query) should default to /search/?type=Item
     # thus, should satisfy same assertions as test_search_view
     res = testapp.get('/search/').follow(status=200)
@@ -79,6 +80,7 @@ def test_search_with_no_query(workbook, testapp):
 
 
 def test_collections_redirect_to_search(workbook, testapp):
+    notice_pytest_fixtures(workbook, testapp)
     # we removed the collections page and redirect to search of that type
     # redirected_from is not used for search
     res = testapp.get('/biosamples/', status=301).follow(status=200)
@@ -95,6 +97,7 @@ def test_collections_redirect_to_search(workbook, testapp):
 
 
 def test_search_with_embedding(workbook, testapp):
+    notice_pytest_fixtures(workbook, testapp)
     res = testapp.get('/search/?type=Biosample&limit=all').json
     # Use a specific biosample, found by accession from test data
     # Check the embedding /types/biosample.py entry; test ensures
@@ -117,6 +120,7 @@ def test_file_search_type(workbook, testapp):
     """ Tests that searching on a type that inherits from File adds a FileSearchResults
         identifier in the @type field
     """
+    notice_pytest_fixtures(workbook, testapp)
     res = testapp.get('/search/?type=FileProcessed').json
     assert 'FileSearchResults' in res['@type']
     res = testapp.get('/search/?type=Biosample').json
@@ -216,10 +220,10 @@ def test_search_facets_and_columns_order(workbook, testapp, registry):
     schema_facets = [fct for fct in schema_facets if not fct[1].get('disabled', False)]
     sort_facets = sorted(schema_facets, key=lambda fct: fct[1].get('order', 0))
     res = testapp.get('/search/?type=ExperimentSetReplicate&limit=all').json
-    for i,val in enumerate(sort_facets):
+    for i, val in enumerate(sort_facets):
         assert res['facets'][i]['field'] == val[0]
     # assert order of columns when we officially upgrade to python 3.6 (ordered dicts)
-    for key,val in schema.get('columns', {}).items():
+    for key, val in schema.get('columns', {}).items():
         assert res['columns'][key]['title'] == val['title']
 
 
@@ -363,19 +367,19 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     FILE_ACCESSION_COL_INDEX = 3
     FILE_DOWNLOAD_URL_COL_INDEX = 0
 
-    def check_tsv(result_rows, len_requested = None):
+    def check_tsv(result_rows, len_requested=None):
         info_row = result_rows.pop(0)
         header_row = result_rows.pop(0)
 
         assert header_row[FILE_ACCESSION_COL_INDEX] == 'File Accession'
-        assert header_row.index('File Download URL') == FILE_DOWNLOAD_URL_COL_INDEX # Ensure we have this column
+        assert header_row.index('File Download URL') == FILE_DOWNLOAD_URL_COL_INDEX  # Ensure we have this column
         assert len(result_rows) > 0 # We at least have some rows.
 
         for row_index in range(1):
-            assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) > 4 # We have a value for File Accession
-            assert 'http' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # Make sure it seems like a valid URL.
+            assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) > 4  # We have a value for File Accession
+            assert 'http' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]  # Make sure it seems like a valid URL.
             assert '/@@download/' in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]
-            assert result_rows[row_index][FILE_ACCESSION_COL_INDEX] in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX] # That File Accession is also in File Download URL of same row.
+            assert result_rows[row_index][FILE_ACCESSION_COL_INDEX] in result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX]  # That File Accession is also in File Download URL of same row.
             assert len(result_rows[row_index][FILE_ACCESSION_COL_INDEX]) < len(result_rows[row_index][FILE_DOWNLOAD_URL_COL_INDEX])
 
         # Last some rows should be 'summary' rows. And have empty spaces for 'Download URL' / first column.
@@ -405,22 +409,27 @@ def test_metadata_tsv_view(workbook, htmltestapp):
     check_tsv(result_rows)
 
     # Perform POST w/ accession triples (main case, for BrowseView downloads)
-    res2_post_data = { # N.B. '.post', not '.post_json' is used. This dict is converted to POST form values, with key values STRINGIFIED, not to POST JSON request.
-        "accession_triples" : [
-            ["4DNESAAAAAA1","4DNEXO67APU1","4DNFIO67APU1"],
-            ["4DNESAAAAAA1","4DNEXO67APU1","4DNFIO67APT1"],
-            ["4DNESAAAAAA1","4DNEXO67APT1","4DNFIO67APV1"],
-            ["4DNESAAAAAA1","4DNEXO67APT1","4DNFIO67APY1"],
-            ["4DNESAAAAAA1","4DNEXO67APV1","4DNFIO67APZ1"],
-            ["4DNESAAAAAA1","4DNEXO67APV1","4DNFIO67AZZ1"]
+
+    # N.B. '.post', not '.post_json' is used. This dict is converted to POST form values,
+    # with key values STRINGIFIED, not to POST JSON request.
+    res2_post_data = {
+        "accession_triples": [
+            ["4DNESAAAAAA1", "4DNEXO67APU1", "4DNFIO67APU1"],
+            ["4DNESAAAAAA1", "4DNEXO67APU1", "4DNFIO67APT1"],
+            ["4DNESAAAAAA1", "4DNEXO67APT1", "4DNFIO67APV1"],
+            ["4DNESAAAAAA1", "4DNEXO67APT1", "4DNFIO67APY1"],
+            ["4DNESAAAAAA1", "4DNEXO67APV1", "4DNFIO67APZ1"],
+            ["4DNESAAAAAA1", "4DNEXO67APV1", "4DNFIO67AZZ1"]
         ],
-        'download_file_name' : 'metadata_TEST.tsv'
+        'download_file_name': 'metadata_TEST.tsv'
     }
 
-    res2 = htmltestapp.post('/metadata/?type=ExperimentSetReplicate', { k : json.dumps(v) for k,v in res2_post_data.items() }) # NEWER URL FORMAT
+    res2 = htmltestapp.post('/metadata/?type=ExperimentSetReplicate',  # NEWER URL FORMAT
+                            {k : json.dumps(v)
+                             for k,v in res2_post_data.items() })
 
     assert 'text/tsv' in res2.content_type
-    result_rows = [ row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n') ]
+    result_rows = [row.rstrip(' \r').split('\t') for row in res2.body.decode('utf-8').split('\n')]
 
     check_tsv(result_rows, len(res2_post_data['accession_triples']))
 
@@ -517,11 +526,11 @@ def test_search_with_no_value(workbook, testapp):
 def test_search_with_static_header(workbook, testapp):
     """ Performs a search which should be accompanied by a search header """
     search = '/search/?type=Workflow'
-    res_json = testapp.get(search, status=404).json # no items, just checking hdr
+    res_json = testapp.get(search, status=404).json  # no items, just checking hdr
     assert 'search_header' in res_json
     assert 'content' in res_json['search_header']
     assert res_json['search_header']['title'] == 'Workflow Information'
-    search = '/search/?type=workflow' # check type resolution
+    search = '/search/?type=workflow'  # check type resolution
     res_json = testapp.get(search, status=404).json
     assert 'search_header' in res_json
     assert 'content' in res_json['search_header']
@@ -599,11 +608,6 @@ class ItemTypeChecker:
             items_not_deleted = res.json.get('@graph', [])
             return items_not_deleted
 
-# @Retry.retry_allowed('test_index_data_workbook.check', wait_seconds=1, retries_allowed=5)
-# def check_item_type(client, item_type):
-#     # This might get a 404 if not enough time has elapsed, so try a few times before giving up.
-#     return client.get('/%s?limit=all' % item_type, status=[200, 301]).follow()
-
 
 @pytest.mark.flaky
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
@@ -624,7 +628,6 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
             break
         retried = True
         print("Posting /index anew because counts are not aligned")
-        # import pdb; pdb.set_trace()
         testapp.post_json('/index', {})
    # e.g., {..., "db_es_compare": {"AnalysisStep": "DB: 26 ES: 26 ", ...}, ...}
     for item_name, item_counts in testapp_counts.json['db_es_compare'].items():
@@ -633,11 +636,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         split_item_counts = item_counts.split()
         db_item_count = int(split_item_counts[1])
         es_item_count = int(split_item_counts[3])
-        try:
-            assert db_item_count == es_item_count
-        except Exception as e:
-            print(f"indexer namespace={app.registry.settings['indexer.namespace']!r}")
-            import pdb; pdb.set_trace()
+        assert db_item_count == es_item_count
 
         # check ES counts directly. Must skip abstract collections
         # must change counts result ("ItemName") to item_type format
@@ -728,15 +727,17 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
     search_result = testapp.get('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate').json
     search_result_count = len(search_result['@graph'])
 
-    # We should get back same count as from search results here. But on Travis oftentime we don't, so we compare either against count of inserts --or-- count returned from regular results.
+    # We should get back same count as from search results here.
+    # But on Travis oftentime we don't, so we compare either against count of inserts
+    # --or-- count returned from regular results.
     exp_set_test_inserts = list(get_inserts('inserts', 'experiment_set_replicate'))
     count_exp_set_test_inserts = len(exp_set_test_inserts)
 
     # Now, test the endpoint after ensuring we have the data correctly loaded into ES.
     # We should get back same count as from search results here.
     res = testapp.post_json('/bar_plot_aggregations', {
-        "search_query_params" : { "type" : ['ExperimentSetReplicate'] },
-        "fields_to_aggregate_for" : ["experiments_in_set.experiment_type.display_title", "award.project"]
+        "search_query_params": {"type": ['ExperimentSetReplicate']},
+        "fields_to_aggregate_for": ["experiments_in_set.experiment_type.display_title", "award.project"]
     }).json
 
     print()
@@ -745,22 +746,22 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
 
     assert (res['total']['experiment_sets'] == count_exp_set_test_inserts) or (res['total']['experiment_sets'] == search_result_count)
 
-    assert res['field'] == 'experiments_in_set.experiment_type.display_title' # top level field
+    assert res['field'] == 'experiments_in_set.experiment_type.display_title'  # top level field
 
     assert isinstance(res['terms'], dict) is True
 
     assert len(res["terms"].keys()) > 0
 
-    #assert isinstance(res['terms']["CHIP-seq"], dict) is True # A common term likely to be found.
+    # assert isinstance(res['terms']["CHIP-seq"], dict) is True # A common term likely to be found.
 
-    #assert res["terms"]["CHIP-seq"]["field"] == "award.project" # Child-field
+    # assert res["terms"]["CHIP-seq"]["field"] == "award.project" # Child-field
 
     # We only have 4DN as single award.project in test inserts so should have values in all buckets, though probably less than total.
-    #assert res["terms"]["CHIP-seq"]["total"]["experiment_sets"] > 0
-    #assert res["terms"]["CHIP-seq"]["total"]["experiment_sets"] < count_exp_set_test_inserts
+    # assert res["terms"]["CHIP-seq"]["total"]["experiment_sets"] > 0
+    # assert res["terms"]["CHIP-seq"]["total"]["experiment_sets"] < count_exp_set_test_inserts
 
-    #assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] > 0
-    #assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] < count_exp_set_test_inserts
+    # assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] > 0
+    # assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] < count_exp_set_test_inserts
 
 
 @pytest.fixture(scope='session')
