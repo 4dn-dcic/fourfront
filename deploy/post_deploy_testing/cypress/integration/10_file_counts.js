@@ -1,14 +1,14 @@
 
-describe('Experiments - Total Count', function () {
+describe('Processed/Raw/Supplementary Files - Counts', function () {
 
-    context('Ensure files total count.', function () {
+    context('Visit random(ish) experiment sets and experiments containing processed/raw/supplementary files', function () {
 
-        it('Visit experiment set page and total count match', function () {
-        
+        it('Visit experiment set pages and compare file counts on tab header, title and download button (firstlyi ensure that all selected)', function () {
+
             for (let interval = 0; interval < 5; interval++) {
-                
+
                 cy.visit('/search/?type=ExperimentSet&experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value').end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).end();
+                    .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
                 cy.scrollToBottom().then(() => {
                     cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * (interval + 1)) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
@@ -44,40 +44,40 @@ describe('Experiments - Total Count', function () {
                                     }).get(".rc-tabs-tabpane.rc-tabs-tabpane-active .overflow-hidden h3.tab-section-title .text-400").first().then(function ($tabFileCount) {
                                         tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
                                     }).end().get(".rc-tabs-tab-active .tab").first().then(function ($tabKeyTitle) {
-                                        tabKeyFileCount= $tabKeyTitle.text().trim().split (' ');
+                                        tabKeyFileCount = $tabKeyTitle.text().trim().split(' ');
                                         cy.expect(downloadFileCount).equal(tabKeyFileCount[0]);
                                     }).end();
                             }
                             else if (tabKey === 'processed-files') {
                                 return cy.wrap($tab).click({ 'force': true }).end()
-                                .wait(200)
-                                .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                                .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
-                                    downloadFileCount = $downloadCountFile.text();
-                                }).get('.processed-files-table-section.exp-table-section h3.tab-section-title .text-400').first().then(function ($tabFileCount) {
-                                    tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
-                                }).end().get(".rc-tabs-tab-active .tab").first().then(function ($tabKeyTitle) {
-                                    tabKeyFileCount= $tabKeyTitle.text().trim().split (' ');
-                                    cy.expect(downloadFileCount).equal(tabKeyFileCount[0]);
-                                }).end();
+                                    .wait(200)
+                                    .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                                    .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
+                                        downloadFileCount = $downloadCountFile.text();
+                                    }).get('.processed-files-table-section.exp-table-section h3.tab-section-title .text-400').first().then(function ($tabFileCount) {
+                                        tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
+                                    }).end().get(".rc-tabs-tab-active .tab").first().then(function ($tabKeyTitle) {
+                                        tabKeyFileCount = $tabKeyTitle.text().trim().split(' ');
+                                        cy.expect(downloadFileCount).equal(tabKeyFileCount[0]);
+                                    }).end();
                             }
 
                         }).end();
                         cy.wrap($tab).click({ 'force': true }).end()
                             .wait(200)
                             .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                            
+
                     }).end();
                 }).end();
             }
 
         });
 
-        it('Visit experiment page and total count match', function () {
+        it('Visit experiment pages and compare file counts on tab header, title and download button (firstlyi ensure that all selected)', function () {
 
             for (let interval = 0; interval < 5; interval++) {
                 cy.visit('/search/?type=Experiment&files.accession!=No+value&processed_files.accession!=No+value&other_processed_files.files.accession%21=No+value').wait(500).end()
-                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
+                    .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
 
                 cy.scrollToBottom().then(() => {
                     cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * (interval + 1)) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(200).end();
@@ -114,23 +114,23 @@ describe('Experiments - Total Count', function () {
                                                 tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
                                             }).end()
                                             .get(".rc-tabs-tab-active .tab").first().then(function ($tabKeyTitle) {
-                                                tabKeyFileCount= $tabKeyTitle.text().trim().split (' ');
+                                                tabKeyFileCount = $tabKeyTitle.text().trim().split(' ');
                                                 cy.expect(downloadFileCount).equal(tabKeyFileCount[0]);
                                             }).end();
                                     }
-                                    else if(tabKey === 'processed-files') {
+                                    else if (tabKey === 'processed-files') {
                                         return cy.wrap($tab).click({ 'force': true }).end()
-                                        .wait(200)
-                                        .get('.rc-tabs-content .rc-tabs-tabpane-active')
-                                        .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
-                                            downloadFileCount = $downloadCountFile.text();
-                                        }).get('.processed-files-table-section.exp-table-section h3.tab-section-title .text-400').first().then(function ($tabFileCount) {
-                                            tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
-                                        }).end()
-                                        .get(".rc-tabs-tab-active .tab").first().then(function ($tabKeyTitle) {
-                                            tabKeyFileCount= $tabKeyTitle.text().trim().split (' ');
-                                            cy.expect(downloadFileCount).equal(tabKeyFileCount[0]);
-                                        }).end();
+                                            .wait(200)
+                                            .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                                            .get(".rc-tabs-tabpane.rc-tabs-tabpane-active  .count-to-download-integer").first().then(function ($downloadCountFile) {
+                                                downloadFileCount = $downloadCountFile.text();
+                                            }).get('.processed-files-table-section.exp-table-section h3.tab-section-title .text-400').first().then(function ($tabFileCount) {
+                                                tabFileCount = $tabFileCount.text(); cy.expect(downloadFileCount).equal(tabFileCount);
+                                            }).end()
+                                            .get(".rc-tabs-tab-active .tab").first().then(function ($tabKeyTitle) {
+                                                tabKeyFileCount = $tabKeyTitle.text().trim().split(' ');
+                                                cy.expect(downloadFileCount).equal(tabKeyFileCount[0]);
+                                            }).end();
                                     }
 
                                 }).end();
@@ -145,7 +145,7 @@ describe('Experiments - Total Count', function () {
                                         });
                                     }).end()
                                     .root().should('not.contain', "client-side error")
-                                    .end()                                 
+                                    .end()
 
                             }).end();
                         }).end();
