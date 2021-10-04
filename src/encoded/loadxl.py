@@ -9,6 +9,7 @@ import structlog
 import webtest
 
 from base64 import b64encode
+from dcicutils.misc_utils import ignored
 from PIL import Image
 from pkg_resources import resource_filename
 from pyramid.paster import get_app
@@ -21,10 +22,12 @@ from .server_defaults import add_last_modified
 text = type(u'')
 logger = structlog.getLogger(__name__)
 
+
 def includeme(config):
     # provide an endpoint to do bulk uploading that just uses loadxl
     config.add_route('load_data', '/load_data')
     config.scan(__name__)
+
 
 # order of items references with linkTo in a field in  'required' in schemas
 ORDER = [
@@ -41,6 +44,7 @@ ORDER = [
     'workflow',
     'vendor',
 ]
+
 
 IS_ATTACHMENT = [
     'attachment',
@@ -97,6 +101,7 @@ def load_data_view(context, request):
     2) store in form of {'item_type': [items], 'item_type2': [items]}
        item_type should be same as insert file names i.e. file_fastq
     """
+    ignored(context)
     # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
     config_uri = request.json.get('config_uri', 'production.ini')
     patch_only = request.json.get('patch_only', False)
@@ -128,8 +133,8 @@ def load_data_view(context, request):
     # this directly calls load_all_gen, instead of load_all
     if iter_resp:
         return Response(
-            content_type = 'text/plain',
-            app_iter = LoadGenWrapper(
+            content_type='text/plain',
+            app_iter=LoadGenWrapper(
                 load_all_gen(testapp, inserts, None, overwrite=overwrite,
                              itype=itype, from_json=from_json, patch_only=patch_only)
             )
@@ -302,6 +307,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
         overwrite (bool)   : if the database contains the item already, skip or patch
         itype (list or str): limit selection to certain type/types
         from_json (bool)   : if set to true, inserts should be dict instead of folder name
+        patch_only (bool)  : if set to true will only do second round patch - no posts
 
     Yields:
         Bytes with information on POSTed/PATCHed items
@@ -388,7 +394,6 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
             first_fields = list(set(req_fields+ids))
             skip_existing_items = set()
             posted = 0
-            patched = 0
             skip_exist = 0
             for an_item in store[a_type]:
                 try:
@@ -423,12 +428,14 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                         # raise StopIteration
             second_round_items[a_type] = [i for i in store[a_type] if i['uuid'] not in skip_existing_items]
             logger.info('{} 1st: {} items posted, {} items exists.'.format(a_type, posted, skip_exist))
-            logger.info('{} 1st: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
+            logger.info('{} 1st: {} items will be patched in second round'
+                        .format(a_type, str(len(second_round_items.get(a_type, [])))))
     elif overwrite:
         logger.info('Posting round skipped')
         for a_type in all_types:
             second_round_items[a_type] = [i for i in store[a_type]]
-            logger.info('{}: {} items will be patched in second round'.format(a_type, str(len(second_round_items.get(a_type, [])))))
+            logger.info('{}: {} items will be patched in second round'
+                        .format(a_type, str(len(second_round_items.get(a_type, [])))))
 
     # Round II - patch the rest of the metadata
     rnd = ' 2nd' if not patch_only else ''
