@@ -15,7 +15,7 @@ import webtest
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 # from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from dcicutils.env_utils import get_mirror_env_from_context, FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE
+from dcicutils.env_utils import get_mirror_env_from_context, is_stg_or_prd_env
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from sentry_sdk.integrations.pyramid import PyramidIntegration
@@ -221,7 +221,7 @@ def main(global_config, **local_config):
 
     # initialize sentry reporting, split into "production" and "mastertest", do nothing in local/testing
     current_env = settings.get('env.name', None)
-    if current_env in [FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE]:
+    if is_stg_or_prd_env(current_env):
         sentry_sdk.init("https://0d46fafce1d04ea2bfbe11ff15ca896e@o427308.ingest.sentry.io/5379985",
                         integrations=[PyramidIntegration(), SqlalchemyIntegration()])
     elif current_env is not None:
