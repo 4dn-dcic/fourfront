@@ -16,17 +16,12 @@ from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
-from snovault.util import generate_indexer_namespace_for_testing
-from .. import main
+# from snovault.util import generate_indexer_namespace_for_testing
 from .conftest_settings import make_app_settings_dictionary
+from .. import main
 
 
-# Done in pytest.ini now.
-#
-# pytest_plugins = [
-#     'encoded.tests.datafixtures',
-#     'snovault.tests.serverfixtures',
-# ]
+
 
 
 @pytest.fixture(autouse=True)
@@ -35,13 +30,16 @@ def autouse_external_tx(external_tx):
 
 
 @pytest.fixture(scope='session')
-def app_settings(request, wsgi_server_host_port, conn, DBSession):
+def app_settings(request, wsgi_server_host_port, conn, DBSession):  # noQA - We didn't choose the fixture name.
+    notice_pytest_fixtures(request, wsgi_server_host_port, conn, DBSession)
     settings = make_app_settings_dictionary()
     settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
-    # add some here for file testing
     settings[DBSESSION] = DBSession
     return settings
 
+
+# INDEXER_NAMESPACE_FOR_TESTING is defined in src/encoded/tests/workbook_fixtures.py
+# (In CGAP it would be defined here, and maybe in the future it will be for Fourfront, too.)
 
 def pytest_configure():
     logging.basicConfig(format='%(message)s')
@@ -63,6 +61,7 @@ def pytest_configure():
 
 @pytest.yield_fixture
 def threadlocals(request, dummy_request, registry):
+    notice_pytest_fixtures(request, dummy_request, registry)
     threadlocal_manager.push({'request': dummy_request, 'registry': registry})
     yield dummy_request
     threadlocal_manager.pop()
@@ -99,8 +98,7 @@ def dummy_request(root, registry, app):
 
 @pytest.fixture(scope='session')
 def app(app_settings):
-    """WSGI application level functional testing.
-    """
+    """ WSGI application level functional testing. """
     return main({}, **app_settings)
 
 
