@@ -10,9 +10,7 @@ import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/e
 import { console, object, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas } from './../util';
 
-import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
-import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import { Publications } from './components/Publications';
 import { HiGlassAdjustableWidthRow } from './HiGlassViewConfigView';
 import { isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
@@ -20,6 +18,7 @@ import { OverviewHeadingContainer } from './components/OverviewHeadingContainer'
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { ProcessedFilesStackedTable, RawFilesStackedTableExtendedColumns, QCMetricsTable } from './../browse/components/file-tables';
+import { addFilesStackedTableStatusColHeader } from './../util/experiments-transforms';
 
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -469,27 +468,9 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
         return null;
     }
 
-    /**
-     * append status column to columnHeaders if it is not included already and there are multiple status found in files
-     * @param {*} columnHeaders 
-     * @param {*} files 
-     * @returns object of { status, columnHeaders }. status field is string if all files have the same status otherwise string[]
-     */
     static getStatusAndColHeaders(columnHeaders, files) {
         const status = ExperimentSupplementaryFilesOPFCollection.collectionStatus(files);
-
-        if (Array.isArray(columnHeaders) && Array.isArray(status) && !_.any(columnHeaders, (colHeader) => colHeader.field === 'status')) {
-            const colHeaders = ExperimentSupplementaryFilesOPFCollection.defaultProps.columnHeaders.slice();
-            colHeaders.push({
-                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field: "status",
-                render: function (file, field, detailIndex, fileEntryBlockProps) {
-                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
-                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
-                }
-            });
-            return { status, columnHeaders: colHeaders };
-        }
-        return { status, columnHeaders };
+        return { status, columnHeaders: addFilesStackedTableStatusColHeader(columnHeaders, files, status) };
     }
 
     static defaultProps = {
@@ -528,31 +509,6 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
         );
     }
 
-    renderStatusIndicator(status){
-        if (!status) return null;
-
-        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
-        if (typeof status === 'string'){
-            const capitalizedStatus = Schemas.Term.toName("status", status);
-            return (
-                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className={outerClsName}>
-                    <i className="item-status-indicator-dot mr-07" data-status={status} />
-                    { capitalizedStatus }
-                </div>
-            );
-        } else {
-            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
-            return (
-                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                    <span className="indicators-collection d-inline-block mr-05">
-                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
-                    </span>
-                    Multiple
-                </div>
-            );
-        }
-    }
-
     render(){
         const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles, columnHeaders: propColumnHeaders } = this.props;
         const { files, higlass_view_config, description, title } = collection;
@@ -567,7 +523,7 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
 
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
-                { this.renderStatusIndicator(status) }
+                { renderStatusIndicator(status) }
                 <h4>
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -611,31 +567,6 @@ class ExperimentSupplementaryReferenceFilesSection extends React.PureComponent {
         this.state = { 'open' : props.defaultOpen };
     }
 
-    renderStatusIndicator(status){
-        if (!status) return null;
-
-        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
-        if (typeof status === 'string'){
-            const capitalizedStatus = Schemas.Term.toName("status", status);
-            return (
-                <div data-tip={"Status for all files is " + capitalizedStatus} className={outerClsName}>
-                    <i className="item-status-indicator-dot mr-07" data-status={status} />
-                    { capitalizedStatus }
-                </div>
-            );
-        } else {
-            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
-            return (
-                <div data-tip={"All files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                    <span className="indicators-collection d-inline-block mr-05">
-                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
-                    </span>
-                    Multiple
-                </div>
-            );
-        }
-    }
-
     toggleOpen(e){
         this.setState(function({ open  }){
             return { 'open' : !open };
@@ -650,7 +581,7 @@ class ExperimentSupplementaryReferenceFilesSection extends React.PureComponent {
         const { status, columnHeaders } = this.getStatusAndColHeaders(propColumnHeaders, files);
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
-                { this.renderStatusIndicator(status) }
+                { renderStatusIndicator(status) }
                 <h4 className="mb-15">
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -817,6 +748,31 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
                     const defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 2));
                     return <ExperimentSupplementaryFilesOPFCollection {..._.extend({ collection, index, defaultOpen }, commonProps)} key={index} />;
                 }) }
+            </div>
+        );
+    }
+}
+
+export function renderStatusIndicator(status) {
+    if (!status) return null;
+
+    const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
+    if (typeof status === 'string'){
+        const capitalizedStatus = Schemas.Term.toName("status", status);
+        return (
+            <div data-tip={"Status for all files is " + capitalizedStatus} className={outerClsName}>
+                <i className="item-status-indicator-dot mr-07" data-status={status} />
+                { capitalizedStatus }
+            </div>
+        );
+    } else {
+        const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
+        return (
+            <div data-tip={"Allx files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
+                <span className="indicators-collection d-inline-block mr-05">
+                    { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
+                </span>
+                Multiple
             </div>
         );
     }
