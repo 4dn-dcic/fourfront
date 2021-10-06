@@ -266,7 +266,7 @@ describe("HiGlass Display pages", function(){
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
                     expect(newJson.body.status).to.equal("released");
-                }).logout4DN();
+                }).wait(500).logout4DN();
         });
     });
 });
