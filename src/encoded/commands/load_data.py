@@ -2,7 +2,7 @@ import argparse
 import logging
 import structlog
 
-from dcicutils.env_utils import is_stg_or_prd_env
+from dcicutils.env_utils import permit_load_data
 from pyramid.paster import get_app
 from pyramid.path import DottedNameResolver
 from .. import configure_dbsession
@@ -12,6 +12,29 @@ log = structlog.getLogger(__name__)
 
 
 EPILOG = __doc__
+
+
+def load_data_should_proceed(env, allow_prod):
+    """ Returns True on whether or not load_data should proceed.
+
+    :param env: env we are on
+    :param allow_prod: prod argument from argparse, defaults to False
+    :return: True if load_data should continue, False otherwise
+    """
+
+    return permit_load_data(envname=env, allow_prod=allow_prod, orchestrated_app='fourfront')
+
+    # # do not run on a production environment unless we set --prod flag
+    # if is_stg_or_prd_env(env) and not allow_prod:
+    #     log.info('load_data: skipping, since we are on a production environment and --prod not used')
+    #     return False
+    #
+    # # do not run on hotseat since it is a prod snapshot
+    # if 'hotseat' in env:
+    #     log.info('load_data: skipping, since we are on hotseat')
+    #     return False
+    #
+    # return True
 
 
 def main():
@@ -40,20 +63,12 @@ def main():
     env = app.registry.settings.get('env.name', '')
 
     load_test_data = app.registry.settings.get('load_test_data')
+    allow_prod = args.prod
     log.info("load_data: load_test_data function is %s" % (load_test_data))
     load_test_data = DottedNameResolver().resolve(load_test_data)
 
-    # do not run on a production environment unless we set --prod flag
-    if is_stg_or_prd_env(env) and not args.prod:
-        log.info('load_data: skipping, since we are on a production environment and --prod not used')
-        return
-
-    # do not run on hotseat since it is a prod snapshot
-    if 'hotseat' in env:
-        log.info('load_data: skipping, since we are on hotseat')
-        return
-
-    load_test_data(app, args.overwrite)
+    if load_data_should_proceed(env, allow_prod):
+        load_test_data(app, args.overwrite)
 
 
 if __name__ == "__main__":

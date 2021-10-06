@@ -42,6 +42,10 @@ def test_should_transform():
     failed = []
     problem_area = set()
 
+    # TODO: I think this function is not doing the right thing. It SHOULD be looking at the Accept header
+    #       not at a constant list. For now a test of legacy behavior to keep it stable, but at some point
+    #       we should experiment with making it responsive to bids in the Accept field.
+    #       -kmp 18-Mar-2021
     with filtered_warnings("ignore", category=DeprecationWarning):
         # Suppresses this warning:
         #     DeprecationWarning: The behavior of .best_match for the Accept classes is currently being maintained
@@ -88,7 +92,7 @@ def test_should_transform():
                                     # it just can't be transformed at all.
                                     rule_applied = "content_type is not application/json"
                                     correct = not _should_transform
-                                # Lack of support for this case is a bug we should fix. -kmp 17-Mar-2021
+                                # TODO: Lack of support for this case is a bug we should fix. -kmp 17-Mar-2021
                                 # elif params.get("frame", "page") != 'page':
                                 #     rule_applied = "?frame=xxx is not page"
                                 #     correct = not _should_transform

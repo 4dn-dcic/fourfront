@@ -1,7 +1,6 @@
 import json
 import pytest
 
-from dcicutils.env_utils import is_stg_or_prd_env, CGAP_ENV_PRODUCTION_BLUE_NEW, CGAP_ENV_PRODUCTION_GREEN_NEW
 from dcicutils.ff_utils import patch_metadata
 from ..types.workflow import _wfoutput_bucket_for_env
 
@@ -99,10 +98,8 @@ def test_workflow_for_env():
     assert _wfoutput_bucket_for_env('fourfront-cgap-green') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
     assert _wfoutput_bucket_for_env('fourfront-cgap-blue') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
 
-    # There is a bug in is_stg_or_prd_env that needs to be fixed before these tests can run right:
-    if is_stg_or_prd_env(CGAP_ENV_PRODUCTION_BLUE_NEW) and is_stg_or_prd_env(CGAP_ENV_PRODUCTION_GREEN_NEW):
-        assert _wfoutput_bucket_for_env('cgap-blue') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
-        assert _wfoutput_bucket_for_env('cgap-green') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
+    assert _wfoutput_bucket_for_env('cgap-blue') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
+    assert _wfoutput_bucket_for_env('cgap-green') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
 
     # Other (non-prod) CGAP environments
 
