@@ -3,7 +3,7 @@ from pyramid.decorator import reify
 from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
 from .schema_formats import is_accession
 from dcicutils import lang_utils
-from dcicutils.env_utils import is_stg_or_prd_env
+from dcicutils.env_utils import infer_foursight_url_from_env
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -81,24 +81,13 @@ def health_check(config):
         response.content_type = 'application/json; charset=utf-8'
         settings = request.registry.settings
 
+        # TODO: This computation of app_url is unused. Is that a bug, or should we remove it? -kmp 4-Oct-2021
         app_url = request.application_url
         if not app_url.endswith('/'):
             app_url = ''.join([app_url, '/'])
 
         env_name = settings.get('env.name')
-        # TODO: Move this logic to dcicutils.env_utils
-        # change when we get a CGAP-specific Foursight
-        if env_name and env_name.startswith('fourfront-'):
-            if is_stg_or_prd_env(env_name):
-                if 'data.4dnucleome.org' in request.domain:  # constant should go in utils as well - Will
-                    fs_env = 'data'
-                else:
-                    fs_env = 'staging'
-            else:
-                fs_env = env_name[len('fourfront-'):]
-            foursight_url = 'https://foursight.4dnucleome.org/view/' + fs_env
-        else:
-            foursight_url = None
+        foursight_url = infer_foursight_url_from_env(request, env_name)
 
         response_dict = {
 
@@ -253,7 +242,7 @@ class FourfrontRoot(Root):
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         return_list = []
         for section_name in sections_to_get:
-            try: # Can be caused by 404 / Not Found during indexing
+            try:  # Can be caused by 404 / Not Found during indexing
                 res = request.embed('/static-sections', section_name, '@@embedded', as_user=user)
                 return_list.append(res)
             except KeyError:
@@ -265,11 +254,11 @@ class FourfrontRoot(Root):
         "type": "array"
     }, category="page")
     def carousel(self, request):
-        '''Returns list of carousel slides'''
+        """Returns list of carousel slides"""
         user = request._auth0_authenticated if hasattr(request, '_auth0_authenticated') else True
         try:
             return request.embed('/search/?type=StaticSection&section_type=Home+Page+Slide&sort=name', as_user=user).get('@graph', [])
-        except KeyError: # Can be caused by 404 / Not Found during indexing
+        except KeyError:  # Can be caused by 404 / Not Found during indexing
             return []
 
     # It is no longer used at the moment, replaced by Twitter feed. 

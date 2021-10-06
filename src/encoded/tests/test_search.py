@@ -688,7 +688,7 @@ def test_index_data_workbook_after_posting_deleted_page_c4_570(workbook, testapp
     Regression test for C4-570.
 
     This test takes a long time to run since it runs a long-running test three different ways.
-    This test must be invoked manually. 'make test' and 'make travis-test' will skip it because it's marked manual.
+    This test must be invoked manually. 'make test' and 'make remote-test' will skip it because it's marked manual.
     See details at https://hms-dbmi.atlassian.net/browse/C4-570
     """
 

@@ -132,14 +132,14 @@ test-npm:
 test-unit:
 	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"
 
-travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
-	make travis-test-npm
-	make travis-test-unit
+remote-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
+	make remote-test-npm
+	make remote-test-unit
 
-travis-test-npm:  # Note this only does the 'not indexing' tests
+remote-test-npm:  # Note this only does the 'not indexing' tests
 	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
-travis-test-unit:  # Note this does the 'indexing' tests
+remote-test-unit:  # Note this does the 'indexing' tests
 	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
