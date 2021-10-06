@@ -1,11 +1,13 @@
 'use strict';
 
+import React from 'react';
 import _ from 'underscore';
 import { atIdFromObject } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/object';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 
 // eslint-disable-next-line no-unused-vars
 import { Item, File, Experiment, ExperimentSet } from './typedefs';
+import { Schemas } from './';
 
 
 
@@ -481,4 +483,23 @@ export function groupExperimentsByBiosample(experiments){
         .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
         .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
         .value();
+}
+
+/**
+ * append status column to columnHeaders if it is not included already and there are multiple status found in files
+ * @param {{ columnClass: string, title: string, field: string, initialWidth: number }[]} columnHeaders 
+ * @param {File[]} files 
+ * @returns object of { status, columnHeaders }. status field is string if all files have the same status otherwise string[]
+ */
+ export function addFilesStackedTableStatusColHeader(columnHeaders, files, collectionStatus) {
+    if (Array.isArray(columnHeaders) && Array.isArray(collectionStatus) && !_.any(columnHeaders, (colHeader) => colHeader.field === 'status')) {
+        return [ ...columnHeaders, {
+            columnClass: 'file-detail', title: 'Status', initialWidth: 30, field: "status",
+            render: function (file, field, detailIndex, fileEntryBlockProps) {
+                const capitalizedStatus = Schemas.Term.toName("status", file.status);
+                return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
+            }
+        } ];
+    }
+    return columnHeaders;
 }
