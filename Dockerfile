@@ -75,13 +75,17 @@ COPY package-lock.json .
 RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/bin/python
 
 # Build front-end
-COPY *.js .
-COPY src/encoded/static .
-RUN npm run build && \
-    npm run build-scss
+# XXX: this fails but might be able to be made to succeed? - Will Oct 7 2021
+# COPY *.js .
+# COPY src/encoded/static .
+# RUN npm run build && \
+  #    npm run build-scss
+
 
 # Copy over the rest of the code
 COPY . .
+RUN npm run build && \
+    npm run build-scss
 
 # Build remaining back-end
 RUN poetry install && \

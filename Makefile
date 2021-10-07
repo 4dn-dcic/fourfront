@@ -157,6 +157,28 @@ deploy-docker-local:
 deploy-docker-local-daemon:
 	docker-compose up -d -V
 
+ENV_NAME ?= fourfront-mastertest
+AWS_ACCOUNT ?= 643366669028
+
+ecr-login:
+	@echo "Making ecr-login AWS_ACCOUNT=${AWS_ACCOUNT} ..."
+	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
+
+build-docker-mastertest:
+	scripts/build-docker-test --login --ecosystem fourfront-mastertest
+
+build-docker-production:
+	@echo "Making build-docker-production AWS_ACCOUNT=${AWS_ACCOUNT} ENV_NAME=${ENV_NAME} ..."
+	docker build -t ${ENV_NAME}:latest .
+	make tag-and-push-docker-production ENV_NAME=${ENV_NAME} AWS_ACCOUNT=${AWS_ACCOUNT}
+
+tag-and-push-docker-production:
+	@echo "Making tag-and-push-docker-production AWS_ACCOUNT=${AWS_ACCOUNT} ENV_NAME=${ENV_NAME} ..."
+	docker tag ${ENV_NAME}:latest ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com/${ENV_NAME}:latest
+	date
+	docker push ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com/${ENV_NAME}:latest
+	date
+
 help:
 	@make info
 
