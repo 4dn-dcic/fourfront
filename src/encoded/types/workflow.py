@@ -9,7 +9,7 @@ import json
 import pstats
 
 from collections import OrderedDict, deque
-from dcicutils.env_utils import FF_ENV_WEBDEV, is_stg_or_prd_env, prod_bucket_env
+from dcicutils.env_utils import default_workflow_env, is_stg_or_prd_env, prod_bucket_env
 from inspect import signature
 from pyramid.httpexceptions import HTTPUnprocessableEntity
 from pyramid.response import Response
@@ -24,7 +24,7 @@ TIBANNA_CODE_NAME = 'pony'
 TIBANNA_WORKFLOW_RUNNER_LAMBDA_FUNCTION = 'run_workflow_pony'
 TIBANNA_WORKFLOW_STATUS_LAMBDA_FUNCTION = 'status_wfr_pony'
 
-ENV_WEBDEV = FF_ENV_WEBDEV
+ENV_WEBDEV = default_workflow_env('fourfront')
 
 steps_run_data_schema = {
     "type": "object",
@@ -743,6 +743,7 @@ def _build_workflow_run_embedded_list():
         'output_files.value.@type',
         'output_files.value.@id',
         'output_files.value.file_size',
+        'output_files.value.open_data_url',
         'output_files.value.quality_metric.url',
         'output_files.value.quality_metric.overall_quality_status',
         'output_files.value.status',

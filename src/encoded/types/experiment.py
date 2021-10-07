@@ -152,6 +152,9 @@ class Experiment(Item):
         'biosample.biosource.tissue.term_name',
         'biosample.biosource.tissue.term_id',
 
+        # Individual linkTo
+        'biosample.biosource.individual.protected_data',
+
         # Organism linkTo
         'biosample.biosource.individual.organism.name',
         'biosample.biosource.individual.organism.scientific_name',
@@ -209,6 +212,10 @@ class Experiment(Item):
         'files.file_type_detailed',
         'files.paired_end',
         'files.external_references.*',
+        'files.related_files.relationship_type',
+        'files.related_files.file.accession',
+        'files.related_files.file.paired_end',
+        'files.related_files.file.file_type',
 
         # FileFormat linkTo
         'files.file_format.file_format',
@@ -265,6 +272,7 @@ class Experiment(Item):
         "processed_files.open_data_url",
         "processed_files.track_and_facet_info.*",
 
+        "other_processed_files.files.accession",
         "other_processed_files.files.href",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_size",
@@ -288,6 +296,10 @@ class Experiment(Item):
         'other_processed_files.files.quality_metric.url',
         'other_processed_files.files.quality_metric.overall_quality_status',
         'other_processed_files.files.quality_metric.quality_metric_summary.*',
+
+        # higlass view config linkTO
+        "other_processed_files.higlass_view_config.description",
+        "other_processed_files.higlass_view_config.last_modified.date_modified",
 
         # FileReference linkTo
         "reference_files.accession",

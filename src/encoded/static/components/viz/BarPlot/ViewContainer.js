@@ -122,7 +122,7 @@ class Bar extends React.PureComponent {
     }
 
     /**
-     * Double check sum of bar parts and report an Exception to Google Analytics if doesn't match.
+     * Double check sum of bar parts and report an Exception to Sentry.io if doesn't match.
      * Do this in a setTimeout because it doesn't affect rendering or site UI.
      */
     verifyCounts(){
@@ -232,23 +232,38 @@ export class ViewContainer extends React.Component {
     }
 
     /**
-     * Double check sum of bar parts and report an Exception to Google Analytics if doesn't match.
+     * Double check sum of bar parts and report an Exception to Sentry.io if doesn't match.
      * Do this in a setTimeout because it doesn't affect rendering or site UI.
      */
     verifyCounts(){
-        var { bars, topLevelField, aggregateType } = this.props,
+        const { bars, topLevelField, aggregateType } = this.props,
             totalCount = topLevelField && topLevelField.total && topLevelField.total[aggregateType];
 
         if (!totalCount || !bars) return;
 
         setTimeout(()=>{
-            var combinedChildrenCount = _.reduce(bars, function(sum, bar){
+            // warning-level message for console
+            const combinedChildrenCount = _.reduce(bars, function(sum, bar){
                 return sum + bar.count;
             }, 0);
             if (combinedChildrenCount && totalCount !== combinedChildrenCount){
-                var errorMsg = (
-                    "Data Error: 1 or more ExperimentSets was counted multiple times for 'group by' field '" +
-                    bars[0].field + "'."
+                const warnMsg = (
+                    "Data Warning: 1 or more " + aggregateType + " was counted multiple times for 'group by' field '" +
+                    bars[0].field + "' (" + totalCount + " vs " + combinedChildrenCount + ")"
+                );
+                console.warn(warnMsg);
+            }
+            // error-level message for sentry.io 
+            const barAggregateTypeCount = _.reduce(bars, function (sum, bar) {
+                if (bar.bars && Array.isArray(bar.bars)) {
+                    _.forEach(bar.bars, (b) => { sum = sum + (b[aggregateType] || 0) });
+                }
+                return sum;
+            }, 0);
+            if (combinedChildrenCount && barAggregateTypeCount && barAggregateTypeCount !== combinedChildrenCount) {
+                const errorMsg = (
+                    "Data Error: bar.count totals and bar['" + aggregateType + "'] totals are not matching for '" +
+                    bars[0].field + "' (" + barAggregateTypeCount + " vs " + combinedChildrenCount + ")"
                 );
                 logger.error(errorMsg);
             }

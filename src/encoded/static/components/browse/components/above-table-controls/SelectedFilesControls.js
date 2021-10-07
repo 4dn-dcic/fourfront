@@ -100,10 +100,10 @@ export class SelectAllFilesButton extends React.PureComponent {
                     if (extData.list === 'browse') {
 
                         allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
-                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,true, true), allExtendedFiles);
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
                     } else {
                         allExtendedFiles =(resp['@graph'] || []);
-                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,false, true), resp['@graph'] );
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, false, true), resp['@graph'] );
                     }
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });
