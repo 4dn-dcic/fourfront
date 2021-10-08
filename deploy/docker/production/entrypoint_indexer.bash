@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting up CGAP-Portal Indexer"
+echo "Starting up Fourfront Indexer"
 
 # Run assume_identity.py to access the desired deployment configuration from
 # secrets manager - this builds production.ini
