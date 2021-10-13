@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
 
-import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 
 import { PageTitleContainer, TitleAndSubtitleUnder, OnlyTitle, StaticPageBreadcrumbs, pageTitleViews } from './../PageTitle';
@@ -20,7 +20,7 @@ import { getTabStaticContent } from './components/TabbedView';
 export default class PublicationView extends DefaultItemView {
 
     static anyExperimentSetsWithPermissions = memoize(function (expSetsUsedInPub, expSetsProdInPub) {
-        return _.any(expSetsUsedInPub || [], object.itemUtil.atId) || _.any(expSetsProdInPub || [], object.itemUtil.atId)
+        return _.any(expSetsUsedInPub || [], isReplicateExperimentSet) || _.any(expSetsProdInPub || [], isReplicateExperimentSet)
     });
 
     getTabViewContents(){
@@ -256,8 +256,8 @@ class PublicationExperimentSets extends React.PureComponent {
         'facetAutoDisplayThreshold': 10
     };
     static experimentSetsWithPermissions = memoize(function (expSetsUsedInPub, expSetsProdInPub) {
-        const expSetsUsedInPubWithPermissions = _.filter(expSetsUsedInPub || [], object.itemUtil.atId);
-        const expSetsProdInPubWithPermissions = _.filter(expSetsProdInPub || [], object.itemUtil.atId);
+        const expSetsUsedInPubWithPermissions = _.filter(expSetsUsedInPub || [], isReplicateExperimentSet);
+        const expSetsProdInPubWithPermissions = _.filter(expSetsProdInPub || [], isReplicateExperimentSet);
 
         return { expSetsUsedInPubWithPermissions, expSetsProdInPubWithPermissions };
     });
@@ -353,5 +353,12 @@ const PublicationViewTitle = React.memo(function PublicationViewTitle(props){
         </PageTitleContainer>
     );
 });
+
+function isReplicateExperimentSet(expSet) {
+    if (!expSet) { return false; }
+    
+    const { experimentset_type } = expSet;
+    return object.itemUtil.atId(expSet) && schemaTransforms.getBaseItemType(expSet) === 'ExperimentSet' && experimentset_type === 'replicate';
+}
 
 pageTitleViews.register(PublicationViewTitle, "Publication");
