@@ -288,8 +288,9 @@ class PublicationExperimentSets extends React.PureComponent {
         const staticContent = getTabStaticContent(context, 'tab:expsets-table');
         const prodTableProps = {
             searchHref: (
-                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
-                "produced_in_pub.display_title=" + encodeURIComponent(display_title)
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                "produced_in_pub.display_title=" + encodeURIComponent(display_title) +
+                "&sort=experiments_in_set.experiment_type.display_title&sort=dataset_label&sort=condition&"
             ),
             title: <SearchTableTitle title="Experiment Set" titleSuffix="Produced In Publication" headerElement="h4" externalSearchLinkVisible />,
             hideFacets: ["type", "validation_errors.name", "produced_in_pub.display_title", "publications_of_set.display_title", "experimentset_type"],
@@ -297,8 +298,9 @@ class PublicationExperimentSets extends React.PureComponent {
         };
         const usedTableProps = {
             searchHref: (
-                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&sort=experiments_in_set.experiment_type.display_title&" +
-                "pubs_using.display_title=" + encodeURIComponent(display_title)
+                "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&" +
+                "pubs_using.display_title=" + encodeURIComponent(display_title) +
+                "&sort=experiments_in_set.experiment_type.display_title&sort=dataset_label&sort=condition&"
             ),
             title: <SearchTableTitle title="Experiment Set" titleSuffix="Used In Publication" headerElement="h4" externalSearchLinkVisible />,
             hideFacets: ["type", "validation_errors.name", "pubs_using.display_title", "publications_of_set.display_title", "experimentset_type"],
