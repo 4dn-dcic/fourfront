@@ -3,6 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import memoize from 'memoize-one';
 
 import { console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { formatPublicationDate } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
@@ -18,6 +19,10 @@ import { getTabStaticContent } from './components/TabbedView';
 
 export default class PublicationView extends DefaultItemView {
 
+    static anyExperimentSetsWithPermissions = memoize(function (expSetsUsedInPub, expSetsProdInPub) {
+        return _.any(expSetsUsedInPub || [], object.itemUtil.atId) || _.any(expSetsProdInPub || [], object.itemUtil.atId)
+    });
+
     getTabViewContents(){
         const {
             context : {
@@ -30,8 +35,8 @@ export default class PublicationView extends DefaultItemView {
         //summary tab
         tabs.push(PublicationSummary.getTabObject(this.props, width));
         //experiment sets tab
-        const anyPublications = exp_sets_used_in_pub.length > 0 || exp_sets_prod_in_pub.length > 0;
-        if (anyPublications){
+        const anyExperimentSets = PublicationView.anyExperimentSetsWithPermissions(exp_sets_used_in_pub, exp_sets_prod_in_pub);
+        if (anyExperimentSets){
             tabs.push(PublicationExperimentSets.getTabObject(this.props, width));
         }
 
@@ -250,6 +255,12 @@ class PublicationExperimentSets extends React.PureComponent {
     static defaultProps = {
         'facetAutoDisplayThreshold': 10
     };
+    static experimentSetsWithPermissions = memoize(function (expSetsUsedInPub, expSetsProdInPub) {
+        const expSetsUsedInPubWithPermissions = _.filter(expSetsUsedInPub || [], object.itemUtil.atId);
+        const expSetsProdInPubWithPermissions = _.filter(expSetsProdInPub || [], object.itemUtil.atId);
+
+        return { expSetsUsedInPubWithPermissions, expSetsProdInPubWithPermissions };
+    });
     /**
      * Get experiment sets tab object for tabpane.
      *
@@ -272,6 +283,8 @@ class PublicationExperimentSets extends React.PureComponent {
             exp_sets_prod_in_pub = []
         } = context || {};
 
+        const { expSetsUsedInPubWithPermissions, expSetsProdInPubWithPermissions } = PublicationExperimentSets.experimentSetsWithPermissions(exp_sets_used_in_pub, exp_sets_prod_in_pub);
+
         const staticContent = getTabStaticContent(context, 'tab:expsets-table');
         const prodTableProps = {
             searchHref: (
@@ -280,7 +293,7 @@ class PublicationExperimentSets extends React.PureComponent {
             ),
             title: <SearchTableTitle title="Experiment Set" titleSuffix="Produced In Publication" headerElement="h4" externalSearchLinkVisible />,
             hideFacets: ["type", "validation_errors.name", "produced_in_pub.display_title", "publications_of_set.display_title", "experimentset_type"],
-            facets: exp_sets_prod_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
+            facets: expSetsProdInPubWithPermissions.length >= facetAutoDisplayThreshold ? undefined : null
         };
         const usedTableProps = {
             searchHref: (
@@ -289,12 +302,14 @@ class PublicationExperimentSets extends React.PureComponent {
             ),
             title: <SearchTableTitle title="Experiment Set" titleSuffix="Used In Publication" headerElement="h4" externalSearchLinkVisible />,
             hideFacets: ["type", "validation_errors.name", "pubs_using.display_title", "publications_of_set.display_title", "experimentset_type"],
-            facets: exp_sets_used_in_pub.length >= facetAutoDisplayThreshold ? undefined : null
+            facets: expSetsUsedInPubWithPermissions.length >= facetAutoDisplayThreshold ? undefined : null
         };
         const totalExperimentSets = exp_sets_used_in_pub.length + exp_sets_prod_in_pub.length;
+        const totalExperimentSetsWithPermissions = expSetsUsedInPubWithPermissions.length + expSetsProdInPubWithPermissions.length;
+
         let titleDetailString = null;
-        if (exp_sets_used_in_pub.length > 0 && exp_sets_prod_in_pub.length > 0) {
-            titleDetailString = totalExperimentSets + " Experiment Sets associated with this Publication";
+        if (expSetsUsedInPubWithPermissions.length > 0 && expSetsProdInPubWithPermissions.length > 0) {
+            titleDetailString = totalExperimentSetsWithPermissions + " Experiment Sets associated with this Publication";
         }
 
         return (
@@ -314,11 +329,11 @@ class PublicationExperimentSets extends React.PureComponent {
                     </React.Fragment>
                 ) : null}
 
-                {exp_sets_prod_in_pub && exp_sets_prod_in_pub.length > 0 ? (
+                {expSetsProdInPubWithPermissions && expSetsProdInPubWithPermissions.length > 0 ? (
                     <EmbeddedExperimentSetSearchTable {...prodTableProps} />
                 ) : null}
 
-                {exp_sets_used_in_pub && exp_sets_used_in_pub.length > 0 ? (
+                {expSetsUsedInPubWithPermissions && expSetsUsedInPubWithPermissions.length > 0 ? (
                     <EmbeddedExperimentSetSearchTable {...usedTableProps} />
                 ) : null}
             </div>
