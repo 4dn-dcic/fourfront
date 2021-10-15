@@ -11,7 +11,6 @@ MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
 # Build Arguments
 ARG INI_BASE
-# TODO: write this file
 ENV INI_BASE=${INI_BASE:-"fourfront_any_alpha.ini"}
 
 # Configure (global) Env
@@ -112,7 +111,9 @@ RUN chown -R nginx:nginx /var/cache/nginx && \
     touch /var/log/nginx/access.log && \
     chown -R nginx:nginx /var/log/nginx/access.log && \
     touch /var/log/nginx/error.log && \
-    chown -R nginx:nginx /var/log/nginx/error.log
+    chown -R nginx:nginx /var/log/nginx/error.log && \
+    mkdir -p /data/nginx/cache && \
+    chown -R nginx:nginx /data/nginx/cache
 
 # Pull all required files
 # Note that *.ini must match the env name in secrets manager!
