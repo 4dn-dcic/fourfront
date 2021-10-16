@@ -1025,12 +1025,15 @@ class ExperimentMic(Experiment):
     def experiment_categorizer(self, request, experiment_type, biosample, imaging_paths=None):
         ''' Use the target(s) in the imaging path'''
         if imaging_paths:
+            unique_targets = []
             path_targets = []
             for pathobj in imaging_paths:
                 path = get_item_or_none(request, pathobj['path'], 'imaging_path')
                 for target in path.get('target', []):
-                    summ = get_item_or_none(request, target, 'bio_feature')['display_title']
-                    path_targets.append(summ)
+                    biofeature = get_item_or_none(request, target, 'bio_feature')
+                    if biofeature['@id'] not in unique_targets:
+                        unique_targets.append(biofeature['@id'])
+                        path_targets.append(biofeature['display_title'])
             if path_targets:
                 value = []
                 sum_targets = {}
