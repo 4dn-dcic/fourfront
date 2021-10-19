@@ -202,6 +202,7 @@ def _build_publication_embedded_list():
 
         # ExperimentType linkTo
         "exp_sets_prod_in_pub.experimentset_type",
+        "exp_sets_used_in_pub.experimentset_type",
 
         # ExperimentType linkTo
         "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title",
