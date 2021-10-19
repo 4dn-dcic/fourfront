@@ -9,5 +9,7 @@ poetry run python -m assume_identity
 # Start nginx proxy
 service nginx start
 
+echo "Started nginx"
+
 # Start application
 pserve production.ini
