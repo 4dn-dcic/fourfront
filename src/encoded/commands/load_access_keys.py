@@ -7,6 +7,8 @@ import boto3
 from pyramid.paster import get_app
 from webtest import TestApp, AppError
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
+from dcicutils.cloudformation_utils import get_ecs_real_url
+from dcicutils.secrets_utils import assume_identity
 
 log = structlog.getLogger(__name__)
 EPILOG = __doc__
@@ -54,7 +56,12 @@ def generate_access_key(testapp, env, user_uuid, description):
     Returns:
         dict: access key contents with server
     """
-    server = get_beanstalk_real_url(env)
+    try:
+        server = get_ecs_real_url(env)
+    except Exception:
+        server = get_beanstalk_real_url(env)
+    if not server:
+        server = get_beanstalk_real_url(env)
     access_key_req = {'user': user_uuid, 'description': description}
     res = testapp.post_json('/access_key', access_key_req).json
     return {'secret': res['secret_access_key'],
@@ -83,6 +90,8 @@ def main():
     )
     parser.add_argument('config_uri', help='path to configfile')
     parser.add_argument('--app-name', help='Pyramid app name in configfile')
+    parser.add_argument('--secret-name', help='name of application identity stored in secrets manager within which'
+                                              'to locate S3_ENCRYPT_KEY, for example: dev/beanstalk/cgap-dev')
     args = parser.parse_args()
 
     app = get_app(args.config_uri, args.app_name)
@@ -96,7 +105,13 @@ def main():
     if not env:
         raise RuntimeError('load_access_keys: cannot find env.name in settings')
 
-    encrypt_key = os.environ.get('S3_ENCRYPT_KEY')
+    # Resolve secret from environment if one is not specified
+    encrypt_key = None
+    if args.secret_name is not None:
+        identity = assume_identity()  # automatically detects GLOBAL_APPLICATION_CONFIGURATION
+        encrypt_key = identity.get('S3_ENCRYPT_KEY', None)  # one of the secrets
+    if not encrypt_key:
+        encrypt_key = os.environ.get('S3_ENCRYPT_KEY')
     if not encrypt_key:
         raise RuntimeError('load_access_keys: must define S3_ENCRYPT_KEY in env')
 
