@@ -288,24 +288,21 @@ export class ExternalVisualizationButtons extends React.PureComponent {
     }
 
     render(){
-        const { file, href, wrapInColumn, className } = this.props;
+        const { file, wrapInColumn, className } = this.props;
+        const { open_data_url } = file || {};
         let epigenomeBtn, juiceBoxBtn;
 
         if (!(file.status === 'archived' || file.status === 'released')){
             return null; // External tools cannot access non-released files.
         }
-        if (!file.href){
+        if (!open_data_url){
             return null;
         }
 
         const fileFormat = commonFileUtil.getFileFormatStr(file);
-        const hrefParts = memoizedUrlParse(href || (store && store.getState().href));
-        const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
-
-
         if (fileFormat === 'hic'){
-            juiceBoxBtn = this.renderJuiceboxBtn(fileUrl);
-            epigenomeBtn = this.renderEpigenomeBtn(fileUrl, file.genome_assembly || null);
+            juiceBoxBtn = this.renderJuiceboxBtn(open_data_url);
+            epigenomeBtn = this.renderEpigenomeBtn(open_data_url, file.genome_assembly || null);
         }
 
         if (!juiceBoxBtn && !epigenomeBtn){
