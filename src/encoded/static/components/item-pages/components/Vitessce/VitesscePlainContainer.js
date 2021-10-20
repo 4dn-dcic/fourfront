@@ -184,7 +184,6 @@ const VitesscePlainContainerBody = React.forwardRef(function VitesscePlainContai
         );
     }
 
-    console.log('xxx vitessceVersionUsed:', vitessceVersionUsed);
     /**
      * TODO: Some state + UI functions to make vitessce view full screen.
      * Should try to make as common as possible between one for workflow tab & this. Won't be 100% compatible since adjust workflow detail tab inner elem styles, but maybe some common func for at least width, height, etc.
