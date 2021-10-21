@@ -70,7 +70,7 @@
             "title": "Imaging Paths",
             "description": "Target to label connections in each channel.",
             "type":  "array",
-            "lookup": 63,
+            "lookup": 62,
             "items": {
                 "title": "Imaging path",
                 "type": "object",
@@ -91,11 +91,18 @@
                 }
             }
         },
-        "microscope_settings_master": {
+        "microscope_configuration_master": {
             "type": "string",
-            "lookup": 62,
-            "title": "Master Microscope Settings",
-            "linkTo": "MicroscopeSetting"
+            "lookup": 63,
+            "title": "Master Microscope Configuration",
+            "description": "Hardware configuration for the microscope instrument.",
+            "linkTo": "MicroscopeConfiguration"
+        },
+        "image_settings_master": {
+            "type": "string",
+            "lookup": 63,
+            "title": "Master Image Settings",
+            "linkTo": "ImageSetting"
         },
         "plate_id": {
             "title": "Plate ID",
