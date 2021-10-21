@@ -4,7 +4,7 @@
     "id": "/profiles/image_setting.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["microscope_configuration"],
+    "required": ["settings"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
