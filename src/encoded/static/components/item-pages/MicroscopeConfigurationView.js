@@ -8,6 +8,7 @@ import Dropdown from 'react-bootstrap/esm/Dropdown';
 
 import { JWT, console, object, layout, ajax, navigate, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
 
 import { MicroMetaPlainContainer } from './components/MicroMeta/MicroMetaPlainContainer';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
@@ -15,6 +16,7 @@ import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { ConfirmModal } from './HiGlassViewConfigView';
 import { onLoginNavItemClick } from './../navigation/components/LoginNavItem';
+import { menu_order } from 'micro-meta-app-react/es/constants';
 
 
 export default class MicroscopeConfigurationView extends DefaultItemView {
@@ -33,22 +35,32 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
         );
     }
 
+    constructor(props){
+        super(props);
+        this.mcRef = React.createRef();
+    }
+
     getTabViewContents(){
         const initTabs = [];
         const width = this.getTabViewWidth();
-        initTabs.push(MicroMetaTabView.getTabObject(this.props, width));
+        const tabProps = _.extend({ ref: this.mcRef }, this.props);
+        initTabs.push(MicroMetaTabView.getTabObject(tabProps, width));
+        initTabs.push(MicroMetaSummaryTabView.getTabObject(tabProps, width));
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }
 
+const MicroMetaTabViewFRef = React.forwardRef((props, ref) => <MicroMetaTabView {...props} forwardRef={ref} />);
 export class MicroMetaTabView extends React.PureComponent {
 
     static getTabObject(props, width) {
+        const { ref } = props;
+
         return {
             'tab' : <span><i className="icon icon-microscope fas icon-fw"/> MicroMeta</span>,
             'key' : 'micrometa',
-            'content' : <MicroMetaTabView {...props} width={width} />
+            'content' : <MicroMetaTabViewFRef {...props} width={width} />
         };
     }
 
@@ -68,6 +80,8 @@ export class MicroMetaTabView extends React.PureComponent {
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
         this.generateNewTitle = this.generateNewTitle.bind(this);
 
+        const { forwardRef } = props;
+
         this.state = {
             'saveLoading'           : false,
             'cloneLoading'          : false,
@@ -75,7 +89,7 @@ export class MicroMetaTabView extends React.PureComponent {
             'modal'                 : null
         };
 
-        this.microMetaToolRef = React.createRef();
+        this.microMetaToolRef = forwardRef;//React.createRef();
 
         //force the page display in full screen
         // const { toggleFullScreen } = props;
@@ -572,6 +586,90 @@ export class MicroMetaTabView extends React.PureComponent {
         );
     }
 
+}
+
+const MicroMetaSummaryTabViewFRef = React.forwardRef((props, ref) => <MicroMetaSummaryTabView {...props} forwardRef={ref} />);
+export class MicroMetaSummaryTabView extends React.PureComponent {
+    
+    static getTabObject(props, width) {
+        const { ref } = props;
+
+        return {
+            'tab': <span><i className="icon icon-list-alt fas icon-fw" /> Summary</span>,
+            'key': 'micrometa-summary',
+            'content': <MicroMetaSummaryTabViewFRef {...props} width={width} />
+        };
+    }
+
+    constructor(props){
+        super(props);
+
+        this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
+        const { forwardRef } = props;
+
+        this.microMetaToolRef = forwardRef;
+    }
+
+    getMicroscopyMetadataToolComponent(){
+        return (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
+    }
+
+    render() {
+        const { isFullscreen, context, windowWidth, windowHeight } = this.props;
+        let { microscope } = context || {}; 
+
+        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
+        const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
+
+        const mtc = this.getMicroscopyMetadataToolComponent();
+        if (!mtc || !mtc.api){
+            logger.error('Could not get API.');
+            // throw new Error('Could not get API.');
+            // return null;
+        } else {
+            const microscopeStr = mtc.api.exportMicroscopeConfString();
+            microscope = microscopeStr && JSON.parse(microscopeStr);
+        }
+
+        const categoryObj = {};
+        _.forEach(microscope.components, function (component) {
+            const words = component.Category.split('.');
+            const category = words.length > 1 ? words[1] : words[0];
+
+            if (!categoryObj[category]) {
+                categoryObj[category] = {};
+            }
+            const term = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
+            if (!categoryObj[category][term]) {
+                categoryObj[category][term] = 1;
+            } else {
+                categoryObj[category][term] += 1;
+            }
+        });
+
+        const facets = [];
+        _.forEach(_.keys(categoryObj).sort(), function (category) {
+            const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
+                return { "key": key, "doc_count": num };
+            }), function (t) { return -t.doc_count });
+            facets.push({
+                "field": category,
+                "title": category,
+                "aggregation_type": "terms",
+                "terms": terms
+            })
+        });
+
+        return (
+            <div class="overflow-hidden">
+                <h3 class="tab-section-title"><span>Components Summary</span></h3>
+                <hr class="tab-section-title-horiz-divider mb-1" />
+                <div className="col-12 col-md-5 col-lg-4 col-xl-3">
+                    <FacetList {...this.props} title="Hardware Explorer" facets={facets} />
+                </div>
+            </div>
+        );
+    }
 }
 
 function StatusMenuItem(props){
