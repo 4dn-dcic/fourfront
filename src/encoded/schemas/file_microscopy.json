@@ -58,6 +58,12 @@
                 "z-stack (63X ch00)"
             ]
         },
+        "microscope_settings": {
+            "type": "string",
+            "lookup": 99,
+            "title": "Microscope Settings",
+            "linkTo": "MicroscopeSetting"
+        },
         "microscope_configuration": {
             "type": "string",
             "lookup": 50,
