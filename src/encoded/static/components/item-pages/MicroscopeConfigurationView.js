@@ -605,18 +605,31 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         super(props);
 
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
+        this.onFilter = this.onFilter.bind(this);
         const { forwardRef } = props;
 
         this.microMetaToolRef = forwardRef;
+        this.state = {
+            'currentFilters': []
+        }
     }
 
     getMicroscopyMetadataToolComponent(){
         return (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
     }
 
+    onFilter(facet, term, callback) {
+        this.setState({
+            'currentFilters': [{ field: facet.field, term: term.key, remove: '' }]
+        });
+
+        return false;
+    }
+
     render() {
-        const { isFullscreen, context, windowWidth, windowHeight } = this.props;
+        const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
         let { microscope } = context || {}; 
+        const { currentFilters } = this.state;
 
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
@@ -665,7 +678,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 <h3 class="tab-section-title"><span>Components Summary</span></h3>
                 <hr class="tab-section-title-horiz-divider mb-1" />
                 <div className="col-12 col-md-5 col-lg-4 col-xl-3">
-                    <FacetList {...this.props} title="Hardware Explorer" facets={facets} />
+                    <FacetList context={{ "filters": currentFilters }} title="Hardware Explorer" facets={facets} onFilter={this.onFilter} />
                 </div>
             </div>
         );
