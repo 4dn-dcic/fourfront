@@ -604,7 +604,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     constructor(props){
         super(props);
 
-        this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
+        this.getMicroscope = this.getMicroscope.bind(this);
         this.onFilter = this.onFilter.bind(this);
         const { forwardRef } = props;
 
@@ -614,27 +614,11 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         }
     }
 
-    getMicroscopyMetadataToolComponent(){
-        return (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
-    }
+    getMicroscope(){
+        const { context } = this.props;
+        let { microscope } = context || {};
 
-    onFilter(facet, term, callback) {
-        this.setState({
-            'currentFilters': [{ field: facet.field, term: term.key, remove: '' }]
-        });
-
-        return false;
-    }
-
-    render() {
-        const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
-        let { microscope } = context || {}; 
-        const { currentFilters } = this.state;
-
-        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
-        const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
-
-        const mtc = this.getMicroscopyMetadataToolComponent();
+        const mtc = (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
         if (!mtc || !mtc.api){
             logger.error('Could not get API.');
             // throw new Error('Could not get API.');
@@ -644,10 +628,38 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             microscope = microscopeStr && JSON.parse(microscopeStr);
         }
 
+        return microscope;
+    }
+
+    onFilter(facet, term, callback) {
+        
+        const microscope = this.getMicroscope();
+
+        const matches = _.filter(microscope.components, function (component) {
+            const t = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
+            return term.key === t;
+        });
+
+        this.setState({
+            'currentFilters': [{ field: facet.field, term: term.key, remove: '' }]
+        });
+
+        return false;
+    }
+
+    render() {
+        const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
+        const { currentFilters } = this.state;
+
+        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
+        const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
+
+        const microscope = this.getMicroscope();
+
         const categoryObj = {};
         _.forEach(microscope.components, function (component) {
-            const words = component.Category.split('.');
-            const category = words.length > 1 ? words[1] : words[0];
+            const s = component.Category.split('.');
+            const category = s.length > 1 ? s[1] : s[0];
 
             if (!categoryObj[category]) {
                 categoryObj[category] = {};
