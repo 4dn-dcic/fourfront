@@ -97,19 +97,21 @@ class FileColumnActionsBtn extends React.PureComponent {
     }
 
     juiceboxButton(){
-        const { file, href } = this.props;
-        const host = FileColumnActionsBtn.hostFromHref(href);
+        const { file } = this.props;
+        const { open_data_url } = file || {};
 
-        if (!host || !file.href) return null; // Needed for a link to be made
+        // open_data_url should exist to render the button
+        if (!open_data_url) return null;
 
-        if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
+        // Juicebox & epigenome browser can only viz HIC files at moment?
+        if (!this.isFileHIC()){ 
             return null;
         }
 
         function onClick(){
             // If we're server-side, there is access to the global browser window object/API.
             if (isServerSide()) return null;
-            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + open_data_url;
             var win = window.open(targetLocation, '_blank');
             win.focus();
         }
@@ -123,13 +125,14 @@ class FileColumnActionsBtn extends React.PureComponent {
     }
 
     epigenomeButton(){
-        const { file, href } = this.props;
-        const host = FileColumnActionsBtn.hostFromHref(href);
+        const { file } = this.props;
+        const { open_data_url } = file || {};
+
         const genomeAssembly = file.genome_assembly || null;
         const epiGenomeMapping = (genomeAssembly && FileColumnActionsBtn.epiGenomeAssemblyMapping[genomeAssembly]) || null;
 
         // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
-        if (!epiGenomeMapping || !host || !file.href) return null; // Needed for a link to be made
+        if (!epiGenomeMapping || !open_data_url) return null; // Needed for a link to be made
 
         if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
             return null;
@@ -138,7 +141,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         function onClick(){
             // If we're server-side, there is access to the global browser window object/API.
             if (isServerSide()) return null;
-            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + file.href;
+            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + open_data_url;
             var win = window.open(targetLocation, '_blank');
             win.focus();
         }
