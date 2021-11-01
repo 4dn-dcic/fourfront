@@ -250,7 +250,7 @@ class MicroscopeConfiguration(UserContent):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, microscope, title = None):
+    def display_title(self, microscope, title=None):
         return title or microscope.get("Name")
 
     class Collection(Item.Collection):
