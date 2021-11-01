@@ -16,7 +16,7 @@ import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { ConfirmModal } from './HiGlassViewConfigView';
 import { onLoginNavItemClick } from './../navigation/components/LoginNavItem';
-import { menu_order } from 'micro-meta-app-react/es/constants';
+import { matchSettings, menu_order } from 'micro-meta-app-react/es/constants';
 
 
 export default class MicroscopeConfigurationView extends DefaultItemView {
@@ -588,6 +588,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
 }
 
+let microMetaDependencies = null;
 const MicroMetaSummaryTabViewFRef = React.forwardRef((props, ref) => <MicroMetaSummaryTabView {...props} forwardRef={ref} />);
 export class MicroMetaSummaryTabView extends React.PureComponent {
     
@@ -595,7 +596,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         const { ref } = props;
 
         return {
-            'tab': <span><i className="icon icon-list-alt fas icon-fw" /> Summary</span>,
+            'tab': <span><i className="icon icon-list-alt fas icon-fw" /> Hardware Summary</span>,
             'key': 'micrometa-summary',
             'content': <MicroMetaSummaryTabViewFRef {...props} width={width} />
         };
@@ -614,6 +615,45 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         }
     }
 
+    componentDidMount(){
+
+        const onComplete = () => {
+            this.setState({ mounted: true });
+        };
+
+        if (!microMetaDependencies) {
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
+            setTimeout(()=>{
+                // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
+                // @see https://webpack.js.org/api/module-methods/#requireensure
+
+                import(
+                    /* webpackChunkName: "micrometa-dependencies" */
+                    'micrometa-dependencies'
+                ).then((loadedDeps) => {
+                    const tempMicroMetaDependencies = loadedDeps;
+                    window
+                        .fetch(
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
+                        )
+                        .then(function (resp) {
+                            return resp.text();
+                        })
+                        .then(function (respText) {
+                            tempMicroMetaDependencies.schemas = JSON.parse(respText);
+                            microMetaDependencies = tempMicroMetaDependencies;
+
+                            console.log('xxx microMetaDependencies:', microMetaDependencies);
+                            onComplete();
+                        });
+                });
+            });
+        } else {
+            onComplete();
+        }
+    }
+
     getMicroscope(){
         const { context } = this.props;
         let { microscope } = context || {};
@@ -624,8 +664,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             // throw new Error('Could not get API.');
             // return null;
         } else {
-            const microscopeStr = mtc.api.exportMicroscopeConfString();
-            microscope = microscopeStr && JSON.parse(microscopeStr);
+            // const microscopeStr = mtc.api.exportMicroscopeConfString();
+            // microscope = microscopeStr && JSON.parse(microscopeStr);
         }
 
         return microscope;
@@ -640,8 +680,19 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             return term.key === t;
         });
 
+        const { schemas = [] } = microMetaDependencies;
+
+        let foundSchema = null;
+        if (schemas && matches.length > 0) {
+            foundSchema = _.find(schemas, function(s){
+                return s.ID === matches[0].Schema_ID;
+            });
+        }
+
         this.setState({
-            'currentFilters': [{ field: facet.field, term: term.key, remove: '' }]
+            'currentFilters': [{ field: facet.field, term: term.key, remove: '' }],
+            'matches': matches,
+            'schema': foundSchema
         });
 
         return false;
@@ -649,13 +700,18 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
     render() {
         const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
-        const { currentFilters } = this.state;
+        const { currentFilters, matches, schema } = this.state;
 
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
         const microscope = this.getMicroscope();
 
+        if(!microscope || !microMetaDependencies){
+            return null;
+        }
+
+        // term count
         const categoryObj = {};
         _.forEach(microscope.components, function (component) {
             const s = component.Category.split('.');
@@ -672,6 +728,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             }
         });
 
+        // left side - facets
         const facets = [];
         _.forEach(_.keys(categoryObj).sort(), function (category) {
             const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
@@ -685,12 +742,84 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             })
         });
 
+        // right side - results
+        let headerRow = null, subCategoriesRow = null;
+        if (matches && matches.length > 0 && schema) {
+            let defaultColClass = 'col-xl-3';
+            if (matches.length === 1) {
+                defaultColClass = 'col-xl-9';
+            } else if (matches.length === 2) {
+                defaultColClass = 'col-xl-4';
+            } else if (matches.length === 4) {
+                defaultColClass = 'col-xl-2';
+            }
+
+            const headerCols = _.map(matches, function (m) {
+                return (<div className={defaultColClass + " summary-title-column text-truncate"}>{m.Name}</div>)
+            });
+            headerRow = (
+                <div className="row summary-sub-header">
+                    <div className="col-xl-3 summary-title-column text-truncate">MetaData</div>
+                    {headerCols}
+                </div>
+            );
+            const schemaPropPairs = _.pairs(schema.properties);
+            
+            subCategoriesRow = _.map(_.keys(schema.subCategoriesOrder), function(sco){
+                const matchingProperties = _.filter(schemaPropPairs, function (p) {
+                    return p[1].category === sco;
+                });
+                
+                const itemRows = _.map(matchingProperties, function (mp) {
+                    const itemCols = _.map(matches, function (m) {
+                        if(!m[mp[0]]){
+                            return null;
+                        }
+                        return (<div className={defaultColClass + " summary-item-column text-truncate"}>{m[mp[0]]}</div>)
+                    });
+                    const anyItemCols = true;//_.any(itemCols, function (iCol) { return !iCol; });
+                    return anyItemCols ? (
+                        <div className="row summary-item-row">
+                            <div className="col-xl-3 summary-item-row-header text-truncate">{mp[0]}</div>
+                            {itemCols}
+                        </div>
+                    ) : null;
+                });
+
+                const anyItemRows = true;//_.any(itemRows, function (iCol) { return !iCol; });
+                
+
+                return (
+                    anyItemRows ?
+                        <React.Fragment>
+                            <div className="row summary-header">
+                                <div class="col summary-title-column text-truncate">
+                                    <i class="icon icon-fw icon-minus fas"></i>&nbsp;<h4 class="summary-title">{sco}</h4>
+                                </div>
+                            </div>
+                            {itemRows}
+                        </React.Fragment> : null
+                )
+            });
+        }
+
         return (
             <div class="overflow-hidden">
-                <h3 class="tab-section-title"><span>Components Summary</span></h3>
+                <h3 class="tab-section-title"><span>Hardware Summary</span></h3>
                 <hr class="tab-section-title-horiz-divider mb-1" />
-                <div className="col-12 col-md-5 col-lg-4 col-xl-3">
-                    <FacetList context={{ "filters": currentFilters }} title="Hardware Explorer" facets={facets} onFilter={this.onFilter} />
+                <div className="row overflow-auto">
+                    <div className="col-12 col-md-5 col-lg-4 col-xl-3">
+                        <FacetList context={{ "filters": currentFilters }} title="Hardware Explorer" facets={facets} onFilter={this.onFilter} />
+                    </div>
+                    <div className="col-12 col-md-7 col-lg-8 col-xl-9 micro-meta-summary-results">
+                        <div className="row summary-header">
+                            <div class="col summary-title-column text-truncate">
+                                <i class="icon icon-fw icon-microscope fas"></i>&nbsp;<h4 class="summary-title">Component Summary Table</h4>
+                            </div>
+                        </div>
+                        {headerRow}
+                        {subCategoriesRow}
+                    </div>
                 </div>
             </div>
         );
