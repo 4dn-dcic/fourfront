@@ -1113,16 +1113,17 @@ export default class App extends React.PureComponent {
             'onBodySubmit'   : this.handleSubmit,
         });
 
+        // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
+        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ... 
         const contentSecurityPolicyStr = [
             "default-src 'self'",
-            "img-src 'self' https://* data:",
+            "img-src 'self' https://* data: www.google-analytics.com",
             "child-src blob:",
-            // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
-            "script-src 'self' https://www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
-            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://rest.ensembl.org 'unsafe-inline' 'unsafe-eval'"
+            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://rest.ensembl.org https://www.google-analytics.com 'unsafe-inline' 'unsafe-eval'"
         ].join("; ");
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
