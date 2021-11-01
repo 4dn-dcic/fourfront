@@ -1115,7 +1115,7 @@ export default class App extends React.PureComponent {
 
         const contentSecurityPolicyStr = [
             "default-src 'self'",
-            "img-src 'self' https://*",
+            "img-src 'self' https://* data:",
             "child-src blob:",
             // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
             "script-src 'self' https://www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
