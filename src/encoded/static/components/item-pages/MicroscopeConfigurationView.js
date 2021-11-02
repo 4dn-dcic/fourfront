@@ -5,6 +5,7 @@ import _ from 'underscore';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Dropdown from 'react-bootstrap/esm/Dropdown';
+import ReactTooltip from 'react-tooltip';
 
 import { JWT, console, object, layout, ajax, navigate, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
@@ -597,7 +598,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
         return {
             'tab': <span><i className="icon icon-list-alt fas icon-fw" /> Hardware Summary</span>,
-            'key': 'micrometa-summary',
+            'key': 'hardware-summary',
             'content': <MicroMetaSummaryTabViewFRef {...props} width={width} />
         };
     }
@@ -644,13 +645,30 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                             tempMicroMetaDependencies.schemas = JSON.parse(respText);
                             microMetaDependencies = tempMicroMetaDependencies;
 
-                            console.log('xxx microMetaDependencies:', microMetaDependencies);
                             onComplete();
                         });
                 });
             });
         } else {
             onComplete();
+        }
+    }
+
+    componentDidUpdate(prevState){
+        const { currentFilters } = this.state;
+        const { currentFilters: prevCurrentFilters } = prevState;
+
+        let term = null, field = null, prevTerm = null, prevField = null;
+        if (currentFilters && currentFilters.length > 0) {
+            ({ term, field } = currentFilters[0]);
+        }
+        if (prevCurrentFilters && prevCurrentFilters.length > 0) {
+            ({ term: prevTerm, field: prevField } = prevCurrentFilters[0]);
+        }
+
+        if (field !== prevField || term !== prevTerm) {
+            ReactTooltip.rebuild();
+
         }
     }
 
@@ -775,7 +793,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                         if(!m[mp[0]]){
                             return null;
                         }
-                        return (<div className={defaultColClass + " summary-item-column text-truncate"}>{m[mp[0]]}</div>)
+                        return (<div className={defaultColClass + " summary-item-column"}><span className="text-truncate" data-tip={m[mp[0]]}>{m[mp[0]]}</span></div>)
                     });
                     const anyItemCols = true;//_.any(itemCols, function (iCol) { return !iCol; });
                     return anyItemCols ? (
