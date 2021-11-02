@@ -12,7 +12,7 @@ import { JWT, console, object, layout, ajax, navigate, logger } from '@hms-dbmi-
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
 
-import { MicroMetaPlainContainer } from './components/MicroMeta/MicroMetaPlainContainer';
+import { MicroMetaPlainContainer, MicroMetaLoadingIndicator } from './components/MicroMeta/MicroMetaPlainContainer';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
@@ -691,7 +691,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         }
     }
 
-    componentDidUpdate(prevState){
+    componentDidUpdate(prevProps, prevState){
         const { currentFilters } = this.state;
         const { currentFilters: prevCurrentFilters } = prevState;
 
@@ -759,10 +759,16 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
 
+        const placeholderStyle = { width: width || null };
+        if (typeof height === 'number' && height >= 140) {
+            placeholderStyle.height = height;
+            placeholderStyle.paddingTop = (height / 2) - 40;
+        }
+
         const microscope = this.getMicroscope();
 
         if (!microscope || !microMetaDependencies) {
-            return null;
+            return <div className="text-center" style={placeholderStyle}><MicroMetaLoadingIndicator /></div>;;
         }
 
         // left side - facets
@@ -797,27 +803,31 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 });
                 
                 const itemRows = _.map(matchingProperties, function (mp) {
-                    const itemCols = _.map(matches, function (m) {
-                        if (!m[mp[0]]) {
+                    const [field, item ] = mp;
+                    const itemCols = _.map(matches, function (match) {
+                        if (typeof match[field] === 'undefined' || match[field] === null) {
                             return null;
                         }
+                        const tooltip = typeof match[field] === 'string' && match[field].length > 20 ? match[field] : null;
                         return (
                             <div className={defaultColClass + " summary-item-column"}>
-                                <div className="text-truncate" data-tip={m[mp[0]]}>{m[mp[0]]}</div>
+                                <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
                             </div>);
                     });
-                    const anyItemCols = true;//_.any(itemCols, function (iCol) { return !iCol; });
+
+                    const anyItemCols = _.any(itemCols, function (iCol) { return !!iCol; });
                     return anyItemCols ? (
                         <div className="row summary-item-row">
-                            <div className="col-xl-3 summary-item-row-header text-truncate">{mp[0]}</div>
+                            <div className="col-xl-3 summary-item-row-header text-truncate">
+                                <object.TooltipInfoIconContainer title={field} tooltip={item.description} />
+                            </div>
                             {itemCols}
                         </div>
                     ) : null;
                 });
 
-                const anyItemRows = true;//_.any(itemRows, function (iCol) { return !iCol; });
+                const anyItemRows = _.any(itemRows, function (iRow) { return !!iRow; });
                 
-
                 return (
                     anyItemRows ?
                         <React.Fragment>
