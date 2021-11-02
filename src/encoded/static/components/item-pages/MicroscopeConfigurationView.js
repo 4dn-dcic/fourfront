@@ -790,10 +790,13 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 
                 const itemRows = _.map(matchingProperties, function (mp) {
                     const itemCols = _.map(matches, function (m) {
-                        if(!m[mp[0]]){
+                        if (!m[mp[0]]) {
                             return null;
                         }
-                        return (<div className={defaultColClass + " summary-item-column"}><span className="text-truncate" data-tip={m[mp[0]]}>{m[mp[0]]}</span></div>)
+                        return (
+                            <div className={defaultColClass + " summary-item-column"}>
+                                <div className="text-truncate" data-tip={m[mp[0]]}>{m[mp[0]]}</div>
+                            </div>);
                     });
                     const anyItemCols = true;//_.any(itemCols, function (iCol) { return !iCol; });
                     return anyItemCols ? (
