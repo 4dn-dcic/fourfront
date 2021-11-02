@@ -1113,6 +1113,19 @@ export default class App extends React.PureComponent {
             'onBodySubmit'   : this.handleSubmit,
         });
 
+        // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
+        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ... 
+        const contentSecurityPolicyStr = [
+            "default-src 'self'",
+            "img-src 'self' https://* data: www.google-analytics.com",
+            "child-src blob:",
+            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "worker-src 'self' blob:",
+            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://rest.ensembl.org https://www.google-analytics.com 'unsafe-inline' 'unsafe-eval'"
+        ].join("; ");
+
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
 
         return (
@@ -1120,6 +1133,7 @@ export default class App extends React.PureComponent {
                 <head>
                     <meta charSet="utf-8"/>
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
+                    <meta httpEquiv="Content-Security-Policy" content={contentSecurityPolicyStr}/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
