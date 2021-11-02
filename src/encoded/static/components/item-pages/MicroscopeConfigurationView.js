@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import memoize from 'memoize-one';
 import _ from 'underscore';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
@@ -603,11 +604,47 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         };
     }
 
+    static facetsFromMicroscope(microscope) {
+        const categoryObj = {};
+        _.forEach(microscope.components, function (component) {
+            const s = component.Category.split('.');
+            const category = s.length > 1 ? s[1] : s[0];
+
+            if (!categoryObj[category]) {
+                categoryObj[category] = {};
+            }
+            const term = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
+            if (!categoryObj[category][term]) {
+                categoryObj[category][term] = 1;
+            } else {
+                categoryObj[category][term] += 1;
+            }
+        });
+
+        const facets = [];
+        _.forEach(_.keys(categoryObj).sort(), function (category) {
+            const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
+                return { "key": key, "doc_count": num };
+            }), function (t) { return -t.doc_count });
+            facets.push({
+                "field": category,
+                "title": category,
+                "aggregation_type": "terms",
+                "terms": terms
+            })
+        });
+
+        return facets;
+    }
+
     constructor(props){
         super(props);
 
         this.getMicroscope = this.getMicroscope.bind(this);
         this.onFilter = this.onFilter.bind(this);
+        this.memoized = {
+            facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope)
+        }
         const { forwardRef } = props;
 
         this.microMetaToolRef = forwardRef;
@@ -668,7 +705,6 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
         if (field !== prevField || term !== prevTerm) {
             ReactTooltip.rebuild();
-
         }
     }
 
@@ -725,40 +761,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
         const microscope = this.getMicroscope();
 
-        if(!microscope || !microMetaDependencies){
+        if (!microscope || !microMetaDependencies) {
             return null;
         }
 
-        // term count
-        const categoryObj = {};
-        _.forEach(microscope.components, function (component) {
-            const s = component.Category.split('.');
-            const category = s.length > 1 ? s[1] : s[0];
-
-            if (!categoryObj[category]) {
-                categoryObj[category] = {};
-            }
-            const term = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
-            if (!categoryObj[category][term]) {
-                categoryObj[category][term] = 1;
-            } else {
-                categoryObj[category][term] += 1;
-            }
-        });
-
         // left side - facets
-        const facets = [];
-        _.forEach(_.keys(categoryObj).sort(), function (category) {
-            const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
-                return { "key": key, "doc_count": num };
-            }), function (t) { return -t.doc_count });
-            facets.push({
-                "field": category,
-                "title": category,
-                "aggregation_type": "terms",
-                "terms": terms
-            })
-        });
+        const facets = this.memoized.facetsFromMicroscope(microscope);
 
         // right side - results
         let headerRow = null, subCategoriesRow = null;
