@@ -642,6 +642,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
         this.getMicroscope = this.getMicroscope.bind(this);
         this.onFilter = this.onFilter.bind(this);
+        this.toggleExpand = this.toggleExpand.bind(this);
         this.memoized = {
             facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope)
         }
@@ -753,9 +754,20 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         return false;
     }
 
+    toggleExpand(sectionKey){
+        const { collapsedSections } = this.state;
+
+        const cloned = _.extend({}, collapsedSections);
+        cloned[sectionKey] = !collapsedSections[sectionKey];
+
+        this.setState({
+            'collapsedSections': cloned
+        });
+    }
+
     render() {
         const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
-        const { currentFilters, matches, schema } = this.state;
+        const { currentFilters, matches, schema, collapsedSections } = this.state;
 
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
@@ -779,71 +791,34 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         let tableHeader = null, tableBody = null;
         if (matches && matches.length > 0 && schema) {
             let defaultColClass = 'col-xl-3';
-            let toolTipLengthLimit = 20;
+            let tooltipLimit = 20;
             if (matches.length === 1) {
                 defaultColClass = 'col-xl-9 col-sm-6';
-                toolTipLengthLimit = 120;
+                tooltipLimit = 120;
             } else if (matches.length === 2) {
                 defaultColClass = 'col-xl-4';
-                toolTipLengthLimit = 50;
+                tooltipLimit = 50;
             } else if (matches.length === 4) {
                 defaultColClass = 'col-xl-2';
             }
 
-            const headerCols = _.map(matches, function (m) {
-                return (<div className={defaultColClass + " summary-title-column text-truncate"}>{m.Name}</div>)
-            });
             tableHeader = (
                 <div className="row summary-sub-header">
                     <div className="col-xl-3 summary-title-column text-truncate">MetaData</div>
-                    {headerCols}
+                    {_.map(matches, function (m) {
+                        return (<div className={defaultColClass + " summary-title-column text-truncate"}>{m.Name}</div>)
+                    })}
                 </div>
             );
             const schemaPropPairs = _.pairs(schema.properties);
             
-            tableBody = _.map(_.keys(schema.subCategoriesOrder), function(sco){
-                const matchingProperties = _.filter(schemaPropPairs, function (p) {
-                    return p[1].category === sco;
+            tableBody = _.map(_.keys(schema.subCategoriesOrder), function(subCategory){
+                const subCategoryProperties = _.filter(schemaPropPairs, function (spp) {
+                    const [, propItem] = spp;
+                    return propItem && propItem.category === subCategory;
                 });
-                
-                const itemRows = _.map(matchingProperties, function (mp) {
-                    const [field, item ] = mp;
-                    const itemCols = _.map(matches, function (match) {
-                        if (typeof match[field] === 'undefined' || match[field] === null) {
-                            return null;
-                        }
-                        const tooltip = typeof match[field] === 'string' && match[field].length > toolTipLengthLimit ? match[field] : null;
-                        return (
-                            <div className={defaultColClass + " summary-item-column"}>
-                                <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
-                            </div>);
-                    });
-
-                    const anyItemCols = _.any(itemCols, function (iCol) { return !!iCol; });
-                    return anyItemCols ? (
-                        <div className="row summary-item-row">
-                            <div className="col-xl-3 summary-item-row-header text-truncate">
-                                <object.TooltipInfoIconContainer title={field} tooltip={item.description} />
-                            </div>
-                            {itemCols}
-                        </div>
-                    ) : null;
-                });
-
-                const anyItemRows = _.any(itemRows, function (iRow) { return !!iRow; });
-                
-                return (
-                    anyItemRows ?
-                        <React.Fragment>
-                            <div className="row summary-section-header">
-                                <div class="col summary-title-column text-truncate">
-                                    <i class="icon icon-fw icon-minus fas"></i>&nbsp;<h4 class="summary-title">{sco}</h4>
-                                </div>
-                            </div>
-                            {itemRows}
-                        </React.Fragment> : null
-                )
-            });
+                return <SubCategorySection key={subCategory} {...{ subCategory, subCategoryProperties, matches, tooltipLimit, defaultColClass, collapsed: !!collapsedSections[subCategory]  }} toggleExpand={this.toggleExpand} />
+            }, this);
         } else {
             placeholderStyle.width = null;
             placeholderStyle.height = null;
@@ -879,6 +854,47 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         );
     }
 }
+
+const SubCategorySection = React.memo(function SubCategorySection(props) {
+    const { subCategory, matches, subCategoryProperties, tooltipLimit, defaultColClass, collapsed, toggleExpand } = props;
+
+    const itemRows = _.map(subCategoryProperties, function ([field, item]) {
+        const itemCols = _.map(matches, function (match) {
+            if (typeof match[field] === 'undefined' || match[field] === null) {
+                return null;
+            }
+            const tooltip = typeof match[field] === 'string' && match[field].length > tooltipLimit ? match[field] : null;
+            return (
+                <div className={defaultColClass + " summary-item-column"}>
+                    <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
+                </div>);
+        });
+
+        const anyItemCols = _.any(itemCols, function (iCol) { return !!iCol; });
+        return anyItemCols ? (
+            <div className="row summary-item-row">
+                <div className="col-xl-3 summary-item-row-header text-truncate">
+                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} />
+                </div>
+                {itemCols}
+            </div>
+        ) : null;
+    });
+
+    const anyItemRows = _.any(itemRows, function (iRow) { return !!iRow; });
+
+    return (
+        anyItemRows ?
+            <React.Fragment>
+                <div className="row summary-section-header">
+                    <div class="col summary-title-column text-truncate">
+                        <i class={"icon icon-fw fas " + (collapsed ? 'icon-plus' : 'icon-minus')} onClick={() => toggleExpand(subCategory)}></i>&nbsp;<h4 class="summary-title">{subCategory}</h4>
+                    </div>
+                </div>
+                {!collapsed ? itemRows : null}
+            </React.Fragment> : null
+    )
+});
 
 function StatusMenuItem(props){
     const { eventKey, context, children } = props;
