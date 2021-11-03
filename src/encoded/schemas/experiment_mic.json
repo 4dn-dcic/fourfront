@@ -53,6 +53,7 @@
                 "Swept-Field Confocal",
                 "STED",
                 "STORM",
+                "dSTORM",
                 "Light-Sheet",
                 "Electron Microscopy",
                 "TIRF",
