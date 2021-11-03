@@ -132,7 +132,7 @@ def fetch_biorxiv(url, doi):
     record_dict = r.json()['collection'][0]
     pub_data = {k: record_dict.get(v) for k,v in fdn2biorxiv.items() if record_dict.get(v)}
     if pub_data.get('authors'):  # format authors according to 4DN schema
-        pub_data['authors'] = [a.lstrip().replace(". ", "").replace(".", "") for a in pub_data['authors'].split(";")]
+        pub_data['authors'] = [a.replace(". ", "").replace(".", "").replace(",", "") for a in pub_data['authors'].split("; ")]
     pub_data['url'] = url
     pub_data['journal'] = 'bioRxiv'
     return pub_data
