@@ -98,6 +98,12 @@
                     "ATTO 565",
                     "ATTO 633",
                     "ATTO 647N",
+                    "CF568",
+                    "JF549",
+                    "JF552",
+                    "JFX554",
+                    "PAJF549",
+                    "PAJF646",
                     "Cy3",
                     "Cy5",
                     "DAPI",
@@ -105,10 +111,6 @@
                     "dTomato"
                 ],
                 "ignored_enum": [
-                    "CF568",
-                    "JF549",
-                    "PAJF549",
-                    "PAJF646",
                     "429/470nm fluorophore",
                     "495/517nm fluorophore",
                     "505/515nm fluorophore",
