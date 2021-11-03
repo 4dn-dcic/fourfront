@@ -2115,6 +2115,16 @@ $badge-item-min-height: 90px;
 		font-size: 1.25rem;
 		font-weight: 500;
 	}
+	.summary-section-header {
+		background-color: #22656d;
+		border-bottom: none;
+		color: #fff;
+		height: 36px;
+
+		h4 {
+			font-size: 1.1rem;
+		}
+	}
 	.summary-title-column {
 		top: -1px;
 		display: flex;
@@ -2132,6 +2142,7 @@ $badge-item-min-height: 90px;
 		height: 36px;
 		font-size: 1rem;
 		font-weight: 300;
+		border-bottom: 1px solid #dcdcdc;
 
 		.summary-item-row-header {
 			font-weight: 500;
@@ -2141,6 +2152,7 @@ $badge-item-min-height: 90px;
 		.summary-item-column {
 			padding-top: 10px;
 			font-weight: 300;
+			border-right: 1px dotted rgba(0,0,0,.075);
 		}
 	}
 }

@@ -746,7 +746,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         this.setState({
             'currentFilters': [{ field: facet.field, term: term.key, remove: '' }],
             'matches': matches,
-            'schema': foundSchema
+            'schema': foundSchema,
+            'collapsedSections': {}
         });
 
         return false;
@@ -768,20 +769,23 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         const microscope = this.getMicroscope();
 
         if (!microscope || !microMetaDependencies) {
-            return <div className="text-center" style={placeholderStyle}><MicroMetaLoadingIndicator /></div>;;
+            return <div className="text-center" style={placeholderStyle}><MicroMetaLoadingIndicator /></div>;
         }
 
         // left side - facets
         const facets = this.memoized.facetsFromMicroscope(microscope);
 
         // right side - results
-        let headerRow = null, subCategoriesRow = null;
+        let tableHeader = null, tableBody = null;
         if (matches && matches.length > 0 && schema) {
             let defaultColClass = 'col-xl-3';
+            let toolTipLengthLimit = 20;
             if (matches.length === 1) {
-                defaultColClass = 'col-xl-9';
+                defaultColClass = 'col-xl-9 col-sm-6';
+                toolTipLengthLimit = 120;
             } else if (matches.length === 2) {
                 defaultColClass = 'col-xl-4';
+                toolTipLengthLimit = 50;
             } else if (matches.length === 4) {
                 defaultColClass = 'col-xl-2';
             }
@@ -789,7 +793,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             const headerCols = _.map(matches, function (m) {
                 return (<div className={defaultColClass + " summary-title-column text-truncate"}>{m.Name}</div>)
             });
-            headerRow = (
+            tableHeader = (
                 <div className="row summary-sub-header">
                     <div className="col-xl-3 summary-title-column text-truncate">MetaData</div>
                     {headerCols}
@@ -797,7 +801,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             );
             const schemaPropPairs = _.pairs(schema.properties);
             
-            subCategoriesRow = _.map(_.keys(schema.subCategoriesOrder), function(sco){
+            tableBody = _.map(_.keys(schema.subCategoriesOrder), function(sco){
                 const matchingProperties = _.filter(schemaPropPairs, function (p) {
                     return p[1].category === sco;
                 });
@@ -808,7 +812,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                         if (typeof match[field] === 'undefined' || match[field] === null) {
                             return null;
                         }
-                        const tooltip = typeof match[field] === 'string' && match[field].length > 20 ? match[field] : null;
+                        const tooltip = typeof match[field] === 'string' && match[field].length > toolTipLengthLimit ? match[field] : null;
                         return (
                             <div className={defaultColClass + " summary-item-column"}>
                                 <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
@@ -831,7 +835,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 return (
                     anyItemRows ?
                         <React.Fragment>
-                            <div className="row summary-header">
+                            <div className="row summary-section-header">
                                 <div class="col summary-title-column text-truncate">
                                     <i class="icon icon-fw icon-minus fas"></i>&nbsp;<h4 class="summary-title">{sco}</h4>
                                 </div>
@@ -840,6 +844,17 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                         </React.Fragment> : null
                 )
             });
+        } else {
+            placeholderStyle.width = null;
+            placeholderStyle.height = null;
+            if (typeof height === 'number' && height >= 400) {
+                placeholderStyle.height = height - 200;
+                placeholderStyle.paddingTop = ((height - 200) / 2) - 40;
+            }
+            tableBody = (
+                <div className="text-center" style={placeholderStyle}>
+                    <MicroMetaLoadingIndicator title="Select a Component to Activate the Summary Table" />
+                </div>);
         }
 
         return (
@@ -856,8 +871,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                                 <i class="icon icon-fw icon-microscope fas"></i>&nbsp;<h4 class="summary-title">Component Summary Table</h4>
                             </div>
                         </div>
-                        {headerRow}
-                        {subCategoriesRow}
+                        {tableHeader}
+                        {tableBody}
                     </div>
                 </div>
             </div>
