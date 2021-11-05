@@ -6,6 +6,7 @@ import _ from 'underscore';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Dropdown from 'react-bootstrap/esm/Dropdown';
+import Collapse from 'react-bootstrap/esm/Collapse';
 import ReactTooltip from 'react-tooltip';
 
 import { JWT, console, object, layout, ajax, navigate, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -941,14 +942,19 @@ const SubCategorySection = React.memo(function SubCategorySection(props) {
 
     return (
         anyItemRows ?
-            <React.Fragment>
+            <div className="summary-section-container">
                 <div className="row summary-section-header">
                     <div class="col summary-title-column text-truncate">
                         <i class={"icon icon-fw fas " + (collapsed ? 'icon-plus' : 'icon-minus')} onClick={() => toggleExpand(subCategory)}></i>&nbsp;<h4 class="summary-title">{subCategory}</h4>
                     </div>
                 </div>
-                {!collapsed ? itemRows : null}
-            </React.Fragment> : null
+                {/* {!collapsed ? itemRows : null} */}
+                <Collapse in={!collapsed}>
+                    <div>
+                        {itemRows}
+                    </div>
+                </Collapse>
+            </div> : null
     )
 });
 

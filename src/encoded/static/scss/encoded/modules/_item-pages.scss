@@ -2103,6 +2103,10 @@ $badge-item-min-height: 90px;
 	}
 }
 .micro-meta-summary-results {
+	.row {
+		margin-left: 0px !important;
+	}
+
 	.summary-header {
 		background-color: #22656d;
 		border-bottom: none;
@@ -2171,7 +2175,7 @@ $badge-item-min-height: 90px;
 			position: relative;
 			height: 100%;
 			width: 36px;
-			border: 1px solid transparent;
+			border: 1px solid #343A40;
 			background: transparent;
 			border-radius: 3px;
 			outline: none;
