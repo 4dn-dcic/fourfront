@@ -643,6 +643,9 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         this.getMicroscope = this.getMicroscope.bind(this);
         this.onFilter = this.onFilter.bind(this);
         this.toggleExpand = this.toggleExpand.bind(this);
+        this.onClickPrevious = this.onClickPrevious.bind(this);
+        this.onClickNext = this.onClickNext.bind(this);
+        this.prevNextButton = this.prevNextButton.bind(this);
         this.memoized = {
             facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope)
         }
@@ -693,8 +696,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState){
-        const { currentFilters } = this.state;
-        const { currentFilters: prevCurrentFilters } = prevState;
+        const { currentFilters, firstVisibleMatchIndex } = this.state;
+        const { currentFilters: prevCurrentFilters, firstVisibleMatchIndex: prevFirstVisibleMatchIndex } = prevState;
 
         let term = null, field = null, prevTerm = null, prevField = null;
         if (currentFilters && currentFilters.length > 0) {
@@ -704,7 +707,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             ({ term: prevTerm, field: prevField } = prevCurrentFilters[0]);
         }
 
-        if (field !== prevField || term !== prevTerm) {
+        if (field !== prevField || term !== prevTerm || firstVisibleMatchIndex !== prevFirstVisibleMatchIndex) {
             ReactTooltip.rebuild();
         }
     }
@@ -748,7 +751,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             'currentFilters': [{ field: facet.field, term: term.key, remove: '' }],
             'matches': matches,
             'schema': foundSchema,
-            'collapsedSections': {}
+            'collapsedSections': {},
+            'firstVisibleMatchIndex': 0
         });
 
         return false;
@@ -765,9 +769,35 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         });
     }
 
+    onClickPrevious(e){
+        const { firstVisibleMatchIndex } = this.state;        
+        this.setState({
+            'firstVisibleMatchIndex': firstVisibleMatchIndex - 1
+        });
+    }
+
+    onClickNext(e){
+        const { firstVisibleMatchIndex } = this.state;        
+        this.setState({
+            'firstVisibleMatchIndex': firstVisibleMatchIndex + 1
+        });
+    }
+
+    prevNextButton(isNext) {
+        return (
+            <div className="prev-next-button-container">
+                <button type="button" className="toggle-detail-button" onClick={isNext ? this.onClickNext : this.onClickPrevious}>
+                    <div className="icon-container" data-tip={'Show ' + (isNext ? 'next component' : 'previous component')}>
+                        <i className={"icon icon-fw fas " + (isNext ? 'icon-angle-right' : 'icon-angle-left')} />
+                    </div>
+                </button>
+            </div>
+        );
+    }
+
     render() {
         const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
-        const { currentFilters, matches, schema, collapsedSections } = this.state;
+        const { currentFilters, matches, schema, collapsedSections, firstVisibleMatchIndex } = this.state;
 
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
@@ -792,22 +822,36 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         if (matches && matches.length > 0 && schema) {
             let defaultColClass = 'col-xl-3';
             let tooltipLimit = 20;
+            let visibleMatchCount = matches.length;
             if (matches.length === 1) {
-                defaultColClass = 'col-xl-9 col-sm-6';
+                defaultColClass = 'col-xl-9';
                 tooltipLimit = 120;
             } else if (matches.length === 2) {
                 defaultColClass = 'col-xl-4';
                 tooltipLimit = 50;
-            } else if (matches.length === 4) {
+            } else if (matches.length >= 4) {
                 defaultColClass = 'col-xl-2';
+                visibleMatchCount = 4;
             }
+
+            const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0 ;
+            const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length;
 
             tableHeader = (
                 <div className="row summary-sub-header">
-                    <div className="col-xl-3 summary-title-column text-truncate">MetaData</div>
-                    {_.map(matches, function (m) {
-                        return (<div className={defaultColClass + " summary-title-column text-truncate"}>{m.Name}</div>)
-                    })}
+                    <div className="col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
+                    {_.map(matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount), function (m, index) {
+                        {/* const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0 && index === 0;
+                        const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length && index === visibleMatchCount - 1; */}
+                        return (
+                            <div className={defaultColClass + " summary-title-column text-truncate"}>
+                                {/* {showPrevBtn ? this.prevNextButton(false) : null} */}
+                                {m.Name}
+                                {/* {showNextBtn ? this.prevNextButton(true) : null} */}
+                            </div>
+                        );
+                    }, this)}
+                    {showNextBtn ? <div className="col-xl-1 summary-title-column text-truncate">{this.prevNextButton(true)}</div> : null}
                 </div>
             );
             const schemaPropPairs = _.pairs(schema.properties);
@@ -817,7 +861,11 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     const [, propItem] = spp;
                     return propItem && propItem.category === subCategory;
                 });
-                return <SubCategorySection key={subCategory} {...{ subCategory, subCategoryProperties, matches, tooltipLimit, defaultColClass, collapsed: !!collapsedSections[subCategory]  }} toggleExpand={this.toggleExpand} />
+                const sectionProps = {
+                    subCategory, subCategoryProperties, matches, tooltipLimit, defaultColClass, 
+                    collapsed: !!collapsedSections[subCategory], firstVisibleMatchIndex, visibleMatchCount
+                };
+                return <SubCategorySection key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />
             }, this);
         } else {
             placeholderStyle.width = null;
@@ -832,6 +880,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 </div>);
         }
 
+        let headerTitle = 'Component Summary Table';
+        if (matches && matches.length > 0 && currentFilters && currentFilters.length > 0) {
+            const [{ term: filterTerm }] = currentFilters;
+            headerTitle += ` - ${filterTerm} (${matches.length})`;
+        }
+
         return (
             <div class="overflow-hidden">
                 <h3 class="tab-section-title"><span>Hardware Summary</span></h3>
@@ -843,7 +897,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     <div className="col-12 col-md-7 col-lg-8 col-xl-9 micro-meta-summary-results">
                         <div className="row summary-header">
                             <div class="col summary-title-column text-truncate">
-                                <i class="icon icon-fw icon-microscope fas"></i>&nbsp;<h4 class="summary-title">Component Summary Table</h4>
+                                <i class="icon icon-fw icon-microscope fas"></i>&nbsp;<h4 class="summary-title">{headerTitle}</h4>
                             </div>
                         </div>
                         {tableHeader}
@@ -856,10 +910,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 }
 
 const SubCategorySection = React.memo(function SubCategorySection(props) {
-    const { subCategory, matches, subCategoryProperties, tooltipLimit, defaultColClass, collapsed, toggleExpand } = props;
+    const { subCategory, matches, subCategoryProperties, tooltipLimit, defaultColClass, collapsed, toggleExpand, firstVisibleMatchIndex, visibleMatchCount } = props;
+
+    const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
-        const itemCols = _.map(matches, function (match) {
+        const itemCols = _.map(visibleMatches, function (match) {
             if (typeof match[field] === 'undefined' || match[field] === null) {
                 return null;
             }
