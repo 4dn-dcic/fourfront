@@ -39,7 +39,6 @@
             "title": "Settings",
             "type": "object",
             "internal_comment": "This is the container for image settings json from micrometa app",
-            "required": [],
             "additionalProperties": true
         }
     }
