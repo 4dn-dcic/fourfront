@@ -916,18 +916,19 @@ const SubCategorySection = React.memo(function SubCategorySection(props) {
     const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
+        let anyItemCols = false;
         const itemCols = _.map(visibleMatches, function (match) {
             if (typeof match[field] === 'undefined' || match[field] === null) {
-                return null;
+                return (<div className={defaultColClass + " summary-item-column"}>&nbsp;</div>);
             }
-            const tooltip = typeof match[field] === 'string' && match[field].length > tooltipLimit ? match[field] : null;
+            anyItemCols = true;
+            const tooltip = typeof match[field] === 'string' && match[field].length >= tooltipLimit ? match[field] : null;
             return (
                 <div className={defaultColClass + " summary-item-column"}>
                     <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
                 </div>);
         });
 
-        const anyItemCols = _.any(itemCols, function (iCol) { return !!iCol; });
         return anyItemCols ? (
             <div className="row summary-item-row">
                 <div className="col-xl-3 summary-item-row-header text-truncate">
