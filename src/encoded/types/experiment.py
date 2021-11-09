@@ -972,12 +972,6 @@ def _build_experiment_mic_embedded_list():
         'files.microscope_settings.ch03_lasers_diodes',
         'files.microscope_settings.ch04_lasers_diodes',
 
-        # MicroscopeConfiguration linkTo
-        'microscope_configuration_master.title',
-        'microscope_configuration_master.microscope.Name',
-        'files.microscope_configuration.title',
-        'files.microscope_configuration.microscope.Name',
-
         # Image linkTo
         'sample_image.title',
         'sample_image.caption',
@@ -1062,30 +1056,6 @@ class ExperimentMic(Experiment):
                     'combined': 'Target: ' + value
                 }
         return super(ExperimentMic, self).experiment_categorizer(request, experiment_type)
-
-    @calculated_property(schema={
-        "title": "Microscopes",
-        "description": "All microscope configurations used in this experiment",
-        "type": "array",
-        "items": {
-            "title": "Microscope Configuration",
-            "description": "Hardware configuration for the microscope instrument",
-            "type": "string",
-            "linkTo": "MicroscopeConfiguration"
-        }
-    })
-    def microscopes(self, request, microscope_configuration_master=None, files=None):
-        mics = []
-        if microscope_configuration_master:
-            mic_conf = get_item_or_none(request, microscope_configuration_master)
-            if mic_conf:
-                mics.append(mic_conf.get('@id'))
-        if files:
-            for f in files:
-                filemic = get_item_or_none(request, f)
-                if filemic and filemic.get('microscope_configuration'):
-                    mics.append(filemic['microscope_configuration'])
-        return list(set(mics))
 
 
 @calculated_property(context=Experiment, category='action')
