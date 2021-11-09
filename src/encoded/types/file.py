@@ -1263,10 +1263,6 @@ def _build_file_microscopy_embedded_list():
         'experiments.files.microscope_settings.ch02_lasers_diodes',
         'experiments.files.microscope_settings.ch03_lasers_diodes',
         'experiments.files.microscope_settings.ch04_lasers_diodes',
-
-        # MicroscopeConfiguration linkTo
-        'microscope_configuration.title',
-        'microscope_configuration.microscope.Name',
         ]
     )
 
