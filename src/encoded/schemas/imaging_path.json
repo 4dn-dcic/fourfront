@@ -108,6 +108,7 @@
                     "Cy5",
                     "DAPI",
                     "eGFP",
+                    "sfGFP",
                     "dTomato"
                 ],
                 "ignored_enum": [
