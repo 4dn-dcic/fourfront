@@ -681,6 +681,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         this.onClickPrevious = this.onClickPrevious.bind(this);
         this.onClickNext = this.onClickNext.bind(this);
         this.prevNextButton = this.prevNextButton.bind(this);
+        this.handleMatchSelection = this.handleMatchSelection.bind(this);
         this.memoized = {
             facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope),
             defaultLayoutSettings: memoize(MicroMetaSummaryTabView.defaultLayoutSettings)
@@ -831,6 +832,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         );
     }
 
+    handleMatchSelection(idx) {
+        this.setState({
+            'firstVisibleMatchIndex': parseInt(idx)
+        });
+    }
+
     render() {
         const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
         const { currentFilters, matches, schema, collapsedSections, firstVisibleMatchIndex } = this.state;
@@ -856,35 +863,61 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         // right side - results
         let headerTitle = 'Component Summary Table';
         let tableHeader = null, tableBody = null;
+        
         if (matches && matches.length > 0 && schema) {
+            
             const { columClassName, tooltipLimit, visibleMatchCount, windowGridSize } = this.memoized.defaultLayoutSettings(windowWidth, matches.length);
 
-            const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0 && windowGridSize !== 'xs';
-            const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length && windowGridSize !== 'xs';
+            const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
 
-            tableHeader = (
-                <div className="row summary-sub-header">
-                    <div className="col col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
-                    {_.map(matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount), function (m, index) {
-                        return (
-                            <div className={columClassName + " summary-title-column text-truncate"}>
-                                {m.Name}
-                            </div>
-                        );
-                    }, this)}
-                    {showNextBtn ? <div className="col-xl-1 summary-title-column text-truncate">{this.prevNextButton(true)}</div> : null}
-                </div>
-            );
-            const schemaPropPairs = _.pairs(schema.properties);
+            if (windowGridSize === 'xs' && matches.length > visibleMatchCount) {
+                tableHeader = (
+                    <div className="row summary-sub-header">
+                        <div className="col col-xl-3 summary-title-column text-truncate">MetaData</div>
+                        <div className={columClassName + " summary-title-column"}>
+                            <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-left"
+                                size="md" className="w-100" onSelect={this.handleMatchSelection}>
+                                {
+                                    _.map(matches, function (match, idx) {
+                                        return (
+                                            <DropdownItem key={"match-" + idx} eventKey={idx}>
+                                                {match.Name || "-"}
+                                            </DropdownItem>);
+                                    })
+                                }
+                            </DropdownButton>
+                        </div>
+                    </div>
+                );
+            } else {
+                const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0;
+                const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length;
+
+                tableHeader = (
+                    <div className="row summary-sub-header">
+                        <div className="col col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
+                        {_.map(visibleMatches, function (m, index) {
+                            return (
+                                <div className={columClassName + " summary-title-column text-truncate"}>
+                                    {m.Name}
+                                </div>
+                            );
+                        }, this)}
+                        {showNextBtn ? <div className="col-xl-1 summary-title-column text-truncate">{this.prevNextButton(true)}</div> : null}
+                    </div>
+                );
+            }
             
+            const schemaPropPairs = _.pairs(schema.properties);          
+
             tableBody = _.map(_.keys(schema.subCategoriesOrder), function(subCategory){
                 const subCategoryProperties = _.filter(schemaPropPairs, function (spp) {
                     const [, propItem] = spp;
                     return propItem && propItem.category === subCategory;
                 });
                 const sectionProps = {
-                    subCategory, subCategoryProperties, matches, tooltipLimit, columClassName, 
-                    collapsed: !!collapsedSections[subCategory], firstVisibleMatchIndex, visibleMatchCount
+                    subCategory, subCategoryProperties, matches: visibleMatches, tooltipLimit, columClassName, 
+                    collapsed: !!collapsedSections[subCategory]
                 };
                 return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />
             }, this);
@@ -931,13 +964,11 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 }
 
 const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props) {
-    const { subCategory, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand, firstVisibleMatchIndex, visibleMatchCount } = props;
-
-    const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
+    const { subCategory, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand } = props;
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
         let hasValidColumn = false;
-        const itemCols = _.map(visibleMatches, function (match) {
+        const itemCols = _.map(matches, function (match) {
             if (typeof match[field] === 'undefined' || match[field] === null) {
                 return (<div className={columClassName + " summary-item-column"}>&nbsp;</div>);
             }
