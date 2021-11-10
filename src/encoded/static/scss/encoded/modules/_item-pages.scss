@@ -2155,11 +2155,19 @@ $badge-item-min-height: 90px;
 			font-weight: 500;
 			background-color: #dedede;
 			padding-top: 10px;
+
+			@include media-breakpoint-down(sm){
+				max-width: 33% !important;
+			}
 		}
 		.summary-item-column {
 			padding-top: 10px;
 			font-weight: 300;
 			border-right: 1px dotted rgba(0,0,0,.075);
+			
+			@include media-breakpoint-down(sm){
+				max-width: 66% !important;
+			}
 		}
 	}
 	.prev-next-button-container {

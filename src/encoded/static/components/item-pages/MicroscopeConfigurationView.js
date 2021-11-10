@@ -638,6 +638,40 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         return facets;
     }
 
+    static defaultLayoutSettings(windowWidth, matches) {
+        let length = 1;
+        if (matches) {
+            if (Array.isArray(matches)) {
+                length = matches.length;
+            } else if (typeof matches === 'int' || typeof matches === 'number') {
+                length = matches;
+            } else {
+                throw Error('matches must be either array or numeric');
+            }
+        }
+
+        const windowGridSize = layout.responsiveGridState(windowWidth);
+
+        let columClassName = 'col-8 col-xl-3';
+        let tooltipLimit = 20;
+        let visibleMatchCount = length;
+        if (windowGridSize === 'xs') {
+            columClassName = 'col-8 col-xl-9';
+            visibleMatchCount = 1;
+        } else if (length === 1) {
+            columClassName = 'col-8 col-xl-9';
+            tooltipLimit = 120;
+        } else if (length === 2) {
+            columClassName = 'col-8 col-xl-4';
+            tooltipLimit = 50;
+        } else if (length >= 4) {
+            columClassName = 'col-8 col-xl-2';
+            visibleMatchCount = 4;
+        }
+
+        return { columClassName, tooltipLimit, visibleMatchCount, windowGridSize };
+    }
+
     constructor(props){
         super(props);
 
@@ -648,7 +682,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         this.onClickNext = this.onClickNext.bind(this);
         this.prevNextButton = this.prevNextButton.bind(this);
         this.memoized = {
-            facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope)
+            facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope),
+            defaultLayoutSettings: memoize(MicroMetaSummaryTabView.defaultLayoutSettings)
         }
         const { forwardRef } = props;
 
@@ -819,36 +854,21 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         const facets = this.memoized.facetsFromMicroscope(microscope);
 
         // right side - results
+        let headerTitle = 'Component Summary Table';
         let tableHeader = null, tableBody = null;
         if (matches && matches.length > 0 && schema) {
-            let defaultColClass = 'col-xl-3';
-            let tooltipLimit = 20;
-            let visibleMatchCount = matches.length;
-            if (matches.length === 1) {
-                defaultColClass = 'col-xl-9';
-                tooltipLimit = 120;
-            } else if (matches.length === 2) {
-                defaultColClass = 'col-xl-4';
-                tooltipLimit = 50;
-            } else if (matches.length >= 4) {
-                defaultColClass = 'col-xl-2';
-                visibleMatchCount = 4;
-            }
+            const { columClassName, tooltipLimit, visibleMatchCount, windowGridSize } = this.memoized.defaultLayoutSettings(windowWidth, matches.length);
 
-            const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0 ;
-            const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length;
+            const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0 && windowGridSize !== 'xs';
+            const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length && windowGridSize !== 'xs';
 
             tableHeader = (
                 <div className="row summary-sub-header">
-                    <div className="col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
+                    <div className="col col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
                     {_.map(matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount), function (m, index) {
-                        {/* const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0 && index === 0;
-                        const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length && index === visibleMatchCount - 1; */}
                         return (
-                            <div className={defaultColClass + " summary-title-column text-truncate"}>
-                                {/* {showPrevBtn ? this.prevNextButton(false) : null} */}
+                            <div className={columClassName + " summary-title-column text-truncate"}>
                                 {m.Name}
-                                {/* {showNextBtn ? this.prevNextButton(true) : null} */}
                             </div>
                         );
                     }, this)}
@@ -863,11 +883,17 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     return propItem && propItem.category === subCategory;
                 });
                 const sectionProps = {
-                    subCategory, subCategoryProperties, matches, tooltipLimit, defaultColClass, 
+                    subCategory, subCategoryProperties, matches, tooltipLimit, columClassName, 
                     collapsed: !!collapsedSections[subCategory], firstVisibleMatchIndex, visibleMatchCount
                 };
-                return <SubCategorySection key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />
+                return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />
             }, this);
+
+            // update title to include selected term name and count
+            if (windowGridSize !== 'xs' && currentFilters && currentFilters.length > 0) {
+                const [{ term: filterTerm }] = currentFilters;
+                headerTitle += ` - ${filterTerm} (${matches.length})`;
+            }
         } else {
             placeholderStyle.width = null;
             placeholderStyle.height = null;
@@ -879,12 +905,6 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 <div className="text-center" style={placeholderStyle}>
                     <MicroMetaLoadingIndicator title="Select a Component to Activate the Summary Table" />
                 </div>);
-        }
-
-        let headerTitle = 'Component Summary Table';
-        if (matches && matches.length > 0 && currentFilters && currentFilters.length > 0) {
-            const [{ term: filterTerm }] = currentFilters;
-            headerTitle += ` - ${filterTerm} (${matches.length})`;
         }
 
         return (
@@ -910,46 +930,45 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     }
 }
 
-const SubCategorySection = React.memo(function SubCategorySection(props) {
-    const { subCategory, matches, subCategoryProperties, tooltipLimit, defaultColClass, collapsed, toggleExpand, firstVisibleMatchIndex, visibleMatchCount } = props;
+const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props) {
+    const { subCategory, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand, firstVisibleMatchIndex, visibleMatchCount } = props;
 
     const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
-        let anyItemCols = false;
+        let hasValidColumn = false;
         const itemCols = _.map(visibleMatches, function (match) {
             if (typeof match[field] === 'undefined' || match[field] === null) {
-                return (<div className={defaultColClass + " summary-item-column"}>&nbsp;</div>);
+                return (<div className={columClassName + " summary-item-column"}>&nbsp;</div>);
             }
-            anyItemCols = true;
+            hasValidColumn = true;
             const tooltip = typeof match[field] === 'string' && match[field].length >= tooltipLimit ? match[field] : null;
             return (
-                <div className={defaultColClass + " summary-item-column"}>
+                <div className={columClassName + " summary-item-column"}>
                     <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
                 </div>);
         });
 
-        return anyItemCols ? (
+        return hasValidColumn ? (
             <div className="row summary-item-row">
-                <div className="col-xl-3 summary-item-row-header text-truncate">
-                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} />
+                <div className="col-4 col-xl-3 summary-item-row-header">
+                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" />
                 </div>
                 {itemCols}
             </div>
         ) : null;
     });
 
-    const anyItemRows = _.any(itemRows, function (iRow) { return !!iRow; });
+    const hasValidRow = _.any(itemRows, function (iRow) { return !!iRow; });
 
     return (
-        anyItemRows ?
+        hasValidRow ?
             <div className="summary-section-container">
                 <div className="row summary-section-header">
                     <div class="col summary-title-column text-truncate">
                         <i class={"icon icon-fw fas " + (collapsed ? 'icon-plus' : 'icon-minus')} onClick={() => toggleExpand(subCategory)}></i>&nbsp;<h4 class="summary-title">{subCategory}</h4>
                     </div>
                 </div>
-                {/* {!collapsed ? itemRows : null} */}
                 <Collapse in={!collapsed}>
                     <div>
                         {itemRows}
