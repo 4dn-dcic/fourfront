@@ -638,7 +638,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         return facets;
     }
 
-    static defaultLayoutSettings(windowWidth, matches) {
+    static defaultLayoutSettings(windowWidth, mounted, matches) {
         let length = 1;
         if (matches) {
             if (Array.isArray(matches)) {
@@ -650,26 +650,47 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             }
         }
 
-        const windowGridSize = layout.responsiveGridState(windowWidth);
+        const gridState = mounted && layout.responsiveGridState(windowWidth);
+        const isMobileSize = gridState && ['xs', 'sm', 'md'].indexOf(gridState) > -1;
 
-        let columClassName = 'col-8 col-xl-3';
-        let tooltipLimit = 20;
+        let columClassName = '', tooltipLimit = 20;
         let visibleMatchCount = length;
-        if (windowGridSize === 'xs') {
+
+        if (isMobileSize) {
             columClassName = 'col-8 col-xl-9';
             visibleMatchCount = 1;
-        } else if (length === 1) {
-            columClassName = 'col-8 col-xl-9';
-            tooltipLimit = 120;
-        } else if (length === 2) {
-            columClassName = 'col-8 col-xl-4';
-            tooltipLimit = 50;
-        } else if (length >= 4) {
-            columClassName = 'col-8 col-xl-2';
-            visibleMatchCount = 4;
+        } else if (gridState === 'lg') {
+            switch (length) {
+                case 1:
+                    columClassName = 'col-8 col-lg-8';
+                    tooltipLimit = 120;
+                    break;
+                default:
+                    columClassName = 'col-8 col-lg-4';
+                    tooltipLimit = 30;
+                    visibleMatchCount = 2;
+            }
+        } else {
+            switch (length) {
+                case 1:
+                    columClassName = 'col-8 col-xl-9';
+                    tooltipLimit = 120;
+                    break;
+                case 2:
+                    columClassName = 'col-8 col-xl-4';
+                    tooltipLimit = 50;
+                    visibleMatchCount = 2;
+                    break;
+                case 3:
+                    columClassName = 'col-8 col-xl-3';
+                    break;
+                default:
+                    columClassName = 'col-8 col-xl-2';
+                    visibleMatchCount = 4;
+            }
         }
 
-        return { columClassName, tooltipLimit, visibleMatchCount, windowGridSize };
+        return { columClassName, tooltipLimit, visibleMatchCount, isMobileSize };
     }
 
     constructor(props){
@@ -733,6 +754,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState){
+        const { windowWidth } = this.props;
+        const { windowWidth: prevWindowWidth } = prevState;
         const { currentFilters, firstVisibleMatchIndex } = this.state;
         const { currentFilters: prevCurrentFilters, firstVisibleMatchIndex: prevFirstVisibleMatchIndex } = prevState;
 
@@ -744,7 +767,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             ({ term: prevTerm, field: prevField } = prevCurrentFilters[0]);
         }
 
-        if (field !== prevField || term !== prevTerm || firstVisibleMatchIndex !== prevFirstVisibleMatchIndex) {
+        if (windowWidth !== prevWindowWidth || field !== prevField ||
+            term !== prevTerm || firstVisibleMatchIndex !== prevFirstVisibleMatchIndex) {
             ReactTooltip.rebuild();
         }
     }
@@ -840,7 +864,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
     render() {
         const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
-        const { currentFilters, matches, schema, collapsedSections, firstVisibleMatchIndex } = this.state;
+        const { mounted, currentFilters, matches, schema, collapsedSections, firstVisibleMatchIndex } = this.state;
 
         const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
         const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
@@ -866,14 +890,14 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         
         if (matches && matches.length > 0 && schema) {
             
-            const { columClassName, tooltipLimit, visibleMatchCount, windowGridSize } = this.memoized.defaultLayoutSettings(windowWidth, matches.length);
+            const { columClassName, tooltipLimit, visibleMatchCount, isMobileSize } = this.memoized.defaultLayoutSettings(windowWidth, mounted, matches.length);
 
             const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
 
-            if (windowGridSize === 'xs' && matches.length > visibleMatchCount) {
+            if (isMobileSize && matches.length > visibleMatchCount) {
                 tableHeader = (
                     <div className="row summary-sub-header">
-                        <div className="col col-xl-3 summary-title-column text-truncate">MetaData</div>
+                        <div className="col summary-title-column text-truncate">MetaData</div>
                         <div className={columClassName + " summary-title-column"}>
                             <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-left"
                                 size="md" className="w-100" onSelect={this.handleMatchSelection}>
@@ -895,7 +919,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
                 tableHeader = (
                     <div className="row summary-sub-header">
-                        <div className="col col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
+                        <div className="col col-lg-3 col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
                         {_.map(visibleMatches, function (m, index) {
                             return (
                                 <div className={columClassName + " summary-title-column text-truncate"}>
@@ -903,7 +927,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                                 </div>
                             );
                         }, this)}
-                        {showNextBtn ? <div className="col-xl-1 summary-title-column text-truncate">{this.prevNextButton(true)}</div> : null}
+                        {showNextBtn ? <div className="col-lg-1 col-xl-1 summary-title-column text-truncate">{this.prevNextButton(true)}</div> : null}
                     </div>
                 );
             }
@@ -923,7 +947,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             }, this);
 
             // update title to include selected term name and count
-            if (windowGridSize !== 'xs' && currentFilters && currentFilters.length > 0) {
+            if (!isMobileSize && currentFilters && currentFilters.length > 0) {
                 const [{ term: filterTerm }] = currentFilters;
                 headerTitle += ` - ${filterTerm} (${matches.length})`;
             }
@@ -982,7 +1006,7 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
 
         return hasValidColumn ? (
             <div className="row summary-item-row">
-                <div className="col-4 col-xl-3 summary-item-row-header">
+                <div className="col-4 col-lg-3 col-xl-3 summary-item-row-header">
                     <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" />
                 </div>
                 {itemCols}
