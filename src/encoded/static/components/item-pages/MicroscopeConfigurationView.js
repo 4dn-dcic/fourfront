@@ -819,28 +819,24 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         return false;
     }
 
-    toggleExpand(sectionKey){
-        const { collapsedSections } = this.state;
+    toggleExpand(sectionKey) {
+        this.setState(function ({ collapsedSections: existingCollapsedSections }) {
+            const collapsedSections = _.extend({}, existingCollapsedSections);
+            collapsedSections[sectionKey] = !collapsedSections[sectionKey];
 
-        const cloned = _.extend({}, collapsedSections);
-        cloned[sectionKey] = !collapsedSections[sectionKey];
-
-        this.setState({
-            'collapsedSections': cloned
+            return { collapsedSections };
         });
     }
 
-    onClickPrevious(e){
-        const { firstVisibleMatchIndex } = this.state;        
-        this.setState({
-            'firstVisibleMatchIndex': firstVisibleMatchIndex - 1
+    onClickPrevious(e) {
+        this.setState(function ({ firstVisibleMatchIndex }) {
+            return { 'firstVisibleMatchIndex': firstVisibleMatchIndex - 1 };
         });
     }
 
     onClickNext(e){
-        const { firstVisibleMatchIndex } = this.state;        
-        this.setState({
-            'firstVisibleMatchIndex': firstVisibleMatchIndex + 1
+        this.setState(function ({ firstVisibleMatchIndex }) {
+            return { 'firstVisibleMatchIndex': firstVisibleMatchIndex + 1 };
         });
     }
 
