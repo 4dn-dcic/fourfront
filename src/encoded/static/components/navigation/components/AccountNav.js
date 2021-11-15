@@ -30,7 +30,9 @@ const auth0Options = {
     },
     allowedConnections: ['github', 'google-oauth2'],
     languageDictionary : {
-        title: "Log In"
+        title: "Log In",
+        unrecoverableError:'Something went wrong.<br />Please <a href="mailto:support@4dnucleome.org">contact</a> technical support.',
+
     }
 };
 
