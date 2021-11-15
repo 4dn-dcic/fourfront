@@ -1120,11 +1120,11 @@ export default class App extends React.PureComponent {
             "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
             "child-src blob:",
             "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
-            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com  www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
-            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
+            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
         ].join("; ");
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
