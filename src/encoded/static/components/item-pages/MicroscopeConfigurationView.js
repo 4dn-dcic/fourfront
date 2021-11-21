@@ -960,13 +960,22 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 </div>);
         }
 
+        const facetListProps = {
+            context: { "filters": currentFilters },
+            title: "Hardware Explorer",
+            facets,
+            onFilter: this.onFilter,
+            termIconStyle: "radio",
+            persistSelectedTerms: false
+        };
+
         return (
             <div class="overflow-hidden">
                 <h3 class="tab-section-title"><span>Hardware Summary</span></h3>
                 <hr class="tab-section-title-horiz-divider mb-1" />
                 <div className="row overflow-auto">
                     <div className="col-12 col-md-5 col-lg-4 col-xl-3">
-                        <FacetList context={{ "filters": currentFilters }} title="Hardware Explorer" facets={facets} onFilter={this.onFilter} />
+                        <FacetList {...facetListProps} />
                     </div>
                     <div className="col-12 col-md-7 col-lg-8 col-xl-9 micro-meta-summary-results">
                         <div className="row summary-header">
