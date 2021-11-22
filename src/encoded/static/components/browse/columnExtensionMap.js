@@ -50,6 +50,16 @@ function sourceDisplayTitleRenderFxn(result) {
         return (<ol style={{ marginTop: '15px', paddingLeft: '14px' }}>{expSetLinks}</ol>);
     }
 }
+function renderTextWithTooltip(value, tooltipLimit = 30) {
+    if (!value) {
+        return <span className="value text-center"> - </span>
+    } else if (typeof value === 'string' && value.length > tooltipLimit) {
+        return <span className="value text-center" data-tip={value}>{value}</span>
+    } else {
+        return <span className="value text-center">{value}</span>
+    }
+}
+
 export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     // TODO: change to organization
     'lab.display_title' : {
@@ -270,5 +280,17 @@ export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     },
     'experiments_in_set.biosample.biosource_summary' : {
         'widthMap' : { 'lg' : 260, 'md' : 230, 'sm' : 180 }
+    },
+    'dataset_label' : {
+        'render': function (result, props) {
+            const { dataset_label } = result;
+            return renderTextWithTooltip(dataset_label);
+        }
+    },
+    'condition' : {
+        'render': function (result, props) {
+            const { condition } = result;
+            return renderTextWithTooltip(condition);
+        }
     }
 });
