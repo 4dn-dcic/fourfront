@@ -1079,7 +1079,7 @@ class ExperimentMic(Experiment):
         if microscope_configuration_master:
             mic_conf = get_item_or_none(request, microscope_configuration_master)
             if mic_conf:
-                mics.append(mic_conf.get('@id'))
+                mics.append(mic_conf['@id'])
         if files:
             for f in files:
                 filemic = get_item_or_none(request, f)
