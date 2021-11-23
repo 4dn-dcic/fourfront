@@ -87,6 +87,7 @@
                 "reads",
                 "segregation table",
                 "signal fold change",
+                "imputed signal fold change",
                 "spt results",
                 "stripe calls"
             ],
