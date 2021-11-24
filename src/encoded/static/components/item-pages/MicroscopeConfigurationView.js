@@ -715,8 +715,11 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         }
     }
 
+    /**
+     * @todo: move dependencies downloading into PackageLockLoader component
+     *        for performance and reusability
+     */
     componentDidMount(){
-
         const onComplete = () => {
             this.setState({ mounted: true });
         };
@@ -791,7 +794,6 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     }
 
     onFilter(facet, term, callback) {
-        
         const microscope = this.getMicroscope();
 
         const matches = _.filter(microscope.components, function (component) {
@@ -815,8 +817,6 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             'collapsedSections': {},
             'firstVisibleMatchIndex': 0
         });
-
-        return false;
     }
 
     toggleExpand(sectionKey) {
@@ -965,7 +965,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             title: "Hardware Explorer",
             facets,
             onFilter: this.onFilter,
-            termIconStyle: "radio",
+            useRadioIcon: true,
             persistSelectedTerms: false
         };
 
@@ -992,6 +992,10 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     }
 }
 
+/**
+ * CollapsibleSubCategory renders subcategory and its fields in a collapsible panel.
+ * Row header displays the field name, rest of the row cells are for component instances' value for that field.
+ */
 const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props) {
     const { subCategory, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand } = props;
 
