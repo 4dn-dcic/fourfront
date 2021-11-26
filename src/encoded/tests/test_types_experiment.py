@@ -866,48 +866,6 @@ def test_experiment_categorizer_cap_c_w_2regions(
 
 
 @pytest.fixture
-def expt_mic_w_microscope(testapp, repliseq_info, exp_types, microscope_conf_1):
-    repliseq_info['experiment_type'] = exp_types['fish']['@id']
-    repliseq_info['microscope_configuration_master'] = microscope_conf_1['@id']
-    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
-
-
-@pytest.fixture
-def filemic_w_microscope(testapp, basic_info, file_formats, microscope_conf_2):
-    basic_info['file_format'] = file_formats.get('tiff').get('@id')
-    basic_info['microscope_configuration'] = microscope_conf_2['@id']
-    return testapp.post_json('/file_microscopy', basic_info).json['@graph'][0]
-
-
-@pytest.fixture
-def expt_mic_w_file(testapp, repliseq_info, exp_types, filemic_w_microscope):
-    repliseq_info['experiment_type'] = exp_types['fish']['@id']
-    repliseq_info['files'] = [filemic_w_microscope['@id']]
-    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
-
-
-def test_experiment_microscopes_only_master(expt_mic_w_microscope):
-    assert len(expt_mic_w_microscope.get('microscopes', [])) == 1
-
-
-def test_experiment_microscopes_only_filemic(expt_mic_w_file):
-    assert len(expt_mic_w_file.get('microscopes', [])) == 1
-
-
-def test_experiment_microscopes_master_and_file(testapp, expt_mic_w_microscope, filemic_w_microscope):
-    patch_file = {'files': [filemic_w_microscope['@id']]}
-    res = testapp.patch_json(expt_mic_w_microscope['@id'], patch_file, status=200).json['@graph'][0]
-    assert len(res.get('microscopes', [])) == 2
-
-
-def test_experiment_microscopes_same_master_and_file(testapp, expt_mic_w_file, microscope_conf_2):
-    patch_mic = {'microscope_configuration_master': microscope_conf_2['@id']}
-    res = testapp.patch_json(expt_mic_w_file['@id'], patch_mic, status=200).json['@graph'][0]
-    assert len(res.get('microscopes', [])) == 1
-    assert res['microscopes'][0] == microscope_conf_2['@id']
-
-
-@pytest.fixture
 def new_exp_type(lab, award):
     data = {
         'uuid': str(uuid4()),

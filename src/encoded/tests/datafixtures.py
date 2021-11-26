@@ -1144,26 +1144,3 @@ def quality_metric_pairsqc(testapp, lab, award):
         'lab': lab['@id']
     }
     return testapp.post_json('/quality_metric_pairsqc', item).json['@graph'][0]
-
-
-@pytest.fixture
-def microscope_conf_basic_info():
-    mic = {
-        'microscope': {
-            'Tier': 1,
-            'ValidationTier': 1,
-            'Name': 'Microscope 1',
-        }
-    }
-    return mic
-
-
-@pytest.fixture
-def microscope_conf_1(testapp, microscope_conf_basic_info):
-    return testapp.post_json('/microscope_configuration', microscope_conf_basic_info).json['@graph'][0]
-
-
-@pytest.fixture
-def microscope_conf_2(testapp, microscope_conf_basic_info):
-    microscope_conf_basic_info['microscope']['Name'] = 'Microscope 2'
-    return testapp.post_json('/microscope_configuration', microscope_conf_basic_info).json['@graph'][0]
