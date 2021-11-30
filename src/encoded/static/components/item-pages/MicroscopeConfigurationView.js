@@ -594,10 +594,8 @@ export class MicroMetaTabView extends React.PureComponent {
 let microMetaDependencies = null;
 const MicroMetaSummaryTabViewFRef = React.forwardRef((props, ref) => <MicroMetaSummaryTabView {...props} forwardRef={ref} />);
 export class MicroMetaSummaryTabView extends React.PureComponent {
-    
-    static getTabObject(props, width) {
-        const { ref } = props;
 
+    static getTabObject(props, width) {
         return {
             'tab': <span><i className="icon icon-list-alt fas icon-fw" /> Hardware Summary</span>,
             'key': 'hardware-summary',
@@ -623,16 +621,16 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         });
 
         const facets = [];
-        _.forEach(_.keys(categoryObj).sort(), function (category) {
+        Object.keys(categoryObj).sort().forEach(function (category) {
             const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
                 return { "key": key, "doc_count": num };
-            }), function (t) { return -t.doc_count });
+            }), function (t) { return -t.doc_count; });
             facets.push({
                 "field": category,
                 "title": category,
                 "aggregation_type": "terms",
                 "terms": terms
-            })
+            });
         });
 
         return facets;
@@ -643,7 +641,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         if (matches) {
             if (Array.isArray(matches)) {
                 length = matches.length;
-            } else if (typeof matches === 'int' || typeof matches === 'number') {
+            } else if (typeof matches === 'number') {
                 length = matches;
             } else {
                 throw Error('matches must be either array or numeric');
@@ -706,13 +704,13 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         this.memoized = {
             facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope),
             defaultLayoutSettings: memoize(MicroMetaSummaryTabView.defaultLayoutSettings)
-        }
+        };
         const { forwardRef } = props;
 
         this.microMetaToolRef = forwardRef;
         this.state = {
             'currentFilters': []
-        }
+        };
     }
 
     /**
@@ -778,7 +776,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
     getMicroscope(){
         const { context } = this.props;
-        let { microscope } = context || {};
+        const { microscope } = context || {};
 
         const mtc = (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
         if (!mtc || !mtc.api){
@@ -883,9 +881,9 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         // right side - results
         let headerTitle = 'Component Summary Table';
         let tableHeader = null, tableBody = null;
-        
+
         if (matches && matches.length > 0 && schema) {
-            
+
             const { columClassName, tooltipLimit, visibleMatchCount, isMobileSize } = this.memoized.defaultLayoutSettings(windowWidth, mounted, matches.length);
 
             const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
@@ -927,20 +925,20 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     </div>
                 );
             }
-            
-            const schemaPropPairs = _.pairs(schema.properties);          
 
-            tableBody = _.map(_.keys(schema.subCategoriesOrder), function(subCategory){
+            const schemaPropPairs = _.pairs(schema.properties);
+
+            tableBody = Object.keys(schema.subCategoriesOrder).map((subCategory) => {
                 const subCategoryProperties = _.filter(schemaPropPairs, function (spp) {
                     const [, propItem] = spp;
                     return propItem && propItem.category === subCategory;
                 });
                 const sectionProps = {
-                    subCategory, subCategoryProperties, matches: visibleMatches, tooltipLimit, columClassName, 
+                    subCategory, subCategoryProperties, matches: visibleMatches, tooltipLimit, columClassName,
                     collapsed: !!collapsedSections[subCategory]
                 };
-                return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />
-            }, this);
+                return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />;
+            });
 
             // update title to include selected term name and count
             if (!isMobileSize && currentFilters && currentFilters.length > 0) {
@@ -970,17 +968,18 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         };
 
         return (
-            <div class="overflow-hidden">
-                <h3 class="tab-section-title"><span>Hardware Summary</span></h3>
-                <hr class="tab-section-title-horiz-divider mb-1" />
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title"><span>Hardware Summary</span></h3>
+                <hr className="tab-section-title-horiz-divider mb-1" />
                 <div className="row overflow-auto">
                     <div className="col-12 col-md-5 col-lg-4 col-xl-3">
                         <FacetList {...facetListProps} />
                     </div>
                     <div className="col-12 col-md-7 col-lg-8 col-xl-9 micro-meta-summary-results">
                         <div className="row summary-header">
-                            <div class="col summary-title-column text-truncate">
-                                <i class="icon icon-fw icon-microscope fas"></i>&nbsp;<h4 class="summary-title">{headerTitle}</h4>
+                            <div className="col summary-title-column text-truncate">
+                                <i className="icon icon-fw icon-microscope fas mr-08"/>
+                                <h4 className="summary-title">{headerTitle}</h4>
                             </div>
                         </div>
                         {tableHeader}
@@ -1029,8 +1028,9 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
         hasValidRow ?
             <div className="summary-section-container">
                 <div className="row summary-section-header">
-                    <div class="col summary-title-column text-truncate">
-                        <i class={"icon icon-fw fas " + (collapsed ? 'icon-plus' : 'icon-minus')} onClick={() => toggleExpand(subCategory)}></i>&nbsp;<h4 class="summary-title">{subCategory}</h4>
+                    <div className="col summary-title-column text-truncate" onClick={() => toggleExpand(subCategory)}>
+                        <i className={"icon icon-fw fas mr-06 " + (collapsed ? 'icon-plus' : 'icon-minus')} />
+                        <h4 className="summary-title">{subCategory}</h4>
                     </div>
                 </div>
                 <Collapse in={!collapsed}>
@@ -1039,12 +1039,12 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
                     </div>
                 </Collapse>
             </div> : null
-    )
+    );
 });
 
 function StatusMenuItem(props){
-    const { eventKey, context, children } = props;
-    const active = context.status === eventKey;
+    const { eventKey, context: { status }, children } = props;
+    const active = status === eventKey;
     return (
         <DropdownItem {..._.omit(props, 'context')} active={active}>
             <span className={active ? "text-500" : null}>

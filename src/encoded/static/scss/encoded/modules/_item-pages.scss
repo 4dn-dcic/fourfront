@@ -63,7 +63,6 @@ h4.tab-section-title {
 			padding-right: 18px;
 			margin-right: 0px;
 			height: 38px;
-			line-height: 36px;
 			padding-top: 0px;
 			padding-bottom: 0px;
 			border-bottom: 1px solid transparent;
@@ -122,6 +121,9 @@ h4.tab-section-title {
 				user-select: none;
 				font-weight: 500;
 				font-size: 1.05rem;
+				height: 100%;
+				display: flex;
+				align-items: center;
 
 				i.icon {
 					margin-right: 3px;
@@ -2138,7 +2140,6 @@ $badge-item-min-height: 90px;
 		}
 	}
 	.summary-title-column {
-		top: -1px;
 		display: flex;
 		align-items: center;
 	}
