@@ -35,7 +35,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                                 .should('include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq')
                                 .should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=human').wait(300).end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
-                                .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
+                                .get('.search-results-container .search-result-row[data-row-number]').should('have.length', expectedFilteredResults).end()
                                 .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end()
                                 .window().screenshot("ATAC-seq x mouse BrowseView results, filtered via BarPlot section hover & click.").end();
