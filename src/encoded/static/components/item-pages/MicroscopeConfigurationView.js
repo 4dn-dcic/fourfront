@@ -1,15 +1,19 @@
 'use strict';
 
 import React from 'react';
+import memoize from 'memoize-one';
 import _ from 'underscore';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Dropdown from 'react-bootstrap/esm/Dropdown';
+import Collapse from 'react-bootstrap/esm/Collapse';
+import ReactTooltip from 'react-tooltip';
 
 import { JWT, console, object, layout, ajax, navigate, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
+import { FacetList } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/FacetList';
 
-import { MicroMetaPlainContainer } from './components/MicroMeta/MicroMetaPlainContainer';
+import { MicroMetaPlainContainer, MicroMetaLoadingIndicator } from './components/MicroMeta/MicroMetaPlainContainer';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
@@ -33,22 +37,30 @@ export default class MicroscopeConfigurationView extends DefaultItemView {
         );
     }
 
+    constructor(props){
+        super(props);
+        this.mcRef = React.createRef();
+    }
+
     getTabViewContents(){
         const initTabs = [];
         const width = this.getTabViewWidth();
-        initTabs.push(MicroMetaTabView.getTabObject(this.props, width));
+        const tabProps = _.extend({ ref: this.mcRef }, this.props);
+        initTabs.push(MicroMetaTabView.getTabObject(tabProps, width));
+        initTabs.push(MicroMetaSummaryTabView.getTabObject(tabProps, width));
         return initTabs.concat(this.getCommonTabs()); // Add remainder of common tabs (Details, Attribution)
     }
 
 }
 
+const MicroMetaTabViewFRef = React.forwardRef((props, ref) => <MicroMetaTabView {...props} forwardRef={ref} />);
 export class MicroMetaTabView extends React.PureComponent {
 
     static getTabObject(props, width) {
         return {
             'tab' : <span><i className="icon icon-microscope fas icon-fw"/> MicroMeta</span>,
             'key' : 'micrometa',
-            'content' : <MicroMetaTabView {...props} width={width} />
+            'content' : <MicroMetaTabViewFRef {...props} width={width} />
         };
     }
 
@@ -68,6 +80,8 @@ export class MicroMetaTabView extends React.PureComponent {
         this.getMicroscopyMetadataToolComponent = this.getMicroscopyMetadataToolComponent.bind(this);
         this.generateNewTitle = this.generateNewTitle.bind(this);
 
+        const { forwardRef } = props;
+
         this.state = {
             'saveLoading'           : false,
             'cloneLoading'          : false,
@@ -75,7 +89,7 @@ export class MicroMetaTabView extends React.PureComponent {
             'modal'                 : null
         };
 
-        this.microMetaToolRef = React.createRef();
+        this.microMetaToolRef = forwardRef;//React.createRef();
 
         //force the page display in full screen
         // const { toggleFullScreen } = props;
@@ -574,9 +588,460 @@ export class MicroMetaTabView extends React.PureComponent {
 
 }
 
+let microMetaDependencies = null;
+const MicroMetaSummaryTabViewFRef = React.forwardRef((props, ref) => <MicroMetaSummaryTabView {...props} forwardRef={ref} />);
+export class MicroMetaSummaryTabView extends React.PureComponent {
+
+    static getTabObject(props, width) {
+        return {
+            'tab': <span><i className="icon icon-list-alt fas icon-fw" /> Hardware Summary</span>,
+            'key': 'hardware-summary',
+            'content': <MicroMetaSummaryTabViewFRef {...props} width={width} />
+        };
+    }
+
+    static facetsFromMicroscope(microscope) {
+        const categoryObj = {};
+        _.forEach(microscope.components, function (component) {
+            const s = component.Category.split('.');
+            const category = s.length > 1 ? s[1] : s[0];
+
+            if (!categoryObj[category]) {
+                categoryObj[category] = {};
+            }
+            const term = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
+            if (!categoryObj[category][term]) {
+                categoryObj[category][term] = 1;
+            } else {
+                categoryObj[category][term] += 1;
+            }
+        });
+
+        const facets = [];
+        Object.keys(categoryObj).sort().forEach(function (category) {
+            const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
+                return { "key": key, "doc_count": num };
+            }), function (t) { return -t.doc_count; });
+            facets.push({
+                "field": category,
+                "title": category,
+                "aggregation_type": "terms",
+                "terms": terms
+            });
+        });
+
+        return facets;
+    }
+
+    static defaultLayoutSettings(windowWidth, mounted, matches) {
+        let length = 1;
+        if (matches) {
+            if (Array.isArray(matches)) {
+                length = matches.length;
+            } else if (typeof matches === 'number') {
+                length = matches;
+            } else {
+                throw Error('matches must be either array or numeric');
+            }
+        }
+
+        const gridState = mounted && layout.responsiveGridState(windowWidth);
+        const isMobileSize = gridState && ['xs', 'sm', 'md'].indexOf(gridState) > -1;
+
+        let columClassName = '', tooltipLimit = 20;
+        let visibleMatchCount = length;
+
+        if (isMobileSize) {
+            columClassName = 'col-8 col-xl-9';
+            visibleMatchCount = 1;
+        } else if (gridState === 'lg') {
+            switch (length) {
+                case 1:
+                    columClassName = 'col-8 col-lg-8';
+                    tooltipLimit = 120;
+                    break;
+                default:
+                    columClassName = 'col-8 col-lg-4';
+                    tooltipLimit = 30;
+                    visibleMatchCount = 2;
+            }
+        } else {
+            switch (length) {
+                case 1:
+                    columClassName = 'col-8 col-xl-9';
+                    tooltipLimit = 120;
+                    break;
+                case 2:
+                    columClassName = 'col-8 col-xl-4';
+                    tooltipLimit = 50;
+                    visibleMatchCount = 2;
+                    break;
+                case 3:
+                    columClassName = 'col-8 col-xl-3';
+                    break;
+                default:
+                    columClassName = 'col-8 col-xl-2';
+                    visibleMatchCount = 4;
+            }
+        }
+
+        return { columClassName, tooltipLimit, visibleMatchCount, isMobileSize };
+    }
+
+    constructor(props){
+        super(props);
+
+        this.getMicroscope = this.getMicroscope.bind(this);
+        this.onFilter = this.onFilter.bind(this);
+        this.toggleExpand = this.toggleExpand.bind(this);
+        this.onClickPrevious = this.onClickPrevious.bind(this);
+        this.onClickNext = this.onClickNext.bind(this);
+        this.prevNextButton = this.prevNextButton.bind(this);
+        this.handleMatchSelection = this.handleMatchSelection.bind(this);
+        this.memoized = {
+            facetsFromMicroscope: memoize(MicroMetaSummaryTabView.facetsFromMicroscope),
+            defaultLayoutSettings: memoize(MicroMetaSummaryTabView.defaultLayoutSettings)
+        };
+        const { forwardRef } = props;
+
+        this.microMetaToolRef = forwardRef;
+        this.state = {
+            'currentFilters': []
+        };
+    }
+
+    /**
+     * @todo: move dependencies downloading into PackageLockLoader component
+     *        for performance and reusability
+     */
+    componentDidMount(){
+        const onComplete = () => {
+            this.setState({ mounted: true });
+        };
+
+        if (!microMetaDependencies) {
+            window.fetch = window.fetch || ajax.fetchPolyfill; // Browser compatibility polyfill
+
+            setTimeout(()=>{
+                // Load in Microscopy Metadata Tool libraries as separate JS file due to large size.
+                // @see https://webpack.js.org/api/module-methods/#requireensure
+
+                import(
+                    /* webpackChunkName: "micrometa-dependencies" */
+                    'micrometa-dependencies'
+                ).then((loadedDeps) => {
+                    const tempMicroMetaDependencies = loadedDeps;
+                    window
+                        .fetch(
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
+                        )
+                        .then(function (resp) {
+                            return resp.text();
+                        })
+                        .then(function (respText) {
+                            tempMicroMetaDependencies.schemas = JSON.parse(respText);
+                            microMetaDependencies = tempMicroMetaDependencies;
+
+                            onComplete();
+                        });
+                });
+            });
+        } else {
+            onComplete();
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState){
+        const { windowWidth } = this.props;
+        const { windowWidth: prevWindowWidth } = prevState;
+        const { currentFilters, firstVisibleMatchIndex } = this.state;
+        const { currentFilters: prevCurrentFilters, firstVisibleMatchIndex: prevFirstVisibleMatchIndex } = prevState;
+
+        let term = null, field = null, prevTerm = null, prevField = null;
+        if (currentFilters && currentFilters.length > 0) {
+            [{ term, field }] = currentFilters;
+        }
+        if (prevCurrentFilters && prevCurrentFilters.length > 0) {
+            [{ term: prevTerm, field: prevField }] = prevCurrentFilters;
+        }
+
+        if (windowWidth !== prevWindowWidth || field !== prevField ||
+            term !== prevTerm || firstVisibleMatchIndex !== prevFirstVisibleMatchIndex) {
+            ReactTooltip.rebuild();
+        }
+    }
+
+    getMicroscope(){
+        const { context } = this.props;
+        const { microscope } = context || {};
+
+        const mtc = (this.microMetaToolRef && this.microMetaToolRef.current && this.microMetaToolRef.current.getMicroMetaAppComponent()) || null;
+        if (!mtc || !mtc.api){
+            logger.error('Could not get API.');
+            // throw new Error('Could not get API.');
+            // return null;
+        } else {
+            // const microscopeStr = mtc.api.exportMicroscopeConfString();
+            // microscope = microscopeStr && JSON.parse(microscopeStr);
+        }
+
+        return microscope;
+    }
+
+    onFilter(facet, term, callback) {
+        const microscope = this.getMicroscope();
+
+        const matches = _.filter(microscope.components, function (component) {
+            const t = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
+            return term.key === t;
+        });
+
+        const { schemas = [] } = microMetaDependencies;
+
+        let foundSchema = null;
+        if (schemas && matches.length > 0) {
+            foundSchema = _.find(schemas, function(s){
+                return s.ID === matches[0].Schema_ID;
+            });
+        }
+
+        this.setState({
+            'currentFilters': [{ field: facet.field, term: term.key, remove: '' }],
+            'matches': matches,
+            'schema': foundSchema,
+            'collapsedSections': {},
+            'firstVisibleMatchIndex': 0
+        });
+    }
+
+    toggleExpand(sectionKey) {
+        this.setState(function ({ collapsedSections: existingCollapsedSections }) {
+            const collapsedSections = _.extend({}, existingCollapsedSections);
+            collapsedSections[sectionKey] = !collapsedSections[sectionKey];
+
+            return { collapsedSections };
+        });
+    }
+
+    onClickPrevious(e) {
+        this.setState(function ({ firstVisibleMatchIndex }) {
+            return { 'firstVisibleMatchIndex': firstVisibleMatchIndex - 1 };
+        });
+    }
+
+    onClickNext(e){
+        this.setState(function ({ firstVisibleMatchIndex }) {
+            return { 'firstVisibleMatchIndex': firstVisibleMatchIndex + 1 };
+        });
+    }
+
+    prevNextButton(isNext) {
+        return (
+            <div className="prev-next-button-container">
+                <button type="button" className="toggle-detail-button" onClick={isNext ? this.onClickNext : this.onClickPrevious}>
+                    <div className="icon-container" data-tip={'Show ' + (isNext ? 'next component' : 'previous component')}>
+                        <i className={"icon icon-fw fas " + (isNext ? 'icon-angle-right' : 'icon-angle-left')} />
+                    </div>
+                </button>
+            </div>
+        );
+    }
+
+    handleMatchSelection(idx) {
+        this.setState({
+            'firstVisibleMatchIndex': parseInt(idx)
+        });
+    }
+
+    render() {
+        const { isFullscreen, context, windowWidth, windowHeight, href } = this.props;
+        const { mounted, currentFilters, matches, schema, collapsedSections, firstVisibleMatchIndex } = this.state;
+
+        const width = isFullscreen ? windowWidth - 40 : layout.gridContainerWidth(windowWidth);
+        const height = isFullscreen ? Math.max(800, windowHeight - 120) : Math.max(800, windowHeight / 2);
+
+        const placeholderStyle = { width: width || null };
+        if (typeof height === 'number' && height >= 140) {
+            placeholderStyle.height = height;
+            placeholderStyle.paddingTop = (height / 2) - 40;
+        }
+
+        const microscope = this.getMicroscope();
+
+        if (!microscope || !microMetaDependencies) {
+            return <div className="text-center" style={placeholderStyle}><MicroMetaLoadingIndicator /></div>;
+        }
+
+        // left side - facets
+        const facets = this.memoized.facetsFromMicroscope(microscope);
+
+        // right side - results
+        let headerTitle = 'Component Summary Table';
+        let tableHeader = null, tableBody = null;
+
+        if (matches && matches.length > 0 && schema) {
+
+            const { columClassName, tooltipLimit, visibleMatchCount, isMobileSize } = this.memoized.defaultLayoutSettings(windowWidth, mounted, matches.length);
+
+            const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
+
+            if (isMobileSize && matches.length > visibleMatchCount) {
+                tableHeader = (
+                    <div className="row summary-sub-header">
+                        <div className="col summary-title-column text-truncate">MetaData</div>
+                        <div className={columClassName + " summary-title-column"}>
+                            <DropdownButton title={matches[firstVisibleMatchIndex].Name} variant="outline-secondary btn-block text-left"
+                                size="md" className="w-100" onSelect={this.handleMatchSelection}>
+                                {
+                                    _.map(matches, function (match, idx) {
+                                        return (
+                                            <DropdownItem key={"match-" + idx} eventKey={idx}>
+                                                {match.Name || "-"}
+                                            </DropdownItem>);
+                                    })
+                                }
+                            </DropdownButton>
+                        </div>
+                    </div>
+                );
+            } else {
+                const showPrevBtn = matches.length > visibleMatchCount && firstVisibleMatchIndex > 0;
+                const showNextBtn = matches.length > visibleMatchCount && (firstVisibleMatchIndex + visibleMatchCount) < matches.length;
+
+                tableHeader = (
+                    <div className="row summary-sub-header">
+                        <div className="col col-lg-3 col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
+                        {_.map(visibleMatches, function (m, index) {
+                            return (
+                                <div className={columClassName + " summary-title-column text-truncate"}>
+                                    {m.Name}
+                                </div>
+                            );
+                        }, this)}
+                        {showNextBtn ? <div className="col-lg-1 col-xl-1 summary-title-column text-truncate">{this.prevNextButton(true)}</div> : null}
+                    </div>
+                );
+            }
+
+            const schemaPropPairs = _.pairs(schema.properties);
+
+            tableBody = Object.keys(schema.subCategoriesOrder).map((subCategory) => {
+                const subCategoryProperties = _.filter(schemaPropPairs, function (spp) {
+                    const [, propItem] = spp;
+                    return propItem && propItem.category === subCategory;
+                });
+                const sectionProps = {
+                    subCategory, subCategoryProperties, matches: visibleMatches, tooltipLimit, columClassName,
+                    collapsed: !!collapsedSections[subCategory]
+                };
+                return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />;
+            });
+
+            // update title to include selected term name and count
+            if (!isMobileSize && currentFilters && currentFilters.length > 0) {
+                const [{ term: filterTerm }] = currentFilters;
+                headerTitle += ` - ${filterTerm} (${matches.length})`;
+            }
+        } else {
+            placeholderStyle.width = null;
+            placeholderStyle.height = null;
+            if (typeof height === 'number' && height >= 400) {
+                placeholderStyle.height = height - 200;
+                placeholderStyle.paddingTop = ((height - 200) / 2) - 40;
+            }
+            tableBody = (
+                <div className="text-center" style={placeholderStyle}>
+                    <MicroMetaLoadingIndicator title="Select a Component to Activate the Summary Table" />
+                </div>);
+        }
+
+        const facetListProps = {
+            context: { "filters": currentFilters },
+            title: "Hardware Explorer",
+            facets,
+            onFilter: this.onFilter,
+            useRadioIcon: true,
+            persistSelectedTerms: false
+        };
+
+        return (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title"><span>Hardware Summary</span></h3>
+                <hr className="tab-section-title-horiz-divider mb-1" />
+                <div className="row overflow-auto">
+                    <div className="col-12 col-md-5 col-lg-4 col-xl-3">
+                        <FacetList {...facetListProps} />
+                    </div>
+                    <div className="col-12 col-md-7 col-lg-8 col-xl-9 micro-meta-summary-results">
+                        <div className="row summary-header">
+                            <div className="col summary-title-column text-truncate">
+                                <i className="icon icon-fw icon-microscope fas mr-08"/>
+                                <h4 className="summary-title">{headerTitle}</h4>
+                            </div>
+                        </div>
+                        {tableHeader}
+                        {tableBody}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+/**
+ * CollapsibleSubCategory renders subcategory and its fields in a collapsible panel.
+ * Row header displays the field name, rest of the row cells are for component instances' value for that field.
+ */
+const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props) {
+    const { subCategory, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand } = props;
+
+    const itemRows = _.map(subCategoryProperties, function ([field, item]) {
+        let hasValidColumn = false;
+        const itemCols = _.map(matches, function (match) {
+            if (typeof match[field] === 'undefined' || match[field] === null) {
+                return (<div className={columClassName + " summary-item-column"}>&nbsp;</div>);
+            }
+            hasValidColumn = true;
+            const tooltip = typeof match[field] === 'string' && match[field].length >= tooltipLimit ? match[field] : null;
+            return (
+                <div className={columClassName + " summary-item-column"}>
+                    <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
+                </div>);
+        });
+
+        return hasValidColumn ? (
+            <div className="row summary-item-row">
+                <div className="col-4 col-lg-3 col-xl-3 summary-item-row-header">
+                    <object.TooltipInfoIconContainer title={field} tooltip={item.description} className="text-truncate" />
+                </div>
+                {itemCols}
+            </div>
+        ) : null;
+    });
+
+    const hasValidRow = _.any(itemRows, function (iRow) { return !!iRow; });
+
+    return (
+        hasValidRow ?
+            <div className="summary-section-container">
+                <div className="row summary-section-header">
+                    <div className="col summary-title-column text-truncate" onClick={() => toggleExpand(subCategory)}>
+                        <i className={"icon icon-fw fas mr-06 " + (collapsed ? 'icon-plus' : 'icon-minus')} />
+                        <h4 className="summary-title">{subCategory}</h4>
+                    </div>
+                </div>
+                <Collapse in={!collapsed}>
+                    <div>
+                        {itemRows}
+                    </div>
+                </Collapse>
+            </div> : null
+    );
+});
+
 function StatusMenuItem(props){
-    const { eventKey, context, children } = props;
-    const active = context.status === eventKey;
+    const { eventKey, context: { status }, children } = props;
+    const active = status === eventKey;
     return (
         <DropdownItem {..._.omit(props, 'context')} active={active}>
             <span className={active ? "text-500" : null}>
