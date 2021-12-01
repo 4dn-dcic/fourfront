@@ -19,7 +19,6 @@ import DefaultItemView from './DefaultItemView';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { ConfirmModal } from './HiGlassViewConfigView';
 import { onLoginNavItemClick } from './../navigation/components/LoginNavItem';
-import { matchSettings, menu_order } from 'micro-meta-app-react/es/constants';
 
 
 export default class MicroscopeConfigurationView extends DefaultItemView {
@@ -58,8 +57,6 @@ const MicroMetaTabViewFRef = React.forwardRef((props, ref) => <MicroMetaTabView 
 export class MicroMetaTabView extends React.PureComponent {
 
     static getTabObject(props, width) {
-        const { ref } = props;
-
         return {
             'tab' : <span><i className="icon icon-microscope fas icon-fw"/> MicroMeta</span>,
             'key' : 'micrometa',
@@ -762,10 +759,10 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
         let term = null, field = null, prevTerm = null, prevField = null;
         if (currentFilters && currentFilters.length > 0) {
-            ({ term, field } = currentFilters[0]);
+            [{ term, field }] = currentFilters;
         }
         if (prevCurrentFilters && prevCurrentFilters.length > 0) {
-            ({ term: prevTerm, field: prevField } = prevCurrentFilters[0]);
+            [{ term: prevTerm, field: prevField }] = prevCurrentFilters;
         }
 
         if (windowWidth !== prevWindowWidth || field !== prevField ||
