@@ -972,6 +972,12 @@ def _build_experiment_mic_embedded_list():
         'files.microscope_settings.ch03_lasers_diodes',
         'files.microscope_settings.ch04_lasers_diodes',
 
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration_master.title',
+        'microscope_configuration_master.microscope.Name',
+        'files.microscope_configuration.title',
+        'files.microscope_configuration.microscope.Name',
+
         # Image linkTo
         'sample_image.title',
         'sample_image.caption',

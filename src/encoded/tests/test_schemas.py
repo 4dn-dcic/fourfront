@@ -128,7 +128,7 @@ def test_load_schema(schema, master_mixins, registry):
                 'ontology.json', 'ontology_term.json', 'page.json',
                 'static_section.json', 'badge.json', 'tracking_item.json',
                 'file_format.json', 'experiment_type.json', 'higlass_view_config.json',
-                'microscope_configuration.json'
+                'microscope_configuration.json', 'image_setting.json'
             ]
             for prop in shared_properties:
                 if schema == 'experiment.json':
