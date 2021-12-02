@@ -63,7 +63,6 @@ h4.tab-section-title {
 			padding-right: 18px;
 			margin-right: 0px;
 			height: 38px;
-			line-height: 36px;
 			padding-top: 0px;
 			padding-bottom: 0px;
 			border-bottom: 1px solid transparent;
@@ -122,6 +121,9 @@ h4.tab-section-title {
 				user-select: none;
 				font-weight: 500;
 				font-size: 1.05rem;
+				height: 100%;
+				display: flex;
+				align-items: center;
 
 				i.icon {
 					margin-right: 3px;
@@ -2113,6 +2115,113 @@ $badge-item-min-height: 90px;
 	}
 	input.has-success {
 		border-color: #5b8c55;
+	}
+}
+.micro-meta-summary-results {
+	.row {
+		margin-left: 0px !important;
+	}
+
+	.summary-header {
+		background-color: #22656d;
+		border-bottom: none;
+		color: #fff;
+		height: 46px;
+	}
+	.summary-sub-header {
+		border-bottom: none;
+		height: 46px;
+		font-size: 1.25rem;
+		font-weight: 500;
+		@include media-breakpoint-down(sm){
+			.text-truncate {
+				overflow-y: auto !important;
+			}
+		}
+	}
+	.summary-section-header {
+		background-color: #22656d;
+		border-bottom: none;
+		color: #fff;
+		height: 36px;
+
+		h4 {
+			font-size: 1.1rem;
+		}
+		i {
+			cursor: pointer;
+		}
+	}
+	.summary-title-column {
+		display: flex;
+		align-items: center;
+	}
+	.summary-title {
+		font-weight: 300;
+		margin: 0;
+		line-height: inherit;
+		color: inherit;
+		display: inline;
+	}
+	.summary-item-row {
+		border-bottom: none;
+		height: 36px;
+		font-size: 1rem;
+		font-weight: 300;
+		border-bottom: 1px solid #dcdcdc;
+
+		.summary-item-row-header {
+			font-weight: 500;
+			background-color: #dedede;
+			padding-top: 10px;
+
+			@include media-breakpoint-down(sm){
+				max-width: 33% !important;
+			}
+		}
+		.summary-item-column {
+			padding-top: 10px;
+			font-weight: 300;
+			border-right: 1px dotted rgba(0,0,0,.075);
+			
+			@include media-breakpoint-down(sm){
+				max-width: 66% !important;
+			}
+		}
+	}
+	.prev-next-button-container {
+		position: absolute;
+		top: 5px;
+		bottom: 5px;
+		right: 10px;
+		z-index: 10;
+
+		> button {
+			padding-left: 0;
+			padding-right: 0;
+			position: relative;
+			height: 100%;
+			width: 36px;
+			border: 1px solid #343A40;
+			background: transparent;
+			border-radius: 3px;
+			outline: none;
+			transition: background-color .3s;
+
+			> .icon-container {
+				width: 100%;
+				text-align: center;
+				> i.icon {
+					position: relative;
+					display: block;
+					margin: 0 auto;
+				}
+			}
+
+			&:hover {
+				background-color: #eee;
+			}
+		}
 	}
 }
 
