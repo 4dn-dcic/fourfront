@@ -50,7 +50,6 @@ function sourceDisplayTitleRenderFxn(result) {
         return (<ol style={{ marginTop: '15px', paddingLeft: '14px' }}>{expSetLinks}</ol>);
     }
 }
-
 export const columnExtensionMap = _.extend({}, basicColumnExtensionMap, {
     // TODO: change to organization
     'lab.display_title' : {
