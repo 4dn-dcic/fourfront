@@ -87,6 +87,7 @@ class FileMicroscopyViewOverview extends React.Component {
 const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
     const { context, schemas, windowWidth } = props;
     const file = context;
+    const { microscope_configuration } = file;
 
     const parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
 
@@ -124,6 +125,10 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
             <div className="row overview-blocks">
 
                 { thumbnailLink ? <div className="col-sm-4">{ thumbnailLink }</div> : null }
+
+                {microscope_configuration ?
+                    <OverViewBodyItem result={file} property="microscope_configuration" fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 col-sm-" + (thumbnailLink ? '8' : '12')} />
+                    : null}
 
                 { parentExperimentWithImagingPaths ?
                     <OverViewBodyItem
