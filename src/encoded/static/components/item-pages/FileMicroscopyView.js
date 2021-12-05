@@ -127,7 +127,7 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
                 { thumbnailLink ? <div className="col-sm-4">{ thumbnailLink }</div> : null }
 
                 {microscope_configuration ?
-                    <OverViewBodyItem result={file} property="microscope_configuration" fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 col-sm-" + (thumbnailLink ? '8' : '12')} />
+                    <OverViewBodyItem result={file} property="microscope_configuration" fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} />
                     : null}
 
                 { parentExperimentWithImagingPaths ?
