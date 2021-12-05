@@ -305,7 +305,7 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
             <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
             <OverViewBodyItem {...commonProps} property="microscopy_technique" fallbackTitle="Microscopy Technique" />
             <OverViewBodyItem {...commonProps} property="microscope_qc" fallbackTitle="Microscope Quality Control" />
-            <OverViewBodyItem {...commonProps} property="microscope_configuration_master" fallbackTitle="Microscope Configuration" />
+            <OverViewBodyItem {...commonProps} property="microscope_configuration_master" fallbackTitle="Microscope Configuration" wrapInColumn="col-12 col-md-6" />
 
             <div className="w-100"></div>
 
