@@ -211,6 +211,7 @@ class Experiment(Item):
         'files.file_classification',
         'files.file_type_detailed',
         'files.paired_end',
+        'files.notes_to_tsv',
         'files.dbxrefs',
         'files.external_references.*',
         'files.related_files.relationship_type',

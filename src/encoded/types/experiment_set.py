@@ -234,6 +234,10 @@ class ExperimentSet(Item):
         "experiments_in_set.files.lab.display_title",
         "experiments_in_set.files.track_and_facet_info.*",
 
+        # MicroscopeConfiguration linkTo
+        "experiments_in_set.files.microscope_configuration.title",
+        "experiments_in_set.files.microscope_configuration.microscope.Name",
+
         # FileFormat linkTo
         "experiments_in_set.files.file_format.file_format",
 
