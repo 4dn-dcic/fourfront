@@ -420,7 +420,12 @@ export class RawFilesStackedTable extends React.PureComponent {
         if (!showMicroscopeConfigurationColumns) return null;
 
         return [
-            { columnClass: 'file-detail', title: 'Microscope Configuration', initialWidth: 40, render: renderFileMicroscopeConfigurationLinkButton }
+            {
+                columnClass: 'file-detail', title: 'Microscope Configuration', initialWidth: 40, render: renderFileMicroscopeConfigurationLinkButton,
+                visibleTitle: function () {
+                    return <i className="icon icon-fw icon-microscope fas" data-tip="Microscope Configuration" />;
+                }
+            }
         ];
     }
     /**
