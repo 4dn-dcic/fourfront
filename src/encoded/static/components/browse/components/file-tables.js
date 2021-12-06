@@ -384,7 +384,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /**
-     * Adds Total Sequences metric column if any raw files in expSet have a `quality_metric`.
+     * Adds Total Sequences metric column if any raw files in expOrExpSet have a `quality_metric`.
      * Or if param `showMetricColumns` is set to true;
      *
      * @see fileUtil.filterFilesWithEmbeddedMetricItem
@@ -404,7 +404,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
     /**
-     * Adds Notes column if any raw files in expSet have a `microscope_configuration`.
+     * Adds Microscope Configuration column if any raw files in expOrExpSet have a `microscope_configuration`.
      * Or if param `showMicroscopeConfigurationColumns` is set to true;
      *
      * @param {*} showNotesColumns - Skips check for microscope_configuration and returns column if true.
@@ -424,7 +424,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
     /**
-     * Adds Notes column if any raw files in expSet have a `notes_to_tsv`.
+     * Adds Notes column if any raw files in expOrExpSet have a `notes_to_tsv`.
      * Or if param `showNotesColumns` is set to true;
      *
      * @param {*} showNotesColumns - Skips check for notes_to_tsv and returns column if true.
