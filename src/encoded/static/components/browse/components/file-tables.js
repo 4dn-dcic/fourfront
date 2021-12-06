@@ -442,22 +442,22 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
 
-    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, showMicroscopeConfigurationColumns, showNotesColumns, expOrExpSet){
+    static columnHeaders(columnHeaders, showMetricColumns, showMicroscopeConfigurationColumns, showNotesColumns, expOrExpSet){
         return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, expOrExpSet) || [])
             .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, expOrExpSet) || [])
             .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, expOrExpSet) || [])
             .concat(RawFilesStackedTable.microscopeConfigurationColumnHeaders(showMicroscopeConfigurationColumns, expOrExpSet) || [])
             .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, expOrExpSet) || []);
-    });
+    }
 
-    static isExperimentSet = memoize(function (expOrExpSet) {
+    static isExperimentSet(expOrExpSet) {
         const itemType = schemaTransforms.getItemType(expOrExpSet);
         return itemType && itemType.indexOf('ExperimentSet') >= 0;
-    });
+    }
 
-    static allRawFiles = memoize(function (expOrExpSet) {
+    static allRawFiles(expOrExpSet) {
         return RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
-    });
+    }
 
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
@@ -515,7 +515,8 @@ export class RawFilesStackedTable extends React.PureComponent {
                 );
                 const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
                 return { experimentsGroupedByBiosample, allRawFiles };
-            })
+            }),
+            columnHeaders: memoize(RawFilesStackedTable.columnHeaders)
         };
     }
 
@@ -572,7 +573,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
-        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || exp),
+        var fullColumnHeaders   = this.memoized.columnHeaders(columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || exp),
             contentsClassName   = 'files',
             contents            = [];
 
@@ -735,7 +736,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             </React.Fragment>
         );
 
-        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || experiment);
+        const columnHeaders = this.memoized.columnHeaders(propColHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || experiment);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
@@ -773,11 +774,11 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
     }
 
-    static columnHeaders = memoize(function (columnHeaders, showNotesColumns, processedFiles) {
+    static columnHeaders(columnHeaders, showNotesColumns, processedFiles) {
         let clonedColumnHeaders = columnHeaders.slice(0);
         clonedColumnHeaders = clonedColumnHeaders.concat(ProcessedFilesStackedTable.notesColumnHeaders(showNotesColumns, processedFiles) || []);
         return clonedColumnHeaders;
-    });
+    }
 
     static propTypes = {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
@@ -836,7 +837,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         this.oddExpRow = false;
 
         this.memoized = {
-            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal)
+            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal),
+            columnHeaders: memoize(ProcessedFilesStackedTable.columnHeaders)
         };
     }
 
@@ -953,7 +955,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         const { files, columnHeaders: propColHeaders, showNotesColumns, collapseLongLists } = this.props;
         const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
-        const columnHeaders = ProcessedFilesStackedTable.columnHeaders(propColHeaders, showNotesColumns, files);
+        const columnHeaders = this.memoized.columnHeaders(propColHeaders, showNotesColumns, files);
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
                 <StackedBlockTable {..._.omit(this.props, 'children', 'files', 'columnHeaders')} columnHeaders={columnHeaders}
