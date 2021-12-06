@@ -209,6 +209,7 @@ class Experiment(Item):
         'files.file_size',
         'files.upload_key',
         'files.file_classification',
+        'files.file_type',
         'files.file_type_detailed',
         'files.paired_end',
         'files.dbxrefs',
