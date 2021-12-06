@@ -126,16 +126,20 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
 
                 { thumbnailLink ? <div className="col-sm-4">{ thumbnailLink }</div> : null }
 
-                {microscope_configuration ?
-                    <OverViewBodyItem result={file} property="microscope_configuration" fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} />
-                    : null}
+                {microscope_configuration || parentExperimentWithImagingPaths ?
+                    <div className={"overview-blocks col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')}>
+                        {microscope_configuration ?
+                            <OverViewBodyItem result={file} property="microscope_configuration" fallbackTitle="Microscope Configuration" wrapInColumn="col-12" />
+                            : null}
 
-                { parentExperimentWithImagingPaths ?
-                    <OverViewBodyItem
-                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas, parentExperimentWithImagingPaths)}
-                        wrapInColumn={"col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} property="imaging_paths" fallbackTitle="Imaging Paths"
-                        listItemElement="div" listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
-                    : null }
+                        {parentExperimentWithImagingPaths ?
+                            <OverViewBodyItem
+                                result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas, parentExperimentWithImagingPaths)}
+                                wrapInColumn="col-12" property="imaging_paths" fallbackTitle="Imaging Paths"
+                                listItemElement="div" listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+                            : null}
+                    </div>
+                    : null}
 
             </div>
             <div className="row overview-blocks">
