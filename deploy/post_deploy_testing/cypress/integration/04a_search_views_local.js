@@ -191,6 +191,72 @@ describe('Deployment/CI Search View Tests', function () {
             // Empty the array now that we're done.
             testItemsToDelete = [];
         });
+
+        it('Hardware Summary Table', function () {
+            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': false }).end()
+                .visit('/search/?type=MicroscopeConfiguration&status=released').end();
+
+            let intervalCount=null;
+            cy.searchPageTotalResultCount().then((totalCountExpected) => {
+                intervalCount = Math.min(0, parseInt(totalCountExpected / 3));
+            });
+
+            cy.scrollToBottom().then(() => {
+                cy.get('.search-results-container .search-result-row[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+            }).end();
+
+            cy.window().then(function (w) {
+                let currPagePath = "/";
+                cy.location('pathname').should('not.equal', currPagePath)
+                    .then(function (pathName) {
+                        currPagePath = pathName;
+                        console.log(currPagePath);
+                    }).wait(3000).end()
+                    .get('h1.page-title').should('not.be.empty').end()
+                    .get('div.rc-tabs span[data-tab-key="hardware-summary"]').should('contain', 'Hardware Summary');
+
+                let currTabTitle = null;
+                cy.get("h3.tab-section-title, h4.tab-section-title").first().then(function ($tabTitle) {
+                    currTabTitle = $tabTitle.text();
+                }).end(); cy.get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function ($tab) {
+                    cy.get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
+                        const tabKey = $tab.children('span.tab').attr('data-tab-key');
+                        let tabFileCount = null;
+                        let facetFileCount = null;
+
+                        if (tabKey === 'hardware-summary') {
+                            cy.wrap($tab).click({ 'force': true }).end()
+                                .wait(2000);
+                            cy.get('.facet.closed > h5').first().scrollToCenterElement().click({ force: true }).end()
+                                .get('.facet.open .facet-list-element a.term').first().click({ force: true }).end().wait(2000)
+                                .get(".facet.open .facet-list-element a.term .facet-count").first().then(function ($facetCountFile) {
+                                    facetFileCount = $facetCountFile.text();
+                                }).get(".row.summary-header .col.summary-title-column.text-truncate .summary-title").first().then(function ($tabFileCount) {
+                                    tabFileCount = $tabFileCount.text();
+                                    var regExp = /\(([^)]+)\)/;
+                                    tabFileCount = regExp.exec(tabFileCount);
+                                    cy.expect(facetFileCount).equal(tabFileCount[1]);
+
+                                    if (parseInt(facetFileCount) > 4) {
+                                        cy.get('.prev-next-button-container').click().end();
+                                    }
+                                    else {
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            const headerCount = $totalHeader.length - 1;
+                                            cy.expect(headerCount.toString()).equal(facetFileCount);
+                                        });
+                                    }
+                                }).end();
+                        }
+
+                    }).end();
+                    cy.wrap($tab).click({ 'force': true }).end()
+                        .wait(200)
+                        .get('.rc-tabs-content .rc-tabs-tabpane-active');
+
+                }).end();
+            }).end();
+        });
     });
 
     context('Search Box in Navigation', function(){
