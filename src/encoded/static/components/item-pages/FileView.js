@@ -217,6 +217,8 @@ export class FileOverviewHeading extends React.PureComponent {
                             fallbackTitle="General Classification" titleRenderFxn={FileOverviewHeading.fileClassificationRenderFxn} />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
                             fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
+                        {/* <OverViewBodyItem {...commonHeadingBlockProps} key="microscope_configuration" property="microscope_configuration"
+                            fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 col-md-6"} /> */}
                     </OverviewHeadingContainer>
                 </div>
                 <div className="col-12 col-md-4 mt-1 mb-3">

@@ -102,7 +102,7 @@ describe('Joint Analysis Page', function () {
                         origTotalCount += parseInt(Cypress.$(block).text());
                     });
                 }).end();
-            }).end().login4DN().getCookie("jwtToken").end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+            }).end().login4DN().wait(500).end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 let nextTotalCount = 0;
                 return cy.get('.block-container-group .stacked-block').should('have.length.greaterThan', 20).then(($nextBlocks)=>{
                     Cypress._.forEach($nextBlocks, function(block){
@@ -111,7 +111,7 @@ describe('Joint Analysis Page', function () {
                     expect(nextTotalCount).to.be.greaterThan(origTotalCount);
                     expect(nextTotalCount).to.be.greaterThan(49);
                 });
-            }).wait(250).end().window().screenshot().end().wait(250).end().logout4DN();
+            }).wait(250).end()/*.window().screenshot().end().wait(250).end()*/.logout4DN();
         });
 
     });
