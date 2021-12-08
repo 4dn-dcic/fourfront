@@ -128,7 +128,7 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
-        it('Verify created microscope\'s tier number and stand matches', function (){
+        it('Verify created microscope configuration\'s tier number and stand matches', function (){
             //Click edit buttton
             cy.get('div.micro-meta-app-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
 
@@ -192,11 +192,10 @@ describe('Deployment/CI Search View Tests', function () {
             testItemsToDelete = [];
         });
 
-        it('Hardware Summary Table', function () {
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': false }).end()
-                .visit('/search/?type=MicroscopeConfiguration&status=released').end();
+        it('Check microscope configuration\'s hardware summary table', function () {
+            cy.visit('/search/?type=MicroscopeConfiguration&status=released').end();
 
-            let intervalCount=null;
+            let intervalCount = null;
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 intervalCount = Math.min(0, parseInt(totalCountExpected / 3));
             });
@@ -237,22 +236,17 @@ describe('Deployment/CI Search View Tests', function () {
                                     tabFileCount = regExp.exec(tabFileCount);
                                     cy.expect(facetFileCount).equal(tabFileCount[1]);
 
+                                    cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                        const headerCount = $totalHeader.length - 1;
+                                        cy.expect(headerCount.toString()).equal(facetFileCount);
+                                    });
                                     if (parseInt(facetFileCount) > 4) {
                                         cy.get('.prev-next-button-container').click().end();
-                                    }
-                                    else {
-                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
-                                            const headerCount = $totalHeader.length - 1;
-                                            cy.expect(headerCount.toString()).equal(facetFileCount);
-                                        });
                                     }
                                 }).end();
                         }
 
                     }).end();
-                    cy.wrap($tab).click({ 'force': true }).end()
-                        .wait(200)
-                        .get('.rc-tabs-content .rc-tabs-tabpane-active');
 
                 }).end();
             }).end();
