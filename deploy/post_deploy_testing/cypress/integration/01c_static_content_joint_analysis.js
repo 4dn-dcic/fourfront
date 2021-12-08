@@ -102,9 +102,7 @@ describe('Joint Analysis Page', function () {
                         origTotalCount += parseInt(Cypress.$(block).text());
                     });
                 }).end();
-            }).end().login4DN().wait(500).end();
-
-            cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
+            }).end().login4DN().wait(500).end().get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 let nextTotalCount = 0;
                 return cy.get('.block-container-group .stacked-block').should('have.length.greaterThan', 20).then(($nextBlocks)=>{
                     Cypress._.forEach($nextBlocks, function(block){
