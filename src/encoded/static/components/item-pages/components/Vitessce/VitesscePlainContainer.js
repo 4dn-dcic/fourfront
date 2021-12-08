@@ -96,13 +96,7 @@ export class VitesscePlainContainer extends React.PureComponent {
                     'vitessce-dependencies'
                 ).then((loadedDeps) =>{
                     vitessceDependencies = loadedDeps;
-                    // const { higlassRegister, StackedBarTrack } = vitessceDependencies;
 
-                    // higlassRegister({
-                    //     name: 'StackedBarTrack',
-                    //     track: StackedBarTrack,
-                    //     config: StackedBarTrack.config,
-                    // });
                     finish();
                 });
 

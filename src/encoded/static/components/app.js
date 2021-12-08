@@ -1114,7 +1114,7 @@ export default class App extends React.PureComponent {
         });
 
         // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
-        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ... 
+        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ...
         const contentSecurityPolicyStr = [
             "default-src 'self'",
             "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",

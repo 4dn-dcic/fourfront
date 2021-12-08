@@ -10,6 +10,7 @@ import { EmbeddedExperimentSetSearchTable } from './components/tables/Experiment
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock } from './FileView';
 import { QualityControlResults } from './QualityMetricView';
+import { VitesscePlainContainer } from './components/Vitessce/VitesscePlainContainer';
 
 export default class FileMicroscopyView extends FileView {
 
@@ -19,6 +20,8 @@ export default class FileMicroscopyView extends FileView {
 
         // Replace default FileOverview (1st tab) with FileMicroscopyViewOverview
         tabs[0] = FileMicroscopyViewOverview.getTabObject(this.props, width);
+
+        tabs.splice(1, 0, FileViewVitessce.getTabObject(this.props, width));
 
         return tabs;
     }
@@ -149,3 +152,81 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         </React.Fragment>
     );
 });
+
+function FileViewVitessce (props) {
+    const { context, windowWidth, width, schemas, href } = props;
+    const viewConfig =
+    {
+        "version": "1.0.1",
+        "name": "ChromEMT test",
+        "description": "Ome ChromEMT image as a test for 4DN integration",
+        "datasets": [
+            {
+                "uid": "A",
+                "name": "image stack",
+                "files": [
+                    {
+                        "type": "raster",
+                        "fileType": "raster.json",
+                        "options": {
+                            "schemaVersion": "0.0.2",
+                            "images": [
+                                {
+                                    "name": "ChromEMT",
+                                    "type": "ome-tiff",
+                                    "url": "https://4dn-dcic-public.s3.amazonaws.com/vitessce/4DNFI8FS2EEE.ome.tiff"
+                                }
+                            ],
+                            "usePhysicalSizeScaling": true,
+                            "renderLayers": [
+                                "ChromEMT"
+                            ]
+                        }
+                    }
+                ]
+            }
+        ],
+        "layout": [
+            {
+                "component": "spatial",
+                "x": 0,
+                "y": 0,
+                "w": 9,
+                "h": 12
+            },
+            {
+                "component": "layerController",
+                "x": 9,
+                "y": 0,
+                "w": 3,
+                "h": 12
+            }
+        ],
+        "initStrategy": "auto"
+    };
+    return (
+        <div>
+            <div className="row overview-blocks">
+                <VitesscePlainContainer height={800} width={1120} theme="light" viewConfig={viewConfig} />
+            </div>
+        </div>
+    );
+}
+FileViewVitessce.propTypes = {
+};
+FileViewVitessce.getTabObject = function({ context, schemas, windowWidth, href }, width){
+    return {
+        'tab' : <span><i className="icon icon-project-diagram fas icon-fw"/> Vitessce</span>,
+        'key' : 'file-vitessce',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title">
+                    <span>Vitessce Visualization</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                <FileViewVitessce {...{ context, width, windowWidth, schemas, href }} />
+            </div>
+        )
+    };
+};
