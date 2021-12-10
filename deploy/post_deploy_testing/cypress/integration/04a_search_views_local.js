@@ -221,32 +221,58 @@ describe('Deployment/CI Search View Tests', function () {
                     cy.get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
                         const tabKey = $tab.children('span.tab').attr('data-tab-key');
                         let tabFileCount = null;
+                        let tabFileNameText= null;
                         let facetFileCount = null;
-
+                        let facetNameText= null;
+                        let facetCount= null;
+                        const items=[];
                         if (tabKey === 'hardware-summary') {
                             cy.wrap($tab).click({ 'force': true }).end()
                                 .wait(2000);
-                            cy.get('.facet.closed > h5').first().scrollToCenterElement().click({ force: true }).end()
+                            let facetItemIndex=1;
+                            cy.get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
+                                facetCount = $facetTotalCount.length;
+                                facetItemIndex = Math.min(1, parseInt(facetCount / 3));
+                            });
+                            cy.get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
                                 .get('.facet.open .facet-list-element a.term').first().click({ force: true }).end().wait(2000)
                                 .get(".facet.open .facet-list-element a.term .facet-count").first().then(function ($facetCountFile) {
                                     facetFileCount = $facetCountFile.text();
-                                }).get(".row.summary-header .col.summary-title-column.text-truncate .summary-title").first().then(function ($tabFileCount) {
-                                    tabFileCount = $tabFileCount.text();
+                                })
+                                .get(".facet.open .facet-list-element a.term .facet-item").first().then(function ($facetTextFile) {
+                                    facetNameText = $facetTextFile.text();
+                                })
+                                .get(".row.summary-header .col.summary-title-column.text-truncate .summary-title").first().then(function ($tabFile) {
+                                    tabFileCount = $tabFile.text();
+                                    tabFileNameText = $tabFile.text().split(" ");
                                     var regExp = /\(([^)]+)\)/;
                                     tabFileCount = regExp.exec(tabFileCount);
                                     cy.expect(facetFileCount).equal(tabFileCount[1]);
-
-                                    cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
-                                        const headerCount = $totalHeader.length - 1;
-                                        cy.expect(headerCount.toString()).equal(facetFileCount);
-                                    });
-                                    if (parseInt(facetFileCount) > 4) {
-                                        cy.get('.prev-next-button-container').click().end();
+                                    cy.expect(facetNameText).equal(tabFileNameText[4]);
+                                    if (parseInt(facetFileCount) > 3) {
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            Cypress._.forEach($totalHeader, function (block) {
+                                                items.push((Cypress.$(block).text()));
+                                            });
+                                            const totalCount=(facetFileCount-items.length)-1;
+                                            for (let i = 0; i < totalCount; i++) {
+                                                cy.get('.prev-next-button-container').click({ 'force': true }).end();
+                                            }
+                                        });
+                                    }
+                                    else{
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            const headerCount = $totalHeader.length - 1;
+                                            cy.expect(headerCount.toString()).equal(facetFileCount);
+                                        });
                                     }
                                 }).end();
                         }
 
                     }).end();
+                    cy.wrap($tab).click({ 'force': true }).end()
+                        .wait(200)
+                        .get('.rc-tabs-content .rc-tabs-tabpane-active');
 
                 }).end();
             }).end();
