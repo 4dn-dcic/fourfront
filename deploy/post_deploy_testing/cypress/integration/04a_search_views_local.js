@@ -1,3 +1,4 @@
+import _ from 'underscore';
 
 
 describe('Deployment/CI Search View Tests', function () {
@@ -224,15 +225,16 @@ describe('Deployment/CI Search View Tests', function () {
                         let tabFileNameText= null;
                         let facetFileCount = null;
                         let facetNameText= null;
-                        let facetCount= null;
-                        const items=[];
+                        let facetTotalCount= null;
+                        const nextButtonItems=[];
+                        const backButtonItems=[];
                         if (tabKey === 'hardware-summary') {
                             cy.wrap($tab).click({ 'force': true }).end()
                                 .wait(2000);
                             let facetItemIndex=1;
                             cy.get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
-                                facetCount = $facetTotalCount.length;
-                                facetItemIndex = Math.min(1, parseInt(facetCount / 3));
+                                facetTotalCount = $facetTotalCount.length;
+                                facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
                             });
                             cy.get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
                                 .get('.facet.open .facet-list-element a.term').first().click({ force: true }).end().wait(2000)
@@ -252,11 +254,54 @@ describe('Deployment/CI Search View Tests', function () {
                                     if (parseInt(facetFileCount) > 3) {
                                         cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
                                             Cypress._.forEach($totalHeader, function (block) {
-                                                items.push((Cypress.$(block).text()));
+                                                const item=(Cypress.$(block).text());
+                                                if ((item.trim() !== 'MetaData') || (item !== "")) {
+                                                    nextButtonItems.push((Cypress.$(block).text()));
+                                                }
                                             });
-                                            const totalCount=(facetFileCount-items.length)-1;
-                                            for (let i = 0; i < totalCount; i++) {
-                                                cy.get('.prev-next-button-container').click({ 'force': true }).end();
+                                            const totalCount = (facetFileCount - nextButtonItems.length);
+                                            for (let i = 0; i <= totalCount; i++) {
+                                                cy.get('.prev-next-button-container [data-tip="Show next component"]').parent().click().end().wait(2000);
+                                                cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                                    Cypress._.forEach($totalHeader, function (block) {
+                                                        const item = (Cypress.$(block).text());
+                                                        if ((item.trim() !== 'MetaData')  || (item !== "")) {
+                                                            nextButtonItems.push((Cypress.$(block).text()));
+                                                        }
+                                                    });
+                                                    if (i == totalCount) {
+                                                        const itemsCount = _.uniq(nextButtonItems);
+                                                        cy.expect(itemsCount.length-1).equal(parseInt(facetFileCount));
+                                                    }
+                                                }).end();
+                                            }
+                                        });
+                                    }
+
+                                    //Back button
+                                    if (parseInt(facetFileCount) > 3) {
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            Cypress._.forEach($totalHeader, function (block) {
+                                                const item=(Cypress.$(block).text());
+                                                if ((item.trim() !== 'MetaData') || (item !== "")) {
+                                                    backButtonItems.push((Cypress.$(block).text()));
+                                                }
+                                            });
+                                            const totalCount = (facetFileCount - backButtonItems.length);
+                                            for (let i = 0; i <= totalCount; i++) {
+                                                cy.get('.prev-next-button-container [data-tip="Show previous component"]').parent().click().end().wait(2000);
+                                                cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                                    Cypress._.forEach($totalHeader, function (block) {
+                                                        const item = (Cypress.$(block).text());
+                                                        if ((item.trim() !== 'MetaData')  || (item !== "")) {
+                                                            backButtonItems.push((Cypress.$(block).text()));
+                                                        }
+                                                    });
+                                                    if (i == totalCount) {
+                                                        const itemsCount = _.uniq(backButtonItems);
+                                                        cy.expect(itemsCount.length-1).equal(parseInt(facetFileCount));
+                                                    }
+                                                }).end();
                                             }
                                         });
                                     }
