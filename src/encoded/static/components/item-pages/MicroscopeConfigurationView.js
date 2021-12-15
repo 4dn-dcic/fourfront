@@ -588,7 +588,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
 }
 
-const MIC_STAND_KEY = 'Microscope Stand';
+const MIC_STAND_KEY = 'MicroscopeStand';
 let microMetaDependencies = null;
 const MicroMetaSummaryTabViewFRef = React.forwardRef((props, ref) => <MicroMetaSummaryTabView {...props} forwardRef={ref} />);
 export class MicroMetaSummaryTabView extends React.PureComponent {
@@ -731,12 +731,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
      */
     componentDidMount(){
         const onComplete = () => {
-            this.setState({ mounted: true });
             //select microscope stand as the default term
             const microscope = this.getMicroscope();
             if (microscope && microscope.MicroscopeStand && microscope.MicroscopeStand.Schema_ID) {
                 this.onFilter({ field: MIC_STAND_KEY }, { key: microscope.MicroscopeStand.Schema_ID.substring(0, microscope.MicroscopeStand.Schema_ID.length - 5) });
             }
+            this.setState({ mounted: true });
         };
 
         if (!microMetaDependencies) {
