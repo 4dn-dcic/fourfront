@@ -1,7 +1,7 @@
 describe('Joint Analysis Page', function () {
 
     before(function(){
-        cy.visit('/joint-analysis').wait(100).end();
+        cy.visit('/joint-analysis-plans').wait(100).end();
     });
 
     context("Expandable Matrix Section", function(){
