@@ -65,7 +65,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         }).end();
                         cy.wrap($tab).click({ 'force': true }).end()
                             .wait(200)
-                            .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                            .get('.rc-tabs-content .rc-tabs-tabpane-active');
 
                     }).end();
                 }).end();
@@ -145,7 +145,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                         });
                                     }).end()
                                     .root().should('not.contain', "client-side error")
-                                    .end()
+                                    .end();
 
                             }).end();
                         }).end();
