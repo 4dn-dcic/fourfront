@@ -588,6 +588,7 @@ export class MicroMetaTabView extends React.PureComponent {
 
 }
 
+const MIC_STAND_KEY = 'MicroscopeStand';
 let microMetaDependencies = null;
 const MicroMetaSummaryTabViewFRef = React.forwardRef((props, ref) => <MicroMetaSummaryTabView {...props} forwardRef={ref} />);
 export class MicroMetaSummaryTabView extends React.PureComponent {
@@ -618,6 +619,16 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         });
 
         const facets = [];
+        // add microscope stand as the first item explicitly since it is not included in components field
+        if (!categoryObj[MIC_STAND_KEY] && microscope.MicroscopeStand && microscope.MicroscopeStand.Schema_ID) {
+            const term = microscope.MicroscopeStand.Schema_ID.substring(0, microscope.MicroscopeStand.Schema_ID.length - 5);
+            facets.push({
+                "field": MIC_STAND_KEY,
+                "title": MIC_STAND_KEY,
+                "aggregation_type": "terms",
+                "terms": [{ "key": term, "doc_count": 1 }]
+            });
+        }
         Object.keys(categoryObj).sort().forEach(function (category) {
             const terms = _.sortBy(_.map(categoryObj[category], function (num, key) {
                 return { "key": key, "doc_count": num };
@@ -648,7 +659,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
         const gridState = mounted && layout.responsiveGridState(windowWidth);
         const isMobileSize = gridState && ['xs', 'sm', 'md'].indexOf(gridState) > -1;
 
-        let columClassName = '', tooltipLimit = 20;
+        let columClassName = '', tooltipLimit = 20, tooltipHeaderLimit = 15;
         let visibleMatchCount = length;
 
         if (isMobileSize) {
@@ -659,10 +670,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 case 1:
                     columClassName = 'col-8 col-lg-8';
                     tooltipLimit = 120;
+                    tooltipHeaderLimit = 80;
                     break;
                 default:
                     columClassName = 'col-8 col-lg-4';
                     tooltipLimit = 30;
+                    tooltipHeaderLimit = 20;
                     visibleMatchCount = 2;
             }
         } else {
@@ -670,10 +683,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                 case 1:
                     columClassName = 'col-8 col-xl-9';
                     tooltipLimit = 120;
+                    tooltipHeaderLimit = 80;
                     break;
                 case 2:
                     columClassName = 'col-8 col-xl-4';
                     tooltipLimit = 50;
+                    tooltipHeaderLimit = 30;
                     visibleMatchCount = 2;
                     break;
                 case 3:
@@ -685,7 +700,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             }
         }
 
-        return { columClassName, tooltipLimit, visibleMatchCount, isMobileSize };
+        return { columClassName, tooltipLimit, tooltipHeaderLimit, visibleMatchCount, isMobileSize };
     }
 
     constructor(props){
@@ -716,6 +731,11 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
      */
     componentDidMount(){
         const onComplete = () => {
+            //select microscope stand as the default term
+            const microscope = this.getMicroscope();
+            if (microscope && microscope.MicroscopeStand && microscope.MicroscopeStand.Schema_ID) {
+                this.onFilter({ field: MIC_STAND_KEY }, { key: microscope.MicroscopeStand.Schema_ID.substring(0, microscope.MicroscopeStand.Schema_ID.length - 5) });
+            }
             this.setState({ mounted: true });
         };
 
@@ -791,10 +811,12 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
     onFilter(facet, term, callback) {
         const microscope = this.getMicroscope();
 
-        const matches = _.filter(microscope.components, function (component) {
-            const t = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
-            return term.key === t;
-        });
+        const matches = facet.field === MIC_STAND_KEY && microscope.MicroscopeStand ?
+            [microscope.MicroscopeStand] :
+            _.filter(microscope.components, function (component) {
+                const t = component.Schema_ID.substring(0, component.Schema_ID.length - 5);
+                return term.key === t;
+            });
 
         const { schemas = [] } = microMetaDependencies;
 
@@ -881,7 +903,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
         if (matches && matches.length > 0 && schema) {
 
-            const { columClassName, tooltipLimit, visibleMatchCount, isMobileSize } = this.memoized.defaultLayoutSettings(windowWidth, mounted, matches.length);
+            const { columClassName, tooltipLimit, tooltipHeaderLimit, visibleMatchCount, isMobileSize } = this.memoized.defaultLayoutSettings(windowWidth, mounted, matches.length);
 
             const visibleMatches = matches.slice(firstVisibleMatchIndex, firstVisibleMatchIndex + visibleMatchCount);
 
@@ -912,8 +934,9 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     <div className="row summary-sub-header">
                         <div className="col col-lg-3 col-xl-3 summary-title-column text-truncate">MetaData {showPrevBtn ? this.prevNextButton(false) : null}</div>
                         {_.map(visibleMatches, function (m, index) {
+                            const tooltip = m.Name && m.Name.length > tooltipHeaderLimit ? m.Name : null;
                             return (
-                                <div className={columClassName + " summary-title-column text-truncate"}>
+                                <div className={columClassName + " summary-title-column text-truncate"} data-tip={tooltip}>
                                     {m.Name}
                                 </div>
                             );
@@ -961,7 +984,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
             facets,
             onFilter: this.onFilter,
             useRadioIcon: true,
-            persistSelectedTerms: false
+            persistSelectedTerms: false,
+            showClearFiltersButton: false
         };
 
         return (
