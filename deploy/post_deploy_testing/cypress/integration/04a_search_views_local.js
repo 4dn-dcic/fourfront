@@ -235,7 +235,6 @@ describe('Deployment/CI Search View Tests', function () {
                                 facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
                             });
                             cy.get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
-                                .get('.facet.open .facet-list-element a.term').first().click({ force: true }).end().wait(2000)
                                 .get(".facet.open .facet-list-element a.term .facet-count").first().then(function ($facetCountFile) {
                                     termCount =parseInt($facetCountFile.text());
                                 })
