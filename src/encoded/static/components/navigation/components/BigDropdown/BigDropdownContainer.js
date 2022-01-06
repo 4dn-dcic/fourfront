@@ -57,9 +57,10 @@ export class BigDropdownContainer extends React.PureComponent {
      * Makes it easier in BigDropdownGroupController to close dropdown on any click in window (outside of menu).
      */
     onBackgroundClick(evt){
+        const { autoHideOnClick = true } = this.props;
         const targetElem = (evt && evt.target) || null;
 
-        if (layout.elementIsChildOfLink(targetElem)){
+        if ((autoHideOnClick === true)  && layout.elementIsChildOfLink(targetElem)){
             // Let bubble up - app.js will catch and navigate via handleClick and BigDropdownGroupController will catch and hide menu.
             return false;
         }
@@ -70,6 +71,12 @@ export class BigDropdownContainer extends React.PureComponent {
         if (Array.isArray(targetElemClassList) && targetElemClassList.indexOf("big-dropdown-menu-background") > -1){
             // Clicked on semi-opaque background - close.
             // Let click event bubble up to be caught by BigDropdownGroupController window click handler and dropdown closed.
+            return false;
+        }
+
+        const elemDataId = targetElem.getAttribute("data-is-form-button");
+        if (elemDataId && elemDataId === "true") {
+            targetElem["escalateToAppJs"] = true;
             return false;
         }
 

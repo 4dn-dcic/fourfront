@@ -53,6 +53,20 @@ $navbar-link-hover-bg: #d7d7d7 !default;
         }
     }
 
+    &.id-search-menu-item {
+        &:hover {
+            color: $navbar-link-active-color !important; /* Set in _base.scss */
+            text-shadow: 0 0 0 0;
+            background-color: transparent !important;
+        }
+        &.dropdown-open-for {
+            display: none;
+        }
+        &.dropdown-toggle:after {
+            content: none;
+        }
+    }
+
     &[disabled] {
         color: $gray-300;
 
@@ -1271,6 +1285,13 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                         visibility: hidden;
                         transition: visibility 0s 0.01s;
                     }
+                }
+            }
+
+            > .big-dropdown-menu[data-open-id="search-menu-item"] {
+                overflow-y: unset;
+                .dropdown-menu {
+                    width: 100%;
                 }
             }
 
