@@ -15,6 +15,7 @@ import {
     BigDropdownPageTreeMenuIntroduction,
     BigDropdownBigLink
 } from './BigDropdown';
+import { SearchBar } from '.';
 
 
 export const LeftNav = React.memo(function LeftNav(props){
@@ -176,16 +177,12 @@ function SearchNavItem(props){
 
     /** @see https://reactjs.org/docs/hooks-reference.html#usememo */
     const bodyProps = useMemo(function(){
-        // Figure out if any items are active
-        const { query = {}, pathname = "/a/b/c/d/e" } = memoizedUrlParse(href);
+        const hrefParts = memoizedUrlParse(href);
+        const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
+        const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
 
-        const browseHref = navigate.getBrowseBaseHref(browseBaseState);
-        const searchHref = "/search/?type=Item";
-        const isSearchActive = pathname === "/search/";
-        const isBrowseActive = pathname === "/browse/";
-        const isAnyActive = (isSearchActive || isBrowseActive);
         return {
-            browseHref, searchHref, isAnyActive, isSearchActive, isBrowseActive
+            searchQueryFromHref, searchTypeFromHref
         };
     }, [ href, browseBaseState ]);
 
@@ -207,67 +204,100 @@ function SearchNavItem(props){
 }
 
 const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
-    const [ searchText, setSearchText ] = useState('');
-    const [ searchItemType, setSearchItemType ] = useState(null);
-    const {
-        browseHref,
-        searchHref,
-        isSearchActive = false,
-        isBrowseActive = false,
-        ...passProps
-    } = props;
+    const { searchQueryFromHref, searchTypeFromHref } = props;
 
-    const onChangeSearchItemType = useCallback((evtKey) => {
+    const initialItemType = AvailableSearchItemTypes[searchTypeFromHref] ? searchTypeFromHref : 'Item';
+    const [searchText, setSearchText] = useState(searchQueryFromHref || '');
+    const [searchItemType, setSearchItemType] = useState(initialItemType);
+
+    const onChangeSearchItemType = useCallback(function (evtKey) {
         if (typeof evtKey === 'string') {
             setSearchItemType(evtKey);
         }
     });
+    //render hidden form inputs
+    const renderHiddenInputsForURIQuery = useCallback(function () {
+        const query = {};
+        switch (searchItemType) {
+            case 'ExperimentSetReplicate': {
+                const browseBaseParams = navigate.getBrowseBaseParams();
+                _.extend(query, browseBaseParams);
+            }
+                break;
+            case 'ByAccession':
+                break;
+            default: {
+                _.extend(query, { 'type': searchItemType });
+            }
+                break;
+        }
+        return SearchBar.renderHiddenInputsForURIQuery(query);
+    });
+    //custom placeholder text for search item type
+    const getSearchTextPlaceholder = useCallback(function () {
+        switch (searchItemType) {
+            case 'Item':
+                return 'Search 4DN Data Portal';
+            case 'ByAccession':
+                return 'Type item\'s accession (e.g. 4DNXXXX ...)';
+            default:
+                return "Search in " + AvailableSearchItemTypes[searchItemType].text;
+        }
+    });
+    //navigate to Item page directly without searching
+    const navigateByAccession = useCallback(function (evt) {
+        if (searchItemType === 'ByAccession') {
+            evt.preventDefault();
+            evt.stopPropagation();
+            navigate('/' + searchText);
+        }
+    });
+    //select all text when focused
+    const handleFocus = useCallback(function (evt) {
+        evt.target.select();
+    });
+
+    const selectedItem = AvailableSearchItemTypes[searchItemType];
+    const action = (selectedItem && selectedItem.action) || '/search';
+    const btnIconClassName = 'icon icon-fw fas ' + (searchItemType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
+    const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
 
     return (//Form submission gets serialized and AJAXed via onSubmit handlers in App.js
         <React.Fragment>
             <h4>Search</h4>
-            <form action={'/search/'} method="GET" className="form-inline navbar-search-form-container">
+            <form action={action} method="GET" className="form-inline navbar-search-form-container" onSubmit={navigateByAccession}>
                 <div className="container">
                     <div className="row">
                         <div className="col-3">
                             <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
                         </div>
                         <div className="form-inputs-container description col-8">
-                            <input type="search" className="form-control search-query w-100" placeholder="Search 4DN Data Portal" name="q"
-                                value={searchText} onChange={function (e) { setSearchText(e.target.value); }} />
+                            <input type="search" className="form-control search-query w-100" placeholder={getSearchTextPlaceholder()} name="q"
+                                value={searchText} onChange={function (e) { setSearchText(e.target.value); }} onFocus={handleFocus} />
                         </div>
                         <div className="form-visibility-toggle col-1">
-                            <button type="submit" className="btn btn-outline-light" data-id="global-search-button" data-is-form-button={true}>
-                                <i className="icon icon-fw icon-search fas" data-id="global-search-button-icon" data-is-form-button={true} />
+                            <button type="submit" className="btn btn-outline-light" data-id="global-search-button" data-is-form-button={true} disabled={btnDisabled}>
+                                <i className={btnIconClassName} data-id="global-search-button-icon" data-is-form-button={true} />
                             </button>
                         </div>
                     </div>
                 </div>
-                <input type="hidden" name="type" value={searchItemType} key="type" />
+                {renderHiddenInputsForURIQuery()}
             </form>
         </React.Fragment>
     );
 });
 
-const AvailableSearchItemTypes = [
-    { type: 'Item', text: 'General (All Item Types)' },
-    { type: 'ExperimentSetReplicate', text: 'Experiment Sets' },
-    { type: 'Publication', text: 'Publications' },
-    { type: 'File', text: 'Files' },
-    { type: 'QualityMetric', text: 'Quality Metrics' },
-    { type: 'Biosource', text: 'Biosources' },
-];
-
 const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
-    const { currentAction, searchItemType, onChangeSearchItemType, onToggleSearchItemType, href, getDropdownTitleText, disabled = true } = props;
-    const selectedItem = _.find(AvailableSearchItemTypes, (item) => item.type == searchItemType);
+    const { searchItemType, onChangeSearchItemType, disabled = true } = props;
+    const selectedItem = AvailableSearchItemTypes[searchItemType];
 
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="l" variant="outline-light w-100" disabled={disabled}
-                title={searchItemType == null ? 'Search in specific type ...' : selectedItem.text} >
+                title={!selectedItem ? 'Search in specific type ...' : selectedItem.text}>
                 {
-                    AvailableSearchItemTypes.map(function (item) {
+                    _.values(AvailableSearchItemTypes).map(function (item) {
                         return (
                             <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
                                 className="w-100" onSelect={onChangeSearchItemType} active={searchItemType == item.type}>
@@ -279,3 +309,13 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
         </div>
     );
 });
+
+const AvailableSearchItemTypes = {
+    'Item': { type: 'Item', text: 'General (All Item Types)' },
+    'ByAccession': { type: 'ByAccession', text: "By Accession" },
+    'ExperimentSetReplicate': { type: 'ExperimentSetReplicate', text: 'Experiment Set Replicates', action: '/browse' },
+    'Publication': { type: 'Publication', text: 'Publications' },
+    'File': { type: 'File', text: 'Files' },
+    'QualityMetric': { type: 'QualityMetric', text: 'Quality Metrics' },
+    'Biosource': { type: 'Biosource', text: 'Biosources' },
+};
