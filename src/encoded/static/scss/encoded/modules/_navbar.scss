@@ -1300,6 +1300,14 @@ body[data-pathname="/search/"][data-current-action="multiselect"] {
                 .dropdown-menu {
                     width: 100%;
                 }
+                input[type="search"] {
+                    &::-webkit-search-cancel-button {
+                        display: none;
+                    }
+                    &.border-danger {
+                        border-width: 2px !important;
+                    }
+                }
             }
 
 		}

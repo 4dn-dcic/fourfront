@@ -6,7 +6,7 @@ import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import url from 'url';
 import _ from 'underscore';
-import { console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util'; // Extended w. browseBaseHref & related fxns.
 import {
     BigDropdownNavItem,
@@ -209,10 +209,20 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const initialItemType = AvailableSearchItemTypes[searchTypeFromHref] ? searchTypeFromHref : 'Item';
     const [searchText, setSearchText] = useState(searchQueryFromHref || '');
     const [searchItemType, setSearchItemType] = useState(initialItemType);
+    const [searchInputIsValid, setSearchInputIsValid] = useState(true);
 
     const onChangeSearchItemType = useCallback(function (evtKey) {
         if (typeof evtKey === 'string') {
             setSearchItemType(evtKey);
+
+            //validate accession
+            let isValid = true;
+            if (evtKey === 'ByAccession') {
+                isValid = object.isAccessionRegex(searchText);
+            }
+            if (searchInputIsValid !== isValid) {
+                setSearchInputIsValid(isValid);
+            }
         }
     });
     //render hidden form inputs
@@ -252,6 +262,19 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
             navigate('/' + searchText);
         }
     });
+    const handleOnChange = useCallback(function (evt) {
+        const value = evt.target.value;
+        setSearchText(value);
+
+        //validate accession
+        let isValid = true;
+        if (searchItemType === 'ByAccession') {
+            isValid = object.isAccessionRegex(value);
+        }
+        if (searchInputIsValid !== isValid) {
+            setSearchInputIsValid(isValid);
+        }
+    });
     //select all text when focused
     const handleFocus = useCallback(function (evt) {
         evt.target.select();
@@ -272,8 +295,8 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                             <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
                         </div>
                         <div className="form-inputs-container description col-lg-8 col-md-6 col-sm-12 mt-1">
-                            <input type="search" className="form-control search-query w-100" placeholder={getSearchTextPlaceholder()} name="q"
-                                value={searchText} onChange={function (e) { setSearchText(e.target.value); }} onFocus={handleFocus} />
+                            <input type="search" className={"form-control search-query w-100" + (!searchInputIsValid ? ' border border-danger' : '')} placeholder={getSearchTextPlaceholder()} name="q"
+                                value={searchText} onChange={handleOnChange} onFocus={handleFocus} key="global-search-input" id="global-search-input" autoComplete="off" />
                         </div>
                         <div className="form-visibility-toggle col-lg-1 col-md-2 col-sm-12 mt-1">
                             <button type="submit" className="btn btn-outline-light w-100" data-id="global-search-button" data-is-form-button={true} disabled={btnDisabled}>
