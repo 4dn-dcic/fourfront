@@ -1,6 +1,6 @@
 'use strict';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import Nav from 'react-bootstrap/esm/Nav';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
@@ -206,6 +206,13 @@ function SearchNavItem(props){
 const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const { searchQueryFromHref, searchTypeFromHref } = props;
 
+    const searchTextInputEl = useRef(null);
+    useEffect(() => {
+        if (searchTextInputEl && searchTextInputEl.current) {
+            searchTextInputEl.current.focus();
+        }
+    }, []);
+
     const initialItemType = AvailableSearchItemTypes[searchTypeFromHref] ? searchTypeFromHref : 'Item';
     const [searchText, setSearchText] = useState(searchQueryFromHref || '');
     const [searchItemType, setSearchItemType] = useState(initialItemType);
@@ -284,6 +291,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const action = (selectedItem && selectedItem.action) || '/search';
     const btnIconClassName = 'icon icon-fw fas ' + (searchItemType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
     const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
+    const searchTextClassName = 'form-control search-query w-100' + (!searchInputIsValid ? ' border border-danger' : '');
 
     return (//Form submission gets serialized and AJAXed via onSubmit handlers in App.js
         <React.Fragment>
@@ -295,8 +303,8 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                             <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
                         </div>
                         <div className="form-inputs-container description col-lg-8 col-md-6 col-sm-12 mt-1">
-                            <input type="search" className={"form-control search-query w-100" + (!searchInputIsValid ? ' border border-danger' : '')} placeholder={getSearchTextPlaceholder()} name="q"
-                                value={searchText} onChange={handleOnChange} onFocus={handleFocus} key="global-search-input" id="global-search-input" autoComplete="off" />
+                            <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={getSearchTextPlaceholder()}
+                                value={searchText} onChange={handleOnChange} onFocus={handleFocus} autoComplete="off" ref={searchTextInputEl} />
                         </div>
                         <div className="form-visibility-toggle col-lg-1 col-md-2 col-sm-12 mt-1">
                             <button type="submit" className="btn btn-outline-light w-100" data-id="global-search-button" data-is-form-button={true} disabled={btnDisabled}>
