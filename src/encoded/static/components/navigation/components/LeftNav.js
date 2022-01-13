@@ -224,22 +224,9 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const [searchItemType, setSearchItemType] = useState(initialItemType);
     const [searchInputIsValid, setSearchInputIsValid] = useState(true);
 
-    const onChangeSearchItemType = useCallback(function (evtKey) {
-        if (typeof evtKey === 'string') {
-            setSearchItemType(evtKey);
-
-            //validate accession
-            let isValid = true;
-            if (evtKey === 'ByAccession') {
-                isValid = object.isAccessionRegex(searchText);
-            }
-            if (searchInputIsValid !== isValid) {
-                setSearchInputIsValid(isValid);
-            }
-        }
-    });
-    //render hidden form inputs
-    const renderHiddenInputsForURIQuery = useCallback(function () {
+    //hidden form inputs & search placeholder text
+    const [hiddenInputsForURIQuery, placeholderText] = useMemo(function () {
+        // hiddenInputsForURIQuery
         const query = {};
         switch (searchItemType) {
             case 'ExperimentSetReplicate': {
@@ -254,28 +241,49 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
             }
                 break;
         }
-        return SearchBar.renderHiddenInputsForURIQuery(query);
-    });
-    //custom placeholder text for search item type
-    const getSearchTextPlaceholder = useCallback(function () {
+        const hiddenInputsForURIQuery = SearchBar.renderHiddenInputsForURIQuery(query);
+
+        //placeholder text
+        let placeholderText = '';
         switch (searchItemType) {
             case 'Item':
-                return 'Search in All Items';
+                placeholderText = 'Search in All Items';
+                break;
             case 'ByAccession':
-                return 'Type Item\'s Accession (e.g. 4DNXXXX ...)';
+                placeholderText = 'Type Item\'s Accession (e.g. 4DNXXXX ...)';
+                break;
             default:
-                return "Search in " + AvailableSearchItemTypes[searchItemType].text;
+                placeholderText = "Search in " + AvailableSearchItemTypes[searchItemType].text;
+                break;
+        }
+
+        return [hiddenInputsForURIQuery, placeholderText];
+    }, [searchItemType]);
+    //handler for search item selection
+    const onChangeSearchItemType = useCallback(function (evtKey) {
+        if (typeof evtKey === 'string') {
+            setSearchItemType(evtKey);
+
+            //validate accession
+            let isValid = true;
+            if (evtKey === 'ByAccession') {
+                isValid = object.isAccessionRegex(searchText);
+            }
+            if (searchInputIsValid !== isValid) {
+                setSearchInputIsValid(isValid);
+            }
         }
     });
     //navigate to Item page directly without searching
-    const navigateByAccession = useCallback(function (evt) {
+    const navigateByAccession = function (evt) {
         if (searchItemType === 'ByAccession') {
             evt.preventDefault();
             evt.stopPropagation();
             navigate('/' + searchText);
         }
-    });
-    const handleOnChange = useCallback(function (evt) {
+    };
+    //handler for search text change
+    const handleOnChange = function (evt) {
         const value = evt.target.value;
         setSearchText(value);
 
@@ -287,11 +295,11 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
         if (searchInputIsValid !== isValid) {
             setSearchInputIsValid(isValid);
         }
-    });
+    };
     //select all text when focused
-    const handleFocus = useCallback(function (evt) {
+    const handleFocus = function (evt) {
         evt.target.select();
-    });
+    };
 
     const selectedItem = AvailableSearchItemTypes[searchItemType];
     const action = (selectedItem && selectedItem.action) || '/search';
@@ -308,7 +316,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                         <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
                     </div>
                     <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
-                        <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={getSearchTextPlaceholder()}
+                        <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={placeholderText}
                             value={searchText} onChange={handleOnChange} onFocus={handleFocus} autoComplete="off" ref={searchTextInputEl} />
                     </div>
                     <div className="col-lg-1 col-md-2 col-sm-12 mt-1">
@@ -317,7 +325,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                         </button>
                     </div>
                 </div>
-                {renderHiddenInputsForURIQuery()}
+                {hiddenInputsForURIQuery}
             </form>
         </React.Fragment>
     );
