@@ -15,7 +15,7 @@ import {
     BigDropdownPageTreeMenuIntroduction,
     BigDropdownBigLink
 } from './BigDropdown';
-import { SearchBar } from '.';
+import { SearchBar } from './SearchBar';
 
 
 export const LeftNav = React.memo(function LeftNav(props){
@@ -291,22 +291,22 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const action = (selectedItem && selectedItem.action) || '/search';
     const btnIconClassName = 'icon icon-fw fas ' + (searchItemType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
     const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
-    const searchTextClassName = 'form-control search-query w-100' + (!searchInputIsValid ? ' border border-danger' : '');
+    const searchTextClassName = 'form-control' + (!searchInputIsValid ? ' border border-danger' : '');
 
     return (//Form submission gets serialized and AJAXed via onSubmit handlers in App.js
         <React.Fragment>
             <h4>Search</h4>
-            <form action={action} method="GET" className="form-inline navbar-search-form-container" onSubmit={navigateByAccession}>
+            <form action={action} method="GET" className="navbar-search-form-container" onSubmit={navigateByAccession}>
                 <div className="container">
                     <div className="row">
                         <div className="col-lg-3 col-md-4 col-sm-12 mt-1">
                             <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
                         </div>
-                        <div className="form-inputs-container description col-lg-8 col-md-6 col-sm-12 mt-1">
+                        <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
                             <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={getSearchTextPlaceholder()}
                                 value={searchText} onChange={handleOnChange} onFocus={handleFocus} autoComplete="off" ref={searchTextInputEl} />
                         </div>
-                        <div className="form-visibility-toggle col-lg-1 col-md-2 col-sm-12 mt-1">
+                        <div className="col-lg-1 col-md-2 col-sm-12 mt-1">
                             <button type="submit" className="btn btn-outline-light w-100" data-id="global-search-button" data-is-form-button={true} disabled={btnDisabled}>
                                 <i className={btnIconClassName} data-id="global-search-button-icon" data-is-form-button={true} />
                             </button>
