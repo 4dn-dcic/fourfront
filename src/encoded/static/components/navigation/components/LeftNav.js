@@ -180,9 +180,14 @@ function SearchNavItem(props){
         const hrefParts = memoizedUrlParse(href);
         const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
         const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
+        const title = {
+            display_title: 'Search',
+            description: 'Search Items in the 4D Nucleome Database',
+            name: 'search'
+        };
 
         return {
-            searchQueryFromHref, searchTypeFromHref
+            searchQueryFromHref, searchTypeFromHref, title
         };
     }, [ href, browseBaseState ]);
 
@@ -196,21 +201,22 @@ function SearchNavItem(props){
     );
 
     return ( // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
-        <BigDropdownNavItem {...navItemProps} id="search-menu-item" navItemHref="/search" navItemContent={navLink}
-            active={false} autoHideOnClick={false}>
+        <BigDropdownNavItem {...navItemProps} id="search-menu-item" navItemHref="/search" navItemContent={navLink} autoHideOnClick={false}>
             <SearchNavItemBody {...bodyProps} />
         </BigDropdownNavItem>
     );
 }
 
 const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
-    const { searchQueryFromHref, searchTypeFromHref } = props;
+    const { searchQueryFromHref, searchTypeFromHref, title } = props;
 
     const searchTextInputEl = useRef(null);
     useEffect(() => {
-        if (searchTextInputEl && searchTextInputEl.current) {
-            searchTextInputEl.current.focus();
-        }
+        setTimeout(() => {
+            if (searchTextInputEl && searchTextInputEl.current) {
+                searchTextInputEl.current.focus();
+            }
+        }, 350);
     }, []);
 
     const initialItemType = AvailableSearchItemTypes[searchTypeFromHref] ? searchTypeFromHref : 'Item';
@@ -254,7 +260,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const getSearchTextPlaceholder = useCallback(function () {
         switch (searchItemType) {
             case 'Item':
-                return 'Search 4DN Data Portal';
+                return 'Search in All Items';
             case 'ByAccession':
                 return 'Type Item\'s Accession (e.g. 4DNXXXX ...)';
             default:
@@ -295,22 +301,20 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
 
     return (//Form submission gets serialized and AJAXed via onSubmit handlers in App.js
         <React.Fragment>
-            <h4>Search</h4>
+            <BigDropdownPageTreeMenuIntroduction titleIcon="search fas" menuTree={title} />
             <form action={action} method="GET" className="navbar-search-form-container" onSubmit={navigateByAccession}>
-                <div className="container">
-                    <div className="row">
-                        <div className="col-lg-3 col-md-4 col-sm-12 mt-1">
-                            <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
-                        </div>
-                        <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
-                            <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={getSearchTextPlaceholder()}
-                                value={searchText} onChange={handleOnChange} onFocus={handleFocus} autoComplete="off" ref={searchTextInputEl} />
-                        </div>
-                        <div className="col-lg-1 col-md-2 col-sm-12 mt-1">
-                            <button type="submit" className="btn btn-outline-light w-100" data-id="global-search-button" data-is-form-button={true} disabled={btnDisabled}>
-                                <i className={btnIconClassName} data-id="global-search-button-icon" data-is-form-button={true} />
-                            </button>
-                        </div>
+                <div className="row">
+                    <div className="col-lg-3 col-md-4 col-sm-12 mt-1">
+                        <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
+                    </div>
+                    <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
+                        <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={getSearchTextPlaceholder()}
+                            value={searchText} onChange={handleOnChange} onFocus={handleFocus} autoComplete="off" ref={searchTextInputEl} />
+                    </div>
+                    <div className="col-lg-1 col-md-2 col-sm-12 mt-1">
+                        <button type="submit" className="btn btn-outline-light w-100" data-id="global-search-button" data-handle-click={true} disabled={btnDisabled}>
+                            <i className={btnIconClassName} data-id="global-search-button-icon" data-handle-click={true} />
+                        </button>
                     </div>
                 </div>
                 {renderHiddenInputsForURIQuery()}

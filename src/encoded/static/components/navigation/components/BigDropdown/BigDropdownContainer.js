@@ -60,7 +60,7 @@ export class BigDropdownContainer extends React.PureComponent {
         const { autoHideOnClick = true } = this.props;
         const targetElem = (evt && evt.target) || null;
 
-        if ((autoHideOnClick === true)  && layout.elementIsChildOfLink(targetElem)){
+        if (autoHideOnClick && layout.elementIsChildOfLink(targetElem) ){
             // Let bubble up - app.js will catch and navigate via handleClick and BigDropdownGroupController will catch and hide menu.
             return false;
         }
@@ -74,7 +74,7 @@ export class BigDropdownContainer extends React.PureComponent {
             return false;
         }
 
-        const elemDataId = targetElem.getAttribute("data-is-form-button");
+        const elemDataId = targetElem.getAttribute("data-handle-click");
         if (elemDataId && elemDataId === "true") {
             targetElem["escalateToAppJs"] = true;
             return false;
