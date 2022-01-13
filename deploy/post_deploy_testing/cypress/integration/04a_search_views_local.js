@@ -330,7 +330,8 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
-            cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
+            cy.get('.form-inline.navbar-search-form-container .form-visibility-toggle button').click().end()
+                .get('input[name="q"]').focus().type('mouse').wait(10).end()
                 .get('form.navbar-search-form-container').submit().end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
@@ -359,7 +360,8 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Wildcard query string returns all results.', function(){
             cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
-                cy.get('#top-nav input[name="q"]').focus().clear().type('*').wait(10).end()
+                cy.get('.form-inline.navbar-search-form-container .form-visibility-toggle button').click().end()
+                    .get('#top-nav input[name="q"]').focus().clear().type('*').wait(10).end()
                     .get('form.navbar-search-form-container').submit().end()
                     .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                     .get('form.navbar-search-form-container div.dropdown-menu a[data-key="all"]').click().end()
