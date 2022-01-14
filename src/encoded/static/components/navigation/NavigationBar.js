@@ -177,7 +177,7 @@ const CollapsedNav = React.memo(function CollapsedNav(props) {
         <Navbar.Collapse>
             <BigDropdownGroupController {...{ addToBodyClassList, removeFromBodyClassList }}>
                 <LeftNav {...leftNavProps} />
-                <SearchBar {...{ href, currentAction, browseBaseState }} />
+                {/* <SearchBar {...{ href, currentAction, browseBaseState }} /> */}
                 <AccountNav {...userActionNavProps} />
             </BigDropdownGroupController>
         </Navbar.Collapse>
