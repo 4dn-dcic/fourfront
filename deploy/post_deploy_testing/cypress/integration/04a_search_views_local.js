@@ -1,3 +1,4 @@
+import _ from 'underscore';
 
 
 describe('Deployment/CI Search View Tests', function () {
@@ -128,7 +129,7 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
-        it('Verify created microscope\'s tier number and stand matches', function (){
+        it('Verify created microscope configuration\'s tier number and stand matches', function (){
             //Click edit buttton
             cy.get('div.micro-meta-app-container #microscopy-app-container .btn.btn-primary.btn-lg').should('contain', 'Edit microscope').first().click().end().wait(1000);
 
@@ -190,6 +191,130 @@ describe('Deployment/CI Search View Tests', function () {
 
             // Empty the array now that we're done.
             testItemsToDelete = [];
+        });
+
+        it('Check microscope configuration\'s hardware summary table', function () {
+            cy.visit('/search/?type=MicroscopeConfiguration&status=released').end();
+
+            let intervalCount = null;
+            cy.searchPageTotalResultCount().then((totalCountExpected) => {
+                intervalCount = Math.min(0, parseInt(totalCountExpected / 3));
+            });
+
+            cy.scrollToBottom().then(() => {
+                cy.get('.search-results-container .search-result-row[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+            }).end();
+
+            cy.window().then(function (w) {
+                let currPagePath = "/";
+                cy.location('pathname').should('not.equal', currPagePath)
+                    .then(function (pathName) {
+                        currPagePath = pathName;
+                        console.log(currPagePath);
+                    }).wait(3000).end()
+                    .get('h1.page-title').should('not.be.empty').end()
+                    .get('div.rc-tabs span[data-tab-key="hardware-summary"]').should('contain', 'Hardware Summary');
+
+                let currTabTitle = null;
+                cy.get("h3.tab-section-title, h4.tab-section-title").first().then(function ($tabTitle) {
+                    currTabTitle = $tabTitle.text();
+                }).end(); cy.get('.rc-tabs .rc-tabs-nav div.rc-tabs-tab:not(.rc-tabs-tab-active):not(.rc-tabs-tab-disabled)').each(function ($tab) {
+                    cy.get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
+                        const tabKey = $tab.children('span.tab').attr('data-tab-key');
+                        let termCount = null;
+                        let termName= null;
+                        let facetTotalCount= null;
+                        const nextButtonItems=[];
+                        const backButtonItems=[];
+                        if (tabKey === 'hardware-summary') {
+                            cy.wrap($tab).click({ 'force': true }).end()
+                                .wait(2000);
+                            let facetItemIndex=1;
+                            cy.get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
+                                facetTotalCount = $facetTotalCount.length;
+                                facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
+                            });
+                            cy.get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
+                                .get(".facet.open .facet-list-element a.term .facet-count").first().then(function ($facetCountFile) {
+                                    termCount =parseInt($facetCountFile.text());
+                                })
+                                .get(".facet.open .facet-list-element a.term .facet-item").first().then(function ($facetTextFile) {
+                                    termName = $facetTextFile.text();
+                                })
+                                .get(".row.summary-header .col.summary-title-column.text-truncate .summary-title").first().then(function ($tabFile) {
+                                    const tabFile = $tabFile.text().trim();
+                                    var regExp = /Component Summary Table - (.*) \((\d*)\)/g;
+                                    const regexCheck = regExp.exec(tabFile);
+                                    cy.expect(termName).equal(regexCheck[1]);
+                                    cy.expect(parseInt(termCount)).equal(parseInt(regexCheck[2]));
+                                    if (termCount > 3) {
+                                        //Next Button
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            Cypress._.forEach($totalHeader, function (block) {
+                                                const item = (Cypress.$(block).text());
+                                                if ((item.trim() !== 'MetaData') || (item !== "")) {
+                                                    nextButtonItems.push((Cypress.$(block).text()));
+                                                }
+                                            });
+                                            const totalCount = (termCount - nextButtonItems.length);
+                                            for (let i = 0; i <= totalCount; i++) {
+                                                cy.get('.prev-next-button-container [data-tip="Show next component"]').parent().click().end().wait(2000);
+                                                cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                                    Cypress._.forEach($totalHeader, function (block) {
+                                                        const item = (Cypress.$(block).text());
+                                                        if ((item.trim() !== 'MetaData') || (item !== "")) {
+                                                            nextButtonItems.push((Cypress.$(block).text()));
+                                                        }
+                                                    });
+                                                    if (i == totalCount) {
+                                                        const itemsCount = _.uniq(nextButtonItems);
+                                                        cy.expect(itemsCount.length - 1).equal(termCount);
+                                                    }
+                                                }).end();
+                                            }
+                                        });
+                                        //Previous Button
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            Cypress._.forEach($totalHeader, function (block) {
+                                                const item = (Cypress.$(block).text());
+                                                if ((item.trim() !== 'MetaData') || (item !== "")) {
+                                                    backButtonItems.push((Cypress.$(block).text()));
+                                                }
+                                            });
+                                            const totalCount = (termCount - backButtonItems.length);
+                                            for (let i = 0; i <= totalCount; i++) {
+                                                cy.get('.prev-next-button-container [data-tip="Show previous component"]').parent().click().end().wait(2000);
+                                                cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                                    Cypress._.forEach($totalHeader, function (block) {
+                                                        const item = (Cypress.$(block).text());
+                                                        if ((item.trim() !== 'MetaData') || (item !== "")) {
+                                                            backButtonItems.push((Cypress.$(block).text()));
+                                                        }
+                                                    });
+                                                    if (i == totalCount) {
+                                                        const itemsCount = _.uniq(backButtonItems);
+                                                        cy.expect(itemsCount.length - 1).equal(termCount);
+                                                    }
+                                                }).end();
+                                            }
+                                        });
+                                    }
+                                    else{
+                                        cy.get('.row.summary-sub-header .summary-title-column.text-truncate').then(function ($totalHeader) {
+                                            const headerCount = $totalHeader.length - 1;
+                                            cy.expect(headerCount).equal(termCount);
+                                        });
+                                    }
+                                }).end();
+                        }
+
+                    }).end();
+                    cy.wrap($tab).click({ 'force': true }).end()
+                        .wait(200)
+                        .get('.rc-tabs-content .rc-tabs-tabpane-active');
+
+                }).end();
+            }).end();
         });
     });
 
