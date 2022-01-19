@@ -357,7 +357,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Clear search works ==> more results', function () {
             cy.searchPageTotalResultCount().then((origTotalResults) => {
-                cy.get('input[name="q"]').focus().type('*').wait(10).end()
+                cy.get('.big-dropdown-menu .form-control').focus().type('*').wait(10).end()
                     .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                     .wait(1200).get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', origTotalResults);
