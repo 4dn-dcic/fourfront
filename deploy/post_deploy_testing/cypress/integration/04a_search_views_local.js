@@ -330,8 +330,13 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
-            cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
-                .get('form.navbar-search-form-container').submit().end()
+            //cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
+            //.get('form.navbar-search-form-container').submit().end()
+            cy.get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ExperimentSetReplicate"]').click().end()
+                .get('input[name="q"]').focus().type('mouse').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Data Browser').end() // Make sure we got redirected to /browse/. We may or may not have results here depending on if on local and logged out or not.
                 .location('search')
@@ -340,8 +345,9 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('"All Items" option works, takes us to search page', function(){
-            cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="all"]').click().end()
+            cy.get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
                 .get('form.navbar-search-form-container').submit().end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end()
                 .location('search').should('not.include', 'award.project=4DN')
@@ -349,9 +355,10 @@ describe('Deployment/CI Search View Tests', function () {
                 .searchPageTotalResultCount().should('be.greaterThan', 0);
         });
 
-        it('Clear search button works ==> more results', function(){
-            cy.searchPageTotalResultCount().then((origTotalResults)=>{
-                cy.get('form.navbar-search-form-container .reset-button').click().end()
+        it('Clear search works ==> more results', function () {
+            cy.searchPageTotalResultCount().then((origTotalResults) => {
+                cy.get('.big-dropdown-menu .form-control').focus().type('*').wait(10).end()
+                    .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                     .wait(1200).get('#slow-load-container').should('not.have.class', 'visible').end()
                     .searchPageTotalResultCount().should('be.greaterThan', origTotalResults);
             });
@@ -359,11 +366,14 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Wildcard query string returns all results.', function(){
             cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
-                cy.get('#top-nav input[name="q"]').focus().clear().type('*').wait(10).end()
-                    .get('form.navbar-search-form-container').submit().end()
-                    .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                    .get('form.navbar-search-form-container div.dropdown-menu a[data-key="all"]').click().end()
-                    .get('form.navbar-search-form-container').submit().end()
+                //cy.get('#top-nav input[name="q"]').focus().clear().type('*').wait(10).end()
+                //.get('form.navbar-search-form-container').submit().end()
+                //.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                //.get('form.navbar-search-form-container div.dropdown-menu a[data-key="all"]').click().end()
+                //.get('form.navbar-search-form-container').submit().end()
+                cy.get("a#search-menu-item").click().end()
+                    .get('.big-dropdown-menu-background .form-control').focus().clear().type('*').wait(10).end()
+                    .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                     // handle url encoding
                     .location('search').should('include', '%2A').wait(300).end()
                     .get('#slow-load-container').should('not.have.class', 'visible').end()
@@ -372,6 +382,60 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
 
+        it('SearchBox placeholder control', function () {
+            cy.visit('/').get("a#search-menu-item").click().end();
+            for (let interval = 1; interval < 7; interval++) {
+                cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end();
+                cy.get('a.w-100.dropdown-item:nth-child(' + interval + ')').click().then(($dataKey) => {
+                    const dataKey = $dataKey.attr("data-key");
+                    switch (dataKey) {
+                        case 'Item':
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in All Items");
+                            break;
+                        case 'ByAccession':
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Type Item's Accession (e.g. 4DNXXXX ...)");
+                            break;
+                        case 'ExperimentSetReplicate':
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in Experiment Sets");
+                            break;
+                        case 'Publication':
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in Publications");
+                            break;
+                        case 'File':
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in Files");
+                            break;
+                        case 'Biosource':
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in Biosources");
+                            break;
+                    }
+
+                });
+            }
+        });
+
+        it('SearchBox accesion id control', function () {
+            cy.visit('/search/?type=ExperimentSet')
+                .get(".title-block.text-truncate.text-monospace.text-small").first().then(($accesion) => {
+                    const accesion = $accesion.text();
+                    cy.get("a#search-menu-item").click().end()
+                        .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                        .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ByAccession"]').click().end()
+                        .get('input[name="q"]').focus().type(accesion).wait(10).end()
+                        .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                        .get('.clickable.copy-wrapper.accession.inline-block').should('contain', accesion).end();
+                });
+        });
+
+        it('SearchBox input works, goes to /search', function () {
+            cy.get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
+                .get('input[name="q"]').focus().type('mouse').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Search').end();
+
+        });
     });
 
 });

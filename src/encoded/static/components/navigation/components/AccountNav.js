@@ -70,7 +70,7 @@ export const AccountNav = React.memo(function AccountNav(props){
     const navItemTitle = (
         <React.Fragment>
             { acctIcon }
-            { acctTitle }
+            <span className="d-inline d-md-none d-lg-inline">{ acctTitle }</span>
         </React.Fragment>
     );
 

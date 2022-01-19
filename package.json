@@ -133,7 +133,7 @@
     "react-tooltip": "^3.11.6",
     "react-transition-group": "^4.4.1",
     "redux": "^3.7.0",
-    "subprocess-middleware": "^0.1.0",
+    "subprocess-middleware": "0.1.0",
     "underscore": "^1.10.2"
   }
 }
