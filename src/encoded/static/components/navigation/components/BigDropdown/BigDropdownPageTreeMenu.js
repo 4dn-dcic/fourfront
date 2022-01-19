@@ -22,7 +22,7 @@ export function BigDropdownPageTreeMenuIntroduction(props) {
     return (
         <BigDropdownIntroductionWrapper {...{ windowHeight, windowWidth, titleIcon, isActive }}>
             <h4 className="mt-0 mb-0">
-                <a href={'/' + pathName}>{ display_title }</a>
+                <a href={'/' + pathName} data-handle-click={true}>{ display_title }</a>
             </h4>
             { description ? <div className="description">{ description }</div> : null }
         </BigDropdownIntroductionWrapper>
