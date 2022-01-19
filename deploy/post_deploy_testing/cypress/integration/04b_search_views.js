@@ -44,15 +44,15 @@ describe('Post-Deployment Search View Tests', function () {
             Cypress.Cookies.preserveOnce("searchSessionID");
         });
 
-        it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function(){
-
-            cy.searchPageTotalResultCount().should('be.greaterThan', 100).then(function(origResultCount){
-                return cy.get('.form-inline.navbar-search-form-container .form-visibility-toggle button').click().end()
-                    .get('#top-nav input[name="q"]').focus().clear().type('olfactory').wait(10).end()
-                    .get('form.navbar-search-form-container').submit().end()
-                    .location('search').should('include', 'q=olfactory').end()
-                    .searchPageTotalResultCount().should('be.lessThan', origResultCount).end();
-            });
+        it('Starting from /search/, typing "olfactory" into searchbox redirects back to search', function () {
+            cy.get("a#search-menu-item").click().end()
+                .searchPageTotalResultCount().should('be.greaterThan', 100).then(function (origResultCount) {
+                    return cy.get('.big-dropdown-menu-background .form-control').focus().clear().type('olfactory').wait(10).end()
+                        .get('form.navbar-search-form-container').submit().end()
+                        .location('search').should('include', 'q=olfactory').end()
+                        .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                        .searchPageTotalResultCount().should('be.lessThan', origResultCount).end();
+                });
 
         });
 

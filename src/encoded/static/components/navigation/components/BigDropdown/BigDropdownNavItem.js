@@ -79,6 +79,7 @@ export class BigDropdownNavItem extends React.PureComponent {
             visibleDropdownID,
             closingDropdownID,
             className = null,
+            autoHideOnClick,
             ...passProps
         } = this.props;
         const { windowHeight, windowWidth } = passProps;
@@ -120,7 +121,7 @@ export class BigDropdownNavItem extends React.PureComponent {
 
         const dropdownContainerProps = {
             href, overlaysContainer, id, open, closing,
-            isDesktopView, testWarningVisible,
+            isDesktopView, testWarningVisible, autoHideOnClick,
             windowWidth, windowHeight,
             'onClose' : this.onCloseDropdown,
             'onToggle': this.handleToggle,
