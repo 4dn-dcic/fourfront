@@ -1114,13 +1114,13 @@ export default class App extends React.PureComponent {
         });
 
         // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
-        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ... 
+        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ...
         const contentSecurityPolicyStr = [
             "default-src 'self'",
             "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
             "child-src blob:",
             "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
-            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
