@@ -9,7 +9,7 @@ import MutationObserver from 'mutation-observer';
 
 //jest.mock('scriptjs');
 
-if (typeof window.DOMParser === 'undefined') {
+if (window.DOMParser === undefined) {
     // jsdom
     window.DOMParser = function DOMParser() {};
     window.DOMParser.prototype.parseFromString = function parseFromString(markup, type) {
@@ -26,7 +26,7 @@ if (typeof window.DOMParser === 'undefined') {
 }
 
 
-if (typeof window.MutationObserver === 'undefined') {
+if (window.MutationObserver === undefined) {
     // See https://stackoverflow.com/questions/48809753/testing-mutationobserver-with-jest
     Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 } else {
@@ -34,7 +34,7 @@ if (typeof window.MutationObserver === 'undefined') {
 }
 
 
-if (typeof window.BUILDTYPE === 'undefined') {
+if (window.BUILDTYPE === undefined) {
     // Not used now, added to remove warning msg, but could be purposed for something later.
     window.BUILDTYPE = "Jest";
 }
