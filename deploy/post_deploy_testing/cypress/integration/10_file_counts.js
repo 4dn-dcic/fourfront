@@ -7,7 +7,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
             for (let interval = 0; interval < 5; interval++) {
 
-                cy.visit('/search/?type=ExperimentSet&experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value').end()
+                cy.visit('/search/?experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value%27&other_processed_files.files.status=released&type=ExperimentSet').end()
                     .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
                 cy.scrollToBottom().then(() => {
@@ -65,7 +65,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         }).end();
                         cy.wrap($tab).click({ 'force': true }).end()
                             .wait(200)
-                            .get('.rc-tabs-content .rc-tabs-tabpane-active')
+                            .get('.rc-tabs-content .rc-tabs-tabpane-active');
 
                     }).end();
                 }).end();
@@ -76,7 +76,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
         it('Visit experiment pages and compare file counts on tab header, title and download button (firstlyi ensure that all selected)', function () {
 
             for (let interval = 0; interval < 5; interval++) {
-                cy.visit('/search/?type=Experiment&files.accession!=No+value&processed_files.accession!=No+value&other_processed_files.files.accession%21=No+value').wait(500).end()
+                cy.visit('/search/?type=Experiment&files.accession!=No+value&processed_files.accession!=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').wait(500).end()
                     .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
 
                 cy.scrollToBottom().then(() => {
@@ -145,7 +145,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                         });
                                     }).end()
                                     .root().should('not.contain', "client-side error")
-                                    .end()
+                                    .end();
 
                             }).end();
                         }).end();

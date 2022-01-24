@@ -120,6 +120,7 @@ export const TitleAndSubtitleBeside = React.memo(function TitleAndSubtitleNextTo
             <span className="title">
                 { children }
             </span>
+            {" "}
             <span className={"subtitle " + (subTitleClassName || '')}>
                 { subtitle }
             </span>

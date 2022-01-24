@@ -66,6 +66,7 @@ $facetlist-term-block-height: 22px;
 .facets-container .facets-body .facet a.term .facet-selector {
 	transform: translate(0, 1px);
 	transform: translate(0, 0.5px);
+	line-height: unset; /* Overrides SPC's line-height: 1 to vertically center better re: 4DN font */
 }
 
 

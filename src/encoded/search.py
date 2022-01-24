@@ -1605,7 +1605,8 @@ def build_table_columns(request, schemas, doc_types):
             "colTitle" : "Type",
             "order" : -80,
             "description" : "Type or category of Item",
-            "type": "string"
+            "type": "string",
+            "tooltip": True
             # Alternative below, if we want type column to be available but hidden by default in selection mode:
             # "default_hidden": request.normalized_params.get('currentAction') == 'selection'
         }
@@ -1629,6 +1630,9 @@ def build_table_columns(request, schemas, doc_types):
                             columns[name]['description'] = field_schema['description']
                         if not columns[name].get('type') and field_schema.get('type') is not None:
                             columns[name]['type'] = field_schema['type']
+                # add tooltip
+                if columns[name].get('tooltip') is None:
+                    columns[name]['tooltip'] = True
                 # iterate through sort_fields and set data type from schema if not already defined            
                 if 'sort_fields' in columns[name]:
                     sort_fields = columns[name].get('sort_fields')

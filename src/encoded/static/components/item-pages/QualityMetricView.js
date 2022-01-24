@@ -3,8 +3,8 @@
 import React from 'react';
 import _ from 'underscore';
 import memoize from 'memoize-one';
+import Collapse from 'react-bootstrap/esm/Collapse';
 import { console, object, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { Collapse } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Collapse';
 import DefaultItemView, { WrapInColumn } from './DefaultItemView';
 import { QCMetricFromSummary } from './../browse/components/file-tables';
 import { Schemas } from './../util';
