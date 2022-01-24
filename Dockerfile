@@ -3,9 +3,9 @@
 # Note that images are pinned via sha256 as opposed to tag
 # so that we don't pick up new images unintentionally
 
-# Debian Buster with Python 3.6.13
+# Debian Buster with Python 3.6.15
 # Note image is updated from cgap-portal
-FROM python@sha256:8273b05f13fac06c1f3bfa14611f92ea50984279bea5d2bcf3b3be7598e28137
+FROM python:3.6.15-slim-buster
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -23,8 +23,8 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.1.4 \
-  NODE_VERSION=12.22.6
+  POETRY_VERSION=1.1.12 \
+  NODE_VERSION=12.22.9
 
 # Install nginx, base system
 COPY deploy/docker/production/install_nginx.sh /
@@ -38,7 +38,7 @@ WORKDIR /home/nginx/.nvm
 # Install Node
 ENV NVM_DIR=/home/nginx/.nvm
 RUN apt install -y curl
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
 RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
@@ -55,7 +55,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Upgrade pip, install in layer
 RUN pip install --upgrade pip && \
-    pip install poetry==1.1.4
+    pip install poetry==$POETRY_VERSION
 
 # Adjust permissions
 RUN chown -R nginx:nginx /opt/venv && \
@@ -80,16 +80,18 @@ RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/b
 # RUN npm run build && \
   #    npm run build-scss
 
-
-# Copy over the rest of the code
-COPY . .
-RUN npm run build && \
-    npm run build-scss
-
 # Build remaining back-end
 RUN poetry install && \
     python setup_eb.py develop && \
     make fix-dist-info
+
+# Copy over the rest of the code
+COPY . .
+
+# Build front-end, remove node_modules when done
+RUN npm run build && \
+    npm run build-scss && \
+    rm -rf node_modules/
 
 # Misc
 RUN make aws-ip-ranges && \
