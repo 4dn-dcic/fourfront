@@ -30,7 +30,8 @@ ENV PYTHONFAULTHANDLER=1 \
 COPY deploy/docker/production/install_nginx.sh /
 RUN bash /install_nginx.sh && \
     apt-get update && \
-    apt-get install -y curl vim emacs postgresql-client net-tools ca-certificates
+    apt-get install -y curl vim emacs postgresql-client net-tools ca-certificates \
+    gcc zlib1g-dev libpq-dev git make
 
 # Configure Fourfront User (nginx)
 WORKDIR /home/nginx/.nvm
