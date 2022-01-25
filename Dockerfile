@@ -81,11 +81,6 @@ RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/b
 # RUN npm run build && \
   #    npm run build-scss
 
-# Build remaining back-end
-RUN poetry install && \
-    python setup_eb.py develop && \
-    make fix-dist-info
-
 # Copy over the rest of the code
 COPY . .
 
@@ -93,6 +88,11 @@ COPY . .
 RUN npm run build && \
     npm run build-scss && \
     rm -rf node_modules/
+
+# Build remaining back-end
+RUN poetry install && \
+    python setup_eb.py develop && \
+    make fix-dist-info
 
 # Misc
 RUN make aws-ip-ranges && \
