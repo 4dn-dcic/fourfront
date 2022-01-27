@@ -3,7 +3,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { isServerSide, console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { SearchTableTitle } from './components/tables/ItemPageTable';
 import { EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
@@ -174,7 +174,7 @@ function FileViewVitessce (props) {
                                 {
                                     "name": "ChromEMT",
                                     "type": "ome-tiff",
-                                    "url": "https://4dn-dcic-public.s3.amazonaws.com/vitessce/4DNFI8FS2EEE.ome.tiff"
+                                    "url": 'http://localhost:8000/files-microscopy/4DNFIATESTM2/vitessce_downloader'
                                 }
                             ],
                             "usePhysicalSizeScaling": true,

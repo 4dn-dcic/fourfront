@@ -1,5 +1,11 @@
 import boto3
+from subprocess import call, Popen, PIPE
+from sys import stderr, stdout
+from threading import Thread
+from PIL import Image as pil_image
+
 import datetime
+import base64
 import json
 import logging
 import os
@@ -8,7 +14,12 @@ import requests
 import structlog
 import transaction
 import urllib.parse
-
+from PIL import Image
+from http.client import HTTPResponse
+import io
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import numpy as np
 from botocore.exceptions import ClientError
 from copy import deepcopy
 from pyramid.httpexceptions import (
@@ -1599,6 +1610,117 @@ def download(context, request):
     else:
         raise HTTPTemporaryRedirect(location=location)
 
+@view_config(name='vitessce_downloader',  request_method=['GET', 'HEAD'])
+@debug_log
+def vitessceFileDownload(context, request):
+    """ Endpoint for handling /@@download/ URLs """
+    check_user_is_logged_in(request)
+    # first check for restricted status
+    if context.properties.get('status') == 'restricted':
+        raise HTTPForbidden('This is a restricted file not available for download')
+    try:
+        user_props = session_properties(request)
+    except Exception as e:
+        user_props = {"error": str(e)}
+
+    user_uuid = user_props.get('details', {}).get('uuid', None)
+    user_groups = user_props.get('details', {}).get('groups', None)
+    if user_groups:
+        user_groups.sort()
+
+    # TODO:
+    # if not user_uuid or file_size_downloaded < 25 * (1024**2): # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
+    #     raise HTTPForbidden("Must login or provide access keys to download files larger than 5mb")
+
+    # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
+    try:
+        use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    except TypeError:
+        # this fails in testing due to testapp not having ip
+        use_download_proxy = False
+
+    # with extra_files the user may be trying to download the main file
+    # or one of the files in extra files, the following logic will
+    # search to find the "right" file and redirect to a download link for that one
+    properties = context.upgrade_properties()
+    file_format = get_item_or_none(request, properties.get('file_format'), 'file-formats')
+    lab = properties.get('lab') and get_item_or_none(request, properties.get('lab'), 'labs')
+    _filename = None
+    if request.subpath:
+        _filename, = request.subpath
+    filename = is_file_to_download(properties, file_format, _filename)
+    if not filename:
+        found = False
+        for extra in properties.get('extra_files', []):
+            eformat = get_item_or_none(request, extra.get('file_format'), 'file-formats')
+            filename = is_file_to_download(extra, eformat, _filename)
+            if filename:
+                found = True
+                properties = extra
+                external = context.propsheets.get('external' + eformat.get('uuid'))
+                break
+        if not found:
+            raise HTTPNotFound(_filename)
+    else:
+        external = context.propsheets.get('external', {})
+
+    # Calculate bytes downloaded from Range header
+    headers = None
+    file_size_downloaded = properties.get('file_size', 0)
+    if request.range:
+        file_size_downloaded = 0
+        headers = {'Range': request.headers.get('Range')}
+        # Assume range unit is bytes. Because there's no spec for others really, atm, afaik..
+        if hasattr(request.range, "ranges"):
+            for (range_start, range_end) in request.range.ranges:
+                file_size_downloaded += (
+                    (range_end or properties.get('file_size', 0)) -
+                    (range_start or 0)
+                )
+        else:
+            file_size_downloaded = (
+                (request.range.end or properties.get('file_size', 0)) -
+                (request.range.start or 0)
+            )
+
+    request_datastore_is_database = (request.datastore == 'database')
+    response=''
+    if not external:
+        external = context.build_external_creds(request.registry, context.uuid, properties)
+    if external.get('service') == 's3':
+        # location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
+        #                                                                request_datastore_is_database)
+        #location='https://4dn-dcic-public.s3.amazonaws.com/vitessce/4DNFI8FS2EEE.ome.tiff'
+        #external = context.build_external_creds(request.registry, context.uuid, properties)
+        print('calisti')
+        s3 = boto3.client('s3')
+        try:
+            fileobj = s3.get_object(
+                Bucket='4dn-dcic-public',
+                Key='vitessce/4DNFI8FS2EEE.ome.tiff',
+                #Range='bytes={}-{}'.format(0,65536)
+                Range= request.headers.get('Range')
+            )
+            file_stream = fileobj['Body']
+            content=fileobj['ContentLength']
+            print('xxxx accept-ranges',fileobj['ResponseMetadata']['HTTPHeaders'])
+
+            return Response(
+                content_type='image/tiff',
+                app_iter=file_stream,
+                accept_ranges=fileobj['ResponseMetadata']['HTTPHeaders']['accept-ranges'],
+                content_range= fileobj['ResponseMetadata']['HTTPHeaders']['content-range'],
+                content_length= fileobj['ResponseMetadata']['HTTPHeaders']['content-length'],
+                vary='Origin,Access-Control-Request-Header,Access-Control-Request-Method',
+            )
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            if error_code == "AccessDenied":
+                print('hata:',error_code)
+            elif error_code == "InvalidLocationConstraint":
+                print('hata:',error_code)
+    else:
+        raise ValueError(external.get('service'))
 
 def get_file_experiment_type(request, context, properties):
     """
