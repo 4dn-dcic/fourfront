@@ -1702,16 +1702,28 @@ def vitessceFileDownload(context, request):
                 Range= request.headers.get('Range')
             )
             file_stream = fileobj['Body']
-            content=fileobj['ContentLength']
             print('xxxx accept-ranges',fileobj['ResponseMetadata']['HTTPHeaders'])
 
             return Response(
-                content_type='image/tiff',
+                headers= {
+                    'Access-Control-Allow-Methods':'GET,HEAD',
+                    'Access-Control-Allow-Origin':'*',
+                    'Access-Control-Expose-Headers':'Content-Length,Content-Type',
+                    #'content-type':'image/tiff',
+                    'accept-ranges':fileobj['ResponseMetadata']['HTTPHeaders']['accept-ranges'],
+                    'content-range': fileobj['ResponseMetadata']['HTTPHeaders']['content-range'],
+                    'content-length': fileobj['ResponseMetadata']['HTTPHeaders']['content-length'],
+                    'vary':'Origin,Access-Control-Request-Header,Access-Control-Request-Method',
+                    'Access-Control-Max-Age':'3000',
+
+
+                },
                 app_iter=file_stream,
-                accept_ranges=fileobj['ResponseMetadata']['HTTPHeaders']['accept-ranges'],
-                content_range= fileobj['ResponseMetadata']['HTTPHeaders']['content-range'],
-                content_length= fileobj['ResponseMetadata']['HTTPHeaders']['content-length'],
-                vary='Origin,Access-Control-Request-Header,Access-Control-Request-Method',
+                content_type='image/tiff',
+                # accept_ranges=fileobj['ResponseMetadata']['HTTPHeaders']['accept-ranges'],
+                # content_range= fileobj['ResponseMetadata']['HTTPHeaders']['content-range'],
+                # content_length= fileobj['ResponseMetadata']['HTTPHeaders']['content-length'],
+                # vary='Origin,Access-Control-Request-Header,Access-Control-Request-Method',
             )
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
