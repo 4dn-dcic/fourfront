@@ -95,9 +95,9 @@
     "string-replace-loader": "^1.0.0",
     "terser-webpack-plugin": "^4.2.3",
     "uglifyjs-webpack-plugin": "^2.2.0",
-    "webpack": "4.44.2",
-    "webpack-bundle-analyzer": "^4.1.0",
-    "webpack-deadcode-plugin": "^0.1.12"
+    "webpack": "4.46.0",
+    "webpack-bundle-analyzer": "^4.5.0",
+    "webpack-deadcode-plugin": "^0.1.15"
   },
   "dependencies": {
     "micro-meta-app-react": "github:WU-BIMAC/MicroMetaApp-React#0.0.0.21",
