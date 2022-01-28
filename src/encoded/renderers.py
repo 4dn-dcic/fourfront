@@ -4,27 +4,24 @@ import os
 import psutil
 import time
 
-from pkg_resources import resource_filename
-from urllib.parse import urlencode, urlparse
+from dcicutils.misc_utils import environ_bool, PRINT, ignored
 from functools import lru_cache
+from pkg_resources import resource_filename
 from pyramid.events import BeforeRender, subscriber
 from pyramid.httpexceptions import (
     HTTPMovedPermanently,
     HTTPPreconditionFailed,
     HTTPUnauthorized,
-    # HTTPForbidden,
     HTTPUnsupportedMediaType,
     HTTPNotAcceptable,
     HTTPServerError
 )
-# from pyramid.security import forget
+from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.threadlocal import manager
-from pyramid.response import Response
 from pyramid.traversal import split_path_info, _join_path_tuple
-# from snovault.validation import CSRFTokenError
-# from subprocess_middleware.tween import SubprocessTween
 from subprocess_middleware.worker import TransformWorker
+from urllib.parse import urlencode
 from webob.cookies import Cookie
 
 
@@ -70,10 +67,12 @@ def includeme(config):
     """
 
     config.add_tween('.renderers.validate_request_tween_factory', under='snovault.stats.stats_tween_factory')
-    # DISABLED - .add_tween('.renderers.remove_expired_session_cookies_tween_factory', under='.renderers.validate_request_tween_factory')
+    # DISABLED - .add_tween('.renderers.remove_expired_session_cookies_tween_factory',
+    #                       under='.renderers.validate_request_tween_factory')
     config.add_tween('.renderers.render_page_html_tween_factory', under='.renderers.validate_request_tween_factory')
 
-    # The above tweens, when using response (= `handler(request)`) act on the _transformed_ response (containing HTML body).
+    # The above tweens, when using response (= `handler(request)`) act on the _transformed_ response
+    # (containing HTML body).
     # The below tweens run _before_ the JS rendering. Responses in these tweens have not been transformed to HTML yet.
     config.add_tween('.renderers.set_response_headers_tween_factory', under='.renderers.render_page_html_tween_factory')
 
@@ -93,6 +92,7 @@ def validate_request_tween_factory(handler, registry):
     Apache config:
         SetEnvIf Request_Method HEAD X_REQUEST_METHOD=HEAD
     """
+    ignored(registry)
 
     def validate_request_tween(request):
 
@@ -120,6 +120,7 @@ def validate_request_tween_factory(handler, registry):
 
 
 def security_tween_factory(handler, registry):
+    ignored(registry)
 
     def security_tween(request):
         """
@@ -147,14 +148,18 @@ def security_tween_factory(handler, registry):
                     raise HTTPUnauthorized(
                         title="No Access",
                         comment="Invalid Authorization header or Auth Challenge response.",
-                        headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
+                        headers={
+                            'WWW-Authenticate': ("Bearer realm=\"{}\"; Basic realm=\"{}\""
+                                                 .format(request.domain, request.domain))
+                        }
                     )
 
         if hasattr(request, 'auth0_expired'):
             # Add some security-related headers on the up-swing
             response = handler(request)
             if request.auth0_expired:
-                #return response
+                # return response
+                #
                 # If have the attribute and it is true, then our session has expired.
                 # This is true for both AJAX requests (which have request.authorization) & browser page
                 # requests (which have cookie); both cases handled in authentication.py
@@ -174,7 +179,11 @@ def security_tween_factory(handler, registry):
                     overwrite=True
                 )  # = Same as response.delete_cookie(..)
                 response.status_code = 401
-                response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
+                response.headers['WWW-Authenticate'] = (
+                    f"Bearer realm=\"{request.domain}\","
+                    f" title=\"Session Expired\";"
+                    f" Basic realm=\"{request.domain}\""
+                )
             else:
                 # We have JWT and it's not expired. Add 'X-Request-JWT' & 'X-User-Info' header.
                 # For performance, only do it if should transform to HTML as is not needed on every request.
@@ -201,13 +210,15 @@ def security_tween_factory(handler, registry):
         # requests from Authorization header which acts like a CSRF token.
         # See authentication.py - get_jwt()
 
-        #token = request.headers.get('X-CSRF-Token')
-        #if token is not None:
-        #    # Avoid dirtying the session and adding a Set-Cookie header
-        #    # XXX Should consider if this is a good idea or not and timeouts
-        #    if token == dict.get(request.session, '_csrft_', None):
-        #        return handler(request)
-        #    raise CSRFTokenError('Incorrect CSRF token')
+        # Alex notes that we do not use request.session so this is probably very old. -kmp 4-Mar-2021
+
+        # token = request.headers.get('X-CSRF-Token')
+        # if token is not None:
+        #     # Avoid dirtying the session and adding a Set-Cookie header
+        #     # XXX Should consider if this is a good idea or not and timeouts
+        #     if token == dict.get(request.session, '_csrft_', None):
+        #         return handler(request)
+        #     raise CSRFTokenError('Incorrect CSRF token')
         # raise CSRFTokenError('Missing CSRF token')
 
     return security_tween
@@ -222,7 +233,8 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
     We disable it for now via removing from tween chain as are using JWT tokens and handling
     their removal in security_tween_factory & authentication.py as well as client-side
     (upon "Logout" action). If needed for some reason, can re-enable.
-    """
+    """  # noQA - not going to break the long URL line above
+    ignored(registry)
 
     ignore = {
         '/favicon.ico',
@@ -233,8 +245,8 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
             return handler(request)
 
         session = request.session
-        #if session or session._cookie_name not in request.cookies:
-        #    return handler(request)
+        # if session or session._cookie_name not in request.cookies:
+        #     return handler(request)
 
         response = handler(request)
         # Below seems to be empty always; though we do have some in request.cookies
@@ -259,6 +271,8 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
 
 def set_response_headers_tween_factory(handler, registry):
     """Add additional response headers here"""
+    ignored(registry)
+
     def set_response_headers_tween(request):
         response = handler(request)
         response.headers['X-Request-URL'] = request.url
@@ -340,7 +354,8 @@ def should_transform(request, response):
         if format_param == 'html':
             return True
         else:
-            raise HTTPNotAcceptable("Improper format URI parameter", comment="The format URI parameter should be set to either html or json.")
+            raise HTTPNotAcceptable("Improper format URI parameter",
+                                    comment="The format URI parameter should be set to either html or json.")
 
     # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
     # which should contain 'text/html'
@@ -374,7 +389,9 @@ def render_page_html_tween_factory(handler, registry):
 
     rss_limit = 256 * (1024 ** 2)  # MB
 
-    reload_process = True if registry.settings.get('reload_templates', False) else lambda proc: psutil.Process(proc.pid).memory_info().rss > rss_limit
+    reload_process = (True
+                      if registry.settings.get('reload_templates', False)
+                      else lambda proc: psutil.Process(proc.pid).memory_info().rss > rss_limit)
 
     # TransformWorker inits and manages a subprocess
     # it re-uses the subprocess so interestingly data in JS global variables

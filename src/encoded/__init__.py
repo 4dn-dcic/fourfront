@@ -35,7 +35,7 @@ from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 # from webob.cookies import JSONSerializer
 
 from .loadxl import load_all
-from .util import find_other_in_pair
+# from .util import find_other_in_pair
 
 
 if sys.version_info.major < 3:
