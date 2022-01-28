@@ -250,7 +250,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                 placeholderText = 'Search in All Items';
                 break;
             case 'ByAccession':
-                placeholderText = 'Type Item\'s Accession (e.g. 4DNXXXX ...)';
+                placeholderText = 'Type Item\'s Complete Accession (e.g. 4DNXXXX ...)';
                 break;
             default:
                 placeholderText = "Search in " + AvailableSearchItemTypes[searchItemType].text;
@@ -277,9 +277,12 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     //navigate to Item page directly without searching
     const navigateByAccession = function (evt) {
         if (searchItemType === 'ByAccession') {
-            evt.preventDefault();
-            evt.stopPropagation();
-            navigate('/' + searchText);
+            const accession = searchText && searchText.trim();
+            if (accession) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                navigate('/' + accession);
+            }
         }
     };
     //handler for search text change
