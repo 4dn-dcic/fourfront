@@ -1,3 +1,4 @@
+from urllib import request
 import boto3
 from subprocess import call, Popen, PIPE
 from sys import stderr, stdout
@@ -17,9 +18,6 @@ import urllib.parse
 from PIL import Image
 from http.client import HTTPResponse
 import io
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import numpy as np
 from botocore.exceptions import ClientError
 from copy import deepcopy
 from pyramid.httpexceptions import (
@@ -1610,14 +1608,16 @@ def download(context, request):
     else:
         raise HTTPTemporaryRedirect(location=location)
 
-@view_config(name='vitessce_downloader',  request_method=['GET', 'HEAD'])
+
+@view_config(name='vitessce_downloader',  request_method=['GET', 'HEAD', 'OPTIONS'])
 @debug_log
 def vitessceFileDownload(context, request):
     """ Endpoint for handling /@@download/ URLs """
     check_user_is_logged_in(request)
     # first check for restricted status
     if context.properties.get('status') == 'restricted':
-        raise HTTPForbidden('This is a restricted file not available for download')
+        raise HTTPForbidden(
+            'This is a restricted file not available for download')
     try:
         user_props = session_properties(request)
     except Exception as e:
@@ -1643,8 +1643,10 @@ def vitessceFileDownload(context, request):
     # or one of the files in extra files, the following logic will
     # search to find the "right" file and redirect to a download link for that one
     properties = context.upgrade_properties()
-    file_format = get_item_or_none(request, properties.get('file_format'), 'file-formats')
-    lab = properties.get('lab') and get_item_or_none(request, properties.get('lab'), 'labs')
+    file_format = get_item_or_none(
+        request, properties.get('file_format'), 'file-formats')
+    lab = properties.get('lab') and get_item_or_none(
+        request, properties.get('lab'), 'labs')
     _filename = None
     if request.subpath:
         _filename, = request.subpath
@@ -1652,12 +1654,14 @@ def vitessceFileDownload(context, request):
     if not filename:
         found = False
         for extra in properties.get('extra_files', []):
-            eformat = get_item_or_none(request, extra.get('file_format'), 'file-formats')
+            eformat = get_item_or_none(
+                request, extra.get('file_format'), 'file-formats')
             filename = is_file_to_download(extra, eformat, _filename)
             if filename:
                 found = True
                 properties = extra
-                external = context.propsheets.get('external' + eformat.get('uuid'))
+                external = context.propsheets.get(
+                    'external' + eformat.get('uuid'))
                 break
         if not found:
             raise HTTPNotFound(_filename)
@@ -1683,54 +1687,32 @@ def vitessceFileDownload(context, request):
                 (request.range.start or 0)
             )
 
-    request_datastore_is_database = (request.datastore == 'database')
-    response=''
     if not external:
-        external = context.build_external_creds(request.registry, context.uuid, properties)
+        external = context.build_external_creds(
+            request.registry, context.uuid, properties)
+    # import pdb;pdb.set_trace()
     if external.get('service') == 's3':
-        # location = context.get_open_data_url_or_presigned_url_location(external, request, filename,
-        #                                                                request_datastore_is_database)
-        #location='https://4dn-dcic-public.s3.amazonaws.com/vitessce/4DNFI8FS2EEE.ome.tiff'
-        #external = context.build_external_creds(request.registry, context.uuid, properties)
-        print('calisti')
         s3 = boto3.client('s3')
         try:
-            fileobj = s3.get_object(
-                Bucket='4dn-dcic-public',
-                Key='vitessce/4DNFI8FS2EEE.ome.tiff',
-                #Range='bytes={}-{}'.format(0,65536)
-                Range= request.headers.get('Range')
+            fileObj = s3.get_object(
+                Bucket = '4dn-dcic-public',
+                Key = 'vitessce/4DNFI8FS2EEE.ome.tiff',
+                Range = request.headers.get('Range')
             )
-            file_stream = fileobj['Body']
-            print('xxxx accept-ranges',fileobj['ResponseMetadata']['HTTPHeaders'])
+            print('fileobj:', fileObj)
 
-            return Response(
-                headers= {
-                    'Access-Control-Allow-Methods':'GET,HEAD',
-                    'Access-Control-Allow-Origin':'*',
-                    'Access-Control-Expose-Headers':'Content-Length,Content-Type',
-                    #'content-type':'image/tiff',
-                    'accept-ranges':fileobj['ResponseMetadata']['HTTPHeaders']['accept-ranges'],
-                    'content-range': fileobj['ResponseMetadata']['HTTPHeaders']['content-range'],
-                    'content-length': fileobj['ResponseMetadata']['HTTPHeaders']['content-length'],
-                    'vary':'Origin,Access-Control-Request-Header,Access-Control-Request-Method',
-                    'Access-Control-Max-Age':'3000',
+            response = Response()
+            response.status = fileObj['ResponseMetadata']['HTTPStatusCode']
+            response.headers = fileObj['ResponseMetadata']['HTTPHeaders']
+            response.app_iter = fileObj['Body']
 
-
-                },
-                app_iter=file_stream,
-                content_type='image/tiff',
-                # accept_ranges=fileobj['ResponseMetadata']['HTTPHeaders']['accept-ranges'],
-                # content_range= fileobj['ResponseMetadata']['HTTPHeaders']['content-range'],
-                # content_length= fileobj['ResponseMetadata']['HTTPHeaders']['content-length'],
-                # vary='Origin,Access-Control-Request-Header,Access-Control-Request-Method',
-            )
+            return response
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
             if error_code == "AccessDenied":
-                print('hata:',error_code)
+                print('hata:', error_code)
             elif error_code == "InvalidLocationConstraint":
-                print('hata:',error_code)
+                print('hata:', error_code)
     else:
         raise ValueError(external.get('service'))
 

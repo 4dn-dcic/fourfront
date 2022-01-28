@@ -174,6 +174,7 @@ function FileViewVitessce (props) {
                                 {
                                     "name": "ChromEMT",
                                     "type": "ome-tiff",
+                                    // "url": 'https://4dn-dcic-public.s3.amazonaws.com/vitessce/4DNFI8FS2EEE.ome.tiff'
                                     "url": 'http://localhost:8000/files-microscopy/4DNFIATESTM2/vitessce_downloader'
                                 }
                             ],
