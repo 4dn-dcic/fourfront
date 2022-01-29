@@ -19,7 +19,6 @@ from pyramid.httpexceptions import (
 from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.threadlocal import manager
-
 from pyramid.traversal import split_path_info, _join_path_tuple
 from subprocess_middleware.worker import TransformWorker
 from urllib.parse import urlencode
@@ -196,8 +195,12 @@ def security_tween_factory(handler, registry):
                             # This header is parsed in renderer.js, or, more accurately,
                             # by libs/react-middleware.js which is imported by server.js and compiled into
                             # renderer.js. Is used to get access to User Info on initial web page render.
-                            response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
-                            user_info = request.user_info.copy() # Re-ified property set in authentication.py
+                            response.headers['X-Request-JWT'] = request.cookies.get('jwtToken', '')
+                            user_info = request.user_info.copy()  # Re-ified property set in authentication.py
+                            # On CGAP we are using HTTPOnly cookie and not storing token inside user_info ever
+                            # (so don't need to delete it from there). In 4DN the token is stored/duplicated in
+                            # authentication.py. If we port the HTTPOnly code, we presumably won't need this del.
+                            # -kmp & alexb 28-Jan-2022
                             del user_info["id_token"] # Redundant - don't need this in SSR nor browser as get from X-Request-JWT.
                             response.headers['X-User-Info'] = json.dumps(user_info)
                         else:
@@ -313,14 +316,79 @@ def canonical_redirect(event):
     raise HTTPMovedPermanently(location=location, detail="Redirected from " + str(request.path_info))
 
 
+# Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
+# which should contain 'text/html'
+MIME_TYPE_HTML = 'text/html'
+MIME_TYPE_JSON = 'application/json'
+MIME_TYPE_LD_JSON = 'application/ld+json'
+
+MIME_TYPES_SUPPORTED = [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
+MIME_TYPE_DEFAULT = MIME_TYPES_SUPPORTED[0]
+MIME_TYPE_TRIAGE_MODE = 'legacy'  # if this doesn't work, fall back to 'legacy'
+
+DEBUG_MIME_TYPES = environ_bool("DEBUG_MIME_TYPES", default=False)
+
+
+def best_mime_type(request, mode=MIME_TYPE_TRIAGE_MODE):
+    # TODO: I think this function does nothing but return MIME_TYPES_SUPPORTED[0] -kmp 3-Feb-2021
+    """
+    Given a request, tries to figure out the best kind of MIME type to use in response
+    based on what kinds of responses we support and what was requested.
+
+    In the case we can't comply, we just use application/json whether or not that's what was asked for.
+    """
+    if mode == 'legacy':
+        # See:
+        # https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
+        # Note that this is now deprecated, or will be. The message is oddly worded ("will be deprecated")
+        # that presumably means "will be removed". Deprecation IS the warning of actual action, not the action itself.
+        # "This is currently maintained for backward compatibility, and will be deprecated in the future.
+        #  AcceptValidHeader.best_match() uses its own algorithm (one not specified in RFC 7231) to determine
+        #  what is a best match. The algorithm has many issues, and does not conform to RFC 7231."
+        # Anyway, we were getting this warning during testing:
+        #   DeprecationWarning: The behavior of AcceptValidHeader.best_match is currently
+        #      being maintained for backward compatibility, but it will be deprecated in the future,
+        #      as it does not conform to the RFC.
+        # TODO: Once the modern replacement is shown to work, we should remove this conditional branch.
+        result = request.accept.best_match(MIME_TYPES_SUPPORTED, MIME_TYPE_DEFAULT)
+    else:
+        options = request.accept.acceptable_offers(MIME_TYPES_SUPPORTED)
+        if not options:
+            # TODO: Probably we should return a 406 response by raising HTTPNotAcceptable if
+            #       no acceptable types are available. (Certainly returning JSON in this case is
+            #       not some kind of friendly help toa naive user with an old browser.)
+            #       Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+            result = MIME_TYPE_DEFAULT
+        else:
+            mime_type, score = options[0]
+            result = mime_type
+    if DEBUG_MIME_TYPES:
+        PRINT("Using mime type", result, "for", request.method, request.url)
+        for k, v in request.headers.items():
+            PRINT("%s: %s" % (k, v))
+        PRINT("----------")
+    return result
+
+
 @lru_cache(maxsize=16)
 def should_transform(request, response):
     """
     Determines whether to transform the response from JSON->HTML/JS depending on type of response
-    and what the request is looking for to be returned via e.g. request Accept, Authorization header.
-    In case of no Accept header, attempts to guess.
+    and what the request is looking for to be returned via these criteria, which are tried in order
+    until one succeeds:
 
-    Memoized via `lru_cache`. Cache size is set to be 16 (> 1) in case sub-requests fired off during handling.
+    * If the request method is other than GET or HEAD, returns False.
+    * If the response.content_type is other than 'application/json', returns False.
+    * If a 'frame=' query param is given and not 'page' (the default), returns False.
+    * If a 'format=json' query param is given explicitly,
+        * For 'format=html', returns True.
+        * For 'format=json', returns False.
+      This rule does not match if 'format=' is not given explicitly.
+      If 'format=' is given an explicit value of ther than 'html' or 'json', an HTTPNotAcceptable error will be raised.
+    * If the first element of MIME_TYPES_SUPPORTED[0] is 'text/html', returns True.
+    * Otherwise, in all remaining cases, returns False.
+
+    NOTE: Memoized via `lru_cache`. Cache size is set to be 16 (> 1) in case sub-requests fired off during handling.
     """
     # We always return JSON in response to POST, PATCH, etc.
     if request.method not in ('GET', 'HEAD'):
@@ -329,6 +397,17 @@ def should_transform(request, response):
     # Only JSON response/content can be plugged into HTML/JS template responses.
     if response.content_type != 'application/json':
         return False
+
+    # cgap uses the following extra check that kmp thinks is the right thing, but commenting
+    # this out leads to bug-for-bug compatibility. The question is whether frame=raw&format=html
+    # should try to transform. kmp thinks that can't hope to win in general and should not be tried,
+    # so should return False notwithstanding the format=html. But Fourfront thinks it should be.
+    #
+    # # If we have a 'frame' that is not None or page, force JSON, since our UI doesn't handle all various
+    # # forms of the data, just embedded/page.
+    # request_frame = request.params.get("frame", "page")
+    # if request_frame != "page":
+    #     return False
 
     # The `format` URI param allows us to override request's 'Accept' header.
     format_param = request.params.get('format')
@@ -345,14 +424,14 @@ def should_transform(request, response):
     # Web browsers send an Accept request header for initial (e.g. non-AJAX) page requests
     # which should contain 'text/html'
     # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
-    mime_type = request.accept.best_match(['text/html',  'application/json', 'application/ld+json'], 'application/json')
-    mime_type_format = mime_type.split('/', 1)[1]  # Will be 1 of 'html', 'json', 'json-ld'
+    mime_type = best_mime_type(request)  # Result will be one of MIME_TYPES_SUPPORTED
 
-    # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?) which can parse JSON-LDs.
-    # At some point we could maybe have it to be same as making an `@@object` or `?frame=object` request (?) esp if fill
+    # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?)
+    # which can parse JSON-LDs. At some point we could maybe have it to be same as
+    # making an `@@object` or `?frame=object` request (?) esp if fill
     # out @context response w/ schema(s) (or link to schema)
 
-    return mime_type_format == 'html'
+    return mime_type == MIME_TYPE_HTML
 
 
 def render_page_html_tween_factory(handler, registry):
@@ -374,7 +453,9 @@ def render_page_html_tween_factory(handler, registry):
 
     rss_limit = 256 * (1024 ** 2)  # MB
 
-    reload_process = True if registry.settings.get('reload_templates', False) else lambda proc: psutil.Process(proc.pid).memory_info().rss > rss_limit
+    reload_process = (True
+                      if registry.settings.get('reload_templates', False)
+                      else lambda proc: psutil.Process(proc.pid).memory_info().rss > rss_limit)
 
     # TransformWorker inits and manages a subprocess
     # it re-uses the subprocess so interestingly data in JS global variables
