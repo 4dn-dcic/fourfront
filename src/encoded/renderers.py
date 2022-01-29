@@ -322,9 +322,11 @@ MIME_TYPE_HTML = 'text/html'
 MIME_TYPE_JSON = 'application/json'
 MIME_TYPE_LD_JSON = 'application/ld+json'
 
+# Note: In cgap-portal, MIME_TYPE_JSON is at the head of this list. In fourfront, MIME_TYPE_HTML is.
+# The cgap-portal behavior might be a bug we should look at bringing into alignment. -kmp 29-Jan-2022
 MIME_TYPES_SUPPORTED = [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
 MIME_TYPE_DEFAULT = MIME_TYPES_SUPPORTED[0]
-MIME_TYPE_TRIAGE_MODE = 'legacy'  # if this doesn't work, fall back to 'legacy'
+MIME_TYPE_TRIAGE_MODE = 'modern'  # if this doesn't work, fall back to 'legacy'
 
 DEBUG_MIME_TYPES = environ_bool("DEBUG_MIME_TYPES", default=False)
 
@@ -398,10 +400,15 @@ def should_transform(request, response):
     if response.content_type != 'application/json':
         return False
 
-    # cgap uses the following extra check that kmp thinks is the right thing, but commenting
-    # this out leads to bug-for-bug compatibility. The question is whether frame=raw&format=html
-    # should try to transform. kmp thinks that can't hope to win in general and should not be tried,
-    # so should return False notwithstanding the format=html. But Fourfront thinks it should be.
+    # cgap uses the following extra check that I think is the right thing, but leaving this commented out
+    # leads to bug-for-bug compatibility in the PR that revises the more modern transformation logic.
+    # The question is whether, for example, a conflicting thing like frame=raw&format=html
+    # should try to transform. I agree with cgap that using non-page frames should ignore format
+    # and return False, so should return False notwithstanding the format=html.
+    # Another alternative would be for this conflict to return an error.
+    # But Fourfront thinks it should just go ahead and try the transform.
+    # Note that uncommenting this logic will require uncommenting the corresponding line in 
+    # test_should_transform that is presently marked as a bug we should fix.
     #
     # # If we have a 'frame' that is not None or page, force JSON, since our UI doesn't handle all various
     # # forms of the data, just embedded/page.
