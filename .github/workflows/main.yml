@@ -25,7 +25,7 @@ jobs:
     # Build matrix
     strategy:
       matrix:
-        test_type: ['UNIT', 'NPM']
+        test_type: ['UNIT', 'NPM', 'Docker']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -42,6 +42,7 @@ jobs:
           check-latest: false
 
       - name: Install/Link Postgres
+        if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
           sudo apt-get install curl ca-certificates gnupg
           curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
@@ -51,6 +52,7 @@ jobs:
           echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
           sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
       - name: Install Deps
+        if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
           node --version
           make build
@@ -114,3 +116,8 @@ jobs:
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+      - name: Docker Build
+        if: ${{ matrix.test_type == 'Docker' }}
+        run: |
+          touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
+          docker build .

@@ -7,7 +7,7 @@ services:
   # sqlalchemy.url = postgresql://postgres:postgres@db:5432/postgres
   db:
     build: ./deploy/docker/postgres
-    container_name: pg1
+    container_name: fourfront-postgres
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
@@ -23,7 +23,7 @@ services:
   # elasticsearch.server = es:9200
 #  es:
 #    build: ./deploy/docker/elasticsearch
-#    container_name: es1
+#    container_name: fourfront-es1
 #    environment:
 #      - node.name=es01
 #      - cluster.name=es-docker-cluster
@@ -50,11 +50,17 @@ services:
       # Default to caller's environment
       AWS_ACCESS_KEY_ID:
       AWS_SECRET_ACCESS_KEY:
-      # TEST: "true" # default: commented out to run local deployment - uncomment to run tests in the container
-      LOAD: "true"  # default: load the inserts (comment this out after first run)
+      # If RUN_TESTS is the empty string (false), tests will not be run. Otherwise, they will.
+      # Set RUN_TESTS=true to run tests in the container.
+      # (There will be no TEST: line here in the output if that is not set.)
+      TEST: "${RUN_TESTS}"
+      # If LOAD_INSERTS is the empty string (false), inserts will not be loaded. Otherwise, they will.
+      # Set LOAD_INSERTS=true to load inserts, usually only for the first run.
+      # (There will be no LOAD: line here in the output if that is not set.)
+      LOAD: "${LOAD_INSERTS}"
       application_type: "local"  # use local entrypoint
       ENCODED_VERSION: "local"
-      FOURFRONT_ENV_NAME: "ffdkr"  # XXX: update me
+      FOURFRONT_ENV_NAME: "cgap-docker-${USER}-test"
     ports:
       - "8000:8000"  # nginx proxy port (note application traffic is not forwarded)
     depends_on:

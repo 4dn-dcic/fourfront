@@ -44,6 +44,10 @@ export default class HealthView extends React.PureComponent {
     static defaultProps = {
         "excludedKeys" : [ ...ItemDetailList.Detail.defaultProps.excludedKeys, 'content' ],
         "keyTitleDescriptionMapConfig" : {
+            'application_bucket_prefix' : {
+                title : "Application Bucket Prefix",
+                description : "Ecosystem-specific name prefix for this server's application buckets."
+            },
             'aggregations' : {
                 title : 'Aggregations',
                 description : "Aggregations of ES-indexed data."
@@ -58,7 +62,7 @@ export default class HealthView extends React.PureComponent {
             },
             'blob_bucket' : {
                 title : "Blob Bucket",
-                description : "Name of blob storage bucket used for blob data."
+                description : "Name of S3 bucket used for blob data."
             },
             'content' : {
                 title : "Extra Information"
@@ -78,6 +82,14 @@ export default class HealthView extends React.PureComponent {
             'foursight' : {
                 title : "Foursight",
                 description : "URI of corresponding Foursight page."
+            },
+            'foursight_bucket_prefix' : {
+                title : "Foursight Bucket Prefix",
+                description : "Ecosystem-specific name prefix for this server's foursight buckets."
+            },
+            'identity': {
+                title : "Identity",
+                description : "An application configuration key that represents the current environment."
             },
             'indexer' : {
                 title : "Indexer",
@@ -100,8 +112,8 @@ export default class HealthView extends React.PureComponent {
                 description : "Last time ontologies were updated."
             },
             'processed_file_bucket' : {
-                title: "Processed File Bucket",
-                description : "Blob storage bucket name of processed files."
+                title : 'Processed File Bucket',
+                description : "Name of S3 bucket used for workflow output files from processing steps."
             },
             'project_version': {
                 title : "Project Version",
@@ -115,9 +127,13 @@ export default class HealthView extends React.PureComponent {
                 title : "Snovault Version",
                 description : "Software version of dcicsnovault being used."
             },
+            's3_encrypt_key_id': {
+                title : "S3 Encrypt Key Id",
+                description : "Name of key whose value is the encrypt key for uploaded file data stored on S3."
+            },
             'system_bucket' : {
                 title : 'System Bucket',
-                description : "Name of blob storage bucket used for system data."
+                description : "Name of S3 Bucket used for system data."
             },
             'uptime': {
                 title : 'Uptime',
