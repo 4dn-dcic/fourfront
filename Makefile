@@ -171,7 +171,7 @@ ecr-login:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
 build-docker-mastertest:
-	scripts/build-docker-test --login --ecosystem fourfront-mastertest
+	scripts/build-docker-test --login --env_name fourfront-mastertest
 
 build-docker-production:
 	@echo "Making build-docker-production AWS_ACCOUNT=${AWS_ACCOUNT} ENV_NAME=${ENV_NAME} ..."
