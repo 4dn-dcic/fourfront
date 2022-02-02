@@ -83,6 +83,10 @@ Object.keys(spcPeerDependencies).forEach(function(packageName) {
     resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
 });
 
+// Fix for Vitessce Integration
+// Check README in https://github.com/vitessce/vitessce
+resolve.alias['txml/txml'] = 'txml/dist/txml';
+
 // Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
 // once update to higlass version w.o. react-bootstrap dependency.
 delete resolve.alias["react-bootstrap"];
