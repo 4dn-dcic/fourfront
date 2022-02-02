@@ -93,8 +93,6 @@ class TreatmentAgent(Treatment):
             disp_title = "Transient transfection of " + plasmids + conditions
         elif treatment_type == "Biological" and biological_agent:
             disp_title = biological_agent + " treatment" + conditions
-        elif treatment_type == "Other":
-            disp_title = "Other treatment" + conditions
         else:
             disp_title = treatment_type + conditions
         return disp_title
