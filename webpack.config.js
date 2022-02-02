@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const env = process.env.NODE_ENV;
+const debug = process.env.NODE_DEBUG;
+const version = process.versions.node;
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
@@ -71,7 +73,9 @@ const resolve = {
     //    path.resolve(__dirname, '..', 'node_modules'),
     //    'node_modules'
     //]
-    alias: {}
+    alias: {
+        canvas: false
+    }
 };
 
 // Common alias, hopefully is fix for duplicate versions of React
@@ -113,19 +117,23 @@ const serverPlugins = plugins.slice(0);
 // This works via a find-replace.
 webPlugins.push(new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(env),
+    'process.env.NODE_DEBUG': JSON.stringify(debug),
+    'process.version':JSON.stringify(version),
     'SERVERSIDE' : JSON.stringify(false),
     'BUILDTYPE' : JSON.stringify(env)
 }));
 
 serverPlugins.push(new webpack.DefinePlugin({
     'process.env.NODE_ENV': JSON.stringify(env),
+    'process.env.NODE_DEBUG': JSON.stringify(debug),
+    'process.version':JSON.stringify(version),
     'SERVERSIDE' : JSON.stringify(true),
-    'BUILDTYPE' : JSON.stringify(env)
+    'BUILDTYPE' : JSON.stringify(env),
 }));
 
 // From https://github.com/jsdom/jsdom/issues/3042
 serverPlugins.push(
-    new webpack.IgnorePlugin(/canvas/, /jsdom$/)
+    new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
 );
 
 if (env === 'development'){
@@ -202,21 +210,12 @@ module.exports = [
                 'package-lock.json': path.resolve(__dirname, "./package-lock.json"),
                 "statistics-page-components" : path.resolve(__dirname, "./src/encoded/static/components/static-pages/components/StatisticsPageViewBody"),
             },
-            /**
-             * From Webpack CLI:
-             * webpack < 5 used to include polyfills for node.js core modules by default.
-             * This is no longer the case. Verify if you need this module and configure a polyfill for it.
-             * If you want to include a polyfill, you need to:
-             *   - add a fallback 'resolve.fallback: { "zlib": require.resolve("browserify-zlib") }'
-             *   - install 'browserify-zlib'
-             * If you don't want to include a polyfill, you can use an empty module like this:
-             *   resolve.fallback: { "zlib": false }
-             */
-            // fallback: {
-            //     "zlib": false
-            //      TODO: Upgrade to webpack v5.
-            //      TODO: polyfill some, update some to other libs, & exclude rest
-            // }
+            fallback: {
+                stream: require.resolve('stream-browserify'),
+                process: require.resolve('process/browser'),
+                util: require.resolve('util/'),
+                crypto: require.resolve('crypto-browserify')
+            }
         },
         //resolveLoader : resolve,
         devtool: devTool,
