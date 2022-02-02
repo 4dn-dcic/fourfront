@@ -60,7 +60,7 @@ services:
       LOAD: "${LOAD_INSERTS}"
       application_type: "local"  # use local entrypoint
       ENCODED_VERSION: "local"
-      FOURFRONT_ENV_NAME: "cgap-docker-${USER}-test"
+      FOURFRONT_ENV_NAME: "ff-docker-${USER}-test"
     ports:
       - "8000:8000"  # nginx proxy port (note application traffic is not forwarded)
     depends_on:
