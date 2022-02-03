@@ -1492,7 +1492,11 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
 @debug_log
 def download(context, request):
     """ Endpoint for handling /@@download/ URLs """
-    check_user_is_logged_in(request)
+
+    # download is resricted for anonymous users unless it is
+    # for vitessce range requests
+    if not is_range_request_for_vitessce(context, request):
+        check_user_is_logged_in(request)
 
     # first check for restricted status
     if context.properties.get('status') == 'restricted':
@@ -1841,6 +1845,13 @@ def validate_extra_file_format(context, request):
             files_ok = False
     if files_ok:
         request.validated.update({})
+
+
+def is_range_request_for_vitessce(context, request) -> bool:
+    tags = context.properties.get('tags', [])
+    if 'vitessce' in tags and request.range:
+        return True
+    return False
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',
