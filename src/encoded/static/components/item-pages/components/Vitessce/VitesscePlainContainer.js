@@ -31,18 +31,18 @@ let vitessceDependencies = null;
 export class VitesscePlainContainer extends React.PureComponent {
 
     static propTypes = {
-        'viewConfig' : PropTypes.object.isRequired,
+        'config' : PropTypes.object.isRequired,
         'isValidating' : PropTypes.bool,
         'height' : PropTypes.number,
         'mountDelay' : PropTypes.number.isRequired,
-        'onViewConfigUpdated': PropTypes.func
+        'onConfigUpdated': PropTypes.func
     };
 
     static defaultProps = {
         'isValidating' : false,
         'disabled' : false,
         'height' : 500,
-        'viewConfig' : null,
+        'config' : null,
         'mountDelay' : 500,
         'placeholder' : <VitessceLoadingIndicator/>
     };
@@ -62,7 +62,7 @@ export class VitesscePlainContainer extends React.PureComponent {
     }
 
     componentDidMount(){
-        const { mountDelay, onViewConfigUpdated } = this.props;
+        const { mountDelay, onConfigUpdated } = this.props;
         const finish = () => {
             this.setState(function(currState){
                 return {
@@ -73,7 +73,7 @@ export class VitesscePlainContainer extends React.PureComponent {
 
                 setTimeout(()=>{
                     this.setState({ "vitessceInitialized": true }, ()=>{
-                        if (onViewConfigUpdated && typeof onViewConfigUpdated === 'function') {
+                        if (onConfigUpdated && typeof onConfigUpdated === 'function') {
                             const vc = this.getVitessceComponent();
                             if (vc) {
                                 // vc.api.on("viewConfig", onViewConfigUpdated);
@@ -121,10 +121,10 @@ export class VitesscePlainContainer extends React.PureComponent {
     }
 
     render(){
-        const { viewConfig, height, theme, ...passProps } = this.props;
+        const { config, height, theme, ...passProps } = this.props;
         return (
             <PackageLockLoader>
-                <VitesscePlainContainerBody {...passProps} {...{ viewConfig, height, theme }} {...this.state} ref={this.vcRef} />
+                <VitesscePlainContainerBody {...passProps} {...{ config, height, theme }} {...this.state} ref={this.vcRef} />
             </PackageLockLoader>
         );
     }
@@ -132,7 +132,7 @@ export class VitesscePlainContainer extends React.PureComponent {
 
 
 const VitesscePlainContainerBody = React.forwardRef(function VitesscePlainContainerBody(props, ref){
-    const { viewConfig, theme, hasRuntimeError, disabled, isValidating, mounted, vitessceInitialized, width, height, mountCount, placeholder, style, className, packageLockJson } = props;
+    const { config, theme, hasRuntimeError, disabled, isValidating, mounted, vitessceInitialized, width, height, mountCount, placeholder, style, className, packageLockJson } = props;
     const outerKey = "mount-number-" + mountCount;
     const { dependencies: { vitessce : { version: vitessceVersionUsed = null } = {} } = {} } = packageLockJson || {};
     const { Vitessce } = vitessceDependencies || {};
@@ -173,7 +173,7 @@ const VitesscePlainContainerBody = React.forwardRef(function VitesscePlainContai
         };
         vitessceInstance = (
             <div key={outerKey} className="vitessce-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={instanceContainerRefFunction}>
-                <Vitessce {...{ config: viewConfig, theme, width, height, ref }} />
+                <Vitessce {...{ config, theme, width, height, ref }} />
             </div>
         );
     }

@@ -1,8 +1,9 @@
 'use strict';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
+import url from 'url';
 import { isServerSide, console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { SearchTableTitle } from './components/tables/ItemPageTable';
@@ -21,7 +22,10 @@ export default class FileMicroscopyView extends FileView {
         // Replace default FileOverview (1st tab) with FileMicroscopyViewOverview
         tabs[0] = FileMicroscopyViewOverview.getTabObject(this.props, width);
 
-        tabs.splice(1, 0, FileViewVitessce.getTabObject(this.props, width));
+        const { context: { tags = [] } = {} } = this.props;
+        if (Array.isArray(tags) && tags.indexOf('vitessce') !== -1) {
+            tabs.splice(1, 0, FileViewVitessce.getTabObject(this.props, width));
+        }
 
         return tabs;
     }
@@ -155,60 +159,65 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
 
 function FileViewVitessce (props) {
     const { context, windowWidth, width, schemas, href } = props;
-    const viewConfig =
-    {
-        "version": "1.0.1",
-        "name": "ChromEMT test",
-        "description": "Ome ChromEMT image as a test for 4DN integration",
-        "datasets": [
-            {
-                "uid": "A",
-                "name": "image stack",
-                "files": [
-                    {
-                        "type": "raster",
-                        "fileType": "raster.json",
-                        "options": {
-                            "schemaVersion": "0.0.2",
-                            "images": [
-                                {
-                                    "name": "ChromEMT",
-                                    "type": "ome-tiff",
-                                    // "url": 'https://4dn-dcic-public.s3.amazonaws.com/vitessce/4DNFI8FS2EEE.ome.tiff'
-                                    "url": 'http://localhost:8000/files-microscopy/4DNFIATESTM2/vitessce_downloader'
-                                }
-                            ],
-                            "usePhysicalSizeScaling": true,
-                            "renderLayers": [
-                                "ChromEMT"
-                            ]
+    const { href: fileHref, display_title: name, description = null } = context || {};
+
+    const config = useMemo(function () {
+        const urlParts = url.parse(href, true);
+        const baseHref = (urlParts.protocol && urlParts.host) ? urlParts.protocol + '//' + urlParts.host : '';
+
+        return {
+            "version": "1.0.1",
+            "name": name,
+            "description": description,
+            "datasets": [
+                {
+                    "uid": "A",
+                    "name": "image stack",
+                    "files": [
+                        {
+                            "type": "raster",
+                            "fileType": "raster.json",
+                            "options": {
+                                "schemaVersion": "0.0.2",
+                                "images": [
+                                    {
+                                        "name": name,
+                                        "type": "ome-tiff",
+                                        "url": baseHref + fileHref
+                                    }
+                                ],
+                                "usePhysicalSizeScaling": true,
+                                "renderLayers": [
+                                    name
+                                ]
+                            }
                         }
-                    }
-                ]
-            }
-        ],
-        "layout": [
-            {
-                "component": "spatial",
-                "x": 0,
-                "y": 0,
-                "w": 9,
-                "h": 12
-            },
-            {
-                "component": "layerController",
-                "x": 9,
-                "y": 0,
-                "w": 3,
-                "h": 12
-            }
-        ],
-        "initStrategy": "auto"
-    };
+                    ]
+                }
+            ],
+            "layout": [
+                {
+                    "component": "spatial",
+                    "x": 0,
+                    "y": 0,
+                    "w": 9,
+                    "h": 12
+                },
+                {
+                    "component": "layerController",
+                    "x": 9,
+                    "y": 0,
+                    "w": 3,
+                    "h": 12
+                }
+            ],
+            "initStrategy": "auto"
+        };
+    }, [href, fileHref, name, description]);
     return (
         <div>
             <div className="row overview-blocks">
-                <VitesscePlainContainer height={800} width={1120} theme="light" viewConfig={viewConfig} />
+                <VitesscePlainContainer height={800} width={1120} theme="light" config={config} />
             </div>
         </div>
     );
