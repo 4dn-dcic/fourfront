@@ -1,12 +1,5 @@
-from urllib import request
 import boto3
-from subprocess import call, Popen, PIPE
-from sys import stderr, stdout
-from threading import Thread
-from PIL import Image as pil_image
-
 import datetime
-import base64
 import json
 import logging
 import os
@@ -15,9 +8,7 @@ import requests
 import structlog
 import transaction
 import urllib.parse
-from PIL import Image
-from http.client import HTTPResponse
-import io
+
 from botocore.exceptions import ClientError
 from copy import deepcopy
 from pyramid.httpexceptions import (
