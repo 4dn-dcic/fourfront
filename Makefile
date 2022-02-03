@@ -47,14 +47,20 @@ configure:  # does any pre-requisite installs
 	pip install setuptools==57.5.0  # this version allows 2to3, any later will break -wrr 20-Sept-2021
 	poetry config virtualenvs.create false --local  # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
-build:  # builds
+build-poetry:
 	make configure
 	poetry install
+
+macbuild-poetry:
+	make configure
+	make macpoetry-install
+
+build:  # builds
+	make build-poetry
 	make build-after-poetry
 
 macbuild:  # builds for Catalina
-	make configure
-	make macpoetry-install
+	make macbuild-poetry
 	make build-after-poetry
 
 rebuild:
@@ -119,7 +125,7 @@ clean-python:
 	pip uninstall -y -r <(pip freeze)
 
 test:
-	make test-unit
+	make test-unit || echo "unit tests failed"
 	make test-npm
 
 test-any:
@@ -165,7 +171,7 @@ ecr-login:
 	aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT}.dkr.ecr.us-east-1.amazonaws.com
 
 build-docker-mastertest:
-	scripts/build-docker-test --login --ecosystem fourfront-mastertest
+	scripts/build-docker-test --login --env_name fourfront-mastertest
 
 build-docker-production:
 	@echo "Making build-docker-production AWS_ACCOUNT=${AWS_ACCOUNT} ENV_NAME=${ENV_NAME} ..."
@@ -190,6 +196,7 @@ info:
 	   $(info - Use 'make build-locust' to install locust. Do not do this unless you know what you are doing.)
 	   $(info - Use 'make clean' to clear out (non-python) dependencies.)
 	   $(info - Use 'make clean-python' to clear python virtualenv for fresh poetry install.)
+	   $(info - Use 'make clear-poetry-cache' to clear the poetry pypi cache if in a bad state. (Safe, but later recaching can be slow.))
 	   $(info - Use 'make configure' to install poetry. You should not have to do this directly.)
 	   $(info - Use 'make deploy1' to spin up postgres/elasticsearch and load inserts.)
 	   $(info - Use 'make deploy2' to spin up the application server.)
@@ -201,3 +208,9 @@ info:
 	   $(info - Use 'make test' to run tests with normal options similar to what we use on GitHub Actions.)
 	   $(info - Use 'make test-any' to run tests without marker constraints (i.e., with no '-m' option).)
 	   $(info - Use 'make update' to update dependencies (and the lock file).)
+	   $(info - Use 'make build-docker-local' to build the local Docker image.)
+	   $(info - Use 'make build-docker-local-clean' to build the local Docker image with no cache.)
+	   $(info - Use 'make deploy-docker-local' start up the cluster - pserve output will follow if successful.)
+	   $(info - Use 'make deploy-docker-local-daemon' will start the cluster in daemon mode.)
+	   $(info - Use 'make ecr-login' to login to ECR with the currently sourced AWS creds.)
+	   $(info - Use 'make build-docker-production' to build/tag/push a production image.)

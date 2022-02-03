@@ -4,6 +4,7 @@ from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
 from .schema_formats import is_accession
 from dcicutils import lang_utils
 from dcicutils.env_utils import infer_foursight_url_from_env
+from dcicutils.s3_utils import HealthPageKey
 from pyramid.security import (
     ALL_PERMISSIONS,
     Allow,
@@ -66,6 +67,35 @@ def uptime_info():
         return "unavailable"
 
 
+class SettingsKey:
+    APPLICATION_BUCKET_PREFIX = 'application_bucket_prefix'
+    # fourfront-only. cgap uses eb_app_version instead.
+    BEANSTALK_APP_VERSION = "beanstalk_app_version"
+    BLOB_BUCKET = 'blob_bucket'
+    # cgap-only.
+    # EB_APP_VERSION = 'eb_app_version'
+    ELASTICSEARCH_SERVER = 'elasticsearch.server'
+    ENCODED_VERSION = 'encoded_version'
+    FILE_UPLOAD_BUCKET = 'file_upload_bucket'
+    FILE_WFOUT_BUCKET = 'file_wfout_bucket'
+    FOURSIGHT_BUCKET_PREFIX = 'foursight_bucket_prefix'
+    IDENTITY = 'identity'
+    INDEXER = 'indexer'
+    INDEXER_NAMESPACE = 'indexer.namespace'
+    INDEX_SERVER = 'index_server'
+    LOAD_TEST_DATA = 'load_test_data'
+    # cgap-only:
+    # METADATA_BUNDLES_BUCKET = 'metadata_bundles_bucket'
+    S3_ENCRYPT_KEY_ID = 's3_encrypt_key_id'
+    SNOVAULT_VERSION = 'snovault_version'
+    SQLALCHEMY_URL = 'sqlalchemy.url'
+    SYSTEM_BUCKET = 'system_bucket'
+    # cgap-only:
+    # TIBANNA_CWLS_BUCKET = 'tibanna_cwls_bucket'
+    # TIBANNA_OUTPUT_BUCKET = 'tibanna_output_bucket'
+    UTILS_VERSION = 'utils_version'
+
+
 def health_check(config):
     """
     Emulate a lite form of Alex's static page routing
@@ -76,6 +106,14 @@ def health_check(config):
     )
 
     def health_page_view(request):
+
+        class ExtendedHealthPageKey(HealthPageKey):
+            # This class can contain new entries in HealthPageKey that are waiting to move to dcicutils
+            pass
+
+        h = ExtendedHealthPageKey
+
+        s = SettingsKey
 
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
@@ -96,25 +134,31 @@ def health_check(config):
             "@id": "/health",
             "content": None,
 
-            'beanstalk_app_version': settings.get('eb_app_version'),
-            "beanstalk_env": env_name,
-            "blob_bucket": settings.get('blob_bucket'),
-            "database": settings.get('sqlalchemy.url').split('@')[1],  # don't show user /password
-            "display_title": "Fourfront Status and Foursight Monitoring",
-            "elasticsearch": settings.get('elasticsearch.server'),
-            "file_upload_bucket": settings.get('file_upload_bucket'),
-            "foursight": foursight_url,
-            "indexer": settings.get('indexer'),
-            "index_server": settings.get('index_server'),
-            "load_data": settings.get('load_test_data'),
-            "namespace": settings.get('indexer.namespace'),
-            "processed_file_bucket": settings.get('file_wfout_bucket'),
-            'project_version': settings.get('encoded_version'),
-            'snovault_version': settings.get('snovault_version'),
-            "system_bucket": settings.get('system_bucket'),
-            'uptime': uptime_info(),
-            'utils_version': settings.get('utils_version'),
-
+            h.APPLICATION_BUCKET_PREFIX: settings.get(s.APPLICATION_BUCKET_PREFIX),
+            h.BEANSTALK_APP_VERSION: settings.get('eb_app_version'),
+            h.BEANSTALK_ENV: env_name,
+            h.BLOB_BUCKET: settings.get('blob_bucket'),
+            h.DATABASE: settings.get(s.SQLALCHEMY_URL).split('@')[1],  # don't show user /password
+            h.DISPLAY_TITLE: "Fourfront Status and Foursight Monitoring",
+            h.ELASTICSEARCH: settings.get(s.ELASTICSEARCH_SERVER),
+            h.FILE_UPLOAD_BUCKET: settings.get(s.FILE_UPLOAD_BUCKET),
+            h.FOURSIGHT: foursight_url,
+            h.FOURSIGHT_BUCKET_PREFIX: settings.get(s.FOURSIGHT_BUCKET_PREFIX),
+            h.IDENTITY: settings.get(s.IDENTITY),
+            h.INDEXER: settings.get(s.INDEXER),
+            h.INDEX_SERVER: settings.get(s.INDEX_SERVER),
+            h.LOAD_DATA: settings.get(s.LOAD_TEST_DATA),
+            # h.METADATA_BUNDLES_BUCKET is cgap-only
+            h.NAMESPACE: settings.get(s.INDEXER_NAMESPACE),
+            h.PROCESSED_FILE_BUCKET: settings.get(s.FILE_WFOUT_BUCKET),
+            h.PROJECT_VERSION: settings.get(s.ENCODED_VERSION),
+            # h.S3_ENCRYPT_KEY_ID is cgap-only
+            h.SNOVAULT_VERSION: settings.get(s.SNOVAULT_VERSION),
+            h.SYSTEM_BUCKET: settings.get(s.SYSTEM_BUCKET),
+            # h.TIBANNA_CWLS_BUCKET is cgap-only
+            # h.TIBANNA_OUTPUT_BUCKET is cgap-only
+            h.UPTIME: uptime_info(),
+            h.UTILS_VERSION: settings.get(s.UTILS_VERSION),
         }
 
         return response_dict
