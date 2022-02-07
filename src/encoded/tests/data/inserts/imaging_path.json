@@ -11,7 +11,8 @@
         "type_labeled_probe": "Antibody",
         "labeled_probe":"Frog Secondary Antibody",
         "other_probes":["Human Gelsolin Monoclonal Primary Antibody"],
-        "labels": ["GFP"]
+        "labels": ["eGFP"],
+        "imaging_rounds": "0"
     },
     {
         "status": "in review by lab",
@@ -24,7 +25,9 @@
         "target":["5a5b6f55-0b54-441c-86bf-292d41e443a0"],
         "type_labeled_probe": "BAC",
         "labeled_probe":"BAC",
-        "labels": ["Atto647N"]
+        "labels": ["ATTO 647N"],
+        "experiment_type": "b27b17cd-544a-3a3b-abc3-17a544544b3c",
+        "imaging_rounds": "1-62"
     },
     {
         "status": "in review by lab",
@@ -37,6 +40,6 @@
         "target":["5a5b6f55-0b54-441c-86bf-292d41e443a0"],
         "type_labeled_probe": "BAC",
         "labeled_probe":"BAC",
-        "labels": ["Atto647N"]
+        "labels": ["ATTO 647N"]
     }
 ]

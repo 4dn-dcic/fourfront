@@ -13,15 +13,8 @@ import Collapse from 'react-bootstrap/esm/Collapse';
 
 export default class UserRegistrationForm extends React.PureComponent {
 
-    static getDerivedStateFromProps(props, state){
-        // We might lose JWT token via navigating to other windows, so we keep it cached here.
-        // We also allow new props.jwtToken to overwrite state.jwtToken, as long as new props.jwtToken
-        // is not blank.
-        return { 'jwtToken' : props.jwtToken || state.jwtToken || null };
-    }
-
     static propTypes = {
-        'jwtToken' : PropTypes.string.isRequired,
+        'unverifiedUserEmail' : PropTypes.string.isRequired,
         'onComplete' : PropTypes.func.isRequired,
         'endpoint' : PropTypes.string.isRequired,
         'captchaSiteKey' : PropTypes.string
@@ -52,7 +45,6 @@ export default class UserRegistrationForm extends React.PureComponent {
         this.recaptchaContainerRef = React.createRef();
 
         this.state = {
-            'jwtToken'             : props.jwtToken, // We cache our JWT token here as it might get unset when opening lab selection window.
             'captchaResponseToken' : null,
             'captchaErrorMsg'      : null,
             'registrationStatus'   : 'form',
@@ -145,18 +137,17 @@ export default class UserRegistrationForm extends React.PureComponent {
         evt.preventDefault();
         evt.stopPropagation();
 
-        const { endpoint, onComplete } = this.props;
-        const { jwtToken, value_for_pending_lab } = this.state;
+        const { endpoint, onComplete, unverifiedUserEmail } = this.props;
+        const { value_for_pending_lab } = this.state;
         const maySubmit = this.maySubmitForm();
         const formData = serialize(this.formRef.current, { 'hash' : true });
-        const decodedToken = JWT.decode(jwtToken);
 
         if (!maySubmit) {
             return;
         }
 
         // Add data which is held in state but not form fields -- email & lab.
-        formData.email = decodedToken.email;
+        formData.email = unverifiedUserEmail;
         if (value_for_pending_lab){ // Add pending_lab, if any.
             formData.pending_lab = value_for_pending_lab;
         }
@@ -172,20 +163,18 @@ export default class UserRegistrationForm extends React.PureComponent {
             // We may have lost our JWT, e.g. by opening a new 4DN window which unsets the cookie.
             // So we reset our cached JWT token to our cookies/localStorage prior to making request
             // so that it is delivered/authenticated as part of registration (required by backend/security).
-            var existingToken = JWT.get();
-            if (!existingToken){
-                if (!jwtToken){
-                    this.setState({ 'registrationStatus' : 'network-failure' });
-                    return;
-                }
-                JWT.save(jwtToken);
-            }
+            // var existingToken = JWT.get();
+            // if (!existingToken){
+            //     if (!jwtToken){
+            //         this.setState({ 'registrationStatus' : 'network-failure' });
+            //         return;
+            //     }
+            //     JWT.save(jwtToken);
+            // }
 
             ajax.load(
                 endpoint,
                 (resp) => {
-                    // TODO
-                    this.setState({ 'registrationStatus' : 'success-loading' });
                     onComplete(); // <- Do request to login, then hide/unmount this component.
                 },
                 'POST',
@@ -211,13 +200,12 @@ export default class UserRegistrationForm extends React.PureComponent {
     }
 
     render(){
-        const { schemas, heading } = this.props;
+        const { schemas, heading, unverifiedUserEmail } = this.props;
         const {
             registrationStatus, value_for_first_name, value_for_last_name, value_for_contact_email,
-            value_for_pending_lab_details, value_for_pending_lab, jwtToken, captchaErrorMsg : captchaError
+            value_for_pending_lab_details, value_for_pending_lab, captchaErrorMsg: captchaError
         } = this.state;
-        const decodedToken = JWT.decode(jwtToken);
-        const { email } = decodedToken;
+
         // eslint-disable-next-line no-useless-escape
         const emailValidationRegex= /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         const contactEmail = value_for_contact_email && value_for_contact_email.toLowerCase();
@@ -272,8 +260,8 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <div className="form-group">
                         <label htmlFor="email-address">Primary E-Mail or Username</label>
                         <h4 id="email-address" className="text-300 mt-0">
-                            { object.itemUtil.User.gravatar(email, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
-                            { email }
+                            { object.itemUtil.User.gravatar(unverifiedUserEmail, 36, { 'style' : { 'borderRadius': '50%', 'marginRight' : 10 } }, 'mm') }
+                            { unverifiedUserEmail }
                         </h4>
                     </div>
 
@@ -299,7 +287,7 @@ export default class UserRegistrationForm extends React.PureComponent {
                     <hr className="mt-1 mb-2" />
 
                     <div className="form-group">
-                        <label htmlFor="pendingLab">Preferred Contact Email <span className="text-300">(Optional)</span></label>
+                        <label htmlFor="pendingLab">Primary Lab <span className="text-300">(Optional)</span></label>
                         <div>
                             <LookupLabField onSelect={this.onSelectLab} currentLabDetails={value_for_pending_lab_details} onClear={this.onClearLab} />
                         </div>
@@ -380,29 +368,39 @@ class LookupLabField extends React.PureComponent {
         };
     }
 
-    toggleIsSelecting(isSelecting){
-        this.setState(function(currState){
-            if (typeof isSelecting !== 'boolean') isSelecting = !currState.isSelecting;
-            if (isSelecting === currState.isSelecting) return null;
+    toggleIsSelecting(isSelecting = null){
+        this.setState(function({ "isSelecting": prevIsSelecting }){
+            if (typeof isSelecting !== 'boolean') {
+                isSelecting = !prevIsSelecting;
+            }
             return { isSelecting };
         });
     }
 
     receiveItem(items, endDataPost) {
-        if (!items || !Array.isArray(items) || items.length === 0 || !_.every(items, function (item) { return item.id && typeof item.id === 'string' && item.json; })) {
+        const { onSelect } = this.props;
+
+        if (!items || !Array.isArray(items) || items.length === 0) {
             return;
         }
-        endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+
+        if (!_.every(items, function ({ id, json }){ return id && typeof id === 'string' && json; })){
+            return;
+        }
+
+        // endDataPost = (endDataPost !== 'undefined' && typeof endDataPost === 'boolean') ? endDataPost : true;
+
         if (items.length > 1) {
             console.warn('Multiple labs selected but we only get a single item, since handler\'s multiple version not implemented yet!');
         }
 
-        this.setState({ 'isSelecting' : !endDataPost }, ()=>{
+        // We can change back to `endDataPost` instead of `false` in future if we ever allow multiple labs.
+        // But most likely additional labs would go into different field, since User.lab is not an array at moment anyway.
+        this.setState({ 'isSelecting' : false }, function(){
             // Invoke the object callback function, using the text input.
             // eslint-disable-next-line react/destructuring-assignment
 
-            // TODO: Currently, we support only a single lab selection. Add multiple version.
-            this.props.onSelect(items[0].id, items[0].json);
+            onSelect(items[0].id, items[0].json);
         });
     }
 
@@ -449,7 +447,9 @@ class LookupLabField extends React.PureComponent {
                         </button>
                     </div>
                 </div>
-                <LinkToSelector isSelecting={isSelecting} onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+                { isSelecting ?
+                    <LinkToSelector isSelecting onSelect={this.receiveItem} onCloseChildWindow={this.unsetIsSelecting} dropMessage={dropMessage} searchURL={searchURL} />
+                    : null }
             </React.Fragment>
         );
     }

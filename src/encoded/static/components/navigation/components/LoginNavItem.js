@@ -9,10 +9,10 @@ import { UserRegistrationModal } from './UserRegistrationModal';
 
 
 export const LoginNavItem = React.memo(function LoginNavItem(props){
-    const { id, isRegistrationModalVisible, showLock, isLoading } = props;
+    const { id = "loginbtn", unverifiedUserEmail, showLock, isLoading, isAuth0LibraryLoaded = true } = props;
     return (
         <React.Fragment>
-            <Nav.Link key="login-reg-btn" active={isRegistrationModalVisible} onClick={showLock} className="user-account-item" id={id}>
+            <Nav.Link key="login-reg-btn" active={unverifiedUserEmail} onClick={showLock} className="user-account-item" id={id} disabled={!isAuth0LibraryLoaded}>
                 { isLoading ? (
                     <i className="account-icon icon icon-spin icon-circle-notch fas align-middle"/>
                 ) : (
@@ -23,7 +23,7 @@ export const LoginNavItem = React.memo(function LoginNavItem(props){
                     </React.Fragment>
                 )}
             </Nav.Link>
-            { isRegistrationModalVisible ? <UserRegistrationModal {...props} /> : null }
+            { unverifiedUserEmail ? <UserRegistrationModal {...props} /> : null }
         </React.Fragment>
     );
 });
@@ -33,4 +33,18 @@ LoginNavItem.propTypes = {
     'id'            : PropTypes.string,
     'windowWidth'   : PropTypes.number,
     ...UserRegistrationModal.propTypes
+};
+
+/**
+ * Somewhat 'wrap-around' but arguably likely cleanest way to open Auth0 login dialog modal
+ * and not require to move up and pass down login-related stuff like `showLock()`.
+ */
+export const onLoginNavItemClick = function(e) {
+    e.preventDefault();
+    const btnElem = document.getElementById("loginbtn");
+    if (btnElem && typeof btnElem.click === "function"){
+        // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
+        btnElem.click();
+    }
+    return false;
 };

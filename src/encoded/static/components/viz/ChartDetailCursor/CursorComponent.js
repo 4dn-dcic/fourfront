@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import _ from 'underscore';
 import * as vizUtil from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
-import { console, isServerSide, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, layout, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 /**
  * @typedef {Object} Offset
@@ -142,13 +142,13 @@ export default class CursorComponent extends React.Component {
             this.overlaysRoot.appendChild(this.portalElement);
         }
 
-        window.addEventListener('mousemove', this._onMouseMove);
+        WindowEventDelegator.addHandler('mousemove', this._onMouseMove);
         this.setState({ 'mounted' : true });
     }
 
     componentWillUnmount() {
         if (this.props.debug) console.log('Will unmount CursorComponent');
-        window.removeEventListener('mousemove', this._onMouseMove);
+        WindowEventDelegator.removeHandler('mousemove', this._onMouseMove);
 
         this.overlaysRoot.removeChild(this.portalElement);
         this.portalElement = null;

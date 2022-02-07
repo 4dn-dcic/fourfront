@@ -8,7 +8,9 @@ from .workbook_fixtures import app_settings, workbook
 notice_pytest_fixtures(app_settings, workbook)
 
 pytestmark = [
-    pytest.mark.working, pytest.mark.indexing,
+    pytest.mark.working,
+    # pytest.mark.indexing,
+    pytest.mark.workbook,
     # pytest.mark.flaky(rerun_filter=delay_rerun),
 ]
 

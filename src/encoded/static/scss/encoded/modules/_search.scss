@@ -149,6 +149,16 @@ $search-results-above-results-row-height: 40px;
 	}
 }
 
+.search-result-row.detail-open > .columns .search-result-column-block {
+	// We have Embedded search table but also a deprecated ItemPageTable (which SimpleFilesTable and some other stuff inherits from).
+	// Edits re: ItemPageTable are below here.
+	> .inner {
+		padding-top: 20px;
+		padding-bottom: 20px;
+		height : 56px;
+	}
+}
+
 /**********************************************************
 			In Experiment Sets Table (Item Pages)
 			// Carry/re-use table cell styles over to ItemPageTable (to be deprecated).
@@ -205,6 +215,16 @@ $search-results-above-results-row-height: 40px;
 					}
 				}
 
+				> .inner {
+					height: 46px;
+				}
+
+			}
+
+			&.detail-open {
+				padding-top: 5px;
+				padding-bottom: 5px;
+				height : 56px;
 			}
 
 			&.no-detail-pane {
