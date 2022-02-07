@@ -30,8 +30,8 @@ ENV PYTHONFAULTHANDLER=1 \
 COPY deploy/docker/production/install_nginx.sh /
 RUN bash /install_nginx.sh && \
     apt-get update && \
-    apt-get install -y curl vim emacs postgresql-client net-tools ca-certificates \
-    gcc zlib1g-dev libpq-dev git make
+    apt-get install -y curl vim emacs net-tools ca-certificates \
+    gcc zlib1g-dev postgresql-client libpq-dev git make
 
 # Configure Fourfront User (nginx)
 WORKDIR /home/nginx/.nvm
@@ -86,8 +86,7 @@ COPY . .
 
 # Build front-end, remove node_modules when done
 RUN npm run build && \
-    npm run build-scss && \
-    rm -rf node_modules/
+    npm run build-scss
 
 # Build remaining back-end
 RUN poetry install && \
