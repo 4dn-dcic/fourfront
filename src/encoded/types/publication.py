@@ -129,10 +129,10 @@ def fetch_biorxiv(url, doi):
             break
         if count == 4:
             return
-    record_dict = r.json()['collection'][0]
+    record_dict = r.json()['collection'][-1]  # get latest version
     pub_data = {k: record_dict.get(v) for k,v in fdn2biorxiv.items() if record_dict.get(v)}
     if pub_data.get('authors'):  # format authors according to 4DN schema
-        pub_data['authors'] = [a.strip() for a in pub_data['authors'].split(";") if a]
+        pub_data['authors'] = [a.replace(" ", "").replace(".", "").replace(",", " ") for a in pub_data['authors'].split(";") if a]
     pub_data['url'] = url
     pub_data['journal'] = 'bioRxiv'
     return pub_data
