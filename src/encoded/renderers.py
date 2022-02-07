@@ -326,7 +326,7 @@ MIME_TYPE_LD_JSON = 'application/ld+json'
 # The cgap-portal behavior might be a bug we should look at bringing into alignment. -kmp 29-Jan-2022
 MIME_TYPES_SUPPORTED = [MIME_TYPE_HTML, MIME_TYPE_JSON, MIME_TYPE_LD_JSON]
 MIME_TYPE_DEFAULT = MIME_TYPES_SUPPORTED[0]
-MIME_TYPE_TRIAGE_MODE = 'modern'  # if this doesn't work, fall back to 'legacy'
+MIME_TYPE_TRIAGE_MODE = 'legacy'  # if this doesn't work, fall back to 'legacy'
 
 DEBUG_MIME_TYPES = environ_bool("DEBUG_MIME_TYPES", default=False)
 
