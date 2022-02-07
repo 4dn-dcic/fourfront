@@ -9,11 +9,11 @@ poetry run python -m assume_identity
 # Clear db/es on fourfront-mastertest if we run an "initial" deploy
 # Do nothing on other environments
 if [ -n "${INITIAL_DEPLOYMENT}" ]; then
-  poetry run clear-db-es-contents production.ini --app-name app --env fourfront-mastertest
+  poetry run clear-db-es-contents production.ini --app-name app --env fourfront_mastertest
 fi
 
 ## Create mapping
-poetry run create-mapping-on-deploy production.ini --app-name app
+poetry run create-mapping-on-deploy production.ini --app-name app --clear-queue
 
 # Load Data (based on development.ini, for now just master-inserts)
 # Not necessary after first deploy
