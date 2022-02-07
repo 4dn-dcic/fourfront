@@ -173,11 +173,13 @@ const CollapsedNav = React.memo(function CollapsedNav(props) {
         schemas, updateAppSessionState, testWarningVisible
     };
 
+    const selectionSearchBar = isSelectAction(currentAction) ? (<SearchBar {...{ href, currentAction, browseBaseState }} />) : <React.Fragment />;
+
     return (
         <Navbar.Collapse>
             <BigDropdownGroupController {...{ addToBodyClassList, removeFromBodyClassList }}>
                 <LeftNav {...leftNavProps} />
-                <SearchBar {...{ href, currentAction, browseBaseState }} />
+                {selectionSearchBar}
                 <AccountNav {...userActionNavProps} />
             </BigDropdownGroupController>
         </Navbar.Collapse>

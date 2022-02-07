@@ -638,7 +638,7 @@ export class OverViewBodyItem extends React.PureComponent {
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         this.state = {
             'collapsed': true
-        }
+        };
     }
 
     handleCollapseToggle(){

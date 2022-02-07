@@ -1142,6 +1142,13 @@ class FileReference(File):
     embedded_list = File.embedded_list
     name_key = 'accession'
 
+    # reference files don't want md5 as unique key
+    def unique_keys(self, properties):
+        keys = super(FileReference, self).unique_keys(properties)
+        if keys.get('alias'):
+            keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
+        return keys
+
 
 @collection(
     name='files-vistrack',
@@ -1263,6 +1270,10 @@ def _build_file_microscopy_embedded_list():
         'experiments.files.microscope_settings.ch02_lasers_diodes',
         'experiments.files.microscope_settings.ch03_lasers_diodes',
         'experiments.files.microscope_settings.ch04_lasers_diodes',
+
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration.title',
+        'microscope_configuration.microscope.Name',
         ]
     )
 
@@ -1695,10 +1706,10 @@ def validate_file_filename(context, request):
 
 
 def validate_processed_file_unique_md5_with_bypass(context, request):
-    '''validator to check md5 on processed files, unless you tell it
-       not to'''
-    # skip validator if not file processed
-    if context.type_info.item_type != 'file_processed':
+    '''validator to check md5 on processed files and reference files, unless
+    you tell it not to'''
+    # skip validator if not file processed or file reference
+    if context.type_info.item_type not in ['file_processed', 'file_reference']:
         return
     data = request.json
     if 'md5sum' not in data or not data['md5sum']:

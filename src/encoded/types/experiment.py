@@ -209,8 +209,10 @@ class Experiment(Item):
         'files.file_size',
         'files.upload_key',
         'files.file_classification',
+        'files.file_type',
         'files.file_type_detailed',
         'files.paired_end',
+        'files.notes_to_tsv',
         'files.dbxrefs',
         'files.external_references.*',
         'files.related_files.relationship_type',
@@ -971,6 +973,12 @@ def _build_experiment_mic_embedded_list():
         'files.microscope_settings.ch02_lasers_diodes',
         'files.microscope_settings.ch03_lasers_diodes',
         'files.microscope_settings.ch04_lasers_diodes',
+
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration_master.title',
+        'microscope_configuration_master.microscope.Name',
+        'files.microscope_configuration.title',
+        'files.microscope_configuration.microscope.Name',
 
         # Image linkTo
         'sample_image.title',
