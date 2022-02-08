@@ -156,8 +156,10 @@ class Experiment(Item):
         'biosample.biosource.individual.protected_data',
 
         # Organism linkTo
-        'biosample.biosource.individual.organism.name',
+        'biosample.biosource.organism.name',
+        'biosample.biosource.organism.scientific_name',  # not sure we need this one
         'biosample.biosource.individual.organism.scientific_name',
+        'biosample.biosource.individual.organism.name',
 
         # Modification linkTo
         'biosample.modifications.modification_type',

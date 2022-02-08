@@ -136,6 +136,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.override_biosource_name",
+        "experiments_in_set.biosample.biosource.override_organism_name",  # do we need this?
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.biosource.cell_line.term_id",
@@ -152,7 +153,10 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.tissue.synonyms",
 
         # Organism linkTo
+        "experiments_in_set.biosample.biosource.organism.name",  # calc prop
         "experiments_in_set.biosample.biosource.individual.organism.name",
+        "experiments_in_set.biosample.biosource.organism.scientific_name",
+        "experiments_in_set.biosample.biosource.individual.organism.scientific_name",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",

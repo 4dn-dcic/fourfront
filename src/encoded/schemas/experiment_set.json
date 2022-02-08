@@ -156,7 +156,7 @@
         "dataset_label" : {
             "title" : "Dataset"
         },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
+        "experiments_in_set.biosample.biosource.organism.name": {
             "title": "Organism"
         },
         "experiments_in_set.biosample.biosample_type": {
@@ -246,7 +246,7 @@
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"
         },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
+        "experiments_in_set.biosample.biosource.organism.name": {
             "title" : "Organism",
             "default_hidden": true
         },

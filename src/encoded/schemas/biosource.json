@@ -130,6 +130,15 @@
             "description": "A override name for the biosource that can be used as the biosource_name in place of the automatically generated one",
             "type": "string",
             "lookup": 1000
+        },
+        "override_organism_name": {
+            "title": "Organism Name Override",
+            "description": "An override name for the organism that can be used to find an Organism Item if the Biosource is not linked to an Individual",
+            "comment": "To get all the links to work this must be equivalent to the organism.name field",
+            "type": "string",
+            "exclude_from" : ["submit4dn"],
+            "permission": "import_items",
+            "lookup": 1000
         }
     },
     "facets": {
@@ -142,7 +151,7 @@
         "tissue.preferred_name": {
             "title": "Tissue"
         },
-        "individual.organism.name": {
+        "organism_name": {
             "title": "Organism"
         },
         "cell_line_tier": {
@@ -156,7 +165,7 @@
         }
     },
     "columns": {
-        "individual.organism.name": {
+        "organism_name": {
             "title": "Organism"
         },
         "biosource_type": {

@@ -57,6 +57,8 @@ def _build_biosample_embedded_list():
             'biosource.*',
             'biosource.individual.sex',
             'biosource.individual.organism.name',
+            'biosource.organism.name',
+            'biosource.override_organism_name',
             'biosource.biosource_vendor.name',  # display_title uses this
 
             # BiosampleCellCulture linkTo + Image linkTo
