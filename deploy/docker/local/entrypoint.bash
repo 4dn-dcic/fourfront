@@ -8,7 +8,7 @@ if [  -z ${TEST+x} ]; then
         poetry run clear-db-es-contents development.ini --app-name app --env "$FOURFRONT_ENV_NAME"
 
         # Create mapping
-        poetry run create-mapping-on-deploy development.ini --app-name app
+        poetry run create-mapping-on-deploy development.ini --app-name app --clear-queue
 
         # Load Data (based on development.ini, for now just master-inserts)
         poetry run load-data development.ini --app-name app --prod
