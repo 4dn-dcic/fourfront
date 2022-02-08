@@ -242,7 +242,6 @@ module.exports = [
             // But probably some way to append/change name of these chunks in this config.
             {
                 'd3': 'var {}',
-                // This is used during build-time only I think...
                 '@babel/register': '@babel/register',
                 'higlass-dependencies': 'var {}',
                 // These remaining /higlass/ defs aren't really necessary
@@ -260,7 +259,7 @@ module.exports = [
                 // We can clean up and change to 'aws-utils' in here in future as well and alias it to spc/utils/aws. But this needs to be synchronized with SPC and 4DN.
                 // We could have some 'ssr-externals.json' file in SPC (letting it define its own, per own version) and merge it into here.
                 // 'aws-utils': 'empty-module',
-                '../util/aws': 'var {}',
+                '../util/aws': 'var {}'
             }
         ],
         output: {
