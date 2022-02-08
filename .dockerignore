@@ -5,3 +5,13 @@ node_modules/
 .pytest_cache
 aws-ip-ranges.json
 .git
+*~
+*env/
+.idea/
+.ebextensions/
+.elasticbeanstalk/
+.python-version
+.python-cmd
+*.DS_Store/
+.egg-info/
+DEBUGLOG-*
