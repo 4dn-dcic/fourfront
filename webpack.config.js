@@ -37,7 +37,7 @@ if (mode === 'production') {
 } else if (env === 'quick') {
     devTool = 'eval'; // Fastest
 } else if (env === 'development') {
-    devTool = 'inline-source-map';
+    devTool = 'eval-source-map';
 }
 
 
