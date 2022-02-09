@@ -157,7 +157,6 @@ class Experiment(Item):
 
         # Organism linkTo
         'biosample.biosource.organism.name',
-        'biosample.biosource.individual.organism.name',
 
         # Modification linkTo
         'biosample.modifications.modification_type',

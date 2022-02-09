@@ -312,8 +312,6 @@ class File(Item):
         # Organism linkTo
         'experiments.biosample.biosource.organism.name',
         'experiments.biosample.biosource.organism.scientific_name',
-        'experiments.biosample.biosource.individual.organism.name',
-        'experiments.biosample.biosource.individual.organism.scientific_name',
 
         # FileFormat linkTo
         'file_format.file_format',

@@ -154,9 +154,7 @@ class ExperimentSet(Item):
 
         # Organism linkTo
         "experiments_in_set.biosample.biosource.organism.name",  # calc prop
-        "experiments_in_set.biosample.biosource.individual.organism.name",
         "experiments_in_set.biosample.biosource.organism.scientific_name",
-        "experiments_in_set.biosample.biosource.individual.organism.scientific_name",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",

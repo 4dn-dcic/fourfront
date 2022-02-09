@@ -138,6 +138,9 @@
             "type": "string",
             "exclude_from" : ["submit4dn"],
             "permission": "import_items",
+            "suggested_enum": [
+                "hamster"
+            ],
             "lookup": 1000
         }
     },

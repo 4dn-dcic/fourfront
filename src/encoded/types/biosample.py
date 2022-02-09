@@ -56,7 +56,6 @@ def _build_biosample_embedded_list():
             # Biosource linkTo - many calc prop dependencies
             'biosource.*',
             'biosource.individual.sex',
-            'biosource.individual.organism.name',
             'biosource.organism.name',
             'biosource.override_organism_name',
             'biosource.biosource_vendor.name',  # display_title uses this
