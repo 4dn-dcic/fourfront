@@ -1,19 +1,15 @@
+import sys
 import uptime
-from pyramid.decorator import reify
-from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
-from .schema_formats import is_accession
+
+from collections import OrderedDict
 from dcicutils import lang_utils
 from dcicutils.env_utils import infer_foursight_url_from_env
 from dcicutils.s3_utils import HealthPageKey
-from pyramid.security import (
-    ALL_PERMISSIONS,
-    Allow,
-    Authenticated,
-    Deny,
-    Everyone,
-)
-from collections import OrderedDict
 from encoded import APP_VERSION_REGISTRY_KEY
+from pyramid.decorator import reify
+from pyramid.security import ALL_PERMISSIONS, Allow, Authenticated, Deny, Everyone
+from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
+from .schema_formats import is_accession
 
 
 def includeme(config):
