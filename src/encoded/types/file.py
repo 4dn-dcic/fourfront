@@ -49,6 +49,8 @@ from snovault.validators import (
     no_validate_item_content_put,
     no_validate_item_content_patch
 )
+from dcicutils.secrets_utils import assume_identity
+from dcicutils.misc_utils import override_environ
 from urllib.parse import (
     parse_qs,
     urlparse,
@@ -120,8 +122,15 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        # boto.set_stream_logger('boto3')
-        conn = boto3.client('sts')
+        if 'IDENTITY' in os.environ:
+            identity = assume_identity()
+            with override_environ(**identity):
+                conn = boto3.client('sts',
+                                    aws_access_key_id=os.environ.get('S3_AWS_ACCESS_KEY_ID'),
+                                    aws_secret_access_key=os.environ.get('S3_AWS_SECRET_ACCESS_KEY'))
+        else:
+            # boto.set_stream_logger('boto3')
+            conn = boto3.client('sts')
         token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
