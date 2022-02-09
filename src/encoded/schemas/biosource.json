@@ -151,7 +151,7 @@
         "tissue.preferred_name": {
             "title": "Tissue"
         },
-        "organism_name": {
+        "organism.name": {
             "title": "Organism"
         },
         "cell_line_tier": {
@@ -165,7 +165,7 @@
         }
     },
     "columns": {
-        "organism_name": {
+        "organism.name": {
             "title": "Organism"
         },
         "biosource_type": {
