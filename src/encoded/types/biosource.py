@@ -177,7 +177,6 @@ class Biosource(Item):
             oterm = oterms.get(tid)
             if oterm:
                 tiered_line_cat[str(oterm.uuid)] = cat
-        # import pdb; pdb.set_trace()
         if cell_line:
             cl_term = get_item_or_none(request, cell_line, 'ontology-terms')
             cluid = cl_term.get('uuid')
@@ -218,7 +217,6 @@ class Biosource(Item):
         "linkTo": "Organism"
     })
     def organism(self, request, individual=None, override_organism_name=None):
-        # import pdb; pdb.set_trace()
         if override_organism_name:
             # if this field use as a lookup key
             org_item = get_item_or_none(request, override_organism_name, 'organisms')
