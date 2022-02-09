@@ -72,8 +72,8 @@ class SettingsKey:
     # fourfront-only. cgap uses eb_app_version instead.
     BEANSTALK_APP_VERSION = "beanstalk_app_version"
     BLOB_BUCKET = 'blob_bucket'
-    # cgap-only.
-    # EB_APP_VERSION = 'eb_app_version'
+    # cgap-only?:
+    EB_APP_VERSION = 'eb_app_version'
     ELASTICSEARCH_SERVER = 'elasticsearch.server'
     ENCODED_VERSION = 'encoded_version'
     FILE_UPLOAD_BUCKET = 'file_upload_bucket'
@@ -90,9 +90,8 @@ class SettingsKey:
     SNOVAULT_VERSION = 'snovault_version'
     SQLALCHEMY_URL = 'sqlalchemy.url'
     SYSTEM_BUCKET = 'system_bucket'
-    # cgap-only:
-    # TIBANNA_CWLS_BUCKET = 'tibanna_cwls_bucket'
-    # TIBANNA_OUTPUT_BUCKET = 'tibanna_output_bucket'
+    TIBANNA_CWLS_BUCKET = 'tibanna_cwls_bucket'
+    TIBANNA_OUTPUT_BUCKET = 'tibanna_output_bucket'
     UTILS_VERSION = 'utils_version'
 
 
@@ -109,6 +108,7 @@ def health_check(config):
 
         class ExtendedHealthPageKey(HealthPageKey):
             # This class can contain new entries in HealthPageKey that are waiting to move to dcicutils
+            PYTHON_VERSION = "python_version"
             pass
 
         h = ExtendedHealthPageKey
@@ -135,9 +135,9 @@ def health_check(config):
             "content": None,
 
             h.APPLICATION_BUCKET_PREFIX: settings.get(s.APPLICATION_BUCKET_PREFIX),
-            h.BEANSTALK_APP_VERSION: settings.get('eb_app_version'),
+            h.BEANSTALK_APP_VERSION: settings.get(s.EB_APP_VERSION),
             h.BEANSTALK_ENV: env_name,
-            h.BLOB_BUCKET: settings.get('blob_bucket'),
+            h.BLOB_BUCKET: settings.get(s.BLOB_BUCKET),
             h.DATABASE: settings.get(s.SQLALCHEMY_URL).split('@')[1],  # don't show user /password
             h.DISPLAY_TITLE: "Fourfront Status and Foursight Monitoring",
             h.ELASTICSEARCH: settings.get(s.ELASTICSEARCH_SERVER),
@@ -148,15 +148,16 @@ def health_check(config):
             h.INDEXER: settings.get(s.INDEXER),
             h.INDEX_SERVER: settings.get(s.INDEX_SERVER),
             h.LOAD_DATA: settings.get(s.LOAD_TEST_DATA),
-            # h.METADATA_BUNDLES_BUCKET is cgap-only
+            # h.METADATA_BUNDLES_BUCKET: settings.get(s.METADATA_BUNDLES_BUCKET),  # cgap-only
             h.NAMESPACE: settings.get(s.INDEXER_NAMESPACE),
             h.PROCESSED_FILE_BUCKET: settings.get(s.FILE_WFOUT_BUCKET),
             h.PROJECT_VERSION: settings.get(s.ENCODED_VERSION),
-            # h.S3_ENCRYPT_KEY_ID is cgap-only
+            h.PYTHON_VERSION: f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            # h.S3_ENCRYPT_KEY_ID: settings.get(s.S3_ENCRYPT_KEY_ID),  # cgap-only
             h.SNOVAULT_VERSION: settings.get(s.SNOVAULT_VERSION),
             h.SYSTEM_BUCKET: settings.get(s.SYSTEM_BUCKET),
-            # h.TIBANNA_CWLS_BUCKET is cgap-only
-            # h.TIBANNA_OUTPUT_BUCKET is cgap-only
+            h.TIBANNA_CWLS_BUCKET: settings.get(s.TIBANNA_CWLS_BUCKET),
+            h.TIBANNA_OUTPUT_BUCKET: settings.get(s.TIBANNA_OUTPUT_BUCKET),
             h.UPTIME: uptime_info(),
             h.UTILS_VERSION: settings.get(s.UTILS_VERSION),
         }
@@ -249,7 +250,7 @@ class FourfrontRoot(Root):
         return acl
 
     def get(self, name, default=None):
-        resource = super(FourfrontRoot, self).get(name, None)
+        resource = super().get(name, None)
         if resource is not None:
             return resource
         resource = self.connection.get_by_unique_key('page:location', name)
@@ -274,7 +275,7 @@ class FourfrontRoot(Root):
 
     def jsonld_type(self):
         """Inherits from '@type' calculated property of Root in snovault/resources.py"""
-        return ['HomePage', 'StaticPage'] + super(FourfrontRoot, self).jsonld_type()
+        return ['HomePage', 'StaticPage'] + super().jsonld_type()
 
     @calculated_property(schema={
         "title": "Static Page Content",
