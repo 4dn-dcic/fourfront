@@ -94,6 +94,7 @@ delete resolve.alias["react-bootstrap"];
 const optimization = {
     usedExports: true,
     minimize: mode === "production",
+    sideEffects: false,
     minimizer: [
         new TerserPlugin({
             parallel: false,
