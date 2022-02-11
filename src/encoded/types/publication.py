@@ -208,6 +208,15 @@ class Publication(Item, ItemWithAttachment):
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
     embedded_list = _build_publication_embedded_list()
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = [
+        'title',
+        'abstract',
+        'authors',
+        'date_published',
+        'journal',
+        'url'
+    ]
 
     class Collection(Item.Collection):
         pass
