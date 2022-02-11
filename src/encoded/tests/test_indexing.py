@@ -493,6 +493,9 @@ class TestInvalidationScopeViewFourfront:
         ('QualityMetricBamqc', 'ExperimentSet',
             DEFAULT_SCOPE + ['overall_quality_status', 'url']
          ),
+        ('Publication', 'ExperimentSet',
+            DEFAULT_SCOPE + ['ID', 'title', 'abstract', 'journal', 'authors', 'date_published', 'url']
+         ),
     ])
     def test_invalidation_scope_view_parametrized(self, indexer_testapp, source_type, target_type, invalidated):
         """ Just call the route function - test some basic interactions.
