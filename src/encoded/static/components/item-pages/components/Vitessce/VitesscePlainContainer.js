@@ -171,9 +171,10 @@ const VitesscePlainContainerBody = React.forwardRef(function VitesscePlainContai
                 });
             }, 500);
         };
+        // TODO: REMOVE onConfigChange before merging into master
         vitessceInstance = (
             <div key={outerKey} className="vitessce-instance" style={{ 'transition' : 'none', 'height' : height, 'width' : width || null }} ref={instanceContainerRefFunction}>
-                <Vitessce {...{ config, theme, width, height, ref }} />
+                <Vitessce {...{ config, theme, width, height, ref }} onConfigChange={console.log} />
             </div>
         );
     }
