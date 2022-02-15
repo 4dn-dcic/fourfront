@@ -410,6 +410,14 @@ def should_transform(request, response):
     # Note that uncommenting this logic will require uncommenting the corresponding line in 
     # test_should_transform that is presently marked as a bug we should fix.
     #
+    # About the commented-out code that follows below, Will says in code review (9-Feb-2022,
+    # https://github.com/4dn-dcic/fourfront/pull/1597#discussion_r802943269):
+    # > I think this point is debatable. The UI will use a default fallback view
+    # > to render frame=raw in FF, which might actually be the desired behavior
+    # > in both instances.
+    # > https://mastertest.4dnucleome.org/experiment-set-replicates/4DNES72G8KB2/?frame=raw
+    # -kmp 15-Feb-2022
+    #
     # # If we have a 'frame' that is not None or page, force JSON, since our UI doesn't handle all various
     # # forms of the data, just embedded/page.
     # request_frame = request.params.get("frame", "page")
