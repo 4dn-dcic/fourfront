@@ -393,7 +393,7 @@ describe('Deployment/CI Search View Tests', function () {
                             cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in All Items");
                             break;
                         case 'ByAccession':
-                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Type Item's Accession (e.g. 4DNXXXX ...)");
+                            cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Type Item's Complete Accession (e.g. 4DNXXXX ...)");
                             break;
                         case 'ExperimentSetReplicate':
                             cy.get('.form-control[name="q"]').invoke('attr', 'placeholder').should('contain', "Search in Experiment Sets");

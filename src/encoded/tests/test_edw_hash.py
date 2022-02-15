@@ -15,4 +15,4 @@ TEST_HASHES = {
 
 @pytest.mark.parametrize(('password', 'pwhash'), TEST_HASHES.items())
 def test_edw_hash(password, pwhash):
-    assert EDWHash.encrypt(password) == pwhash
+    assert EDWHash.hash(password) == pwhash

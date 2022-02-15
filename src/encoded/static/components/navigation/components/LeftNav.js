@@ -21,12 +21,15 @@ import { SearchBar } from './SearchBar';
 export const LeftNav = React.memo(function LeftNav(props){
     // `props` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer,
     // visibleDropdownID, closingDropdownID, etc.
+    const { visibleDropdownID } = props;
+    const isSearchBarOpen = (visibleDropdownID === 'search-menu-item');
+    const passProps = isSearchBarOpen ? _.extend({ 'active': false }, props) : props;
     return (
         <Nav className="mr-auto">
-            <DataNavItem {...props} />
-            <ToolsNavItem {...props} />
-            <ResourcesNavItem {...props} />
-            <HelpNavItem {...props} />
+            <DataNavItem {...passProps} />
+            <ToolsNavItem {...passProps} />
+            <ResourcesNavItem {...passProps} />
+            <HelpNavItem {...passProps} />
             <SearchNavItem {...props} />
         </Nav>
     );
@@ -77,6 +80,7 @@ function ToolsNavItem(props){
 
 function DataNavItem(props){
     const { href, browseBaseState, ...navItemProps } = props;
+    const { active: propActive } = navItemProps;
 
     /** @see https://reactjs.org/docs/hooks-reference.html#usememo */
     const bodyProps = useMemo(function(){
@@ -119,10 +123,10 @@ function DataNavItem(props){
             <span className="text-black">Data</span>
         </React.Fragment>
     );
-
+    const active = propActive !== false && bodyProps.isAnyActive;
     return ( // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
         <BigDropdownNavItem {...navItemProps} id="data-menu-item" navItemHref={bodyProps.browseHref} navItemContent={navLink}
-            active={bodyProps.isAnyActive}>
+            active={active}>
             <DataNavItemBody {...bodyProps} />
         </BigDropdownNavItem>
     );
@@ -250,7 +254,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                 placeholderText = 'Search in All Items';
                 break;
             case 'ByAccession':
-                placeholderText = 'Type Item\'s Accession (e.g. 4DNXXXX ...)';
+                placeholderText = 'Type Item\'s Complete Accession (e.g. 4DNXXXX ...)';
                 break;
             default:
                 placeholderText = "Search in " + AvailableSearchItemTypes[searchItemType].text;
@@ -277,9 +281,12 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     //navigate to Item page directly without searching
     const navigateByAccession = function (evt) {
         if (searchItemType === 'ByAccession') {
-            evt.preventDefault();
-            evt.stopPropagation();
-            navigate('/' + searchText);
+            const accession = searchText && searchText.trim();
+            if (accession) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                navigate('/' + accession);
+            }
         }
     };
     //handler for search text change

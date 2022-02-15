@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "3.6.0.1b0"
+version = "4.0.0.4b0"  # includes master and Will's containerize branch
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -37,13 +37,14 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.6.1,<3.8"
-boto3 = "^1.20.34"
+awscli = ">=1.21.3,!=1.22.52"
+boto3 = "^1.18.46"
 botocore = "^1.21.46"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault ="4.9.2.1b4"  # was dcicutils = "^4.9.0", but should be "^5.0.0"
-dcicutils = "^3.7.0.1b1"  # To become "^3.8.0"
+dcicsnovault = "^5.1.1"
+dcicutils = "^3.9.0"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -168,7 +169,7 @@ configure-kibana-index = "encoded.commands.configure_kibana_index:main"
 create-mapping-on-deploy = "encoded.commands.create_mapping_on_deploy:main"
 dev-servers = "encoded.dev_servers:main"
 dis2pheno = "encoded.commands.parse_hpoa:main"
-es-index-data = "encoded.commands.es_index_data:main"
+es-index-data = "snovault.commands.es_index_data:main"
 export-data = "encoded.commands.export_data:main"
 extract-test-data = "encoded.commands.extract_test_data:main"
 import-data = "encoded.commands.import_data:main"
@@ -181,6 +182,9 @@ migrate-dataset-type = "encoded.commands.migrate_dataset_type:main"
 migrate-files-aws = "encoded.commands.migrate_files_aws:main"
 owl-to-items = "encoded.commands.generate_items_from_owl:main"
 profile = "encoded.commands.profile:main"
+# Will asks that there be some better doc for prepare-docker.
+# https://hms-dbmi.atlassian.net/browse/C4-781
+prepare-docker = "encoded.commands.prepare_docker:main"
 run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
 update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"

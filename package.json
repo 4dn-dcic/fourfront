@@ -109,6 +109,7 @@
     "d3": "^5.16.0",
     "detect-browser": "^3.0.1",
     "domready": "^0.3.0",
+    "fbjs": "^0.8.17",
     "form-serialize": "^0.6.0",
     "higlass": "1.10.0",
     "higlass-multivec": "0.2.4",

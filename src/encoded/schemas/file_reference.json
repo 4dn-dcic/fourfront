@@ -42,6 +42,7 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "suggested_enum": [
+                "alignments",
                 "chromosome sizes",
                 "genome reference",
                 "genome index",

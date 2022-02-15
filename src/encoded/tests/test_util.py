@@ -5,7 +5,8 @@ from pyramid.httpexceptions import HTTPForbidden
 
 from ..util import (
     # compute_set_difference_one, find_other_in_pair,
-    delay_rerun, utc_today_str, customized_delay_rerun, check_user_is_logged_in
+    delay_rerun,  # utc_today_str,
+    customized_delay_rerun, check_user_is_logged_in
 )
 
 
@@ -71,10 +72,10 @@ def test_customize_delay_rerun():
     assert (t1 - t0).total_seconds() < custom_delay + DELAY_FUZZ_SECONDS
 
 
-def test_utc_today_str():
-    pattern = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
-    actual = utc_today_str()
-    assert re.match(pattern, actual), "utc_today_str() result %s did not match format: %s" % (actual, pattern)
+# def test_utc_today_str():
+#     pattern = "[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]"
+#     actual = utc_today_str()
+#     assert re.match(pattern, actual), "utc_today_str() result %s did not match format: %s" % (actual, pattern)
 
 
 @pytest.mark.parametrize('principals, allow', [

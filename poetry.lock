@@ -54,14 +54,14 @@ wrapt = "*"
 
 [[package]]
 name = "awscli"
-version = "1.22.42"
+version = "1.22.55"
 description = "Universal Command Line Environment for AWS."
 category = "main"
 optional = false
 python-versions = ">= 3.6"
 
 [package.dependencies]
-botocore = "1.23.42"
+botocore = "1.24.0"
 colorama = ">=0.2.5,<0.4.4"
 docutils = ">=0.10,<0.16"
 PyYAML = ">=3.10,<5.5"
@@ -101,14 +101,14 @@ python-versions = "*"
 
 [[package]]
 name = "boto3"
-version = "1.20.42"
+version = "1.21.0"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.6"
 
 [package.dependencies]
-botocore = ">=1.23.42,<1.24.0"
+botocore = ">=1.24.0,<1.25.0"
 jmespath = ">=0.7.1,<1.0.0"
 s3transfer = ">=0.5.0,<0.6.0"
 
@@ -432,7 +432,7 @@ xray = ["mypy-boto3-xray (>=1.20.0)"]
 
 [[package]]
 name = "botocore"
-version = "1.23.42"
+version = "1.24.0"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -586,7 +586,7 @@ python-versions = ">=3.6, <3.7"
 
 [[package]]
 name = "dcicsnovault"
-version = "4.9.2.1b4"
+version = "5.1.1"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
@@ -595,20 +595,21 @@ python-versions = ">=3.6.1,<3.8"
 [package.dependencies]
 aws_requests_auth = ">=0.4.1,<0.5.0"
 "backports.statistics" = "0.1.0"
-boto3 = ">=1.20.34,<2.0.0"
-dcicutils = ">=3.6.0,<4.0.0"
+boto3 = ">=1.20.49,<2.0.0"
+dcicutils = ">=3.8.0,<4.0.0"
 elasticsearch = "6.8.1"
 elasticsearch_dsl = ">=6.4.0,<7.0.0"
 future = ">=0.15.2,<1"
 futures = ">=3.1.1,<4.0.0"
+html5lib = ">=1.1"
 humanfriendly = ">=1.44.9,<2.0.0"
 jsonschema_serialize_fork = ">=2.1.1,<3.0.0"
 netaddr = ">=0.8.0,<1"
 passlib = ">=1.7.4,<2.0.0"
 Pillow = ">=6.2.2,<7.0.0"
 psutil = ">=5.9.0,<6.0.0"
-psycopg2-binary = ">=2.9.3,<3.0.0"
-PyBrowserID = ">=0.10.0,<0.11.0"
+psycopg2-binary = ">=2.9.1,<3.0.0"
+PyBrowserID = ">=0.10.0,<1"
 pyramid = "1.10.4"
 pyramid_localroles = ">=0.1,<1"
 pyramid-multiauth = ">=0.9.0,<1"
@@ -616,9 +617,9 @@ pyramid-retry = ">=1.0,<2.0"
 pyramid-tm = ">=2.4,<3.0"
 pyramid-translogger = ">=0.1,<0.2"
 python-dateutil = ">=2.8.2,<3.0.0"
-python_magic = ">=0.4.15"
+python_magic = ">=0.4.11,<1"
 pytz = ">=2021.3"
-PyYAML = ">=5.1,<5.3"
+PyYAML = ">=5.1,<5.5"
 rdflib = ">=4.2.2,<5.0.0"
 rdflib-jsonld = ">=0.5.0,<1.0.0"
 rutter = ">=0.3,<1"
@@ -639,11 +640,11 @@ xlrd = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "dcicutils"
-version = "3.7.0.1b1"
+version = "3.9.0"
 description = "Utility package for interacting with the 4DN Data Portal and other 4DN resources"
 category = "main"
 optional = false
-python-versions = ">=3.6.1,<3.9"
+python-versions = ">=3.6.1,<3.10"
 
 [package.dependencies]
 aws-requests-auth = ">=0.4.2,<1"
@@ -830,6 +831,24 @@ python-versions = ">=3.6"
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
 typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.10\""}
+
+[[package]]
+name = "html5lib"
+version = "1.1"
+description = "HTML parser based on the WHATWG HTML specification"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[package.dependencies]
+six = ">=1.9"
+webencodings = "*"
+
+[package.extras]
+all = ["genshi", "chardet (>=2.2)", "lxml"]
+chardet = ["chardet (>=2.2)"]
+genshi = ["genshi"]
+lxml = ["lxml"]
 
 [[package]]
 name = "humanfriendly"
@@ -1887,6 +1906,14 @@ docs = ["Sphinx (>=1.8.1)", "docutils", "pylons-sphinx-themes (>=1.0.9)"]
 testing = ["pytest", "pytest-cover", "coverage (>=5.0)"]
 
 [[package]]
+name = "webencodings"
+version = "0.5.1"
+description = "Character encoding aliases for legacy web content"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "webob"
 version = "1.8.7"
 description = "WSGI request and response object"
@@ -2043,7 +2070,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1,<3.8"
-content-hash = "b82f52311b685cf774d1a4d4c8d278178cec11835d86ae838f9dc0c91c32ca64"
+content-hash = "6645dff0e9a056ef0435fc19cbcc5448a3b81a7a0e7d4b8118f4a334ef9f486a"
 
 [metadata.files]
 apipkg = [
@@ -2067,8 +2094,8 @@ aws-xray-sdk = [
     {file = "aws_xray_sdk-0.95-py2.py3-none-any.whl", hash = "sha256:72791618feb22eaff2e628462b0d58f398ce8c1bacfa989b7679817ab1fad60c"},
 ]
 awscli = [
-    {file = "awscli-1.22.42-py3-none-any.whl", hash = "sha256:8d26ffa8b9bc893d27f39430165e557d38ab6cd1c90db467105d087a174b02bd"},
-    {file = "awscli-1.22.42.tar.gz", hash = "sha256:51393a71a1c00aca4f101321454751b4bde1186776f729230295f1a3c315f9f7"},
+    {file = "awscli-1.22.55-py3-none-any.whl", hash = "sha256:dbd843896df6c230841774d3a400a59fef2744390cb9f1156a357c94a2156a17"},
+    {file = "awscli-1.22.55.tar.gz", hash = "sha256:ec4ae488fdcc0ee9e528e95a5a355b5a2800e35fab88d78c052cc13f69f3f719"},
 ]
 "backports.statistics" = [
     {file = "backports.statistics-0.1.0-py2.py3-none-any.whl", hash = "sha256:2732e003151620762ba3ea25b881b5ca0debe2fcbf41b32b6eaff5842a8b99d7"},
@@ -2083,16 +2110,16 @@ boto = [
     {file = "boto-2.49.0.tar.gz", hash = "sha256:ea0d3b40a2d852767be77ca343b58a9e3a4b00d9db440efb8da74b4e58025e5a"},
 ]
 boto3 = [
-    {file = "boto3-1.20.42-py3-none-any.whl", hash = "sha256:49499acf3f1dbb5f09eb93abfeb4025cd76fb7880c16a01a2901dfa335496f0d"},
-    {file = "boto3-1.20.42.tar.gz", hash = "sha256:d2fce99e42cb7cb263f3ff272bc707aa6a66bc6ab30d90bf0ff6cbdddd867cfa"},
+    {file = "boto3-1.21.0-py3-none-any.whl", hash = "sha256:25a76b7b530a124d9e526c62ff2b7da5782315195badb9a6273714898d689820"},
+    {file = "boto3-1.21.0.tar.gz", hash = "sha256:cc40566dec3f48611a82ace07b29489848e9bd35a51e3e992d1902a3c037e9fc"},
 ]
 boto3-stubs = [
     {file = "boto3-stubs-1.20.42.tar.gz", hash = "sha256:f24a22779892adcdd05336725feae52cc78cba9f6fde1d872008069230c49307"},
     {file = "boto3_stubs-1.20.42-py3-none-any.whl", hash = "sha256:a93a9336381a62b931bc5f37be210b53c2dea0f032820217f93ff86047f21c0f"},
 ]
 botocore = [
-    {file = "botocore-1.23.42-py3-none-any.whl", hash = "sha256:e2e5509934e634a374afa560de4ddc770bb562c7259cb63cd92aa7e54f943bc1"},
-    {file = "botocore-1.23.42.tar.gz", hash = "sha256:a58f1e559ff2c65495f55ac48217afefb56f2d709d30f7377c40287e8c5765d0"},
+    {file = "botocore-1.24.0-py3-none-any.whl", hash = "sha256:2bf4463513bd89817aa5d7341ed81c7c76d906e6c70672c8762d64ecf3275771"},
+    {file = "botocore-1.24.0.tar.gz", hash = "sha256:47723cef6112f451630bf2446cfd6be2782cc1d6b1b92acb12ff00797588c5f3"},
 ]
 botocore-stubs = [
     {file = "botocore-stubs-1.23.42.tar.gz", hash = "sha256:8e6849d3b96248c79b530ae1d4c3b985734b5c3bbef2f65f78c011c22a55b815"},
@@ -2253,12 +2280,12 @@ dataclasses = [
     {file = "dataclasses-0.8.tar.gz", hash = "sha256:8479067f342acf957dc82ec415d355ab5edb7e7646b90dc6e2fd1d96ad084c97"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-4.9.2.1b4-py3-none-any.whl", hash = "sha256:e051245afad4ad63d757b5527237bcde9630b6c61f40f874490a005bc3dfb33f"},
-    {file = "dcicsnovault-4.9.2.1b4.tar.gz", hash = "sha256:71d6118f4174e97381f539f2914143e829d1c6352d6200f13799d11b691cf693"},
+    {file = "dcicsnovault-5.1.1-py3-none-any.whl", hash = "sha256:23c05a55de8c06d77297a51c53f93ad37a8c6c70130913036ea5a700e71011fd"},
+    {file = "dcicsnovault-5.1.1.tar.gz", hash = "sha256:6cc92dbfa949f2e8ce9309c481bced166e864652f1295b0a42eaf1520a4d5c36"},
 ]
 dcicutils = [
-    {file = "dcicutils-3.7.0.1b1-py3-none-any.whl", hash = "sha256:226bcc7762cd364a3bdbadfe67d388ce80b5b11af32fb4ff94eecc2db36c1736"},
-    {file = "dcicutils-3.7.0.1b1.tar.gz", hash = "sha256:198520cbee79b7e71e50425b704f7fa8fa778827e0a6270873cefa0edbd0e9b7"},
+    {file = "dcicutils-3.9.0-py3-none-any.whl", hash = "sha256:2500f312f568938168ac91a2c110a452274d6187b5e9e16a76d133f915befe70"},
+    {file = "dcicutils-3.9.0.tar.gz", hash = "sha256:fab80de8da0f797744a230ff786f123dc97d24e1f442131b55e64f0293afedbf"},
 ]
 docker = [
     {file = "docker-4.4.4-py2.py3-none-any.whl", hash = "sha256:f3607d5695be025fa405a12aca2e5df702a57db63790c73b927eb6a94aac60af"},
@@ -2314,6 +2341,10 @@ gitdb = [
 gitpython = [
     {file = "GitPython-3.1.20-py3-none-any.whl", hash = "sha256:b1e1c269deab1b08ce65403cf14e10d2ef1f6c89e33ea7c5e5bb0222ea593b8a"},
     {file = "GitPython-3.1.20.tar.gz", hash = "sha256:df0e072a200703a65387b0cfdf0466e3bab729c0458cf6b7349d0e9877636519"},
+]
+html5lib = [
+    {file = "html5lib-1.1-py2.py3-none-any.whl", hash = "sha256:0d78f8fde1c230e99fe37986a60526d7049ed4bf8a9fadbad5f00e22e58e041d"},
+    {file = "html5lib-1.1.tar.gz", hash = "sha256:b2e5b40261e20f354d198eae92afc10d750afb487ed5e50f9c4eaf07c184146f"},
 ]
 humanfriendly = [
     {file = "humanfriendly-1.44.9-py2.py3-none-any.whl", hash = "sha256:ed65dfd6172b579318eef1c6f73614a406db618e6c55fc8788de05a73ab88657"},
@@ -2975,6 +3006,10 @@ venusian = [
 waitress = [
     {file = "waitress-2.0.0-py3-none-any.whl", hash = "sha256:29af5a53e9fb4e158f525367678b50053808ca6c21ba585754c77d790008c746"},
     {file = "waitress-2.0.0.tar.gz", hash = "sha256:69e1f242c7f80273490d3403c3976f3ac3b26e289856936d1f620ed48f321897"},
+]
+webencodings = [
+    {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
+    {file = "webencodings-0.5.1.tar.gz", hash = "sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"},
 ]
 webob = [
     {file = "WebOb-1.8.7-py2.py3-none-any.whl", hash = "sha256:73aae30359291c14fa3b956f8b5ca31960e420c28c1bec002547fb04928cf89b"},
