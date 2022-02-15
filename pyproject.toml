@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "4.0.0"  # 4.0.0 introduces containerization
+version = "4.0.0.2b8"  # includes master (3.5.10) but built on Will's containerize and containerize_restore branches, which will be 4.0.0
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -36,13 +36,14 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.6.1,<3.7"
+awscli = ">=1.21.3,!=1.22.52"
 boto3 = "^1.18.46"
 botocore = "^1.21.46"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault = "^4.9.0"
-dcicutils = "^3.1.0"
+dcicsnovault = "^5.1.1"
+dcicutils = "^3.9.0"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"
 execnet = "1.4.1"
@@ -178,6 +179,9 @@ migrate-dataset-type = "encoded.commands.migrate_dataset_type:main"
 migrate-files-aws = "encoded.commands.migrate_files_aws:main"
 owl-to-items = "encoded.commands.generate_items_from_owl:main"
 profile = "encoded.commands.profile:main"
+# Will asks that there be some better doc for prepare-docker.
+# https://hms-dbmi.atlassian.net/browse/C4-781
+prepare-docker = "encoded.commands.prepare_docker:main"
 run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
 update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
