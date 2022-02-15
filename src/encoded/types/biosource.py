@@ -57,11 +57,11 @@ def _build_biosource_embedded_list():
                 'individual.health_status',
 
                 # Organism linkTo
-                'individual.organism.name',
-                'individual.organism.scientific_name',
+                'organism.name',
+                'organism.scientific_name',
 
                 # Ontology linkTo
-                'tissue.source_ontologies.ontology_name',
+                'tissue.source_ontologies.ontology_name'
             ]
     )
 
