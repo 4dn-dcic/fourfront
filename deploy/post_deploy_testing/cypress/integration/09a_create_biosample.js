@@ -49,7 +49,7 @@ describe('Biosample create page', function () {
                     return cy.contains('Skip').click().end();
                 })
                 .end()
-                .get("h1.page-title").contains("Biosample").wait(1000).end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
+                .get("h1.page-title").contains("Biosample").wait(3000).end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
 
             // Queue for deletion in subsequent test.
             cy.get('script[data-prop-name=context]').then(function($context){

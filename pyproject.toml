@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "4.0.0.2b7"  # includes master (3.5.9) but built on Will's containerize and containerize_restore branches, which will be 4.0.0
+version = "4.0.0.2b8"  # includes master (3.5.10) but built on Will's containerize and containerize_restore branches, which will be 4.0.0
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
