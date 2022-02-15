@@ -466,6 +466,12 @@ def render_page_html_tween_factory(handler, registry):
     # tricky to enforce (we would need to create one cgroup per process.)
     # So we just manually check the resource usage after each transform.
 
+    # In code review (9-Feb-2022,
+    # https://github.com/4dn-dcic/fourfront/pull/1597#discussion_r802944325),
+    # Will says:
+    # > Looking at this now, I think this number rss_limit should be reconsidered
+    # > in the context of Fargate (much higher).
+    # -kmp 15-Feb-2022
     rss_limit = 256 * (1024 ** 2)  # MB
 
     reload_process = (True
