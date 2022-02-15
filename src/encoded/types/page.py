@@ -129,8 +129,8 @@ def add_sibling_parent_relations_to_tree(node):
     return node
 
 
-
 def is_static_page(info, request):
+    """ Re-ified property on all static pages - note that get_by_json can be expensive on small ES clusters. """
     page_name = "/".join(info.get('match', {}).get('subpath'))
     if '@@' in page_name:
         return False
