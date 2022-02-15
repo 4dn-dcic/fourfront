@@ -5,7 +5,7 @@
 
 # Debian Buster with Python 3.6.15
 # Note image is updated from cgap-portal
-FROM python:3.6.15-slim-buster
+FROM python:3.7.12-slim-buster
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -26,7 +26,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_VERSION=1.1.12 \
   NODE_VERSION=12.22.9
 
-# Install nginx, base system
+# Install nginx, base system requirements
 COPY deploy/docker/production/install_nginx.sh /
 RUN bash /install_nginx.sh && \
     apt-get update && \
@@ -74,24 +74,19 @@ COPY package.json .
 COPY package-lock.json .
 RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/bin/python
 
-# Build front-end
-# XXX: this fails but might be able to be made to succeed? - Will Oct 7 2021
-# COPY *.js .
-# COPY src/encoded/static .
-# RUN npm run build && \
-  #    npm run build-scss
-
 # Copy over the rest of the code
 COPY . .
 
-# Build front-end, remove node_modules when done
-RUN npm run build && \
-    npm run build-scss
 
 # Build remaining back-end
 RUN poetry install && \
     python setup_eb.py develop && \
     make fix-dist-info
+# Build front-end, remove node_modules when done
+RUN npm run build && \
+    npm run build-scss
+# Maybe also....
+# && rm -rf node_modules/
 
 # Misc
 RUN make aws-ip-ranges && \
