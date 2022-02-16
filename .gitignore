@@ -51,6 +51,7 @@ beanstalk.cfg
 +.pydevproject
 *.log
 .python-version
+.python-cmd
 ~$*
 .~*#
 production.ini

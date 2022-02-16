@@ -59,7 +59,7 @@ def deduplicate_list(lst):
 
 
 def gunzip_content(content):
-    """ Helper that will gunzip content """
+    """ Helper that will gunzip content (into memory) """
     f_in = BytesIO()
     f_in.write(content)
     f_in.seek(0)
