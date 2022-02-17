@@ -120,7 +120,7 @@ def fetch_biorxiv(url, doi):
         'abstract': 'abstract',
         'authors': 'authors',
         'date_published': 'date',
-        "version": "version"
+        'version': 'version'
     }
     biorxiv_api = 'https://api.biorxiv.org/details/biorxiv/'
     # try fetching data 5 times and return empty if fails
