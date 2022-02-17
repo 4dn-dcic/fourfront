@@ -216,6 +216,7 @@ class Publication(Item, ItemWithAttachment):
         'authors',
         'date_published',
         'journal',
+        'version',
         'url'
     ]
 
