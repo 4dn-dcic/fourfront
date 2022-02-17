@@ -571,6 +571,14 @@ export class OverViewBodyItem extends React.PureComponent {
                     { matchingFile ? <div className="microscope-setting col-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
+        },
+        'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+            var matchingExp = _.find(fullObject.experiments_in_set || [], function(exp){
+                return exp.biosample.biosource_summary == item;
+            });
+            const value = object.atIdFromObject(matchingExp.biosample.biosource[0]);
+            const title = matchingExp.biosample.biosource_summary;
+            return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{title}</a>;
         }
     }
 
