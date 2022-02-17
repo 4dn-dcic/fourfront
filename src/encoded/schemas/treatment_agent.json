@@ -96,7 +96,10 @@
                 "MOI",
                 "PFU",
                 "lux"
-              ]
+            ],
+            "ignored_enum": [
+                "μl"
+            ]
         },
         "duration": {
             "title": "Duration",
