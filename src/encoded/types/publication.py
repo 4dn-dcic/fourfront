@@ -114,12 +114,13 @@ def fetch_pubmed(PMID):
 
 
 def fetch_biorxiv(url, doi):
-    """Takes url and doi, returns title abstract authors date url journal"""
+    """Takes url and doi, returns title abstract authors date url journal version"""
     fdn2biorxiv = {
         'title': 'title',
         'abstract': 'abstract',
         'authors': 'authors',
-        'date_published': 'date'
+        'date_published': 'date',
+        "version": "version"
     }
     biorxiv_api = 'https://api.biorxiv.org/details/biorxiv/'
     # try fetching data 5 times and return empty if fails
