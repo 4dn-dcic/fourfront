@@ -135,6 +135,6 @@
     "redux": "^3.7.0",
     "subprocess-middleware": "0.1.0",
     "underscore": "^1.13.2",
-    "vitessce": "^1.1.15"
+    "vitessce": "^1.1.18"
   }
 }
