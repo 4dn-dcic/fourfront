@@ -65,6 +65,7 @@ def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
     assert publication_doi_biorxiv['url'] == 'http://biorxiv.org/lookup/doi/10.1101/2021.10.14.464435'
     assert publication_doi_biorxiv['date_published'] == '2021-10-15'
     assert publication_doi_biorxiv['journal'] == 'bioRxiv'
+    assert publication_doi_biorxiv['version'] == '1'
 
 
 def test_update_publication_date_published(testapp, publication_PMID):
