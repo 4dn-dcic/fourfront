@@ -515,7 +515,39 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     );
 });
 
+/** Used in OverViewBodyItem.titleRenderPresets */
+const SampleBiosourceItem = React.memo(function SampleBiosourceItem(props) {
+    const { item, index, fullObject } = props;
 
+    const matchingExps = _.filter(fullObject.experiments_in_set || [], function (exp) {
+        const { biosample: { biosource_summary } = {} } = exp;
+        return biosource_summary === item;
+    });
+
+    // fallback
+    if (matchingExps.length === 0) {
+        return item;
+    }
+
+    const biosources = _.uniq(_.reduce(matchingExps, function (m, exp) {
+        const { biosample: { biosource = [] } = {} } = exp;
+        return m.concat(biosource.map(function (bs) {
+            return { accession: bs.accession, atId: object.atIdFromObject(bs) };
+        }));
+    }, []), function (bs) { return bs.accession; });
+
+    // create a link to the item page for a single item, whereas a link to search page for multiple items results
+    const style = { 'overflowWrap': 'break-word' };
+    if (biosources.length === 1) {
+        const [bs] = biosources;
+        return <a href={bs.atId} style={style} data-tip="View Biosource Details">{item}</a>;
+    } else if (biosources.length > 1) {
+        const link = '/search/?type=Biosource&accession=' + _.pluck(biosources, 'accession').join('&accession=');
+        return <a href={link} style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
+    }
+
+    return item;
+});
 
 export class OverViewBodyItem extends React.PureComponent {
 
@@ -573,12 +605,7 @@ export class OverViewBodyItem extends React.PureComponent {
             );
         },
         'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
-            var matchingExp = _.find(fullObject.experiments_in_set || [], function(exp){
-                return exp.biosample.biosource_summary == item;
-            });
-            const value = object.atIdFromObject(matchingExp.biosample.biosource[0]);
-            const title = matchingExp.biosample.biosource_summary;
-            return <a href={value} style={{ 'overflowWrap' : 'break-word' }}>{title}</a>;
+            return <SampleBiosourceItem {...{ item, index, fullObject }} />;
         }
     }
 
