@@ -139,7 +139,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     search, string_query = build_query(search, prepared_terms, source_fields)
 
     ### Set sort order
-    search = set_sort_order(request, search, prepared_terms, types, doc_types, result)
+    search = set_sort_order(request, search, prepared_terms, types, doc_types, result, schemas)
     # TODO: implement BOOST here?
 
     ### Set filters
@@ -622,7 +622,7 @@ def build_query(search, prepared_terms, source_fields):
     return search, string_query
 
 
-def set_sort_order(request, search, search_term, types, doc_types, result):
+def set_sort_order(request, search, search_term, types, doc_types, result, schemas):
     """
     sets sort order for elasticsearch results
     example: /search/?type=Biosource&sort=display_title
@@ -686,6 +686,27 @@ def set_sort_order(request, search, search_term, types, doc_types, result):
     if requested_sorts:
         for rs in requested_sorts:
             add_to_sort_dict(rs)
+    else:
+        # check default sort fields defined in the schema
+        # example definition:
+        # "default_sort_fields": [
+        #     {
+        #         "field_name": "date_published",
+        #         "order": "desc"
+        #     },
+        #     {
+        #         "field_name": "display_title",
+        #         "order": "asc"
+        #     }
+        # ]
+        for schema in schemas:
+            if 'default_sort_fields' in schema:
+                for fields in schema['default_sort_fields']:
+                    order = fields.get('order','')
+                    fieldName = fields.get('field_name','')
+                    if order and order == 'desc':
+                        fieldName = '-' + fieldName
+                    add_to_sort_dict(fieldName)
 
     text_search = search_term.get('q')
 
@@ -976,9 +997,9 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
         # TODO: Re-enable below line if/when 'range' URI param queries for date & numerical fields are implemented.
         # ('date_created', {'title': 'Date Created', 'hide_from_view' : True, 'aggregation_type' : 'date_histogram' })
     ]
-    validation_error_facets = [
-        ('validation_errors.name', {'title': 'Validation Errors', 'order': 999})
-    ]
+    # validation_error_facets = [
+    #     ('validation_errors.name', {'title': 'Validation Errors', 'order': 999})
+    # ]
     # hold disabled facets from schema; we also want to remove these from the prepared_terms facets
     disabled_facets = []
 
@@ -1069,7 +1090,7 @@ def initialize_facets(request, doc_types, prepared_terms, schemas, additional_fa
     # Append additional facets (status, validation_errors, ...) at the end of
     # list unless were already added via schemas, etc.
     used_facets = [ facet[0] for facet in facets ] # Reset this var
-    for ap_facet in append_facets + validation_error_facets:
+    for ap_facet in append_facets: # + validation_error_facets:
         if ap_facet[0] not in used_facets:
             facets.append(ap_facet)
         else: # Update with better title if not already defined from e.g. requested filters.
@@ -1572,7 +1593,8 @@ def build_table_columns(request, schemas, doc_types):
     # Add title column, at beginning always
     columns['display_title'] = {
         "title" : "Title",
-        "order" : -100
+        "order" : -100,
+        "type": "string"
     }
 
     # Add type column if any abstract types in search
@@ -1583,6 +1605,8 @@ def build_table_columns(request, schemas, doc_types):
             "colTitle" : "Type",
             "order" : -80,
             "description" : "Type or category of Item",
+            "type": "string",
+            "tooltip": True
             # Alternative below, if we want type column to be available but hidden by default in selection mode:
             # "default_hidden": request.normalized_params.get('currentAction') == 'selection'
         }
@@ -1598,33 +1622,49 @@ def build_table_columns(request, schemas, doc_types):
                     # If @type or display_title etc. column defined in schema, then override defaults.
                     for prop in schema_columns[name]:
                         columns[name][prop] = schema_columns[name][prop]
-                # Add description from field schema, if none otherwise.
-                if not columns[name].get('description'):
+                # Add description and data type from field schema, if none otherwise.
+                if not columns[name].get('description') or not columns[name].get('type'):
                     field_schema = schema_for_field(name, request, doc_types)
                     if field_schema:
-                        if field_schema.get('description') is not None:
+                        if not columns[name].get('description') and field_schema.get('description') is not None:
                             columns[name]['description'] = field_schema['description']
+                        if not columns[name].get('type') and field_schema.get('type') is not None:
+                            columns[name]['type'] = field_schema['type']
+                # add tooltip
+                if columns[name].get('tooltip') is None:
+                    columns[name]['tooltip'] = True
+                # iterate through sort_fields and set data type from schema if not already defined            
+                if 'sort_fields' in columns[name]:
+                    sort_fields = columns[name].get('sort_fields')
+                    for sort_field in sort_fields:
+                        if not sort_field.get('type') and sort_field.get('field') is not None:
+                            sort_field_schema = schema_for_field(sort_field.get('field'), request, doc_types)
+                            if sort_field_schema.get('type') is not None:
+                                sort_field['type'] = sort_field_schema.get('type')
 
     # Add status column, if not present, at end.
     if 'status' not in columns:
         columns['status'] = {
             "title"             : "Status",
             "default_hidden"    : True,
-            "order"             : 501
+            "order"             : 501,
+            "type"              : "string"
         }
     # Add created date column, if not present, at end.
     if 'date_created' not in columns:
         columns['date_created'] = {
             "title"             : "Date Created",
             "default_hidden"    : True,
-            "order"             : 510
+            "order"             : 510,
+            "type"              : "date"
         }
     # Add modified date column, if not present, at end.   
     if 'last_modified.date_modified' not in columns:
         columns['last_modified.date_modified'] = {
             "title"             : "Date Modified",
             "default_hidden"    : True,
-            "order"             : 520
+            "order"             : 520,
+            "type"              : "date"
         }
     return columns
 

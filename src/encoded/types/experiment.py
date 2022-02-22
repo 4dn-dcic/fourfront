@@ -1,6 +1,7 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
 import itertools
+import re
 
 from snovault import (
     abstract_collection,
@@ -30,6 +31,7 @@ from .base import (
     get_item_or_none,
     lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
 
 EXP_CATEGORIZER_SCHEMA = {
     "title": "Categorizer",
@@ -52,6 +54,13 @@ EXP_CATEGORIZER_SCHEMA = {
 }
 
 
+def _build_experiment_embedded_list():
+    """ Helper function intended to be used to create the embedded list for experiment.
+        All types should implement a function like this going forward.
+    """
+    pass
+
+
 @abstract_collection(
     name='experiments',
     unique_key='accession',
@@ -61,7 +70,13 @@ EXP_CATEGORIZER_SCHEMA = {
         'description': 'Listing of all types of experiments.',
     })
 class Experiment(Item):
-    """The main experiment class."""
+    """The main experiment class.
+
+        As a special reminder on this item, which is a "parent type" item, that when you linkTo this and
+        embed fields from it, you are picking up default_embeds (display_title) and must embed ALL possible
+        fields that could impact it by analyzing the child types.
+    """
+    # TODO: Review embeds of this item for correctness. - Will 1/26/2021
     item_type = 'experiment'
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
@@ -70,89 +85,178 @@ class Experiment(Item):
         'experiment_sets': ('ExperimentSet', 'experiments_in_set')
     }
     aggregated_items = {
-        "badges": [
-            "messages",
-            "badge.commendation",
-            "badge.warning",
-            "badge.uuid",
-            "badge.@id",
-            "badge.badge_icon",
-            "badge.description"
+        'badges': [
+            'messages',
+            'badge.commendation',
+            'badge.warning',
+            'badge.uuid',
+            'badge.@id',
+            'badge.badge_icon',
+            'badge.description'
         ]
     }
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        "badges.badge.title",
-        "badges.badge.commendation",
-        "badges.badge.warning",
-        "badges.badge.badge_classification",
-        "badges.badge.description",
-        "badges.badge.badge_icon",
-        "badges.messages",
-        "experiment_sets.experimentset_type",
-        "experiment_sets.@type",
-        "experiment_sets.accession",
-        # "experiment_type.display_title",
-        "produced_in_pub.title",
-        "produced_in_pub.abstract",
-        "produced_in_pub.journal",
-        "produced_in_pub.authors",
-        "produced_in_pub.short_attribution",
-        "produced_in_pub.date_published",
-        "publications_of_exp.title",
-        "publications_of_exp.abstract",
-        "publications_of_exp.journal",
-        "publications_of_exp.authors",
-        "publications_of_exp.short_attribution",
-        "publications_of_exp.date_published",
-        "biosample.accession",
-        "biosample.modifications_summary",
-        "biosample.treatments_summary",
-        "biosample.biosource_summary",
-        "biosample.biosample_type",
-        "biosample.biosource.biosource_type",
-        "biosample.biosource.cell_line.slim_terms",
-        "biosample.biosource.cell_line.synonyms",
-        "biosample.biosource.tissue.slim_terms",
-        "biosample.biosource.tissue.synonyms",
-        "biosample.biosource.individual.organism.name",
-        "biosample.modifications.modification_type",
-        "biosample.modifications.display_title",
-        "biosample.treatments.treatment_type",
-        "biosample.treatments.display_title",
-        "biosample.badges.badge.title",
-        "biosample.badges.badge.commendation",
-        "biosample.badges.badge.warning",
-        "biosample.badges.badge.badge_classification",
-        "biosample.badges.badge.description",
-        "biosample.badges.badge.badge_icon",
-        "biosample.badges.messages",
+        # Badge linkTo
+        'badges.badge.title',
+        'badges.badge.commendation',
+        'badges.badge.warning',
+        'badges.badge.badge_classification',
+        'badges.badge.description',
+        'badges.badge.badge_icon',
+        'badges.messages',
 
-        "experiment_type.experiment_category",
-        "experiment_type.assay_subclass_short",
+        # ExperimentSet linkTo
+        'experiment_sets.experimentset_type',
+        'experiment_sets.@type',
+        'experiment_sets.accession',
 
-        "files.href",
-        "files.accession",
-        "files.uuid",
-        "files.file_size",
-        "files.upload_key",
-        "files.file_format",
-        "files.file_classification",
-        "files.file_type_detailed",
-        "files.paired_end",
-        "files.external_references.*",
-        # "files.badges.badge.title",
-        # "files.badges.badge.commendation",
-        # "files.badges.badge.warning",
-        # "files.badges.badge.badge_classification",
-        # "files.badges.badge.description",
-        # "files.badges.badge.badge_icon",
-        # "files.badges.messages",
-        "files.quality_metric.Total Sequences",
-        "files.quality_metric.Sequence length",
-        "files.quality_metric.url",
-        "files.quality_metric.overall_quality_status",
-        "files.quality_metric.quality_metric_summary.*",
+        # Publication linkTo
+        'produced_in_pub.ID',
+        'produced_in_pub.title',
+        'produced_in_pub.abstract',
+        'produced_in_pub.journal',
+        'produced_in_pub.authors',
+        'produced_in_pub.short_attribution',
+        'produced_in_pub.date_published',
 
+        # Publication linkTo
+        'publications_of_exp.ID',
+        'publications_of_exp.title',
+        'publications_of_exp.abstract',
+        'publications_of_exp.journal',
+        'publications_of_exp.authors',
+        'publications_of_exp.short_attribution',
+        'publications_of_exp.date_published',
+
+        # Biosample linkTo
+        'biosample.accession',
+        'biosample.modifications_summary',  # XXX: investigate these calc props for needed embeds
+        'biosample.treatments_summary',
+        'biosample.biosource_summary',
+        'biosample.biosample_type',
+
+        # Biosouce linkTo (lots)
+        'biosample.biosource.*',
+
+        # OntologyTerm linkTo
+        'biosample.biosource.cell_line.slim_terms',
+        'biosample.biosource.cell_line.synonyms',
+        'biosample.biosource.cell_line.preferred_name',
+        'biosample.biosource.cell_line.term_name',
+        'biosample.biosource.cell_line.term_id',
+
+        # OntologyTerm linkTo
+        'biosample.biosource.tissue.slim_terms',
+        'biosample.biosource.tissue.synonyms',
+        'biosample.biosource.tissue.preferred_name',
+        'biosample.biosource.tissue.term_name',
+        'biosample.biosource.tissue.term_id',
+
+        # Individual linkTo
+        'biosample.biosource.individual.protected_data',
+
+        # Organism linkTo
+        'biosample.biosource.individual.organism.name',
+        'biosample.biosource.individual.organism.scientific_name',
+
+        # Modification linkTo
+        'biosample.modifications.modification_type',
+        'biosample.modifications.genomic_change',
+        'biosample.modifications.override_modification_name',
+        'biosample.modifications.description',
+
+        # BioFeature linkTo
+        'biosample.modifications.target_of_mod.feature_type',
+        'biosample.modifications.target_of_mod.preferred_label',
+        'biosample.modifications.target_of_mod.cellular_structure',
+        'biosample.modifications.target_of_mod.organism_name',
+        'biosample.modifications.target_of_mod.relevant_genes',
+        'biosample.modifications.target_of_mod.feature_mods',
+        'biosample.modifications.target_of_mod.genome_location',
+
+        # Treatment linkTo
+        'biosample.treatments.treatment_type',
+        'biosample.treatments.description',
+        'biosample.treatments.chemical',
+        'biosample.treatments.biological_agent',
+        'biosample.treatments.duration',
+        'biosample.treatments.duration_units',
+        'biosample.treatments.concentration',
+        'biosample.treatments.concentration_units',
+        'biosample.treatments.temperature',
+
+        # Construct linkTo
+        'biosample.treatments.constructs.name',
+
+        # Badge linkTo
+        'biosample.badges.badge.title',
+        'biosample.badges.badge.commendation',
+        'biosample.badges.badge.warning',
+        'biosample.badges.badge.badge_classification',
+        'biosample.badges.badge.description',
+        'biosample.badges.badge.badge_icon',
+        'biosample.badges.messages',
+
+        # ExperimentType linkTo
+        'experiment_type.title',
+        'experiment_type.experiment_category',
+        'experiment_type.assay_subclass_short',
+
+        # Files linkTo
+        'files.href',
+        'files.accession',
+        'files.uuid',
+        'files.file_size',
+        'files.upload_key',
+        'files.file_classification',
+        'files.file_type',
+        'files.file_type_detailed',
+        'files.paired_end',
+        'files.notes_to_tsv',
+        'files.dbxrefs',
+        'files.external_references.*',
+        'files.related_files.relationship_type',
+        'files.related_files.file.accession',
+        'files.related_files.file.paired_end',
+        'files.related_files.file.file_type',
+
+        # FileFormat linkTo
+        'files.file_format.file_format',
+
+        # QualityMetric linkTo
+        'files.quality_metric.Total Sequences',
+        'files.quality_metric.Sequence length',
+        'files.quality_metric.url',
+        'files.quality_metric.overall_quality_status',
+        'files.quality_metric.quality_metric_summary.*',
+
+        # FileProcessed linkTo
+        'processed_files.href',
+        'processed_files.accession',
+        'processed_files.uuid',
+        'processed_files.file_size',
+        'processed_files.upload_key',
+        'processed_files.file_classification',
+        'processed_files.file_type_detailed',
+        'processed_files.external_references.*',
+
+        # FileFormat linkTo
+        'processed_files.file_format.file_format',
+
+        # QualityMetric linkTo
+        'processed_files.quality_metric.url',
+        'processed_files.quality_metric.overall_quality_status',
+        'processed_files.quality_metric.quality_metric_summary.*',
+        'processed_files.quality_metric.Total reads',
+        'processed_files.quality_metric.qc_list.value.Total reads',
+
+        # Object
+        'other_processed_files.title',
+        'other_processed_files.description',
+        'other_processed_files.type',
+        'other_processed_files.files.notes_to_tsv',
+
+        # File linkTo
         "processed_files.href",
         "processed_files.accession",
         "processed_files.uuid",
@@ -167,23 +271,40 @@ class Experiment(Item):
         "processed_files.quality_metric.quality_metric_summary.*",
         "processed_files.quality_metric.Total reads",
         "processed_files.quality_metric.qc_list.value.Total reads",
+        "processed_files.notes_to_tsv",
+        "processed_files.open_data_url",
+        "processed_files.track_and_facet_info.*",
 
+        "other_processed_files.files.accession",
         "other_processed_files.files.href",
-        "other_processed_files.title",
-        "other_processed_files.description",
-        "other_processed_files.type",
         "other_processed_files.files.file_type_detailed",
-        "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
         "other_processed_files.files.genome_assembly",
         "other_processed_files.files.status",
-        "other_processed_files.files.last_modified.date_modified",
+        "other_processed_files.files.notes_to_tsv",
+        "other_processed_files.files.open_data_url",
+        "other_processed_files.files.track_and_facet_info.*",
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
-        "other_processed_files.files.notes_to_tsv",
 
+        # FileFormat linkTo
+        "other_processed_files.files.file_format.file_format",
+
+        # last modification (since just time, no invalidation)
+        "other_processed_files.files.last_modified.date_modified",
+
+        # QualityMetric linkTo
+        'other_processed_files.files.quality_metric.url',
+        'other_processed_files.files.quality_metric.overall_quality_status',
+        'other_processed_files.files.quality_metric.quality_metric_summary.*',
+
+        # higlass view config linkTO
+        "other_processed_files.higlass_view_config.description",
+        "other_processed_files.higlass_view_config.last_modified.date_modified",
+
+        # FileReference linkTo
         "reference_files.accession",
         "reference_files.file_type_detailed",
         "reference_files.file_size",
@@ -387,7 +508,10 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
-    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name"]
+    embedded_list = Experiment.embedded_list + [
+        # Enzyme linkTo
+        'digestion_enzyme.name'
+    ]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -426,9 +550,36 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded_list = Experiment.embedded_list + ["digestion_enzyme.name",
-                                                "targeted_regions.target.display_title",
-                                                "targeted_regions.oligo_file.href"]
+    embedded_list = Experiment.embedded_list + [
+        # Enzyme linkTo
+        'digestion_enzyme.name',
+
+        # Biofeature linkTo
+        'targeted_regions.target.feature_type',
+        'targeted_regions.target.preferred_label',
+        'targeted_regions.target.cellular_structure',
+        'targeted_regions.target.organism_name',
+
+        # GenomicRegion linkTo
+        'targeted_regions.target.genome_location.genome_assembly',
+        'targeted_regions.target.genome_location.location_description',
+        'targeted_regions.target.genome_location.start_coordinate',
+        'targeted_regions.target.genome_location.end_coordinate',
+        'targeted_regions.target.genome_location.chromosome',
+
+        # Object
+        'targeted_regions.target.feature_mods.mod_type',
+        'targeted_regions.target.feature_mods.mod_position',
+
+        # Gene linkTo
+        'targeted_regions.target.relevant_genes.geneid',
+        'targeted_regions.target.relevant_genes.preferred_symbol',
+
+        # File linkTo
+        'targeted_regions.oligo_file.file_format.*',
+        'targeted_regions.oligo_file.accession',
+        'targeted_regions.oligo_file.href',
+    ]
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -478,6 +629,18 @@ class ExperimentCaptureC(Experiment):
         return super(ExperimentCaptureC, self).experiment_categorizer(request, experiment_type, digestion_enzyme)
 
 
+def _build_experiment_repliseq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentRepliseq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-repliseq',
     unique_key='accession',
@@ -489,7 +652,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repli-seq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_repliseq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -571,6 +734,18 @@ class ExperimentAtacseq(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
+def _build_experiment_chiapet_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentChiapet.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-chiapet',
     unique_key='accession',
@@ -583,7 +758,7 @@ class ExperimentChiapet(Experiment):
 
     item_type = 'experiment_chiapet'
     schema = load_schema('encoded:schemas/experiment_chiapet.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_chiapet_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -660,6 +835,18 @@ class ExperimentDamid(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
+def _build_experiment_seq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentSeq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-seq',
     unique_key='accession',
@@ -672,7 +859,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_seq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -702,6 +889,21 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
     })
     def display_title(self, request, experiment_type, biosample, targeted_factor=None):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
+
+
+def _build_experiment_tsaseq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentTsaseq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    secondary_antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='secondary_antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds + secondary_antibody_embeds
+    )
 
 
 @collection(
@@ -716,7 +918,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
 
     item_type = 'experiment_tsaseq'
     schema = load_schema('encoded:schemas/experiment_tsaseq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_tsaseq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -748,6 +950,51 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
+def _build_experiment_mic_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentMic.
+        All types should implement a function like this going forward.
+    """
+    imaging_path_embeds = DependencyEmbedder.embed_for_type(
+        base_path='imaging_paths.path',
+        t='imaging_path',
+        additional_embeds=['imaging_rounds', 'experiment_type.title'])
+    return (Experiment.embedded_list + imaging_path_embeds + [
+        # Files linkTo
+        'files.accession',  # detect display_title diff
+
+        # MicroscopeSettings linkTo
+        'files.microscope_settings.ch00_light_source_center_wl',
+        'files.microscope_settings.ch01_light_source_center_wl',
+        'files.microscope_settings.ch02_light_source_center_wl',
+        'files.microscope_settings.ch03_light_source_center_wl',
+        'files.microscope_settings.ch04_light_source_center_wl',
+        'files.microscope_settings.ch00_lasers_diodes',
+        'files.microscope_settings.ch01_lasers_diodes',
+        'files.microscope_settings.ch02_lasers_diodes',
+        'files.microscope_settings.ch03_lasers_diodes',
+        'files.microscope_settings.ch04_lasers_diodes',
+
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration_master.title',
+        'microscope_configuration_master.microscope.Name',
+        'files.microscope_configuration.title',
+        'files.microscope_configuration.microscope.Name',
+
+        # Image linkTo
+        'sample_image.title',
+        'sample_image.caption',
+        'sample_image.microscopy_file.accession',
+        'sample_image.microscopy_file.omerolink',
+        'sample_image.attachment.href',
+        'sample_image.attachment.type',
+        'sample_image.attachment.md5sum',
+        'sample_image.attachment.download',
+        'sample_image.attachment.width',
+        'sample_image.attachment.height',
+        ]
+    )
+
+
 @collection(
     name='experiments-mic',
     unique_key='accession',
@@ -759,29 +1006,8 @@ class ExperimentMic(Experiment):
     """The experiment class for Microscopy experiments."""
     item_type = 'experiment_mic'
     schema = load_schema('encoded:schemas/experiment_mic.json')
-    embedded_list = Experiment.embedded_list + [
-        "files.microscope_settings.ch00_light_source_center_wl",
-        "files.microscope_settings.ch01_light_source_center_wl",
-        "files.microscope_settings.ch02_light_source_center_wl",
-        "files.microscope_settings.ch03_light_source_center_wl",
-        "files.microscope_settings.ch00_lasers_diodes",
-        "files.microscope_settings.ch01_lasers_diodes",
-        "files.microscope_settings.ch02_lasers_diodes",
-        "files.microscope_settings.ch03_lasers_diodes",
 
-        'sample_image.caption',
-        'sample_image.microscopy_file.accession',
-        'sample_image.microscopy_file.omerolink',
-        'sample_image.attachment.href',
-        'sample_image.attachment.type',
-        'sample_image.attachment.md5sum',
-        'sample_image.attachment.download',
-        'sample_image.attachment.width',
-        'sample_image.attachment.height',
-
-        'imaging_paths.path.imaging_rounds',
-        'imaging_paths.path.experiment_type'
-    ]
+    embedded_list = _build_experiment_mic_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -808,14 +1034,30 @@ class ExperimentMic(Experiment):
     def experiment_categorizer(self, request, experiment_type, biosample, imaging_paths=None):
         ''' Use the target(s) in the imaging path'''
         if imaging_paths:
+            unique_targets = []
             path_targets = []
             for pathobj in imaging_paths:
-                path = request.embed('/', pathobj['path'], '@@object')
+                path = get_item_or_none(request, pathobj['path'], 'imaging_path')
                 for target in path.get('target', []):
-                    summ = request.embed('/', target, '@@object')['display_title']
-                    path_targets.append(summ)
+                    biofeature = get_item_or_none(request, target, 'bio_feature')
+                    if biofeature['@id'] not in unique_targets:
+                        unique_targets.append(biofeature['@id'])
+                        path_targets.append(biofeature['display_title'])
             if path_targets:
-                value = ', '.join(list(set(path_targets)))
+                value = []
+                sum_targets = {}
+                for target in path_targets:
+                    # check if target starts with numbers, e.g. '50 TADs', '40 TADs'
+                    # sum them if there are more: '90 TADs'
+                    split_target = re.split(r'(^[0-9]+)', target, maxsplit=1)
+                    if len(split_target) > 1:
+                        t_num, t_name = split_target[1:3]
+                        sum_targets[t_name] = sum_targets.setdefault(t_name, 0) + int(t_num)
+                    elif target not in value:
+                        value.append(target)
+                if sum_targets:
+                    value = [str(n) + t for t, n in sum_targets.items()] + value
+                value = ', '.join(value)
                 return {
                     'field': 'Target',
                     'value': value,

@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 
 def includeme(config):
-    '''
+    """
     Can get tween ordering by executing the following on command-line from root dir:
         `bin/ptween development.ini`
 
@@ -67,7 +67,7 @@ def includeme(config):
     This means that if handler(request) is called, then the downstream tweens are acted upon it,
     until response is returned. It's an ONION!
 
-    '''
+    """
 
     config.add_tween('.renderers.validate_request_tween_factory', under='snovault.stats.stats_tween_factory')
     # DISABLED - .add_tween('.renderers.remove_expired_session_cookies_tween_factory', under='.renderers.validate_request_tween_factory')
@@ -132,7 +132,7 @@ def security_tween_factory(handler, registry):
         """
 
         expected_user = request.headers.get('X-If-Match-User')
-        if expected_user is not None: # Not sure when this is the case
+        if expected_user is not None:  # Not sure when this is the case
             if request.authenticated_userid != 'mailto.' + expected_user:
                 detail = 'X-If-Match-User does not match'
                 raise HTTPPreconditionFailed(detail)
@@ -150,7 +150,6 @@ def security_tween_factory(handler, registry):
                         headers={'WWW-Authenticate': "Bearer realm=\"{}\"; Basic realm=\"{}\"".format(request.domain, request.domain) }
                     )
 
-
         if hasattr(request, 'auth0_expired'):
             # Add some security-related headers on the up-swing
             response = handler(request)
@@ -166,14 +165,13 @@ def security_tween_factory(handler, registry):
                 # Especially for initial document requests by browser, but also desired for AJAX and other requests,
                 # unset jwtToken cookie so initial client-side React render has App(instance).state.session = false
                 # to be synced w/ server-side
-                request_parts = urlparse(request.referrer)
-                request_domain = request_parts.hostname
                 response.set_cookie(
                     name='jwtToken',
                     value=None,
-                    domain=request_domain,
+                    domain=request.domain,
                     max_age=0,
-                    path='/'
+                    path='/',
+                    overwrite=True
                 )  # = Same as response.delete_cookie(..)
                 response.status_code = 401
                 response.headers['WWW-Authenticate'] = "Bearer realm=\"{}\", title=\"Session Expired\"; Basic realm=\"{}\"".format(request.domain, request.domain)
@@ -216,7 +214,7 @@ def security_tween_factory(handler, registry):
 
 
 def remove_expired_session_cookies_tween_factory(handler, registry):
-    '''
+    """
     CURRENTLY DISABLED
     Original purpose of this was to remove expired (session?) cookies.
     See: https://github.com/ENCODE-DCC/encoded/commit/75854803c99e5044a6a33aedb3a79d750481b6cd#diff-bc19a9793a1b3b4870cff50e7c7c9bd1R135
@@ -224,7 +222,7 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
     We disable it for now via removing from tween chain as are using JWT tokens and handling
     their removal in security_tween_factory & authentication.py as well as client-side
     (upon "Logout" action). If needed for some reason, can re-enable.
-    '''
+    """
 
     ignore = {
         '/favicon.ico',
@@ -260,7 +258,7 @@ def remove_expired_session_cookies_tween_factory(handler, registry):
 
 
 def set_response_headers_tween_factory(handler, registry):
-    '''Add additional response headers here'''
+    """Add additional response headers here"""
     def set_response_headers_tween(request):
         response = handler(request)
         response.headers['X-Request-URL'] = request.url
@@ -318,13 +316,13 @@ def canonical_redirect(event):
 
 @lru_cache(maxsize=16)
 def should_transform(request, response):
-    '''
+    """
     Determines whether to transform the response from JSON->HTML/JS depending on type of response
     and what the request is looking for to be returned via e.g. request Accept, Authorization header.
     In case of no Accept header, attempts to guess.
 
     Memoized via `lru_cache`. Cache size is set to be 16 (> 1) in case sub-requests fired off during handling.
-    '''
+    """
     # We always return JSON in response to POST, PATCH, etc.
     if request.method not in ('GET', 'HEAD'):
         return False
@@ -334,12 +332,12 @@ def should_transform(request, response):
         return False
 
     # The `format` URI param allows us to override request's 'Accept' header.
-    format = request.params.get('format')
-    if format is not None:
-        format = format.lower()
-        if format == 'json':
+    format_param = request.params.get('format')
+    if format_param is not None:
+        format_param = format_param.lower()
+        if format_param == 'json':
             return False
-        if format == 'html':
+        if format_param == 'html':
             return True
         else:
             raise HTTPNotAcceptable("Improper format URI parameter", comment="The format URI parameter should be set to either html or json.")
@@ -348,15 +346,13 @@ def should_transform(request, response):
     # which should contain 'text/html'
     # See: https://tedboy.github.io/flask/generated/generated/werkzeug.Accept.best_match.html#werkzeug-accept-best-match
     mime_type = request.accept.best_match(['text/html',  'application/json', 'application/ld+json'], 'application/json')
-    format = mime_type.split('/', 1)[1] # Will be 1 of 'html', 'json', 'json-ld'
+    mime_type_format = mime_type.split('/', 1)[1]  # Will be 1 of 'html', 'json', 'json-ld'
 
     # N.B. ld+json (JSON-LD) is likely more unique case and might be sent by search engines (?) which can parse JSON-LDs.
     # At some point we could maybe have it to be same as making an `@@object` or `?frame=object` request (?) esp if fill
     # out @context response w/ schema(s) (or link to schema)
 
-    if format == 'html':
-        return True
-    return False
+    return mime_type_format == 'html'
 
 
 def render_page_html_tween_factory(handler, registry):

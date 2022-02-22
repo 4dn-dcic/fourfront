@@ -60,35 +60,30 @@ TSV_MAPPING = OrderedDict([
     ('md5sum',                      (FILE,      ['md5sum'], True)),
     ('File Type',                   (FILE,      ['file_type'], True)),
     ('File Format',                 (FILE,      ['file_format.display_title'], True)),
-   #('Experiment Title',            (EXP,       ['display_title'], True)),
-    ('Experiment Type',             (EXP,       ['experiment_type.display_title'], True)),
     ('Bio Rep No',                  (EXP_SET,   ['replicate_exps.bio_rep_no'], True)),
     ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'], True)),
-    ('Condition',                   (EXP_SET,   ['condition'], True)),
-    ('Dataset',                     (EXP_SET,   ['dataset_label'], True)),
 
-    ('Biosource',                   (EXP,       ['biosample.biosource_summary'], True)),
     ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'], True)),
     ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'], True)),
-    ('Assay Details',               (EXP,       ['experiment_categorizer.combined'], True)),
-   #('Digestion Enzyme',            (EXP,       ['digestion_enzyme.name'], True)),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'], False)),
     ('Related File',                (FILE,      ['related_files.file.accession'], False)),
     ('Paired End',                  (FILE,      ['paired_end'], True)),
     ('Set Status',                  (EXP_SET,   ['status'], True)),
     ('File Status',                 (FILE,      ['status'], True)),
     ('Publication',                 (EXP_SET,   ['produced_in_pub.short_attribution'], True)),
-    ('Experiment Type',             (FILE_ONLY, ['track_and_facet_info.experiment_type'], True)),
-    ('Replicate Info',              (FILE_ONLY, ['track_and_facet_info.replicate_info'], True)),
-    ('Assay Details',               (FILE_ONLY, ['track_and_facet_info.assay_info'], True)),
-    ('Biosource',                   (FILE_ONLY, ['track_and_facet_info.biosource_name'], True)),
-    ('Condition ',                  (FILE_ONLY, ['track_and_facet_info.condition'], True)), #do not remove trailing whitespace of the key
-    ('Dataset ',                    (FILE_ONLY, ['track_and_facet_info.dataset'], True)), #do not remove trailing whitespace of the key
-    ('In Experiment As',            (FILE_ONLY, ['track_and_facet_info.experiment_bucket'], True)),
+    ('Experiment Type',             (FILE,      ['track_and_facet_info.experiment_type'], True)),
+    ('Replicate Info',              (FILE,      ['track_and_facet_info.replicate_info'], True)),
+    ('Assay Details',               (FILE,      ['track_and_facet_info.assay_info'], True)),
+    ('Biosource',                   (FILE,      ['track_and_facet_info.biosource_name'], True)),
+    ('Dataset',                     (FILE,      ['track_and_facet_info.dataset'], True)),
+    ('Condition',                   (FILE,      ['track_and_facet_info.condition'], True)),
+    ('In Experiment As',            (FILE,      ['track_and_facet_info.experiment_bucket'], True)),
     ('Project',                     (EXP_SET,   ['award.project'], True)),
-    ('Generating Lab',              (FILE,      ['lab.display_title'], True)),
+    ('Generating Lab',              (FILE,      ['track_and_facet_info.lab_name'], True)),
+    ('Experimental Lab',            (FILE,      ['track_and_facet_info.experimental_lab'], True)),
     ('Contributing Lab',            (FILE,      ['contributing_labs.display_title'], True)),
     ('Notes',                       (FILE,      ['notes_to_tsv'], True)),
+    ('Open Data URL',               (FILE,      ['open_data_url'], True)),
 
 
 
@@ -383,7 +378,8 @@ def metadata_tsv(context, request):
             if ',' not in experiment_accession:
                 return get_val(experiment_accession)
             else:
-                return ', '.join([ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ])
+                vals = [ get_val(accession) for accession in experiment_accession.split(', ') if accession is not None and accession != 'NONE' ]
+                return ', '.join(filter(None, vals))
         return None
 
     def should_file_row_object_be_included(column_vals_dict):
@@ -573,6 +569,12 @@ def metadata_tsv(context, request):
             summary['lists']['Duplicate Files'].append(('Duplicate of row ' + str(row_num_duplicated), file_row_dict ))
             return file_row_dict
 
+        # remove repeating/redundant lab info in Contributing Lab
+        if (file_row_dict['Contributing Lab'] is not None and file_row_dict['Contributing Lab'] != '' and
+            (file_row_dict['Contributing Lab'] == file_row_dict['Experimental Lab'] or
+            file_row_dict['Contributing Lab'] == file_row_dict['Generating Lab'])):
+            file_row_dict['Contributing Lab'] = ''
+        
         file_cache[file_row_dict['File Download URL']] = idx
         if('Size (MB)' in file_row_dict and file_row_dict['Size (MB)'] != None and file_row_dict['Size (MB)'] != ''):
             file_row_dict['Size (MB)'] = format(

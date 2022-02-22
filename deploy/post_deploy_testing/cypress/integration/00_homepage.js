@@ -26,7 +26,7 @@ describe('Home Page', function () {
 
 
     it('Has carousel', function() {
-        cy.get('.homepage-carousel-wrapper .slider-frame ul.slider-list li').should('have.length.of.at.least', 2);
+        cy.get('.homepage-carousel-wrapper .slider-frame .slider-list .slider-slide').should('have.length.of.at.least', 2);
     });
 
     it('Has Twitter feed w. 5+ tweets', function() {

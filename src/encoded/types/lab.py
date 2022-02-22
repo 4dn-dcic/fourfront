@@ -39,6 +39,19 @@ ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
 ] + ONLY_ADMIN_VIEW
 
 
+def _build_lab_embedded_list():
+    """ Helper function intended to be used to create the embedded list for lab.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + [
+        # Award linkTo
+        'awards.project',
+        'awards.name',
+        'awards.pi.last_name',
+        'awards.center_title'
+    ]
+
+
 @collection(
     name='labs',
     unique_key='lab:name',
@@ -52,10 +65,7 @@ class Lab(Item):
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
-    embedded_list = Item.embedded_list + [
-        'awards.project',
-        'awards.center_title'
-    ]
+    embedded_list = _build_lab_embedded_list()
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,

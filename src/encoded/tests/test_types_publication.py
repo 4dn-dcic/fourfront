@@ -34,7 +34,7 @@ def publication_doi_biorxiv(testapp, lab, award):
         'uuid': '8312fc0c-b241-4cb2-9b01-143891055002',
         'award': award['@id'],
         'lab': lab['@id'],
-        'ID': "doi:10.1101/000091"
+        'ID': "doi:10.1101/2021.10.14.464435"
     }
     return testapp.post_json('/publication', item, status=201).json['@graph'][0]
 
@@ -59,12 +59,13 @@ def test_update_publication_doi_pubmed(testapp, publication_doi_pubmed):
 
 
 def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
-    assert publication_doi_biorxiv['title'][:50] == 'Designing Robustness to Temperature in a Feedforwa'
-    assert publication_doi_biorxiv['abstract'][:50] == 'Incoherent feedforward loops represent important b'
-    assert publication_doi_biorxiv['authors'] == ['Shaunak Sen', 'Jongmin Kim', 'Richard M. Murray']
-    assert publication_doi_biorxiv['url'] == 'https://www.biorxiv.org/content/10.1101/000091v1'
-    assert publication_doi_biorxiv['date_published'] == '2013-11-07'
+    assert publication_doi_biorxiv['title'][:50] == 'The 4D Nucleome Data Portal: a resource for search'
+    assert publication_doi_biorxiv['abstract'][:50] == 'The 4D Nucleome (4DN) Network aims to elucidate th'
+    assert publication_doi_biorxiv['authors'][:4] == ['Reiff SB', 'Schroeder AJ', 'Kirli K', 'Cosolo A']
+    assert publication_doi_biorxiv['url'] == 'http://biorxiv.org/lookup/doi/10.1101/2021.10.14.464435'
+    assert publication_doi_biorxiv['date_published'] == '2021-10-15'
     assert publication_doi_biorxiv['journal'] == 'bioRxiv'
+    assert publication_doi_biorxiv['version'] == '1'
 
 
 def test_update_publication_date_published(testapp, publication_PMID):

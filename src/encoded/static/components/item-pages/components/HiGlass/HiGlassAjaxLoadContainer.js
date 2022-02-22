@@ -15,73 +15,10 @@ import { HiGlassPlainContainer, HiGlassLoadingIndicator } from './HiGlassPlainCo
  */
 export class HiGlassAjaxLoadContainer extends React.PureComponent {
 
-    /**
-     * Dynamically scale the 1-dimensional top tracks in the Higlass viewconf.
-     * Memoized function.
-     * @param {object} The Higlass view configuration. This is not modified.
-     * @param {integer} The target height for the Higlass config, in pixels.
-     * @returns {object}
-     */
-    static scaleViewconfToHeight = memoize(function(originalViewconf, givenHeight){
-        const viewconf = object.deepClone(originalViewconf);
-
-        // Check parameters.
-        if (!("views" in viewconf)) { return viewconf; }
-        if (givenHeight === null || givenHeight <= 0) {return viewconf; }
-
-        // Are there any views with 1D tracks? If not, stop
-        const has1DTracks = function(view) {
-            return (
-                "tracks" in view &&
-                "top" in view["tracks"] &&
-                view["tracks"]["top"].length > 0
-            );
-        };
-        if (!(_.some(viewconf["views"], has1DTracks))) {
-            return viewconf;
-        }
-
-        // Determine the height for each view. There may be so many views they must be on multiple rows.
-        const heightPerView = viewconf["views"] <= 2 ? givenHeight : (givenHeight / 2) | 0;
-
-        _.each(viewconf["views"], function(view){
-            if (!(has1DTracks(view))) { return; }
-
-            // 2D tracks scale automatically, so we will let it take about 2/3s of the total height.
-            let scaledHeightFor1DTracks = heightPerView;
-            if (
-                "tracks" in view &&
-                "center" in view["tracks"] &&
-                view["tracks"]["center"].length > 0
-            ) {
-                scaledHeightFor1DTracks = (heightPerView / 3) | 0;
-            }
-
-            const tracksEligibleForScaling = _.filter(view["tracks"]["top"], function(track) { 
-                // Don't scale gene annotation tracks, they need to be completely visible
-                return (("height" in track) && track["type"] !== "horizontal-gene-annotations");
-            });
-
-            if (tracksEligibleForScaling.length === 0) { return; }
-
-            const sumOfOriginal1DTracks = _.reduce(
-                tracksEligibleForScaling,
-                function(memo, track) { return memo + track["height"];},
-                0
-            );
-            // Resize each 1D track to fit the given display height (round to the nearest integer so Higlass can use them)
-            _.each(
-                tracksEligibleForScaling,
-                function (track) {
-                    track["height"] = (track["height"] * scaledHeightFor1DTracks / sumOfOriginal1DTracks) | 0;
-                }
-            );
-        });
-        return viewconf;
-    });
-
     static propTypes = {
+        'higlassItem': PropTypes.object,
         'scale1dTopTrack': PropTypes.bool.isRequired,
+        'height': PropTypes.number
     }
 
     static defaultProps = {
@@ -139,7 +76,6 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
     }
     render(){
         const { higlassItem, loading } = this.state;
-        const { scale1dTopTrack } = this.props;
         let { height } = this.props;
 
         //if height not defined by container then use instance defined value
@@ -167,9 +103,6 @@ export class HiGlassAjaxLoadContainer extends React.PureComponent {
             );
         }
 
-        // Scale the higlass config so it fits the given container.
-        const adjustedViewconfig = scale1dTopTrack ? HiGlassAjaxLoadContainer.scaleViewconfToHeight(higlassItem.viewconfig, height) : object.deepClone(higlassItem.viewconfig);
-        // Pass the viewconfig to the HiGlassPlainContainer
-        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem', 'height')} viewConfig={adjustedViewconfig} ref={this.containerRef} height={height} />;
+        return <HiGlassPlainContainer {..._.omit(this.props, 'higlassItem', 'height')} viewConfig={higlassItem.viewconfig} ref={this.containerRef} height={height} />;
     }
 }

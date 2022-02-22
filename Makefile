@@ -20,6 +20,9 @@ clean-npm-caches:
 clean-node-modules:
 	rm -rf node_modules
 
+clear-poetry-cache:  # clear poetry/pypi cache. for user to do explicitly, never automatic
+	poetry cache clear pypi --all
+
 aws-ip-ranges:
 	curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json
 
@@ -40,7 +43,9 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 
 configure:  # does any pre-requisite installs
 	pip install --upgrade pip
-	pip install poetry==1.1.4  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
+	pip install poetry==1.1.9  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
+	pip install setuptools==57.5.0  # this version allows 2to3, any later will break -wrr 20-Sept-2021
+	poetry config virtualenvs.create false --local  # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
 build:  # builds
 	make configure
@@ -111,11 +116,11 @@ kill:  # kills back-end processes associated with the application. Use with care
 clean-python:
 	@echo -n "Are you sure? This will wipe all libraries installed on this virtualenv [y/N] " && read ans && [ $${ans:-N} = y ]
 	pip uninstall encoded
-	pip freeze | xargs pip uninstall -y
+	pip uninstall -y -r <(pip freeze)
 
 test:
-	make test-npm
 	make test-unit
+	make test-npm
 
 test-any:
 	bin/test -vv --timeout=200
@@ -127,15 +132,15 @@ test-npm:
 test-unit:
 	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"
 
-travis-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
-	make travis-test-npm
-	make travis-test-unit
+remote-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
+	make remote-test-npm
+	make remote-test-unit
 
-travis-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+remote-test-npm:  # Note this only does the 'not indexing' tests
+	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
-travis-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=400 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+remote-test-unit:  # Note this does the 'indexing' tests
+	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update

@@ -15,7 +15,7 @@ import webtest
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 # from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
-from dcicutils.env_utils import get_mirror_env_from_context, FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE
+from dcicutils.env_utils import get_mirror_env_from_context, is_stg_or_prd_env
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from sentry_sdk.integrations.pyramid import PyramidIntegration
@@ -29,12 +29,13 @@ from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
 from snovault.elasticsearch import APP_FACTORY
+from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 # from snovault.json_renderer import json_renderer
 # from sqlalchemy import engine_from_config
 # from webob.cookies import JSONSerializer
 
 from .loadxl import load_all
-from .utils import find_other_in_pair
+from .util import find_other_in_pair
 
 
 if sys.version_info.major < 3:
@@ -159,6 +160,8 @@ def main(global_config, **local_config):
     # set google reCAPTCHA keys
     settings['g.recaptcha.key'] = os.environ.get('reCaptchaKey')
     settings['g.recaptcha.secret'] = os.environ.get('reCaptchaSecret')
+    # enable invalidation scope
+    settings[INVALIDATION_SCOPE_ENABLED] = True
 
     # set mirrored Elasticsearch location (for staging and production servers)
     mirror = get_mirror_env_from_context(settings)
@@ -218,7 +221,7 @@ def main(global_config, **local_config):
 
     # initialize sentry reporting, split into "production" and "mastertest", do nothing in local/testing
     current_env = settings.get('env.name', None)
-    if current_env in [FF_ENV_PRODUCTION_GREEN, FF_ENV_PRODUCTION_BLUE]:
+    if is_stg_or_prd_env(current_env):
         sentry_sdk.init("https://0d46fafce1d04ea2bfbe11ff15ca896e@o427308.ingest.sentry.io/5379985",
                         integrations=[PyramidIntegration(), SqlalchemyIntegration()])
     elif current_env is not None:

@@ -9,14 +9,14 @@ import ReactTooltip from 'react-tooltip';
 var serialize = require('form-serialize');
 import { detect as detectBrowser } from 'detect-browser';
 import jsonScriptEscape from '../libs/jsonScriptEscape';
-import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions } from './globals';
+import { content_views as globalContentViews, portalConfig, getGoogleAnalyticsTrackingID, analyticsConfigurationOptions, sentryDsn } from './globals';
 import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
 import { store } from './../store';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
-import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Schemas, SEO, typedefs, navigate } from './util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -223,6 +223,12 @@ export default class App extends React.PureComponent {
             );
         }
 
+        //Load up sentry io
+        const dsn = sentryDsn(href);
+        if (dsn) {
+            logger.initializeLogger(dsn);
+        }
+
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
         this.loadSchemas();
 
@@ -260,7 +266,7 @@ export default class App extends React.PureComponent {
 
         console.info('BROWSER', browserInfo);
 
-        if (browserInfo && typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari'].indexOf(browserInfo.name) === -1){
+        if (browserInfo && typeof browserInfo.name === 'string' && ['chrome', 'firefox', 'safari', 'opera'].indexOf(browserInfo.name) === -1){
             Alerts.queue({
                 'title' : 'Browser Suggestion',
                 'message' : (
@@ -271,7 +277,7 @@ export default class App extends React.PureComponent {
                             the recommended browser(s) for using the 4DN Data Portal.
                         </p>
                         <p className="mb-0">
-                            Microsoft Edge, Safari, etc. should work for a majority of portal functions but are not explicitly supported and may present some glitches, e.g. during submission.
+                            Microsoft Edge, Safari, Opera etc. should work for a majority of portal functions but are not explicitly supported and may present some glitches, e.g. during submission.
                         </p>
                     </div>
                 ),
@@ -381,7 +387,7 @@ export default class App extends React.PureComponent {
         // Handle list of values, e.g. if `currentAction=selection&currentAction=selection&currentAction=edit` or something is in URL.
         // We should __not__ get an array here and is glitch, but if so, lets fallback and choose _1st_ non-null item.
         if (Array.isArray(action)){
-            console.error("Received unexpected list for `currentAction` URI param", action);
+            logger.error("Received unexpected list for `currentAction` URI param", action);
             action = _.filter(action);
             action = (action.length > 0 ? action[0] : null);
         }
@@ -905,7 +911,7 @@ export default class App extends React.PureComponent {
                     if (response.code === 404){
                         // This may not be caught as a server or network error.
                         // If is explicit 404 (vs just 0 search results), pyramid will send it as 'code' property.
-                        analytics.exception('Page Not Found - ' + targetHref);
+                        logger.error('Page Not Found - ' + targetHref);
                     }
                 });
 
@@ -939,11 +945,11 @@ export default class App extends React.PureComponent {
                 console.error('Error in App.navigate():', err);
 
                 if (err.status === 500){
-                    analytics.exception('Server Error: ' + err.status + ' - ' + targetHref);
+                    logger.error('Server Error: ' + err.status + ' - ' + targetHref);
                 }
 
                 if (err.status === 404){
-                    analytics.exception('Page Not Found - ' + targetHref);
+                    logger.error('Page Not Found - ' + targetHref);
                 }
 
                 if (err.message === 'HTTPForbidden'){
@@ -954,10 +960,10 @@ export default class App extends React.PureComponent {
                 } else if (typeof err.status === 'number' && [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
-                    analytics.exception('Network Error: ' + err.status + ' - ' + targetHref);
+                    logger.error('Network Error: ' + err.status + ' - ' + targetHref);
                 } else {
                     Alerts.queue(Alerts.ConnectionError);
-                    analytics.exception('Unknown Network Error: ' + err.status + ' - ' + targetHref);
+                    logger.error('Unknown Network Error: ' + err.status + ' - ' + targetHref);
                     // Unknown/unanticipated error: Bubble it up (won't break app).
                     throw err;
                 }
@@ -1107,6 +1113,20 @@ export default class App extends React.PureComponent {
             'onBodySubmit'   : this.handleSubmit,
         });
 
+        // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
+        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ...
+        const contentSecurityPolicyStr = [
+            "default-src 'self'",
+            "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
+            "child-src blob:",
+            "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
+            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "worker-src 'self' blob:",
+            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
+        ].join("; ");
+
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
 
         return (
@@ -1114,6 +1134,7 @@ export default class App extends React.PureComponent {
                 <head>
                     <meta charSet="utf-8"/>
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
+                    <meta httpEquiv="Content-Security-Policy" content={contentSecurityPolicyStr}/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
@@ -1396,7 +1417,7 @@ class BodyElement extends React.PureComponent {
     componentDidCatch(err, info){
         const { href } = this.props;
         this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
-            analytics.exception('Client Error - ' + href + ': ' + err, true);
+            logger.error('Client Error - ' + href + ': ' + err, true);
             // Unset app.historyEnabled so that user may navigate backward w/o JS.
             if (window && window.fourfront && window.fourfront.app){
                 window.fourfront.app.historyEnabled = false;
@@ -1785,7 +1806,7 @@ class ContentErrorBoundary extends React.Component {
     componentDidCatch(err, info){
         const { href } = this.props;
         this.setState({ 'hasError' : true, 'errorInfo' : info }, ()=>{
-            analytics.exception('Client Error - ' + href + ': ' + err, true);
+            logger.error('Client Error - ' + href + ': ' + err);
         });
     }
 

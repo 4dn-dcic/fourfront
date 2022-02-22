@@ -57,6 +57,13 @@
                 "postnatal"
             ]
         },
+        "protected_data": {
+            "title": "Protected Data",
+            "description": "A flag to indicate whether fastq and bam files from this individual are subject to restricted access. If false, patient has given consent to release sequencing data.",
+            "type": "boolean",
+            "default": true,
+            "lookup": 50
+        },
         "organism": {
             "default": "7745b647-ff15-4ff3-9ced-b897d4e2983c",
             "exclude_from": ["submit4dn", "FFedit-create"],

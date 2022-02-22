@@ -46,7 +46,9 @@
                 "balanced normalized contact matrix",
                 "boundaries",
                 "calibration",
+                "cells table - scalar",
                 "chromatin states",
+                "chromatin traces",
                 "clustering metrics",
                 "compartments",
                 "contact list",
@@ -85,12 +87,16 @@
                 "reads",
                 "segregation table",
                 "signal fold change",
+                "imputed signal fold change",
                 "spt results",
                 "stripe calls"
             ],
             "ignored_enum": [
+                "additional spot data",
+                "chromatin traces - bio data",
                 "contact list-combined",
                 "contact list-replicate",
+                "directory tree",
                 "image mask-cell",
                 "image mask-cytoplasm",
                 "image mask-nucleus",
@@ -98,7 +104,9 @@
                 "read counts (minus)",
                 "read counts (plus)",
                 "reads-combined",
-                "spt results, submitter format"
+                "readme",
+                "spt results, submitter format",
+                "filtered feature-barcode matrices"
             ]
         },
         "file_classification": {

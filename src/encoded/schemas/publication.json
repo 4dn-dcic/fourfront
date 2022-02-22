@@ -51,6 +51,17 @@
                 "released to project"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "published_by": {
             "title": "Published by",
             "type": "string",
@@ -154,6 +165,12 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "version": {
+            "title": "Version",
+            "description": "Version of the record as is appears in the external database (e.g. bioRxiv version)",
+            "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the source.",
@@ -171,6 +188,19 @@
         }
     },
     "columns": {
+        "display_title": {
+            "title": "Title",
+            "sort_fields": [
+                {
+                    "field": "title",
+                    "title": "Publication Title"
+                },
+                {
+                    "field": "display_title",
+                    "title": "Author Name"
+                }
+            ]
+        },
         "date_published": {
             "title": "Year"
         },

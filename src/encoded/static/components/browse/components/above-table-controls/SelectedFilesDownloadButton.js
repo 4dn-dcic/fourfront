@@ -60,7 +60,7 @@ export const BrowseViewSelectedFilesDownloadButton = React.memo(function BrowseV
             <i className="icon icon-download fas icon-fw mr-07"/>
             <span className="d-none d-lg-inline">Download </span>
             <span className="count-to-download-integer">{ countToShow }</span>
-            <span className="d-none d-md-inline text-400"> Selected Files</span>
+            <span className="d-none d-lg-inline text-400"> Selected Files</span>
         </SelectedFilesDownloadButton>
     );
 });

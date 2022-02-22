@@ -2,7 +2,7 @@ import pytest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
 from .workbook_fixtures import app_settings, workbook
-# from ..utils import delay_rerun
+# from ..util import delay_rerun
 
 
 notice_pytest_fixtures(app_settings, workbook)
@@ -14,7 +14,7 @@ pytestmark = [
     # pytest.mark.flaky(rerun_filter=delay_rerun),
 ]
 
-
+@pytest.mark.skip(reason="validation_errors facet was removed in search.py")
 def test_validation_err_facet(workbook, testapp):
     res = testapp.get('/search/?type=ExperimentSetReplicate').json
     val_err_facets = [facet for facet in res['facets'] if facet['title'] == 'Validation Errors']

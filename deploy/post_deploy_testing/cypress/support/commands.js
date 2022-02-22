@@ -148,7 +148,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         "iss": "https://hms-dbmi.auth0.com/"
     };
 
-    jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
+    jwt_token = jwt.sign(jwtPayload, Buffer.from(auth0secret, 'utf-8'));
     expect(jwt_token).to.have.length.greaterThan(0);
     Cypress.log({
         'name' : "Login 4DN",
@@ -159,7 +159,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 });
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
-    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().wait(100).end()
+    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().wait(300).end()
         .get('#logoutbtn').click().end()
         .get(navUserAcctLoginBtnSelector).should('contain', 'Log In').wait(300).end()
         .get('#slow-load-container').should('not.have.class', 'visible').end();

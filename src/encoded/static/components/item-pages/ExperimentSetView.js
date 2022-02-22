@@ -7,22 +7,20 @@ import memoize from 'memoize-one';
 
 import Collapse from 'react-bootstrap/esm/Collapse';
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
-import { console, object, isServerSide, layout, commonFileUtil, schemaTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, isServerSide, layout, commonFileUtil, schemaTransforms, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas, typedefs } from './../util';
 
-import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
-import { HiGlassPlainContainer, isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
-import { AdjustableDividerRow } from './components/AdjustableDividerRow';
+import { isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
 import { OverviewHeadingContainer } from './components/OverviewHeadingContainer';
 import { OverViewBodyItem } from './DefaultItemView';
+import { HiGlassAdjustableWidthRow } from './HiGlassViewConfigView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
-import { QCMetricFromSummary } from './QualityMetricView';
+import { renderStatusIndicator } from './ExperimentView';
 
-import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, renderFileQCReportLinkButton, renderFileQCDetailLinkButton } from './../browse/components/file-tables';
+import { RawFilesStackedTableExtendedColumns, ProcessedFilesStackedTable, QCMetricsTable } from './../browse/components/file-tables';
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
-import { EmbeddedHiglassActions } from './../static-pages/components';
-import { combineExpsWithReplicateNumbersForExpSet } from './../util/experiments-transforms';
+import { combineExpsWithReplicateNumbersForExpSet, addFilesStackedTableStatusColHeader } from './../util/experiments-transforms';
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 
 // eslint-disable-next-line no-unused-vars
@@ -100,9 +98,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         //context = SET; // Use for testing along with _testing_data
 
         const processedFiles = this.allProcessedFilesFromExperimentSet(context);
-        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
+        const processedFilesUniqeLen = (processedFiles && processedFiles.length && ProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
         const rawFiles = this.allFilesFromExperimentSet(context, false);
-        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
+        const rawFilesUniqueLen = (rawFiles && rawFiles.length && RawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
         const width = this.getTabViewWidth();
 
         const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
@@ -111,9 +109,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         var tabs = [];
 
         // Processed Files Table Tab
-        if (processedFilesLen > 0){
+        if (processedFilesUniqeLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-microchip fas icon-fw"/>{ ' ' + processedFilesLen + " Processed File" + (processedFilesLen > 1 ? 's' : '') }</span>,
+                tab : <span><i className="icon icon-microchip fas icon-fw"/>{ ' ' + processedFilesUniqeLen + " Processed File" + (processedFilesUniqeLen > 1 ? 's' : '') }</span>,
                 key : 'processed-files',
                 content : (
                     <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={processedFiles}>
@@ -124,9 +122,9 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
         }
 
         // Raw files tab, if have experiments with raw files
-        if (rawFilesLen > 0){
+        if (rawFilesUniqueLen > 0){
             tabs.push({
-                tab : <span><i className="icon icon-leaf fas icon-fw"/>{ ' ' + rawFilesLen + " Raw File" + (rawFilesLen > 1 ? 's' : '') }</span>,
+                tab : <span><i className="icon icon-leaf fas icon-fw"/>{ ' ' + rawFilesUniqueLen + " Raw File" + (rawFilesUniqueLen > 1 ? 's' : '') }</span>,
                 key : 'raw-files',
                 content : (
                     <SelectedFilesController resetSelectedFilesCheck={ExperimentSetView.resetSelectedFilesCheck} initiallySelectedFiles={rawFiles}>
@@ -134,16 +132,6 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     </SelectedFilesController>
                 )
             });
-        }
-
-        // Graph Section Tab
-        if (this.shouldGraphExist()){
-            tabs.push(FileViewGraphSection.getTabObject(
-                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
-                this.state,
-                this.handleToggleAllRuns,
-                width
-            ));
         }
 
         // Supplementary Files Tab
@@ -161,6 +149,16 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
                     </SelectedFilesController>
                 )
             });
+        }
+
+        // Graph Section Tab
+        if (this.shouldGraphExist()){
+            tabs.push(FileViewGraphSection.getTabObject(
+                _.extend({}, this.props, { 'isNodeCurrentContext' : this.isWorkflowNodeCurrentContext }),
+                this.state,
+                this.handleToggleAllRuns,
+                width
+            ));
         }
 
         return _.map(tabs.concat(this.getCommonTabs()), function(tabObj){
@@ -209,7 +207,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-sm-6 col-md-9" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
-                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} hideIfNoValue />
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={5} collapseShow={4} hideIfNoValue />
 
         </OverviewHeadingContainer>
     );
@@ -232,17 +230,18 @@ const expCategorizerTitleRenderFxn = memoize(function(field, val, allowJX = true
 
 export class RawFilesStackedTableSection extends React.PureComponent {
 
+    static allFilesUniqueCount = memoize(uniqueFileCount);
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
         const { context, files, selectedFiles, session } = this.props;
+        const allFilesUniqueCount = RawFilesStackedTableSection.allFilesUniqueCount(files);
         const selectedFilesUniqueCount = RawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
-        const fileCount = files.length;
         const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
 
         return (
             <h3 className="tab-section-title">
-                <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
+                <span className="text-400">{ allFilesUniqueCount }</span>{ ' Raw File' + (allFilesUniqueCount !== 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
@@ -266,284 +265,8 @@ export class RawFilesStackedTableSection extends React.PureComponent {
                 { this.renderHeader() }
                 <div className="exp-table-container">
                     <RawFilesStackedTableExtendedColumns {..._.extend(_.pick(this.props, 'width', 'windowWidth', 'href'), SelectedFilesController.pick(this.props))}
-                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7} analyticsImpressionOnMount />
-                </div>
-            </div>
-        );
-    }
-}
-
-/**
- * TODO: Move to HiGlassTabView.js ?
- */
-class HiGlassAdjustableWidthRow extends React.PureComponent {
-
-    static propTypes = {
-        'width' : PropTypes.number.isRequired,
-        'mounted' : PropTypes.bool.isRequired,
-        'renderRightPanel' : PropTypes.func,
-        'windowWidth' : PropTypes.number.isRequired,
-        'higlassItem' : PropTypes.object,
-        'minOpenHeight' : PropTypes.number,
-        'maxOpenHeight' : PropTypes.number,
-        'renderLeftPanelPlaceholder' : PropTypes.func,
-        'leftPanelCollapseHeight' : PropTypes.number,
-        'leftPanelCollapseWidth' : PropTypes.number,
-        'leftPanelDefaultCollapsed' : PropTypes.bool
-    };
-
-    static defaultProps = {
-        'minOpenHeight' : 300,
-        'maxOpenHeight' : 800
-    };
-
-    constructor(props){
-        super(props);
-        _.bindAll(this, 'correctHiGlassTrackDimensions', 'renderLeftPanel');
-        this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions, 100);
-        this.higlassContainerRef = React.createRef();
-    }
-
-    componentDidUpdate(pastProps){
-        const { width } = this.props;
-        if (pastProps.width !== width){
-            this.correctHiGlassTrackDimensions();
-        }
-    }
-
-    /**
-     * This is required because HiGlass doesn't always update all of own tracks' widths (always updates header, tho)
-     */
-    correctHiGlassTrackDimensions(){
-        var internalHiGlassComponent = this.higlassContainerRef.current && this.higlassContainerRef.current.getHiGlassComponent();
-        if (!internalHiGlassComponent) {
-            console.warn('Internal HiGlass Component not accessible.');
-            return;
-        }
-        setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
-    }
-
-    renderLeftPanel(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight){
-        const { renderLeftPanelPlaceholder, leftPanelCollapseHeight, higlassItem, minOpenHeight, maxOpenHeight } = this.props;
-        if (collapsed){
-            var useHeight = leftPanelCollapseHeight || rightPanelHeight || minOpenHeight;
-            if (typeof renderLeftPanelPlaceholder === 'function'){
-                return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
-            } else {
-                return (
-                    <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
-                        data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
-                        <i className="icon icon-fw fas icon-tv"/>
-                    </h5>
-                );
-            }
-        } else {
-            return (
-                <React.Fragment>
-                    <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
-                    <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
-                </React.Fragment>
-            );
-        }
-    }
-
-    render(){
-        const { mounted, minOpenHeight, leftPanelCollapseWidth, windowWidth } = this.props;
-
-        // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
-        if (!mounted) {
-            return (
-                <div className="adjustable-divider-row text-center py-5">
-                    <div className="text-center my-5">
-                        <i className="icon icon-spin icon-circle-notch fas text-secondary icon-2x"/>
-                    </div>
-                </div>
-            );
-        }
-
-        // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
-        const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
-        const rgs = layout.responsiveGridState(windowWidth);
-        const leftPanelDefaultWidth = rgs === 'xl' ? 400 : 300;
-
-        return (
-            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel" leftPanelDefaultWidth={leftPanelDefaultWidth}
-                leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
-                renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
-        );
-    }
-}
-
-
-class QCMetricsTable extends React.PureComponent {
-
-    static qcSummaryItemTitleTooltipsByTitle(fileGroup) {
-        const tooltipsByTitle = {};
-        fileGroup.forEach(function({ title: qmsTitle, quality_metric_summary: { title_tooltip = null } = {} }){
-            if (typeof tooltipsByTitle[qmsTitle] === "string") {
-                return; // skip/continue; already found a tooltip_title for this qms title.
-            }
-            if (title_tooltip && typeof title_tooltip === "string"){
-                tooltipsByTitle[qmsTitle] = title_tooltip;
-            }
-        });
-        return tooltipsByTitle;
-    }
-
-    static renderForFileColValue(file) {
-        const fileAtId = file && object.atIdFromObject(file);
-        let fileTitleString;
-        if (file.accession) {
-            fileTitleString = file.accession;
-        }
-        if (!fileTitleString && fileAtId) {
-            var idParts = _.filter(fileAtId.split('/'));
-            if (idParts[1].slice(0, 5) === '4DNFI') {
-                fileTitleString = idParts[1];
-            }
-        }
-        if (!fileTitleString) {
-            fileTitleString = file.uuid || fileAtId || 'N/A';
-        }
-        return (
-            <React.Fragment>
-                <div>{ Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true) }</div>
-                <a className="text-500 name-title" href={fileAtId}>
-                    {fileTitleString}
-                </a>
-            </React.Fragment>);
-    }
-
-    static generateAlignedColumnHeaders(fileGroups){
-        return fileGroups.map(function(fileGroup){
-            const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
-            const columnHeaders = [ // Static / present-for-each-table headers
-                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
-                { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
-            ].concat(fileGroup[0].quality_metric.quality_metric_summary.map(function(qmsObj, qmsIndex){ // Dynamic Headers
-                const { title, title_tooltip } = qmsObj;
-                // title tooltip: if missing in the first item then try to get it from the first valid one in array
-                return {
-                    columnClass: 'file-detail',
-                    title,
-                    title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
-                    initialWidth: 80,
-                    render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
-                        const qmsItem = file.quality_metric.quality_metric_summary[qmsIndex];
-                        const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
-                        return <span className="d-inline-block" data-tip={tooltip}>{value}</span>;
-                    }
-                };
-            }));
-
-            // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
-            const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
-                return f && f.quality_metric && f.quality_metric.url;
-            });
-
-            if (anyFilesWithMetricURL) {
-                columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
-                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
-            } else {
-                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
-            }
-            return columnHeaders;
-        });
-    }
-
-    /**
-     * commonFileUtil.groupFilesByQCSummaryTitles function is wrapped to allow
-     * custom sorting by QC schema's qc_order and @type Atacseq or Chipseq specific QCS items
-     */
-    static groupFilesByQCSummaryTitles(filesWithMetrics, schemas) {
-        let filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
-
-        const comparerFunc = (filesA, filesB) => {
-            const [fileA] = filesA; //assumption: 1st file's QC is adequate to define order
-            const [fileB] = filesB; //assumption: 1st file's QC is adequate to define order
-
-            let orderA, orderB;
-            if (schemas) {
-                const itemTypeA = schemaTransforms.getItemType(fileA.quality_metric);
-                if (itemTypeA && schemas[itemTypeA]) {
-                    const { qc_order } = schemas[itemTypeA];
-                    if (typeof qc_order === 'number') {
-                        orderA = qc_order;
-                    }
-                }
-                const itemTypeB = schemaTransforms.getItemType(fileB.quality_metric);
-                if (itemTypeB && schemas[itemTypeB]) {
-                    const { qc_order } = schemas[itemTypeB];
-                    if (typeof qc_order === 'number') {
-                        orderB = qc_order;
-                    }
-                }
-            }
-
-            if (orderA && orderB && orderA !== orderB) {
-                return orderA - orderB;
-            }
-
-            //custom comparison for @type Atacseq or Chipseq specific QCS items
-            if (_.any(fileA.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
-                return -1;
-            } else if (_.any(fileB.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
-                return 1;
-            }
-
-            return 0;
-        };
-
-        if (filesByTitles) {
-            filesByTitles = filesByTitles.slice();
-            filesByTitles.sort(comparerFunc);
-        }
-
-        return filesByTitles;
-    }
-
-    static defaultProps = {
-        heading: (
-            <h3 className="tab-section-title mt-12">
-                <span>Quality Metrics</span>
-            </h3>
-        )
-    };
-
-    constructor(props){
-        super(props);
-        this.memoized = {
-            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
-            groupFilesByQCSummaryTitles: memoize(QCMetricsTable.groupFilesByQCSummaryTitles),
-            generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
-        };
-    }
-
-    render() {
-        const { width, files, windowWidth, href, heading, schemas } = this.props;
-        const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
-        const filesWithMetricsLen = filesWithMetrics.length;
-
-        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
-
-        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics, schemas);
-        const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
-        const commonTableProps = {
-            width, windowWidth, href,
-            collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
-            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics",
-            showNotesColumns: 'never'
-        };
-
-        return (
-            <div className="row">
-                <div className="exp-table-container col-12">
-                    { heading }
-                    { filesByTitles.map(function(fileGroup, i){
-                        return (
-                            <ProcessedFilesStackedTable {...commonTableProps} key={i} files={fileGroup} columnHeaders={columnHeadersForFileGroups[i]} />
-                        );
-                    })}
+                        experimentSet={context} showMetricColumns={anyFilesWithMetrics} collapseLongLists={true} collapseLimit={10} collapseShow={7}
+                        incrementalExpandLimit={100} incrementalExpandStep={100} analyticsImpressionOnMount />
                 </div>
             </div>
         );
@@ -574,11 +297,12 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
     static tableProps(sectionProps){
         return _.extend(
             _.pick(sectionProps, 'files', 'windowWidth', 'href'),
-            { 'collapseLimit' : 10, 'collapseShow' : 7, 'analyticsImpressionOnMount': true },
+            { 'collapseLimit': 10, 'collapseShow': 7, 'incrementalExpandLimit': 100, 'incrementalExpandStep': 100, 'analyticsImpressionOnMount': true },
             SelectedFilesController.pick(sectionProps)
         );
     }
 
+    static allFilesUniqueCount = memoize(uniqueFileCount);
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     constructor(props){
@@ -642,12 +366,13 @@ class ProcessedFilesStackedTableSection extends React.PureComponent {
 }
 
 const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTableSectionHeader({ files, selectedFiles, context, session }){
+    const allFilesUniqueCount = ProcessedFilesStackedTableSection.allFilesUniqueCount(files);
     const selectedFilesUniqueCount = ProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
     const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
     return (
         <h3 className="tab-section-title">
             <span>
-                <span className="text-400">{ files.length }</span> Processed Files
+                <span className="text-400">{ allFilesUniqueCount }</span> { 'Processed File' + (allFilesUniqueCount !== 1 ? 's' : '') }
             </span>
             { selectedFiles ? // Make sure data structure is present (even if empty)
                 <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
@@ -675,7 +400,7 @@ const ExperimentsWithoutFilesStackedTable = React.memo(function ExperimentsWitho
     }
 
     const tableProps = { 'columnHeaders': ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders };
-    const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps, expsNotAssociatedWithAnyFiles);
+    const expsWithReplicateExps = expFxn.combineWithReplicateNumbers(context.replicate_exps || [], expsNotAssociatedWithAnyFiles);
     const experimentBlock = expsWithReplicateExps.map((exp) => {
         const content = _.map(ProcessedFilesStackedTableSection.expsNotAssociatedWithFileColumnHeaders, function (col, idx) {
             if (col.render && typeof col.render === 'function') { return col.render(exp); }
@@ -729,8 +454,17 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         return null;
     }
 
+    static getStatusAndColHeaders(columnHeaders, files) {
+        const status = SupplementaryFilesOPFCollection.collectionStatus(files);
+        return { status, columnHeaders: addFilesStackedTableStatusColHeader(columnHeaders, files, status) };
+    }
+
     static defaultProps = {
-        'defaultOpen' : false
+        'defaultOpen' : false,
+        'columnHeaders' : (function(){
+            const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
+            return colHeaders;
+        })()
     };
 
     constructor(props){
@@ -738,7 +472,7 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
         // Usually have >1 SupplementaryFilesOPFCollection on page so we memoize at instance level not class level.
-        this.collectionStatus = memoize(SupplementaryFilesOPFCollection.collectionStatus);
+        this.getStatusAndColHeaders = memoize(SupplementaryFilesOPFCollection.getStatusAndColHeaders);
 
         this.state = {
             'open' : props.defaultOpen
@@ -752,43 +486,17 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     renderFilesTable(width, resetDividerFxn, leftPanelCollapsed){
-        const { collection, href } = this.props;
+        const { collection, href, columnHeaders: propColumnHeaders } = this.props;
+        const { files } = collection;
+        const { columnHeaders } = this.getStatusAndColHeaders(propColumnHeaders, files);
         const passProps = _.extend({ width, href }, SelectedFilesController.pick(this.props));
         return (
-            <ProcessedFilesStackedTable {...passProps} files={collection.files} collapseLongLists analyticsImpressionOnMount />
+            <ProcessedFilesStackedTable {...passProps} files={collection.files} columnHeaders={columnHeaders} collapseLongLists analyticsImpressionOnMount />
         );
     }
 
-    renderStatusIndicator(){
-        const { collection } = this.props;
-        const { files, description } = collection;
-        const status = this.collectionStatus(files);
-        if (!status) return null;
-
-        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
-        if (typeof status === 'string'){
-            const capitalizedStatus = Schemas.Term.toName("status", status);
-            return (
-                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className={outerClsName}>
-                    <i className="item-status-indicator-dot mr-07" data-status={status} />
-                    { capitalizedStatus }
-                </div>
-            );
-        } else {
-            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
-            return (
-                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                    <span className="indicators-collection d-inline-block mr-05">
-                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
-                    </span>
-                    Multiple
-                </div>
-            );
-        }
-    }
-
     render(){
-        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles, columnHeaders: propColumnHeaders } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         const qcMetricsHeading = (
@@ -797,9 +505,11 @@ class SupplementaryFilesOPFCollection extends React.PureComponent {
             </h4>
         );
 
+        const { status } = this.getStatusAndColHeaders(propColumnHeaders, files);
+
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
-                { this.renderStatusIndicator() }
+                { renderStatusIndicator(status) }
                 <h4>
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -832,13 +542,6 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
         'defaultOpen' : true,
         'columnHeaders' : (function(){
             const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
-            colHeaders.push({
-                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
-                render : function(file, field, detailIndex, fileEntryBlockProps){
-                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
-                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
-                }
-            });
             return colHeaders;
         })()
     };
@@ -846,6 +549,7 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
+        this.getStatusAndColHeaders = memoize(SupplementaryFilesOPFCollection.getStatusAndColHeaders);
         this.state = { 'open' : props.defaultOpen };
     }
 
@@ -856,12 +560,14 @@ class SupplementaryReferenceFilesSection extends React.PureComponent {
     }
 
     render(){
-        const { files, width, href, columnHeaders } = this.props;
+        const { files, width, href, columnHeaders: propColumnHeaders } = this.props;
         const { open } = this.state;
         const filesLen = files.length;
         const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
+        const { status, columnHeaders } = this.getStatusAndColHeaders(propColumnHeaders, files);
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
+                { renderStatusIndicator(status) }
                 <h4 className="mb-15">
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -946,7 +652,7 @@ class SupplementaryFilesTabView extends React.PureComponent {
                         return (object.itemUtil.atId(existFile) || 'a') === (object.itemUtil.atId(f) || 'b');
                     });
                     if (duplicateExistingFile){
-                        console.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
+                        logger.error('Found existing/duplicate file in ExperimentSet other_processed_files of Experiment File ' + f['@id']);
                         // TODO send to analytics?
                     } else {
                         collectionsByTitle[title].files.push(f);

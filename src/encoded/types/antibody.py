@@ -8,10 +8,24 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    get_item_or_none,
+    lab_award_attribution_embed_list
 )
+from .dependencies import DependencyEmbedder
 import string
 import re
+
+
+def _build_antibody_embedded_list():
+    """ Helper function intended to be used to create the embedded list for antibody.
+        All types should implement a function like this going forward.
+    """
+    antibody_target_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='antibody_target', t='bio_feature')
+    return Item.embedded_list + lab_award_attribution_embed_list + antibody_target_embeds + [
+        # Vendor linkTo
+        'antibody_vendor.title'
+    ]
 
 
 @collection(
@@ -27,7 +41,7 @@ class Antibody(Item):
     item_type = 'antibody'
     schema = load_schema('encoded:schemas/antibody.json')
     name_key = 'antibody_id'
-    embedded_list = Item.embedded_list + ['award.project']
+    embedded_list = _build_antibody_embedded_list()
 
     def _update(self, properties, sheets=None):
         # set antibody_id based on values of antibody_name and product_no
@@ -43,7 +57,12 @@ class Antibody(Item):
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     })
-    def display_title(self, antibody_name, antibody_product_no=None):
+    def display_title(self, request, antibody_name, antibody_product_no=None, antibody_vendor=None):
+        antibody_details = []
+        if antibody_vendor:
+            antibody_details.append(get_item_or_none(request, antibody_vendor, 'vendor').get('display_title'))
         if antibody_product_no:
-            antibody_name += ' ({})'.format(antibody_product_no)
+            antibody_details.append(antibody_product_no)
+        if antibody_details:
+            antibody_name += ' ({})'.format(', '.join(antibody_details))
         return antibody_name

@@ -1,7 +1,6 @@
 import re
-import rfc3987
 
-from dcicutils.misc_utils import ignored
+from dcicutils.misc_utils import ignored, is_valid_absolute_uri
 from jsonschema_serialize_fork import FormatChecker
 from pyramid.threadlocal import get_current_request
 from .server_defaults import (
@@ -14,9 +13,14 @@ from .server_defaults import (
 
 ACCESSION_CODES = "BS|ES|EX|FI|FS|IN|SR|WF"
 
+# Codes we allow for testing go here.
+ACCESSION_TEST_CODES = "BS|ES|EX|FI|FS|IN|SR|WF"
+
 accession_re = re.compile(r'^%s(%s)[1-9A-Z]{7}$' % (ACCESSION_PREFIX, ACCESSION_CODES))
-test_accession_re = re.compile(r'^%s(%s)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$' % (ACCESSION_TEST_PREFIX, ACCESSION_CODES))
-uuid_re = re.compile(r'(?i)\{?(?:[0-9a-f]{4}-?){8}\}?')  # NoQA - https://youtrack.jetbrains.com/issue/PY-47380
+test_accession_re = re.compile(r'^%s(%s)[0-9]{4}([0-9][0-9][0-9]|[A-Z][A-Z][A-Z])$' % (
+    ACCESSION_TEST_PREFIX, ACCESSION_TEST_CODES))
+
+uuid_re = re.compile(r'(?i)[{]?(?:[0-9a-f]{4}-?){8}[}]?')
 
 
 @FormatChecker.cls_checks("uuid")
@@ -70,7 +74,4 @@ def is_target_label(instance):
 
 @FormatChecker.cls_checks("uri", raises=ValueError)
 def is_uri(instance):
-    if ':' not in instance:
-        # We want only absolute uris
-        return False
-    return rfc3987.parse(instance, rule="URI_reference")
+    return is_valid_absolute_uri(instance)

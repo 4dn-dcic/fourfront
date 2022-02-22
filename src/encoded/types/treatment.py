@@ -12,6 +12,17 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
+
+
+def _build_treatments_embedded_list():
+    """ Helper function intended to be used to create the embedded list for treatments.
+        All types should implement a function like this going forward.
+    """
+    return Item.embedded_list + lab_award_attribution_embed_list + [
+        # Construct linkTo
+        'constructs.name'
+    ]
 
 
 @abstract_collection(
@@ -26,7 +37,14 @@ class Treatment(Item):
     item_type = 'treatment'
     base_types = ['Treatment'] + Item.base_types
     schema = load_schema('encoded:schemas/treatment.json')
-    embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    embedded_list = _build_treatments_embedded_list()
+
+
+def _build_treatments_agent_embedded_list():
+    """ Helper function intended to be used to create the embedded list for treatments_agent.
+        All types should implement a function like this going forward.
+    """
+    return Treatment.embedded_list
 
 
 @collection(
@@ -40,7 +58,7 @@ class TreatmentAgent(Treatment):
 
     item_type = 'treatment_agent'
     schema = load_schema('encoded:schemas/treatment_agent.json')
-    embedded_list = Treatment.embedded_list + ['constructs.name']
+    embedded_list = _build_treatments_agent_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",
@@ -75,11 +93,21 @@ class TreatmentAgent(Treatment):
             disp_title = "Transient transfection of " + plasmids + conditions
         elif treatment_type == "Biological" and biological_agent:
             disp_title = biological_agent + " treatment" + conditions
-        elif treatment_type == "Other":
-            disp_title = "Other treatment" + conditions
         else:
             disp_title = treatment_type + conditions
         return disp_title
+
+
+def _build_treatments_rnai_embedded_list():
+    """ Helper function intended to be used to create the embedded list for treatments_rnai.
+        All types should implement a function like this going forward.
+    """
+    bio_feature_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='target',
+                                                                    t='bio_feature')
+    return Treatment.embedded_list + bio_feature_embeds + [
+        # Vendor linkTo
+        'rnai_vendor.title',
+    ]
 
 
 @collection(
@@ -93,10 +121,7 @@ class TreatmentRnai(Treatment):
 
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
-    embedded_list = Treatment.embedded_list + [
-        'rnai_vendor.name',
-        'constructs.designed_to_target',
-    ]
+    embedded_list = _build_treatments_rnai_embedded_list()
 
     @calculated_property(schema={
         "title": "Display Title",

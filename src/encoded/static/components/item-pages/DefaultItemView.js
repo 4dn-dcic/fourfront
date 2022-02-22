@@ -9,8 +9,9 @@ import _ from 'underscore';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-import { console, object, layout, ajax, commonFileUtil, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, layout, ajax, commonFileUtil, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
+import { StackedBlockListViewMoreButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { Schemas, fileUtil, typedefs } from './../util';
 
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
@@ -133,11 +134,11 @@ export default class DefaultItemView extends React.PureComponent {
             ajax.load('/search/?type=Item&field=@id&field=uuid&field=accession&status=replaced&accession=' + redirected_from_accession, (r)=>{
                 const ourOldItem = _.findWhere(r['@graph'], { 'accession' : redirected_from_accession });
                 if (!ourOldItem){
-                    console.error('Couldnt find correct Item in list of results.');
+                    logger.error('Couldnt find correct Item in list of results.');
                     return;
                 }
                 if (!object.itemUtil.atId(ourOldItem)){
-                    console.error('Couldnt find @id of Item.');
+                    logger.error('Couldnt find @id of Item.');
                     return;
                 }
                 Alerts.queue({
@@ -146,7 +147,7 @@ export default class DefaultItemView extends React.PureComponent {
                     'style': 'warning'
                 });
             }, 'GET', (err)=>{
-                console.error('No results found');
+                logger.error('No results found');
             });
         }
     }
@@ -246,10 +247,10 @@ export default class DefaultItemView extends React.PureComponent {
             try {
                 tabbedView.setActiveKey(nextKey);
             } catch (e) {
-                console.warn('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
+                logger.warning('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
             }
         } else {
-            console.error('Cannot access tabbedView.setActiveKey()');
+            logger.error('Cannot access tabbedView.setActiveKey()');
         }
     }
 
@@ -478,18 +479,24 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
             '@id' : fileMicroscopyID = null,
             omerolink = null
         } = {},
+        attachment : {
+            'href' : attachmentHref = null,
+            'caption' : attachmentCaption = null
+        } = {},
         custom_link = null
     } = item;
 
-    const linkHref = (fileMicroscopyID && omerolink) || custom_link || linkToItem;
-    const { attachment = null } = item;
-    const { href: attachmentHref = null, caption: attachmentCaption = null } = attachment || {};
+    const imageSrc =  linkToItem + attachmentHref;
+    const linkHref = (fileMicroscopyID && omerolink) || custom_link || imageSrc;
     const filename = itemAttachmentFileName(item);
 
     if (!attachmentHref || !isAttachmentImage(filename)) return <EmbeddedItemWithAttachment {...props} />;
 
+    const openInNewWindow = (imageSrc === linkHref);
+    const linkProps = openInNewWindow ? { target: '_blank', rel: 'noreferrer' } : {};
+
     const imageElem = (
-        <a href={linkHref} className="image-wrapper">
+        <a href={linkHref} className="image-wrapper" {...linkProps}>
             <img className="embedded-item-image" src={linkToItem + attachmentHref} />
         </a>
     );
@@ -502,6 +509,7 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
                 { imageElem }
                 { captionText && <div className="caption">{ captionText }</div> }
                 { fileMicroscopyID && <a href={fileMicroscopyID}>View File Item - { item.microscopy_file.accession }</a> }
+                { !fileMicroscopyID && openInNewWindow && <a href={linkToItem} data-tip="View image item details">View Image Item</a> }
             </div>
         </div>
     );
@@ -510,6 +518,8 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
 
 
 export class OverViewBodyItem extends React.PureComponent {
+
+    static ViewMoreButton = StackedBlockListViewMoreButton;
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
@@ -617,19 +627,32 @@ export class OverViewBodyItem extends React.PureComponent {
         'singleItemClassName'           : null,
         'fallbackTitle'                 : null,
         'propertyForLabel'              : null,
-        'property'                      : null
+        'property'                      : null,
+        'collapseShow'                  : 0,
+        'collapseLimit'                 : 0,
     };
 
     constructor(props){
         super(props);
         this.createList = memoize(OverViewBodyItem.createList);
+        this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
+        this.state = {
+            'collapsed': true
+        };
+    }
+
+    handleCollapseToggle(){
+        this.setState(function({ collapsed }){
+            return { 'collapsed' : !collapsed };
+        });
     }
 
     render(){
         const {
             result, property, fallbackValue, titleRenderFxn, addDescriptionTipForLinkTos, wrapInColumn,
-            singleItemClassName, overrideTitle, hideIfNoValue
+            singleItemClassName, overrideTitle, hideIfNoValue, collapseLimit, collapseShow
         } = this.props;
+        const { collapsed } = this.state;
         let { propertyForLabel, listItemElement, listWrapperElement, listItemElementProps, listWrapperElementProps } = this.props;
 
         function fallbackify(val){
@@ -646,7 +669,7 @@ export class OverViewBodyItem extends React.PureComponent {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
-        const resultPropertyValue = property && this.createList(
+        let resultPropertyValue = property && this.createList(
             object.getNestedProperty(result, property),
             property,
             titleRenderFxn,
@@ -664,6 +687,16 @@ export class OverViewBodyItem extends React.PureComponent {
         propertyForLabel = propertyForLabel || property;
 
         if (Array.isArray(resultPropertyValue)){
+            let viewMoreButton = null;
+            if (collapseLimit && collapseShow && (resultPropertyValue.length >= collapseLimit) && (collapseLimit >= collapseShow)) {
+                const collapsibleChildren = collapsed ? resultPropertyValue.slice(collapseShow) : resultPropertyValue;
+                resultPropertyValue = collapsed ? resultPropertyValue.slice(0, collapseShow) : resultPropertyValue;
+                viewMoreButton = (
+                    <OverViewBodyItem.ViewMoreButton {...this.props} collapsibleChildren={collapsibleChildren}
+                        collapsed={collapsed} handleCollapseToggle={this.handleCollapseToggle}
+                    />);
+            }
+
             innerBlockReturned = (
                 <div className="inner" key="inner" data-field={property}>
                     <object.TooltipInfoIconContainerAuto
@@ -672,11 +705,12 @@ export class OverViewBodyItem extends React.PureComponent {
                         title={overrideTitle}
                         elementType="h5" />
                     { resultPropertyValue ?
-                        (resultPropertyValue.length > 1 ?
+                        (resultPropertyValue.length > 1 || viewMoreButton ?
                             React.createElement(listWrapperElement, listWrapperElementProps || null, fallbackify(resultPropertyValue))
                             : fallbackify(resultPropertyValue) )
                         : fallbackify(null)
                     }
+                    { viewMoreButton }
                 </div>
             );
         } else {

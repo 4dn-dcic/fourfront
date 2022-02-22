@@ -54,7 +54,7 @@ QC_SUMMARY_SCHEMA = {
     }
 }
 
-"""OVERALL QAULITY SCORE INFO
+"""OVERALL QUALITY SCORE INFO
 All QC objects come with a field 'overall_quality_status', which is by default set to 'PASS'
 For some qc object we don't have a current protocol to judge the overall quality based on the
 fields in the qc item.
@@ -73,7 +73,15 @@ class QualityMetricFlag(Item):
 
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded_list = ['award.project', 'quality_metrics.overall_quality_status']
+    embedded_list = [
+        # Award linkTo
+        'award.project',
+        'award.name',
+
+        # QualityMetric linkTo
+        'quality_metrics.overall_quality_status',
+        'quality_metrics.url'
+    ]
 
 
 @abstract_collection(
@@ -553,3 +561,44 @@ def get_chipseq_atacseq_qc_summary(quality_metric, qc_type):
                            "numberType": "integer"})
 
     return qc_summary if qc_summary else None
+
+
+@collection(
+    name='quality-metrics-mcool',
+    properties={
+        'title': 'QC Quality metrics for mcool files',
+        'description': 'Listing of QC Quality Metrics for mcool files.',
+    })
+class QualityMetricMcool(QualityMetric):
+    """Subclass of quality matrics for mcool files"""
+
+    item_type = 'quality_metric_mcool'
+    schema = load_schema('encoded:schemas/quality_metric_mcool.json')
+    embedded_list = QualityMetric.embedded_list
+
+    def _update(self, properties, sheets=None):
+        balancing_info = properties.get('Failed Balancing')
+        resolutions = properties.get('Resolutions in File')
+        overall = 'PASS'
+
+        if balancing_info[0] != 'None':
+            overall = 'WARN'
+        elif len(balancing_info) == len(resolutions):
+            overall = 'FAIL'
+        # set name based on what is entered into title
+        properties['overall_quality_status'] = overall
+        super(QualityMetricMcool, self)._update(properties, sheets)
+
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc = self.properties
+        qc_summary = []
+        val = ''
+        qc_val = qc.get("Failed Balancing")
+        val = '; '.join(qc_val)
+
+        qc_summary.append({"title": "Failed Balancing",
+                           "value": val,
+                           "tooltip": 'Resolutions where balancing failed',
+                           "numberType": "string"})
+        return qc_summary

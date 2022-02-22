@@ -722,6 +722,24 @@ def microscopy_w_multipath(testapp, repliseq_info, imaging_path_1, imaging_path_
     return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
 
 
+@pytest.fixture
+def microscopy_w_splitpath(testapp, repliseq_info, exp_types,
+                           imaging_path_1, imaging_path_3,
+                           basic_region_bio_feature, genomic_region_bio_feature):
+    '''Sometimes a (group of) target(s) is split into different imaging paths,
+    e.g. due to multiplexing. If text is formatted as follows, the split group
+    will be found and replaced with the sum'''
+    repliseq_info['experiment_type'] = exp_types['fish']['@id']
+    img_path1 = {'path': imaging_path_1['@id'], 'channel': 'ch01'}
+    img_path3 = {'path': imaging_path_3['@id'], 'channel': 'ch03'}
+    repliseq_info['imaging_paths'] = [img_path1, img_path3]
+    testapp.patch_json(basic_region_bio_feature['@id'],
+                       {'preferred_label': '15 TADs on chr19'}).json['@graph'][0]
+    testapp.patch_json(genomic_region_bio_feature['@id'],
+                       {'preferred_label': '22 TADs on chr19'}).json['@graph'][0]
+    return testapp.post_json('/experiment_mic', repliseq_info).json['@graph'][0]
+
+
 def test_experiment_atacseq_display_title(experiment_atacseq):
     assert experiment_atacseq.get('display_title') == 'ATAC-seq on GM12878 - ' + experiment_atacseq.get('accession')
 
@@ -760,6 +778,12 @@ def test_experiment_categorizer_4_mic_w_multi_path(testapp, microscopy_w_multipa
     assert len(value) == len2chk
     for v in vals2chk:
         assert v in value
+
+
+def test_experiment_categorizer_4_mic_w_split_path(testapp, microscopy_w_splitpath):
+    '''Sometimes a (group of) target(s) is split into different imaging paths,
+    e.g. due to multiplexing. Sum the split targets and return only one string.'''
+    assert microscopy_w_splitpath['experiment_categorizer']['value'] == '37 TADs on chr19'
 
 
 def test_experiment_categorizer_4_chiapet_no_fusion(testapp, repliseq_info, exp_types):

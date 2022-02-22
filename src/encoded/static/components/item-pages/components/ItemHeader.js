@@ -286,7 +286,7 @@ export class MiddleRow extends React.Component {
                 className={baseClass}
                 textClassName="text-medium"
                 defaultExpanded={(textDescription || '').length < 600}
-                fitTo="grid"
+                fitTo="self"
                 lineHeight={22}
                 isInlineEditable={isInlineEditable}
                 dimensions={{

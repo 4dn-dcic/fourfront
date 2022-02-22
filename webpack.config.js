@@ -71,19 +71,27 @@ const resolve = {
     //    path.resolve(__dirname, '..', 'node_modules'),
     //    'node_modules'
     //]
+    alias: {}
 };
+
+// Common alias, hopefully is fix for duplicate versions of React
+// on npm version 7+ and can supersede `./setup-npm-links-for-local-development.js`.
+// @see https://blog.maximeheckel.com/posts/duplicate-dependencies-npm-link/
+spcPackageJson = require("@hms-dbmi-bgm/shared-portal-components/package.json");
+spcPeerDependencies = spcPackageJson.peerDependencies || {};
+Object.keys(spcPeerDependencies).forEach(function(packageName) {
+    resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+});
+
+// Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
+// once update to higlass version w.o. react-bootstrap dependency.
+delete resolve.alias["react-bootstrap"];
 
 const optimization = {
     usedExports: true,
     minimize: mode === "production",
     minimizer: [
-        //new UglifyJsPlugin({
-        //    parallel: true,
-        //    sourceMap: true
-        //})
         new TerserPlugin({
-            // This was causing problems in other areas, maybe it will fix our deploy problems? -kmp 2-Mar-2021
-            // parallel: true,
             parallel: false,
             sourceMap: true,
             terserOptions:{
@@ -115,6 +123,10 @@ serverPlugins.push(new webpack.DefinePlugin({
     'BUILDTYPE' : JSON.stringify(env)
 }));
 
+// From https://github.com/jsdom/jsdom/issues/3042
+serverPlugins.push(
+    new webpack.IgnorePlugin(/canvas/, /jsdom$/)
+);
 
 if (env === 'development'){
     // Skip for `npm run dev-quick` (`env === "quick"`) since takes a while
@@ -172,7 +184,10 @@ module.exports = [
         //     dns: "empty",
         // },
         externals: [
-            { 'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}' }
+            {
+                'xmlhttprequest' : '{XMLHttpRequest:XMLHttpRequest}',
+                'jsdom': '{JSDOM:{}}'
+            }
         ],
         module: {
             rules: rules
@@ -181,7 +196,9 @@ module.exports = [
         resolve: {
             ...resolve,
             alias: {
+                ...resolve.alias,
                 'higlass-dependencies': path.resolve(__dirname, "./src/encoded/static/components/item-pages/components/HiGlass/higlass-dependencies.js"),
+                'micrometa-dependencies': path.resolve(__dirname, "./src/encoded/static/components/item-pages/components/MicroMeta/micrometa-dependencies.js"),
                 'package-lock.json': path.resolve(__dirname, "./package-lock.json"),
                 "statistics-page-components" : path.resolve(__dirname, "./src/encoded/static/components/static-pages/components/StatisticsPageViewBody"),
             },
@@ -235,7 +252,7 @@ module.exports = [
                 'aws-sdk': 'empty-module',
                 'package-lock.json': 'empty-module',
                 "statistics-page-components" : 'empty-module',
-                "4dn-microscopy-metadata-tool" : 'empty-module',
+                "micrometa-dependencies" : 'empty-module',
                 // Below - prevent some stuff in SPC from being bundled in.
                 // These keys are literally matched against the string values, not actual path contents, hence why is "../util/aws".. it exactly what within SPC/SubmissionView.js
                 // We can clean up and change to 'aws-utils' in here in future as well and alias it to spc/utils/aws. But this needs to be synchronized with SPC and 4DN.

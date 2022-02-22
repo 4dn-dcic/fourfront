@@ -78,6 +78,7 @@ ITEM_INDEX_ORDER = [
     'MicroscopeSettingD1',
     'MicroscopeSettingD2',
     'MicroscopeConfiguration',
+    'ImageSetting',
 
     'HiglassViewConfig',
     'QualityMetricAtacseq',
@@ -93,6 +94,7 @@ ITEM_INDEX_ORDER = [
     'QualityMetricRnaseqMadqc',
     'QualityMetricWorkflowrun',
     'QualityMetricQclist',
+    'QualityMetricMcool',
 
     'ExperimentAtacseq',
     'ExperimentCaptureC',
