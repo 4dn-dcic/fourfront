@@ -107,6 +107,27 @@ def thous_genomes_biosources(testapp, human_biosource_data, thousandgen_oterms, 
     return bsources
 
 
+def test_calculated_organism_wo_ind(testapp, human_biosource_data):
+    human_biosource_data['biosource_type'] = 'primary cell'
+    del human_biosource_data['individual']
+    res = testapp.post_json('/biosource', human_biosource_data, status=201).json['@graph'][0]
+    assert 'organism' not in res
+
+
+def test_calculated_organism_wo_ind_w_override(testapp, human_biosource_data, human):
+    human_biosource_data['biosource_type'] = 'primary cell'
+    human_biosource_data['override_organism_name'] = 'human'
+    del human_biosource_data['individual']
+    res = testapp.post_json('/biosource', human_biosource_data, status=201).json['@graph'][0]
+    assert res.get('organism') == human.get('uuid')
+
+
+def test_calculated_organism_w_ind(testapp, human_biosource_data, human):
+    human_biosource_data['biosource_type'] = 'primary cell'
+    res = testapp.post_json('/biosource', human_biosource_data, status=201).json['@graph'][0]
+    assert res.get('organism') == human.get('uuid')
+
+
 def test_calculated_biosource_category_multicellular(lung_biosource, whole_biosource):
     assert 'Multicellular Tissue' in lung_biosource.get('biosource_category')
     assert 'Multicellular Tissue' in whole_biosource.get('biosource_category')

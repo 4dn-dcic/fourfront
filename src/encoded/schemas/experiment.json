@@ -229,7 +229,7 @@
         "experiment_type.display_title" : {
             "title" : "Experiment Type"
         },
-        "biosample.biosource.individual.organism.name": {
+        "biosample.biosource.organism.name": {
             "title": "Organism"
         },
         "biosample.biosample_type": {
@@ -252,7 +252,7 @@
         }
     },
     "columns": {
-        "biosample.biosource.individual.organism.name": {
+        "biosample.biosource.organism.name": {
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
