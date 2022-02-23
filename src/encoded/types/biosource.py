@@ -57,11 +57,11 @@ def _build_biosource_embedded_list():
                 'individual.health_status',
 
                 # Organism linkTo
-                'individual.organism.name',
-                'individual.organism.scientific_name',
+                'organism.name',
+                'organism.scientific_name',
 
                 # Ontology linkTo
-                'tissue.source_ontologies.ontology_name',
+                'tissue.source_ontologies.ontology_name'
             ]
     )
 
@@ -177,7 +177,6 @@ class Biosource(Item):
             oterm = oterms.get(tid)
             if oterm:
                 tiered_line_cat[str(oterm.uuid)] = cat
-        # import pdb; pdb.set_trace()
         if cell_line:
             cl_term = get_item_or_none(request, cell_line, 'ontology-terms')
             cluid = cl_term.get('uuid')
@@ -210,6 +209,27 @@ class Biosource(Item):
         if not category:
             category.append('Other')
         return category
+
+    @calculated_property(schema={
+        "title": "Organism",
+        "description": "Organism from which this Biosource was derived.",
+        "type": "string",
+        "linkTo": "Organism"
+    })
+    def organism(self, request, individual=None, override_organism_name=None):
+        if override_organism_name:
+            # if this field use as a lookup key
+            org_item = get_item_or_none(request, override_organism_name, 'organisms')
+            if org_item:
+                return org_item.get('uuid')
+        if individual:
+            individual_props = get_item_or_none(request, individual, 'individuals')
+            if individual_props:
+                organism = individual_props.get('organism')
+                organism_props = get_item_or_none(request, organism, 'organisms')
+                if organism_props:
+                    return organism_props.get('uuid')
+        return None
 
     @calculated_property(schema={
         "title": "Display Title",
