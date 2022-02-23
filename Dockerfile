@@ -23,44 +23,40 @@ ENV PYTHONFAULTHANDLER=1 \
   PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.1.12 \
+  NVM_VERSION=v0.39.1 \
   NODE_VERSION=12.22.9
 
-# Install nginx, base system requirements
-COPY deploy/docker/production/install_nginx.sh /
-RUN bash /install_nginx.sh && \
-    apt-get update && \
-    apt-get install -y curl vim emacs net-tools ca-certificates \
-    gcc zlib1g-dev postgresql-client libpq-dev git make
-
-# Configure Fourfront User (nginx)
-WORKDIR /home/nginx/.nvm
-
-# Install Node
-ENV NVM_DIR=/home/nginx/.nvm
-RUN apt install -y curl
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
-RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
-ENV PATH="/home/nginx/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-RUN node --version
-RUN npm --version
-
-WORKDIR /home/nginx
-
-# Configure venv
+# Configure Python3.7 venv
 ENV VIRTUAL_ENV=/opt/venv
 RUN python -m venv /opt/venv
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Upgrade pip, install in layer
-RUN pip install --upgrade pip && \
-    pip install poetry==$POETRY_VERSION
+# Install system level dependencies (poetry, nvm, nginx)
+# Note that the ordering of these operations is intentional to minimize package footprint
+WORKDIR /home/nginx/.nvm
+ENV NVM_DIR=/home/nginx/.nvm
+COPY deploy/docker/production/install_nginx.sh /
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends vim emacs net-tools ca-certificates \
+    gcc zlib1g-dev postgresql-client libpq-dev git make curl libmagic-dev && \
+    pip install --upgrade pip && \
+    curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
+    . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION} && \
+    nvm use v${NODE_VERSION} && \
+    nvm alias default v${NODE_VERSION} && \
+    curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json && \
+    bash /install_nginx.sh && \
+    chown -R nginx:nginx /opt/venv && \
+    mkdir -p /home/nginx/cgap-portal && \
+    mv aws-ip-ranges.json /home/nginx/cgap-portal/aws-ip-ranges.json && \
+    apt-get clean
 
-# Adjust permissions
-RUN chown -R nginx:nginx /opt/venv && \
-    mkdir -p /home/nginx/fourfront
+# Link, verify installations
+ENV PATH="/home/nginx/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+#RUN node --version
+#RUN npm --version
+#RUN nginx --version
 
 WORKDIR /home/nginx/fourfront
 
@@ -77,20 +73,19 @@ RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/b
 # Copy over the rest of the code
 COPY . .
 
-
 # Build remaining back-end
 RUN poetry install && \
     python setup_eb.py develop && \
     make fix-dist-info
+
 # Build front-end, remove node_modules when done
+ENV NODE_ENV=production
 RUN npm run build && \
-    npm run build-scss
-# Maybe also....
-# && rm -rf node_modules/
+    npm run build-scss && \
+    rm -rf node_modules/
 
 # Misc
-RUN make aws-ip-ranges && \
-    cat /dev/urandom | head -c 256 | base64 > session-secret.b64
+RUN cat /dev/urandom | head -c 256 | base64 > session-secret.b64
 
 # Copy config files in (down here for quick debugging)
 # Remove default configuration from Nginx
