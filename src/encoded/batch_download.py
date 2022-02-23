@@ -64,7 +64,7 @@ TSV_MAPPING = OrderedDict([
     ('Tech Rep No',                 (EXP_SET,   ['replicate_exps.tec_rep_no'], True)),
 
     ('Biosource Type',              (EXP,       ['biosample.biosource.biosource_type'], True)),
-    ('Organism',                    (EXP,       ['biosample.biosource.individual.organism.name'], True)),
+    ('Organism',                    (EXP,       ['biosample.biosource.organism.name'], True)),
     ('Related File Relationship',   (FILE,      ['related_files.relationship_type'], False)),
     ('Related File',                (FILE,      ['related_files.file.accession'], False)),
     ('Paired End',                  (FILE,      ['paired_end'], True)),

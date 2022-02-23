@@ -73,6 +73,7 @@ export const Term = {
             case 'individual.organism.name':
             case 'biosource.individual.organism.name':
             case 'biosample.biosource.individual.organism.name':
+            case 'biosample.biosource.organism.name':
                 name = capitalize(term);
                 break;
             case 'file_type':
@@ -142,7 +143,7 @@ export const Term = {
 export const Field = {
 
     nameMap : {
-        'experiments_in_set.biosample.biosource.individual.organism.name' : 'Organism',
+        'experiments_in_set.biosample.biosource.organism.name' : 'Organism',
         'accession' : 'Experiment Set',
         'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
         'experiments_in_set.biosample.biosource_summary' : 'Biosource',

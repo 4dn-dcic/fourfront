@@ -191,7 +191,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
         <OverviewHeadingContainer {...props}>
             {/* <OverViewBodyItem result={expSet} tips={tips} property='award.project' fallbackTitle="Project" wrapInColumn={col} /> */}
             <OverViewBodyItem {...commonProps} property="experimentset_type" fallbackTitle="Set Type" />
-            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.individual.organism" fallbackTitle="Organism" />
+            <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource.organism" fallbackTitle="Organism" />
             <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosample_type" fallbackTitle="Sample Type" />
             <OverViewBodyItem {...commonProps} property="experiments_in_set.biosample.biosource_summary" fallbackTitle="Sample"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.biosource_summary} />
