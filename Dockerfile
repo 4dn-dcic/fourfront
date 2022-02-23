@@ -14,7 +14,6 @@ ARG INI_BASE
 ENV INI_BASE=${INI_BASE:-"fourfront_any_alpha.ini"}
 
 # Configure (global) Env
-ENV APP=cgap-portal
 ENV NGINX_USER=nginx
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
@@ -49,8 +48,8 @@ RUN apt-get update && apt-get upgrade -y && \
     curl -o aws-ip-ranges.json https://ip-ranges.amazonaws.com/ip-ranges.json && \
     bash /install_nginx.sh && \
     chown -R nginx:nginx /opt/venv && \
-    mkdir -p /home/nginx/$APP && \
-    mv aws-ip-ranges.json /home/nginx/$APP/aws-ip-ranges.json && \
+    mkdir -p /home/nginx/fourfront && \
+    mv aws-ip-ranges.json /home/nginx/fourfront/aws-ip-ranges.json && \
     apt-get clean
 
 # Link, verify installations
