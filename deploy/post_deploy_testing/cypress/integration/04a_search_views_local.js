@@ -157,6 +157,26 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
+        it('Can edit the tag', function () {
+            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+
+            //Edit click
+            cy.get(".action-button[data-action='edit'] a").click({ force: true }).end();
+
+            // Add tag
+            cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end();
+
+            // Click Validate button
+            cy.get(".action-buttons-container .btn")
+                .within(function () {
+                    return cy.contains('Validate').click().end().wait(1000);
+                }).end()
+                //Click Submit button
+                .get(".action-buttons-container .btn").within(function () {
+                    return cy.contains('Submit').click().end().wait(500);
+                }).end();
+        });
+
         it('Delete microscope configuration', function () {
 
             // Log in _as admin_.
