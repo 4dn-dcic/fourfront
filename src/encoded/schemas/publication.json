@@ -165,6 +165,12 @@
             "type": "string",
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
+        "version": {
+            "title": "Version",
+            "description": "Version of the record as is appears in the external database (e.g. bioRxiv version)",
+            "type": "string",
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the source.",

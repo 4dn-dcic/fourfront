@@ -157,5 +157,13 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "accession": "4DNBS1235556"
+    },
+    {
+        "uuid": "a9163992-7486-4edd-b21d-f492884bff63",
+        "description": "Hamster Cells prepped for ATAC-seq",
+        "biosource": ["c9165aa4-2ab5-428d-b5a7-db86dbb2d815"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com"
     }
 ]
