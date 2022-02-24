@@ -39,5 +39,11 @@
         "taxon_id": "7955",
         "genome_assembly": "GRCz11",
         "uuid": "30b53150-cff7-43ed-a8d6-fc5836df98a7"
-    }
+    },
+    {
+        "name": "hamster",
+        "taxon_id": "10036",
+        "scientific_name": "Mesocricetus auratus",
+        "uuid": "e15deec1-4c1f-41e4-bdd2-71c8c159bf9f"
+}
 ]

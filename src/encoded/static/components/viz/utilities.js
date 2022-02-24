@@ -144,7 +144,7 @@ export const style = {
 
 
 const highlightTermFxn = _.debounce(function(
-    field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+    field = 'experiments_in_set.biosample.biosource.organism.name',
     term = 'human',
     color = ''
 ){
@@ -227,7 +227,7 @@ const highlightTermFxn = _.debounce(function(
  * @param {string} color - A valid CSS color.
  */
 export function highlightTerm(
-    field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+    field = 'experiments_in_set.biosample.biosource.organism.name',
     term = 'human',
     color = ''
 ){
