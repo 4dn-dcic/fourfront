@@ -157,7 +157,7 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
-        it('Can edit the tag', function () {
+        it('Edit microscope configuration - add deleted_by_cypress_test tag', function () {
             cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Edit click
