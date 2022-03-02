@@ -151,21 +151,26 @@ def _run_create_mapping(app, args):
     """
 
     try:
-
-        deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=get_my_env(app), args=args, log=log,
+        my_env = get_my_env(app)
+        deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
                                                                     client='create_mapping_on_deploy')
+        # XXX: Temporary workaround for production ECS envs - Will March 2 2022
+        if my_env in [
+            'fourfront-production-blue',
+            'fourfront-production-green'
+        ]:
+            deploy_cfg['SKIP'] = False
+            deploy_cfg['WIPE_ES'] = True
+            deploy_cfg['STRICT'] = True
 
         if not deploy_cfg['SKIP']:
-
             log.info('Calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
             run_create_mapping(app=app,
                                check_first=(not deploy_cfg['WIPE_ES']),
                                purge_queue=args.clear_queue,  # this option does not vary, so no need to override
                                item_order=ITEM_INDEX_ORDER,
                                strict=deploy_cfg['STRICT'])
-
         else:
-
             log.info('NOT calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
 
         exit(0)
