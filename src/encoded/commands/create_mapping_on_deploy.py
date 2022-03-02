@@ -152,9 +152,12 @@ def _run_create_mapping(app, args):
 
     try:
         my_env = get_my_env(app)
-        deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
-                                                                    client='create_mapping_on_deploy')
         # XXX: Temporary workaround for production ECS envs - Will March 2 2022
+        try:
+            deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
+                                                                        client='create_mapping_on_deploy')
+        except Exception:
+            deploy_cfg = {'SKIP': True}
         if my_env in [
             'fourfront-production-blue',
             'fourfront-production-green'
