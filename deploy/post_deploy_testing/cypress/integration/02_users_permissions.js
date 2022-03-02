@@ -63,7 +63,7 @@ describe('Impersonate user JWT, navigate to profile, edit last_name to & back.',
                                 .reload()//.visit(currUrl + '?datastore=database').end()
                                 .get('.page-container .user-title-row-container h1.user-title').should('have.text', "Frontend SuperTest").end()
                                 // Cleanup & test again
-                                .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click({ force : true }).end()
+                                .get('.page-container .user-title-row-container h1.user-title .last_name .value.saved a.edit-button').click().end()
                                 .get('.page-container .user-title-row-container h1.user-title .last_name .value.editing input').should('have.value', 'SuperTest')
                                 .clear({ force : true }).type('Test', { force : true }).then(function(inputfield){
                                     return cy.wait(100)
