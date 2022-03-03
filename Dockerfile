@@ -49,7 +49,7 @@ RUN apt-get update && apt-get upgrade -y && \
     chown -R nginx:nginx /opt/venv && \
     mkdir -p /home/nginx/fourfront && \
     mv aws-ip-ranges.json /home/nginx/fourfront/aws-ip-ranges.json && \
-    apt-get update && apt-get install ca-certificates && \
+    apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
     apt-get clean
 
 # Link, verify installations
