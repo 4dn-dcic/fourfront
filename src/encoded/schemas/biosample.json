@@ -152,7 +152,7 @@
         "biosource_summary": {
             "title": "Biosource"
         },
-        "biosource.individual.organism.name": {
+        "biosource.organism.name": {
             "title": "Organism"
         },
         "modifications.modification_type": {
@@ -163,7 +163,7 @@
         }
     },
     "columns": {
-        "biosource.individual.organism.name": {
+        "biosource.organism.name": {
           "title": "Organism"
         },
         "biosource_summary": {
