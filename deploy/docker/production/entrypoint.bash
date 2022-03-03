@@ -18,7 +18,7 @@ portal="portal"
 local="local"
 
 echo "Generating session randomness"
-cat /dev/urandom | head -c 256 | base64 > session-secret.b64
+cat /dev/urandom | head -c 256 | base64 >> session-secret.b64
 
 echo "Resolving which entrypoint is desired"
 

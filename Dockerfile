@@ -3,8 +3,7 @@
 # Note that images are pinned via sha256 as opposed to tag
 # so that we don't pick up new images unintentionally
 
-# Debian Buster with Python 3.6.15
-# Note image is updated from cgap-portal
+# Debian Buster with Python 3.7.12
 FROM python:3.7.12-slim-buster
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
@@ -14,17 +13,17 @@ ARG INI_BASE
 ENV INI_BASE=${INI_BASE:-"fourfront_any_alpha.ini"}
 
 # Configure (global) Env
-ENV NGINX_USER=nginx
-ENV DEBIAN_FRONTEND=noninteractive
-ENV CRYPTOGRAPHY_DONT_BUILD_RUST=1
-ENV PYTHONFAULTHANDLER=1 \
-  PYTHONUNBUFFERED=1 \
-  PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
-  PIP_DISABLE_PIP_VERSION_CHECK=on \
-  PIP_DEFAULT_TIMEOUT=100 \
-  NVM_VERSION=v0.39.1 \
-  NODE_VERSION=12.22.9
+ENV NGINX_USER=nginx \
+    DEBIAN_FRONTEND=noninteractive \
+    CRYPTOGRAPHY_DONT_BUILD_RUST=1 \
+    PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONHASHSEED=random \
+    PIP_NO_CACHE_DIR=off \
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    PIP_DEFAULT_TIMEOUT=100 \
+    NVM_VERSION=v0.39.1 \
+    NODE_VERSION=12.22.9
 
 # Configure Python3.7 venv
 ENV VIRTUAL_ENV=/opt/venv
@@ -50,6 +49,7 @@ RUN apt-get update && apt-get upgrade -y && \
     chown -R nginx:nginx /opt/venv && \
     mkdir -p /home/nginx/fourfront && \
     mv aws-ip-ranges.json /home/nginx/fourfront/aws-ip-ranges.json && \
+    apt-get update && apt-get install ca-certificates && \
     apt-get clean
 
 # Link, verify installations
@@ -110,12 +110,12 @@ RUN chown -R nginx:nginx /var/cache/nginx && \
 # based on env variable "application_type".
 COPY deploy/docker/local/docker_development.ini development.ini
 COPY deploy/docker/local/entrypoint.bash entrypoint_local.bash
-RUN chown nginx:nginx development.ini
-RUN chmod +x entrypoint_local.bash
+RUN chown nginx:nginx development.ini && \
+    chmod +x entrypoint_local.bash
 
 # Production setup
-RUN touch production.ini
-RUN chown nginx:nginx production.ini
+RUN touch production.ini && chown nginx:nginx production.ini && \
+    touch session-secret.b64 && chown nginx:nginx session-secret.b64
 COPY deploy/docker/production/$INI_BASE deploy/ini_files/.
 COPY deploy/docker/production/entrypoint.bash .
 COPY deploy/docker/production/entrypoint_portal.bash .
@@ -124,11 +124,12 @@ COPY deploy/docker/production/entrypoint_indexer.bash .
 # Note that fourfront does not have an ingester
 # COPY deploy/docker/production/entrypoint_ingester.sh .
 COPY deploy/docker/production/assume_identity.py .
-RUN chmod +x entrypoint.bash
-RUN chmod +x entrypoint_deployment.bash
-RUN chmod +x entrypoint_deployment.bash
-RUN chmod +x entrypoint_indexer.bash
-RUN chmod +x assume_identity.py
+RUN chmod +x entrypoint.bash && \
+    chmod +x entrypoint_deployment.bash && \
+    chmod +x entrypoint_deployment.bash && \
+    chmod +x entrypoint_indexer.bash && \
+    chmod +x assume_identity.py
+
 EXPOSE 8000
 
 # Container does not run as root
