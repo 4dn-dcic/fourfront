@@ -197,6 +197,7 @@ describe("HiGlass Display pages", function(){
                         .get(".action-button[data-action='edit'] a").click({ force: true }).end()
                         .get("input#field_for_title").clear().type(newTitle).end()
                         .get('#field_for_description').clear().type(newDescription).end()
+                        .get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end()
                         // Click validate then click submit
                         .get(".action-buttons-container button.btn-info").click().end()
                         .get(".action-buttons-container button.btn-success").click().end()
