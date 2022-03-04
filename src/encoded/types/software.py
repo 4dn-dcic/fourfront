@@ -25,6 +25,8 @@ class Software(Item):
     item_type = 'software'
     schema = load_schema('encoded:schemas/software.json')
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['title']
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'software_relation' are stored in self.properties

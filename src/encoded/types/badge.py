@@ -24,6 +24,8 @@ class Badge(Item):
     item_type = 'badge'
     schema = load_schema('encoded:schemas/badge.json')
     name_key = 'badge_name'
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['badge_name']
 
     @calculated_property(schema={
         "title": "Commendation",

@@ -41,6 +41,8 @@ class OntologyTerm(Item):
     schema = load_schema('encoded:schemas/ontology_term.json')
     embedded_list = _build_ontology_term_embedded_list()
     name_key = 'term_id'
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['preferred_name']
 
     def _update(self, properties, sheets=None):
         '''set preferred_name field to term_name if it's not already populated

@@ -42,6 +42,8 @@ class Antibody(Item):
     schema = load_schema('encoded:schemas/antibody.json')
     name_key = 'antibody_id'
     embedded_list = _build_antibody_embedded_list()
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['antibody_id']
 
     def _update(self, properties, sheets=None):
         # set antibody_id based on values of antibody_name and product_no
