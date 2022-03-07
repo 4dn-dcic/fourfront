@@ -34,6 +34,7 @@ class DependencyEmbedder:
     GENE = 'gene'
     GENOMIC_REGION = 'genomic_region'
     IMAGING_PATH = 'imaging_path'
+    SOFTWARE = 'software'
 
     EMBED_MAPPER = {
         ANTIBODY: {
@@ -99,7 +100,12 @@ class DependencyEmbedder:
             'override_display_title': None,
             'target': BIO_FEATURE,
         },
-
+        SOFTWARE: {
+            'name': None,
+            'title': None,
+            'version': None,
+            'commit': None,
+        }
     }
 
     @classmethod

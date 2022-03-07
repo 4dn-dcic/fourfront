@@ -393,7 +393,7 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['accession', 'file_format', 'filename', 'file_size']
          ),
         ('Software', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['name', 'title', 'version', 'source_url']
+            DEFAULT_SCOPE + ['name', 'title', 'version', 'commit', 'source_url']
          ),
         ('Workflow', 'WorkflowRunAwsem',
             DEFAULT_SCOPE + ['category', 'experiment_types', 'app_name', 'title']
