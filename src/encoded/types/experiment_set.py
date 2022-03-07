@@ -548,8 +548,6 @@ class ExperimentSetReplicate(ExperimentSet):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded_list = _build_experiment_set_replicate_embedded_list()
-    # the following fields are patched by the update method and should always be included in the invalidation diff
-    default_diff = ['experiments_in_set']
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties.get('replicate_exps', [])]
