@@ -35,6 +35,9 @@ describe('Biosample create page', function () {
                 .get(".field-row[data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
                 .should('have.length', 1).click().wait(1000).end();
 
+            // Add deleted_by_cypress_test tag
+            cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end();
+
             // Click Validate button
             cy.get(".action-buttons-container .btn")
                 .within(function () {
