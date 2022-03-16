@@ -149,7 +149,7 @@ describe('Deployment/CI Search View Tests', function () {
 
             // get response and store atId (to delete item at the end of test)
             addAtIdToDeletedItems();
-        });        
+        });
 
         it('Verify created microscope configuration\'s tier number and stand matches', function (){
             //Click edit buttton
@@ -181,7 +181,7 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
-        //Cloned microscope configuration editing
+        //Edit clonned microscope configuration
         editMicroscopeConfiguration();
         
         it('Delete microscope configuration', function () {
