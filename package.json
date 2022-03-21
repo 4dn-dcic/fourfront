@@ -34,9 +34,11 @@
       "libs/react-patches",
       "jsdom"
     ],
-    "transform": {},
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
     "transformIgnorePatterns": [
-      "node_modules/(?!(@hms-dbmi-bgm/shared-portal-components|micro-meta-app-react|@babel|react-bootstrap)/).+\\.js$"
+      "node_modules/(?!(@hms-dbmi-bgm/shared-portal-components|micro-meta-app-react|@babel|react-bootstrap|react-infinite)/).+\\.js$"
     ],
     "testPathIgnorePatterns": [
       "node_modules/",
