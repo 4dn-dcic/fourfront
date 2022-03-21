@@ -125,6 +125,8 @@ class QualityMetricBamcheck(QualityMetric):
     item_type = 'quality_metric_bamcheck'
     schema = load_schema('encoded:schemas/quality_metric_bamcheck.json')
     embedded_list = QualityMetric.embedded_list
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['overall_quality_status']
 
     def _update(self, properties, sheets=None):
         qc_val = properties.get('quickcheck', '')
@@ -575,6 +577,8 @@ class QualityMetricMcool(QualityMetric):
     item_type = 'quality_metric_mcool'
     schema = load_schema('encoded:schemas/quality_metric_mcool.json')
     embedded_list = QualityMetric.embedded_list
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['overall_quality_status']
 
     def _update(self, properties, sheets=None):
         balancing_info = properties.get('Failed Balancing')
