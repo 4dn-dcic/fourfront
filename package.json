@@ -111,7 +111,7 @@
     "d3": "^5.16.0",
     "detect-browser": "^3.0.1",
     "domready": "^1.0.8",
-    "form-serialize": "^0.6.0",
+    "form-serialize": "^0.7.2",
     "higlass": "1.10.0",
     "higlass-multivec": "0.2.4",
     "higlass-register": "^0.3.0",
