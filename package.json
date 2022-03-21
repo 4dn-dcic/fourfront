@@ -123,7 +123,7 @@
     "pixi.js": "^5.3.0",
     "prop-types": "^15.7.2",
     "query-string": "^4.3.4",
-    "radium": "^0.25.2",
+    "radium": "^0.26.2",
     "rc-tabs": "^9.7.0",
     "react": "^16.13.1",
     "react-bootstrap": "1.0.1",
