@@ -6,7 +6,9 @@ module.exports = function(api){
         "presets" : [
             // We don't need to convert import/export statements unless in test/Jest environment (as Webpack will handle later; not converting here preserves code-splitting).
             // @see https://stackoverflow.com/questions/63563485/how-can-i-preserve-dynamic-import-statements-with-babel-preset-env
-            [ "@babel/preset-env", { "modules": modulesEnabled ? "auto" : false } ],
+            [ "@babel/preset-env", {
+                "modules": false
+            } ],
             "@babel/preset-react",
         ],
         "plugins": [

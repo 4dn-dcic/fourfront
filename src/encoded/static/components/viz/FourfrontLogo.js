@@ -2,7 +2,7 @@
 
 import React from 'react';
 import _ from 'underscore';
-import * as d3 from 'd3';
+import { select as d3Select } from 'd3-selection';
 
 /** Renders out the 4DN Logo SVG as a React element(s) */
 export class FourfrontLogo extends React.PureComponent {
@@ -99,19 +99,19 @@ export class FourfrontLogo extends React.PureComponent {
         setTimeout(()=>{
             const { hover } = this.state;
             if (!hover) return; // No longer hovering. Cancel.
-            d3.select(this.bgCircleRef.current)
+            d3Select(this.bgCircleRef.current)
                 .interrupt()
                 .transition()
                 .duration(1000)
                 .attr('d', circlePathDefinitionHover);
 
-            d3.select(this.fgTextRef.current)
+            d3Select(this.fgTextRef.current)
                 .interrupt()
                 .transition()
                 .duration(700)
                 .attr('transform', textTransformHover);
 
-            d3.select(this.fgCircleRef.current)
+            d3Select(this.fgCircleRef.current)
                 .interrupt()
                 .transition()
                 .duration(1200)
@@ -124,19 +124,19 @@ export class FourfrontLogo extends React.PureComponent {
         const { circlePathDefinitionOrig, textTransformOrig, fgCircleTransformOrig } = this.props;
         this.setState({ 'hover' : false }, ()=>{
 
-            d3.select(this.bgCircleRef.current)
+            d3Select(this.bgCircleRef.current)
                 .interrupt()
                 .transition()
                 .duration(1000)
                 .attr('d', circlePathDefinitionOrig);
 
-            d3.select(this.fgTextRef.current)
+            d3Select(this.fgTextRef.current)
                 .interrupt()
                 .transition()
                 .duration(1200)
                 .attr('transform', textTransformOrig);
 
-            d3.select(this.fgCircleRef.current)
+            d3Select(this.fgCircleRef.current)
                 .interrupt()
                 .transition()
                 .duration(1000)
