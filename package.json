@@ -89,7 +89,7 @@
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.5",
-    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.1.36b5",
+    "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.1.38",
     "auth0-lock": "^11.32.2",
     "babel-polyfill": "^6.26.0",
     "d3": "^5.16.0",
@@ -116,7 +116,7 @@
     "react-json-tree": "^0.16.1",
     "react-jsx-parser": "^1.25.1",
     "react-redux": "^7.2.6",
-    "react-tooltip": "^4.2.10",
+    "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.4.2",
     "redux": "^3.7.0",
     "subprocess-middleware": "0.2.0",
