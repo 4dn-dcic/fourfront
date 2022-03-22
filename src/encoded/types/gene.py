@@ -93,6 +93,16 @@ class Gene(Item):
         'organism.scientific_name',
         'organism.name'
     ]
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = [
+        'organism',
+        'ncbi_entrez_status',
+        'official_symbol',
+        'preferred_symbol',
+        'synonyms',
+        'fullname',
+        'url'
+    ]
 
     def _update(self, properties, sheets=None):
         # fetch info from ncbi gene based on id provided
