@@ -35,6 +35,8 @@ HUMAN_TAXON = "http://purl.obolibrary.org/obo/NCBITaxon_9606"
 HAS_PART = "http://purl.obolibrary.org/obo/BFO_0000051"
 ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
 
+ontregex = re.compile(r'( +\(((EFO|SO|UBERON|4DN|OBI), )*(EFO|SO|UBERON|4DN|OBI)\))')
+
 
 def iterative_parents(nodes, terms, data):
     """returns all the parents traversing the term graph structure
@@ -653,6 +655,17 @@ def _parse_def(defstr):
     pass
 
 
+def _definition_list(text):
+    dlist = []
+    matches = re.findall(ontregex, text)
+    remaining = ''.join(list(text))
+    for item in matches:
+        dlist.extend(remaining.split(item[0]))
+        dlist.insert(-1, item[0].strip().strip('()'))
+        remaining = dlist.pop(-1)
+    return [s.strip() for s in dlist]
+
+
 def update_definition(tdef, dbdef, ont):
     # pass
     """
@@ -662,12 +675,14 @@ def update_definition(tdef, dbdef, ont):
     remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
     string
     """
-    ontregex = re.compile(r' +\(([A-Z]+,* *[A-Z]*)\)\s*')
-    tmatch = ontregex.split(tdef)
-    tstr = tmatch[0]
-    dbmatch = ontregex.split(dbdef)
+    #ontregex = re.compile(r' +\(([A-Z]+,* *[A-Z]*)\)\s*')
+    #tmatch = ontregex.split(tdef)
+    #tstr = tmatch[0]
+    tstr = _definition_list(tdef)[0]
+    #dbmatch = ontregex.split(dbdef)
+    dbmatch = _definition_list(dbdef)
     dbdefs = dict(zip(dbmatch[::2], dbmatch[1::2]))
-    dbdefs = {k: v.split(',') for k, v in dbdefs.items()}
+    dbdefs = {k: [val.strip() for val in v.split(',')] for k, v in dbdefs.items()}
     # if tstr is not in dbdefs keys
     # if for any dbdef the ontology is in value
     # take the ont out
@@ -678,6 +693,7 @@ def update_definition(tdef, dbdef, ont):
             if ont in o:
                 o.remove(ont)
         dbdefs[tstr] = [ont]
+        dbdefs = {k: v for k, v in dbdefs.items() if v}
     else:
         if ont not in dbdefs[tstr]:
             dbdefs[tstr].append(ont)
