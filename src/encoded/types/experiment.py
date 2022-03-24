@@ -249,6 +249,11 @@ class Experiment(Item):
         'processed_files.quality_metric.Total reads',
         'processed_files.quality_metric.qc_list.value.Total reads',
 
+        # Static Section linkTo
+        'processed_files.static_content.location',
+        'processed_files.static_content.description',
+        'processed_files.static_content.content.@type',
+
         # Object
         'other_processed_files.title',
         'other_processed_files.description',
@@ -291,6 +296,11 @@ class Experiment(Item):
         # FileFormat linkTo
         "other_processed_files.files.file_format.file_format",
 
+        # Static Section linkTo
+        "other_processed_files.files.static_content.location",
+        "other_processed_files.files.static_content.description",
+        "other_processed_files.files.static_content.content.@type",
+
         # last modification (since just time, no invalidation)
         "other_processed_files.files.last_modified.date_modified",
 
@@ -308,7 +318,12 @@ class Experiment(Item):
         "reference_files.file_type_detailed",
         "reference_files.file_size",
         "reference_files.file_classification",
-        "reference_files.status"
+        "reference_files.status",
+
+        # Static Section linkTo
+        "reference_files.static_content.location",
+        "reference_files.static_content.description",
+        "reference_files.static_content.content.@type"
     ]
 
     def generate_mapid(self, experiment_type, num):
