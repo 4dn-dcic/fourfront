@@ -651,10 +651,6 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
     return parents2keep
 
 
-def _parse_def(defstr):
-    pass
-
-
 def _definition_list(text):
     dlist = []
     matches = re.findall(ontregex, text)
@@ -667,25 +663,23 @@ def _definition_list(text):
 
 
 def update_definition(tdef, dbdef, ont):
-    # pass
     """
-    for the term because it is only a single ont if got here then def ends with ontpre in parens
-    need to check the def in the db to see if any of the defs in the string come from db being
-    processed - if the ontprefix is in the trailing string and the 2 defs don't match need to
-    remove the ontpre from the dbdef and if no longer any ontpres the whole bit then add new tdef
-    string
+    This function is only invoked if we are updating from a single ontology, and is
+    for resolving problems with updated and/or conflicting definitions.
+    We check the def to see if it is already in the db definition.
+    If not, we add it to the db definition.
+    If the ontology newly added that term (from another ontology), we simply add it.
+    If the term is not new to the current ontology being updated, and that ontology is
+    reflected in the db definition, then we remove the association of the ontology to the
+    portion of the old db definition and associate it with the new definition instead.
     """
-    #ontregex = re.compile(r' +\(([A-Z]+,* *[A-Z]*)\)\s*')
-    #tmatch = ontregex.split(tdef)
-    #tstr = tmatch[0]
     tstr = _definition_list(tdef)[0]
-    #dbmatch = ontregex.split(dbdef)
     dbmatch = _definition_list(dbdef)
     dbdefs = dict(zip(dbmatch[::2], dbmatch[1::2]))
     dbdefs = {k: [val.strip() for val in v.split(',')] for k, v in dbdefs.items()}
-    # if tstr is not in dbdefs keys
-    # if for any dbdef the ontology is in value
-    # take the ont out
+    # if term def not in db def
+    # if for any db def the current ontology is in value
+    # take the ont out of value (because it will be associated with new def instead)
     if tstr not in dbdefs.keys():
         # the def is new for that ontology so remove that prefix from
         # any existing def strings
@@ -693,6 +687,7 @@ def update_definition(tdef, dbdef, ont):
             if ont in o:
                 o.remove(ont)
         dbdefs[tstr] = [ont]
+        # remove defs no longer associated with any ontology
         dbdefs = {k: v for k, v in dbdefs.items() if v}
     else:
         if ont not in dbdefs[tstr]:
