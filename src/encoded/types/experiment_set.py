@@ -133,6 +133,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.tissue_organ_info.tissue_source",
 
         # Biosource linkTo
+        "experiments_in_set.biosample.biosource.accession",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.override_biosource_name",

@@ -1701,7 +1701,10 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime } = this.props;
+        const {
+            onBodyClick, onBodySubmit, context, alerts, canonical, mounted,
+            currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime
+        } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
@@ -1768,7 +1771,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
 
             </body>
         );
