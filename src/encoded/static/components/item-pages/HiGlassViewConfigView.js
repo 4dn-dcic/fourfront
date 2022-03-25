@@ -1013,7 +1013,8 @@ function HiGlassFileDetailPane(props) {
                         <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible />
                     </FieldSet>
                 </td>
-            </tr>);
+            </tr>
+        );
     });
 
     return (
@@ -1133,8 +1134,7 @@ function StatusMenuItem(props){
     );
 }
 
-
- export class HiGlassAdjustableWidthRow extends React.PureComponent {
+export class HiGlassAdjustableWidthRow extends React.PureComponent {
 
     static propTypes = {
         'width' : PropTypes.number.isRequired,
@@ -1263,7 +1263,8 @@ export const ConfirmModal = React.memo(function (props) {
                         <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
                     </button> : null}
             </Modal.Footer>
-        </Modal>);
+        </Modal>
+    );
 });
 ConfirmModal.propTypes = {
     'handleConfirm': PropTypes.func.isRequired,

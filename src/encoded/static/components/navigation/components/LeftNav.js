@@ -6,7 +6,7 @@ import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import url from 'url';
 import _ from 'underscore';
-import { object, console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, console, memoizedUrlParse, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { navigate } from './../../util'; // Extended w. browseBaseHref & related fxns.
 import {
     BigDropdownNavItem,
@@ -227,6 +227,8 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const [searchText, setSearchText] = useState(searchQueryFromHref || '');
     const [searchItemType, setSearchItemType] = useState(initialItemType);
     const [searchInputIsValid, setSearchInputIsValid] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [suggestions, setSuggestions] = useState(null);
 
     //hidden form inputs & search placeholder text
     const [hiddenInputsForURIQuery, placeholderText] = useMemo(function () {
@@ -302,6 +304,24 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
         if (searchInputIsValid !== isValid) {
             setSearchInputIsValid(isValid);
         }
+
+        if (value && value.length >= 3) {
+            ajax.load('/search/?type=Item&q=' + value, (r) => {
+                const { facets } = r;
+                if (facets && Array.isArray(facets) && facets.length > 0) {
+                    const facetItem = facets.find((f) => f.field === "type");
+                    if (facetItem) {
+                        const { terms } = facetItem;
+                        const suggestions = terms.map(function (t) { return { "name": t.key, "count": t.doc_count }; });
+                        setSuggestions(suggestions);
+                    }
+                } else if (suggestions && suggestions.length > 0) {
+                    setSuggestions([]);
+                }
+            });
+        } else if (suggestions && suggestions.length > 0) {
+            setSuggestions([]);
+        }
     };
     //select all text when focused
     const handleFocus = function (evt) {
@@ -325,6 +345,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                     <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
                         <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={placeholderText}
                             value={searchText} onChange={handleOnChange} onFocus={handleFocus} autoComplete="off" ref={searchTextInputEl} />
+                        <SearchSuggestionPanel {...{ searchText, suggestions, loading }} />
                     </div>
                     <div className="col-lg-1 col-md-2 col-sm-12 mt-1">
                         <button type="submit" className="btn btn-outline-light w-100" data-id="global-search-button" data-handle-click={true} disabled={btnDisabled}>
@@ -352,7 +373,8 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
                             <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
                                 className="w-100" onSelect={onChangeSearchItemType} active={searchItemType == item.type}>
                                 {item.text}
-                            </DropdownItem>);
+                            </DropdownItem>
+                        );
                     })
                 }
             </DropdownButton>
@@ -368,3 +390,54 @@ const AvailableSearchItemTypes = {
     'File': { type: 'File', text: 'Files' },
     'Biosource': { type: 'Biosource', text: 'Biosources' },
 };
+
+function SearchSuggestionPanel(props) {
+    const { loading, searchText, suggestions } = props;
+    if (loading) {
+        return (
+            <div className="multisearch__results-container">
+                <div>Loading...</div>
+            </div>
+        );
+    }
+    if (!searchText || !suggestions || suggestions.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="multisearch__results-container">
+            <span className="group-title">Top results by type</span>
+            <div className="top-hits-search__results">
+                {
+                    suggestions.map(function (s) {
+                        const { name, count } = s;
+                        return <a key={name} href={`/search/?type=${name}&q=${searchText}`} className="section-title" data-handle-click="true">{name} ({count})</a>;
+                    })
+                }
+                {/* <a href="/search/?type=Biosample&amp;searchTerm=mouse" className="section-title">Biosample (1)</a>
+                <ul>
+                    <li><a href="/biosamples/4DNBS7FK1D8U/" className="section-item"><span className="item-accession">4DNBS7FK1D8U</span><span className="item-title">Hamster</span><span className="item-description">primary cell</span></a></li>
+                    <li><a href="/biosamples/4DNBS1234444/" className="section-item"><span className="item-accession">4DNBS1234444</span><span className="item-title">Hamster</span><span className="item-description">stem cell derived cell line</span></a></li>
+                </ul>
+                <a href="/search/?type=Experiment&amp;searchTerm=mouse" className="section-title">Experiment (26)</a>
+                <ul>
+                    <li><a href="/experiments/4DNSR298WSI/" className="section-item"><span className="item-accession">4DNEXO67AWMM</span><span className="item-title">Microscopy Experiment</span><span className="item-description">immortalized cell line</span></a></li>
+                    <li><a href="/experiments/4DNSR392BBU/" className="section-item"><span className="item-accession">4DNEXO6777Z1</span><span className="item-title">Proximity Ligation with ChIP Experiment</span><span className="item-description">immortalized cell line</span></a></li>
+                    <li><a href="/experiments/4DNSR323GNP/" className="section-item"><span className="item-accession">4DNEXO6777X1</span><span className="item-title">Proximity Ligation with ChIP Experiment</span><span className="item-description">immortalized cell line</span></a></li>
+                </ul>
+                <a href="/search/?type=Publication&amp;searchTerm=mouse" className="section-title">Publication (5)</a>
+                <ul>
+                    <li><a href="/publications/28d09d8b-2ff5-4190-9384-7f0778b4b78e/" className="section-item"><span className="item-accession">Connecting tumor genomics with therapeutics through...</span><span className="item-authors">Webber JT, Ranall MV...</span><span className="item-description">Recent efforts have catalogued genomic, transcriptomic, epigene...</span></a></li>
+                    <li><a href="/publications/f1d54c11-9e20-4ef8-bc0a-cf7ac9759e3c/" className="section-item"><span className="item-accession">The development and activity-dependent expression...</span><span className="item-authors">Kind PC, Sengpiel F, Bea...</span><span className="item-description">The Cat-301 monoclonal antibody identifies aggrecan, a cho...</span></a></li>
+                    <li><a href="/publications/aee432eb-5d57-4d97-ab80-d5f32e83c909/" className="section-item"><span className="item-accession">An integrated encyclopedia of DNA elements in the human...</span><span className="item-authors">ENCODE Project Consortium</span><span className="item-description">The human genome encodes the blueprint of life, but the ...</span></a></li>
+                </ul>
+                <a href="/search/?type=File&amp;searchTerm=mouse" className="section-title">File (72)</a>
+                <ul>
+                    <li><a href="/files/4DNFF693YGW/" className="section-item"><span className="item-accession">4DNFIENCODEDV.bw</span><span className="item-description">Visualization Track file</span></a></li>
+                    <li><a href="/files/4DNFF097CIT/" className="section-item"><span className="item-accession">4DNFIATESTM2.tiff</span><span className="item-description">Microscopy file</span></a></li>
+                    <li><a href="/files/4DNFF521ODJ/" className="section-item"><span className="item-accession">4DNFIATESTM1.tiff</span><span className="item-description">Microscopy file</span></a></li>
+                </ul> */}
+            </div>
+        </div>
+    );
+}
