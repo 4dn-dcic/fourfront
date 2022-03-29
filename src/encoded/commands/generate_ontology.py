@@ -652,6 +652,21 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
 
 
 def _definition_list(text):
+    """
+    This is a helper function that converts a definition string, possibly containing
+    one or more references to associated ontologies, to a list of separated definitions
+    and their sources ontologies.
+
+    Example input:
+    "Here is the first definition. (EFO) Here is a second definition that might contain
+    an abbreviation for something like amyotrophic lateral sclerosis (ALS) that is not an
+    ontology abbreviation. (OBI, SO)"
+
+    Example output:
+    ["Here is the first definition.", "EFO", "Here is a second definition that \
+    might contain an abbreviation for something like amyotrophic lateral sclerosis \
+    (ALS) that is not an ontology abbreviation.", "OBI, SO"]
+    """
     dlist = []
     matches = re.findall(ontregex, text)
     remaining = ''.join(list(text))
