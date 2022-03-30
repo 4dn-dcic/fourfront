@@ -216,7 +216,8 @@ module.exports = [
                 stream: require.resolve('stream-browserify'),
                 process: require.resolve('process/browser'),
                 util: require.resolve('util/'),
-                "crypto": false
+                "crypto": false,
+                "events": false
             }
         },
         //resolveLoader : resolve,
