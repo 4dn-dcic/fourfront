@@ -105,7 +105,7 @@
   "dependencies": {
     "micro-meta-app-react": "github:WU-BIMAC/MicroMetaApp-React#0.0.0.21",
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "@hms-dbmi-bgm/react-workflow-viz": "0.1.5b",
+    "@hms-dbmi-bgm/react-workflow-viz": "0.1.6b",
     "@hms-dbmi-bgm/shared-portal-components": "github:4dn-dcic/shared-portal-components#0.1.42",
     "auth0-lock": "^11.32.2",
     "d3": "^6.7.0",
