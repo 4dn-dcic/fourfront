@@ -20,9 +20,7 @@ module.exports = function(api){
                 "method": "coroutine"
             }],
             ["@babel/plugin-proposal-pipeline-operator", { "proposal": "minimal" }],
-            ["@babel/plugin-transform-runtime", {
-                "corejs": 2,
-            }],
+            ["@babel/plugin-transform-runtime"],
         ],
         "comments": true
     };

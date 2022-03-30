@@ -88,9 +88,8 @@ export class TopRow extends React.Component {
     viewJSONButton(){
         const { href } = this.props;
         if (!href) return null; // Shouldn't occur.
-        const parseUrl=memoizedUrlParse(href);
-        console.log('xxxx parseUrl',parseUrl);
-        const urlParts = _.extend({},parseUrl );
+
+        const urlParts = _.extend({}, memoizedUrlParse(href));
         urlParts.search = '?' + queryString.stringify(_.extend({}, urlParts.query, { 'format' : 'json' }));
         const viewUrl = url.format(urlParts);
         return (
