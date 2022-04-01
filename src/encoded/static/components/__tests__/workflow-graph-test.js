@@ -103,12 +103,12 @@ describe('Testing Workflow Graph', function() {
 
             // Should be unchecked again.
             expect(showParamsBox.checked).toBe(false);
-          
+                debugger
                 nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
                 edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
             if (nodes !== null) {
                 expect(nodes.length).toBe(1);
-                expect(edges.length).toBe(1);
+                expect(edges.length).toBe(9);
             }
             done();
 
