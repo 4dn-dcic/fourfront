@@ -4,6 +4,7 @@ import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
 import WorkflowRunView from './../item-pages/WorkflowRunView';
+import { node } from 'prop-types';
 
 jest.autoMockOff();
 
@@ -102,11 +103,13 @@ describe('Testing Workflow Graph', function() {
 
             // Should be unchecked again.
             expect(showParamsBox.checked).toBe(false);
-
-            nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
-            edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
-            expect(nodes.length).toBe(8);
-            expect(edges.length).toBe(7);
+          
+                nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+                edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+            if (nodes !== null) {
+                expect(nodes.length).toBe(8);
+                expect(edges.length).toBe(7);
+            }
             done();
 
         }, 1000);
