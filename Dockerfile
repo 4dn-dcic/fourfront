@@ -129,7 +129,6 @@ RUN chmod +x entrypoint.bash && \
     chmod +x entrypoint_deployment.bash && \
     chmod +x entrypoint_indexer.bash && \
     chmod +x assume_identity.py
-
 EXPOSE 8000
 
 # Container does not run as root
