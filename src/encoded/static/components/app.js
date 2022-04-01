@@ -1124,7 +1124,7 @@ export default class App extends React.PureComponent {
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
-            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
+            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
         ].join("; ");
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
@@ -1701,7 +1701,10 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime } = this.props;
+        const {
+            onBodyClick, onBodySubmit, context, alerts, canonical, mounted,
+            currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime
+        } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
@@ -1768,7 +1771,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
 
             </body>
         );

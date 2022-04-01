@@ -393,7 +393,7 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['accession', 'file_format', 'filename', 'file_size']
          ),
         ('Software', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['name', 'title', 'version', 'source_url']
+            DEFAULT_SCOPE + ['name', 'title', 'version', 'commit', 'source_url']
          ),
         ('Workflow', 'WorkflowRunAwsem',
             DEFAULT_SCOPE + ['category', 'experiment_types', 'app_name', 'title']
@@ -465,7 +465,7 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['accession']  # XXX: this embeds calc props that are not fully reflected IMO - Will 3/31/21
          ),
         ('Biosource', 'ExperimentSet',
-            DEFAULT_SCOPE + ['biosource_type', 'cell_line_tier', 'override_biosource_name', 'override_organism_name']
+            DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line_tier', 'override_biosource_name', 'override_organism_name']
          ),
         ('Construct', 'ExperimentSet',
             DEFAULT_SCOPE + ['name']

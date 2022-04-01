@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '16'
 
       # Runs a set of commands using the runners shell
       - name: Install
@@ -41,4 +41,4 @@ jobs:
           Auth0Client: ${{ secrets.Auth0Client }}
           Auth0Secret: ${{ secrets.Auth0Secret }}
         run: |
-         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config baseUrl=http://staging.4dnucleome.org/ --parallel 
+         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config video=false baseUrl=http://staging.4dnucleome.org/ --parallel 

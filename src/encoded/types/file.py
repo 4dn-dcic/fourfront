@@ -348,6 +348,10 @@ class File(Item):
         'quality_metric.qc_list.value.@type',
         'quality_metric.qc_list.value.Total reads'
     ]
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = [
+        # open_data_url,  # consistency reliant on CNAME swap (full reindex) after transfer to open-data - uncomment if inconsistency with linking items becomes problematic
+    ]
     name_key = 'accession'
     rev = {
         'experiments': ('Experiment', 'files'),

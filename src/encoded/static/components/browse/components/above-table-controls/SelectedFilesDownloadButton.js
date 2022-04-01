@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import moment from 'moment';
 import Modal from 'react-bootstrap/esm/Modal';
 
 import { console, ajax, JWT, typedefs, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -189,7 +188,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
         let { action } = this.props;
         const { disclaimerAccepted } = this.state;
 
-        const suggestedFilename = filenamePrefix + dateTimeDisplay(moment().utc(), 'date-time-file', '-', false) + '.tsv';
+        const suggestedFilename = filenamePrefix + dateTimeDisplay(new Date(), 'date-time-file', '-', false) + '.tsv';
         const userInfo = JWT.getUserInfo();
         const profileHref = (session && userInfo.user_actions && _.findWhere(userInfo.user_actions, { 'id' : 'profile' }).href) || '/me';
         const foundUnpublishedFiles = SelectedFilesDownloadModal.findUnpublishedFiles(selectedFiles);

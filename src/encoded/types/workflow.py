@@ -18,7 +18,7 @@ from snovault import calculated_property, collection, load_schema, CONNECTION, T
 from snovault.util import debug_log
 from time import sleep
 from .base import Item, lab_award_attribution_embed_list
-
+from .dependencies import DependencyEmbedder
 
 TIBANNA_CODE_NAME = 'pony'
 TIBANNA_WORKFLOW_RUNNER_LAMBDA_FUNCTION = 'run_workflow_pony'
@@ -646,7 +646,9 @@ def trace_workflows(original_file_set_to_trace, request, options=None):
 
 def _build_workflows_embedded_list():
     """ Helper function for building workflow embedded list. """
-    return Item.embedded_list + lab_award_attribution_embed_list + [
+    software_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='steps.meta.software_used',
+                                                                 t='software')
+    return Item.embedded_list + lab_award_attribution_embed_list + software_embeds + [
         'steps.name',
 
         # Objects
@@ -654,9 +656,6 @@ def _build_workflows_embedded_list():
         'steps.outputs',
 
         # Software linkTo
-        'steps.meta.software_used.name',
-        'steps.meta.software_used.title',
-        'steps.meta.software_used.version',
         'steps.meta.software_used.source_url',
 
         # FileFormat linkTo
@@ -702,7 +701,9 @@ class Workflow(Item):
 
 def _build_workflow_run_embedded_list():
     """ Helper function for building workflow embedded list. """
-    return Item.embedded_list + lab_award_attribution_embed_list + [
+    software_embeds = DependencyEmbedder.embed_defaults_for_type(base_path='workflow.steps.meta.software_used',
+                                                                 t='software')
+    return Item.embedded_list + lab_award_attribution_embed_list + software_embeds + [
         # Workflow linkTo
         'workflow.category',
         'workflow.experiment_types',
@@ -711,9 +712,6 @@ def _build_workflow_run_embedded_list():
         'workflow.steps.name',
 
         # Software linkTo
-        'workflow.steps.meta.software_used.name',
-        'workflow.steps.meta.software_used.title',
-        'workflow.steps.meta.software_used.version',
         'workflow.steps.meta.software_used.source_url',
 
         # String
