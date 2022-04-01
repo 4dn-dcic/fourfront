@@ -25,7 +25,7 @@ import { WFRStepDetailBody } from './WFRStepDetailBody';
 
 export class WorkflowDetailPane extends React.PureComponent {
 
-    static Legend = Legend
+    static Legend = Legend;
 
     static propTypes = {
         'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])
