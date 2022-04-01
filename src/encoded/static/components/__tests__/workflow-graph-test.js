@@ -107,8 +107,8 @@ describe('Testing Workflow Graph', function() {
                 nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
                 edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
             if (nodes !== null) {
-                expect(nodes.length).toBe(8);
-                expect(edges.length).toBe(7);
+                expect(nodes.length).toBe(1);
+                expect(edges.length).toBe(1);
             }
             done();
 
