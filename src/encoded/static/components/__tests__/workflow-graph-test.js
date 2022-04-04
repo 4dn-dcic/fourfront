@@ -110,7 +110,7 @@ describe('Testing Workflow Graph', function() {
             //     expect(nodes.length).toBe(1);
             //     expect(edges.length).toBe(9);
             // }
-            done();
+            //done();
 
         }, 1000);
 
