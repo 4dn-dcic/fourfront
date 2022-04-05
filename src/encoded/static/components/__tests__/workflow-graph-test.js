@@ -101,16 +101,13 @@ describe('Testing Workflow Graph', function() {
 
         setTimeout(()=>{
 
-            // Should be unchecked again.
-            // expect(showParamsBox.checked).toBe(false);
-            //     debugger
-            //     nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
-            //     edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
-            // if (nodes !== null) {
-            //     expect(nodes.length).toBe(1);
-            //     expect(edges.length).toBe(9);
-            // }
-            //done();
+            //Should be unchecked again.
+            expect(showParamsBox.checked).toBe(false);
+                nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+                edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+                expect(nodes.length).toBe(8);
+                expect(edges.length).toBe(7);
+            done();
 
         }, 1000);
 
