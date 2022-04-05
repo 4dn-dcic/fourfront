@@ -42,7 +42,7 @@ describe('Testing Workflow Graph', function() {
             schemas, context,
             'onNodeClick' : null,
             'windowWidth' : 1200,
-            'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
+            'href' : "https://data.4dnucleome.org/workflow-runs-awsem/31e35b82-5bfb-40cd-84eb-51d9ea3d0925/"
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
@@ -105,8 +105,8 @@ describe('Testing Workflow Graph', function() {
             expect(showParamsBox.checked).toBe(false);
                 nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
                 edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
-                // expect(nodes.length).toBe(8);
-                // expect(edges.length).toBe(7);
+                expect(nodes.length).toBe(8);
+                expect(edges.length).toBe(7);
             done();;
 
         }, 1000);
@@ -245,7 +245,7 @@ describe('Find nodes from other columns', function() {
             schemas, context,
             'onNodeClick' : null,
             'windowWidth' : 1200,
-            'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
+            'href' : "https://data.4dnucleome.org/workflow-runs-awsem/31e35b82-5bfb-40cd-84eb-51d9ea3d0925/"
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
