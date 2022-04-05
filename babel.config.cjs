@@ -17,7 +17,7 @@ module.exports = function(api){
             ["@babel/plugin-proposal-decorators", { "legacy": true }],
             ["@babel/transform-async-to-generator", {
                 "module": "bluebird",
-                "method": "coroutine",
+                "method": "coroutine"
             }],
             ["@babel/plugin-proposal-pipeline-operator", { "proposal": "minimal" }],
             ["@babel/plugin-transform-runtime"],
