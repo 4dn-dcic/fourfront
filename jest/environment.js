@@ -9,6 +9,8 @@ const { JSDOM } = jsdom;
 const dom = new JSDOM();
 global.document = dom.window.document;
 global.window = dom.window;
+global.DOMParser = window.DOMParser;
+global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 global.navigator = {
     userAgent: 'node',
 };

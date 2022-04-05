@@ -4,7 +4,7 @@ import React from 'react';
 import _ from 'underscore';
 import TestUtils from 'react-dom/test-utils';
 import WorkflowRunView from './../item-pages/WorkflowRunView';
-import { node } from 'prop-types';
+// import { node } from 'prop-types';
 
 jest.autoMockOff();
 
