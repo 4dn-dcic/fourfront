@@ -73,6 +73,7 @@ jobs:
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
         run: |
+          npm test
           make remote-test-npm
 
       - name: Cleanup (NPM)
