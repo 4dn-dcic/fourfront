@@ -25,41 +25,41 @@ describe('Testing about.js', function() {
     
     // Setup required variables/dependencies before running tests.
     
-    var About, testItem, page, data, banners, Wrapper, App, app, sinon, server;
+    // var About, testItem, page, data, banners, Wrapper, App, app, sinon, server;
 
-    beforeAll(()=>{
-        // Get App from ../index instead of ../app to make sure prerequisite modules/components 
-        // have loaded and initialized, e.g. AboutPage registered as handler for AboutPage @type in about.js.
-        App = require('../index').default;
-        data = require('../testdata/static/aboutpage');
+    // beforeAll(()=>{
+    //     // Get App from ../index instead of ../app to make sure prerequisite modules/components 
+    //     // have loaded and initialized, e.g. AboutPage registered as handler for AboutPage @type in about.js.
+    //     App = require('../index').default;
+    //     data = require('../testdata/static/aboutpage');
 
-        sinon = require('sinon');
-        server = sinon.fakeServer.create();
+    //     sinon = require('sinon');
+    //     server = sinon.fakeServer.create();
         
-        server.respondWith(
-            "GET",
-            '/profiles/',
-            [
-                200, 
-                { "Content-Type" : "application/json" },
-                '<html></html>' // Don't actually need content JSON here for test.
-            ]
-        );
+    //     server.respondWith(
+    //         "GET",
+    //         '/profiles/',
+    //         [
+    //             200, 
+    //             { "Content-Type" : "application/json" },
+    //             '<html></html>' // Don't actually need content JSON here for test.
+    //         ]
+    //     );
 
-        act(()=>{
-            page = TestUtils.renderIntoDocument(
-                <App href="http://data.4dnucleome.org/about" alerts={[]} context={data} />
-            );
-        });
-        //jest.runAllTimers();
-    });
+    //     act(()=>{
+    //         page = TestUtils.renderIntoDocument(
+    //             <App href="http://data.4dnucleome.org/about" alerts={[]} context={data} />
+    //         );
+    //     });
+    //     //jest.runAllTimers();
+    // });
 
-    afterAll(function(){
-        server.restore();
-    });
+    // afterAll(function(){
+    //     server.restore();
+    // });
 
     // Check that has functional navBar with links
-    it('Has global navigation bar & links', function() {
+    it.skip('Has global navigation bar & links', function() {
 
         var navBanner = TestUtils.scryRenderedDOMComponentsWithClass(page, 'navbar-main navbar');
         var navBannerLinkWrapper = TestUtils.scryRenderedDOMComponentsWithClass(page, 'navbar-collapse');
@@ -139,7 +139,7 @@ describe('Testing about.js', function() {
     });
 
 
-    it("Has 'about' page elements -- '.static-page' wrapper, title, and content regions", function() {
+    it.skip("Has 'about' page elements -- '.static-page' wrapper, title, and content regions", function() {
         var staticContainer = TestUtils.findRenderedDOMComponentWithClass(page, "static-page");
         expect(staticContainer).toBeTruthy();
         
@@ -156,7 +156,7 @@ describe('Testing about.js', function() {
     });
 
     // Example of something which would be present on About page.
-    it("Has Burak and Nils' names", function() {
+    it.skip("Has Burak and Nils' names", function() {
         var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "section-content");
         expect(contentParagraphs.length).toBeGreaterThan(1); // At least 1 paragraph.
 
