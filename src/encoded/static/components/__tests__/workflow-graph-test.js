@@ -42,7 +42,7 @@ describe('Testing Workflow Graph', function() {
             schemas, context,
             'onNodeClick' : null,
             'windowWidth' : 1200,
-            'href' : "https://data.4dnucleome.org/workflow-runs-awsem/31e35b82-5bfb-40cd-84eb-51d9ea3d0925/"
+            'href' : "https://data.4dnucleome.org/workflow-runs-awsem/08c74287-c12c-421d-afc5-b383574e7558/"
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
@@ -245,7 +245,7 @@ describe('Find nodes from other columns', function() {
             schemas, context,
             'onNodeClick' : null,
             'windowWidth' : 1200,
-            'href' : "https://data.4dnucleome.org/workflow-runs-awsem/31e35b82-5bfb-40cd-84eb-51d9ea3d0925/"
+            'href' : "https://data.4dnucleome.org/workflow-runs-awsem/08c74287-c12c-421d-afc5-b383574e7558/"
         };
 
         testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
