@@ -63,7 +63,7 @@ export class WorkflowDetailPane extends React.PureComponent {
                 commonDetailProps.minWidth = 800;
             }
 
-            if (node.meta && node.meta.run_data && node.meta.run_data.file){
+            if (node.meta && node.meta.run_data && node.meta.run_data.file&& session){
                 // File
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }
