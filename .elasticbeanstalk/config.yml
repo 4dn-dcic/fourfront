@@ -1,23 +1,12 @@
 branch-defaults:
-  add_wf_engine:
-    environment: fourfront-webdev
   master:
     environment: fourfront-mastertest
   production:
     environment: fourfront-mastertest
-environment-defaults:
-  fourfront-webdev:
-    branch: null
-    repository: null
 global:
   application_name: 4dn-web
-  default_ec2_keyname: null
+  default_ec2_keyname: 4dn-encode
   default_platform: Python 3.6
   default_region: us-east-1
-  include_git_submodules: false
-  instance_profile: null
-  platform_name: null
-  platform_version: null
   profile: null
   sc: git
-  workspace_type: Application
