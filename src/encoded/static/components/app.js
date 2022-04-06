@@ -1113,6 +1113,20 @@ export default class App extends React.PureComponent {
             'onBodySubmit'   : this.handleSubmit,
         });
 
+        // Allowing unsafe-eval temporarily re: 'box-intersect' dependency of some HiGlass tracks.
+        // www.google-analytics.com without http(s) makes it available in either data or staging/hotseat ...
+        const contentSecurityPolicyStr = [
+            "default-src 'self'",
+            "img-src 'self' https://* data: www.google-analytics.com abs.twimg.com https://pbs.twimg.com ton.twimg.com platform.twitter.com https://syndication.twitter.com",
+            "child-src blob:",
+            "frame-src https://twitter.com platform.twitter.com syndication.twitter.com www.google.com/recaptcha/",
+            "script-src 'self' www.google-analytics.com https://cdn.auth0.com https://hms-dbmi.auth0.com https://secure.gravatar.com https://cdn.syndication.twimg.com platform.twitter.com https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-eval'", // + (typeof BUILDTYPE === "string" && BUILDTYPE === "quick" ? " 'unsafe-eval'" : ""),
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
+            "font-src 'self' https://fonts.gstatic.com",
+            "worker-src 'self' blob:",
+            "connect-src 'self' https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
+        ].join("; ");
+
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
 
         return (
@@ -1120,6 +1134,7 @@ export default class App extends React.PureComponent {
                 <head>
                     <meta charSet="utf-8"/>
                     <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
+                    <meta httpEquiv="Content-Security-Policy" content={contentSecurityPolicyStr}/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="sia9P1_R16tk3XW93WBFeJZvlTt3h0qL00aAJd3QknU" />
@@ -1686,7 +1701,10 @@ class BodyElement extends React.PureComponent {
 
     /** Renders out the body layout of the application. */
     render(){
-        const { onBodyClick, onBodySubmit, context, alerts, canonical, currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime } = this.props;
+        const {
+            onBodyClick, onBodySubmit, context, alerts, canonical, mounted,
+            currentAction, href, hrefParts, slowLoad, session, schemas, updateAppSessionState, browseBaseState, lastCSSBuildTime
+        } = this.props;
         const { windowWidth, windowHeight, hasError, isFullscreen } = this.state;
         const { registerWindowOnResizeHandler, registerWindowOnScrollHandler, addToBodyClassList, removeFromBodyClassList, toggleFullScreen } = this;
         const appClass = slowLoad ? 'communicating' : 'done';
@@ -1753,7 +1771,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" />
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
 
             </body>
         );

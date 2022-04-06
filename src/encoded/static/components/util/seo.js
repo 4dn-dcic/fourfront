@@ -168,7 +168,7 @@ export class CurrentContext extends React.PureComponent {
                 listOfPropsForKeyWords = [
                     'experiments_in_set.biosample.biosource_summary',
                     'experiments_in_set.biosample.biosource.biosource_type',
-                    'experiments_in_set.biosample.biosource.individual.organism.display_title',
+                    'experiments_in_set.biosample.biosource.organism.name',
                     'experiments_in_set.biosample.treatments.treatment_type',
                     'experiments_in_set.experiment_categorizer.value'
                 ];

@@ -515,7 +515,39 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     );
 });
 
+/** Used in OverViewBodyItem.titleRenderPresets */
+const SampleBiosourceItem = React.memo(function SampleBiosourceItem(props) {
+    const { item, index, fullObject } = props;
 
+    const matchingExps = _.filter(fullObject.experiments_in_set || [], function (exp) {
+        const { biosample: { biosource_summary } = {} } = exp;
+        return biosource_summary === item;
+    });
+
+    // fallback
+    if (matchingExps.length === 0) {
+        return item;
+    }
+
+    const biosources = _.uniq(_.reduce(matchingExps, function (m, exp) {
+        const { biosample: { biosource = [] } = {} } = exp;
+        return m.concat(biosource.map(function (bs) {
+            return { accession: bs.accession, atId: object.atIdFromObject(bs) };
+        }));
+    }, []), function (bs) { return bs.accession; });
+
+    // create a link to the item page for a single item, whereas a link to search page for multiple items results
+    const style = { 'overflowWrap': 'break-word' };
+    if (biosources.length === 1) {
+        const [bs] = biosources;
+        return <a href={bs.atId} style={style} data-tip="View Biosource Details">{item}</a>;
+    } else if (biosources.length > 1) {
+        const link = '/search/?type=Biosource&accession=' + _.pluck(biosources, 'accession').join('&accession=');
+        return <a href={link} style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
+    }
+
+    return item;
+});
 
 export class OverViewBodyItem extends React.PureComponent {
 
@@ -571,6 +603,9 @@ export class OverViewBodyItem extends React.PureComponent {
                     { matchingFile ? <div className="microscope-setting col-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
+        },
+        'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+            return <SampleBiosourceItem {...{ item, index, fullObject }} />;
         }
     }
 
@@ -638,7 +673,7 @@ export class OverViewBodyItem extends React.PureComponent {
         this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
         this.state = {
             'collapsed': true
-        }
+        };
     }
 
     handleCollapseToggle(){

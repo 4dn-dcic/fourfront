@@ -115,7 +115,7 @@ def google_analytics_tracking_data():
                         "ga:users": 13,
                         "ga:totalEvents": 16,
                         "ga:sessions": 15,
-                        "ga:dimension3": "experiments_in_set.biosample.biosource.individual.organism.name"
+                        "ga:dimension3": "experiments_in_set.biosample.biosource.organism.name"
                     }
                 ],
                 "views_by_file": [

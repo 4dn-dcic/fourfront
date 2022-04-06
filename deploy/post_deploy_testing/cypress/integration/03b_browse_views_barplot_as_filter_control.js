@@ -33,9 +33,9 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                                 .get('.cursor-component-root .actions.buttons-container .btn-primary').should('contain', "Explore").click({ force: true }).end() // Browser will scroll after click itself (e.g. triggered by app)
                                 .location('search')
                                 .should('include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq')
-                                .should('include', 'experiments_in_set.biosample.biosource.individual.organism.name=human').wait(300).end()
+                                .should('include', 'experiments_in_set.biosample.biosource.organism.name=human').wait(300).end()
                                 .get('#slow-load-container').should('not.have.class', 'visible').end()
-                                .get('.search-results-container .search-result-row').should('have.length', expectedFilteredResults).end()
+                                .get('.search-results-container .search-result-row[data-row-number]').should('have.length', expectedFilteredResults).end()
                                 .getQuickInfoBarCounts({ 'shouldNotEqual' : '' + origCount.experiment_sets }).its('experiment_sets').should('not.equal', origCount.experiment_sets).should('equal', expectedFilteredResults).end()
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length', 1).end()
                                 .window().screenshot("ATAC-seq x mouse BrowseView results, filtered via BarPlot section hover & click.").end();
@@ -58,7 +58,7 @@ describe('Browse Views - BarPlotChart & QuickInfoBar I', function () {
                                 .get('.bar-plot-chart .chart-bar .bar-part').should('have.length.greaterThan', unfilteredOnceBarPartCount)
                                 .getQuickInfoBarCounts().its('experiment_sets').should('be.greaterThan', unfilteredOnceExpSetCount).end()
                                 .location('search').should('include', 'experimentset_type=replicate')
-                                .should('not.include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq').should('not.include', 'experiments_in_set.biosample.biosource.individual.organism.name=human');
+                                .should('not.include', 'experiments_in_set.experiment_type.display_title=2-stage+Repli-seq').should('not.include', 'experiments_in_set.biosample.biosource.organism.name=human');
                         });
                     });
             });

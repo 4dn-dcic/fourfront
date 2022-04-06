@@ -60,9 +60,22 @@
         },
         "microscope_settings": {
             "type": "string",
-            "lookup": 50,
+            "lookup": 99,
             "title": "Microscope Settings",
             "linkTo": "MicroscopeSetting"
+        },
+        "microscope_configuration": {
+            "type": "string",
+            "lookup": 50,
+            "title": "Microscope Configuration",
+            "description": "Hardware configuration for the microscope instrument",
+            "linkTo": "MicroscopeConfiguration"
+        },
+        "image_settings": {
+            "type": "string",
+            "lookup": 51,
+            "title": "Image Settings",
+            "linkTo": "ImageSetting"
         },
         "related_files": {
             "exclude_from": ["submit4dn", "FFedit-create"]

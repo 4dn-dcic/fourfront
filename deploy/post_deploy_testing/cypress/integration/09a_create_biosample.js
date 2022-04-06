@@ -35,6 +35,9 @@ describe('Biosample create page', function () {
                 .get(".field-row[data-field-name=biosource] .search-selection-menu-body .scroll-items .dropdown-item")
                 .should('have.length', 1).click().wait(1000).end();
 
+            // Add deleted_by_cypress_test tag
+            cy.get('input#field_for_tags.form-control').focus().type('deleted_by_cypress_test').wait(100).end();
+
             // Click Validate button
             cy.get(".action-buttons-container .btn")
                 .within(function () {
@@ -49,7 +52,7 @@ describe('Biosample create page', function () {
                     return cy.contains('Skip').click().end();
                 })
                 .end()
-                .get("h1.page-title").contains("Biosample").wait(1000).end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
+                .get("h1.page-title").contains("Biosample").wait(3000).end(); // Await until are at Biosample page. Then wait 1s to ensure we have new context.
 
             // Queue for deletion in subsequent test.
             cy.get('script[data-prop-name=context]').then(function($context){

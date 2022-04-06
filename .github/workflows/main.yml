@@ -38,7 +38,7 @@ jobs:
       # Per doc for node install at https://github.com/actions/setup-node#usage
       - uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: '16'
           check-latest: false
 
       - name: Install/Link Postgres
@@ -74,7 +74,7 @@ jobs:
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
         run: |
           npm test
-          make travis-test-npm
+          make remote-test-npm
 
       - name: Cleanup (NPM)
         if: ${{ always() && matrix.test_type == 'NPM' }}
@@ -102,7 +102,7 @@ jobs:
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
-          make travis-test-unit
+          make remote-test-unit
 
       - name: Cleanup (UNIT)
         if: ${{ always() && matrix.test_type == 'UNIT' }}

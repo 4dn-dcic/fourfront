@@ -214,6 +214,8 @@ export class FileOverviewHeading extends React.PureComponent {
                             fallbackTitle="General Classification" titleRenderFxn={FileOverviewHeading.fileClassificationRenderFxn} />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
                             fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
+                        {/* <OverViewBodyItem {...commonHeadingBlockProps} key="microscope_configuration" property="microscope_configuration"
+                            fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 col-md-6"} /> */}
                     </OverviewHeadingContainer>
                 </div>
                 <div className="col-12 col-md-4 mt-1 mb-3">
@@ -288,24 +290,21 @@ export class ExternalVisualizationButtons extends React.PureComponent {
     }
 
     render(){
-        const { file, href, wrapInColumn, className } = this.props;
+        const { file, wrapInColumn, className } = this.props;
+        const { open_data_url } = file || {};
         let epigenomeBtn, juiceBoxBtn;
 
         if (!(file.status === 'archived' || file.status === 'released')){
             return null; // External tools cannot access non-released files.
         }
-        if (!file.href){
+        if (!open_data_url){
             return null;
         }
 
         const fileFormat = commonFileUtil.getFileFormatStr(file);
-        const hrefParts = memoizedUrlParse(href || (store && store.getState().href));
-        const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
-
-
         if (fileFormat === 'hic'){
-            juiceBoxBtn = this.renderJuiceboxBtn(fileUrl);
-            epigenomeBtn = this.renderEpigenomeBtn(fileUrl, file.genome_assembly || null);
+            juiceBoxBtn = this.renderJuiceboxBtn(open_data_url);
+            epigenomeBtn = this.renderEpigenomeBtn(open_data_url, file.genome_assembly || null);
         }
 
         if (!juiceBoxBtn && !epigenomeBtn){

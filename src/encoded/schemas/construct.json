@@ -94,8 +94,7 @@
               "title": "Insert Sequence",
               "description": "Nucleotide Sequence of the Insert",
               "type":  "string",
-              "lookup": 80,
-              "pattern": "^[ATGCN]+$"
+              "lookup": 80
           },
           "construct_vendor": {
               "title": "Construct Vendor",

@@ -156,8 +156,7 @@ class Experiment(Item):
         'biosample.biosource.individual.protected_data',
 
         # Organism linkTo
-        'biosample.biosource.individual.organism.name',
-        'biosample.biosource.individual.organism.scientific_name',
+        'biosample.biosource.organism.name',
 
         # Modification linkTo
         'biosample.modifications.modification_type',
@@ -209,8 +208,11 @@ class Experiment(Item):
         'files.file_size',
         'files.upload_key',
         'files.file_classification',
+        'files.file_type',
         'files.file_type_detailed',
         'files.paired_end',
+        'files.notes_to_tsv',
+        'files.dbxrefs',
         'files.external_references.*',
         'files.related_files.relationship_type',
         'files.related_files.file.accession',
@@ -971,6 +973,12 @@ def _build_experiment_mic_embedded_list():
         'files.microscope_settings.ch03_lasers_diodes',
         'files.microscope_settings.ch04_lasers_diodes',
 
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration_master.title',
+        'microscope_configuration_master.microscope.Name',
+        'files.microscope_configuration.title',
+        'files.microscope_configuration.microscope.Name',
+
         # Image linkTo
         'sample_image.title',
         'sample_image.caption',
@@ -1025,12 +1033,15 @@ class ExperimentMic(Experiment):
     def experiment_categorizer(self, request, experiment_type, biosample, imaging_paths=None):
         ''' Use the target(s) in the imaging path'''
         if imaging_paths:
+            unique_targets = []
             path_targets = []
             for pathobj in imaging_paths:
                 path = get_item_or_none(request, pathobj['path'], 'imaging_path')
                 for target in path.get('target', []):
-                    summ = get_item_or_none(request, target, 'bio_feature')['display_title']
-                    path_targets.append(summ)
+                    biofeature = get_item_or_none(request, target, 'bio_feature')
+                    if biofeature['@id'] not in unique_targets:
+                        unique_targets.append(biofeature['@id'])
+                        path_targets.append(biofeature['display_title'])
             if path_targets:
                 value = []
                 sum_targets = {}

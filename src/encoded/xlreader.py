@@ -109,7 +109,7 @@ class DictReader:
 def zipfile_to_csv(zipfilename, outpath, ext='.csv', dialect='excel', **fmtparams):
     """ For Google Drive download zips
     """
-    zf = ZipFile(zipfilename)
+    zf = zipfile.ZipFile(zipfilename)
     for name in zf.namelist():
         subpath, entry_ext = os.path.splitext(name)
         if entry_ext.lower() != '.xlsx':

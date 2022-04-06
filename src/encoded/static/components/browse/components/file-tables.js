@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import url from 'url';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
@@ -15,7 +14,6 @@ import { console, isServerSide, analytics, object, commonFileUtil, navigate, mem
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
 import { expFxn, Schemas, typedefs, fileUtil } from './../../util';
-import { Item, ExperimentSet } from '../../util/typedefs';
 
 
 
@@ -97,19 +95,21 @@ class FileColumnActionsBtn extends React.PureComponent {
     }
 
     juiceboxButton(){
-        const { file, href } = this.props;
-        const host = FileColumnActionsBtn.hostFromHref(href);
+        const { file } = this.props;
+        const { open_data_url } = file || {};
 
-        if (!host || !file.href) return null; // Needed for a link to be made
+        // open_data_url should exist to render the button
+        if (!open_data_url) return null;
 
-        if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
+        // Juicebox & epigenome browser can only viz HIC files at moment?
+        if (!this.isFileHIC()){
             return null;
         }
 
         function onClick(){
             // If we're server-side, there is access to the global browser window object/API.
             if (isServerSide()) return null;
-            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + open_data_url;
             var win = window.open(targetLocation, '_blank');
             win.focus();
         }
@@ -123,13 +123,14 @@ class FileColumnActionsBtn extends React.PureComponent {
     }
 
     epigenomeButton(){
-        const { file, href } = this.props;
-        const host = FileColumnActionsBtn.hostFromHref(href);
+        const { file } = this.props;
+        const { open_data_url } = file || {};
+
         const genomeAssembly = file.genome_assembly || null;
         const epiGenomeMapping = (genomeAssembly && FileColumnActionsBtn.epiGenomeAssemblyMapping[genomeAssembly]) || null;
 
         // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
-        if (!epiGenomeMapping || !host || !file.href) return null; // Needed for a link to be made
+        if (!epiGenomeMapping || !open_data_url) return null; // Needed for a link to be made
 
         if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
             return null;
@@ -138,7 +139,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         function onClick(){
             // If we're server-side, there is access to the global browser window object/API.
             if (isServerSide()) return null;
-            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + file.href;
+            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + open_data_url;
             var win = window.open(targetLocation, '_blank');
             win.focus();
         }
@@ -263,6 +264,22 @@ export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockPr
     }
 }
 
+export function renderFileMicroscopeConfigurationLinkButton(file, field, detailIndex, fileEntryBlockProps) {
+    if (!file || !file.microscope_configuration) {
+        return '-';
+    }
+    const href = object.atIdFromObject(file.microscope_configuration);
+    if (!href) {
+        return '-';
+    }
+    return (
+        <a className="btn btn-xs btn-primary" data-tip="View microscope configuration details"
+            href={href}>
+            <i className="icon icon-fw icon-microscope fas" />
+        </a>
+    );
+}
+
 export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
     if (!file || !file.quality_metric || !file.quality_metric.url){
         return '-';
@@ -367,7 +384,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /**
-     * Adds Total Sequences metric column if any raw files in expSet have a `quality_metric`.
+     * Adds Total Sequences metric column if any raw files in expOrExpSet have a `quality_metric`.
      * Or if param `showMetricColumns` is set to true;
      *
      * @see fileUtil.filterFilesWithEmbeddedMetricItem
@@ -376,10 +393,9 @@ export class RawFilesStackedTable extends React.PureComponent {
      * @param {ExperimentSet} expOrExpSet - Experiment or ExperimentSet Item.
      */
     static metricColumnHeaders(showMetricColumns, expOrExpSet){
-        const allFiles = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
+        const allFiles = RawFilesStackedTable.allRawFiles(expOrExpSet);
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
-        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) ||
-            commonFileUtil.filterFilesWithEmbeddedMetricItem(allFiles, true) ? true : false;
+        showMetricColumns = (typeof showMetricColumns === 'boolean') ? showMetricColumns : commonFileUtil.filterFilesWithEmbeddedMetricItem(allFiles, true);
 
         if (!showMetricColumns) return null;
 
@@ -388,16 +404,41 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
     /**
-     * Adds Notes column if any raw files in expSet have a `notes_to_tsv`.
+     * Adds Microscope Configuration column if any raw files in expOrExpSet have a `microscope_configuration`.
+     * Or if param `showMicroscopeConfigurationColumns` is set to true;
+     *
+     * @param {*} showNotesColumns - Skips check for microscope_configuration and returns column if true.
+     * @param {*} expOrExpSet - Experiment or ExperimentSet Item.
+     */
+    static microscopeConfigurationColumnHeaders(showMicroscopeConfigurationColumns, expOrExpSet) {
+        const allFiles = RawFilesStackedTable.allRawFiles(expOrExpSet);
+        // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
+        showMicroscopeConfigurationColumns =
+            (typeof showMicroscopeConfigurationColumns === 'boolean') ?
+                showMicroscopeConfigurationColumns : _.any(allFiles, (f) => f.microscope_configuration);
+
+        if (!showMicroscopeConfigurationColumns) return null;
+
+        return [
+            {
+                columnClass: 'file-detail', title: 'Microscope Configuration', initialWidth: 40, render: renderFileMicroscopeConfigurationLinkButton,
+                visibleTitle: function () {
+                    return <i className="icon icon-fw icon-microscope fas" data-tip="Microscope Configuration" />;
+                }
+            }
+        ];
+    }
+    /**
+     * Adds Notes column if any raw files in expOrExpSet have a `notes_to_tsv`.
      * Or if param `showNotesColumns` is set to true;
      *
      * @param {*} showNotesColumns - Skips check for notes_to_tsv and returns column if true.
      * @param {*} expOrExpSet - Experiment or ExperimentSet Item.
      */
     static notesColumnHeaders(showNotesColumns, expOrExpSet) {
-        const allFiles = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
+        const allFiles = RawFilesStackedTable.allRawFiles(expOrExpSet);
         // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
-        showNotesColumns = (typeof showNotesColumns === 'boolean' && showNotesColumns) || _.any(allFiles, (f) => f.notes_to_tsv) ? true : false;
+        showNotesColumns = (typeof showNotesColumns === 'boolean') ? showNotesColumns : _.any(allFiles, (f) => f.notes_to_tsv);
 
         if (!showNotesColumns) return null;
 
@@ -406,17 +447,22 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
 
-    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, showNotesColumns, expOrExpSet){
+    static columnHeaders(columnHeaders, showMetricColumns, showMicroscopeConfigurationColumns, showNotesColumns, expOrExpSet){
         return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, expOrExpSet) || [])
             .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, expOrExpSet) || [])
             .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.microscopeConfigurationColumnHeaders(showMicroscopeConfigurationColumns, expOrExpSet) || [])
             .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, expOrExpSet) || []);
-    });
+    }
 
-    static isExperimentSet = memoize(function (expOrExpSet) {
+    static isExperimentSet(expOrExpSet) {
         const itemType = schemaTransforms.getItemType(expOrExpSet);
         return itemType && itemType.indexOf('ExperimentSet') >= 0;
-    });
+    }
+
+    static allRawFiles(expOrExpSet) {
+        return RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
+    }
 
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
@@ -447,6 +493,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         ],
         'collapseLongLists' : true,
         'showMetricColumns' : null,
+        'showMicroscopeConfigurationColumns' : null,
         'showNotesColumns'  : null,
         'preventExpand'     : false
     };
@@ -473,7 +520,8 @@ export class RawFilesStackedTable extends React.PureComponent {
                 );
                 const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
                 return { experimentsGroupedByBiosample, allRawFiles };
-            })
+            }),
+            columnHeaders: memoize(RawFilesStackedTable.columnHeaders)
         };
     }
 
@@ -520,7 +568,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showNotesColumns, href, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
+        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, href, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
 
         const allRawFiles = exp.files || [];
 
@@ -530,7 +578,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
-        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, showNotesColumns, experimentSet || exp),
+        var fullColumnHeaders   = this.memoized.columnHeaders(columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || exp),
             contentsClassName   = 'files',
             contents            = [];
 
@@ -669,7 +717,7 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Much of styling/layouting is defined in CSS.
      */
     render(){
-        const { experimentSet, experiment: propExperiment, columnHeaders: propColHeaders, showMetricsColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
+        const { experimentSet, experiment: propExperiment, columnHeaders: propColHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
         let experimentsGroupedByBiosample, allRawFiles, experiment;
         if (experimentSet) {
             ({ experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet));
@@ -693,7 +741,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             </React.Fragment>
         );
 
-        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, showNotesColumns, experimentSet || experiment);
+        const columnHeaders = this.memoized.columnHeaders(propColHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || experiment);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
@@ -722,32 +770,26 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
      */
     static notesColumnHeaders(showNotesColumns, processedFiles) {
 
-        switch (showNotesColumns) {
+        showNotesColumns = (typeof showNotesColumns === 'boolean') ? showNotesColumns : _.any(processedFiles || [], (f) => f.notes_to_tsv);
 
-            case 'always':
-                return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
-            case 'conditional':
-                if (_.any(processedFiles || [], (f) => f.notes_to_tsv)) {
-                    return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
-                }
-                return null;
-            case 'never':
-            default:
-                return null;
+        if(!showNotesColumns) {
+            return null;
         }
+
+        return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
     }
 
-    static columnHeaders = memoize(function (columnHeaders, showNotesColumns, processedFiles) {
+    static columnHeaders(columnHeaders, showNotesColumns, processedFiles) {
         let clonedColumnHeaders = columnHeaders.slice(0);
         clonedColumnHeaders = clonedColumnHeaders.concat(ProcessedFilesStackedTable.notesColumnHeaders(showNotesColumns, processedFiles) || []);
         return clonedColumnHeaders;
-    });
+    }
 
     static propTypes = {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
         'files' : PropTypes.array.isRequired,
         'analyticsImpressionOnMount' : PropTypes.bool,
-        'showNotesColumns': PropTypes.oneOf(['always', 'never', 'conditional'])
+        'showNotesColumns': PropTypes.bool
     };
 
     static defaultProps = {
@@ -761,7 +803,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
         'titleForFiles'     : 'Processed Files',
-        'showNotesColumns'  : 'conditional'
+        'showNotesColumns'  : null
     };
 
     /**
@@ -800,7 +842,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         this.oddExpRow = false;
 
         this.memoized = {
-            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal)
+            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal),
+            columnHeaders: memoize(ProcessedFilesStackedTable.columnHeaders)
         };
     }
 
@@ -917,7 +960,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         const { files, columnHeaders: propColHeaders, showNotesColumns, collapseLongLists } = this.props;
         const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
-        const columnHeaders = ProcessedFilesStackedTable.columnHeaders(propColHeaders, showNotesColumns, files);
+        const columnHeaders = this.memoized.columnHeaders(propColHeaders, showNotesColumns, files);
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
                 <StackedBlockTable {..._.omit(this.props, 'children', 'files', 'columnHeaders')} columnHeaders={columnHeaders}
@@ -1158,7 +1201,7 @@ export class QCMetricsTable extends React.PureComponent {
             width, windowWidth, href,
             collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
             analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics",
-            showNotesColumns: 'never'
+            showNotesColumns: false
         };
 
         return (

@@ -133,9 +133,11 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.tissue_organ_info.tissue_source",
 
         # Biosource linkTo
+        "experiments_in_set.biosample.biosource.accession",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.override_biosource_name",
+        "experiments_in_set.biosample.biosource.override_organism_name",  # do we need this?
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.biosource.cell_line.term_id",
@@ -152,7 +154,8 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.tissue.synonyms",
 
         # Organism linkTo
-        "experiments_in_set.biosample.biosource.individual.organism.name",
+        "experiments_in_set.biosample.biosource.organism.name",  # calc prop
+        "experiments_in_set.biosample.biosource.organism.scientific_name",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
@@ -233,6 +236,10 @@ class ExperimentSet(Item):
         "experiments_in_set.files.contributing_labs.display_title",
         "experiments_in_set.files.lab.display_title",
         "experiments_in_set.files.track_and_facet_info.*",
+
+        # MicroscopeConfiguration linkTo
+        "experiments_in_set.files.microscope_configuration.title",
+        "experiments_in_set.files.microscope_configuration.microscope.Name",
 
         # FileFormat linkTo
         "experiments_in_set.files.file_format.file_format",

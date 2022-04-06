@@ -10,9 +10,7 @@ import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/e
 import { console, object, layout, commonFileUtil } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn, Schemas } from './../util';
 
-import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
 import { ExperimentSetsTableTabView } from './components/tables/ExperimentSetTables';
-import { SimpleFilesTable, SimpleFilesTableLoaded } from './components/tables/SimpleFilesTable';
 import { Publications } from './components/Publications';
 import { HiGlassAdjustableWidthRow } from './HiGlassViewConfigView';
 import { isHiglassViewConfigItem } from './components/HiGlass/HiGlassPlainContainer';
@@ -20,6 +18,7 @@ import { OverviewHeadingContainer } from './components/OverviewHeadingContainer'
 import { SelectedFilesController, uniqueFileCount } from './../browse/components/SelectedFilesController';
 import { SelectedFilesDownloadButton } from './../browse/components/above-table-controls/SelectedFilesDownloadButton';
 import { ProcessedFilesStackedTable, RawFilesStackedTableExtendedColumns, QCMetricsTable } from './../browse/components/file-tables';
+import { addFilesStackedTableStatusColHeader } from './../util/experiments-transforms';
 
 import { OverViewBodyItem, StaticHeadersArea } from './DefaultItemView';
 import WorkflowRunTracingView, { FileViewGraphSection } from './WorkflowRunTracingView';
@@ -83,19 +82,19 @@ export default class ExperimentView extends WorkflowRunTracingView {
         const tabs = [];
 
         const extendedExp = _.extend({ from_experiment_set: { accession: 'NONE' } }, context);
-        
+
         const commonProps = { width, context, schemas, windowWidth, href, session, mounted };
         const propsForTableSections = _.extend(SelectedFilesController.pick(this.props), commonProps);
 
         const processedFiles = this.allProcessedFilesFromExperiments([extendedExp]);
-        const processedFilesLen = (processedFiles && processedFiles.length) || 0;
+        const processedFilesUniqueLen = (processedFiles && processedFiles.length && ExperimentProcessedFilesStackedTableSection.allFilesUniqueCount(processedFiles)) || 0;
 
-        if (processedFilesLen > 0) {
+        if (processedFilesUniqueLen > 0) {
             tabs.push({
                 tab: (
                     <span>
                         <i className="icon icon-microchip fas icon-fw" />
-                        {processedFilesLen + " Processed File" + (processedFilesLen === 1 ? "" : "s")}
+                        {processedFilesUniqueLen + " Processed File" + (processedFilesUniqueLen === 1 ? "" : "s")}
                     </span>
                 ),
                 key: 'processed-files',
@@ -108,14 +107,14 @@ export default class ExperimentView extends WorkflowRunTracingView {
         }
 
         const rawFiles = this.allFilesFromExperiment(extendedExp, false, false);
-        const rawFilesLen = (rawFiles && rawFiles.length) || 0;
+        const rawFilesUniqueLen = (rawFiles && rawFiles.length && ExperimentRawFilesStackedTableSection.allFilesUniqueCount(rawFiles)) || 0;
 
-        if (rawFilesLen > 0) {
+        if (rawFilesUniqueLen > 0) {
             tabs.push({
                 tab : (
                     <span>
                         <i className="icon icon-leaf fas icon-fw"/>
-                        { rawFilesLen + " Raw File" + (rawFilesLen === 1 ? "" : "s") }
+                        { rawFilesUniqueLen + " Raw File" + (rawFilesUniqueLen === 1 ? "" : "s") }
                     </span>
                 ),
                 key : 'raw-files',
@@ -306,6 +305,9 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
             <OverViewBodyItem {...commonBioProps} property="treatments_summary" fallbackTitle="Biosample Treatments" />
             <OverViewBodyItem {...commonProps} property="microscopy_technique" fallbackTitle="Microscopy Technique" />
             <OverViewBodyItem {...commonProps} property="microscope_qc" fallbackTitle="Microscope Quality Control" />
+            <OverViewBodyItem {...commonProps} property="microscope_configuration_master" fallbackTitle="Microscope Configuration" wrapInColumn="col-12 col-md-6" />
+
+            <div className="w-100"></div>
 
             <OverViewBodyItem {...commonProps} property="sample_image" fallbackTitle="Sample Image"
                 wrapInColumn="col-12 col-md-3" singleItemClassName="block"
@@ -313,66 +315,26 @@ const OverviewHeadingMic = React.memo(function OverviewHeadingMic(props){
 
             <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
                 wrapInColumn="col-12 col-md-9 pull-right" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
-                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={3} collapseShow={2} />
+                titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={5} collapseShow={4} />
 
         </OverviewHeadingContainer>
-    );
-});
-
-
-const RawFilesTableSection = React.memo(function RawFilesTableSection(props){
-    const { files, context, width, schemas } = props;
-    const { uuid: expUUID } = context || {};
-    const columns = _.clone(SimpleFilesTable.defaultProps.columns);
-
-    columns['related_files'] = {
-        'title' : 'Relations',
-        'minColumnWidth' : 120,
-        'render' : function(result, columnDefinition, props, width){
-            var related_files = _.map(_.filter(result.related_files, function(rF){ return rF.file && object.atIdFromObject(rF.file); }), function(fContainer, i){
-                var link = object.atIdFromObject(fContainer.file);
-                var title = typeof fContainer.file.accession === 'string' ? <span className="text-monospace">{fContainer.file.accession}</span> : fContainer.file.display_title;
-                return <span key={link || i}>{ fContainer.relationship_type } { link ? <a href={link}>{ title }</a> : title }</span>;
-            });
-            return related_files;
-        }
-    };
-
-    // Add column for paired end if any files have one.
-    if (_.any(files, function(f) { return typeof f.paired_end !== 'undefined'; })){
-        columns['paired_end'] = {
-            "title" : 'End',
-            'widthMap' : { 'sm' : 30, 'md' : 40, 'lg' : 50 },
-            'minColumnWidth' : 30
-        };
-    }
-
-    // Get all files which have expUUID in experiments.uuid[] excluding reference and processed files.
-    const searchHref = `/search/?type=File&experiments.uuid=${encodeURIComponent(expUUID)}&type%21=FileProcessed&type%21=FileReference`;
-
-    return (
-        <div className="raw-files-table-section">
-            <h3 className="tab-section-title">
-                <span><span className="text-400">{ files.length }</span> Raw File{ files.length === 1 ? '' : 's' }</span>
-            </h3>
-            <EmbeddedItemSearchTable {...{ searchHref, schemas, columns, width }} facets={null} />
-        </div>
     );
 });
 
 class ExperimentRawFilesStackedTableSection extends React.PureComponent {
 
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
+    static allFilesUniqueCount = memoize(uniqueFileCount);
 
     renderHeader(){
         const { context, files, selectedFiles, session } = this.props;
+        const allFilesUniqueCount = ExperimentRawFilesStackedTableSection.allFilesUniqueCount(files);
         const selectedFilesUniqueCount = ExperimentRawFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
-        const fileCount = files.length;
         const filenamePrefix = (context.accession || context.display_title) + "_raw_files_";
 
         return (
             <h3 className="tab-section-title">
-                <span className="text-400">{ fileCount }</span>{ ' Raw File' + (fileCount > 1 ? 's' : '')}
+                <span className="text-400">{ allFilesUniqueCount }</span>{ ' Raw File' + (allFilesUniqueCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
@@ -404,22 +366,6 @@ class ExperimentRawFilesStackedTableSection extends React.PureComponent {
     }
 }
 
-const ProcessedFilesTableSection = React.memo(function ProcessedFilesTableSection(props){
-    const { files, context, schemas } = props;
-    //const { uuid: expUUID } = context;
-    const fileUrls = _.map(files, object.itemUtil.atId);
-    //const searchHref = `/search/?type=FileProcessed&experiments.uuid=${encodeURIComponent(expUUID)}`;
-    return (
-        <div className="processed-files-table-section">
-            <h3 className="tab-section-title">
-                <span><span className="text-400">{ files.length }</span> Processed File{ files.length === 1 ? '' : 's' }</span>
-            </h3>
-            {/* <EmbeddedItemSearchTable {...{ searchHref, schemas }} facets={null} /> */}
-            <SimpleFilesTableLoaded {..._.pick(props, 'schemas', 'width')} fileUrls={fileUrls} id={object.itemUtil.atId(context)} />
-        </div>
-    );
-});
-
 class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
 
     /**
@@ -449,6 +395,7 @@ class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
         );
     }
 
+    static allFilesUniqueCount = memoize(uniqueFileCount);
     static selectedFilesUniqueCount = memoize(uniqueFileCount);
 
     constructor(props){
@@ -459,12 +406,13 @@ class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
     renderHeader(){
         const { context, files, selectedFiles, session } = this.props;
 
+        const allFilesUniqueCount = ExperimentProcessedFilesStackedTableSection.allFilesUniqueCount(files);
         const selectedFilesUniqueCount = ExperimentProcessedFilesStackedTableSection.selectedFilesUniqueCount(selectedFiles);
         const filenamePrefix = (context.accession || context.display_title) + "_processed_files_";
         return (
             <h3 className="tab-section-title">
                 <span>
-                    <span className="text-400">{files.length}</span> Processed Files
+                    <span className="text-400">{allFilesUniqueCount}</span> Processed Files
                 </span>
                 {selectedFiles ? // Make sure data structure is present (even if empty)
                     <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
@@ -523,8 +471,17 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
         return null;
     }
 
+    static getStatusAndColHeaders(columnHeaders, files) {
+        const status = ExperimentSupplementaryFilesOPFCollection.collectionStatus(files);
+        return { status, columnHeaders: addFilesStackedTableStatusColHeader(columnHeaders, files, status) };
+    }
+
     static defaultProps = {
-        'defaultOpen' : false
+        'defaultOpen' : false,
+        'columnHeaders' : (function(){
+            const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
+            return colHeaders;
+        })()
     };
 
     constructor(props){
@@ -532,7 +489,7 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
         this.toggleOpen = this.toggleOpen.bind(this);
         this.renderFilesTable = this.renderFilesTable.bind(this);
         // Usually have >1 SupplementaryFilesOPFCollection on page so we memoize at instance level not class level.
-        this.collectionStatus = memoize(ExperimentSupplementaryFilesOPFCollection.collectionStatus);
+        this.getStatusAndColHeaders = memoize(ExperimentSupplementaryFilesOPFCollection.getStatusAndColHeaders);
 
         this.state = {
             'open' : props.defaultOpen
@@ -546,43 +503,17 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
     }
 
     renderFilesTable(width, resetDividerFxn, leftPanelCollapsed){
-        const { collection, href } = this.props;
+        const { collection, href, columnHeaders: propColumnHeaders } = this.props;
+        const { files } = collection;
+        const { columnHeaders } = this.getStatusAndColHeaders(propColumnHeaders, files);
         const passProps = _.extend({ width, href }, SelectedFilesController.pick(this.props));
         return (
-            <ProcessedFilesStackedTable {...passProps} files={collection.files} collapseLongLists analyticsImpressionOnMount />
+            <ProcessedFilesStackedTable {...passProps} files={collection.files} columnHeaders={columnHeaders} collapseLongLists analyticsImpressionOnMount />
         );
     }
 
-    renderStatusIndicator(){
-        const { collection } = this.props;
-        const { files, description } = collection;
-        const status = this.collectionStatus(files);
-        if (!status) return null;
-
-        const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
-        if (typeof status === 'string'){
-            const capitalizedStatus = Schemas.Term.toName("status", status);
-            return (
-                <div data-tip={"Status for all files in this collection is " + capitalizedStatus} className={outerClsName}>
-                    <i className="item-status-indicator-dot mr-07" data-status={status} />
-                    { capitalizedStatus }
-                </div>
-            );
-        } else {
-            const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
-            return (
-                <div data-tip={"All files in collection have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
-                    <span className="indicators-collection d-inline-block mr-05">
-                        { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
-                    </span>
-                    Multiple
-                </div>
-            );
-        }
-    }
-
     render(){
-        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles } = this.props;
+        const { collection, index, width, mounted, defaultOpen, windowWidth, href, selectedFiles, columnHeaders: propColumnHeaders } = this.props;
         const { files, higlass_view_config, description, title } = collection;
         const { open } = this.state;
         const qcMetricsHeading = (
@@ -591,9 +522,11 @@ class ExperimentSupplementaryFilesOPFCollection extends React.PureComponent {
             </h4>
         );
 
+        const { status } = this.getStatusAndColHeaders(propColumnHeaders, files);
+
         return (
             <div data-open={open} className="supplementary-files-section-part" key={title || 'collection-' + index}>
-                { this.renderStatusIndicator() }
+                { renderStatusIndicator(status) }
                 <h4>
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -626,13 +559,6 @@ class ExperimentSupplementaryReferenceFilesSection extends React.PureComponent {
         'defaultOpen' : true,
         'columnHeaders' : (function(){
             const colHeaders = ProcessedFilesStackedTable.defaultProps.columnHeaders.slice();
-            colHeaders.push({
-                columnClass: 'file-detail', title: 'Status', initialWidth: 30, field : "status",
-                render : function(file, field, detailIndex, fileEntryBlockProps){
-                    const capitalizedStatus = Schemas.Term.toName("status", file.status);
-                    return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
-                }
-            });
             return colHeaders;
         })()
     };
@@ -640,6 +566,7 @@ class ExperimentSupplementaryReferenceFilesSection extends React.PureComponent {
     constructor(props){
         super(props);
         this.toggleOpen = this.toggleOpen.bind(this);
+        this.getStatusAndColHeaders = memoize(ExperimentSupplementaryFilesOPFCollection.getStatusAndColHeaders);
         this.state = { 'open' : props.defaultOpen };
     }
 
@@ -650,12 +577,14 @@ class ExperimentSupplementaryReferenceFilesSection extends React.PureComponent {
     }
 
     render(){
-        const { files, width, href, columnHeaders } = this.props;
+        const { files, width, href, columnHeaders: propColumnHeaders } = this.props;
         const { open } = this.state;
         const filesLen = files.length;
         const passProps = _.extend({ width : width - 21, href, files }, SelectedFilesController.pick(this.props));
+        const { status, columnHeaders } = this.getStatusAndColHeaders(propColumnHeaders, files);
         return (
             <div data-open={open} className="reference-files-section supplementary-files-section-part">
+                { renderStatusIndicator(status) }
                 <h4 className="mb-15">
                     <span className="d-inline-block clickable" onClick={this.toggleOpen}>
                         <i className={"text-normal icon icon-fw fas icon-" + (open ? 'minus' : 'plus')} />
@@ -822,6 +751,31 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
                     const defaultOpen = (gridState === 'sm' || gridState === 'xs' || !gridState) ? false : ((all.length < 4) || (index < 2));
                     return <ExperimentSupplementaryFilesOPFCollection {..._.extend({ collection, index, defaultOpen }, commonProps)} key={index} />;
                 }) }
+            </div>
+        );
+    }
+}
+
+export function renderStatusIndicator(status) {
+    if (!status) return null;
+
+    const outerClsName = "d-inline-block pull-right mr-12 ml-2 mt-1";
+    if (typeof status === 'string'){
+        const capitalizedStatus = Schemas.Term.toName("status", status);
+        return (
+            <div data-tip={"Status for all files is " + capitalizedStatus} className={outerClsName}>
+                <i className="item-status-indicator-dot mr-07" data-status={status} />
+                { capitalizedStatus }
+            </div>
+        );
+    } else {
+        const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
+        return (
+            <div data-tip={"Allx files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
+                <span className="indicators-collection d-inline-block mr-05">
+                    { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
+                </span>
+                Multiple
             </div>
         );
     }
