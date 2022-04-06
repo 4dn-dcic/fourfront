@@ -30,6 +30,7 @@ describe('Testing Workflow Graph', function() {
 
     afterAll(function(){
         server.restore();
+        done();
     });
 
     beforeEach(function() {
