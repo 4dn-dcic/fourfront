@@ -74,6 +74,7 @@ jobs:
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
         run: |
           npm test
+          echo "make remote process"
           make remote-test-npm
 
       - name: Cleanup (NPM)
