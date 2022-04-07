@@ -18,54 +18,63 @@ jest.dontMock('underscore');
 jest.mock('@hms-dbmi-bgm/shared-portal-components/es/components/util/ajax');
 jest.mock('../viz/chart-data-controller');
 
-function mapStateToProps(store) {
-   return {
-       href: store.href,
-       context: store.context
-   };
-}
+// function mapStateToProps(store) {
+//    return {
+//        href: store.href,
+//        context: store.context
+//    };
+// }
 
 describe('Testing browse.js for experiment set browser', function() {
     var Browse, testItem, page, store, context, filters, Wrapper, searchViewCommonProps;
 
-    // beforeEach(function() {
-    //     var { Provider, connect } = require('react-redux');
-    //     Browse = require('../browse/BrowseView').default;
-    //     context = require('../testdata/browse/context');
-    //     store = require('../../store').store;
+    beforeEach(function() {
+        var { Provider, connect } = require('react-redux');
+        Browse = require('../browse/BrowseView').default;
+        context = require('../testdata/browse/context');
+        store = require('../../store').store;
 
-    //     var dispatch_vals = {
-    //         'href' : "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN",
-    //         'context' : context
-    //     };
+        // var dispatch_vals = {
+        //     'href' : "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN",
+        //     'context' : context
+        // };
 
-    //     store.dispatch({
-    //         type: dispatch_vals
-    //     });
+        // store.dispatch({
+        //     type: dispatch_vals
+        // });
 
-    //     searchViewCommonProps = {
-    //         // Mocked props that would be sent from app.BodyElement
-    //         "windowWidth" : 1000,
-    //         "registerWindowOnScrollHandler" : function(fxn){
-    //             setTimeout(()=> console.log(fxn(345, 345)), 2000);
-    //             setTimeout(()=> console.log(fxn(40, -305)), 5000);
-    //             console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
-    //             //jest.runOnlyPendingTimers();
-    //         }
-    //     };
+        searchViewCommonProps = {
+            // Mocked props that would be sent from app.BodyElement
+            "windowWidth" : 1000,
+            "registerWindowOnScrollHandler" : function(fxn){
+                setTimeout(()=> console.log(fxn(345, 345)), 2000);
+                setTimeout(()=> console.log(fxn(40, -305)), 5000);
+                console.log("Will call `fxn` in 2 & 5 seconds and print their return val. Fine if 'undefined'.");
+                //jest.runOnlyPendingTimers();
+            }
+        };
 
-    //     var UseBrowse = connect(mapStateToProps)(Browse);
-    //     act(()=>{
-    //         page = TestUtils.renderIntoDocument(
-    //             <Provider store={store}>
-    //                 <UseBrowse {...searchViewCommonProps} />
-    //             </Provider>
-    //         );
-    //     });
+        // var UseBrowse = connect(mapStateToProps)(Browse);
+        // act(()=>{
+        //     page = TestUtils.renderIntoDocument(
+        //         <Provider store={store}>
+        //             <UseBrowse {...searchViewCommonProps} />
+        //         </Provider>
+        //     );
+        // });
+
+        act(()=>{
+            page = TestUtils.renderIntoDocument(
+                <Browse
+                    context={context} windowWidth={1200}
+                    href="http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&award.project=4DN"
+                />
+            );
+        });
         
-    //});
+    });
 
-    it.skip('has 3 passing entries (experiment sets)', function() {
+    it('has 3 passing entries (experiment sets)', function() {
         var rows = TestUtils.scryRenderedDOMComponentsWithClass(page, 'search-result-row');
         var resultRows = rows.filter(function(r){
             if (r.className.indexOf('fin') > -1) return false;
@@ -77,7 +86,7 @@ describe('Testing browse.js for experiment set browser', function() {
         expect(resultRows.length).toEqual(context['@graph'].length);
     });
 
-    it.skip('filters are rendered correctly (facetlist terms)', function() {
+    it('filters are rendered correctly (facetlist terms)', function() {
         var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'term');
         //console.log(expFilters.map(function(f){ return f.innerHTML; }))
         expect(expFilters.length).toBeGreaterThan(9);
