@@ -402,6 +402,9 @@ class ExperimentSet(Item):
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
+        "other_processed_files.files.static_content.location",
+        "other_processed_files.files.static_content.description",
+        "other_processed_files.files.static_content.content.@type",
         "other_processed_files.files.notes_to_tsv",
 
         # Lab linkTo
@@ -427,6 +430,9 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
+        "experiments_in_set.other_processed_files.files.static_content.location",
+        "experiments_in_set.other_processed_files.files.static_content.description",
+        "experiments_in_set.other_processed_files.files.static_content.content.@type",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
         "experiments_in_set.other_processed_files.files.open_data_url",
         "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
@@ -451,6 +457,11 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.md5sum",
         "experiments_in_set.reference_files.lab.name",
         "experiments_in_set.reference_files.contributing_labs.name",
+
+        # Static Section linkTo
+        "experiments_in_set.reference_files.static_content.location",
+        "experiments_in_set.reference_files.static_content.description",
+        "experiments_in_set.reference_files.static_content.content.@type",
 
         # FileFormat linkTo
         "experiments_in_set.reference_files.file_format.file_format",
