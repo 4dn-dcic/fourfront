@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
 import * as d3 from 'd3';
-import moment from 'moment';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
@@ -505,7 +504,7 @@ export const usageAggsToChartData = _.pick(aggregationsToChartData,
 export class UsageStatsViewController extends React.PureComponent {
 
     static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily"){
-        const untilDate = moment.utc();
+        const untilDate = new Date();
         let fromDate;
         if (currentGroupBy === 'monthly'){ // 1 yr (12 mths)
             untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month

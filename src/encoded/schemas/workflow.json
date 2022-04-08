@@ -173,6 +173,16 @@
             ],
             "default": "CWL"
         },
+        "workflow_engine": {
+            "title": "Workflow engine",
+            "description": "Optional name of the workflow engine, e.g. caper for WDL",
+            "type": "string"
+        },
+        "run_args": {
+            "title": "Workflow engine's run arguments",
+            "description": "Optional input for run engines requiring additional fields",
+            "type": "string"
+        },
         "docker_registry_url": {
             "title": "Docker Registry URL",
             "description": "Docker Hub or 7 bridges registry URL.",
