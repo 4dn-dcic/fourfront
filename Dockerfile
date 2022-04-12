@@ -50,6 +50,7 @@ RUN apt-get update && apt-get upgrade -y && \
     mkdir -p /home/nginx/fourfront && \
     mv aws-ip-ranges.json /home/nginx/fourfront/aws-ip-ranges.json && \
     apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
+    touch ~/.ssh/known_hosts && \
     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts && \
     apt-get clean
 
