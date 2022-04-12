@@ -7,7 +7,6 @@ import memoize from 'memoize-one';
 import { console, object, ajax, navigate, isServerSide, WindowEventDelegator, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { PackageLockLoader } from './../../../util/package-lock-loader';
-import { flattenSchemaPropertyToColumnDefinition } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/schema-transforms';
 
 
 /**
