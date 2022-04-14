@@ -1321,10 +1321,19 @@ def test_get_raw_form(embedded_dbterm):
     print(raw_term)
 
 
-def test_update_definition():
+def test_update_definition_double():
     prefix = 'EFO'
     tdef = 'here is EFO definition (EFO)'
     dbdef = 'here is outdated definition (EFO, OBI) and another def (SO)'
     newdef = go.update_definition(tdef, dbdef, prefix)
     assert tdef in newdef
     assert 'here is outdated definition (EFO, OBI)' not in newdef
+
+
+def test_update_definition_single():
+    prefix = 'EFO'
+    tdef = 'here (ABL) is EFO definition (EFO)'
+    dbdef = 'here (ABL) is outdated definition (EFO) and another (random abbrev) def (OBI, SO)'
+    newdef = go.update_definition(tdef, dbdef, prefix)
+    assert tdef in newdef
+    assert newdef == 'here (ABL) is EFO definition (EFO) and another (random abbrev) def (OBI, SO)'
