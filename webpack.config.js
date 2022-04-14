@@ -218,7 +218,7 @@ module.exports = [
                 process: require.resolve('process/browser'),
                 util: require.resolve('util/'),
                 "crypto": false,
-                "event": false,
+                "events": false,
             }
         },
         //resolveLoader : resolve,
