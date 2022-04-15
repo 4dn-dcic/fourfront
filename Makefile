@@ -100,7 +100,10 @@ deploy2:  # spins up waittress to serve the application
 	pserve development.ini
 
 psql-dev:  # starts psql with the url after 'sqlalchemy.url =' in development.ini
-	@psql `grep 'sqlalchemy[.]url =' development.ini | sed -E 's/^.* = (.*)/\1/'`
+	@scripts/psql-start dev
+
+psql-test:  # starts psql with a url constructed from data in 'ps aux'.
+	@scripts/psql-start test
 
 kibana-start:
 	scripts/kibana-start
