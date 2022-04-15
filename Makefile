@@ -119,8 +119,12 @@ clean-python:
 	pip uninstall -y -r <(pip freeze)
 
 test:
+	@git log -1 --decorate | head -1
+	@date
+	make test-npm || echo "npm tests failed"
 	make test-unit
-	make test-npm
+	@git log -1 --decorate | head -1
+	@date
 
 test-any:
 	bin/test -vv --timeout=200
