@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "test": "jest",
-    "build": "node --max-old-space-size=4096 ./node_modules/.bin/gulp build",
+    "build": "node --max-old-space-size=6000 ./node_modules/.bin/gulp build",
     "build-scss": "gulp build-scss",
     "watch-scss": "gulp build-scss-dev && sass ./src/encoded/static/scss/style.scss ./src/encoded/static/css/style.css --watch --style expanded",
     "dev-analyzed": "gulp dev-analyzed --preserve-symlinks",
