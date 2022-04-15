@@ -5,6 +5,8 @@
 
 # Debian Buster with Python 3.7.12
 FROM python:3.7.12-slim-buster
+# bullseye seems to perform worse
+#FROM python:3.7.12-slim-bullseye
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -13,6 +15,7 @@ ARG INI_BASE
 ENV INI_BASE=${INI_BASE:-"fourfront_any_alpha.ini"}
 
 # Configure (global) Env
+# Note that some important versions are pinned in this statement
 ENV NGINX_USER=nginx \
     DEBIAN_FRONTEND=noninteractive \
     CRYPTOGRAPHY_DONT_BUILD_RUST=1 \
@@ -59,7 +62,7 @@ ENV PATH="/home/nginx/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 #RUN node --version
 #RUN npm --version
 #RUN nginx --version
-
+# Build application
 WORKDIR /home/nginx/fourfront
 
 # Do the back-end dependency install
