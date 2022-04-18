@@ -101,7 +101,7 @@ def main():
     parser.add_argument('config_uri', help='path to configfile')
     parser.add_argument('--app-name', help='Pyramid app name in configfile')
     parser.add_argument('--secret-name', help='name of application identity stored in secrets manager within which'
-                                              'to locate S3_ENCRYPT_KEY, for example: dev/beanstalk/cgap-dev')
+                                              'to locate S3_ENCRYPT_KEY, for example: C4DataStoreFourfrontGreenAppConfig')
     args = parser.parse_args()
 
     app = get_app(args.config_uri, args.app_name)

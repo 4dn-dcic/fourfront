@@ -40,7 +40,7 @@ ENV NVM_DIR=/home/nginx/.nvm
 COPY deploy/docker/production/install_nginx.sh /
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends vim emacs net-tools ca-certificates \
-    gcc zlib1g-dev postgresql-client libpq-dev git make curl libmagic-dev ssh-client && \
+    gcc zlib1g-dev postgresql-client libpq-dev git make curl libmagic-dev && \
     pip install --upgrade pip && \
     curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
@@ -53,8 +53,6 @@ RUN apt-get update && apt-get upgrade -y && \
     mkdir -p /home/nginx/fourfront && \
     mv aws-ip-ranges.json /home/nginx/fourfront/aws-ip-ranges.json && \
     apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
-    mkdir ~/.ssh && \
-    ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts && \
     apt-get clean
 
 # Link, verify installations
@@ -62,6 +60,7 @@ ENV PATH="/home/nginx/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 #RUN node --version
 #RUN npm --version
 #RUN nginx --version
+
 # Build application
 WORKDIR /home/nginx/fourfront
 
@@ -89,7 +88,7 @@ RUN npm run build && \
     npm run build-scss && \
     rm -rf node_modules/
 
-# Copy config files in (down here for quick debugging)
+# Copy config files in
 # Remove default configuration from Nginx
 RUN rm /etc/nginx/nginx.conf && \
     rm /etc/nginx/conf.d/default.conf
@@ -120,7 +119,7 @@ RUN chown nginx:nginx development.ini && \
 
 # Production setup
 RUN touch production.ini && chown nginx:nginx production.ini && \
-    touch session-secret.b64 && chown nginx:nginx session-secret.b64
+    touch session-secret.b64 && chown nginx:nginx session-secret.b64 && chown nginx:nginx poetry.toml
 COPY deploy/docker/production/$INI_BASE deploy/ini_files/.
 COPY deploy/docker/production/entrypoint.bash .
 COPY deploy/docker/production/entrypoint_portal.bash .

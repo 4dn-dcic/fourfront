@@ -15,9 +15,7 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPTemporaryRedirect,
     HTTPNotFound,
-    # HTTPBadRequest
 )
-# from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
 from pyramid.traversal import resource_path
@@ -59,7 +57,6 @@ from uuid import uuid4
 from ..authentication import session_properties
 from ..search import make_search_subreq
 from ..util import check_user_is_logged_in
-# from . import TrackingItem
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
