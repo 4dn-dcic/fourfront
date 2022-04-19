@@ -78,6 +78,7 @@
     "path-browserify": "1.0.1",
     "plugin-error": "^1.0.1",
     "sass": "^1.39.0",
+    "sass-loader":"^12.6.0",
     "sinon": "^1.17.6",
     "source-map-support": "^0.5.19",
     "stream-browserify": "3.0.0",
@@ -90,7 +91,7 @@
   "dependencies": {
     "micro-meta-app-react": "git+https:github.com/WU-BIMAC/MicroMetaApp-React#0.0.0.21",
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "@hms-dbmi-bgm/react-workflow-viz": "0.1.5",
+    "@hms-dbmi-bgm/react-workflow-viz": "0.1.7",
     "@hms-dbmi-bgm/shared-portal-components": "git+https:github.com/4dn-dcic/shared-portal-components#0.1.42",
     "auth0-lock": "^11.32.2",
     "d3": "^5.16.0",

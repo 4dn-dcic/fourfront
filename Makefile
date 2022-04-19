@@ -42,11 +42,12 @@ macpoetry-install:  # Same as 'poetry install' except that on OSX Catalina, an e
 	bin/macpoetry-install
 
 configure:  # does any pre-requisite installs
+	@#pip install --upgrade pip==21.0.1
 	pip install --upgrade pip
-	@#pip install poetry==1.1.9  # this version is known to work, so we'll use it for now. -kmp 3-Mar-2021
+	@#pip install poetry==1.1.9  # this version is known to work. -kmp 11-Mar-2021
 	pip install poetry
-	pip install setuptools==57.5.0  # this version allows 2to3, any later will break -wrr 20-Sept-2021
-	poetry config virtualenvs.create false --local  # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
+	pip install setuptools==57.5.0 # this version allows 2to3, any later will break -wrr 20-Sept-2021
+	poetry config virtualenvs.create false --local # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
 build-poetry:
 	make configure
@@ -82,7 +83,7 @@ macbuild-full:  # rebuilds for Catalina, addressing zlib possibly being in an al
 
 build-after-poetry:  # continuation of build after poetry install
 	make moto-setup
-	make npm-setup  # cgap uses 'make npm-setup-if-needed' here. should this also do that? -kmp 15-Dec-2020
+	make npm-setup-if-needed
 	poetry run python setup_eb.py develop
 	make fix-dist-info
 
@@ -128,10 +129,13 @@ clean-python:
 test:
 	@git log -1 --decorate | head -1
 	@date
-	make test-npm || echo "npm tests failed"
-	make test-unit
+	make test-unit || echo "unit tests failed"
+	make test-npm
 	@git log -1 --decorate | head -1
 	@date
+
+retest:
+	poetry run python -m pytest -vv -r w --last-failed
 
 test-any:
 	bin/test -vv --timeout=200
