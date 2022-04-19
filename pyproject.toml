@@ -44,7 +44,7 @@ certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
 dcicsnovault = "^5.4.0"
-dcicutils = "^3.9.0"
+dcicutils = "^3.12.0.1b0"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"

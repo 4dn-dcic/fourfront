@@ -6,6 +6,7 @@ from pyramid.paster import get_app
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from dcicutils.log_utils import set_logging
 from dcicutils.deployment_utils import CreateMappingOnDeployManager
+from dcicutils.env_utils import is_beanstalk_env, is_stg_or_prd_env
 
 
 log = structlog.getLogger(__name__)
@@ -152,16 +153,11 @@ def _run_create_mapping(app, args):
 
     try:
         my_env = get_my_env(app)
-        # XXX: Temporary workaround for production ECS envs - Will March 2 2022
-        try:
+        deploy_cfg = {'SKIP': True}  # default
+        if is_beanstalk_env(my_env):
             deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
                                                                         client='create_mapping_on_deploy')
-        except Exception:
-            deploy_cfg = {'SKIP': True}
-        if my_env in [
-            'fourfront-production-blue',
-            'fourfront-production-green'
-        ]:
+        elif is_stg_or_prd_env(my_env):
             deploy_cfg['SKIP'] = False
             deploy_cfg['WIPE_ES'] = True
             deploy_cfg['STRICT'] = True
