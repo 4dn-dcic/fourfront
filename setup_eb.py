@@ -19,12 +19,14 @@ _TILDE_MATCH = re.compile(r"[~]([0-9]+[.])([0-9]+)([.].*)?$")
 
 def fix_requirement(requirement):
     if isinstance(requirement, str):
-        return fix_requirement_string(requirement)
+        return _fix_requirement_string(requirement)
     elif isinstance(requirement, list):
-        return fix_requirement(select_requirement(requirement))
+        return fix_requirement(_select_requirement(requirement))
+    else:
+        raise ValueError(f"Unrecognized requirement: {requirement!r}")
 
 
-def select_requirement(requirement):
+def _select_requirement(requirement):
     if not isinstance(requirement, list):
         raise ValueError(f"{requirement!r} is not a list.")
     python_version = Version(f"{python_version_info.major}.{python_version_info.minor}.{python_version_info.micro}")
@@ -38,7 +40,7 @@ def select_requirement(requirement):
     raise ValueError(f"No clauses matched: {requirement!r}")
 
 
-def fix_requirement_string(requirement):
+def _fix_requirement_string(requirement):
     m = _CARET_MATCH.match(requirement)
     if m:
         return ">=%s%s,<%s" % (m.group(1), m.group(2), int(m.group(1)) + 1)
