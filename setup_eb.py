@@ -3,6 +3,9 @@ import re
 import toml.decoder
 
 from setuptools import setup, find_packages
+# from packaging.version import parse as version_parse
+from sys import version_info as python_version_info
+from semantic_version import SimpleSpec, Version
 
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -15,6 +18,27 @@ _TILDE_MATCH = re.compile(r"[~]([0-9]+[.])([0-9]+)([.].*)?$")
 
 
 def fix_requirement(requirement):
+    if isinstance(requirement, str):
+        return fix_requirement_string(requirement)
+    elif isinstance(requirement, list):
+        return fix_requirement(select_requirement(requirement))
+
+
+def select_requirement(requirement):
+    if not isinstance(requirement, list):
+        raise ValueError(f"{requirement!r} is not a list.")
+    python_version = Version(f"{python_version_info.major}.{python_version_info.minor}.{python_version_info.micro}")
+    for clause in requirement:
+        if set(clause.keys()) != {'python', 'version'}:
+            raise ValueError(f"Unanticipated requirement clause: {clause!r}")
+        if SimpleSpec(clause['python']).match(python_version):
+            return clause['version']
+        else:
+            pass
+    raise ValueError(f"No clauses matched: {requirement!r}")
+
+
+def fix_requirement_string(requirement):
     m = _CARET_MATCH.match(requirement)
     if m:
         return ">=%s%s,<%s" % (m.group(1), m.group(2), int(m.group(1)) + 1)

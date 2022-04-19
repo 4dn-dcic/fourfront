@@ -83,6 +83,7 @@ rdflib-jsonld = ">=0.5.0,<1.0.0"
 requests = "^2.26.0"
 rsa = "3.3"
 rutter = ">=0.3,<1"
+semantic_version = ">=2.9.0"
 # We don't use this directly. It's part of boto3. It slows down solving to pin.
 # s3transfer = ">=0.3.7,<0.4.0"
 sentry-sdk = "^1.5.6"
