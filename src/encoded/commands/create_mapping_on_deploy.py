@@ -2,10 +2,11 @@ import argparse
 import structlog
 import logging
 
+from dcicutils.deployment_utils import CreateMappingOnDeployManager
+from dcicutils.env_utils import is_beanstalk_env, is_stg_or_prd_env
+from dcicutils.log_utils import set_logging
 from pyramid.paster import get_app
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
-from dcicutils.log_utils import set_logging
-from dcicutils.deployment_utils import CreateMappingOnDeployManager
 from ..appdefs import ITEM_INDEX_ORDER
 
 
@@ -34,21 +35,25 @@ def _run_create_mapping(app, args):
     """
 
     try:
-
-        deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=get_my_env(app), args=args, log=log,
-                                                                    client='create_mapping_on_deploy')
+        my_env = get_my_env(app)
+        deploy_cfg = {'SKIP': True}  # default
+        if is_beanstalk_env(my_env):
+            deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
+                                                                        client='create_mapping_on_deploy')
+        elif is_stg_or_prd_env(my_env):
+            deploy_cfg['SKIP'] = False
+            deploy_cfg['WIPE_ES'] = True
+            deploy_cfg['STRICT'] = True
+            deploy_cfg['ENV_NAME'] = my_env
 
         if not deploy_cfg['SKIP']:
-
             log.info('Calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
             run_create_mapping(app=app,
                                check_first=(not deploy_cfg['WIPE_ES']),
                                purge_queue=args.clear_queue,  # this option does not vary, so no need to override
                                item_order=ITEM_INDEX_ORDER,
                                strict=deploy_cfg['STRICT'])
-
         else:
-
             log.info('NOT calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
 
         exit(0)

@@ -1,46 +1,28 @@
-# from future.standard_library import install_aliases
-# TODO: Once things are working, remove this as probably 2.7 compatibility. --kent&will 4-Feb-2020
-# install_aliases()  # NOQA
-
 import hashlib
 import json
 import mimetypes
 import netaddr
 import os
 import sentry_sdk
-# import structlog
 import subprocess
-import sys
 import webtest
 
 from dcicutils.beanstalk_utils import source_beanstalk_env_vars
-# from dcicutils.beanstalk_utils import whodaman as _whodaman  # don't export
 from dcicutils.env_utils import get_mirror_env_from_context, is_stg_or_prd_env
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from pkg_resources import resource_filename
-# from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.config import Configurator
 from pyramid_localroles import LocalRolesAuthorizationPolicy
-# from pyramid.path import AssetResolver, caller_package
-# from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import asbool
 from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbsession, changelogs, json_asset
 from snovault.elasticsearch import APP_FACTORY
 from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
-# from snovault.json_renderer import json_renderer
-# from sqlalchemy import engine_from_config
-# from webob.cookies import JSONSerializer
 
 from .appdefs import APP_VERSION_REGISTRY_KEY
 from .loadxl import load_all
-from .util import find_other_in_pair
-
-
-if sys.version_info.major < 3:
-    raise EnvironmentError("The Fourfront encoded library no longer supports Python 2.")
 
 
 # location of environment variables on elasticbeanstalk
