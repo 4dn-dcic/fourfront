@@ -1710,6 +1710,7 @@ class BodyElement extends React.PureComponent {
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
         const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
+        const { is_mobile: isMobile = false } = context;
 
         if (hasError) return this.renderErrorState();
 
@@ -1718,6 +1719,11 @@ class BodyElement extends React.PureComponent {
             browseBaseState, updateAppSessionState, addToBodyClassList, removeFromBodyClassList,
             windowWidth, windowHeight, isFullscreen, overlaysContainer
         };
+
+        const initialFields = [
+            isMobile ? 'experiments_in_set.biosample.biosource.biosource_type' : 'experiments_in_set.experiment_type.display_title',
+            'experiments_in_set.biosample.biosource.organism.name'
+        ];
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
@@ -1754,7 +1760,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
-                                    {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
+                                    {...{ windowWidth, windowHeight, navigate, isFullscreen, initialFields }} />
                             </div>
 
                             <ContentErrorBoundary canonical={canonical} href={href}>
