@@ -7,9 +7,19 @@ import boto3
 from pyramid.paster import get_app
 from webtest import TestApp, AppError
 from dcicutils.beanstalk_utils import get_beanstalk_real_url
+from dcicutils.secrets_utils import assume_identity
 
 log = structlog.getLogger(__name__)
 EPILOG = __doc__
+
+
+def get_ecs_url_from_gac(identity):
+    """ Acquires the LB URL from the GAC. Change this to the canonical CNAME when configured. """
+    if not identity:
+        raise Exception('Identity unset (No GAC)')
+    if 'ENCODED_URL' in identity:
+        return identity['ENCODED_URL']
+    raise Exception('No ENCODED_URL in GAC!')
 
 
 def get_existing_key_ids(testapp, user_uuid, key_desc):
@@ -41,7 +51,7 @@ def get_existing_key_ids(testapp, user_uuid, key_desc):
     return [res['@id'] for res in search_res['@graph']]
 
 
-def generate_access_key(testapp, env, user_uuid, description):
+def generate_access_key(testapp, env, user_uuid, description, identity=None):
     """
     Generate an access key for given user on given environment.
 
@@ -50,11 +60,18 @@ def generate_access_key(testapp, env, user_uuid, description):
         env (str): application environment used to find server
         user_uuid (str): uuid of the user to gener
         description (str): description to add to access key
+        identity (dict): GAC, if set
 
     Returns:
         dict: access key contents with server
     """
-    server = get_beanstalk_real_url(env)
+    try:
+        server = get_ecs_url_from_gac(identity)
+    except Exception:
+        server = get_beanstalk_real_url(env)
+    if not server:
+        raise Exception('No server found! If this is a legacy env, check env argument. If this is an ECS env,'
+                        'check that ENCODED_URL is set in the GAC.')
     access_key_req = {'user': user_uuid, 'description': description}
     res = testapp.post_json('/access_key', access_key_req).json
     return {'secret': res['secret_access_key'],
@@ -83,6 +100,8 @@ def main():
     )
     parser.add_argument('config_uri', help='path to configfile')
     parser.add_argument('--app-name', help='Pyramid app name in configfile')
+    parser.add_argument('--secret-name', help='name of application identity stored in secrets manager within which'
+                                              'to locate S3_ENCRYPT_KEY, for example: C4DataStoreFourfrontGreenAppConfig')
     args = parser.parse_args()
 
     app = get_app(args.config_uri, args.app_name)
@@ -96,7 +115,13 @@ def main():
     if not env:
         raise RuntimeError('load_access_keys: cannot find env.name in settings')
 
-    encrypt_key = os.environ.get('S3_ENCRYPT_KEY')
+    # Resolve secret from environment if one is not specified
+    encrypt_key, identity = None, None
+    if args.secret_name is not None:
+        identity = assume_identity()  # automatically detects GLOBAL_APPLICATION_CONFIGURATION
+        encrypt_key = identity.get('S3_ENCRYPT_KEY', None)  # one of the secrets
+    if not encrypt_key:
+        encrypt_key = os.environ.get('S3_ENCRYPT_KEY')
     if not encrypt_key:
         raise RuntimeError('load_access_keys: must define S3_ENCRYPT_KEY in env')
 
@@ -122,7 +147,7 @@ def main():
             except AppError:
                 log.error('load_access_keys: key_id: %s does not exist in database but exists in ES' % key_id)
 
-        key = generate_access_key(testapp, env, user_props['uuid'], key_name)
+        key = generate_access_key(testapp, env, user_props['uuid'], key_name, identity=identity)
         s3.put_object(Bucket=s3_bucket,
                       Key=key_name,
                       Body=json.dumps(key),
