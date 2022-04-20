@@ -129,8 +129,8 @@ clean-python:
 test:
 	@git log -1 --decorate | head -1
 	@date
-	make test-npm || echo "npm tests failed"
-	make test-unit
+	make test-unit || echo "unit tests failed"
+	make test-npm
 	@git log -1 --decorate | head -1
 	@date
 
