@@ -23,34 +23,34 @@ describe('Testing Workflow Graph', function() {
         return showParamsBox;
     }
 
-    // beforeAll(function(){
-    //     sinon = require('sinon');
-    //     server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
-    // });
+    beforeAll(function(){
+        sinon = require('sinon');
+        server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
+    });
 
-    // afterAll(function(){
-    //     server.restore();
-    // });
+    afterAll(function(){
+        server.restore();
+    });
 
-    // beforeEach(function() {
+    beforeEach(function() {
 
-    //     // Get test Data
-    //     context = require('./../testdata/workflow_run/awsem-partc').default;
-    //     schemas = require('../testdata/schemas');
+        // Get test Data
+        context = require('./../testdata/workflow_run/awsem-partc').default;
+        schemas = require('../testdata/schemas');
 
-    //     var viewProps = {
-    //         schemas, context,
-    //         'onNodeClick' : null,
-    //         'windowWidth' : 1200,
-    //         'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
-    //     };
+        var viewProps = {
+            schemas, context,
+            'onNodeClick' : null,
+            'windowWidth' : 1200,
+            'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
+        };
 
-    //     testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
-    //     jest.useRealTimers();
-    //     //jest.runAllTimers();
-    // });
+        testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
+        jest.useRealTimers();
+        //jest.runAllTimers();
+    });
 
-    it.skip('Given no extra configuration, it has the correct number of nodes & edges, and proper step names', function() {
+    it('Given no extra configuration, it has the correct number of nodes & edges, and proper step names', function() {
 
         var nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
         expect(nodes.length).toBe(8);
@@ -75,7 +75,7 @@ describe('Testing Workflow Graph', function() {
 
 
 
-    it.skip('Clicking on "Show Parameters" adds some extra parameter nodes', function() {
+    it('Clicking on "Show Parameters" adds some extra parameter nodes', function() {
 
         var showParamsBox = getShowParamsCheckBox();
 
@@ -99,17 +99,17 @@ describe('Testing Workflow Graph', function() {
         // Toggle the checkbox input again, to go back to 8 nodes.
         TestUtils.Simulate.change(showParamsBox);
 
-        // setTimeout(()=>{
+        setTimeout(()=>{
 
-        //     //Should be unchecked again.
-        //     expect(showParamsBox.checked).toBe(false);
-        //         nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
-        //         edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
-        //         expect(nodes.length).toBe(8);
-        //         expect(edges.length).toBe(7);
-        //     done();;
+            //Should be unchecked again.
+            expect(showParamsBox.checked).toBe(false);
+                nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+                edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+                expect(nodes.length).toBe(8);
+                expect(edges.length).toBe(7);
+            done();;
 
-        // }, 1000);
+        }, 1000);
 
         
 
@@ -226,34 +226,34 @@ describe('Find nodes from other columns', function() {
         return showReferenceFilesBox;
     }
 
-    // beforeAll(function(){
-    //     sinon = require('sinon');
-    //     server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
-    // });
+    beforeAll(function(){
+        sinon = require('sinon');
+        server = sinon.fakeServer.create(); // We just need this to patch AJAX requests atm.
+    });
 
-    // afterAll(function(){
-    //     server.restore();
-    // });
+    afterAll(function(){
+        server.restore();
+    });
 
-    // beforeEach(function() {
+    beforeEach(function() {
 
-    //     // Make a workflow run with at least 5 graph columns (including arrows.) The node in column 4 refers to a chromsize file whose node is already in column 0.
-    //     context = require('./../testdata/workflow_run/awsem-node-dupe-check').default;
-    //     schemas = require('../testdata/schemas');
+        // Make a workflow run with at least 5 graph columns (including arrows.) The node in column 4 refers to a chromsize file whose node is already in column 0.
+        context = require('./../testdata/workflow_run/awsem-node-dupe-check').default;
+        schemas = require('../testdata/schemas');
 
-    //     var viewProps = {
-    //         schemas, context,
-    //         'onNodeClick' : null,
-    //         'windowWidth' : 1200,
-    //         'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
-    //     };
+        var viewProps = {
+            schemas, context,
+            'onNodeClick' : null,
+            'windowWidth' : 1200,
+            'href' : "https://data.4dnucleome.org/workflow-runs-sbg/0fe19e8e-c565-4c0c-8058-effe5d81f53b/"
+        };
 
-    //     testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
-    //     jest.useFakeTimers();
-    //     jest.runAllTimers();
-    // });
+        testWorkflowInstance = TestUtils.renderIntoDocument(<WorkflowRunView {...viewProps} />);
+        jest.useFakeTimers();
+        jest.runAllTimers();
+    });
 
-    it.skip('Should match Nodes with previous columns', function() {
+    it('Should match Nodes with previous columns', function() {
         // Graph generation must look for all of the previous columns for existing nodes, not just the direct ancestors.
 
         // Now visit the graph.
