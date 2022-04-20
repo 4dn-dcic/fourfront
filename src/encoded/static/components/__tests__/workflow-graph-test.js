@@ -74,7 +74,7 @@ describe('Testing Workflow Graph', function() {
 
 
 
-    it('Clicking on "Show Parameters" adds some extra parameter nodes', function() {
+    it('Clicking on "Show Parameters" adds some extra parameter nodes', function(done) {
 
         var showParamsBox = getShowParamsCheckBox();
 
