@@ -124,7 +124,7 @@ jobs:
           poetry run wipe-test-indices ff-$TRAVIS_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 
       - name: Docker Build
-        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '12' && matrix.python_version == '3.7' }}
+        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '16' && matrix.python_version == '3.7' }}
         run: |
           # The docker_development.ini has node 12 and Python 3.7 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
