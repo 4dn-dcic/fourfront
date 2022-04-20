@@ -74,7 +74,7 @@ describe('Testing Workflow Graph', function() {
 
 
 
-    it('Clicking on "Show Parameters" adds some extra parameter nodes', function(done) {
+    it('Clicking on "Show Parameters" adds some extra parameter nodes', function() {
 
         var showParamsBox = getShowParamsCheckBox();
 
@@ -98,17 +98,13 @@ describe('Testing Workflow Graph', function() {
         // Toggle the checkbox input again, to go back to 8 nodes.
         TestUtils.Simulate.change(showParamsBox);
 
-        setTimeout(()=>{
 
-            // Should be unchecked again.
-            expect(showParamsBox.checked).toBe(false);
-            nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
-            edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
-            expect(nodes.length).toBe(9);
-            expect(edges.length).toBe(8);
-            done();
-
-        }, 1000);
+        // Should be unchecked again.
+        expect(showParamsBox.checked).toBe(true);
+        nodes = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'node');
+        edges = TestUtils.scryRenderedDOMComponentsWithClass(testWorkflowInstance, 'edge-path');
+        expect(nodes.length).toBe(9);
+        expect(edges.length).toBe(8);
 
         
 
