@@ -13,6 +13,7 @@ from ..appdefs import ITEM_INDEX_ORDER
 log = structlog.getLogger(__name__)
 EPILOG = __doc__
 
+
 def get_my_env(app):
     """
     Gets the env name of the currently running environment
@@ -65,7 +66,7 @@ def _run_create_mapping(app, args):
 
 
 def main():
-    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is specified wrong here.
+    parser = argparse.ArgumentParser(  # noqa - PyCharm wrongly thinks the formatter_class is invalid
         description="Create Elasticsearch mapping on deployment", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
