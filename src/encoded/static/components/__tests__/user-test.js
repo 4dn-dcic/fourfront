@@ -20,37 +20,37 @@ function mapStateToProps(store) {
 }
 
 describe('Testing user.js', function() {
-    // var  User, user, testItem, page, store, context, filters, Wrapper, sinon, props;
-    // beforeAll(function() {
-    //     const { Provider, connect } = require('react-redux');
-    //     User = require('./../item-pages/UserView').default;
-    //     context = require('../testdata/submitter');
-    //     store = require('../../store').store;
-    //     const dispatch_vals = {
-    //         'context' : context
-    //     };
-    //     store.dispatch({
-    //         type: dispatch_vals
-    //     });
+    var  User, user, testItem, page, store, context, filters, Wrapper, sinon, props;
+    beforeAll(function() {
+        const { Provider, connect } = require('react-redux');
+        User = require('./../item-pages/UserView').default;
+        context = require('../testdata/submitter');
+        store = require('../../store').store;
+        const dispatch_vals = {
+            'context' : context
+        };
+        store.dispatch({
+            type: dispatch_vals
+        });
 
-    //     props = {
-    //         'context' : context,
-    //         'href' : "http://localhost:8000/users/0abbd494-b852-433c-b360-93996f679dae/",
-    //         'navigate' : function(){ console.info("Mocked Navigate Function was called."); return; }
-    //     }
+        props = {
+            'context' : context,
+            'href' : "http://localhost:8000/users/0abbd494-b852-433c-b360-93996f679dae/",
+            'navigate' : function(){ console.info("Mocked Navigate Function was called."); return; }
+        }
 
-    //     // Mock this b/c certain data doesn't exist in test environment -- 
-    //     // e.g. REST endpoints for test lab data which is to be AJAXed in.
-    //     jest.mock('./../item-pages/components/FormattedInfoBlock');
+        // Mock this b/c certain data doesn't exist in test environment -- 
+        // e.g. REST endpoints for test lab data which is to be AJAXed in.
+        jest.mock('./../item-pages/components/FormattedInfoBlock');
 
-    //     var UseUser = connect(mapStateToProps)(User);
-    //     page = TestUtils.renderIntoDocument(
-    //         <Provider store={store}>
-    //             <UseUser {...props}  />
-    //         </Provider>
-    //     );
+        var UseUser = connect(mapStateToProps)(User);
+        page = TestUtils.renderIntoDocument(
+            <Provider store={store}>
+                <UseUser {...props}  />
+            </Provider>
+        );
 
-    //});
+    });
 
     it.skip('has panels for user info and work info, with some profile fields', function() {
         var panelUserInfo = TestUtils.scryRenderedDOMComponentsWithClass(page, 'user-info');
