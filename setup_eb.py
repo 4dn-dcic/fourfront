@@ -91,9 +91,9 @@ ENTRY_POINTS = entry_points()
 
 PACKAGE_NAME = POETRY_DATA['name']
 README = open(os.path.join(ROOT_DIR, 'README.rst')).read()
-CHANGES = open(os.path.join(ROOT_DIR, 'CHANGES.rst')).read()
+# CHANGES = open(os.path.join(ROOT_DIR, 'CHANGES.rst')).read())
 DESCRIPTION = POETRY_DATA['description']
-LONG_DESCRIPTION = README + '\n\n' + CHANGES
+LONG_DESCRIPTION = README
 AUTHOR, AUTHOR_EMAIL = author_and_email(POETRY_DATA['authors'][0])
 URL = 'http://data.4dnucleome.org'
 LICENSE = 'MIT'
