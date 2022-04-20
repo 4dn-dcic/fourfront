@@ -247,15 +247,15 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                         </div> : null }
 
                     { foundUnpublishedFiles && !disclaimerAccepted?
-                        <button type="button" className="btn btn-info" onClick={this.handleAcceptDisclaimer}>
-                            <i className="icon icon-fw icon-check mr-05 fas"/>
+                        <button type="button" className="btn btn-info mr-1 mt-1 btn-block-xs-only" onClick={this.handleAcceptDisclaimer}>
+                            <i className="icon icon-fw icon-check fas mr-1"/>
                             I have read and understand the notes.
                         </button>
                         :
                         <SelectedFilesDownloadStartButton {...{ selectedFiles, suggestedFilename, context, action }} />
                     }
 
-                    <button type="reset" onClick={onHide} className="btn btn-outline-dark ml-05">Cancel</button>
+                    <button type="reset" onClick={onHide} className="btn btn-outline-dark mt-1 btn-block-xs-only">Cancel</button>
 
                 </Modal.Body>
             </Modal>
@@ -320,12 +320,12 @@ const SelectedFilesDownloadStartButton = React.memo(function SelectedFilesDownlo
     }, [ selectedFiles, context ]);
 
     return (
-        <form method="POST" action={action} className="d-inline-block">
+        <form method="POST" action={action} className="d-inline-block d-block-xs-only">
             <input type="hidden" name="accession_triples" value={JSON.stringify(accessionTripleArrays)} />
             <input type="hidden" name="download_file_name" value={JSON.stringify(suggestedFilename)} />
-            <button type="submit" name="Download" className="btn btn-primary" onClick={onClick}
+            <button type="submit" name="Download" className="btn btn-primary mt-1 mr-1 btn-block-xs-only" onClick={onClick}
                 data-tip="Details for each individual selected file delivered via a TSV spreadsheet.">
-                <i className="icon icon-fw icon-file-alt fas"/>&nbsp; Download metadata for files
+                <i className="icon icon-fw icon-file-alt fas mr-1"/>Download metadata for files
             </button>
         </form>
     );
