@@ -2064,6 +2064,19 @@ $badge-item-min-height: 90px;
 	}
 }
 
+.vitessce-wrapper {
+	.vitessce-container.vitessce-theme-light {
+		.bg-primary, .bg-secondary {
+			background-color: #F1F1F1 !important;
+		}
+	}
+	.vitessce-container.vitessce-theme-dark {
+		.bg-primary, .bg-secondary {
+			background-color: #222 !important;
+		}
+	}
+}
+
 // .micro-meta-app-wrapper {
 // 	.micro-meta-app-instance {
 // 		transition: opacity 1s;

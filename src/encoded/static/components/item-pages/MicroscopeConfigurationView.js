@@ -919,7 +919,8 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                                         return (
                                             <DropdownItem key={"match-" + idx} eventKey={idx}>
                                                 {match.Name || "-"}
-                                            </DropdownItem>);
+                                            </DropdownItem>
+                                        );
                                     })
                                 }
                             </DropdownButton>
@@ -948,17 +949,44 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
 
             const schemaPropPairs = _.pairs(schema.properties);
 
-            tableBody = Object.keys(schema.subCategoriesOrder).map((subCategory) => {
-                const subCategoryProperties = _.filter(schemaPropPairs, function (spp) {
-                    const [, propItem] = spp;
-                    return propItem && propItem.category === subCategory;
-                });
-                const sectionProps = {
-                    subCategory, subCategoryProperties, matches: visibleMatches, tooltipLimit, columClassName,
-                    collapsed: !!collapsedSections[subCategory]
-                };
-                return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />;
-            });
+            tableBody = _.flatten(Object.keys(schema.subCategoriesOrder).map((subCategory) => {
+                if (!schema.properties[subCategory] || schema.properties[subCategory].type !== 'array') {
+                    const subCategoryProperties = _.filter(schemaPropPairs, function (spp) {
+                        const [propKey, propItem] = spp;
+                        return propItem && (propItem.category === subCategory || propKey === subCategory);
+                    });
+                    const sectionProps = {
+                        subCategory, subCategoryProperties, matches: visibleMatches, tooltipLimit, columClassName,
+                        collapsed: !!collapsedSections[subCategory]
+                    };
+                    return <CollapsibleSubCategory key={subCategory} {...sectionProps} toggleExpand={this.toggleExpand} />;
+                } else {
+                    const { items: { properties = {} } = {} } = schema.properties[subCategory] || {};
+                    const subCategoryProperties = _.pairs(properties);
+                    //find the object having the longest array
+                    const maxMatch = _.max(visibleMatches, function (m) {
+                        return m[subCategory] ? m[subCategory].length : 0;
+                    });
+                    //generate a range from array length to iterate on
+                    const range = _.range(maxMatch && maxMatch[subCategory] && maxMatch[subCategory].length || 0);
+
+                    return _.map(range, (r, index) => {
+                        const matches = _.map(visibleMatches, function (vm) {
+                            return (vm[subCategory] && vm[subCategory][index]) || {};
+                        });
+                        const sectionProps = {
+                            subCategory,
+                            subCategoryProperties,
+                            matches,
+                            tooltipLimit,
+                            columClassName,
+                            index,
+                            collapsed: !!collapsedSections[subCategory + index]
+                        };
+                        return <CollapsibleSubCategory key={subCategory + " - " + index} {...sectionProps} toggleExpand={this.toggleExpand} />;
+                    });
+                }
+            }));
 
             // update title to include selected term name and count
             if (!isMobileSize && currentFilters && currentFilters.length > 0) {
@@ -1017,7 +1045,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
  * Row header displays the field name, rest of the row cells are for component instances' value for that field.
  */
 const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props) {
-    const { subCategory, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand } = props;
+    const { subCategory, index, matches, subCategoryProperties, tooltipLimit, columClassName, collapsed, toggleExpand } = props;
 
     const itemRows = _.map(subCategoryProperties, function ([field, item]) {
         let hasValidColumn = false;
@@ -1030,7 +1058,8 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
             return (
                 <div className={columClassName + " summary-item-column"}>
                     <div className="text-truncate" data-tip={tooltip}>{match[field].toString()}</div>
-                </div>);
+                </div>
+            );
         });
 
         return hasValidColumn ? (
@@ -1044,14 +1073,16 @@ const CollapsibleSubCategory = React.memo(function CollapsibleSubCategory(props)
     });
 
     const hasValidRow = _.any(itemRows, function (iRow) { return !!iRow; });
+    const expandKey = subCategory + (index || index === 0 ? index : '');
+    const title = subCategory + (index || index === 0 ? ' [' + index + ']' : '');
 
     return (
         hasValidRow ?
             <div className="summary-section-container">
                 <div className="row summary-section-header">
-                    <div className="col summary-title-column text-truncate" onClick={() => toggleExpand(subCategory)}>
+                    <div className="col summary-title-column text-truncate" onClick={() => toggleExpand(expandKey)}>
                         <i className={"icon icon-fw fas mr-06 " + (collapsed ? 'icon-plus' : 'icon-minus')} />
-                        <h4 className="summary-title">{subCategory}</h4>
+                        <h4 className="summary-title">{title}</h4>
                     </div>
                 </div>
                 <Collapse in={!collapsed}>
