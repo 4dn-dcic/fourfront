@@ -17,7 +17,7 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Test Suite for fourfront (Python 3.7, Node 12)
+    name: Test Suite for fourfront (Python 3.7, Node 16)
 
     # The type of runner that the job will run on
     runs-on: ubuntu-18.04
@@ -119,6 +119,6 @@ jobs:
       - name: Docker Build
         if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '16' && matrix.python_version == '3.7' }}
         run: |
-          # The docker_development.ini has node 12 and Python 3.7 wired into it.
+          # The docker_development.ini has node 16 and Python 3.7 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
           docker build .
