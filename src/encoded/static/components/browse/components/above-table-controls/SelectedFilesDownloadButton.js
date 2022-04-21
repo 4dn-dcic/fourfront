@@ -7,7 +7,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 import Modal from 'react-bootstrap/esm/Modal';
 
-import { console, ajax, JWT, typedefs, analytics } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax, JWT, typedefs, analytics, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { display as dateTimeDisplay } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
 import { uniqueFileCount, fileCountWithDuplicates } from './../SelectedFilesController';
 import { onLoginNavItemClick } from './../../../navigation/components/LoginNavItem';
@@ -208,7 +208,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                 <Modal.Body>
                     <div className="important-notes-section">
                         <h4 className="mb-07 text-500">Important</h4>
-                        <ul className="mb-25">
+                        <ul>
                             <li className="mb-05">
                                 <span className="text-danger"><b>As of October 15, 2020</b>, you must include an <b>access key</b> in your cURL command for bulk downloads.</span>
                             </li>
@@ -225,7 +225,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                     { /*session || */foundUnpublishedFiles ?
                         <div className="extra-notes-section">
                             <h4 className="mt-2 mb-07 text-500">Notes</h4>
-                            <ul className="mb-25">
+                            <ul className="mb-20">
                                 {/* { session ?
                                     <li className="mb-05">
                                         To download files which are not yet released, please include an <b>access key</b> in your cURL command which you can configure in <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a>.
@@ -265,11 +265,18 @@ class SelectedFilesDownloadModal extends React.PureComponent {
 
 const ModalCodeSnippet = React.memo(function ModalCodeSnippet(props){
     const { filename, session } = props;
-    return (
-        <pre className="mb-15">
-            cut -f 1 <b>{ filename }</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
-            { session ? <code style={{ 'opacity' : 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null }
+    const htmlValue = (
+        <pre className="mb-15 d-md-inline curl-command">
+            cut -f 1 <b>{filename}</b> | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L
+            {session ? <code style={{ 'opacity': 0.5 }}> --user <em>{'<access_key_id>:<access_key_secret>'}</em></code> : null}
         </pre>
+    );
+    const plainValue = `cut -f 1 ${filename} | tail -n +3 | grep -v ^# | xargs -n 1 curl -O -L` + (session ? " --user <access_key_id>:<access_key_secret>" : '');
+    return (
+        <object.CopyWrapper value={plainValue} className="curl-command-wrapper" data-tip={'Click to copy'}
+            wrapperElement="div" iconProps={{ }}>
+            {htmlValue}
+        </object.CopyWrapper>
     );
 });
 
