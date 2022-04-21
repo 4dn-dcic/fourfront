@@ -55,10 +55,10 @@ _S3_UTILS_BUCKET_VAR_DATA = [
         'recent': True,
     },
     {
-        'attribute': 'tibanna_cwl_bucket',
-        'health_key': 'tibanna_cwl_bucket',
-        'description': "The 'tibanna-cwl' bucket",
-        'template': 'TIBANNA_CWL_BUCKET_TEMPLATE',
+        'attribute': 'tibanna_cwls_bucket',
+        'health_key': 'tibanna_cwls_bucket',
+        'description': "The 'tibanna-cwls' bucket",
+        'template': 'TIBANNA_CWLS_BUCKET_TEMPLATE',
         'recent': True,
     },
 ]
