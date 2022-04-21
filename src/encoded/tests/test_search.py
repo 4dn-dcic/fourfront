@@ -651,7 +651,9 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         # check items in search result individually
         search_url = '/%s?limit=all' % item_type
         print("search_url=", search_url)
+        print("testapp=", testapp)
         items = ItemTypeChecker.get_all_items_of_type(client=testapp, item_type=item_type)
+        print("items=", items)
         for item_res in items:
             index_view_res = es.get(index=namespaced_index, doc_type=item_type,
                                     id=item_res['uuid'])['_source']
