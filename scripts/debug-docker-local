@@ -1,0 +1,16 @@
+if [ $# -ne 0 ]; then
+
+    echo "Syntax: $0 [ --help ]"
+    exit 1
+    
+fi
+
+container=`docker ps | grep '.*_app-portal' | cut -d ' ' -f 1`
+
+if [ -z "${container}" ]; then
+    echo "No local app-portal docker container seems to be running."
+else
+    echo "Debugging local app-portal docker container ${container} ..."
+    docker exec -it "${container}" /bin/bash
+    echo "Done debugging local app-portal docker container ${container}."
+fi

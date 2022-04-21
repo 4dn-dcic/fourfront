@@ -3,6 +3,9 @@ import re
 import toml.decoder
 
 from setuptools import setup, find_packages
+# from packaging.version import parse as version_parse
+from sys import version_info as python_version_info
+from semantic_version import SimpleSpec, Version
 
 
 ROOT_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -15,6 +18,29 @@ _TILDE_MATCH = re.compile(r"[~]([0-9]+[.])([0-9]+)([.].*)?$")
 
 
 def fix_requirement(requirement):
+    if isinstance(requirement, str):
+        return _fix_requirement_string(requirement)
+    elif isinstance(requirement, list):
+        return fix_requirement(_select_requirement(requirement))
+    else:
+        raise ValueError(f"Unrecognized requirement: {requirement!r}")
+
+
+def _select_requirement(requirement):
+    if not isinstance(requirement, list):
+        raise ValueError(f"{requirement!r} is not a list.")
+    python_version = Version(f"{python_version_info.major}.{python_version_info.minor}.{python_version_info.micro}")
+    for clause in requirement:
+        if set(clause.keys()) != {'python', 'version'}:
+            raise ValueError(f"Unanticipated requirement clause: {clause!r}")
+        if SimpleSpec(clause['python']).match(python_version):
+            return clause['version']
+        else:
+            pass
+    raise ValueError(f"No clauses matched: {requirement!r}")
+
+
+def _fix_requirement_string(requirement):
     m = _CARET_MATCH.match(requirement)
     if m:
         return ">=%s%s,<%s" % (m.group(1), m.group(2), int(m.group(1)) + 1)
@@ -65,9 +91,9 @@ ENTRY_POINTS = entry_points()
 
 PACKAGE_NAME = POETRY_DATA['name']
 README = open(os.path.join(ROOT_DIR, 'README.rst')).read()
-CHANGES = open(os.path.join(ROOT_DIR, 'CHANGES.rst')).read()
+# CHANGES = open(os.path.join(ROOT_DIR, 'CHANGES.rst')).read())
 DESCRIPTION = POETRY_DATA['description']
-LONG_DESCRIPTION = README + '\n\n' + CHANGES
+LONG_DESCRIPTION = README
 AUTHOR, AUTHOR_EMAIL = author_and_email(POETRY_DATA['authors'][0])
 URL = 'http://data.4dnucleome.org'
 LICENSE = 'MIT'

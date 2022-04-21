@@ -12,7 +12,7 @@
 # and the value of dist_info_found will be the empty string.
 # Otherwise, it will be the file listing.
 
-dist_info_found=`ls -dal ${VIRTUAL_ENV}/lib/python3.6/site-packages/encoded-[0-9][.][0-9]*.dist-info 2>/dev/null`
+dist_info_found=`ls -dal ${VIRTUAL_ENV}/lib/python3.[0-9]*/site-packages/encoded-[0-9][.][0-9]*.dist-info 2>/dev/null`
 
 # Now we test whether there are files to delete, and if there are we do it.
 
@@ -20,7 +20,7 @@ if [ -n "${dist_info_found}" ]; then
     echo "Unwanted .dist_info files for the 'encoded' library were found:"
     echo "${dist_info_found}"
     echo "Cleaning up..."
-    rm -rf ${VIRTUAL_ENV}/lib/python3.6/site-packages/encoded-[0-9][.][0-9]*.dist-info
+    rm -rf ${VIRTUAL_ENV}/lib/python3.[0-9]*/site-packages/encoded-[0-9][.][0-9]*.dist-info
     echo "Done cleaning up."
 else
     echo "No unwanted .dist_info files for the 'encoded' library found."

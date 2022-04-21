@@ -1,7 +1,8 @@
 import pytest
 
+from dcicutils.misc_utils import utc_today_str
 from ..types.image import Image
-from ..util import utc_today_str
+# from ..util import utc_today_str
 
 
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
@@ -226,7 +227,7 @@ def vendor_data_alias(lab, award):
         'award': award['@id'],
         'aliases': ['my_lab:this_is_correct_one',
                     'my_lab:this/is_wrong',
-                    'my_lab:this\is_wrong_too']}
+                    'my_lab:this\\is_wrong_too']}
 
 
 def test_vendor_alias_wrong_format(testapp, vendor_data_alias):

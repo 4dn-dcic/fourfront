@@ -35,7 +35,8 @@ if (mode === 'production') {
     chunkFilename = '[name].[chunkhash].js';
     devTool = 'source-map';
 } else if (env === 'quick') {
-    devTool = 'eval'; // Fastest
+    // `eval` is fastest but doesn't abide by production Content-Security-Policy, so we check for env=="quick" in app.js to adjust the CSP accordingly.
+    devTool = 'eval';
 } else if (env === 'development') {
     devTool = 'eval-source-map';
 }
@@ -110,7 +111,7 @@ const optimization = {
     sideEffects: false,
     minimizer: [
         new TerserPlugin({
-            parallel: false,
+            parallel: false,  // XXX: this option causes docker build to fail - Will 2/25/2021
             sourceMap: true,
             terserOptions:{
                 compress: true,

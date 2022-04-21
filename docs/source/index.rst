@@ -26,7 +26,12 @@ This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`
 Installation
 ============
 
-Fourfront is known to work with Python 3.6.x and will not work with Python 3.7 or greater. If part of the 4DN team, it is recommended to use Python 3.4.3, since that's what is running on our servers. It is best practice to create a fresh Python virtualenv using one of these versions before proceeding to the following steps.
+Fourfront is known to work with Python 3.6.x and 3.7.x and will not work with Python 3.8 or greater.
+If part of the HMS team, it is recommended to use a high patch version, such as Python 3.7.12,
+since that's what we try to do with our servers, but any version of 3.7 should work if you
+find you are unable to install that particular patch version.
+It is best practice to create a fresh Python
+virtualenv using one of these versions before proceeding to the following steps.
 
 Step 0: Obtain Credentials
 --------------------------
