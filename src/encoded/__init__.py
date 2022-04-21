@@ -21,6 +21,7 @@ from snovault.app import STATIC_MAX_AGE, session, json_from_path, configure_dbse
 from snovault.elasticsearch import APP_FACTORY
 from snovault.elasticsearch.interfaces import INVALIDATION_SCOPE_ENABLED
 
+from .appdefs import APP_VERSION_REGISTRY_KEY
 from .loadxl import load_all
 
 
@@ -76,12 +77,6 @@ def load_workbook(app, workbook_filename, docsdir):
     }
     testapp = webtest.TestApp(app, environ)
     load_all(testapp, workbook_filename, docsdir)
-
-
-# This key is best interpreted not as the 'snovault version' but rather the 'version of the app built on snovault'.
-# As such, it should be left this way, even though it may appear redundant with the 'eb_app_version' registry key
-# that we also have, which tries to be the value eb uses. -kmp 28-Apr-2020
-APP_VERSION_REGISTRY_KEY = 'snovault.app_version'
 
 
 def app_version(config):
