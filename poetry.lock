@@ -527,6 +527,17 @@ dev = ["check-manifest"]
 test = ["coverage", "nosetests"]
 
 [[package]]
+name = "codeguru-profiler-agent"
+version = "1.2.4"
+description = "The Python agent to be used for Amazon CodeGuru Profiler"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+boto3 = ">=1.14.0"
+
+[[package]]
 name = "colorama"
 version = "0.3.3"
 description = "Cross-platform colored terminal text."
@@ -2096,7 +2107,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.10,<3.8"
-content-hash = "c6514f4c0f1527e8ec2d40ef03532907a4ee2ec5967042ae1a39c4460c4f0b9d"
+content-hash = "ef25b89bf5bfd39829344c0b987d9a7e7aed6e3c4d1939861b79f4c564ea6537"
 
 [metadata.files]
 apipkg = [
@@ -2222,6 +2233,10 @@ click = [
 codacy-coverage = [
     {file = "codacy-coverage-1.3.11.tar.gz", hash = "sha256:b94651934745c638a980ad8d67494077e60f71e19e29aad1c275b66e0a070cbc"},
     {file = "codacy_coverage-1.3.11-py2.py3-none-any.whl", hash = "sha256:d8a1ce56b0dd156d6b1de14fa6217d32ec86097902f08a17ff2f95ba27264474"},
+]
+codeguru-profiler-agent = [
+    {file = "codeguru_profiler_agent-1.2.4-py3-none-any.whl", hash = "sha256:7325777f83acd0e5be342eba7acc5bc372a4d992eb3e22218e3f42f137bebe95"},
+    {file = "codeguru_profiler_agent-1.2.4.tar.gz", hash = "sha256:fde1bc9837b79ce9587a723ef8ac2776846e4c5c6a4acc93cc8029fb1fc9168b"},
 ]
 colorama = [
     {file = "colorama-0.3.3.tar.gz", hash = "sha256:eb21f2ba718fbf357afdfdf6f641ab393901c7ca8d9f37edd0bee4806ffa269c"},
