@@ -125,6 +125,7 @@ COPY deploy/docker/production/entrypoint.bash .
 COPY deploy/docker/production/entrypoint_portal.bash .
 COPY deploy/docker/production/entrypoint_deployment.bash .
 COPY deploy/docker/production/entrypoint_indexer.bash .
+COPY deploy/docker/production/supervisord.conf .
 # Note that fourfront does not have an ingester
 # COPY deploy/docker/production/entrypoint_ingester.sh .
 COPY deploy/docker/production/assume_identity.py .

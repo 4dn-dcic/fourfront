@@ -57,8 +57,8 @@ def rss_checker(rss_limit=None, rss_percent_limit=None):
         else:
             over_perc = True  # only consider rss if we have no percent set
         if over_rss and over_perc:
-            log.error("Restarting process. Memory usage: %s (limit %s); Percentage "
-                      "%s (limit %s)" % (rss, rss_limit, rss_perc, rss_percent_limit))
+            log.error(f"Restarting process. Memory usage: {rss}Mb (limit {rss_limit}); Percentage "
+                      f"{rss_perc} (limit {rss_percent_limit})")
             process.kill()
 
     return callback
