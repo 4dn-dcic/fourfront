@@ -51,13 +51,13 @@ def rss_checker(rss_limit=None, rss_percent_limit=None):
     def callback(environ):
         rss = process.memory_info().rss
         over_rss = rss_limit and rss > rss_limit
-        rss_perc = process.memory_percent(memtype="rss")
+        rss_perc = process.memory_percent(memtype="rss")  # XXX: this does not work on Fargate (reports host stats)
         if rss_percent_limit:
             over_perc = rss_perc > rss_percent_limit
         else:
             over_perc = True  # only consider rss if we have no percent set
         if over_rss and over_perc:
-            log.error(f"Restarting process. Memory usage: {rss}Mb (limit {rss_limit}); Percentage "
+            log.error(f"Killing process. Memory usage: {rss}Mb (limit {rss_limit}); Percentage "
                       f"{rss_perc} (limit {rss_percent_limit})")
             process.kill()
 
