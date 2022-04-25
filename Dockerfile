@@ -119,7 +119,8 @@ RUN chown nginx:nginx development.ini && \
 
 # Production setup
 RUN touch production.ini && chown nginx:nginx production.ini && \
-    touch session-secret.b64 && chown nginx:nginx session-secret.b64 && chown nginx:nginx poetry.toml
+    touch session-secret.b64 && chown nginx:nginx session-secret.b64 && chown nginx:nginx poetry.toml && \
+    touch supervisord.log && chown nginx:nginx supervisord.log
 COPY deploy/docker/production/$INI_BASE deploy/ini_files/.
 COPY deploy/docker/production/entrypoint.bash .
 COPY deploy/docker/production/entrypoint_portal.bash .
