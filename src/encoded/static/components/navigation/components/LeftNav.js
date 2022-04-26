@@ -23,7 +23,7 @@ export const LeftNav = React.memo(function LeftNav(props){
     // visibleDropdownID, closingDropdownID, etc.
     const { visibleDropdownID } = props;
     const isSearchBarOpen = (visibleDropdownID === 'search-menu-item');
-    const passProps = isSearchBarOpen ? _.extend({ 'active': false }, props) : props;
+    const passProps = isSearchBarOpen ? _.omit(_.extend({ 'active': false }, props), 'searchNavItemRef') : props;
     return (
         <Nav className="mr-auto">
             <DataNavItem {...passProps} />
@@ -177,7 +177,7 @@ const DataNavItemBody = React.memo(function DataNavItemBody(props) {
 });
 
 function SearchNavItem(props){
-    const { href, browseBaseState, ...navItemProps } = props;
+    const { href, browseBaseState, searchNavItemRef, ...navItemProps } = props;
 
     /** @see https://reactjs.org/docs/hooks-reference.html#usememo */
     const bodyProps = useMemo(function(){
@@ -205,7 +205,7 @@ function SearchNavItem(props){
     );
 
     return ( // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
-        <BigDropdownNavItem {...navItemProps} id="search-menu-item" navItemHref="/search" navItemContent={navLink} autoHideOnClick={false}>
+        <BigDropdownNavItem {...navItemProps} id="search-menu-item" navItemHref="/search" navItemContent={navLink} autoHideOnClick={false} ref={searchNavItemRef}>
             <SearchNavItemBody {...bodyProps} />
         </BigDropdownNavItem>
     );
@@ -352,7 +352,8 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
                             <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
                                 className="w-100" onSelect={onChangeSearchItemType} active={searchItemType == item.type}>
                                 {item.text}
-                            </DropdownItem>);
+                            </DropdownItem>
+                        );
                     })
                 }
             </DropdownButton>

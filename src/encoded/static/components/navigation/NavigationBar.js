@@ -40,6 +40,8 @@ export class NavigationBar extends React.PureComponent {
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
+        this.handleMobileSearchClick = this.handleMobileSearchClick.bind(this);
+        this.searchNavItemRef = React.createRef();
 
         let testWarning = true;
         const initHostName = memoizedUrlParse(props.href).hostname;
@@ -117,6 +119,14 @@ export class NavigationBar extends React.PureComponent {
         this.setState({ 'mobileDropdownOpen' : open });
     }
 
+    handleMobileSearchClick(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.searchNavItemRef && this.searchNavItemRef.current) {
+            this.searchNavItemRef.current.handleToggle();
+        }
+    }
+
     render() {
         const { testWarning, mobileDropdownOpen, mounted } = this.state;
         const { href, context, schemas, browseBaseState, isFullscreen, currentAction } = this.props;
@@ -138,11 +148,15 @@ export class NavigationBar extends React.PureComponent {
                                 <FourfrontLogo />
                             </a>
 
+                            <button className="mobile-search-bar-icon" type="button" onClick={this.handleMobileSearchClick}>
+                                <i className="icon icon-fw icon-search fas align-middle"></i>
+                            </button>
+
                             <Navbar.Toggle>
                                 <i className="icon icon-bars fas icon-fw align-middle" />
                             </Navbar.Toggle>
 
-                            <CollapsedNav {...this.props} {...{ testWarningVisible, mounted }} />
+                            <CollapsedNav {...this.props} {...{ testWarningVisible, mounted }} ref={this.searchNavItemRef} />
                         </Navbar>
                     </div>
                     <ChartDataController.Provider id="quick_info_bar1">
@@ -153,19 +167,20 @@ export class NavigationBar extends React.PureComponent {
         );
     }
 }
+const CollapsedNav = React.forwardRef((props, ref) => <CollapsedNavBody {...props} forwardRef={ref} />);
 
-const CollapsedNav = React.memo(function CollapsedNav(props) {
+const CollapsedNavBody = React.memo(function CollapsedNav(props) {
     const {
         href, currentAction, session, mounted,
         overlaysContainer, windowWidth, windowHeight,
         browseBaseState, testWarningVisible,
         addToBodyClassList, removeFromBodyClassList,
-        schemas, updateAppSessionState
+        schemas, updateAppSessionState, forwardRef
     } = props;
 
     const leftNavProps = {
         windowWidth, windowHeight, href, mounted, overlaysContainer, session,
-        testWarningVisible, browseBaseState//, addToBodyClassList, removeFromBodyClassList
+        testWarningVisible, browseBaseState, searchNavItemRef: forwardRef//, addToBodyClassList, removeFromBodyClassList
     };
 
     const userActionNavProps = {

@@ -610,7 +610,8 @@ div#top-nav.navbar-fixed-top {
 
         /** When on xs & sm sizes **/
         > .navbar-toggler,
-        > .navbar-toggler {
+        > .navbar-toggler,
+        > .mobile-search-bar-icon {
             margin-top: 20px;
             margin-bottom: 20px;
             height: 40px;
@@ -633,6 +634,10 @@ div#top-nav.navbar-fixed-top {
         
         }
 
+        .mobile-search-bar-icon {
+            color: rgba(0,0,0,0.5) !important;
+            background-color: rgba(0,0,0,0);
+        }
     }
 
     #stats {
