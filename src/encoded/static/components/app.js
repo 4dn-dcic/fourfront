@@ -1710,7 +1710,7 @@ class BodyElement extends React.PureComponent {
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
         const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
-        const { is_mobile: isMobile = false } = context;
+        const { is_mobile_browser: isMobileBrowser = false } = context;
 
         if (hasError) return this.renderErrorState();
 
@@ -1721,7 +1721,7 @@ class BodyElement extends React.PureComponent {
         };
 
         const initialFields = [
-            isMobile ? 'experiments_in_set.biosample.biosource.biosource_type' : 'experiments_in_set.experiment_type.display_title',
+            isMobileBrowser ? 'experiments_in_set.biosample.biosource.biosource_type' : 'experiments_in_set.experiment_type.display_title',
             'experiments_in_set.biosample.biosource.organism.name'
         ];
 
