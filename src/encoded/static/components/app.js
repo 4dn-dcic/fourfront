@@ -23,7 +23,6 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import { PageTitleSection } from './PageTitle';
-import Sinon from 'sinon';
 
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
@@ -791,7 +790,7 @@ export default class App extends React.PureComponent {
                     window.location.replace(targetHref + hashAppendage);
                 } else {
                     const [ old_path ] = ('' + window.location).split('#');
-                    Sinon.stub(targetHref + hashAppendage);
+                    window.location.assign(targetHref + hashAppendage);
                     if (old_path === targetHref) {
                         window.location.reload();
                     }
@@ -860,7 +859,7 @@ export default class App extends React.PureComponent {
                         if (options.replace) {
                             window.location.replace(targetHref + hashAppendage);
                         } else {
-                            Sinon.stub(targetHref + hashAppendage);
+                            window.location.assign(targetHref + hashAppendage);
                         }
                     }
 
