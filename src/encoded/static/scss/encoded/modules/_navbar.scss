@@ -610,8 +610,7 @@ div#top-nav.navbar-fixed-top {
 
         /** When on xs & sm sizes **/
         > .navbar-toggler,
-        > .navbar-toggler,
-        > .mobile-search-bar-icon {
+        > .navbar-toggler {
             margin-top: 20px;
             margin-bottom: 20px;
             height: 40px;
@@ -633,14 +632,56 @@ div#top-nav.navbar-fixed-top {
             }
         
         }
+    }
 
-        .mobile-search-bar-icon {
-            color: rgba(0,0,0,0.5) !important;
-            background-color: rgba(0,0,0,0);
+    .mobile-search-bar-icon {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        height: 40px;
+        line-height: 40px;
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-left: 8px;
+        padding-right: 8px;
+        font-size: 1.5rem;
+        border: none;
 
-            @include media-breakpoint-up(md) {
-                display: none;
+        &:hover, &:active, &:focus {
+            background-color: rgba(0,0,0,0.125);
+            color: $gray-800;
+        }
+        color: rgba(0,0,0,0.5) !important;
+        background-color: rgba(0,0,0,0);
+
+        // @include media-breakpoint-up(md) {
+        //     display: none;
+        // }
+    }
+
+    .desktop-search-bar-icon {
+        line-height: 20px;
+        max-width: 200px;
+        width: 20%;
+        color: #777;
+        cursor: pointer;
+        display: inherit;
+
+        // @include media-breakpoint-up(md) {
+        //     display: inherit;               
+        // }
+
+        >i.icon-search {
+            color: $primary-dark;
+            padding-top: 2px;
+            font-size: 1.2rem;
+
+            &:hover {
+                color: $primary-dark;
             }
+        }
+
+        &:hover {
+            color: inherit;
         }
     }
 

@@ -195,17 +195,8 @@ function SearchNavItem(props){
         };
     }, [ href, browseBaseState ]);
 
-    const navLink = (
-        <React.Fragment>
-            <span className="border border-secondary rounded p-2 ml-lg-5">
-                <span className="d-inline-block text-black">Search ...</span>
-                <i className="icon icon-fw icon-search fas align-middle" />
-            </span>
-        </React.Fragment>
-    );
-
     return ( // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
-        <BigDropdownNavItem {...navItemProps} id="search-menu-item" navItemHref="/search" navItemContent={navLink} autoHideOnClick={false} ref={searchNavItemRef}>
+        <BigDropdownNavItem {...navItemProps} id="search-menu-item" navItemHref="/search" navItemContent={null} autoHideOnClick={false} ref={searchNavItemRef}>
             <SearchNavItemBody {...bodyProps} />
         </BigDropdownNavItem>
     );
