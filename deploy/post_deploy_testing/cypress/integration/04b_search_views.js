@@ -62,8 +62,9 @@ describe('Post-Deployment Search View Tests', function () {
                 const intervalCount = parseInt(resultCount / 25) - ( resultCount % 25 > 0 ? 0 : 1); // Skip last interval if no more to load.
 
                 for (let interval = 0; interval < intervalCount; interval++){
-                    cy.scrollToBottom().end().get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
-                }
+                    cy.scrollToBottom().then(()=>{
+                        cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
+                    });}
             });
 
         });

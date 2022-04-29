@@ -11,6 +11,7 @@ from dcicutils.beanstalk_utils import source_beanstalk_env_vars
 from dcicutils.env_utils import get_mirror_env_from_context, is_stg_or_prd_env
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
+from codeguru_profiler_agent import Profiler
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from pkg_resources import resource_filename
@@ -27,6 +28,7 @@ from .loadxl import load_all
 
 # location of environment variables on elasticbeanstalk
 BEANSTALK_ENV_PATH = "/opt/python/current/env"
+FOURFRONT_ECS_REGION = 'us-east-1'
 
 
 def static_resources(config):
@@ -112,6 +114,11 @@ def app_version(config):
             raise Exception(ga_conf_file + " does not exist in filesystem. Aborting.")
         with open(ga_conf_file) as json_file:
             config.registry.settings["ga_config"] = json.load(json_file)
+
+
+def init_code_guru(*, group_name, region=FOURFRONT_ECS_REGION):
+    """ Starts AWS CodeGuru process for profiling the app remotely. """
+    Profiler(profiling_group_name=group_name, region_name=region).start()
 
 
 def main(global_config, **local_config):
@@ -204,6 +211,11 @@ def main(global_config, **local_config):
     elif current_env is not None:
         sentry_sdk.init("https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642",
                         integrations=[PyramidIntegration(), SqlalchemyIntegration()])
+
+    # initialize CodeGuru profiling, if set
+    # note that this is intentionally an env variable (so it is a TASK level setting)
+    if 'ENCODED_PROFILING_GROUP' in os.environ:
+        init_code_guru(group_name=os.environ['ENCODED_PROFILING_GROUP'])
 
     app = config.make_wsgi_app()
 
