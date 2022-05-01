@@ -337,7 +337,7 @@ const CreateNewConfigurationDropDownButton = React.memo(function (props) {
     const tierOptions = _.range(startTier, endTier + 1);
     return (
         <DropdownButton id="tier-selector" onSelect={handleChangeMicroscopeTier}
-            title="Create New Configuration" size="xs" disabled={disabled}>
+            title="Create New" size="xs" disabled={disabled}>
             {tierOptions.map((opt, i) => (
                 <DropdownItem key={opt} eventKey={opt} data-key={opt}>
                     {'Tier ' + opt}
