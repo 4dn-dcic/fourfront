@@ -111,7 +111,7 @@
     "auth0-lock": "^11.32.2",
     "d3": "^6.7.0",
     "date-fns": "^2.28.0",
-    "detect-browser": "^3.0.1",
+    "detect-browser": "^5.3.0",
     "domready": "^1.0.8",
     "form-serialize": "^0.7.2",
     "higlass": "1.10.0",
