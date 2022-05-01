@@ -292,7 +292,7 @@ export default class App extends React.PureComponent {
             // DEPRECATED:
             // Emit event from our window object to notify that fourfront JS has initialized.
             // This is to be used by, e.g. submissions view which might control a child window.
-            window.dispatchEvent(new Event('fourfrontinitialized'));
+            //window.dispatchEvent(new Event('fourfrontinitialized'));
             // CURRENT: If we have parent window, post a message to it as well.
             if (window.opener) window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
 

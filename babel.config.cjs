@@ -13,7 +13,14 @@ module.exports = function(api){
             "@babel/plugin-syntax-dynamic-import",
             "@babel/plugin-proposal-object-rest-spread",
             "@babel/plugin-proposal-class-properties",
-            "babel-plugin-minify-dead-code-elimination"
+            "babel-plugin-minify-dead-code-elimination",
+            ["@babel/plugin-proposal-decorators", { "legacy": true }],
+            ["@babel/transform-async-to-generator", {
+                "module": "bluebird",
+                "method": "coroutine"
+            }],
+            ["@babel/plugin-proposal-pipeline-operator", { "proposal": "minimal" }],
+            ["@babel/plugin-transform-runtime"],
         ],
         "comments": true
     };

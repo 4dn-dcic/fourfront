@@ -25,7 +25,7 @@ import { WFRStepDetailBody } from './WFRStepDetailBody';
 
 export class WorkflowDetailPane extends React.PureComponent {
 
-    static Legend = Legend
+    static Legend = Legend;
 
     static propTypes = {
         'selectedNode' : PropTypes.oneOfType([ PropTypes.object, PropTypes.oneOf([null]) ])
@@ -63,7 +63,7 @@ export class WorkflowDetailPane extends React.PureComponent {
                 commonDetailProps.minWidth = 800;
             }
 
-            if (node.meta && node.meta.run_data && node.meta.run_data.file){
+            if (node.meta && node.meta.run_data && node.meta.run_data.file&& session){
                 // File
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }

@@ -65,7 +65,7 @@ describe('Testing browse.js for experiment set browser', function() {
         
     });
 
-    it('has 3 passing entries (experiment sets)', function() {
+    it.skip('has 3 passing entries (experiment sets)', function() {
         var rows = TestUtils.scryRenderedDOMComponentsWithClass(page, 'search-result-row');
         var resultRows = rows.filter(function(r){
             if (r.className.indexOf('fin') > -1) return false;
@@ -77,7 +77,7 @@ describe('Testing browse.js for experiment set browser', function() {
         expect(resultRows.length).toEqual(context['@graph'].length);
     });
 
-    it('filters are rendered correctly (facetlist terms)', function() {
+    it.skip('filters are rendered correctly (facetlist terms)', function() {
         var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'term');
         //console.log(expFilters.map(function(f){ return f.innerHTML; }))
         expect(expFilters.length).toBeGreaterThan(9);
