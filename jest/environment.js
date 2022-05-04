@@ -6,7 +6,14 @@
 
 import jsdom from 'jsdom';
 const { JSDOM } = jsdom;
-
+const dom = new JSDOM();
+global.document = dom.window.document;
+global.window = dom.window;
+global.DOMParser = window.DOMParser;
+global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
+global.navigator = {
+    userAgent: 'node',
+};
 //jest.mock('scriptjs');
 
 // if (window.DOMParser === undefined) {
