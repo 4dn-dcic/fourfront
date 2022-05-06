@@ -17,7 +17,7 @@ describe('Deployment/CI Search View Tests', function () {
 
     function editMicroscopeConfiguration() {
         it('Edit microscope configuration - add deleted_by_cypress_test tag', function () {
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Edit click
             cy.get(".action-button[data-action='edit'] a").click({ force: true }).end();
@@ -124,7 +124,7 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Can add new tier-1 microscope configuration', function(){
 
-            cy.login4DN({ 'email' : '4dndcic@gmail.com', 'useEnvToken' : false }).end()
+            cy.login4DN({ 'email' : 'ud4dntest@gmail.com', 'useEnvToken' : false }).end()
                 .visit('/search/?type=MicroscopeConfiguration').end()
                 .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                     expect($searchResultElems.length).to.be.greaterThan(0);
@@ -169,7 +169,7 @@ describe('Deployment/CI Search View Tests', function () {
         editMicroscopeConfiguration();
 
         it('Can save as microscope configuration', function () {
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Clone microscope data
             cy.get("div.dropup button#dropdown-basic-button.dropdown-toggle.btn.btn-dark.btn-lg div").contains('Save').click().wait(1000).end()
@@ -183,11 +183,11 @@ describe('Deployment/CI Search View Tests', function () {
 
         //Edit clonned microscope configuration
         editMicroscopeConfiguration();
-        
+
         it('Delete microscope configuration', function () {
 
             // Log in _as admin_.
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             // Delete microscope configuration
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
