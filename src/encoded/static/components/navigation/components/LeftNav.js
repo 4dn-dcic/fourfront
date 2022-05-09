@@ -316,7 +316,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     };
 
     const selectedItem = AvailableSearchTypes[searchType];
-    const action = (selectedItem && selectedItem.action) || '/search';
+    const action = (selectedItem && selectedItem.action) || '/search/';
     const btnIconClassName = 'icon icon-fw fas ' + (searchType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
     const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
     const searchTextClassName = 'form-control' + (!searchInputIsValid ? ' border border-danger' : '');
@@ -373,7 +373,7 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
 const AvailableSearchTypes = {
     'Item': { type: 'Item', text: 'General (All Item Types)' },
     'ByAccession': { type: 'ByAccession', text: "By Accession" },
-    'ExperimentSetReplicate': { type: 'ExperimentSetReplicate', text: 'Experiment Sets', action: '/browse' },
+    'ExperimentSetReplicate': { type: 'ExperimentSetReplicate', text: 'Experiment Sets', action: '/browse/' },
     'Publication': { type: 'Publication', text: 'Publications' },
     'File': { type: 'File', text: 'Files' },
     'Biosource': { type: 'Biosource', text: 'Biosources' },
