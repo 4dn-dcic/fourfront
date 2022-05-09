@@ -181,8 +181,7 @@ function SearchNavItem(props){
     const bodyProps = useMemo(function(){
         const hrefParts = memoizedUrlParse(href);
 
-        const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
-        const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
+        const searchQueryFromHref = (hrefParts && hrefParts.query) || {};
         const isSearchPage = SearchBar.isBrowseOrSearchPage(href);
 
         const title = {
@@ -192,7 +191,7 @@ function SearchNavItem(props){
         };
 
         return {
-            searchQueryFromHref, searchTypeFromHref, title, isSearchPage, hrefParts
+            searchQueryFromHref, isSearchPage, title
         };
     }, [ href, browseBaseState ]);
 
@@ -213,7 +212,7 @@ function SearchNavItem(props){
 }
 
 const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
-    const { searchQueryFromHref, searchTypeFromHref, title, hrefParts, isSearchPage } = props;
+    const { searchQueryFromHref, title, isSearchPage } = props;
 
     const searchTextInputEl = useRef(null);
     useEffect(() => {
@@ -224,12 +223,9 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
         }, 350);
     }, []);
 
-    const [searchText, setSearchText] = useState(searchQueryFromHref || '');
+    const [searchText, setSearchText] = useState(searchQueryFromHref.q || '');
     const [searchType, setSearchType] = useState(isSearchPage ? 'Within' : 'Item');
     const [searchInputIsValid, setSearchInputIsValid] = useState(true);
-
-    console.log('xxx searchQueryFromHref:', searchQueryFromHref);
-    console.log('xxx hrefParts.query:', hrefParts.query);
 
     //hidden form inputs & search placeholder text
     const [hiddenInputsForURIQuery, placeholderText] = useMemo(function () {
@@ -245,7 +241,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                 break;
             case 'Within':
                 _.extend(query,
-                    _.omit(hrefParts.query || {}, 'q')  // Remove 'q' as is provided via the <input name="q" .../> element.
+                    _.omit(searchQueryFromHref || {}, 'q')  // Remove 'q' as is provided via the <input name="q" .../> element.
                 );
                 break;
             default: {
