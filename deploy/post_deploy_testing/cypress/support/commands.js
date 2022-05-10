@@ -73,7 +73,10 @@ Cypress.Commands.add('scrollToCenterElement', { prevSubject : true }, (subject, 
     });
 });
 
-
+const auth0UserIds = {
+    'ud4dntest@gmail.com':'google-oauth2|116789716005557674891',
+    'u4dntestcypress@gmail.com': 'google-oauth2|104145819796576369116'
+};
 
 /**
  * This emulates login.js. Perhaps we should adjust login.js somewhat to match this better re: navigate.then(...) .
@@ -145,7 +148,8 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         'email': email,
         'email_verified': true,
         'aud': auth0client,
-        "iss": "https://hms-dbmi.auth0.com/"
+        "iss": "https://hms-dbmi.auth0.com/",
+        "sub": auth0UserIds[email] || ''
     };
 
     jwt_token = jwt.sign(jwtPayload, Buffer.from(auth0secret, 'utf-8'));
