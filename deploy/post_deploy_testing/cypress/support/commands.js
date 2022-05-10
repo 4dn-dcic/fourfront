@@ -75,7 +75,7 @@ Cypress.Commands.add('scrollToCenterElement', { prevSubject : true }, (subject, 
 
 const auth0UserIds = {
     'ud4dntest@gmail.com':'google-oauth2|116789716005557674891',
-    'u4dntestcypress@gmail.com': 'google-oauth2|1041458197969576369116'
+    'u4dntestcypress@gmail.com': 'google-oauth2|104145819796576369116'
 };
 
 /**

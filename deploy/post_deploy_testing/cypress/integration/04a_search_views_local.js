@@ -11,7 +11,9 @@ describe('Deployment/CI Search View Tests', function () {
             const contextData = JSON.parse(context);
             const atId = contextData['@id'];
             console.log('DELETING atId', atId);
-            testItemsToDelete.push(atId);
+            if (atId !== '/search/?type=MicroscopeConfiguration') {
+                testItemsToDelete.push(atId);
+            }
         });
     }
 
@@ -195,15 +197,16 @@ describe('Deployment/CI Search View Tests', function () {
                 cy.getCookie('jwtToken')
                     .then((cookie) => {
                         const token = cookie.value;
+                        // cy.request({
+                        //     method: "DELETE",
+                        //     url: testItemURL,
+                        //     headers: {
+                        //         'Authorization': 'Bearer ' + token,
+                        //         "Content-Type": "application/json",
+                        //         "Accept": "application/json"
+                        //     }
+                        // }).end().request({
                         cy.request({
-                            method: "DELETE",
-                            url: testItemURL,
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                "Content-Type": "application/json",
-                                "Accept": "application/json"
-                            }
-                        }).end().request({
                             method: "PATCH",
                             url: testItemURL,
                             headers: {

@@ -16,7 +16,7 @@ describe('Biosample create page', function () {
         it('Ensure logged in, visit biosample create page ', function () {
 
             // Login CypressTest user
-            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
+            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true  }).end()
                 .get(navUserAcctDropdownBtnSelector).then((accountListItem) => {
                     expect(accountListItem.text()).to.contain('Cypress');
                 }).end();
@@ -59,7 +59,9 @@ describe('Biosample create page', function () {
                 const context = $context.text();
                 const contextData = JSON.parse(context);
                 const atId = contextData['@id'];
-                testItemsToDelete.push(atId);//Test biosample data @id
+                if (atId !== '/search/?type=Biosample') {
+                    testItemsToDelete.push(atId);//Test biosample data @id
+                }
             });
 
         });
@@ -76,15 +78,16 @@ describe('Biosample create page', function () {
                 cy.getCookie('jwtToken')
                     .then((cookie) => {
                         const token = cookie.value;
+                        // cy.request({
+                        //     method: "DELETE",
+                        //     url: testItemURL,
+                        //     headers: {
+                        //         'Authorization': 'Bearer ' + token,
+                        //         "Content-Type": "application/json",
+                        //         "Accept": "application/json"
+                        //     }
+                        // }).end().request({
                         cy.request({
-                            method: "DELETE",
-                            url: testItemURL,
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                "Content-Type": "application/json",
-                                "Accept": "application/json"
-                            }
-                        }).end().request({
                             method: "PATCH",
                             url: testItemURL,
                             headers: {
