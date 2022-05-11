@@ -777,7 +777,7 @@ class File(Item):
         "title": "Upload Key",
         "type": "string",
     })
-    def upload_key(self, request, filename):
+    def upload_key(self, request, filename=None):
         properties = self.properties
         external = self.propsheets.get('external', {})
         extkey = external.get('key')
