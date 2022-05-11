@@ -780,14 +780,14 @@ class File(Item):
         properties = self.properties
         external = self.propsheets.get('external', {})
         extkey = external.get('key')
-        od_url = self._open_data_url(self.properties['status'], filename=filename)
-        if od_url:
-            return f'No upload key for open data file {filename}'
+        # od_url = self._open_data_url(self.properties['status'], filename=filename)
+        # if od_url:
+        #     return f'No upload key for open data file {filename}'
         if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError:
-                return f'Failed to acquire upload credentials for {self.uuid}'
+            except ClientError as e:
+                return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
         return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
