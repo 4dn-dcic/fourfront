@@ -108,14 +108,14 @@
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.7",
     "@hms-dbmi-bgm/shared-portal-components": "git+https:github.com/4dn-dcic/shared-portal-components#0.1.42",
-    "auth0-lock": "^11.32.2",
+    "auth0-lock": "^11.33.0",
     "d3": "^6.7.0",
     "date-fns": "^2.28.0",
     "detect-browser": "^3.0.1",
     "domready": "^1.0.8",
     "form-serialize": "^0.7.2",
-    "higlass": "1.10.0",
-    "higlass-multivec": "0.2.4",
+    "higlass": "1.11.11",
+    "higlass-multivec": "0.2.10",
     "higlass-register": "^0.3.0",
     "html-react-parser": "^1.2.8",
     "markdown-to-jsx": "^7.1.6",
@@ -139,7 +139,7 @@
     "underscore": "^1.13.2",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "^1.1.19"
+    "vitessce": "^1.1.20"
   },
   "optionalDependencies": {
     "cypress": "^9.5.1"
