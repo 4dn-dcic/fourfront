@@ -83,6 +83,17 @@
             "type": "string",
             "lookup": 90
         },
+        "fbs_vendor_lot": {
+            "title": "FBS Vendor and Lot",
+            "description": "Indicates the FBS product/lot used for the data production culture - NOTE must be from provided selections for Gold status",
+            "type": "string",
+            "suggested_enum": [
+                "VWR 97068-091 Lot 035B15 (phase 1)",
+                "Peak Serum PS-FBS2 Lot 21E1202 (phase 2)",
+                "VWR 89510-184 lot 310B19 (phase 2)"
+            ],
+            "lookup": 92
+        },
         "protocols_additional": {
             "title": "Additional Protocols used in Cell Culture",
             "description": "Protocols including additional culture manipulations such as stem cell differentiation or cell cycle synchronization.",
