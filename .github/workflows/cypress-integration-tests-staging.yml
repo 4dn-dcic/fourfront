@@ -41,4 +41,4 @@ jobs:
           Auth0Client: ${{ secrets.Auth0Client }}
           Auth0Secret: ${{ secrets.Auth0Secret }}
         run: |
-         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config video=false CYPRESS_BASE_URL=http://staging.4dnucleome.org/ --parallel 
+         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config baseUrl=http://staging.4dnucleome.org/ --parallel 
