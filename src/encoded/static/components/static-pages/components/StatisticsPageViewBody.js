@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
 import * as d3 from 'd3';
+import { sub, startOfMonth, toDate, format as formatDate } from 'date-fns';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
@@ -504,16 +505,16 @@ export const usageAggsToChartData = _.pick(aggregationsToChartData,
 export class UsageStatsViewController extends React.PureComponent {
 
     static getSearchReqMomentsForTimePeriod(currentGroupBy = "daily"){
-        const untilDate = new Date();
+        let untilDate = new Date();
         let fromDate;
         if (currentGroupBy === 'monthly'){ // 1 yr (12 mths)
-            untilDate.startOf('month').subtract(1, 'minute'); // Last minute of previous month
-            fromDate = untilDate.clone();
-            fromDate.subtract(12, 'month'); // Go back 12 months
+            untilDate = sub(startOfMonth(untilDate), { minutes: 1 }); // Last minute of previous month
+            fromDate = toDate(untilDate);
+            fromDate = sub(fromDate, { months: 12 }); // Go back 12 months
         } else if (currentGroupBy === 'daily'){ // 30 days
-            untilDate.subtract(1, 'day');
-            fromDate = untilDate.clone();
-            fromDate.subtract(30, 'day'); // Go back 30 days
+            untilDate = sub(untilDate, { days: 1 });
+            fromDate = toDate(untilDate);
+            fromDate = sub(fromDate, { days: 30 }); // Go back 30 days
         }
         return { fromDate, untilDate };
     }
@@ -540,7 +541,7 @@ export class UsageStatsViewController extends React.PureComponent {
                 let uri = '/search/?type=TrackingItem&tracking_type=google_analytics&sort=-google_analytics.for_date&format=json';
 
                 uri += '&limit=all&google_analytics.date_increment=' + currentGroupBy;
-                uri += '&google_analytics.for_date.from=' + fromDate.format('YYYY-MM-DD') + '&google_analytics.for_date.to=' + untilDate.format('YYYY-MM-DD');
+                uri += '&google_analytics.for_date.from=' + formatDate(fromDate, 'yyyy-MM-dd') + '&google_analytics.for_date.to=' + formatDate(untilDate, 'yyyy-MM-dd');
                 uri += "&" + report_names.map(function(n){ return "field=google_analytics.reports." + encodeURIComponent(n); }).join("&");
                 uri += "&field=google_analytics.for_date";
 
