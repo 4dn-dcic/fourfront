@@ -70,8 +70,7 @@ describe('Biosample create page', function () {
         it('Biosample delete data', function () {
 
             // Log in _as admin_.
-            cy.visit('/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
-
+            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true }).wait(1000);
             // Delete item biosample data.
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
                 console.log('DELETING', testItemURL);
