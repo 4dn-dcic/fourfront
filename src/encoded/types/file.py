@@ -125,10 +125,11 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 conn = boto3.client('sts',
                                     aws_access_key_id=os.environ.get('S3_AWS_ACCESS_KEY_ID'),
                                     aws_secret_access_key=os.environ.get('S3_AWS_SECRET_ACCESS_KEY'))
+                token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         else:
             # boto.set_stream_logger('boto3')
             conn = boto3.client('sts')
-        token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
+            token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
         # Convert Expiration datetime object to string via cast
@@ -776,17 +777,18 @@ class File(Item):
         "title": "Upload Key",
         "type": "string",
     })
-    def upload_key(self, request):
+    def upload_key(self, request, filename=None):
         properties = self.properties
         external = self.propsheets.get('external', {})
         extkey = external.get('key')
+        # od_url = self._open_data_url(self.properties['status'], filename=filename)
+        # if od_url:
+        #     return f'No upload key for open data file {filename}'
         if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError:
-                log.error(os.environ)
-                log.error(properties)
-                return 'UPLOAD KEY FAILED'
+            except ClientError as e:
+                return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
         return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
