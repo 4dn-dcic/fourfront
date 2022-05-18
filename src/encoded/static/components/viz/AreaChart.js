@@ -267,7 +267,7 @@ export class GroupByController extends React.PureComponent {
             'experiments_in_set.experiment_type.display_title' : <span><i className="icon fas icon-fw icon-chart-bar"/>&nbsp; Experiment Type</span>
         },
         'initialGroupBy' : 'award.center_title'
-    }
+    };
 
     constructor(props){
         super(props);
@@ -308,7 +308,7 @@ export class GroupByDropdown extends React.PureComponent {
         },
         'outerClassName' : "dropdown-container mb-15",
         'id' : "select_primary_charts_group_by"
-    }
+    };
 
     constructor(props){
         super(props);
@@ -849,7 +849,7 @@ export class AreaChart extends React.PureComponent {
         const stackedData   = this.stackData(data, d3TimeFormat);
         const svg           = this.svg || d3.select(this.svgRef.current); // SHOULD be same as evt.target.
         const tooltip       = this.tooltipRef.current;
-        let [ mX, mY ]      = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
+        let [ mX, mY ]      = d3.pointer(svg.node(), evt); // [x: number, y: number]
         const chartWidth    = this.innerWidth || this.getInnerChartWidth();
         const chartHeight   = this.innerHeight || this.getInnerChartHeight();
         const currentTerm   = (evt && evt.target.getAttribute('data-term')) || null;

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import _ from 'underscore';
 import { stringify } from 'query-string';
 import * as d3 from 'd3';
-import { sub, startOfMonth, toDate, format as formatDate } from 'date-fns';
+import { sub, startOfMonth, toDate, format as formatDate, endOfDay, endOfMonth, startOfDay, add, format } from 'date-fns';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 
@@ -731,19 +731,20 @@ export function UsageStatsView(props){
     }
 
     const { anyExpandedCharts, commonXDomain, dateRoundInterval } = useMemo(function(){
-        const { fromDate, untilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
+        const { fromDate: propFromDate, untilDate: propUntilDate } = UsageStatsViewController.getSearchReqMomentsForTimePeriod(currentGroupBy);
         let dateRoundInterval;
-
+        let fromDate;
+        let untilDate;
         // We want all charts to share the same x axis. Here we round to date boundary.
         // Minor issue is that file downloads are stored in UTC/GMT while analytics are in EST timezone..
         // TODO improve on this somehow, maybe pass prop to FileDownload chart re: timezone parsing of some sort.
         if (currentGroupBy === 'daily'){
-            fromDate.startOf('day').add(15, 'minute');
-            untilDate.endOf('day').subtract(45, 'minute');
+            fromDate=add(startOfDay(propFromDate), { minutes: 15 });
+            untilDate=add(endOfDay(propUntilDate), { minutes: 45 });
             dateRoundInterval = 'day';
         } else if (currentGroupBy === 'monthly') {
-            fromDate.endOf('month'); // Not rly needed.
-            untilDate.endOf('month').subtract(1, 'day');
+            fromDate=add(endOfMonth, { days: 0 }); // Not rly needed.
+            untilDate=add(endOfMonth(propUntilDate), { days: 1 });
             dateRoundInterval = 'month';
         } else if (currentGroupBy === 'yearly'){ // Not yet implemented
             dateRoundInterval = 'year';
@@ -751,7 +752,7 @@ export function UsageStatsView(props){
 
         return {
             anyExpandedCharts: _.any(_.values(chartToggles)),
-            commonXDomain: [ fromDate.toDate(), untilDate.toDate() ],
+            commonXDomain: [fromDate, untilDate],
             dateRoundInterval
         };
     }, [ currentGroupBy, anyExpandedCharts ]);
