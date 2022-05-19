@@ -267,7 +267,7 @@ export class GroupByController extends React.PureComponent {
             'experiments_in_set.experiment_type.display_title' : <span><i className="icon fas icon-fw icon-chart-bar"/>&nbsp; Experiment Type</span>
         },
         'initialGroupBy' : 'award.center_title'
-    }
+    };
 
     constructor(props){
         super(props);
@@ -308,7 +308,7 @@ export class GroupByDropdown extends React.PureComponent {
         },
         'outerClassName' : "dropdown-container mb-15",
         'id' : "select_primary_charts_group_by"
-    }
+    };
 
     constructor(props){
         super(props);
@@ -849,17 +849,21 @@ export class AreaChart extends React.PureComponent {
         const stackedData   = this.stackData(data, d3TimeFormat);
         const svg           = this.svg || d3.select(this.svgRef.current); // SHOULD be same as evt.target.
         const tooltip       = this.tooltipRef.current;
-        let [ mX, mY ]      = d3.clientPoint(svg.node(), evt); // [x: number, y: number]
+        let [ mX, mY ]      = d3.pointer(evt); // [x: number, y: number]
         const chartWidth    = this.innerWidth || this.getInnerChartWidth();
         const chartHeight   = this.innerHeight || this.getInnerChartHeight();
         const currentTerm   = (evt && evt.target.getAttribute('data-term')) || null;
         const tdp           = tooltipDataProperty || 'total';
 
-        let dateFormatFxn = function(aDate){ return formatDateTime(aDate, 'date-sm'); };
+        let dateFormatFxn = function(aDate){
+            const isoStr = aDate.toISOString();
+            return formatDateTime(isoStr, 'date-sm');
+        };
 
         if (dateRoundInterval === 'month'){
             dateFormatFxn = function(aDate){
-                return formatDateTime(aDate, 'date-month');
+                const isoStr = aDate.toISOString();
+                return formatDateTime(isoStr, 'date-month');
             };
         } else if (dateRoundInterval === 'week'){
             // TODO maybe. Currently just keeps day format.
@@ -876,31 +880,31 @@ export class AreaChart extends React.PureComponent {
             return this.removeTooltip();
         }
 
-        var xScale              = this.xScale(chartWidth),
-            yScale              = this.yScale(chartHeight),
-            hovDate             = xScale.invert(mX),
-            dateString          = dateFormatFxn(hovDate),
-            leftPosition        = xScale(hovDate),
-            isToLeft            = leftPosition > (chartWidth / 2),
-            maxTermsVisible     = Math.floor((chartHeight - 60) / 18),
-            stackedLegendItems  = _.filter(_.map(stackedData, function(sD){
-                return _.find(sD, function(stackedDatum, i, all){
-                    var curr = stackedDatum.data,
-                        next = (all[i + 1] && all[i + 1].data) || null;
+        const xScale = this.xScale(chartWidth);
+        const yScale = this.yScale(chartHeight);
+        const hovDate = xScale.invert(mX);
+        const dateString = dateFormatFxn(hovDate);
+        const leftPosition = xScale(hovDate);
+        const isToLeft = leftPosition > (chartWidth / 2);
+        const maxTermsVisible = Math.floor((chartHeight - 60) / 18);
+        const stackedLegendItems = _.filter(_.map(stackedData, function (sD) {
+            return _.find(sD, function (stackedDatum, i, all) {
+                var curr = stackedDatum.data,
+                    next = (all[i + 1] && all[i + 1].data) || null;
 
-                    if (hovDate > curr.date && (!next || next.date >= hovDate)){
-                        return true;
-                    }
-                    return false;
-                });
-            })),
-            total               = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100,
-            termChildren        = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function(c){
-                if (c.term === null) return false;
-                return c && c[tdp] > 0;
-            }), function(c){ return -c[tdp]; }),
-            isEmpty             = termChildren.length === 0,
-            topPosition         = yScale(total);
+                if (hovDate > curr.date && (!next || next.date >= hovDate)) {
+                    return true;
+                }
+                return false;
+            });
+        }));
+        const total = parseInt(((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data[tdp]) || 0) * 100) / 100;
+        let termChildren = _.sortBy(_.filter((stackedLegendItems.length > 0 && stackedLegendItems[0].data && stackedLegendItems[0].data.children) || [], function (c) {
+            if (c.term === null) return false;
+            return c && c[tdp] > 0;
+        }), function(c){ return -c[tdp]; });
+        const isEmpty = termChildren.length === 0;
+        const topPosition = yScale(total);
 
         // It's anti-pattern for component to update its children using setState instead of passing props as done here.
         // However _this_ component is a PureComponent which redraws or at least transitions D3 chart upon any update,

@@ -50,7 +50,6 @@ function HelpNavItem(props){
     );
 }
 
-
 function ResourcesNavItem(props){
     const { session, ...navItemProps } = props;
     // `navItemProps` contains: href, windowHeight, windowWidth, isFullscreen, testWarning, mounted, overlaysContainer
@@ -63,7 +62,6 @@ function ResourcesNavItem(props){
         </BigDropdownPageLoader>
     );
 }
-
 
 function ToolsNavItem(props){
     const { session, ...navItemProps } = props;
@@ -182,8 +180,11 @@ function SearchNavItem(props){
     /** @see https://reactjs.org/docs/hooks-reference.html#usememo */
     const bodyProps = useMemo(function(){
         const hrefParts = memoizedUrlParse(href);
-        const searchQueryFromHref = (hrefParts && hrefParts.query && hrefParts.query.q) || '';
-        const searchTypeFromHref = (hrefParts && hrefParts.query && hrefParts.query.type) || '';
+
+        const searchQueryFromHref = (hrefParts && hrefParts.query) || {};
+        const isBrowseOrSearchPage = SearchBar.isBrowseOrSearchPage(href);
+        const isBrowsePage = navigate.isBrowseHref(href);
+
         const title = {
             display_title: 'Search',
             description: 'Search Items in the 4D Nucleome Database',
@@ -191,7 +192,7 @@ function SearchNavItem(props){
         };
 
         return {
-            searchQueryFromHref, searchTypeFromHref, title
+            searchQueryFromHref, isBrowseOrSearchPage, isBrowsePage, title
         };
     }, [ href, browseBaseState ]);
 
@@ -203,7 +204,7 @@ function SearchNavItem(props){
 }
 
 const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
-    const { searchQueryFromHref, searchTypeFromHref, title } = props;
+    const { searchQueryFromHref, title, isBrowseOrSearchPage, isBrowsePage } = props;
 
     const searchTextInputEl = useRef(null);
     useEffect(() => {
@@ -214,16 +215,15 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
         }, 350);
     }, []);
 
-    const initialItemType = AvailableSearchItemTypes[searchTypeFromHref] ? searchTypeFromHref : 'Item';
-    const [searchText, setSearchText] = useState(searchQueryFromHref || '');
-    const [searchItemType, setSearchItemType] = useState(initialItemType);
+    const [searchText, setSearchText] = useState(searchQueryFromHref.q || '');
+    const [searchType, setSearchType] = useState(isBrowseOrSearchPage ? 'Within' : 'Item');
     const [searchInputIsValid, setSearchInputIsValid] = useState(true);
 
     //hidden form inputs & search placeholder text
     const [hiddenInputsForURIQuery, placeholderText] = useMemo(function () {
         // hiddenInputsForURIQuery
         const query = {};
-        switch (searchItemType) {
+        switch (searchType) {
             case 'ExperimentSetReplicate': {
                 const browseBaseParams = navigate.getBrowseBaseParams();
                 _.extend(query, browseBaseParams);
@@ -231,8 +231,13 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
                 break;
             case 'ByAccession':
                 break;
+            case 'Within':
+                _.extend(query,
+                    _.omit(searchQueryFromHref || {}, 'q')  // Remove 'q' as is provided via the <input name="q" .../> element.
+                );
+                break;
             default: {
-                _.extend(query, { 'type': searchItemType });
+                _.extend(query, { 'type': searchType });
             }
                 break;
         }
@@ -240,24 +245,27 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
 
         //placeholder text
         let placeholderText = '';
-        switch (searchItemType) {
+        switch (searchType) {
             case 'Item':
                 placeholderText = 'Search in All Items';
                 break;
             case 'ByAccession':
                 placeholderText = 'Type Item\'s Complete Accession (e.g. 4DNXXXX ...)';
                 break;
+            case 'Within':
+                placeholderText = 'Search in Current Results';
+                break;
             default:
-                placeholderText = "Search in " + AvailableSearchItemTypes[searchItemType].text;
+                placeholderText = "Search in " + AvailableSearchTypes[searchType].text;
                 break;
         }
 
         return [hiddenInputsForURIQuery, placeholderText];
-    }, [searchItemType]);
+    }, [searchType]);
     //handler for search item selection
-    const onChangeSearchItemType = useCallback(function (evtKey) {
+    const onChangeSearchType = useCallback(function (evtKey) {
         if (typeof evtKey === 'string') {
-            setSearchItemType(evtKey);
+            setSearchType(evtKey);
 
             //validate accession
             let isValid = true;
@@ -271,7 +279,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     });
     //navigate to Item page directly without searching
     const navigateByAccession = function (evt) {
-        if (searchItemType === 'ByAccession') {
+        if (searchType === 'ByAccession') {
             const accession = searchText && searchText.trim();
             if (accession) {
                 evt.preventDefault();
@@ -287,7 +295,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
 
         //validate accession
         let isValid = true;
-        if (searchItemType === 'ByAccession') {
+        if (searchType === 'ByAccession') {
             isValid = object.isAccessionRegex(value);
         }
         if (searchInputIsValid !== isValid) {
@@ -299,9 +307,9 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
         evt.target.select();
     };
 
-    const selectedItem = AvailableSearchItemTypes[searchItemType];
-    const action = (selectedItem && selectedItem.action) || '/search';
-    const btnIconClassName = 'icon icon-fw fas ' + (searchItemType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
+    const selectedItem = AvailableSearchTypes[searchType];
+    const action = (searchType === 'Within' && isBrowsePage) ? '/browse/' : ((selectedItem && selectedItem.action) || '/search/');
+    const btnIconClassName = 'icon icon-fw fas ' + (searchType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
     const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
     const searchTextClassName = 'form-control' + (!searchInputIsValid ? ' border border-danger' : '');
 
@@ -311,7 +319,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
             <form action={action} method="GET" className="navbar-search-form-container" onSubmit={navigateByAccession}>
                 <div className="row">
                     <div className="col-lg-3 col-md-4 col-sm-12 mt-1">
-                        <SelectItemTypeDropdownBtn {...{ searchItemType }} disabled={false} onChangeSearchItemType={onChangeSearchItemType} />
+                        <SelectItemTypeDropdownBtn {...{ searchType, isBrowseOrSearchPage }} disabled={false} onChangeSearchType={onChangeSearchType} />
                     </div>
                     <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
                         <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={placeholderText}
@@ -330,21 +338,23 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
 });
 
 const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
-    const { searchItemType, onChangeSearchItemType, disabled = true } = props;
-    const selectedItem = AvailableSearchItemTypes[searchItemType];
+    const { searchType, isBrowseOrSearchPage, onChangeSearchType, disabled = true } = props;
+    const selectedItem = AvailableSearchTypes[searchType];
 
     return (
         <div className="search-item-type-wrapper">
             <DropdownButton id="search-item-type-selector" size="l" variant="outline-light w-100" disabled={disabled}
                 title={!selectedItem ? 'Search in specific type ...' : selectedItem.text}>
                 {
-                    _.values(AvailableSearchItemTypes).map(function (item) {
-                        return (
-                            <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
-                                className="w-100" onSelect={onChangeSearchItemType} active={searchItemType == item.type}>
-                                {item.text}
-                            </DropdownItem>
-                        );
+                    _.pairs(AvailableSearchTypes).map(function (pair) {
+                        const [key, item] = pair;
+                        return (!isBrowseOrSearchPage && key === 'Within') ? null :
+                            (
+                                <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
+                                    className="w-100" onSelect={onChangeSearchType} active={searchType == item.type}>
+                                    {item.text}
+                                </DropdownItem>
+                            );
                     })
                 }
             </DropdownButton>
@@ -352,11 +362,12 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
     );
 });
 
-const AvailableSearchItemTypes = {
+const AvailableSearchTypes = {
     'Item': { type: 'Item', text: 'General (All Item Types)' },
     'ByAccession': { type: 'ByAccession', text: "By Accession" },
-    'ExperimentSetReplicate': { type: 'ExperimentSetReplicate', text: 'Experiment Sets', action: '/browse' },
+    'ExperimentSetReplicate': { type: 'ExperimentSetReplicate', text: 'Experiment Sets', action: '/browse/' },
     'Publication': { type: 'Publication', text: 'Publications' },
     'File': { type: 'File', text: 'Files' },
     'Biosource': { type: 'Biosource', text: 'Biosources' },
+    'Within': { type: 'Within', text: 'Within Results' }
 };
