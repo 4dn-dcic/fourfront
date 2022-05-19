@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "4.2.2"  # 4.0.0 introduced containerization
+version = "4.2.8"  # 4.0.0 introduced containerization
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -43,7 +43,7 @@ botocore = "^1.24.5"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault = "^5.4.0"
+dcicsnovault = "^5.5.1"
 dcicutils = "^3.12.0.1b0"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"  # TODO: port code from cgap-portal to get rid of uses

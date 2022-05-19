@@ -47,6 +47,13 @@ def _run_create_mapping(app, args):
             deploy_cfg['STRICT'] = True
             deploy_cfg['ENV_NAME'] = my_env
 
+        # TODO: handle these better
+        elif my_env in ['fourfront_hotseat', 'fourfront_webdev', 'fourfront_mastertest']:
+            deploy_cfg['SKIP'] = False
+            deploy_cfg['WIPE_ES'] = True
+            deploy_cfg['STRICT'] = True
+            deploy_cfg['ENV_NAME'] = my_env
+
         if not deploy_cfg['SKIP']:
             log.info('Calling run_create_mapping for env %s.' % deploy_cfg['ENV_NAME'])
             run_create_mapping(app=app,
