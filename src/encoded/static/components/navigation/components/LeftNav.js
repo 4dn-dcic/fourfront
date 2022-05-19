@@ -182,7 +182,8 @@ function SearchNavItem(props){
         const hrefParts = memoizedUrlParse(href);
 
         const searchQueryFromHref = (hrefParts && hrefParts.query) || {};
-        const isSearchPage = SearchBar.isBrowseOrSearchPage(href);
+        const isBrowseOrSearchPage = SearchBar.isBrowseOrSearchPage(href);
+        const isBrowsePage = navigate.isBrowseHref(href);
 
         const title = {
             display_title: 'Search',
@@ -191,7 +192,7 @@ function SearchNavItem(props){
         };
 
         return {
-            searchQueryFromHref, isSearchPage, title
+            searchQueryFromHref, isBrowseOrSearchPage, isBrowsePage, title
         };
     }, [ href, browseBaseState ]);
 
@@ -212,7 +213,7 @@ function SearchNavItem(props){
 }
 
 const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
-    const { searchQueryFromHref, title, isSearchPage } = props;
+    const { searchQueryFromHref, title, isBrowseOrSearchPage, isBrowsePage } = props;
 
     const searchTextInputEl = useRef(null);
     useEffect(() => {
@@ -224,7 +225,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     }, []);
 
     const [searchText, setSearchText] = useState(searchQueryFromHref.q || '');
-    const [searchType, setSearchType] = useState(isSearchPage ? 'Within' : 'Item');
+    const [searchType, setSearchType] = useState(isBrowseOrSearchPage ? 'Within' : 'Item');
     const [searchInputIsValid, setSearchInputIsValid] = useState(true);
 
     //hidden form inputs & search placeholder text
@@ -316,7 +317,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     };
 
     const selectedItem = AvailableSearchTypes[searchType];
-    const action = (selectedItem && selectedItem.action) || '/search/';
+    const action = (searchType === 'Within' && isBrowsePage) ? '/browse/' : ((selectedItem && selectedItem.action) || '/search/');
     const btnIconClassName = 'icon icon-fw fas ' + (searchType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
     const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
     const searchTextClassName = 'form-control' + (!searchInputIsValid ? ' border border-danger' : '');
@@ -327,7 +328,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
             <form action={action} method="GET" className="navbar-search-form-container" onSubmit={navigateByAccession}>
                 <div className="row">
                     <div className="col-lg-3 col-md-4 col-sm-12 mt-1">
-                        <SelectItemTypeDropdownBtn {...{ searchType, isSearchPage }} disabled={false} onChangeSearchType={onChangeSearchType} />
+                        <SelectItemTypeDropdownBtn {...{ searchType, isBrowseOrSearchPage }} disabled={false} onChangeSearchType={onChangeSearchType} />
                     </div>
                     <div className="col-lg-8 col-md-6 col-sm-12 mt-1">
                         <input type="search" key="global-search-input" name="q" className={searchTextClassName} placeholder={placeholderText}
@@ -346,7 +347,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
 });
 
 const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(props){
-    const { searchType, isSearchPage, onChangeSearchType, disabled = true } = props;
+    const { searchType, isBrowseOrSearchPage, onChangeSearchType, disabled = true } = props;
     const selectedItem = AvailableSearchTypes[searchType];
 
     return (
@@ -356,7 +357,7 @@ const SelectItemTypeDropdownBtn = React.memo(function SelectItemTypeDropdownBtn(
                 {
                     _.pairs(AvailableSearchTypes).map(function (pair) {
                         const [key, item] = pair;
-                        return (!isSearchPage && key === 'Within') ? null :
+                        return (!isBrowseOrSearchPage && key === 'Within') ? null :
                             (
                                 <DropdownItem key={item.type} eventKey={item.type} data-key={item.type}
                                     className="w-100" onSelect={onChangeSearchType} active={searchType == item.type}>
