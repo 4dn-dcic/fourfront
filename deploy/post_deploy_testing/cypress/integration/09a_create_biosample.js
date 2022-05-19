@@ -16,7 +16,7 @@ describe('Biosample create page', function () {
         it('Ensure logged in, visit biosample create page ', function () {
 
             // Login CypressTest user
-            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com' }).end()
+            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true  }).end()
                 .get(navUserAcctDropdownBtnSelector).then((accountListItem) => {
                     expect(accountListItem.text()).to.contain('Cypress');
                 }).end();
@@ -59,7 +59,9 @@ describe('Biosample create page', function () {
                 const context = $context.text();
                 const contextData = JSON.parse(context);
                 const atId = contextData['@id'];
-                testItemsToDelete.push(atId);//Test biosample data @id
+                if (atId !== '/search/?type=Biosample') {
+                    testItemsToDelete.push(atId);//Test biosample data @id
+                }
             });
 
         });
@@ -68,23 +70,23 @@ describe('Biosample create page', function () {
         it('Biosample delete data', function () {
 
             // Log in _as admin_.
-            cy.visit('/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
-
+            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true }).wait(1000);
             // Delete item biosample data.
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
                 console.log('DELETING', testItemURL);
                 cy.getCookie('jwtToken')
                     .then((cookie) => {
                         const token = cookie.value;
+                        // cy.request({
+                        //     method: "DELETE",
+                        //     url: testItemURL,
+                        //     headers: {
+                        //         'Authorization': 'Bearer ' + token,
+                        //         "Content-Type": "application/json",
+                        //         "Accept": "application/json"
+                        //     }
+                        // }).end().request({
                         cy.request({
-                            method: "DELETE",
-                            url: testItemURL,
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                "Content-Type": "application/json",
-                                "Accept": "application/json"
-                            }
-                        }).end().request({
                             method: "PATCH",
                             url: testItemURL,
                             headers: {

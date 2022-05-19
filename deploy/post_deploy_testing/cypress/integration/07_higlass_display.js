@@ -78,22 +78,23 @@ describe("HiGlass Display pages", function(){
             if (testItemsToDeleteIDs.length === 0) return;
 
             // Log in _as admin_.
-            cy.visit('/higlass-view-configs/').login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken' : true }).wait(500);
+            cy.visit('/higlass-view-configs/').login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken' : true }).wait(500);
 
             // Delete all newly created higlass views.
             cy.wrap(testItemsToDeleteIDs).each(function(testItemID){ // Synchronously process async stuff.
                 cy.getCookie('jwtToken')
                     .then((cookie) => {
                         const token = cookie.value;
+                        // cy.request({
+                        //     method: "DELETE",
+                        //     url: testItemID,
+                        //     headers: {
+                        //         'Authorization': 'Bearer ' + token,
+                        //         "Content-Type" : "application/json",
+                        //         "Accept" : "application/json"
+                        //     }
+                        // }).end().request({
                         cy.request({
-                            method: "DELETE",
-                            url: testItemID,
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                "Content-Type" : "application/json",
-                                "Accept" : "application/json"
-                            }
-                        }).end().request({
                             method: "PATCH",
                             url: testItemID,
                             headers: {
@@ -267,7 +268,7 @@ describe("HiGlass Display pages", function(){
                 // Download the JSON to see if the higlass display is released
                 .request(draftUrl + "?format=json&datastore=database").then((newJson)=>{
                     expect(newJson.body.status).to.equal("released");
-                }).logout4DN();
+                }).logout4DN().wait(200).end();
         });
     });
 });

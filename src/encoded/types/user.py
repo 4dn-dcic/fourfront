@@ -1,6 +1,7 @@
 """The user collection."""
 # -*- coding: utf-8 -*-
 
+import os
 import logging
 import requests
 import structlog
@@ -31,6 +32,8 @@ from snovault.resource_views import item_view_page
 from snovault.util import debug_log
 from dcicutils.env_utils import is_fourfront_env, is_stg_or_prd_env
 from dcicutils.s3_utils import s3Utils
+from dcicutils.secrets_utils import assume_identity
+from dcicutils.misc_utils import override_environ
 
 
 logging.getLogger('boto3').setLevel(logging.WARNING)
@@ -164,11 +167,16 @@ class User(Item):
         # Is this only for fourfront or does cgap want to do this, too? -kmp 3-Apr-2020
         if ff_env is not None and update_email is not None and is_fourfront_env(ff_env) and is_stg_or_prd_env(ff_env):
             try:
-                s3Obj = s3Utils(env='data')
-                jh_key = s3Obj.get_jupyterhub_key()
-                jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', update_email])
-                jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
-                res = requests.post(jh_endpoint, headers=jh_headers)
+                if 'IDENTITY' in os.environ:
+                    identity = assume_identity()
+                    with override_environ(**identity):
+                        s3Obj = s3Utils(env='data')
+                        jh_key = s3Obj.get_jupyterhub_key()
+                        jh_endpoint = ''.join([jh_key['server'], '/hub/api/users/', update_email])
+                        jh_headers = {'Authorization': 'token %s' % jh_key['secret']}
+                        res = requests.post(jh_endpoint, headers=jh_headers)
+                else:
+                    raise Exception('Tried to register JH user on beanstalk')
             except Exception as jh_exc:
                 log.error('Error posting user %s to JupyterHub' % update_email,
                           error=str(jh_exc))

@@ -104,7 +104,7 @@ describe('Joint Analysis Page', function () {
                         origTotalCount += parseInt(Cypress.$(block).text());
                     });
                 }).end();
-            }).end().login4DN().end().wait(5000);
+            }).end().login4DN({ 'email' : 'ud4dntest@gmail.com', 'useEnvToken' : false }).end().wait(5000);
 
             cy.get('.stacked-block-viz-container').first().within(($firstMatrix)=>{
                 let nextTotalCount = 0;
