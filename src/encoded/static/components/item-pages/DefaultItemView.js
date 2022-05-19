@@ -607,7 +607,7 @@ export class OverViewBodyItem extends React.PureComponent {
         'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             return <SampleBiosourceItem {...{ item, index, fullObject }} />;
         }
-    }
+    };
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null, origResult = null){
