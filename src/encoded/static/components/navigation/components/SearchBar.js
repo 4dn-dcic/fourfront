@@ -31,6 +31,10 @@ export class SearchBar extends React.PureComponent {
         return (typedSearchQuery && typeof typedSearchQuery === 'string' && typedSearchQuery.length > 0) || false;
     }
 
+    static isBrowseOrSearchPage(href) {
+        return href && typeof href === 'string' && (href.indexOf('/browse/') > -1 || href.indexOf('/search/') > -1);
+    }
+
     static buildURIQuery(hrefParts = {}){
         const query = {};
         // Preserve filters, incl type facet.
