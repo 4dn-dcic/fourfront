@@ -771,7 +771,7 @@ export function renderStatusIndicator(status) {
     } else {
         const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
         return (
-            <div data-tip={"Allx files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
+            <div data-tip={"All files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
                 <span className="indicators-collection d-inline-block mr-05">
                     { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
                 </span>
