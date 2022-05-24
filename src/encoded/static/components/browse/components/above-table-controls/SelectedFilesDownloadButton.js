@@ -210,7 +210,7 @@ class SelectedFilesDownloadModal extends React.PureComponent {
                         <h4 className="mb-07 text-500">Important</h4>
                         <ul>
                             <li className="mb-05">
-                                <span className="text-danger"><b>As of October 15, 2020</b>, you must include an <b>access key</b> in your cURL command for bulk downloads.</span>
+                                <span className="text-danger">You must include an <b>access key</b> in your cURL command for bulk downloads.</span>
                             </li>
                             <li className="mb-05">You can configure the access key in {session ? <a href={profileHref} target="_blank" rel="noopener noreferrer">your profile</a> : 'your profile'}, then use it in place of <em>{'<access_key_id>:<access_key_secret>'}</em>, below.</li>
                             {!session ?
