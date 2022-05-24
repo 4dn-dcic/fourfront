@@ -353,7 +353,7 @@ class FourfrontRoot(Root):
         "type": "boolean"
     })
     def is_mobile_browser(self, request):
-        if hasattr(request, 'user_agent'):
+        if hasattr(request, 'user_agent') and request.user_agent is not None:
             user_agent = request.user_agent
             b = _IS_MOBILE_BROWSER_MATCH_B.search(user_agent)
             v = _IS_MOBILE_BROWSER_MATCH_V.search(user_agent[0:4])
