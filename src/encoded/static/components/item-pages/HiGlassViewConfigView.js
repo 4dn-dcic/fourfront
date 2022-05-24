@@ -952,9 +952,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             {hgcHeightField}
                             {filesTableSearchHref ?
                                 (
-                                    <div className="raw-files-table-section">
+                                    <div className="higlass-files-table-section">
                                         <h3 className="tab-section-title">
-                                            <span>
+                                            <span className="float-none">
                                                 <span className="text-400">{_.keys(tilesetUids).length}</span> File(s) {viewConfigModified ? notPersistentMessage : null}
                                             </span>
                                         </h3>
@@ -1013,11 +1013,12 @@ function HiGlassFileDetailPane(props) {
                         <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible />
                     </FieldSet>
                 </td>
-            </tr>);
+            </tr>
+        );
     });
 
     return (
-        <div className="mr-1">
+        <div className="mr-1" style={{ minWidth: '90%' }}>
             {!viewConfigTracks ? null : (
                 <div className="flex-description-container">
                     <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
@@ -1134,7 +1135,7 @@ function StatusMenuItem(props){
 }
 
 
- export class HiGlassAdjustableWidthRow extends React.PureComponent {
+export class HiGlassAdjustableWidthRow extends React.PureComponent {
 
     static propTypes = {
         'width' : PropTypes.number.isRequired,
@@ -1263,7 +1264,8 @@ export const ConfirmModal = React.memo(function (props) {
                         <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
                     </button> : null}
             </Modal.Footer>
-        </Modal>);
+        </Modal>
+    );
 });
 ConfirmModal.propTypes = {
     'handleConfirm': PropTypes.func.isRequired,

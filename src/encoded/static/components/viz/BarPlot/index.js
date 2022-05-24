@@ -2,7 +2,7 @@
 
 /**
  * Components and functions for displaying a BarPlot chart.
- * 
+ *
  * @module viz/BarPlot
  * @example
  * <caption>Example usage to aggregate and visualize 'experiment_sets' and 'filtered_experiment_sets' passed as props from ChartDataController.Provider.</caption>

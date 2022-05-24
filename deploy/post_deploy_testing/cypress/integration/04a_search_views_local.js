@@ -131,7 +131,7 @@ describe('Deployment/CI Search View Tests', function () {
                 .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                     expect($searchResultElems.length).to.be.greaterThan(0);
                 }).end()
-                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration").click().end().wait(1000)
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New").click().end().wait(1000)
                 .get('a.dropdown-item').contains('Tier 1').click().end();
 
             // set microscope conf. name
