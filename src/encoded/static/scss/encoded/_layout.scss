@@ -454,6 +454,13 @@ h1.page-title + .page-subtitle {
 	}
 }
 
+.btn-block-xs-only, .d-block-xs-only {
+	@include media-breakpoint-only(xs){
+		display: block;
+    	width: 100%;
+	}
+}
+
 .clickable {
 	cursor: pointer;
 	> label {

@@ -115,7 +115,7 @@ class BigBrowseButton extends React.Component {
         'element' : 'a',
         'className' : "btn btn-block btn-primary btn-lg text-400",
         'children' : 'Browse 4DN Data'
-    }
+    };
 
     constructor(props){
         super(props);

@@ -336,7 +336,7 @@ class ExperimentRawFilesStackedTableSection extends React.PureComponent {
             <h3 className="tab-section-title">
                 <span className="text-400">{ allFilesUniqueCount }</span>{ ' Raw File' + (allFilesUniqueCount > 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
-                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                    <div className="download-button-container pull-right" style={{ marginTop : -5 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="exp-raw-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
@@ -415,7 +415,7 @@ class ExperimentProcessedFilesStackedTableSection extends React.PureComponent {
                     <span className="text-400">{allFilesUniqueCount}</span> Processed Files
                 </span>
                 {selectedFiles ? // Make sure data structure is present (even if empty)
-                    <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
+                    <div className="download-button-container pull-right" style={{ marginTop: -5 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download icon-fw fas mr-07 align-baseline" />
@@ -730,9 +730,9 @@ class ExperimentSupplementaryFilesTabView extends React.PureComponent {
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     Supplementary Files
-                    { titleDetailString.length > 0 ? <span className="small">&nbsp;&nbsp; &bull; {titleDetailString}</span> : null }
+                    { titleDetailString.length > 0 ? <span className="small tab-section-subtitle">{titleDetailString}</span> : null }
                     {selectedFiles ? // Make sure data structure is present (even if empty)
-                        <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
+                        <div className="download-button-container pull-right" style={{ marginTop: -5 }}>
                             <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                                 id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
                                 <i className="icon icon-download fas icon-fw mr-07 align-baseline" />
@@ -771,7 +771,7 @@ export function renderStatusIndicator(status) {
     } else {
         const capitalizedStatuses = _.map(status, Schemas.Term.toName.bind(null, "status"));
         return (
-            <div data-tip={"Allx files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
+            <div data-tip={"All files have one of the following statuses - " + capitalizedStatuses.join(', ')} className={outerClsName}>
                 <span className="indicators-collection d-inline-block mr-05">
                     { _.map(status, function(s){ return <i className="item-status-indicator-dot mr-02" data-status={s} />; }) }
                 </span>

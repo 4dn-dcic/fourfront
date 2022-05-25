@@ -306,8 +306,8 @@ const AccessKeyTable = React.memo(function AccessKeyTable({ accessKeys, onDelete
                             <td>{ date_created ? <LocalizedTime timestamp={date_created} formatType="date-time-md" dateTimeSeparator=" - " /> : 'N/A' }</td>
                             <td>{ description }</td>
                             <td className="access-key-buttons">
-                                <button type="button" className="btn btn-xs btn-success" onClick={resetKey}>Reset</button>
-                                <button type="button" className="btn btn-xs btn-danger" onClick={deleteKey}>Delete</button>
+                                <button type="button" className="btn btn-xs btn-success mt-01 btn-block-xs-only" onClick={resetKey}>Reset</button>
+                                <button type="button" className="btn btn-xs btn-danger mt-01 btn-block-xs-only" onClick={deleteKey}>Delete</button>
                             </td>
                         </tr>
                     );
