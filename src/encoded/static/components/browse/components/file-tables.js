@@ -155,7 +155,8 @@ class FileColumnActionsBtn extends React.PureComponent {
         const { file, href } = this.props;
         const fileIsPublic = (file.status === 'archived' || file.status === 'released');
         if (!fileIsPublic){ // If not public, then 3rd-party service such as JuiceBox cannot access file to viz it.
-            return null;
+            const higlassBtn = this.higlassButton(false);
+            return higlassBtn || null;
         }
 
         //const higlassBtn = this.higlassButton();
@@ -203,6 +204,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
             fileTitleString = fileAtId;
         }
     }
+    console.log('xxx renderFileTitleColumn 2 fileTitleString:', fileTitleString);
 
     const className = 'title-of-file' + (file.accession ? ' text-monospace' : '');
 
