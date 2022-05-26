@@ -204,7 +204,6 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
             fileTitleString = fileAtId;
         }
     }
-    console.log('xxx renderFileTitleColumn 2 fileTitleString:', fileTitleString);
 
     const className = 'title-of-file' + (file.accession ? ' text-monospace' : '');
 
