@@ -1,5 +1,6 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
+from argparse import FileType
 from tkinter.messagebox import NO
 from uuid import uuid4
 from snovault import (
@@ -133,16 +134,17 @@ class StaticSection(UserContent):
 
         return None
 
-    @calculated_property(schema ={
-        "title":"RstContent",
-        "description":"Rst to html content",
+    @calculated_property(schema={
+        "title": "Content as HTML",
+        "description": "Converted content into HTML (Currently, only RST content is supported)",
         "type": "string"
-
     })
-    def rst_html(self, request, body=None, file=None, options=None):
-        if options and options.get('filetype') is not None:
-            if options['filetype'] == "rst" and body is not None:
-                output = docutils.core.publish_parts(body, writer_name='html')
+    def content_as_html(self, request, body=None, file=None, options=None):
+        file_type = self.filetype(request, body, file, options)
+        if file_type == 'rst':
+            content = self.content(request, body, file)
+            if content is not None:
+                output = docutils.core.publish_parts(content, writer_name='html')
                 return output["html_body"]
         return None
 

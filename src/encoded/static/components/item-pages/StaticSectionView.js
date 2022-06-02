@@ -20,7 +20,7 @@ export default class StaticSectionView extends DefaultItemView {
 }
 
 const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ context, windowWidth }){
-    const { content, filetype, section_type, rst_html } = context;
+    const { content, filetype, section_type, content_as_html } = context;
 
     if (section_type === "Home Page Slide"){
         // Some hardcoded style for previewing a homepage slide.
@@ -40,7 +40,7 @@ const StaticSectionViewPreview = React.memo(function StaticSectionViewPreview({ 
     }
     return (
         <div className="mt-18 static-section-entry">
-            <BasicStaticSectionBody {...{ content, filetype, placeholderReplacementFxn, windowWidth, rst_html }} />
+            <BasicStaticSectionBody {...{ content, filetype, placeholderReplacementFxn, windowWidth, content_as_html }} />
         </div>
     );
 });

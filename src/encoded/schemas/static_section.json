@@ -155,6 +155,9 @@
     "facets" : {
         "section_type" : {
             "title" : "Type"
+        },
+        "filetype" : {
+            "title" : "File Type"
         }
     },
     "columns" : {
@@ -163,6 +166,10 @@
         },
         "section_type" : {
             "title" : "Type"
+        },
+        "filetype" : {
+            "title" : "File Type",
+            "width" : 100
         }
     },
     "excludedColumns" : ["lab.display_title"]
