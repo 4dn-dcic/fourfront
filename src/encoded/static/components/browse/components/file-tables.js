@@ -155,7 +155,8 @@ class FileColumnActionsBtn extends React.PureComponent {
         const { file, href } = this.props;
         const fileIsPublic = (file.status === 'archived' || file.status === 'released');
         if (!fileIsPublic){ // If not public, then 3rd-party service such as JuiceBox cannot access file to viz it.
-            return null;
+            const higlassBtn = this.higlassButton(false);
+            return higlassBtn || null;
         }
 
         //const higlassBtn = this.higlassButton();
