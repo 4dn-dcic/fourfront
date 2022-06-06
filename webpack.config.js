@@ -92,14 +92,14 @@ const resolve = {
     }
 };
 
-// Common alias, hopefully is fix for duplicate versions of React
-// on npm version 7+ and can supersede `./setup-npm-links-for-local-development.js`.
-// @see https://blog.maximeheckel.com/posts/duplicate-dependencies-npm-link/
-spcPackageJson = require("@hms-dbmi-bgm/shared-portal-components/package.json");
-spcPeerDependencies = spcPackageJson.peerDependencies || {};
-Object.keys(spcPeerDependencies).forEach(function(packageName) {
-    resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
-});
+// // Common alias, hopefully is fix for duplicate versions of React
+// // on npm version 7+ and can supersede `./setup-npm-links-for-local-development.js`.
+// // @see https://blog.maximeheckel.com/posts/duplicate-dependencies-npm-link/
+// spcPackageJson = require("@hms-dbmi-bgm/shared-portal-components/package.json");
+// spcPeerDependencies = spcPackageJson.peerDependencies || {};
+// Object.keys(spcPeerDependencies).forEach(function(packageName) {
+//     resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+// });
 
 // Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
 // once update to higlass version w.o. react-bootstrap dependency.
