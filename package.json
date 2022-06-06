@@ -139,7 +139,8 @@
     "underscore": "^1.13.2",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "^1.1.20"
+    "vitessce": "^1.1.20",
+    "jsonwebtoken": ">=7.4.0"
   },
   "optionalDependencies": {
     "cypress": "^9.5.1"
