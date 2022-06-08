@@ -456,6 +456,39 @@ describe('Deployment/CI Search View Tests', function () {
                 });
         });
 
+        it('SearchBox within search result', function () {
+            cy.visit('/search/?type=ExperimentSet')
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
+                .get('input[name="q"]').focus().type('human').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Search').end();
+        });
+
+        it('SearchBox input Biosource', function () {
+            cy.visit('/search/?type=ExperimentSet')
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
+                .get('input[name="q"]').focus().type('hamster').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Search').end();
+        });
+
+        it('SearchBox input Publication', function () {
+            cy.visit('/search/?type=ExperimentSet')
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Publication"]').click().end()
+                .get('input[name="q"]').focus().type('nature').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Publications').end();
+        });
+
         it('SearchBox input works, goes to /search', function () {
             cy.get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
