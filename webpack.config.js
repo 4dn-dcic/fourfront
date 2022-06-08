@@ -81,7 +81,7 @@ const rules = [
 ];
 
 const resolve = {
-    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx'],
+    extensions : [".webpack.js", ".web.js", ".js", ".json", ".jsx"],
     //symlinks: false,
     //modules: [
     //    path.resolve(__dirname, '..', 'node_modules'),
