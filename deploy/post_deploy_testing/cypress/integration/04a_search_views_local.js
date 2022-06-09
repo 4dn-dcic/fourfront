@@ -457,14 +457,17 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('SearchBox within search result', function () {
-            cy.visit('/search/?type=ExperimentSet')
+            cy.visit('/search/?type=ExperimentSet&award.project=4DN')
                 .get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
                 .get('input[name="q"]').focus().type('human').wait(10).end()
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
-                .get('#page-title-container .page-title').should('contain', 'Search').end();
+                .get('#page-title-container .page-title').should('contain', 'Search').end()
+                .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
+                    expect($selectedFacet.length).to.be.greaterThan(0);
+                });
         });
 
         it('SearchBox input Biosource', function () {
