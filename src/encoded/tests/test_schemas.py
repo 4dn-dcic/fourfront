@@ -197,3 +197,21 @@ def test_fourfront_crawl_schemas(testapp, registry):
     field_schema = crawl_schema(registry[TYPES], field_path, schema)
     assert isinstance(field_schema, dict)
     assert field_schema['title'] == 'File Size'
+
+
+def test_schema_version_present_on_items(app):
+    """Test a valid schema version is present on all non-test item
+    types.
+    Expecting positive integer values for non-abstract items, and empty
+    string for all abstract items.
+    """
+    all_types = app.registry.get(TYPES).by_item_type
+    for type_name, item_type in all_types.items():
+        if type_name.startswith("testing"):
+            continue
+        schema_version = item_type.schema_version
+        if item_type.is_abstract is False:
+            assert schema_version
+            assert int(schema_version) >= 1
+        else:
+            assert schema_version == ""
