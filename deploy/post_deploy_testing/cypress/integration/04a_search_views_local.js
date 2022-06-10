@@ -457,7 +457,15 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('SearchBox within search result', function () {
-            cy.visit('/search/?type=ExperimentSet&award.project=4DN')
+            let facetItemIndex=1;
+            let facetTotalCount= null;
+            cy.visit('/search')
+                .get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
+                    facetTotalCount = $facetTotalCount.length;
+                    facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
+                })
+                .get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
+                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
                 .get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
@@ -465,6 +473,28 @@ describe('Deployment/CI Search View Tests', function () {
                 .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                 .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get('#page-title-container .page-title').should('contain', 'Search').end()
+                .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
+                    expect($selectedFacet.length).to.be.greaterThan(0);
+                });
+        });
+
+        it('Browse view searchBox within search result', function () {
+            let facetItemIndex=1;
+            let facetTotalCount= null;
+            cy.visit('/browse')
+                .get(".facets-body .facet.closed").first().click({ force: true }).end()
+                .get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
+                    facetTotalCount = $facetTotalCount.length;
+                    facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
+                })
+                .get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
+                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end().wait(300)
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
+                .get('input[name="q"]').focus().type('human').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
                 .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
                     expect($selectedFacet.length).to.be.greaterThan(0);
                 });
