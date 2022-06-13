@@ -1,7 +1,6 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
 from argparse import FileType
-from tkinter.messagebox import NO
 from uuid import uuid4
 from snovault import (
     abstract_collection,
