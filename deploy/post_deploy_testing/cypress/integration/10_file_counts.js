@@ -154,6 +154,30 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
             }
         });
 
+        it('Visualization higlas icon', function () {
+
+            for (let interval = 0; interval < 5; interval++) {
+                cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments!=None').end()
+                    .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+                cy.scrollToBottom().then(() => {
+                    cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * (interval + 1)) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                }).end().wait(200);
+                let accession = null;
+                cy.get('.clickable.copy-wrapper.accession.inline-block[data-tip="Accession: A unique identifier to be used to reference the object."]').then(function ($accesionText) {
+                    accession = $accesionText.text();
+                });
+                cy.get('.files-tables-container .processed-files-table-section').click({ force: 'true' }).end();
+                cy.get('.name-title.d-inline-block .title-of-file.text-monospace').then(function ($higlassAccesions){
+                    expect(Cypress._.find($higlassAccesions, function(item){
+                        return item.outerText.trim() === accession.trim();
+                    })).not.to.equal(undefined);
+                });
+                cy.get('.btn.btn-xs.btn-primary.in-stacked-table-button[data-tip="Visualize with HiGlass"]').then(function ($higlassIcon){
+                    expect($higlassIcon.length).to.be.greaterThan(0);
+                });
+            }
+
+        });
     });
 
 });
