@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 
-import { console, object, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, layout, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { fileUtil, expFxn } from './../../../util';
 
 import { FlexibleDescriptionBox } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FlexibleDescriptionBox';
@@ -173,21 +173,7 @@ export class FileDetailBody extends React.PureComponent {
                 body = null;
             }
         } else if (WorkflowNodeElement.isNodeQCMetric(node)){
-            // Case: QC Metric
-            const metrics = object.listFromTips(object.tipsFromSchema(schemas, file))
-                .filter(function(m){
-                    if (m.key === 'status') return false;
-                    if (m.enum) return true;
-                    if (m.type === 'number') return true;
-                    return false;
-                })
-                .map(function(m){
-                    return _.extend(m, {
-                        'result' : file[m.key]
-                    });
-                });
-
-            body = <MetricsView metrics={metrics} />;
+            body = <NodeQCMetricsTable {...{ file, schemas }} />;
         } else {
             // Default Case: Single (Pre-)Loaded File
             var table = null;
@@ -235,5 +221,77 @@ export class FileDetailBody extends React.PureComponent {
                 { body }
             </div>
         );
+    }
+}
+
+class NodeQCMetricsTable extends React.PureComponent {
+
+    static propTypes = {
+        'file' : PropTypes.object.isRequired,
+        'schemas' : PropTypes.object.isRequired,
+    };
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            'mounted': false,
+        };
+    }
+
+    componentDidMount() {
+        const { file } = this.props;
+        const qcAtId = file && object.atIdFromObject(file);
+
+        if (qcAtId) {
+            this.setState({ 'mounted': true, 'loading': true }, () => {
+                ajax.load(qcAtId, (res) => {
+                    if (res && typeof res === 'object') {
+                        this.setState({ 'qcItem': res, 'loading': false });
+                    }
+                }, 'GET', () => {
+                    this.setState({ 'qcItem': file, 'loading': false });
+                });
+            });
+        } else {
+            this.setState({ 'qcItem': file, 'loading': false });
+        }
+    }
+
+    render() {
+        const { schemas } = this.props;
+        const { mounted, loading, qcItem } = this.state;
+
+        if (!mounted) {
+            return null;
+        }
+        if (loading) {
+            return (
+                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                    <i className="icon icon-fw fas icon-spin icon-circle-notch" />
+                </div>
+            );
+        }
+        if (!qcItem) {
+            return (
+                <div className="text-center text-300 mt-1" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                    Quality Metrics not found
+                </div>
+            );
+        }
+        // Case: QC Metric
+        const metrics = object.listFromTips(object.tipsFromSchema(schemas, qcItem))
+            .filter(function (m) {
+                if (m.key === 'status') return false;
+                if (m.enum) return true;
+                if (m.type === 'number') return true;
+                return false;
+            })
+            .map(function (m) {
+                return _.extend(m, {
+                    'result': qcItem[m.key]
+                });
+            });
+
+        return <MetricsView metrics={metrics} />;
     }
 }
