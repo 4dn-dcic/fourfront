@@ -68,12 +68,10 @@ export class WorkflowDetailPane extends React.PureComponent {
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }
             if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
-                console.log('xxx ParameterDetailBody');
                 // Parameter
                 return <ParameterDetailBody {...commonDetailProps} />;
             }
             if (node.nodeType === 'step' && node.meta && typeof node.meta === 'object'){
-                console.log('xxx Next');
                 // Step - WorkflowRun or Basic
 
                 var nodeTypeVisible = null;
