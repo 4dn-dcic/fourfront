@@ -457,6 +457,7 @@ class ExperimentSet(Item):
         "experiments_in_set.reference_files.md5sum",
         "experiments_in_set.reference_files.lab.name",
         "experiments_in_set.reference_files.contributing_labs.name",
+        "experiments_in_set.reference_files.notes_to_tsv",
 
         # Static Section linkTo
         "experiments_in_set.reference_files.static_content.location",
