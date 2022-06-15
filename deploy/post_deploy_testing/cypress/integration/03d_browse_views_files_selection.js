@@ -194,6 +194,23 @@ describe('Browse Views - Files Selection', function () {
 
         });
 
+        it("Can sort column for title to results table", function () {
+            //Open column selector panel
+            cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Sort multiple columns"]').click().end()
+                //Open sort panel
+                .get('.btn.btn-outline-secondary.btn-sm.btn-block[data-tip="Remove sort column"]').click().end()
+                //Dropdown choose value
+                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
+                .click({ 'force': true }).end()
+                .get('.dropdown-item').contains('Title').click({ 'force': true }).end()
+                .get('.btn.btn-primary.btn-sm.btn-block[data-tip="Re-sort columns"]').click().end()
+                .get('.headers-columns-overflow-container [data-field="display_title"] .active.column-sort-icon')
+                //Re-open sort panel
+                .get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Sort multiple columns"]').click().end()
+                //Return to default order
+                .get('.btn.btn-outline-secondary.btn-sm.btn-block[data-tip="Remove sort column"]').click().end()
+                .get('.btn.btn-primary.btn-sm.btn-block[data-tip="Re-sort columns"]').click().end();
+        });
 
     });
 
