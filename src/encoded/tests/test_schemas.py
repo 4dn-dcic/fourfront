@@ -213,5 +213,5 @@ def test_schema_version_present_on_items(app):
         if item_type.is_abstract:
             assert schema_version == ""
         else:
-            assert schema_version
+            assert schema_version, f'failed for {item_type.name}'
             assert int(schema_version) >= 1
