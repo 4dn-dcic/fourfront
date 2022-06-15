@@ -210,8 +210,8 @@ def test_schema_version_present_on_items(app):
         if type_name.startswith("testing"):
             continue
         schema_version = item_type.schema_version
-        if item_type.is_abstract is False:
+        if item_type.is_abstract:
+            assert schema_version == ""
+        else:
             assert schema_version
             assert int(schema_version) >= 1
-        else:
-            assert schema_version == ""
