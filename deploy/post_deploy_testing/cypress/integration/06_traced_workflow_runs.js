@@ -27,6 +27,21 @@ describe("WorkflowRun traced graphs for selected ExperimentSets", function(){
 
         testNodesTextGlobalInputs(global_input_file_accessions);
 
+        it('Workflow view node detail', function () {
+            cy.get('.graph-wrapper .nodes-layer .node[data-node-type="input"]').first().then(function ($inputNode) {
+                Cypress._.forEach($inputNode, function(inputNode){
+                    const selectedNodeText=Cypress.$(inputNode).find('.node-name').text();
+                    cy.get('.graph-wrapper .nodes-layer .node[data-node-type="input"] .innermost').first().click({ force: true }).end();
+
+                    //Node detail pane
+                    cy.get('.detail-pane-body .information .node-file-title').then(function ($nodeDetail) {
+                        const nodeDetailText=$nodeDetail.text().trim().split('.');
+                        cy.expect(selectedNodeText).equal(nodeDetailText[0]);
+                    });
+                });
+            });
+        });
+
         it.skip('1st column of steps is aligned to input nodes', function(){
             // Wait for node.nodeData.node to exist on each DOM node before proceeding w/ further tests.
             cy.get('.graph-wrapper .nodes-layer .node[data-node-type="step"][data-node-column="1"]').should('have.length', 3).then(function($stepNodes){
