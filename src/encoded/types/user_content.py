@@ -1,5 +1,6 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
+from argparse import FileType
 from uuid import uuid4
 from snovault import (
     abstract_collection,
@@ -7,6 +8,7 @@ from snovault import (
     collection,
     load_schema
 )
+import docutils.core
 from snovault.interfaces import STORAGE
 from .base import (
     Item,
@@ -129,6 +131,20 @@ class StaticSection(UserContent):
                 file_path = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../../.." + file)   # Go to top of repo, append file
                 return get_local_file_contents(file_path)
 
+        return None
+
+    @calculated_property(schema={
+        "title": "Content as HTML",
+        "description": "Converted content into HTML (Currently, only RST content is supported)",
+        "type": "string"
+    })
+    def content_as_html(self, request, body=None, file=None, options=None):
+        file_type = self.filetype(request, body, file, options)
+        if file_type == 'rst':
+            content = self.content(request, body, file)
+            if content is not None:
+                output = docutils.core.publish_parts(content, writer_name='html')
+                return output["html_body"]
         return None
 
     @calculated_property(schema={
