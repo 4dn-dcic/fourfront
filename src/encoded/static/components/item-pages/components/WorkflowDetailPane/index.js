@@ -50,7 +50,7 @@ export class WorkflowDetailPane extends React.PureComponent {
      * This function acts as a router to different types of DetailPane views, depending on Node type.
      */
     route(){
-        const { selectedNode: node, isFullscreen, context, legendItems } = this.props;
+        const { selectedNode: node, isFullscreen, context, legendItems, session } = this.props;
 
         if (node){
 
@@ -68,10 +68,12 @@ export class WorkflowDetailPane extends React.PureComponent {
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }
             if (node.meta && node.meta.run_data && (typeof node.meta.run_data.value === 'number' || typeof node.meta.run_data.value === 'string')){
+                console.log('xxx ParameterDetailBody');
                 // Parameter
                 return <ParameterDetailBody {...commonDetailProps} />;
             }
             if (node.nodeType === 'step' && node.meta && typeof node.meta === 'object'){
+                console.log('xxx Next');
                 // Step - WorkflowRun or Basic
 
                 var nodeTypeVisible = null;
