@@ -71,4 +71,19 @@ describe('Post-Deployment Search View Tests', function () {
 
     });
 
+    it('Search result table file type filter icon', function () {
+        cy.visit('/search/').wait(300);
+        let typeTitle;
+        cy.searchPageTotalResultCount().then((totalCountExpected) => {
+            const intervalCount = Math.min(5, parseInt(totalCountExpected / 25));
+            cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
+                typeTitle = $typeTitle.text().trim();
+            })
+                .get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end()
+                .get('.facets-body .facet.open[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
+                    const selectedTypeTitle = $selectedTypeTitle.text().trim();
+                    cy.expect(typeTitle).equal(selectedTypeTitle);
+                });
+        });
+    });
 });
