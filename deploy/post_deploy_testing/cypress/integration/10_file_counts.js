@@ -3,11 +3,11 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
     context('Visit random(ish) experiment sets and experiments containing processed/raw/supplementary files', function () {
 
-        it('Visit experiment set pages and compare file counts on tab header, title and download button (firstlyi ensure that all selected)', function () {
+        it('Visit experiment set pages and compare file counts on tab header, title and download button (Firstly, ensure that all selected)', function () {
 
             for (let interval = 0; interval < 5; interval++) {
 
-                cy.visit('/search/?experiments_in_set.files.accession%21=No+value&experiments_in_set.processed_files.accession%21=No+value&other_processed_files.files.accession%21=No+value%27&other_processed_files.files.status=released&type=ExperimentSet').end()
+                cy.visit('/search/?type=ExperimentSet&experiments_in_set.files.accession!=No+value&experiments_in_set.processed_files.accession!=No+value&other_processed_files.files.accession!=No+value&other_processed_files.files.status=released').end()
                     .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
                 cy.scrollToBottom().then(() => {
@@ -66,17 +66,16 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         cy.wrap($tab).click({ 'force': true }).end()
                             .wait(200)
                             .get('.rc-tabs-content .rc-tabs-tabpane-active');
-
                     }).end();
                 }).end();
             }
 
         });
 
-        it('Visit experiment pages and compare file counts on tab header, title and download button (firstlyi ensure that all selected)', function () {
+        it('Visit experiment pages and compare file counts on tab header, title and download button (Firstly, ensure that all selected)', function () {
 
             for (let interval = 0; interval < 5; interval++) {
-                cy.visit('/search/?type=Experiment&files.accession!=No+value&processed_files.accession!=No+value&other_processed_files.files.accession%21=No+value&other_processed_files.files.status=released').wait(500).end()
+                cy.visit('/search/?type=Experiment&files.accession!=No+value&processed_files.accession!=No+value&other_processed_files.files.accession!=No+value&other_processed_files.files.status=released').wait(500).end()
                     .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
 
                 cy.scrollToBottom().then(() => {
@@ -154,28 +153,40 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
             }
         });
 
-        it('Visualization higlas icon', function () {
+        it('Search files having HiGlass display as static content, then check the HiGlass icon is visible in associated ExpSet file tables', function () {
 
-            for (let interval = 0; interval < 5; interval++) {
-                cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments!=None').end()
-                    .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
-                cy.scrollToBottom().then(() => {
-                    cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * (interval + 1)) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
-                }).end().wait(200);
-                let accession = null;
-                cy.get('.clickable.copy-wrapper.accession.inline-block[data-tip="Accession: A unique identifier to be used to reference the object."]').then(function ($accesionText) {
-                    accession = $accesionText.text();
-                });
-                cy.get('.files-tables-container .processed-files-table-section').click({ force: 'true' }).end();
-                cy.get('.name-title.d-inline-block .title-of-file.text-monospace').then(function ($higlassAccesions){
-                    expect(Cypress._.find($higlassAccesions, function(item){
-                        return item.outerText.trim() === accession.trim();
-                    })).not.to.equal(undefined);
-                });
-                cy.get('.btn.btn-xs.btn-primary.in-stacked-table-button[data-tip="Visualize with HiGlass"]').then(function ($higlassIcon){
-                    expect($higlassIcon.length).to.be.greaterThan(0);
-                });
-            }
+            cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments!=No+value').end()
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+
+            cy.searchPageTotalResultCount().then((totalCountExpected) => {
+                const intervalCount = totalCountExpected >= 15 ? 5 : Math.min(1, parseInt(totalCountExpected / 3));
+
+                for (let interval = 0; interval < intervalCount; interval++) {
+                    if (interval > 0) {
+                        cy.visit('/search/?type=File&static_content.location=tab:higlass&source_experiments!=No+value').end();
+                    }
+
+                    cy.scrollToBottom().then(() => {
+                        cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * interval + 1) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                    }).end().wait(200);
+
+                    let accession = null;
+                    cy.get('.clickable.copy-wrapper.accession.inline-block[data-tip="Accession: A unique identifier to be used to reference the object."]').then(function ($accesionText) {
+                        accession = $accesionText.text();
+                    });
+
+                    cy.get('.files-tables-container .processed-files-table-section').click({ force: 'true' }).end();
+                    cy.get('.name-title.d-inline-block .title-of-file.text-monospace').then(function ($higlassAccesions) {
+                        expect(Cypress._.find($higlassAccesions, function (item) {
+                            return item.outerText.trim() === accession.trim();
+                        })).not.to.equal(undefined);
+                    });
+
+                    cy.get('.btn.btn-xs.btn-primary.in-stacked-table-button[data-tip="Visualize with HiGlass"]').then(function ($higlassIcon) {
+                        expect($higlassIcon.length).to.be.greaterThan(0);
+                    });
+                }
+            });
 
         });
     });
