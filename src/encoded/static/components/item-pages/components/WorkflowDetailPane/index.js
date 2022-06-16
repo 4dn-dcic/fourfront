@@ -50,7 +50,7 @@ export class WorkflowDetailPane extends React.PureComponent {
      * This function acts as a router to different types of DetailPane views, depending on Node type.
      */
     route(){
-        const { selectedNode: node, isFullscreen, context, legendItems } = this.props;
+        const { selectedNode: node, isFullscreen, context, legendItems, session } = this.props;
 
         if (node){
 
@@ -63,7 +63,7 @@ export class WorkflowDetailPane extends React.PureComponent {
                 commonDetailProps.minWidth = 800;
             }
 
-            if (node.meta && node.meta.run_data && node.meta.run_data.file&& session){
+            if (node.meta && node.meta.run_data && node.meta.run_data.file){
                 // File
                 return <FileDetailBody {...commonDetailProps} file={node.meta.run_data.file} />;
             }
