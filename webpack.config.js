@@ -81,7 +81,7 @@ const rules = [
 ];
 
 const resolve = {
-    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx'],
+    extensions : [".webpack.js", ".web.js", ".js", ".json", ".jsx"],
     //symlinks: false,
     //modules: [
     //    path.resolve(__dirname, '..', 'node_modules'),
@@ -98,7 +98,9 @@ const resolve = {
 spcPackageJson = require("@hms-dbmi-bgm/shared-portal-components/package.json");
 spcPeerDependencies = spcPackageJson.peerDependencies || {};
 Object.keys(spcPeerDependencies).forEach(function(packageName) {
-    resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+    if (packageName !== 'auth0-lock') {
+        resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+    }
 });
 
 // Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
