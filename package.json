@@ -11,7 +11,7 @@
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:open-local": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://localhost:8000",
-    "cypress:open-hotseat": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com",
+    "cypress:open-hotseat": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com",
     "cypress:test": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
     "cypress:test-recorded": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:test-recorded-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
@@ -138,8 +138,8 @@
     "subprocess-middleware": "0.2.0",
     "underscore": "^1.13.2",
     "url": "^0.11.0",
-    "uuid": "^8.3.2",
-    "vitessce": "^1.1.20"
+    "vitessce": "^1.1.20",
+    "jsonwebtoken": ">=7.4.0"
   },
   "optionalDependencies": {
     "cypress": "^9.5.1"
