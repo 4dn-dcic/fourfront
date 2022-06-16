@@ -131,7 +131,7 @@
     "react-draggable": "^4.4.4",
     "react-json-tree": "^0.16.1",
     "react-jsx-parser": "^1.25.1",
-    "react-redux": "^7.2.6",
+    "react-redux": "^8.0.2",
     "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.4.2",
     "redux": "^3.7.0",
