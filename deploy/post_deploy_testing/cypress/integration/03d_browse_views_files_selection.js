@@ -202,14 +202,23 @@ describe('Browse Views - Files Selection', function () {
                 //Dropdown choose value
                 .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
                 .click({ 'force': true }).end()
-                .get('.dropdown-item').contains('Title').click({ 'force': true }).end()
+                .get('.show.dropdown').contains('Title').click({ 'force': true }).end()
+                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
+                .click({ 'force': true }).end()
+                .get('.show.dropdown').contains('Dataset').click({ 'force': true }).end()
+                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
+                .click({ 'force': true }).end()
+                .get('.show.dropdown').contains('Condition').click({ 'force': true }).end()
                 .get('.btn.btn-primary.btn-sm.btn-block[data-tip="Re-sort columns"]').click().end()
-                .get('.headers-columns-overflow-container [data-field="display_title"] .active.column-sort-icon')
-                //Re-open sort panel
-                .get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Sort multiple columns"]').click().end()
-                //Return to default order
-                .get('.btn.btn-outline-secondary.btn-sm.btn-block[data-tip="Remove sort column"]').click().end()
-                .get('.btn.btn-primary.btn-sm.btn-block[data-tip="Re-sort columns"]').click().end();
+                .get('.headers-columns-overflow-container [data-field="display_title"] .active.column-sort-icon').then(function ($itemIndex) {
+                    cy.expect(1).equal(parseInt($itemIndex.text()));
+                })
+                .get('.headers-columns-overflow-container [data-field="dataset_label"] .active.column-sort-icon').then(function ($itemIndex) {
+                    cy.expect(2).equal(parseInt($itemIndex.text()));
+                })
+                .get('.headers-columns-overflow-container [data-field="condition"] .active.column-sort-icon').then(function ($itemIndex) {
+                    cy.expect(3).equal(parseInt($itemIndex.text()));
+                });
         });
 
     });
