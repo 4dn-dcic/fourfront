@@ -1081,7 +1081,8 @@ export class QCMetricsTable extends React.PureComponent {
                 <a className="text-500 name-title" href={fileAtId}>
                     {fileTitleString}
                 </a>
-            </React.Fragment>);
+            </React.Fragment>
+        );
     }
 
     static generateAlignedColumnHeaders(fileGroups) {

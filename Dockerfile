@@ -1,12 +1,8 @@
 # Fourfront (Production) Dockerfile
 # Based off of the cgap-portal Dockerfile
-# Note that images are pinned via sha256 as opposed to tag
-# so that we don't pick up new images unintentionally
 
-# Debian Buster with Python 3.7.12
-FROM python:3.7.12-slim-buster
-# bullseye seems to perform worse
-#FROM python:3.7.12-slim-bullseye
+# Debian Buster with Python 3.8.13
+FROM python:3.8.13-slim-buster
 
 MAINTAINER William Ronchetti "william_ronchetti@hms.harvard.edu"
 
@@ -39,7 +35,7 @@ WORKDIR /home/nginx/.nvm
 ENV NVM_DIR=/home/nginx/.nvm
 COPY deploy/docker/production/install_nginx.sh /
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends vim emacs net-tools ca-certificates \
+    apt-get install -y --no-install-recommends vim emacs net-tools ca-certificates build-essential \
     gcc zlib1g-dev postgresql-client libpq-dev git make curl libmagic-dev && \
     pip install --upgrade pip && \
     curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \

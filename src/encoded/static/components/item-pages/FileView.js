@@ -177,7 +177,8 @@ export class FileOverviewHeading extends React.PureComponent {
                 {classification}
                 {isSupplementary ? <br /> : null}
                 {isSupplementary ? '(Supplementary)' : null}
-            </React.Fragment>);
+            </React.Fragment>
+        );
     }
 
     constructor(props){
