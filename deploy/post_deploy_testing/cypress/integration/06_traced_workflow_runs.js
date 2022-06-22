@@ -27,15 +27,15 @@ describe("WorkflowRun traced graphs for selected ExperimentSets", function(){
 
         testNodesTextGlobalInputs(global_input_file_accessions);
 
-        it('Workflow view node detail', function () {
+        it('Check node is clickable and details are visible', function () {
             cy.get('.graph-wrapper .nodes-layer .node[data-node-type="input"]').first().then(function ($inputNode) {
-                Cypress._.forEach($inputNode, function(inputNode){
-                    const selectedNodeText=Cypress.$(inputNode).find('.node-name').text();
+                Cypress._.forEach($inputNode, function (inputNode) {
+                    const selectedNodeText = Cypress.$(inputNode).find('.node-name').text();
                     cy.get('.graph-wrapper .nodes-layer .node[data-node-type="input"] .innermost').first().click({ force: true }).end();
 
                     //Node detail pane
                     cy.get('.detail-pane-body .information .node-file-title').then(function ($nodeDetail) {
-                        const nodeDetailText=$nodeDetail.text().trim().split('.');
+                        const nodeDetailText = $nodeDetail.text().trim().split('.');
                         cy.expect(selectedNodeText).equal(nodeDetailText[0]);
                     });
                 });
