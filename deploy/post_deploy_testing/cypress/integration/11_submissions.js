@@ -2,19 +2,19 @@
 /**
 * Test you can visit the Submission page.
 */
-describe('Submission page', function () {
+describe('Submission Page Tests', function () {
 
-    context('Cypress test Submission', function () {
+    context('My Submissions, Submissions for My Lab', function () {
 
         it('Ensure logged in, visit submission page ', function () {
             // Login CypressTest user
             cy.visit('/submissions').end()
                 .get('#page-title-container .page-title').should('contain', 'Submissions');
-            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true  }).end();
+            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true }).end();
 
         });
 
-        it('Compare the total count of my submissions', function () {
+        it('Check the total count of My Submissions', function () {
             let totalCount;
             cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true }).end()
                 .get('#content .submission-page-heading .col.text-400.pt-01').contains('My submissions').end();
@@ -25,7 +25,7 @@ describe('Submission page', function () {
             });
         });
 
-        it('My submissions file type filter icon', function () {
+        it('My Submissions filter by item type dropdown', function () {
             let totalCount;
             let typeTitle;
             cy.get('.submission-page-heading[data-open=true] .ml-1.text-300').then(function ($submissionTotalCountText) {
@@ -44,10 +44,10 @@ describe('Submission page', function () {
             });
         });
 
-        it('Compare the total count of submissions for my lab', function () {
+        it('Check the total count of Submissions for My Lab', function () {
             cy.visit('/submissions').end()
                 .get('#page-title-container .page-title').should('contain', 'Submissions');
-            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true  }).end();
+            cy.login4DN({ 'email': 'u4dntestcypress@gmail.com', 'useEnvToken': true }).end();
             let totalCount;
             cy.get('.submission-page-heading[data-open=false] .col.text-400.pt-01').contains('Submissions for my lab').end();
             cy.get('.submission-page-heading[data-open=false] .btn.btn-default.icon-container').click({ 'force': true });
