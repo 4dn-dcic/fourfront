@@ -1,5 +1,5 @@
 
-import { navUserAcctDropdownBtnSelector } from './../support/variables';
+import { navUserAcctDropdownBtnSelector } from '../support/variables';
 
 /**
 * Test you can visit the Biosample create page.
