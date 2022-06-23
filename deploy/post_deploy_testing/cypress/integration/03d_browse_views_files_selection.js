@@ -194,30 +194,35 @@ describe('Browse Views - Files Selection', function () {
 
         });
 
-        it("Can sort column for title to results table", function () {
-            //Open column selector panel
+        it("Sort multiple columns via column sorter; check result's column headers", function () {
+            //Open multi-column sorter
             cy.get('#content div.above-results-table-row div.right-buttons button.btn[data-tip="Sort multiple columns"]').click().end()
-                //Open sort panel
+                //Remove existing sort column
                 .get('.btn.btn-outline-secondary.btn-sm.btn-block[data-tip="Remove sort column"]').click().end()
-                //Dropdown choose value
-                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
-                .click({ 'force': true }).end()
+                //Sort column 1 (asc)
+                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort').click({ 'force': true }).end()
                 .get('.show.dropdown').contains('Title').click({ 'force': true }).end()
-                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
-                .click({ 'force': true }).end()
+                //Sort column 2 (desc)
+                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort').click({ 'force': true }).end()
                 .get('.show.dropdown').contains('Dataset').click({ 'force': true }).end()
-                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort')
-                .click({ 'force': true }).end()
+                .get('.multi-column-sort .dropdown-toggle').eq(3).contains('Ascending').click({ 'force': true }).end()
+                .get('.show.dropdown').contains('Descending').click({ 'force': true }).end()
+                //Sort column 3 (asc)
+                .get('.multi-column-sort .dropdown-toggle').contains('Select a column to sort').click({ 'force': true }).end()
                 .get('.show.dropdown').contains('Condition').click({ 'force': true }).end()
+                //Click sorting
                 .get('.btn.btn-primary.btn-sm.btn-block[data-tip="Re-sort columns"]').click().end()
-                .get('.headers-columns-overflow-container [data-field="display_title"] .active.column-sort-icon').then(function ($itemIndex) {
-                    cy.expect(1).equal(parseInt($itemIndex.text()));
+                .get('.headers-columns-overflow-container [data-field="display_title"] .active.column-sort-icon').then(function ($item) {
+                    cy.expect(1).equal(parseInt($item.text()));
+                    cy.expect(1).equal($item.children('i.icon-sort-up').length);
                 })
-                .get('.headers-columns-overflow-container [data-field="dataset_label"] .active.column-sort-icon').then(function ($itemIndex) {
-                    cy.expect(2).equal(parseInt($itemIndex.text()));
+                .get('.headers-columns-overflow-container [data-field="dataset_label"] .active.column-sort-icon').then(function ($item) {
+                    cy.expect(2).equal(parseInt($item.text()));
+                    cy.expect(1).equal($item.children('i.icon-sort-down').length);
                 })
-                .get('.headers-columns-overflow-container [data-field="condition"] .active.column-sort-icon').then(function ($itemIndex) {
-                    cy.expect(3).equal(parseInt($itemIndex.text()));
+                .get('.headers-columns-overflow-container [data-field="condition"] .active.column-sort-icon').then(function ($item) {
+                    cy.expect(3).equal(parseInt($item.text()));
+                    cy.expect(1).equal($item.children('i.icon-sort-up').length);
                 });
         });
 
