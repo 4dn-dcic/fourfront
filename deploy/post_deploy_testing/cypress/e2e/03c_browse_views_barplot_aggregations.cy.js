@@ -1,6 +1,6 @@
 
 import _ from 'underscore';
-import { compareQuickInfoCountsVsBarPlotCounts } from './../support/macros';
+import { compareQuickInfoCountsVsBarPlotCounts } from '../support/macros';
 
 describe('Browse Views - BarPlotChart II', function () {
 

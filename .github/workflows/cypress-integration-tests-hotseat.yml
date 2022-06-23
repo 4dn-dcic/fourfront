@@ -38,4 +38,4 @@ jobs:
           Auth0Client: ${{ secrets.Auth0Client }}
           Auth0Secret: ${{ secrets.Auth0Secret }}
         run: |
-         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com/ --parallel 
+         $(npm bin)/cypress run --record --key $CYPRESS_KEY --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --project ./deploy/post_deploy_testing --browser chrome --config baseUrl=http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com/ --parallel 
