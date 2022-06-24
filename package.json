@@ -23,8 +23,6 @@
   "repository": "4dn-dcic/fourfront",
   "sideEffects": false,
   "jest": {
-
-  },
     "rootDir": "src/encoded/static",
     "setupFiles": [
       "../../../jest/environment.js"
