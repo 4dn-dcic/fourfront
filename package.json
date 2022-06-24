@@ -23,14 +23,8 @@
   "repository": "4dn-dcic/fourfront",
   "sideEffects": false,
   "jest": {
-    "globals": {
-      "window": {},
-      "document": {},
-      "Element": {},
-      "onmouseenter": {},
-      "regeneratorRuntime": {}
 
-    },
+  },
     "rootDir": "src/encoded/static",
     "setupFiles": [
       "../../../jest/environment.js"
