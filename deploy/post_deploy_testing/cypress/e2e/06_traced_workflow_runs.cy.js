@@ -7,7 +7,7 @@
  * - SelectedNode -> graph visually adjusts correctly (edge classes/colors, node classes/colors) & shows appropriate detailPane.
  */
 
-import { testGraphTabClick, testNodesTextGlobalInputs } from './../support/macros';
+import { testGraphTabClick, testNodesTextGlobalInputs } from '../support/macros';
 
 function getRowIndexFromNode(node){
     return (parseInt(node.style.top) - 60) / 75;
