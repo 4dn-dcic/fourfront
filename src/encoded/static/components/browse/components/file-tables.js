@@ -244,7 +244,7 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
 export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
     const fileFormat = commonFileUtil.getFileFormatStr(file);
     if (file && file.file_type === 'other') {
-        return fileFormat;
+        return file.file_format.file_format;
     }
     return file.file_type_detailed;
 
