@@ -1,5 +1,5 @@
 
-import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from './../support/variables';
+import { navUserAcctDropdownBtnSelector, navUserAcctLoginBtnSelector } from '../support/variables';
 
 describe('Impersonate user JWT, navigate to profile, edit last_name to & back.', function () {
 
