@@ -3,7 +3,7 @@
         "data.4dnucleome.org" : "UA-86655305-1",
         "mastertest.4dnucleome.org" : "UA-86655305-2",
         "staging.4dnucleome.org" : "UA-86655305-2",
-        "fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com" : "UA-86655305-2",
+        "fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com" : "UA-86655305-2",
         "hotseat.4dnucleome.org" : "UA-86655305-2",
         "localhost:8000" : "UA-86655305-3",
         "localhost:6543" : "UA-86655305-3",

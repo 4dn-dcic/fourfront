@@ -11,11 +11,11 @@
     "cypress:open": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:open-staging": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
     "cypress:open-local": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://localhost:8000",
-    "cypress:open-hotseat": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com",
+    "cypress:open-hotseat": "node_modules/.bin/cypress open --project './deploy/post_deploy_testing' --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com",
     "cypress:test": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config videoRecording=false",
     "cypress:test-recorded": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret",
     "cypress:test-recorded-staging": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://staging.4dnucleome.org",
-    "cypress:test-recorded-hotseat": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat.9wzadzju3p.us-east-1.elasticbeanstalk.com"
+    "cypress:test-recorded-hotseat": "node_modules/.bin/cypress run --project './deploy/post_deploy_testing' --record --key $CYPRESS_KEY --browser chrome --env Auth0Client=$Auth0Client,Auth0Secret=$Auth0Secret --config baseUrl=http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com"
   },
   "author": "4DN DCIC",
   "license": "MIT",
@@ -29,7 +29,6 @@
       "Element": {},
       "onmouseenter": {},
       "regeneratorRuntime": {}
-
     },
     "rootDir": "src/encoded/static",
     "setupFiles": [
@@ -63,7 +62,7 @@
     "collectCoverage": true
   },
   "devDependencies": {
-    "@babel/core": "^7.17.5",
+    "@babel/core": "^7.17.9",
     "@babel/eslint-parser": "^7.17.0",
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/plugin-proposal-decorators": "^7.17.8",
@@ -107,15 +106,15 @@
     "micro-meta-app-react": "git+https:github.com/WU-BIMAC/MicroMetaApp-React#0.0.0.21",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.7",
-    "@hms-dbmi-bgm/shared-portal-components": "git+https:github.com/4dn-dcic/shared-portal-components#0.1.44",
-    "auth0-lock": "^11.33.0",
+    "@hms-dbmi-bgm/shared-portal-components": "git+https:github.com/4dn-dcic/shared-portal-components#0.1.47",
+    "auth0-lock": "^11.33.1",
     "d3": "^6.7.0",
     "date-fns": "^2.28.0",
     "detect-browser": "^5.3.0",
     "domready": "^1.0.8",
     "form-serialize": "^0.7.2",
-    "higlass": "1.11.11",
-    "higlass-multivec": "0.2.10",
+    "higlass": "1.10.0",
+    "higlass-multivec": "0.2.4",
     "higlass-register": "^0.3.0",
     "html-react-parser": "^1.2.8",
     "markdown-to-jsx": "^7.1.6",
@@ -131,17 +130,17 @@
     "react-draggable": "^4.4.4",
     "react-json-tree": "^0.16.1",
     "react-jsx-parser": "^1.25.1",
-    "react-redux": "^7.2.6",
+    "react-redux": "^8.0.2",
     "react-tooltip": "^4.2.21",
     "react-transition-group": "^4.4.2",
-    "redux": "^3.7.0",
+    "redux": "^4.2.0",
     "subprocess-middleware": "0.2.0",
-    "underscore": "^1.13.2",
+    "underscore": "^1.13.3",
     "url": "^0.11.0",
-    "uuid": "^8.3.2",
-    "vitessce": "^1.1.20"
+    "vitessce": "^1.1.20",
+    "jsonwebtoken": ">=7.4.0"
   },
   "optionalDependencies": {
-    "cypress": "^9.5.1"
+    "cypress": "^10.2.0"
   }
 }

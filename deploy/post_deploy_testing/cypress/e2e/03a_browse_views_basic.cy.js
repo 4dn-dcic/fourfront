@@ -1,4 +1,4 @@
-import { navBrowseBtnSelector } from './../support/variables';
+import { navBrowseBtnSelector } from '../support/variables';
 
 describe('Browse Views - Basic Tests', function () {
 

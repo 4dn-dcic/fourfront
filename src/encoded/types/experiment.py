@@ -319,6 +319,7 @@ class Experiment(Item):
         "reference_files.file_size",
         "reference_files.file_classification",
         "reference_files.status",
+        "reference_files.notes_to_tsv",
 
         # Static Section linkTo
         "reference_files.static_content.location",

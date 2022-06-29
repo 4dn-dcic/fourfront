@@ -240,11 +240,12 @@ export default class App extends React.PureComponent {
                 window.history.replaceState(null, '', window.location.href);
             }
             // Avoid popState on load, see: http://stackoverflow.com/q/6421769/199100
-            var register = window.addEventListener.bind(window, 'popstate', this.handlePopState, true);
+            // We don't use WindowEventDelegator here since we intend to `useCapture` to prevent default browser handling from being triggered for this.
+            const registerWindowOnPopState = () => { window.addEventListener("popstate", this.handlePopState, true); };
             if (window._onload_event_fired) {
-                register();
+                registerWindowOnPopState();
             } else {
-                window.addEventListener('load', setTimeout.bind(window, register));
+                window.addEventListener("load", function () { setTimeout(registerWindowOnPopState, 10); });
             }
         } else {
             window.onhashchange = this.onHashChange;
