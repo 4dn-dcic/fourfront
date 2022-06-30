@@ -31,7 +31,7 @@ describe('Post-Deployment Search View Tests', function () {
         });
 
         it('Filter by "Type" filter icon within search results', function () {
-            cy.visit('/search/').wait(300);
+            cy.visit('/search/').wait(1000);
             let typeTitle;
             cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const intervalCount = Math.min(5, parseInt(totalCountExpected / 25));
