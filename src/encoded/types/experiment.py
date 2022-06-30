@@ -207,7 +207,6 @@ class Experiment(Item):
         'files.uuid',
         'files.file_size',
         'files.upload_key',
-        'files.file_format',
         'files.file_classification',
         'files.file_type',
         'files.file_type_detailed',
@@ -316,7 +315,6 @@ class Experiment(Item):
 
         # FileReference linkTo
         "reference_files.accession",
-        "reference_files.file_format"
         "reference_files.file_type_detailed",
         "reference_files.file_size",
         "reference_files.file_classification",
