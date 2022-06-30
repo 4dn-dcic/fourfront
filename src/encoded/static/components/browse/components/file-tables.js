@@ -250,7 +250,7 @@ export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryB
         '-'
     );
     if(summary.slice(0, 6).toLowerCase() === 'other ') {
-        return summary.match(/(?<=\()[^()]+(?=\))/gm);
+        return fileFormat;
     }
     if (file && file.file_type === 'other') {
         return file.file_format.file_format || file.file_format.display_title;
