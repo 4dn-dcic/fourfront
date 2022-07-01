@@ -318,6 +318,7 @@ class Experiment(Item):
         "reference_files.file_type_detailed",
         "reference_files.file_size",
         "reference_files.file_format.file_format",
+        "reference_files.file_type",
         "reference_files.file_classification",
         "reference_files.status",
         "reference_files.notes_to_tsv",
