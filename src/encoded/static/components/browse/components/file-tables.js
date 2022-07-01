@@ -243,17 +243,8 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
 
 export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
     const fileFormat = commonFileUtil.getFileFormatStr(file);
-    const summary = (
-        file.file_type_detailed ||
-        ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
-        fileFormat ||
-        '-'
-    );
-    if(summary.slice(0, 6).toLowerCase() === 'other ') {
-        return fileFormat;
-    }
     if (file && file.file_type === 'other') {
-        return file.file_format.file_format || file.file_format.display_title;
+        return fileFormat;
     }
     return file.file_type_detailed;
 
