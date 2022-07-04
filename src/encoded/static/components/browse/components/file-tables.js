@@ -913,8 +913,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-        const { collapseLongLists, titleForFiles } = this.props;
-        return filesGroupedByExperimentOrGlobal.map(([ experimentAccession, filesForExperiment ])=>{
+        const { experimentSet,titleForFiles, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, href, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
+        return filesGroupedByExperimentOrGlobal.map(([experimentAccession, filesForExperiment]) => {
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
 
@@ -940,7 +940,9 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             );
 
             var expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
-
+            const showMoreExtTitle = preventExpand && expSetAccession ? (
+                <a href={object.itemUtil.atId(filesForExperiment[0].from_experiment.from_experiment_set)}>(view in Experiment Set)</a>
+            ) : null;
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
                     key={experimentAccession} label={
@@ -948,7 +950,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                             accession={experimentAccession === 'global' ? expSetAccession : experimentAccession} subtitleVisible />
                     }>
                     { nameBlock }
-                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={null}>
+                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={showMoreExtTitle} {...{ collapseLimit, collapseShow, collapseShowMoreLimit, collapseItemsIncrement }} >
                         { this.renderFileBlocksForExperiment(filesForExperiment) }
                     </StackedBlockList>
                 </StackedBlock>
