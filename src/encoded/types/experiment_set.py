@@ -143,14 +143,14 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.cell_line.term_id",
         "experiments_in_set.biosample.biosource.cell_line.term_name",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
-        "experiments_in_set.biosample.biosource.cell_line.slim_terms",
+        "experiments_in_set.biosample.biosource.cell_line.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.biosource.tissue.term_id",
         "experiments_in_set.biosample.biosource.tissue.term_name",
         "experiments_in_set.biosample.biosource.tissue.preferred_name",
-        "experiments_in_set.biosample.biosource.tissue.slim_terms",
+        "experiments_in_set.biosample.biosource.tissue.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.biosource.tissue.synonyms",
 
         # Organism linkTo
@@ -161,7 +161,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_id",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_name",
-        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms",
+        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.synonyms",
 
         # Modification linkTo
@@ -171,13 +171,13 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.modifications.override_modification_name",
 
         # BioFeature linkTo
-        "experiments_in_set.biosample.modifications.target_of_mod.feature_type",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_type.uuid",
         "experiments_in_set.biosample.modifications.target_of_mod.preferred_label",
         "experiments_in_set.biosample.modifications.target_of_mod.cellular_structure",
         "experiments_in_set.biosample.modifications.target_of_mod.organism_name",
-        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes",
-        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods",
-        "experiments_in_set.biosample.modifications.target_of_mod.genome_location",
+        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes.uuid",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods.*",
+        "experiments_in_set.biosample.modifications.target_of_mod.genome_location.uuid",
 
         # Treatment linkTo
         "experiments_in_set.biosample.treatments.treatment_type",
@@ -308,7 +308,6 @@ class ExperimentSet(Item):
 
         # FileFormat linkTo
         "processed_files.extra_files.file_format.file_format",
-
         "processed_files.last_modified.date_modified",
 
         # StaticSection linkTo

@@ -390,16 +390,16 @@ class TestInvalidationScopeViewFourfront:
     @pytest.mark.parametrize('source_type, target_type, invalidated', [
         # Test WorkflowRun
         ('FileProcessed', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'filename', 'file_size']
+            DEFAULT_SCOPE + ['accession', 'filename', 'file_size']
          ),
         ('Software', 'WorkflowRunAwsem',
             DEFAULT_SCOPE + ['name', 'title', 'version', 'commit', 'source_url']
          ),
         ('Workflow', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['category', 'experiment_types', 'app_name', 'title']
+            DEFAULT_SCOPE + ['title', 'experiment_types', 'category', 'app_name', 'steps.name']
          ),
-        ('WorkflowRunAwsem', 'FileProcessed',  # no link
-            DEFAULT_SCOPE
+        ('WorkflowRunAwsem', 'FileProcessed',
+            DEFAULT_SCOPE + ['input_files.workflow_argument_name', 'output_files.workflow_argument_name']
          ),
         # Test FileProcessed
         ('Enzyme', 'FileProcessed',  # embeds 'name'
@@ -409,7 +409,7 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['title']
          ),
         ('ExperimentSet', 'FileProcessed',  # embeds 'title'
-            DEFAULT_SCOPE + ['accession', 'experimentset_type']
+            DEFAULT_SCOPE + ['last_modified.date_modified', 'accession', 'experimentset_type']
          ),
         ('Biosample', 'FileProcessed',  # embeds 'accession' + calc props (not detected)
             DEFAULT_SCOPE + ['accession']
@@ -418,8 +418,13 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['biosource_type', 'cell_line_tier', 'override_biosource_name']
          ),
         ('BioFeature', 'FileProcessed',
-            DEFAULT_SCOPE + ['preferred_label', 'feature_type', 'organism_name', 'genome_location',
-                             'relevant_genes', 'cellular_structure']
+            DEFAULT_SCOPE + ['static_headers', 'static_content.content', 'static_content.location',
+                             'static_content.description', 'dbxrefs', 'tags', 'lab', 'contributing_labs', 'award',
+                             'public_release', 'project_release', 'last_modified.date_modified',
+                             'last_modified.modified_by', 'date_created', 'submitted_by', 'viewable_by',
+                             'notes', 'aliases', 'schema_version', 'description', 'preferred_label',
+                             'feature_type', 'organism_name', 'genome_location', 'relevant_genes', 'cellular_structure',
+                             'feature_mods.mod_type', 'feature_mods.mod_position']
          ),
         ('OntologyTerm', 'FileProcessed',
             DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name']
@@ -432,9 +437,22 @@ class TestInvalidationScopeViewFourfront:
          ),
         # Test ExperimentSet
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'description', 'file_format', 'file_type', 'file_classification',
-                             'md5sum', 'file_size', 'notes_to_tsv', 'higlass_uid',
-                             'genome_assembly', 'dbxrefs']
+            DEFAULT_SCOPE + ['accession', 'description', 'filename', 'file_format', 'file_type', 'file_classification',
+                             'md5sum', 'content_md5sum', 'file_size', 'extra_files.file_format', 'extra_files.href',
+                             'extra_files.md5sum', 'extra_files.file_size', 'extra_files.status', 'extra_files.use_for',
+                             'related_files.relationship_type', 'related_files.file', 'restricted',
+                             'viewable_by', 'quality_metric', 'override_lab_name', 'override_experimental_lab',
+                             'override_experiment_type', 'override_biosource_name', 'override_assay_info',
+                             'override_replicate_info', 'override_experiment_bucket', 'override_dataset',
+                             'override_condition', 'notes_to_tsv', 'higlass_defaults.valueScaling',
+                             'higlass_defaults.minusStrandColor', 'higlass_defaults.plusStrandColor',
+                             'static_headers', 'static_content.content', 'static_content.location',
+                             'static_content.description', 'tags', 'external_submission.date_exported',
+                             'external_submission.database', 'dbxrefs', 'alternate_accessions', 'notes', 'lab',
+                             'contributing_labs', 'award', 'aliases', 'public_release', 'project_release',
+                             'last_modified.date_modified', 'last_modified.modified_by', 'date_created',
+                             'submitted_by', 'schema_version', 'higlass_uid', 'source_experiments',
+                             'genome_assembly', 'produced_from', 'disable_wfr_inputs', 'percent_clipped_sites_with_re_motif']
          ),
         ('User', 'ExperimentSet',
             DEFAULT_SCOPE + ['email', 'first_name', 'last_name', 'preferred_email',
@@ -449,7 +467,7 @@ class TestInvalidationScopeViewFourfront:
                              'temperature']
          ),
         ('OntologyTerm', 'ExperimentSet',
-            DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name', 'slim_terms', 'synonyms']
+            DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name', 'synonyms']
          ),
         ('Organism', 'ExperimentSet',
             DEFAULT_SCOPE + ['name', 'scientific_name']
@@ -458,11 +476,16 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'override_modification_name']
          ),
         ('BioFeature', 'ExperimentSet',
-            DEFAULT_SCOPE + ['feature_type', 'preferred_label', 'cellular_structure', 'organism_name', 'relevant_genes',
-                             'genome_location']
+            DEFAULT_SCOPE + ['static_headers', 'static_content.content', 'static_content.location',
+                             'static_content.description', 'dbxrefs', 'tags', 'lab', 'contributing_labs', 'award',
+                             'public_release', 'project_release', 'last_modified.date_modified',
+                             'last_modified.modified_by', 'date_created', 'submitted_by', 'viewable_by',
+                             'notes', 'aliases', 'schema_version', 'description', 'preferred_label',
+                             'feature_type', 'organism_name', 'genome_location', 'relevant_genes', 'cellular_structure',
+                             'feature_mods.mod_type', 'feature_mods.mod_position']
          ),
         ('Biosample', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession']  # XXX: this embeds calc props that are not fully reflected IMO - Will 3/31/21
+            DEFAULT_SCOPE + ['badges.messages', 'accession']  # XXX: this embeds calc props that are not fully reflected IMO - Will 3/31/21
          ),
         ('Biosource', 'ExperimentSet',
             DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line_tier', 'override_biosource_name', 'override_organism_name']
@@ -473,25 +496,59 @@ class TestInvalidationScopeViewFourfront:
         ('Enzyme', 'ExperimentSet',
             DEFAULT_SCOPE + ['name']
          ),
-        ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
-                             'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
-         ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
-                          'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
+         DEFAULT_SCOPE + ['accession', 'aliases', 'alternate_accessions', 'award', 'content_md5sum',
+                          'contributing_labs', 'date_created', 'dbxrefs', 'description', 'external_submission.database',
+                          'external_submission.date_exported', 'extra_files.file_format', 'extra_files.file_size',
+                          'extra_files.href', 'extra_files.md5sum', 'extra_files.status', 'extra_files.use_for',
+                          'file_classification', 'file_format', 'file_size', 'file_type', 'filename', 'genome_assembly',
+                          'higlass_defaults.minusStrandColor', 'higlass_defaults.plusStrandColor',
+                          'higlass_defaults.valueScaling', 'higlass_uid', 'lab', 'last_modified.date_modified',
+                          'last_modified.modified_by', 'md5sum', 'notes', 'notes_to_tsv', 'override_assay_info',
+                          'override_biosource_name', 'override_condition', 'override_dataset',
+                          'override_experiment_bucket', 'override_experiment_type', 'override_experimental_lab',
+                          'override_lab_name', 'override_replicate_info', 'project_release', 'public_release',
+                          'quality_metric', 'related_files.file', 'related_files.relationship_type', 'restricted',
+                          'schema_version', 'static_content.content', 'static_content.description',
+                          'static_content.location', 'static_headers', 'submitted_by', 'tags',
+                          'viewable_by']
          ),
         ('FileFormat', 'ExperimentSet',
             DEFAULT_SCOPE + ['file_format']
          ),
         ('QualityMetricFastqc', 'ExperimentSet',
-            DEFAULT_SCOPE + ['Sequence length', 'Total Sequences', 'overall_quality_status', 'url']
+            DEFAULT_SCOPE + ['overall_quality_status', 'url', 'static_headers', 'static_content.content',
+                             'static_content.location', 'static_content.description', 'viewable_by',
+                             'public_release', 'project_release', 'last_modified.date_modified',
+                             'last_modified.modified_by', 'date_created', 'submitted_by', 'lab',
+                             'contributing_labs', 'award', 'aliases', 'schema_version', 'Basic Statistics',
+                             'Total Sequences', 'Sequences flagged as poor quality', 'Sequence length', '%GC',
+                             'Per base sequence quality', 'Per tile sequence quality',
+                             'Per sequence quality scores', 'Per base sequence content',
+                             'Per sequence GC content', 'Per base N content', 'Sequence Length Distribution',
+                             'Sequence Duplication Levels', 'Overrepresented sequences', 'Adapter Content', 'Kmer Content']
          ),
         ('QualityMetricMargi', 'ExperimentSet',
-            DEFAULT_SCOPE + ['overall_quality_status', 'url']
+            DEFAULT_SCOPE + ['overall_quality_status', 'url', 'static_headers', 'static_content.content',
+                             'static_content.location', 'static_content.description', 'viewable_by',
+                             'public_release', 'project_release', 'last_modified.date_modified',
+                             'last_modified.modified_by', 'date_created', 'submitted_by', 'lab', 'contributing_labs',
+                             'award', 'aliases', 'schema_version', 'Sequence mapping QC', 'total_read_pairs',
+                             'unique_mapped_pairs', 'single_side_unique_mapped', 'nondup_unique_mapped_pairs',
+                             'Total number of interactions', 'Inter-chromosome interactions',
+                             'Intra-chromosome interactions', 'Type', 'Distal', 'Proximal',
+                             '#total_valid_interactions/#nondup_unique_mapped_pairs',
+                             '(#unique_mapped_pairs + #single_side_unique_mapped)/#total_read_pairs']
          ),
         ('QualityMetricBamqc', 'ExperimentSet',
-            DEFAULT_SCOPE + ['overall_quality_status', 'url']
+            DEFAULT_SCOPE + ['overall_quality_status', 'url', 'static_headers', 'static_content.content',
+                             'static_content.location', 'static_content.description', 'viewable_by',
+                             'public_release', 'project_release', 'last_modified.date_modified',
+                             'last_modified.modified_by', 'date_created', 'submitted_by', 'lab', 'contributing_labs',
+                             'award', 'aliases', 'schema_version', 'Total Reads', 'Minor Contigs',
+                             'Filtered Reads', '% of duplicates', '% of reads mapped', '% of reads filtered',
+                             '% of rescued chimeras', 'DD', 'MM', 'MR', 'MU', 'NM', 'NN', 'NR', 'NU', 'RU', 'UR',
+                             'UU', 'WW']
          ),
     ])
     def test_invalidation_scope_view_parametrized(self, indexer_testapp, source_type, target_type, invalidated):
