@@ -50,3 +50,14 @@ export const onLoginNavItemClick = function(e) {
     }
     return false;
 };
+
+export const NotLoggedInAlert = {
+    "title" : "Not Logged In",
+    "message" : (
+        <span>
+            You are currently browsing as guest, please <a onClick={onLoginNavItemClick} href="#loginbtn">login</a> if you have an account.
+        </span>
+    ),
+    "style" : "warning",
+    "navigateDisappearThreshold" : 2
+};
