@@ -127,13 +127,13 @@ export default class HealthView extends React.PureComponent {
                 title : "Shared Portal Components Version",
                 description : "Software version of shared-portal-components package being used."
             },
-            'mikro_meta_version': {
+            'micro_meta_version': {
                 title : "MicroMeta Version",
                 description : "Software version of MicroMeta package being used."
             },
             'vitessce_version': {
                 title : "Vitessce Version",
-                description : "Software version of vitessce package being used."
+                description : "Software version of Vitessce package being used."
             },
             'snovault_version': {
                 title : "Snovault Version",
