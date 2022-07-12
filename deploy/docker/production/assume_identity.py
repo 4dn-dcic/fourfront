@@ -7,7 +7,6 @@
 import os
 import logging
 from dcicutils.qa_utils import override_environ
-from dcicutils.deployment_utils import BasicOrchestratedFourfrontIniFileManager
 from dcicutils.secrets_utils import assume_identity
 
 
@@ -16,14 +15,7 @@ logger = logging.getLogger(__file__)
 _MY_DIR = os.path.dirname(__file__)
 
 
-class FourfrontDockerIniFileManager(BasicOrchestratedFourfrontIniFileManager):
-    """ This runs at top level, so path is slightly different. """
-    # should work but doesn't (missing fourfront): os.path.join(os.path.dirname(_MY_DIR), "pyproject.toml")
-    # expected = <hardwired>
-    # actual = <computed>
-    # assert actual == expected, "The actual value %s was not what we expected, %s." % (actual, expected)
-    TEMPLATE_DIR = '/home/nginx/fourfront/deploy/ini_files'
-    PYPROJECT_FILE_NAME = '/home/nginx/fourfront/pyproject.toml'
+
 
 
 def build_production_ini_from_global_application_configuration():
@@ -34,6 +26,17 @@ def build_production_ini_from_global_application_configuration():
 
     # build production.ini
     with override_environ(**identity):
+        # XXX: temporary fix so load occurs with GLOBAL_ENV_BUCKET set
+        from dcicutils.deployment_utils import BasicOrchestratedFourfrontIniFileManager
+
+        class FourfrontDockerIniFileManager(BasicOrchestratedFourfrontIniFileManager):
+            """ This runs at top level, so path is slightly different. """
+            # should work but doesn't (missing fourfront): os.path.join(os.path.dirname(_MY_DIR), "pyproject.toml")
+            # expected = <hardwired>
+            # actual = <computed>
+            # assert actual == expected, "The actual value %s was not what we expected, %s." % (actual, expected)
+            TEMPLATE_DIR = '/home/nginx/fourfront/deploy/ini_files'
+            PYPROJECT_FILE_NAME = '/home/nginx/fourfront/pyproject.toml'
 
         # TODO: this probably needs configuring but minimal
         FourfrontDockerIniFileManager.build_ini_file_from_template(
