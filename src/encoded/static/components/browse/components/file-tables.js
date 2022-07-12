@@ -241,19 +241,17 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
     );
 }
 
-export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
-    const fileFormat = commonFileUtil.getFileFormatStr(file);
-    const summary = (
-        file.file_type_detailed ||
-        ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
-        fileFormat ||
-        '-'
-    );
-    // Remove 'other', if present, because it just takes up horizontal space.
-    if (summary.slice(0, 6).toLowerCase() === 'other '){
-        return summary.slice(7).slice(0, -1);
+export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps) {
+    if (!file) {
+        return '-';
     }
-    return summary;
+    const fileFormat = commonFileUtil.getFileFormatStr(file);
+    const { file_type, file_type_detailed } = file;
+    if (fileFormat && file_type === 'other') {
+        return fileFormat;
+    }
+
+    return file_type_detailed || '-';
 }
 
 export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockProps) {
@@ -337,7 +335,7 @@ function renderFileHeaderWithCheckbox(stackedBlockProps){
 
 export class RawFilesStackedTable extends React.PureComponent {
 
-    static StackedBlock = StackedBlock
+    static StackedBlock = StackedBlock;
 
     static builtInHeaders(expSetType = 'replicate'){
         switch (expSetType){
