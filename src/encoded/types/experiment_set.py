@@ -282,6 +282,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.related_files.file.accession",
         "experiments_in_set.files.related_files.file.paired_end",
         "experiments_in_set.files.related_files.file.file_type",
+        "experiments_in_set.files.related_files.file.file_type_detailed",
+        "experiments_in_set.files.related_files.file.file_format.file_format",
 
         # ProcessedFile linkTo
         "processed_files.href",
@@ -367,6 +369,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.related_files.relationship_type",
         "experiments_in_set.processed_files.related_files.file.accession",
         "experiments_in_set.processed_files.related_files.file.file_type",
+        "experiments_in_set.processed_files.related_files.file.file_type_detailed",
 
         # StaticSection linkTo
         "experiments_in_set.processed_files.static_content.location",
@@ -383,6 +386,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.track_and_facet_info.*",
 
         "other_processed_files.files.accession",
+        "other_processed_files.files.file_type",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
@@ -419,6 +423,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.description",
         "experiments_in_set.other_processed_files.type",
         "experiments_in_set.other_processed_files.files.accession",
+        "experiments_in_set.other_processed_files.files.file_type",
         "experiments_in_set.other_processed_files.files.file_type_detailed",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
@@ -448,8 +453,8 @@ class ExperimentSet(Item):
         # File linkTo
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
-        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_type",
+        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_size",
         "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
