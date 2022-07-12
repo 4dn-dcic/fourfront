@@ -913,7 +913,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-        const { experimentSet,titleForFiles, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, href, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
+        const { titleForFiles, collapseLongLists, collapseShow = 3, collapseLimit = 2, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
         return filesGroupedByExperimentOrGlobal.map(([experimentAccession, filesForExperiment]) => {
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
@@ -932,17 +932,18 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
             const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
 
-            var nameBlock = (
+            const nameBlock = (
                 <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
                     { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
 
-            var expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
+            const expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
             const showMoreExtTitle = preventExpand && expSetAccession ? (
                 <a href={object.itemUtil.atId(filesForExperiment[0].from_experiment.from_experiment_set)}>(view in Experiment Set)</a>
             ) : null;
+
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
                     key={experimentAccession} label={
