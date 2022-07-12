@@ -911,7 +911,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-        const { titleForFiles, collapseLongLists, collapseShow = 3, collapseLimit = 2, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
+        const { titleForFiles, collapseLongLists, preventExpand } = this.props;
         return filesGroupedByExperimentOrGlobal.map(([experimentAccession, filesForExperiment]) => {
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
@@ -937,9 +937,9 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                 </StackedBlockName>
             );
 
-            const expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
+            const expSetAccession = experiment.from_experiment_set.accession;
             const showMoreExtTitle = preventExpand && expSetAccession ? (
-                <a href={object.itemUtil.atId(filesForExperiment[0].from_experiment.from_experiment_set)}>(view in Experiment Set)</a>
+                <a href={object.itemUtil.atId(experiment.from_experiment_set)}>(view in Experiment Set)</a>
             ) : null;
 
             return (
@@ -949,7 +949,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                             accession={experimentAccession === 'global' ? expSetAccession : experimentAccession} subtitleVisible />
                     }>
                     { nameBlock }
-                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={showMoreExtTitle} {...{ collapseLimit, collapseShow, collapseShowMoreLimit, collapseItemsIncrement }} >
+                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={showMoreExtTitle}>
                         { this.renderFileBlocksForExperiment(filesForExperiment) }
                     </StackedBlockList>
                 </StackedBlock>
