@@ -37,6 +37,7 @@ from collections import OrderedDict
 from copy import deepcopy
 import uuid
 import structlog
+from .util import is_mobile_browser
 
 log = structlog.getLogger(__name__)
 
@@ -216,6 +217,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['@graph'] = list(graph)
     if created_new_search_session_id:
         request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
+    
+    #misc
+    result['is_mobile_browser'] = is_mobile_browser(request)
+
     return result
 
 
