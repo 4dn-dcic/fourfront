@@ -7,9 +7,11 @@ import sentry_sdk
 import subprocess
 import webtest
 
-from dcicutils.env_utils import get_mirror_env_from_context, is_stg_or_prd_env
+from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context, is_stg_or_prd_env
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
+from dcicutils.secrets_utils import assume_identity
+from dcicutils.misc_utils import override_environ
 from codeguru_profiler_agent import Profiler
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -125,6 +127,12 @@ def main(global_config, **local_config):
     """
     This function returns a Pyramid WSGI application.
     """
+    identity = assume_identity()
+
+    # Assume GAC and load env utils (once)
+    with override_environ(**identity):
+        # load env_utils
+        EnvUtils.init()
 
     settings = global_config
     settings.update(local_config)
