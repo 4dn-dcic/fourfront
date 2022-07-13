@@ -649,7 +649,7 @@ xlrd = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "dcicutils"
-version = "3.14.2.3b52"
+version = "3.14.2.3b53"
 description = "Utility package for interacting with the 4DN Data Portal and other 4DN resources"
 category = "main"
 optional = false
@@ -2086,7 +2086,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1,<3.9"
-content-hash = "67d49d48048a53059a191430c7a9e00d050803dba3244341c2ee7cc7f66eb33f"
+content-hash = "a17396f24fd8fed45ab736a3f469d9ac061630e52c756f12a6a26000b87da93c"
 
 [metadata.files]
 apipkg = [
