@@ -390,16 +390,17 @@ class TestInvalidationScopeViewFourfront:
     @pytest.mark.parametrize('source_type, target_type, invalidated', [
         # Test WorkflowRun
         ('FileProcessed', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['accession', 'filename', 'file_format', 'file_size']
+            DEFAULT_SCOPE + ['accession', 'filename', 'file_format', 'file_size', 'quality_metric']
          ),
         ('Software', 'WorkflowRunAwsem',
             DEFAULT_SCOPE + ['name', 'title', 'version', 'commit', 'source_url']
          ),
         ('Workflow', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['title', 'experiment_types', 'category', 'app_name', 'steps.name']
+            DEFAULT_SCOPE + ['title', 'name', 'experiment_types', 'category', 'app_name', 'steps.name']
          ),
         ('WorkflowRunAwsem', 'FileProcessed',
-            DEFAULT_SCOPE + ['input_files.workflow_argument_name', 'output_files.workflow_argument_name']
+            DEFAULT_SCOPE + ['input_files.workflow_argument_name', 'output_files.workflow_argument_name', 'title',
+                             'workflow']
          ),
         # Test FileProcessed
         ('Enzyme', 'FileProcessed',  # embeds 'name'
@@ -412,13 +413,15 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['last_modified.date_modified', 'accession', 'experimentset_type']
          ),
         ('Biosample', 'FileProcessed',  # embeds 'accession' + calc props (not detected)
-            DEFAULT_SCOPE + ['accession', 'biosource', 'modifications']
+            DEFAULT_SCOPE + ['accession', 'biosource', 'cell_culture_details', 'modifications']
          ),
         ('Biosource', 'FileProcessed',
-            DEFAULT_SCOPE + ['biosource_type', 'modifications', 'cell_line_tier', 'override_biosource_name']
+            DEFAULT_SCOPE + ['biosource_type', 'cell_line', 'cell_line_tier', 'individual', 'modifications',
+                             'override_biosource_name', 'tissue']
          ),
         ('BioFeature', 'FileProcessed',
-            DEFAULT_SCOPE + ['preferred_label', 'organism_name', 'cellular_structure']
+            DEFAULT_SCOPE + ['cellular_structure', 'feature_mods.mod_position', 'feature_mods.mod_type', 'feature_type',
+                             'genome_location', 'organism_name', 'preferred_label', 'relevant_genes']
          ),
         ('OntologyTerm', 'FileProcessed',
             DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name']
@@ -431,26 +434,25 @@ class TestInvalidationScopeViewFourfront:
          ),
         # Test ExperimentSet
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'file_type', 'file_classification', 'md5sum', 'file_size',
-                             'extra_files.href', 'extra_files.md5sum', 'extra_files.file_size', 'extra_files.use_for',
-                             'related_files.relationship_type', 'quality_metric', 'notes_to_tsv',
-                             'static_content.location', 'static_content.description', 'dbxrefs',
-                             'last_modified.date_modified', 'higlass_uid', 'genome_assembly']
+            DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
+                             'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
+                             'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
+                             'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
+                             'related_files.relationship_type', 'static_content.description', 'static_content.location']
          ),
         ('User', 'ExperimentSet',
-            DEFAULT_SCOPE + ['email', 'first_name', 'last_name', 'preferred_email',
-                             'job_title', 'timezone']
+            DEFAULT_SCOPE + ['email', 'first_name', 'job_title', 'lab', 'last_name', 'preferred_email', 'submitted_by',
+                             'timezone']
          ),
         ('Badge', 'ExperimentSet',
             DEFAULT_SCOPE + ['title', 'badge_classification', 'badge_icon', 'description']
          ),
         ('TreatmentAgent', 'ExperimentSet',
-            DEFAULT_SCOPE + ['treatment_type', 'description', 'chemical', 'biological_agent',
-                             'duration', 'duration_units', 'concentration', 'concentration_units',
-                             'temperature']
+            DEFAULT_SCOPE + ['biological_agent', 'chemical', 'concentration', 'concentration_units', 'constructs',
+                             'description', 'duration', 'duration_units', 'temperature', 'treatment_type',]
          ),
         ('OntologyTerm', 'ExperimentSet',
-            DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name', 'synonyms']
+            DEFAULT_SCOPE + ['preferred_name', 'slim_terms', 'synonyms', 'term_id', 'term_name']
          ),
         ('Organism', 'ExperimentSet',
             DEFAULT_SCOPE + ['name', 'scientific_name']
@@ -459,13 +461,16 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'target_of_mod', 'override_modification_name']
          ),
         ('BioFeature', 'ExperimentSet',
-            DEFAULT_SCOPE + ['preferred_label', 'organism_name', 'cellular_structure']
+            DEFAULT_SCOPE + ['cellular_structure', 'feature_mods.mod_position', 'feature_mods.mod_type', 'feature_type',
+                             'genome_location', 'organism_name', 'preferred_label', 'relevant_genes']
          ),
         ('Biosample', 'ExperimentSet',
-            DEFAULT_SCOPE + ['badges.messages', 'accession', 'modifications']
+            DEFAULT_SCOPE + ['accession', 'badges.messages', 'biosource', 'cell_culture_details', 'description',
+                             'modifications', 'treatments']
          ),
         ('Biosource', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line_tier', 'override_biosource_name', 'override_organism_name']
+            DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line', 'cell_line_tier', 'override_biosource_name',
+                             'override_organism_name', 'tissue']
          ),
         ('Construct', 'ExperimentSet',
             DEFAULT_SCOPE + ['name']
@@ -474,11 +479,11 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name']
          ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'file_format', 'file_type', 'file_classification', 'md5sum', 'file_size',
-                          'extra_files.href', 'extra_files.md5sum', 'extra_files.file_size', 'extra_files.use_for',
-                          'related_files.relationship_type', 'quality_metric', 'notes_to_tsv',
-                          'static_content.location', 'static_content.description', 'dbxrefs',
-                          'last_modified.date_modified', 'higlass_uid', 'genome_assembly']
+         DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
+                          'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
+                          'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
+                          'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
+                          'related_files.relationship_type', 'static_content.description', 'static_content.location']
          ),
         ('FileFormat', 'ExperimentSet',
             DEFAULT_SCOPE + ['file_format']
@@ -502,8 +507,6 @@ class TestInvalidationScopeViewFourfront:
         """
         req = self.MockedRequest(indexer_testapp.app.registry, source_type, target_type)
         scope = compute_invalidation_scope(None, req)
-        if sorted(scope['Invalidated']) != sorted(invalidated):
-            import pdb; pdb.set_trace()
         assert sorted(scope['Invalidated']) == sorted(invalidated)
 
     # @pytest.mark.broken

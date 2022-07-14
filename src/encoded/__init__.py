@@ -127,12 +127,15 @@ def main(global_config, **local_config):
     """
     This function returns a Pyramid WSGI application.
     """
-    identity = assume_identity()
+    # If running in production (not a unit test or local deploy), assume identity
+    # and resolve EnvUtils
+    if not local_config.get('testing', False):
+        identity = assume_identity()
 
-    # Assume GAC and load env utils (once)
-    with override_environ(**identity):
-        # load env_utils
-        EnvUtils.init()
+        # Assume GAC and load env utils (once)
+        with override_environ(**identity):
+            # load env_utils
+            EnvUtils.init()
 
     settings = global_config
     settings.update(local_config)
