@@ -1125,7 +1125,8 @@ export default class App extends React.PureComponent {
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com  https://unpkg.com https://ton.twimg.com platform.twitter.com",
             "font-src 'self' https://fonts.gstatic.com",
             "worker-src 'self' blob:",
-            "connect-src 'self' * blob: http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
+            "Access-Control-Allow-Origin 'self' http://fourfront-hotseat-1650461284.us-east-1.elb.amazonaws.com",
+            "connect-src 'self' * blob: https://raw.githubusercontent.com https://higlass.4dnucleome.org https://*.s3.amazonaws.com https://s3.amazonaws.com/4dn-dcic-public/ https://www.encodeproject.org https://rest.ensembl.org https://www.google-analytics.com https://o427308.ingest.sentry.io https://www.gstatic.com/recaptcha/ https://www.google.com/recaptcha/ 'unsafe-inline' 'unsafe-eval'"
         ].join("; ");
 
         // `lastCSSBuildTime` is used for both CSS and JS because is most likely they change at the same time on production from recompiling
