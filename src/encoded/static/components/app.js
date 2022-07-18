@@ -1778,7 +1778,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff={isMobileBrowser ? 'click' : undefined} key="tooltip" /> : null }
 
             </body>
         );
