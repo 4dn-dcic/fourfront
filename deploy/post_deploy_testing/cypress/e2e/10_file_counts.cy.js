@@ -189,6 +189,39 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
             });
 
         });
+
+        it('Biosample warning tab control',function () {
+            let biosampleAccesionName;
+            for (let interval = 0; interval < 1; interval++) {
+
+                cy.visit('/search/?badges=No+value&type=ExperimentSet&experiments_in_set.files.accession!=No+value&experiments_in_set.processed_files.accession!=No+value&other_processed_files.files.accession!=No+value&other_processed_files.files.status=released').end()
+                    .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
+
+                cy.scrollToBottom().then(() => {
+                    cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * (interval + 1)) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                }).end();
+                cy.window().then(function (w) {
+                    let currPagePath = "/";
+                    cy.location('pathname').should('not.equal', currPagePath)
+                        .then(function (pathName) {
+                            currPagePath = pathName;
+                            console.log(currPagePath);
+                        }).wait(3000).end()
+                        .get('h1.page-title').should('not.be.empty').end()
+                        .get('div.rc-tabs span[data-tab-key="badges"]').should('contain', 'Warnings')
+                        .get('div.rc-tabs span[data-tab-key="badges"]').click({ 'force': true }).end()
+                        .wait(200)
+                        .get('.badge-classification-group .badge-item .inner.mb-05 .mt-02 .text-600').first().then(function ($biosampleAccesionName) {
+                            biosampleAccesionName = $biosampleAccesionName.text().trim();
+                        })
+                        .get('.badge-classification-group .badge-item .inner.mb-05 .mt-02 a').first().click({ 'force': true }).end().wait(300)
+                        .get('.item-label-title .accession.inline-block').then(function ($selectedAccesionName) {
+                            const selectedAccesionName = $selectedAccesionName.text().trim();
+                            expect(biosampleAccesionName).to.contain(selectedAccesionName);
+                        });
+                }).end();
+            }
+        });
     });
 
 });
