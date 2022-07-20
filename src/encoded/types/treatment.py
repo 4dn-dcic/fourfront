@@ -83,9 +83,12 @@ class TreatmentAgent(Treatment):
         if conditions:
             conditions = " (" + conditions + ")"
 
-        if chemical:
-            action = "treatment" if concentration != 0 else "washout"
-            disp_title = chemical + " " + action + conditions
+        if treatment_type == "Chemical":
+            if chemical is None:
+                chemical, action = "", "Untreated"
+            else:
+                action = " treatment" if concentration != 0 else " washout"
+            disp_title = chemical + action + conditions
         elif treatment_type == "Transient Transfection" and constructs:
             plasmids = ", ".join(
                 [get_item_or_none(request, construct).get('name') for construct in constructs]

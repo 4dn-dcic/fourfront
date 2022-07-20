@@ -5,14 +5,18 @@ pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def drug_treatment(testapp, lab, award):
+def chemical_treatment(testapp, lab, award):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
         'treatment_type': 'Chemical',
-        'chemical': 'Drug',
     }
     return testapp.post_json('/treatment_agent', item).json['@graph'][0]
+
+
+@pytest.fixture
+def drug_treatment(testapp, chemical_treatment):
+    return testapp.patch_json(chemical_treatment['@id'], {'chemical': 'Drug'}).json['@graph'][0]
 
 
 @pytest.fixture
@@ -73,6 +77,14 @@ def test_calculated_chemical_treatment_washout_display_title(testapp, drug_treat
         {'duration': 3.5, 'duration_units': 'hour', 'concentration': 0, 'concentration_units': 'M'}
     )
     assert res.json['@graph'][0]['display_title'] == 'Drug washout (3.5h)'
+
+
+def test_calculated_chemical_treatment_untreated_display_title(testapp, chemical_treatment):
+    assert chemical_treatment['display_title'] == 'Untreated'
+    res = testapp.patch_json(
+        chemical_treatment['@id'],
+        {'duration': 3.5, 'duration_units': 'hour'})
+    assert res.json['@graph'][0]['display_title'] == 'Untreated (3.5h)'
 
 
 def test_calculated_biological_treatment_display_title(testapp, viral_treatment):
