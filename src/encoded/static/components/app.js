@@ -208,20 +208,20 @@ export default class App extends React.PureComponent {
             store.dispatch({ 'type' : { 'href' : windowHref } });
         }
 
-        // Load up analytics
-        // Load up analytics & perform initial pageview track
-        const analyticsID = getGoogleAnalyticsTrackingID(href);
-        if (analyticsID){
-            analytics.initializeGoogleAnalytics(
-                analyticsID,
-                {
-                    ...analyticsConfigurationOptions,
-                    reduxStore: store,
-                    initialContext: context,
-                    initialHref: windowHref
-                }
-            );
-        }
+        // // Load up analytics
+        // // Load up analytics & perform initial pageview track
+        // const analyticsID = getGoogleAnalyticsTrackingID(href);
+        // if (analyticsID){
+        //     analytics.initializeGoogleAnalytics(
+        //         analyticsID,
+        //         {
+        //             ...analyticsConfigurationOptions,
+        //             reduxStore: store,
+        //             initialContext: context,
+        //             initialHref: windowHref
+        //         }
+        //     );
+        // }
 
         //Load up sentry io
         const dsn = sentryDsn(href);
