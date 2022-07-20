@@ -1,0 +1,1312 @@
+{
+    "title": "Quality Metric for ChIP-Seq",
+    "description": "Schema for reporting the specific calculation of an quality metrics",
+    "id": "/profiles/quality_metric_chipseq.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "quality_metric.json#/properties" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/modified" },
+        { "$ref": "mixins.json#/release_dates" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/static_embeds" },
+        { "$ref": "quality_metric.json#/properties" }
+    ],
+    "mixinFacets": [
+        { "$ref": "mixins.json#/facets_common" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "name": {
+            "type": "string"
+        },
+        "desc": {
+            "type": "string"
+        },
+        "overall_quality_status": {
+            "qc_order": 1
+        },
+        "replication": {
+            "title": "IDR Reproducibility",
+            "type": "object",
+            "qc_order": 3,
+            "additionalProperties": false,
+            "properties": {
+                "reproducibility": {
+                    "type": "object",
+                    "properties": {
+                        "overlap": {
+                            "type": "object",
+                            "properties": {
+                                "Nt": {
+                                    "title": "Nt",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "N1": {
+                                    "title": "N1",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "N2": {
+                                    "title": "N2",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "Np": {
+                                    "title": "Np",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "N_opt": {
+                                    "title": "N Optimal",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "N_consv": {
+                                    "title": "N Conservative",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "opt_set": {
+                                    "title": "Optimal Set",
+                                    "type": "string",
+                                    "qc_order": 7
+                                },
+                                "consv_set": {
+                                    "title": "Conservative Set",
+                                    "type": "string",
+                                    "qc_order": 8
+                                },
+                                "rescue_ratio": {
+                                    "title": "Rescue Ratio",
+                                    "type": "number",
+                                    "qc_order": 9
+                                },
+                                "self_consistency_ratio": {
+                                    "title": "Self Consistency Ratio",
+                                    "type": "number",
+                                    "qc_order": 10
+                                },
+                                "reproducibility": {
+                                    "title": "Reproducibility",
+                                    "type": "string",
+                                    "qc_order": 11
+                                }
+                            }
+                        }
+                    }
+                },
+                "num_peaks": {
+                    "type": "object",
+                    "rep1": {
+                        "type": "object",
+                        "properties": {
+                            "num_peaks": {
+                                "title": "Number of peaks",
+                                "type": "number",
+                                "qc_order": 1
+                            }
+                        }
+                    },
+                    "rep2": {
+                        "type": "object",
+                        "properties": {
+                            "num_peaks": {
+                                "title": "Number of peaks",
+                                "type": "number",
+                                "qc_order": 1
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "peak_stat": {
+            "title": "Peak Statistics",
+            "type": "object",
+            "qc_order": 2,
+            "additionalProperties": false,
+            "properties": {
+                "peak_region_size": {
+                    "type": "object",
+                    "properties": {
+                        "rep1": {
+                            "type": "object",
+                            "properties": {
+                                "min_size": {
+                                    "title": "Min Size",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "25_pct": {
+                                    "title": "25th Percentile",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "50_pct": {
+                                    "title": "50th Percentile",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "75_pct": {
+                                    "title": "75th Percentile",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "max_size": {
+                                    "title": "Max Size",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mean": {
+                                    "title": "Mean",
+                                    "type": "number",
+                                    "qc_order": 6
+                                }
+                            }
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "properties": {
+                                "min_size": {
+                                    "title": "Min Size",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "25_pct": {
+                                    "title": "25th Percentile",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "50_pct": {
+                                    "title": "50th Percentile",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "75_pct": {
+                                    "title": "75th Percentile",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "max_size": {
+                                    "title": "Max Size",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mean": {
+                                    "title": "Mean",
+                                    "type": "number",
+                                    "qc_order": 6
+                                }
+                            }
+                        },
+                        "overlap_opt": {
+                            "type": "object",
+                            "properties": {
+                                "min_size": {
+                                    "title": "Min Size",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "25_pct": {
+                                    "title": "25th Percentile",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "50_pct": {
+                                    "title": "50th Percentile",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "75_pct": {
+                                    "title": "75th Percentile",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "max_size": {
+                                    "title": "Max Size",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mean": {
+                                    "title": "Mean",
+                                    "type": "number",
+                                    "qc_order": 6
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "peak_enrich": {
+            "title": "FRiP MACS2",
+            "type": "object",
+            "qc_order": 3,
+            "additionalProperties": false,
+            "properties": {
+                "frac_reads_in_peaks": {
+                    "type": "object",
+                    "properties": {
+                        "macs2": {
+                            "type": "object",
+                            "properties": {
+                                "rep1": {
+                                    "title": "Rep1",
+                                    "type": "object",
+                                    "qc_order": 1,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep2": {
+                                    "title": "Rep2",
+                                    "type": "object",
+                                    "qc_order": 2,
+                                    "additionalProperties": false,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep1-pr1": {
+                                    "title": "Rep1 - Pr1",
+                                    "type": "object",
+                                    "qc_order": 3,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep2-pr1": {
+                                    "title": "Rep2 - Pr1",
+                                    "type": "object",
+                                    "qc_order": 4,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep1-pr2": {
+                                    "title": "Rep1 - Pr2",
+                                    "type": "object",
+                                    "qc_order": 5,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep2-pr2": {
+                                    "title": "Rep2 - Pr2",
+                                    "type": "object",
+                                    "qc_order": 6,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "pooled": {
+                                    "title": "Pooled",
+                                    "type": "object",
+                                    "qc_order": 7,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "pooled-pr1": {
+                                    "title": "Pooled-pr1",
+                                    "type": "object",
+                                    "qc_order": 8,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "pooled-pr2": {
+                                    "title": "Pooled-pr2",
+                                    "type": "object",
+                                    "qc_order": 9,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "overlap": {
+                            "type": "object",
+                            "properties": {
+                                "rep1_vs_rep2": {
+                                    "title": "Rep1 vs Rep2",
+                                    "type": "object",
+                                    "qc_order": 1,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep1-pr1_vs_rep1-pr2": {
+                                    "title": "Rep1-Pr1 vs Rep1-Pr2",
+                                    "type": "object",
+                                    "qc_order": 2,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "rep1-pr1_vs_rep2-pr2": {
+                                    "title": "Rep1-Pr1 vs Rep2-Pr2",
+                                    "type": "object",
+                                    "qc_order": 3,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                },
+                                "pooled-pr1_vs_pooled-pr2": {
+                                    "title": "Pooled-Pr1 vs Pooled-Pr2",
+                                    "type": "object",
+                                    "qc_order": 4,
+                                    "properties": {
+                                        "FRiP": {
+                                            "title": "FRiP",
+                                            "type": "number",
+                                            "qc_order": 1
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "align": {
+            "type": "object",
+            "properties": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "samstat": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "rep1": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "total_reads": {
+                                        "title": "Total read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "total_reads_qc_failed": {
+                                        "title": "Total read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads": {
+                                        "title": "Duplicate read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads_qc_failed": {
+                                        "title": "Duplicate read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads": {
+                                        "title": "Mapped read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads_qc_failed": {
+                                        "title": "Mapped read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_mapped_reads": {
+                                        "title": "Percent of read pairs mapped",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads": {
+                                        "title": "Paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads_qc_failed": {
+                                        "title": "Paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1": {
+                                        "title": "Read 1",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1_qc_failed": {
+                                        "title": "Read 1 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2": {
+                                        "title": "Read 2",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2_qc_failed": {
+                                        "title": "Read 2 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads": {
+                                        "title": "Properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads_qc_failed": {
+                                        "title": "Properly paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_properly_paired_reads": {
+                                        "title": "Percent properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself": {
+                                        "title": "Paired with itself",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself_qc_failed": {
+                                        "title": "Paired with itself failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons": {
+                                        "title": "Singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons_qc_failed": {
+                                        "title": "Singletons failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_singletons": {
+                                        "title": "Percent singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms": {
+                                        "title": "Different chromosomes",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms_qc_failed": {
+                                        "title": "Different chromosomes failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    }
+                                }
+                            },
+                            "rep2": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "total_reads": {
+                                        "title": "Total read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "total_reads_qc_failed": {
+                                        "title": "Total read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads": {
+                                        "title": "Duplicate read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads_qc_failed": {
+                                        "title": "Duplicate read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads": {
+                                        "title": "Mapped read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads_qc_failed": {
+                                        "title": "Mapped read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_mapped_reads": {
+                                        "title": "Percent of read pairs mapped",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads": {
+                                        "title": "Paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads_qc_failed": {
+                                        "title": "Paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1": {
+                                        "title": "Read 1",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1_qc_failed": {
+                                        "title": "Read 1 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2": {
+                                        "title": "Read 2",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2_qc_failed": {
+                                        "title": "Read 2 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads": {
+                                        "title": "Properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads_qc_failed": {
+                                        "title": "Properly paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_properly_paired_reads": {
+                                        "title": "Percent properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself": {
+                                        "title": "Paired with itself",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself_qc_failed": {
+                                        "title": "Paired with itself failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons": {
+                                        "title": "Singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons_qc_failed": {
+                                        "title": "Singletons failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_singletons": {
+                                        "title": "Percent singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms": {
+                                        "title": "Different chromosomes",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms_qc_failed": {
+                                        "title": "Different chromosomes failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "dup": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "rep1": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "unpaired_reads": {
+                                        "title": "Unpaired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads": {
+                                        "title": "Paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "unmapped_reads": {
+                                        "title": "Unmapped reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "unpaired_duplicate_reads": {
+                                        "title": "Unpaired duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_duplicate_reads": {
+                                        "title": "Paired duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_optical_duplicate_reads": {
+                                        "title": "Paired optical duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_duplicate_reads": {
+                                        "title": "Percent duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    }
+                                }
+                            },
+                            "rep2": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "unpaired_reads": {
+                                        "title": "Unpaired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads": {
+                                        "title": "Paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "unmapped_reads": {
+                                        "title": "Unmapped reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "unpaired_duplicate_reads": {
+                                        "title": "Unpaired duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_duplicate_reads": {
+                                        "title": "Paired duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_optical_duplicate_reads": {
+                                        "title": "Paired optical duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_duplicate_reads": {
+                                        "title": "Percent duplicate reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "nodup_samstat": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "rep1": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "total_reads": {
+                                        "title": "Total read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "total_reads_qc_failed": {
+                                        "title": "Total read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads": {
+                                        "title": "Duplicate read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads_qc_failed": {
+                                        "title": "Duplicate read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads": {
+                                        "title": "Mapped read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads_qc_failed": {
+                                        "title": "Mapped read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_mapped_reads": {
+                                        "title": "Percent of read pairs mapped",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads": {
+                                        "title": "Paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads_qc_failed": {
+                                        "title": "Paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1": {
+                                        "title": "Read 1",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1_qc_failed": {
+                                        "title": "Read 1 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2": {
+                                        "title": "Read 2",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2_qc_failed": {
+                                        "title": "Read 2 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads": {
+                                        "title": "Properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads_qc_failed": {
+                                        "title": "Properly paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_properly_paired_reads": {
+                                        "title": "Percent properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself": {
+                                        "title": "Paired with itself",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself_qc_failed": {
+                                        "title": "Paired with itself failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons": {
+                                        "title": "Singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons_qc_failed": {
+                                        "title": "Singletons failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_singletons": {
+                                        "title": "Percent singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms": {
+                                        "title": "Different chromosomes",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms_qc_failed": {
+                                        "title": "Different chromosomes failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    }
+                                }
+                            },
+                            "rep2": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "properties": {
+                                    "total_reads": {
+                                        "title": "Total read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "total_reads_qc_failed": {
+                                        "title": "Total read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads": {
+                                        "title": "Duplicate read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "duplicate_reads_qc_failed": {
+                                        "title": "Duplicate read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads": {
+                                        "title": "Mapped read pairs",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "mapped_reads_qc_failed": {
+                                        "title": "Mapped read pairs failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_mapped_reads": {
+                                        "title": "Percent of read pairs mapped",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads": {
+                                        "title": "Paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "paired_reads_qc_failed": {
+                                        "title": "Paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1": {
+                                        "title": "Read 1",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read1_qc_failed": {
+                                        "title": "Read 1 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2": {
+                                        "title": "Read 2",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "read2_qc_failed": {
+                                        "title": "Read 2 failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads": {
+                                        "title": "Properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "properly_paired_reads_qc_failed": {
+                                        "title": "Properly paired reads failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_properly_paired_reads": {
+                                        "title": "Percent properly paired reads",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself": {
+                                        "title": "Paired with itself",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "with_itself_qc_failed": {
+                                        "title": "Paired with itself failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons": {
+                                        "title": "Singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "singletons_qc_failed": {
+                                    "title": "Singletons failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "pct_singletons": {
+                                        "title": "Percent singletons",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms": {
+                                        "title": "Different chromosomes",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "diff_chroms_qc_failed": {
+                                        "title": "Different chromosomes failing QC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "lib_complexity": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties":
+                "lib_complexity": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties":
+                        "rep1": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_fragments": {
+                                    "title": "Total fragments",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "distinct_fragments": {
+                                    "title": "Distinct fragments",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "positions_with_one_read": {
+                                    "title": "Positions with one read",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "NRF": {
+                                    "title": "NRF",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "PCB1": {
+                                    "title": "PCB1",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "PCB2": {
+                                    "title": "PCB2",
+                                    "type": "number",
+                                    "qc_order": 6
+                                }
+                            }
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_fragments": {
+                                    "title": "Total fragments",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "distinct_fragments": {
+                                    "title": "Distinct fragments",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "positions_with_one_read": {
+                                    "title": "Positions with one read",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "NRF": {
+                                    "title": "NRF",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "PCB1": {
+                                    "title": "PCB1",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "PCB2": {
+                                    "title": "PCB2",
+                                    "type": "number",
+                                    "qc_order": 6
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "align_enrich": {
+            "xcor_score": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "rep1": {
+                            "subsampled_reads": {
+                                "title": "Subsampled reads",
+                                "type": "number",
+                                "qc_order": 1
+                            },
+                            "estimated_fragment_len": {
+                                "title": "Estimated fragment length",
+                                "type": "number",
+                                "qc_order": 2
+                            },
+                            "corr_estimated_fragment_len": {
+                                "title": "Estimated fragment length correlation",
+                                "type": "number",
+                                "qc_order": 3
+                            },
+                            "phantom_peak": {
+                                "title": "Phantom peaks",
+                                "type": "number",
+                                "qc_order": 4
+                            },
+                            "corr_phantom_peak": {
+                                "title": "Phantom peak correlation",
+                                "type": "number",
+                                "qc_order": 5
+                            },
+                            "argmin_corr": {
+                                "title": "Argmin correlation",
+                                "type": "number",
+                                "qc_order": 6
+                            },
+                            "min_corr": {
+                                "title": "Min correlation",
+                                "type": "number",
+                                "qc_order": 7
+                            },
+                            "NSC": {
+                                "title": "Normalized strand cross-correlation coefficient",
+                                "type": "number",
+                                "qc_order": 8
+                            },
+                            "RSC": {
+                                "title": "Relative strand cross-correlation coefficient",
+                                "type": "number",
+                                "qc_order": 9
+                            }
+                        },
+                        "rep2": {
+                            "subsampled_reads": {
+                                "title": "Subsampled reads",
+                                "type": "number",
+                                "qc_order": 1
+                            },
+                            "estimated_fragment_len": {
+                                "title": "Estimated fragment length",
+                                "type": "number",
+                                "qc_order": 2
+                            },
+                            "corr_estimated_fragment_len": {
+                                "title": "Estimated fragment length correlation",
+                                "type": "number",
+                                "qc_order": 3
+                            },
+                            "phantom_peak": {
+                                "title": "Phantom peaks",
+                                "type": "number",
+                                "qc_order": 4
+                            },
+                            "corr_phantom_peak": {
+                                "title": "Phantom peak correlation",
+                                "type": "number",
+                                "qc_order": 5
+                            },
+                            "argmin_corr": {
+                                "title": "Argmin correlation",
+                                "type": "number",
+                                "qc_order": 6
+                            },
+                            "min_corr": {
+                                "title": "Min correlation",
+                                "type": "number",
+                                "qc_order": 7
+                            },
+                            "NSC": {
+                                "title": "Normalized strand cross-correlation coefficient",
+                                "type": "number",
+                                "qc_order": 8
+                            },
+                            "RSC": {
+                                "title": "Relative strand cross-correlation coefficient",
+                                "type": "number",
+                                "qc_order": 9
+                            }
+                        }
+                    }
+                }
+            },
+            "jsd": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "rep1": {
+                            "auc": {
+                                "title": "AUC",
+                                "type": "number",
+                                "qc_order": 1
+                            },
+                            "syn_auc": {
+                                "title": "Syn AUC",
+                                "type": "number",
+                                "qc_order": 2
+                            },
+                            "x_intercept": {
+                                "title": "X intercept",
+                                "type": "number",
+                                "qc_order": 3
+                            },
+                            "syn_x_intercept": {
+                                "title": "Syn x intercept",
+                                "type": "number",
+                                "qc_order": 4
+                            },
+                            "elbow_pt": {
+                                "title": "Elbow point",
+                                "type": "number",
+                                "qc_order": 5
+                            },
+                            "syn_elbow_pt": {
+                                "title": "Syn elbow point",
+                                "type": "number",
+                                "qc_order": 6
+                            },
+                            "syn_jsd": {
+                                "title": "Syn jsd",
+                                "type": "number",
+                                "qc_order": 7
+                            }
+                        },
+                        "rep2": {
+                            "auc": {
+                                "title": "AUC",
+                                "type": "number",
+                                "qc_order": 1
+                            },
+                            "syn_auc": {
+                                "title": "Syn AUC",
+                                "type": "number",
+                                "qc_order": 2
+                            },
+                            "x_intercept": {
+                                "title": "X intercept",
+                                "type": "number",
+                                "qc_order": 3
+                            },
+                            "syn_x_intercept": {
+                                "title": "Syn x intercept",
+                                "type": "number",
+                                "qc_order": 4
+                            },
+                            "elbow_pt": {
+                                "title": "Elbow point",
+                                "type": "number",
+                                "qc_order": 5
+                            },
+                            "syn_elbow_pt": {
+                                "title": "Syn elbow point",
+                                "type": "number",
+                                "qc_order": 6
+                            },
+                            "syn_jsd": {
+                                "title": "Syn jsd",
+                                "type": "number",
+                                "qc_order": 7
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "facets": {
+        "overall_quality_status": {
+            "title": "Overall Quality"
+        }
+    },
+    "columns": {
+        "overall_quality_status": {
+            "title": "Overall Quality"
+        }
+    },
+    "qc_order": 1
+}

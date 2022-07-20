@@ -314,6 +314,45 @@ class QualityMetricDedupqcRepliseq(QualityMetric):
 
 
 @collection(
+    name='quality-metrics-chipseq-v2',
+    properties={
+        'title': 'QC Quality Metrics for ChIP-seq',
+        'description': 'Listing of QC Quality Metrics for ChIP-seq',
+    })
+class QualityMetricChipseq(QualityMetric):
+    """Subclass of quality metrics for chip-seq"""
+
+    item_type = 'quality_metric_chipseq_v2'
+    schema = load_schema('encoded:schemas/quality_metric_chipseq_v2.json')
+    embedded_list = QualityMetric.embedded_list
+
+    @calculated_property(schema=QC_SUMMARY_SCHEMA)
+    def quality_metric_summary(self, request):
+        qc = self.properties
+        qc_summary = []
+
+        if 'align' in quality_metric:
+            qc_summary.append({"title": "Nonredundant Read Fraction (NRF)",
+                               "value": str(round2(quality_metric.get("lib_complexity")["lib_complexity"]["rep1"]["NRF"])),
+                               "tooltip": "distinct non-mito read pairs / total non-mito read pairs",
+                               "numberType": "float"})
+            qc_summary.append({"title": "PCR Bottleneck Coefficient (PBC)",
+                               "value": str(round2(quality_metric.get("lib_complexity")["lib_complexity"]["rep1"]["PBC1"])),
+                               "tooltip": "one-read non-mito read pairs / distinct non-mito read pairs",
+                               "numberType": "float"})
+            '''
+            final_reads = quality_metric.get(
+                "align")["nodup_samstat"]["rep1"]  # PE
+            if not final_reads:
+                final_reads = quality_metric.get(
+                    "align")["nodup_samstat"]  # SE
+            qc_summary.append({"title": "Filtered & Deduped Reads",
+                               "value": str(final_reads),
+                               "numberType": "integer"})
+            '''
+        return qc_summary
+
+@collection(
     name='quality-metrics-chipseq',
     properties={
         'title': 'QC Quality Metrics for ChIP-seq',
@@ -329,7 +368,6 @@ class QualityMetricChipseq(QualityMetric):
     @calculated_property(schema=QC_SUMMARY_SCHEMA)
     def quality_metric_summary(self, request):
         return get_chipseq_atacseq_qc_summary(self.properties, 'QualityMetricChipseq')
-
 
 @collection(
     name='quality-metrics-atacseq',
