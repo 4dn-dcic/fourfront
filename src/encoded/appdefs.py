@@ -77,6 +77,7 @@ ITEM_INDEX_ORDER = [
     'QualityMetricBamqc',
     'QualityMetricBamcheck',
     'QualityMetricChipseq',
+    'QualityMetricChipseqV2'
     'QualityMetricDedupqcRepliseq',
     'QualityMetricFastqc',
     'QualityMetricFlag',
