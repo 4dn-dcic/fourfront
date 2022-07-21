@@ -1026,11 +1026,11 @@
         "lib_complexity": {
             "type": "object",
             "additionalProperties": false,
-            "properties":
+            "properties": {
                 "lib_complexity": {
                     "type": "object",
                     "additionalProperties": false,
-                    "properties":
+                    "properties": {
                         "rep1": {
                             "type": "object",
                             "additionalProperties": false,
