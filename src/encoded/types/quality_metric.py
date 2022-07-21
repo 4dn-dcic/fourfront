@@ -332,15 +332,18 @@ class QualityMetricChipseqV2(QualityMetric):
         qc_summary = []
 
         if 'align' in qc:
+            
+            # removed          "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["NRF"])),
             qc_summary.append({"title": "Nonredundant Read Fraction (NRF)",
-                               "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["NRF"])),
+                               "value": "1234",
                                "tooltip": "distinct non-mito read pairs / total non-mito read pairs",
                                "numberType": "float"})
+            '''
             qc_summary.append({"title": "PCR Bottleneck Coefficient (PBC)",
                                "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["PBC1"])),
                                "tooltip": "one-read non-mito read pairs / distinct non-mito read pairs",
                                "numberType": "float"})
-            '''
+            
             final_reads = quality_metric.get(
                 "align")["nodup_samstat"]["rep1"]  # PE
             if not final_reads:
