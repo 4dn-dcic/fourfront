@@ -44,7 +44,7 @@ certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
 dcicsnovault = "^5.7.0"
-dcicutils = "3.16.0.3b64"
+dcicutils = "3.16.0.3b68"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -161,6 +161,12 @@ wheel = ">=0.29.0"  # needed for distribution but not any particular version
 # See details at https://pytest.org/en/stable/customize.html
 
 [tool.poetry.scripts]
+# dcicutils commands
+add-image-tag = "dcicutils.ecr_scripts:add_image_tag_main"
+show-global-env-bucket = "dcicutils.env_scripts:show_global_env_bucket_main"
+show-image-manifest = "dcicutils.ecr_scripts:show_image_manifest_main"
+show-image-catalog = "dcicutils.ecr_scripts:show_image_catalog_main"
+unrelease-most-recent-image = "dcicutils.ecr_scripts:unrelease_most_recent_image_main"
 # snovault commands
 batchupgrade = "snovault.batchupgrade:main"
 create-mapping = "snovault.elasticsearch.create_mapping:main"
@@ -194,7 +200,6 @@ run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
 update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
 verify-item = "encoded.commands.verify_item:main"
-
 
 [paste.app_factory]
 main = "encoded:main"
