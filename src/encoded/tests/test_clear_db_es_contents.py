@@ -52,10 +52,10 @@ def test_run_clear_db_envs(app, testapp):
         mock_clear_db_tables.side_effect = mocked_clear_db_tables
 
         # should never run on these envs (but we have mocked out the clear_db_tables just in case)
-        test_clear(env_to_simulate='fourfront-webprod', expecting_to_clear=False)
-        test_clear(env_to_simulate='fourfront-webprod2', expecting_to_clear=False)
-        test_clear(env_to_simulate='fourfront-blue', expecting_to_clear=False)
-        test_clear(env_to_simulate='fourfront-cgap', expecting_to_clear=False)
+        test_clear(env_to_simulate='data', expecting_to_clear=False)
+        test_clear(env_to_simulate='staging', expecting_to_clear=False)
+        test_clear(env_to_simulate='fourfront-production-blue', expecting_to_clear=False)
+        test_clear(env_to_simulate='fourfront-production-green', expecting_to_clear=False)
         # Let's NOT test green and just assume it works, rather than risking a public catastrophe if we goofed
         # on BOTH the logic and the mocking. Unlikely, but hey, weirder things have happened. -kmp 3-Apr-2020
 

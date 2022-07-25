@@ -88,12 +88,12 @@ class MockedLog:
 # These next are more extensively tested in dcicutils.
 # This is just plausibility checking that we've received things OK.
 
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-blue'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-production-blue'))
 def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the new staging case """
     my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
-    assert my_env == 'fourfront-blue'
+    assert my_env == 'fourfront-production-blue'
     cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
     assert cfg['ENV_NAME'] == my_env  # sanity
     assert cfg['SKIP'] is False
@@ -101,12 +101,12 @@ def test_get_deployment_config_staging():
     assert cfg['STRICT'] is True
 
 
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-production-green'))
 def test_get_deployment_config_prod():
     """ Tests get_deployment_config in the new production case """
     my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
-    assert my_env == 'fourfront-green'
+    assert my_env == 'fourfront-production-green'
     with pytest.raises(RuntimeError):
         CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
 
@@ -168,8 +168,8 @@ class Simulation:
 
 
 @patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-production-green'))
 @patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
 def test_run_create_mapping_production(mock_run_create_mapping, app):
 
@@ -183,7 +183,7 @@ def test_run_create_mapping_production(mock_run_create_mapping, app):
         assert e.code == 1
     assert simulation.run_has_been_called is False
     assert mocked_log.log == [
-        ('info', 'Environment fourfront-green is currently the production environment.'
+        ('info', 'Environment fourfront-production-green is currently the production environment.'
                  ' Something is definitely wrong. We never deploy there, we always CNAME swap.'
                  ' This deploy cannot proceed. DeploymentFailure will be raised.'),
         ('error', 'Exception encountered while gathering deployment information or running create_mapping'),
@@ -192,8 +192,8 @@ def test_run_create_mapping_production(mock_run_create_mapping, app):
 
 
 @patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-blue'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-production-blue'))
 @patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
 def test_run_create_mapping_staging(mock_run_create_mapping, app):
 
@@ -211,7 +211,7 @@ def test_run_create_mapping_staging(mock_run_create_mapping, app):
         raise AssertionError("Unexpected error exit (%s): %s" % (e.__class__.__name__, e))
     assert simulation.run_has_been_called is True
     assert mocked_log.log == [
-        ('info', 'Environment fourfront-blue is currently the staging environment. Processing mode: STRICT,WIPE_ES'),
+        ('info', 'Environment fourfront-production-blue is currently the staging environment. Processing mode: STRICT,WIPE_ES'),
         ('info', 'Calling run_create_mapping for env fourfront-blue.')
     ]
     assert exit_condition, "Unexpected non-error exit."
@@ -219,7 +219,7 @@ def test_run_create_mapping_staging(mock_run_create_mapping, app):
 
 
 @patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
 @patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
 def test_run_create_mapping_hotseat(mock_run_create_mapping, app):
@@ -240,7 +240,7 @@ def test_run_create_mapping_hotseat(mock_run_create_mapping, app):
 
 
 @patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
 @patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
 def test_run_create_mapping_mastertest(mock_run_create_mapping, app):
@@ -261,7 +261,7 @@ def test_run_create_mapping_mastertest(mock_run_create_mapping, app):
 
 
 @patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
 @patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
 def test_run_create_mapping_mastertest_with_clear_queue(mock_run_create_mapping, app):

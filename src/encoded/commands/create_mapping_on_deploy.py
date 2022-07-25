@@ -37,7 +37,7 @@ def _run_create_mapping(app, args):
 
     try:
         my_env = get_my_env(app)
-        deploy_cfg = {'SKIP': True}  # default
+        deploy_cfg = {'SKIP': True, 'ENV_NAME': my_env}  # default
         if is_beanstalk_env(my_env):
             deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
                                                                         client='create_mapping_on_deploy')
