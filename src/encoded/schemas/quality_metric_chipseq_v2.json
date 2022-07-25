@@ -432,590 +432,586 @@
         },
         "align": {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "samstat": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "rep1": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "total_reads": {
-                                        "title": "Total read pairs",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "total_reads_qc_failed": {
-                                        "title": "Total read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "duplicate_reads": {
-                                        "title": "Duplicate read pairs",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "duplicate_reads_qc_failed": {
-                                        "title": "Duplicate read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "mapped_reads": {
-                                        "title": "Mapped read pairs",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "mapped_reads_qc_failed": {
-                                        "title": "Mapped read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "pct_mapped_reads": {
-                                        "title": "Percent of read pairs mapped",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    },
-                                    "paired_reads": {
-                                        "title": "Paired reads",
-                                        "type": "number",
-                                        "qc_order": 8
-                                    },
-                                    "paired_reads_qc_failed": {
-                                        "title": "Paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 9
-                                    },
-                                    "read1": {
-                                        "title": "Read 1",
-                                        "type": "number",
-                                        "qc_order": 10
-                                    },
-                                    "read1_qc_failed": {
-                                        "title": "Read 1 failing QC",
-                                        "type": "number",
-                                        "qc_order": 11
-                                    },
-                                    "read2": {
-                                        "title": "Read 2",
-                                        "type": "number",
-                                        "qc_order": 12
-                                    },
-                                    "read2_qc_failed": {
-                                        "title": "Read 2 failing QC",
-                                        "type": "number",
-                                        "qc_order": 13
-                                    },
-                                    "properly_paired_reads": {
-                                        "title": "Properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 14
-                                    },
-                                    "properly_paired_reads_qc_failed": {
-                                        "title": "Properly paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 15
-                                    },
-                                    "pct_properly_paired_reads": {
-                                        "title": "Percent properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 16
-                                    },
-                                    "with_itself": {
-                                        "title": "Paired with itself",
-                                        "type": "number",
-                                        "qc_order": 17
-                                    },
-                                    "with_itself_qc_failed": {
-                                        "title": "Paired with itself failing QC",
-                                        "type": "number",
-                                        "qc_order": 18
-                                    },
-                                    "singletons": {
-                                        "title": "Singletons",
-                                        "type": "number",
-                                        "qc_order": 19
-                                    },
-                                    "singletons_qc_failed": {
-                                        "title": "Singletons failing QC",
-                                        "type": "number",
-                                        "qc_order": 20
-                                    },
-                                    "pct_singletons": {
-                                        "title": "Percent singletons",
-                                        "type": "number",
-                                        "qc_order": 21
-                                    },
-                                    "diff_chroms": {
-                                        "title": "Different chromosomes",
-                                        "type": "number",
-                                        "qc_order": 22
-                                    },
-                                    "diff_chroms_qc_failed": {
-                                        "title": "Different chromosomes failing QC",
-                                        "type": "number",
-                                        "qc_order": 23
-                                    }
+                "samstat": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "rep1": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_reads": {
+                                    "title": "Total read pairs",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "total_reads_qc_failed": {
+                                    "title": "Total read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "duplicate_reads": {
+                                    "title": "Duplicate read pairs",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "duplicate_reads_qc_failed": {
+                                    "title": "Duplicate read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "mapped_reads": {
+                                    "title": "Mapped read pairs",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mapped_reads_qc_failed": {
+                                    "title": "Mapped read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "pct_mapped_reads": {
+                                    "title": "Percent of read pairs mapped",
+                                    "type": "number",
+                                    "qc_order": 7
+                                },
+                                "paired_reads": {
+                                    "title": "Paired reads",
+                                    "type": "number",
+                                    "qc_order": 8
+                                },
+                                "paired_reads_qc_failed": {                                        "title": "Paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 9
+                                },
+                                "read1": {
+                                    "title": "Read 1",
+                                    "type": "number",
+                                    "qc_order": 10
+                                },
+                                "read1_qc_failed": {
+                                    "title": "Read 1 failing QC",
+                                    "type": "number",
+                                    "qc_order": 11
+                                },
+                                "read2": {
+                                    "title": "Read 2",
+                                    "type": "number",
+                                    "qc_order": 12
+                                },
+                                "read2_qc_failed": {
+                                    "title": "Read 2 failing QC",
+                                    "type": "number",
+                                    "qc_order": 13
+                                },
+                                "properly_paired_reads": {
+                                    "title": "Properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 14
+                                },
+                                "properly_paired_reads_qc_failed": {
+                                    "title": "Properly paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 15
+                                },
+                                "pct_properly_paired_reads": {
+                                    "title": "Percent properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 16
+                                },
+                                "with_itself": {
+                                    "title": "Paired with itself",
+                                    "type": "number",
+                                    "qc_order": 17
+                                },
+                                "with_itself_qc_failed": {
+                                    "title": "Paired with itself failing QC",
+                                    "type": "number",
+                                    "qc_order": 18
+                                },
+                                "singletons": {
+                                    "title": "Singletons",
+                                    "type": "number",
+                                    "qc_order": 19
+                                },
+                                "singletons_qc_failed": {
+                                    "title": "Singletons failing QC",
+                                    "type": "number",
+                                    "qc_order": 20
+                                },
+                                "pct_singletons": {
+                                    "title": "Percent singletons",
+                                    "type": "number",
+                                    "qc_order": 21
+                                },
+                                "diff_chroms": {
+                                    "title": "Different chromosomes",
+                                    "type": "number",
+                                    "qc_order": 22
+                                },
+                                "diff_chroms_qc_failed": {
+                                    "title": "Different chromosomes failing QC",
+                                    "type": "number",
+                                    "qc_order": 23
                                 }
-                            },
-                            "rep2": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "total_reads": {
-                                        "title": "Total read pairs",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "total_reads_qc_failed": {
-                                        "title": "Total read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "duplicate_reads": {
-                                        "title": "Duplicate read pairs",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "duplicate_reads_qc_failed": {
-                                        "title": "Duplicate read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "mapped_reads": {
-                                        "title": "Mapped read pairs",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "mapped_reads_qc_failed": {
-                                        "title": "Mapped read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "pct_mapped_reads": {
-                                        "title": "Percent of read pairs mapped",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    },
-                                    "paired_reads": {
-                                        "title": "Paired reads",
-                                        "type": "number",
-                                        "qc_order": 8
-                                    },
-                                    "paired_reads_qc_failed": {
-                                        "title": "Paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 9
-                                    },
-                                    "read1": {
-                                        "title": "Read 1",
-                                        "type": "number",
-                                        "qc_order": 10
-                                    },
-                                    "read1_qc_failed": {
-                                        "title": "Read 1 failing QC",
-                                        "type": "number",
-                                        "qc_order": 11
-                                    },
-                                    "read2": {
-                                        "title": "Read 2",
-                                        "type": "number",
-                                        "qc_order": 12
-                                    },
-                                    "read2_qc_failed": {
-                                        "title": "Read 2 failing QC",
-                                        "type": "number",
-                                        "qc_order": 13
-                                    },
-                                    "properly_paired_reads": {
-                                        "title": "Properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 14
-                                    },
-                                    "properly_paired_reads_qc_failed": {
-                                        "title": "Properly paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 15
-                                    },
-                                    "pct_properly_paired_reads": {
-                                        "title": "Percent properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 16
-                                    },
-                                    "with_itself": {
-                                        "title": "Paired with itself",
-                                        "type": "number",
-                                        "qc_order": 17
-                                    },
-                                    "with_itself_qc_failed": {
-                                        "title": "Paired with itself failing QC",
-                                        "type": "number",
-                                        "qc_order": 18
-                                    },
-                                    "singletons": {
-                                        "title": "Singletons",
-                                        "type": "number",
-                                        "qc_order": 19
-                                    },
-                                    "singletons_qc_failed": {
-                                        "title": "Singletons failing QC",
-                                        "type": "number",
-                                        "qc_order": 20
-                                    },
-                                    "pct_singletons": {
-                                        "title": "Percent singletons",
-                                        "type": "number",
-                                        "qc_order": 21
-                                    },
-                                    "diff_chroms": {
-                                        "title": "Different chromosomes",
-                                        "type": "number",
-                                        "qc_order": 22
-                                    },
-                                    "diff_chroms_qc_failed": {
-                                        "title": "Different chromosomes failing QC",
-                                        "type": "number",
-                                        "qc_order": 23
-                                    }
+                            }
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_reads": {
+                                    "title": "Total read pairs",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "total_reads_qc_failed": {
+                                    "title": "Total read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "duplicate_reads": {
+                                    "title": "Duplicate read pairs",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "duplicate_reads_qc_failed": {
+                                    "title": "Duplicate read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "mapped_reads": {
+                                    "title": "Mapped read pairs",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mapped_reads_qc_failed": {
+                                    "title": "Mapped read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "pct_mapped_reads": {
+                                    "title": "Percent of read pairs mapped",
+                                    "type": "number",
+                                    "qc_order": 7
+                                },
+                                "paired_reads": {
+                                    "title": "Paired reads",
+                                    "type": "number",
+                                    "qc_order": 8
+                                },
+                                "paired_reads_qc_failed": {
+                                    "title": "Paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 9
+                                },
+                                "read1": {
+                                    "title": "Read 1",
+                                    "type": "number",
+                                    "qc_order": 10
+                                },
+                                "read1_qc_failed": {
+                                    "title": "Read 1 failing QC",
+                                    "type": "number",
+                                    "qc_order": 11
+                                },
+                                "read2": {
+                                    "title": "Read 2",
+                                    "type": "number",
+                                    "qc_order": 12
+                                },
+                                "read2_qc_failed": {
+                                    "title": "Read 2 failing QC",
+                                    "type": "number",
+                                    "qc_order": 13
+                                },
+                                "properly_paired_reads": {
+                                    "title": "Properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 14
+                                },
+                                "properly_paired_reads_qc_failed": {
+                                    "title": "Properly paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 15
+                                },
+                                "pct_properly_paired_reads": {
+                                    "title": "Percent properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 16
+                                },
+                                "with_itself": {
+                                    "title": "Paired with itself",
+                                    "type": "number",
+                                    "qc_order": 17
+                                },
+                                "with_itself_qc_failed": {
+                                    "title": "Paired with itself failing QC",
+                                    "type": "number",
+                                    "qc_order": 18
+                                },
+                                "singletons": {
+                                    "title": "Singletons",
+                                    "type": "number",
+                                    "qc_order": 19
+                                },
+                                "singletons_qc_failed": {
+                                    "title": "Singletons failing QC",
+                                    "type": "number",
+                                    "qc_order": 20
+                                },
+                                "pct_singletons": {
+                                    "title": "Percent singletons",
+                                    "type": "number",
+                                    "qc_order": 21
+                                },
+                                "diff_chroms": {
+                                    "title": "Different chromosomes",
+                                    "type": "number",
+                                    "qc_order": 22
+                                },
+                                "diff_chroms_qc_failed": {
+                                    "title": "Different chromosomes failing QC",
+                                    "type": "number",
+                                    "qc_order": 23
                                 }
                             }
                         }
-                    },
-                    "dup": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "rep1": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "unpaired_reads": {
-                                        "title": "Unpaired reads",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "paired_reads": {
-                                        "title": "Paired reads",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "unmapped_reads": {
-                                        "title": "Unmapped reads",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "unpaired_duplicate_reads": {
-                                        "title": "Unpaired duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "paired_duplicate_reads": {
-                                        "title": "Paired duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "paired_optical_duplicate_reads": {
-                                        "title": "Paired optical duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "pct_duplicate_reads": {
-                                        "title": "Percent duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    }
+                    }
+                },
+                "dup": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "rep1": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "unpaired_reads": {
+                                    "title": "Unpaired reads",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "paired_reads": {
+                                    "title": "Paired reads",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "unmapped_reads": {
+                                    "title": "Unmapped reads",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "unpaired_duplicate_reads": {
+                                    "title": "Unpaired duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "paired_duplicate_reads": {
+                                    "title": "Paired duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "paired_optical_duplicate_reads": {
+                                    "title": "Paired optical duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "pct_duplicate_reads": {
+                                    "title": "Percent duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 7
                                 }
-                            },
-                            "rep2": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "unpaired_reads": {
-                                        "title": "Unpaired reads",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "paired_reads": {
-                                        "title": "Paired reads",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "unmapped_reads": {
-                                        "title": "Unmapped reads",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "unpaired_duplicate_reads": {
-                                        "title": "Unpaired duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "paired_duplicate_reads": {
-                                        "title": "Paired duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "paired_optical_duplicate_reads": {
-                                        "title": "Paired optical duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "pct_duplicate_reads": {
-                                        "title": "Percent duplicate reads",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    }
+                            }
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "unpaired_reads": {
+                                    "title": "Unpaired reads",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "paired_reads": {
+                                    "title": "Paired reads",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "unmapped_reads": {
+                                    "title": "Unmapped reads",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "unpaired_duplicate_reads": {
+                                    "title": "Unpaired duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "paired_duplicate_reads": {
+                                    "title": "Paired duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "paired_optical_duplicate_reads": {
+                                    "title": "Paired optical duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "pct_duplicate_reads": {
+                                    "title": "Percent duplicate reads",
+                                    "type": "number",
+                                    "qc_order": 7
                                 }
                             }
                         }
-                    },
-                    "nodup_samstat": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "rep1": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "total_reads": {
-                                        "title": "Total read pairs",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "total_reads_qc_failed": {
-                                        "title": "Total read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "duplicate_reads": {
-                                        "title": "Duplicate read pairs",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "duplicate_reads_qc_failed": {
-                                        "title": "Duplicate read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "mapped_reads": {
-                                        "title": "Mapped read pairs",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "mapped_reads_qc_failed": {
-                                        "title": "Mapped read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "pct_mapped_reads": {
-                                        "title": "Percent of read pairs mapped",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    },
-                                    "paired_reads": {
-                                        "title": "Paired reads",
-                                        "type": "number",
-                                        "qc_order": 8
-                                    },
-                                    "paired_reads_qc_failed": {
-                                        "title": "Paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 9
-                                    },
-                                    "read1": {
-                                        "title": "Read 1",
-                                        "type": "number",
-                                        "qc_order": 10
-                                    },
-                                    "read1_qc_failed": {
-                                        "title": "Read 1 failing QC",
-                                        "type": "number",
-                                        "qc_order": 11
-                                    },
-                                    "read2": {
-                                        "title": "Read 2",
-                                        "type": "number",
-                                        "qc_order": 12
-                                    },
-                                    "read2_qc_failed": {
-                                        "title": "Read 2 failing QC",
-                                        "type": "number",
-                                        "qc_order": 13
-                                    },
-                                    "properly_paired_reads": {
-                                        "title": "Properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 14
-                                    },
-                                    "properly_paired_reads_qc_failed": {
-                                        "title": "Properly paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 15
-                                    },
-                                    "pct_properly_paired_reads": {
-                                        "title": "Percent properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 16
-                                    },
-                                    "with_itself": {
-                                        "title": "Paired with itself",
-                                        "type": "number",
-                                        "qc_order": 17
-                                    },
-                                    "with_itself_qc_failed": {
-                                        "title": "Paired with itself failing QC",
-                                        "type": "number",
-                                        "qc_order": 18
-                                    },
-                                    "singletons": {
-                                        "title": "Singletons",
-                                        "type": "number",
-                                        "qc_order": 19
-                                    },
-                                    "singletons_qc_failed": {
-                                        "title": "Singletons failing QC",
-                                        "type": "number",
-                                        "qc_order": 20
-                                    },
-                                    "pct_singletons": {
-                                        "title": "Percent singletons",
-                                        "type": "number",
-                                        "qc_order": 21
-                                    },
-                                    "diff_chroms": {
-                                        "title": "Different chromosomes",
-                                        "type": "number",
-                                        "qc_order": 22
-                                    },
-                                    "diff_chroms_qc_failed": {
-                                        "title": "Different chromosomes failing QC",
-                                        "type": "number",
-                                        "qc_order": 23
-                                    }
+                    }
+                },
+                "nodup_samstat": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "rep1": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_reads": {
+                                    "title": "Total read pairs",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "total_reads_qc_failed": {
+                                    "title": "Total read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "duplicate_reads": {
+                                    "title": "Duplicate read pairs",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "duplicate_reads_qc_failed": {
+                                    "title": "Duplicate read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "mapped_reads": {
+                                    "title": "Mapped read pairs",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mapped_reads_qc_failed": {
+                                    "title": "Mapped read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "pct_mapped_reads": {
+                                    "title": "Percent of read pairs mapped",
+                                    "type": "number",
+                                    "qc_order": 7
+                                },
+                                "paired_reads": {
+                                    "title": "Paired reads",
+                                    "type": "number",
+                                    "qc_order": 8
+                                },
+                                "paired_reads_qc_failed": {
+                                    "title": "Paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 9
+                                },
+                                "read1": {
+                                    "title": "Read 1",
+                                    "type": "number",
+                                    "qc_order": 10
+                                },
+                                "read1_qc_failed": {
+                                    "title": "Read 1 failing QC",
+                                    "type": "number",
+                                    "qc_order": 11
+                                },
+                                "read2": {
+                                    "title": "Read 2",
+                                    "type": "number",
+                                    "qc_order": 12
+                                },
+                                "read2_qc_failed": {
+                                    "title": "Read 2 failing QC",
+                                    "type": "number",
+                                    "qc_order": 13
+                                },
+                                "properly_paired_reads": {
+                                    "title": "Properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 14
+                                },
+                                "properly_paired_reads_qc_failed": {
+                                    "title": "Properly paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 15
+                                },
+                                "pct_properly_paired_reads": {
+                                    "title": "Percent properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 16
+                                },
+                                "with_itself": {
+                                    "title": "Paired with itself",
+                                    "type": "number",
+                                    "qc_order": 17
+                                },
+                                "with_itself_qc_failed": {
+                                    "title": "Paired with itself failing QC",
+                                    "type": "number",
+                                    "qc_order": 18
+                                },
+                                "singletons": {
+                                    "title": "Singletons",
+                                    "type": "number",
+                                    "qc_order": 19
+                                },
+                                "singletons_qc_failed": {
+                                    "title": "Singletons failing QC",
+                                    "type": "number",
+                                    "qc_order": 20
+                                },
+                                "pct_singletons": {
+                                    "title": "Percent singletons",
+                                    "type": "number",
+                                    "qc_order": 21
+                                },
+                                "diff_chroms": {
+                                    "title": "Different chromosomes",
+                                    "type": "number",
+                                    "qc_order": 22
+                                },
+                                "diff_chroms_qc_failed": {
+                                    "title": "Different chromosomes failing QC",
+                                    "type": "number",
+                                    "qc_order": 23
                                 }
-                            },
-                            "rep2": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "total_reads": {
-                                        "title": "Total read pairs",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "total_reads_qc_failed": {
-                                        "title": "Total read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "duplicate_reads": {
-                                        "title": "Duplicate read pairs",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "duplicate_reads_qc_failed": {
-                                        "title": "Duplicate read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "mapped_reads": {
-                                        "title": "Mapped read pairs",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "mapped_reads_qc_failed": {
-                                        "title": "Mapped read pairs failing QC",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "pct_mapped_reads": {
-                                        "title": "Percent of read pairs mapped",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    },
-                                    "paired_reads": {
-                                        "title": "Paired reads",
-                                        "type": "number",
-                                        "qc_order": 8
-                                    },
-                                    "paired_reads_qc_failed": {
-                                        "title": "Paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 9
-                                    },
-                                    "read1": {
-                                        "title": "Read 1",
-                                        "type": "number",
-                                        "qc_order": 10
-                                    },
-                                    "read1_qc_failed": {
-                                        "title": "Read 1 failing QC",
-                                        "type": "number",
-                                        "qc_order": 11
-                                    },
-                                    "read2": {
-                                        "title": "Read 2",
-                                        "type": "number",
-                                        "qc_order": 12
-                                    },
-                                    "read2_qc_failed": {
-                                        "title": "Read 2 failing QC",
-                                        "type": "number",
-                                        "qc_order": 13
-                                    },
-                                    "properly_paired_reads": {
-                                        "title": "Properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 14
-                                    },
-                                    "properly_paired_reads_qc_failed": {
-                                        "title": "Properly paired reads failing QC",
-                                        "type": "number",
-                                        "qc_order": 15
-                                    },
-                                    "pct_properly_paired_reads": {
-                                        "title": "Percent properly paired reads",
-                                        "type": "number",
-                                        "qc_order": 16
-                                    },
-                                    "with_itself": {
-                                        "title": "Paired with itself",
-                                        "type": "number",
-                                        "qc_order": 17
-                                    },
-                                    "with_itself_qc_failed": {
-                                        "title": "Paired with itself failing QC",
-                                        "type": "number",
-                                        "qc_order": 18
-                                    },
-                                    "singletons": {
-                                        "title": "Singletons",
-                                        "type": "number",
-                                        "qc_order": 19
-                                    },
-                                    "singletons_qc_failed": {
-                                        "title": "Singletons failing QC",
-                                        "type": "number",
-                                        "qc_order": 20
-                                    },
-                                    "pct_singletons": {
-                                        "title": "Percent singletons",
-                                        "type": "number",
-                                        "qc_order": 21
-                                    },
-                                    "diff_chroms": {
-                                        "title": "Different chromosomes",
-                                        "type": "number",
-                                        "qc_order": 22
-                                    },
-                                    "diff_chroms_qc_failed": {
-                                        "title": "Different chromosomes failing QC",
-                                        "type": "number",
-                                        "qc_order": 23
-                                    }
+                            }
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "total_reads": {
+                                    "title": "Total read pairs",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "total_reads_qc_failed": {
+                                    "title": "Total read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "duplicate_reads": {
+                                    "title": "Duplicate read pairs",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "duplicate_reads_qc_failed": {
+                                    "title": "Duplicate read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "mapped_reads": {
+                                    "title": "Mapped read pairs",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "mapped_reads_qc_failed": {
+                                    "title": "Mapped read pairs failing QC",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "pct_mapped_reads": {
+                                    "title": "Percent of read pairs mapped",
+                                    "type": "number",
+                                    "qc_order": 7
+                                },
+                                "paired_reads": {
+                                    "title": "Paired reads",
+                                    "type": "number",
+                                    "qc_order": 8
+                                },
+                                "paired_reads_qc_failed": {
+                                    "title": "Paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 9
+                                },
+                                "read1": {
+                                    "title": "Read 1",
+                                    "type": "number",
+                                    "qc_order": 10
+                                },
+                                "read1_qc_failed": {
+                                    "title": "Read 1 failing QC",
+                                    "type": "number",
+                                    "qc_order": 11
+                                },
+                                "read2": {
+                                    "title": "Read 2",
+                                    "type": "number",
+                                    "qc_order": 12
+                                },
+                                "read2_qc_failed": {
+                                    "title": "Read 2 failing QC",
+                                    "type": "number",
+                                    "qc_order": 13
+                                },
+                                "properly_paired_reads": {
+                                    "title": "Properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 14
+                                },
+                                "properly_paired_reads_qc_failed": {
+                                    "title": "Properly paired reads failing QC",
+                                    "type": "number",
+                                    "qc_order": 15
+                                },
+                                "pct_properly_paired_reads": {
+                                    "title": "Percent properly paired reads",
+                                    "type": "number",
+                                    "qc_order": 16
+                                },
+                                "with_itself": {
+                                    "title": "Paired with itself",
+                                    "type": "number",
+                                    "qc_order": 17
+                                },
+                                "with_itself_qc_failed": {
+                                    "title": "Paired with itself failing QC",
+                                    "type": "number",
+                                    "qc_order": 18
+                                },
+                                "singletons": {
+                                    "title": "Singletons",
+                                    "type": "number",
+                                    "qc_order": 19
+                                },
+                                "singletons_qc_failed": {
+                                    "title": "Singletons failing QC",
+                                    "type": "number",
+                                    "qc_order": 20
+                                },
+                                "pct_singletons": {
+                                    "title": "Percent singletons",
+                                    "type": "number",
+                                    "qc_order": 21
+                                },
+                                "diff_chroms": {
+                                    "title": "Different chromosomes",
+                                    "type": "number",
+                                    "qc_order": 22
+                                },
+                                "diff_chroms_qc_failed": {
+                                    "title": "Different chromosomes failing QC",
+                                    "type": "number",
+                                    "qc_order": 23
                                 }
                             }
                         }
