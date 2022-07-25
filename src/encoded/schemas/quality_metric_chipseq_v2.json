@@ -267,7 +267,7 @@
                                     "type": "object",
                                     "qc_order": 1,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -280,7 +280,7 @@
                                     "qc_order": 2,
                                     "additionalProperties": false,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -292,7 +292,7 @@
                                     "type": "object",
                                     "qc_order": 3,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -304,7 +304,7 @@
                                     "type": "object",
                                     "qc_order": 4,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -316,7 +316,7 @@
                                     "type": "object",
                                     "qc_order": 5,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -328,7 +328,7 @@
                                     "type": "object",
                                     "qc_order": 6,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -340,7 +340,7 @@
                                     "type": "object",
                                     "qc_order": 7,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -352,7 +352,7 @@
                                     "type": "object",
                                     "qc_order": 8,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -364,7 +364,7 @@
                                     "type": "object",
                                     "qc_order": 9,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -381,7 +381,7 @@
                                     "type": "object",
                                     "qc_order": 1,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -393,7 +393,7 @@
                                     "type": "object",
                                     "qc_order": 2,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -405,7 +405,7 @@
                                     "type": "object",
                                     "qc_order": 3,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -417,7 +417,7 @@
                                     "type": "object",
                                     "qc_order": 4,
                                     "properties": {
-                                        "FRiP": {
+                                        "frip": {
                                             "title": "FRiP",
                                             "type": "number",
                                             "qc_order": 1
@@ -1052,13 +1052,13 @@
                                     "type": "number",
                                     "qc_order": 4
                                 },
-                                "PCB1": {
-                                    "title": "PCB1",
+                                "PBC1": {
+                                    "title": "PBC1",
                                     "type": "number",
                                     "qc_order": 5
                                 },
-                                "PCB2": {
-                                    "title": "PCB2",
+                                "PBC2": {
+                                    "title": "PBC2",
                                     "type": "number",
                                     "qc_order": 6
                                 }
@@ -1088,13 +1088,13 @@
                                     "type": "number",
                                     "qc_order": 4
                                 },
-                                "PCB1": {
-                                    "title": "PCB1",
+                                "PBC1": {
+                                    "title": "PBC1",
                                     "type": "number",
                                     "qc_order": 5
                                 },
-                                "PCB2": {
-                                    "title": "PCB2",
+                                "PBC2": {
+                                    "title": "PBC2",
                                     "type": "number",
                                     "qc_order": 6
                                 }
