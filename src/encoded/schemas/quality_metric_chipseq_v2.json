@@ -482,7 +482,8 @@
                                     "type": "number",
                                     "qc_order": 8
                                 },
-                                "paired_reads_qc_failed": {                                        "title": "Paired reads failing QC",
+                                "paired_reads_qc_failed": {
+                                    "title": "Paired reads failing QC",
                                     "type": "number",
                                     "qc_order": 9
                                 },
