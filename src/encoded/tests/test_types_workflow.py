@@ -89,8 +89,7 @@ def test_workflow_for_env():
     assert _wfoutput_bucket_for_env('fourfront-production-green') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
 
     # Other (non-prod) Fourfront environments
-
     assert _wfoutput_bucket_for_env('fourfront-mastertest') == 'elasticbeanstalk-fourfront-mastertest-wfoutput'
     assert _wfoutput_bucket_for_env('fourfront-webdev') == 'elasticbeanstalk-fourfront-webdev-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-yellow') == 'elasticbeanstalk-fourfront-yellow-wfoutput'
+    assert _wfoutput_bucket_for_env('fourfront-hotseat') == 'elasticbeanstalk-fourfront-hotseat-wfoutput'
 
