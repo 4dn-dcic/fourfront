@@ -1,3 +1,4 @@
+import _ from 'underscore';
 
 describe('Processed/Raw/Supplementary Files - Counts', function () {
 
@@ -255,6 +256,36 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                 });
             });
         });
-    });
 
+        it('Visit qualityMetric data', function () {
+            const columnNames = [];
+            const columnValues = [];
+            let href;
+            cy.visit('/experiment-set-replicates/4DNESO2R26BF/').end();
+            cy.get(".exp-table-container.col-12 .stacked-block-table-outer-container.overflow-auto .stacked-block-table.mounted.fade-in.expset-processed-files .headers.stacked-block-table-headers").each(function ($el, idx) {
+                if (parseInt(idx) === 0) {
+                    const children = $el.children('.heading-block.col-file-detail');
+                    _.each(children, function (item) {
+                        if (item.innerText !== 'Report')
+                            columnNames.push(item.innerText);
+                    });
+                }
+            });
+
+            cy.get('.exp-table-container.col-12 .s-block-list.expset-processed-files.stack-depth-0 .s-block-list.files.stack-depth-1 .s-block.file.stack-depth-2').each(function ($el, idx) {
+                if (parseInt(idx) === 0) {
+                    const children = $el.children('.col-file-detail');
+                    _.each(children, function (item, idx) {
+                        if (item.innerText !== '') {
+                            columnValues.push(item.innerText);
+                        }
+                        if (idx === columnNames.length) {
+                            href = item.lastChild['href'];
+                            return cy.visit(href);
+                        }
+                    });
+                }
+            });
+        });
+    });
 });
