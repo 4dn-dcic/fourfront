@@ -219,7 +219,9 @@ def main(global_config, **local_config):
     config.registry['aws_ipset'] = netaddr.IPSet(
         record['ip_prefix'] for record in aws_ip_ranges['prefixes'] if record['service'] == 'AMAZON')
 
-    if asbool(settings.get('testing', False)):
+    doing_testing = asbool(settings.get('testing', False))
+
+    if doing_testing:
         config.include('.tests.testing_views')
 
     # Load upgrades last so that all views (including testing views) are
@@ -231,7 +233,7 @@ def main(global_config, **local_config):
     if is_stg_or_prd_env(current_env):
         sentry_sdk.init("https://0d46fafce1d04ea2bfbe11ff15ca896e@o427308.ingest.sentry.io/5379985",
                         integrations=[PyramidIntegration(), SqlalchemyIntegration()])
-    elif current_env is not None:
+    elif current_env is not None and not doing_testing:
         sentry_sdk.init("https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642",
                         integrations=[PyramidIntegration(), SqlalchemyIntegration()])
 

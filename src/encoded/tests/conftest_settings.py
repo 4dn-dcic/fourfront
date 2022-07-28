@@ -32,6 +32,7 @@ _app_settings = {
     'testing': True,
     'indexer': True,
     'mpindexer': False,
+    'env.name': 'fourfront-mastertest',
     'production': True,
     'pyramid.debug_authorization': True,
     'postgresql.statement_timeout': 20,
