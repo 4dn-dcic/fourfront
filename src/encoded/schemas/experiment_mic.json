@@ -147,6 +147,7 @@
             ],
             "ignored_enum": [
                 "fluorophore cleavage and photobleaching",
+                "strand displacement and photobleaching",
                 "55% wash buffer and 4x saline sodium citrate"
             ]
         },
