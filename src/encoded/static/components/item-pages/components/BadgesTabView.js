@@ -52,7 +52,7 @@ export class BadgesTabView extends React.PureComponent {
 
     static classificationMapAsObject = memoize(function(classificationMap = BadgesTabView.classificationMap){
         return object.mapToObject(classificationMap);
-    })
+    });
 
     static badgeClassification(badge, propMapping = BadgesTabView.classificationMap){
         var badgeItem = badge && badge.item && badge.item.badge,
