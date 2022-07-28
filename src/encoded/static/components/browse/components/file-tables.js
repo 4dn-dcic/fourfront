@@ -241,19 +241,17 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
     );
 }
 
-export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
-    const fileFormat = commonFileUtil.getFileFormatStr(file);
-    const summary = (
-        file.file_type_detailed ||
-        ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
-        fileFormat ||
-        '-'
-    );
-    // Remove 'other', if present, because it just takes up horizontal space.
-    if (summary.slice(0, 6).toLowerCase() === 'other '){
-        return summary.slice(7).slice(0, -1);
+export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps) {
+    if (!file) {
+        return '-';
     }
-    return summary;
+    const fileFormat = commonFileUtil.getFileFormatStr(file);
+    const { file_type, file_type_detailed } = file;
+    if (fileFormat && file_type === 'other') {
+        return fileFormat;
+    }
+
+    return file_type_detailed || '-';
 }
 
 export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockProps) {
@@ -337,7 +335,7 @@ function renderFileHeaderWithCheckbox(stackedBlockProps){
 
 export class RawFilesStackedTable extends React.PureComponent {
 
-    static StackedBlock = StackedBlock
+    static StackedBlock = StackedBlock;
 
     static builtInHeaders(expSetType = 'replicate'){
         switch (expSetType){
@@ -913,8 +911,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-        const { collapseLongLists, titleForFiles } = this.props;
-        return filesGroupedByExperimentOrGlobal.map(([ experimentAccession, filesForExperiment ])=>{
+        const { titleForFiles, collapseLongLists, preventExpand } = this.props;
+        return filesGroupedByExperimentOrGlobal.map(([experimentAccession, filesForExperiment]) => {
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
 
@@ -932,14 +930,17 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
             const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
 
-            var nameBlock = (
+            const nameBlock = (
                 <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
                     { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
 
-            var expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
+            const expSetAccession = experiment.from_experiment_set.accession;
+            const showMoreExtTitle = preventExpand && expSetAccession ? (
+                <a href={object.itemUtil.atId(experiment.from_experiment_set)}>(view in Experiment Set)</a>
+            ) : null;
 
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
@@ -948,7 +949,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                             accession={experimentAccession === 'global' ? expSetAccession : experimentAccession} subtitleVisible />
                     }>
                     { nameBlock }
-                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={null}>
+                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={showMoreExtTitle}>
                         { this.renderFileBlocksForExperiment(filesForExperiment) }
                     </StackedBlockList>
                 </StackedBlock>
