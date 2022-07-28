@@ -171,7 +171,6 @@
             "type": "string",
             "lookup": 120,
             "suggested_enum": [
-                "non synchronized",
                 "G1",
                 "early G1",
                 "mid G1",
@@ -189,6 +188,7 @@
                 "1h after mitotic shakeoff"
             ],
             "ignored_enum": [
+                "non synchronized",
                 "3h after mitotic shakeoff",
                 "6h after mitotic shakeoff",
                 "10h after mitotic shakeoff",
