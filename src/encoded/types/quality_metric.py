@@ -339,7 +339,7 @@ class QualityMetricChipseqV2(QualityMetric):
                                "numberType": "float"})
             
             qc_summary.append({"title": "PCR Bottleneck Coefficient (PBC)",
-                               "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["PBC1"])),
+                               "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["PCB1"])),
                                "tooltip": "one-read non-mito read pairs / distinct non-mito read pairs",
                                "numberType": "float"})
             
