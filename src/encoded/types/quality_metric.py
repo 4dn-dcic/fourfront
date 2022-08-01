@@ -339,15 +339,15 @@ class QualityMetricChipseqV2(QualityMetric):
                                "numberType": "float"})
             
             qc_summary.append({"title": "PCR Bottleneck Coefficient (PBC)",
-                               "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["PCB1"])),
+                               "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["PBC1"])),
                                "tooltip": "one-read non-mito read pairs / distinct non-mito read pairs",
                                "numberType": "float"})
             
             final_reads = quality_metric.get(
-                "align")["nodup_samstat"]["rep1"]  # PE
+                "align")["nodup_samstat"]["rep1"]["read1"]  # PE
             if not final_reads:
                 final_reads = quality_metric.get(
-                    "align")["nodup_samstat"]  # SE
+                    "align")["nodup_samstat"]["total"]  # SE
             qc_summary.append({"title": "Filtered & Deduped Reads",
                                "value": str(final_reads),
                                "numberType": "integer"})
