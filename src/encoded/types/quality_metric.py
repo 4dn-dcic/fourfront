@@ -347,12 +347,12 @@ class QualityMetricChipseqV2(QualityMetric):
                 "align")["nodup_samstat"]["rep1"]["read1"]  # PE
             if not final_reads:
                 final_reads = quality_metric.get(
-                    "align")["nodup_samstat"]["total"]  # SE
+                    "align")["nodup_samstat"]["total_reads"]  # SE
             qc_summary.append({"title": "Filtered & Deduped Reads",
                                "value": str(final_reads),
                                "numberType": "integer"})
             
-        return qc_summary
+        return qc_summary if qc_summary else None
 
 @collection(
     name='quality-metrics-chipseq',
