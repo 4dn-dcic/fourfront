@@ -1726,6 +1726,8 @@ class BodyElement extends React.PureComponent {
             'experiments_in_set.biosample.biosource.organism.name'
         ];
 
+        const tooltipGlobalEventOff = isMobileBrowser ? 'click' : undefined;
+
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
                 data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
@@ -1778,7 +1780,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff={tooltipGlobalEventOff} key="tooltip" /> : null }
 
             </body>
         );
