@@ -242,8 +242,12 @@ export default class HealthView extends React.PureComponent {
             vitessceVersion = dependencies.vitessce.version;
         }
 
-        const AmbigousSpcVersion= ambigousVersion(spcVersionUsed, spcVersion, spcInstallVersion);
-        const context = { ...propContext, "spc_version": AmbigousSpcVersion , "mikro_meta_version": microMetaVersionUsed || microMetaVersion || "-", "vitessce_version": vitessceVersion || "-"
+        const spcVersionDetailed = getDetailedVersion(spcVersionUsed, spcVersion, spcInstallVersion);
+        const context = {
+            ...propContext,
+            'spc_version': spcVersionDetailed,
+            'micro_meta_version': microMetaVersionUsed || microMetaVersion || "-",
+            'vitessce_version': vitessceVersion || "-"
         };
 
         return (
@@ -264,13 +268,12 @@ export default class HealthView extends React.PureComponent {
     }
 }
 
-function ambigousVersion(depUsedVersion, depVersion, depInstallVersion) {
+function getDetailedVersion(depUsedVersion, depVersion, depInstallVersion) {
     if (depUsedVersion === depInstallVersion) {
         return depUsedVersion || depVersion || "-";
-    }
-    else {
+    } else {
         const version = depUsedVersion || depVersion || "-";
-        return 'There is a version incompatibility. Dependecies Version: ' + version +' Installation Version: ' + depInstallVersion ;
+        return 'There is a version incompatibility. Dependecies Version: ' + version + ' Installation Version: ' + depInstallVersion;
     }
 }
 const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
