@@ -601,7 +601,7 @@ test = ["pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest-subtests",
 
 [[package]]
 name = "dcicsnovault"
-version = "6.0.1"
+version = "6.0.2"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
@@ -2119,7 +2119,10 @@ aws-xray-sdk = [
     {file = "aws-xray-sdk-0.95.tar.gz", hash = "sha256:9e7ba8dd08fd2939376c21423376206bff01d0deaea7d7721c6b35921fed1943"},
     {file = "aws_xray_sdk-0.95-py2.py3-none-any.whl", hash = "sha256:72791618feb22eaff2e628462b0d58f398ce8c1bacfa989b7679817ab1fad60c"},
 ]
-awscli = []
+awscli = [
+    {file = "awscli-1.25.37-py3-none-any.whl", hash = "sha256:43e6062245ffcbc3b2903c7c5255ab573eea29f5f14be9c1b20e433f7b338a51"},
+    {file = "awscli-1.25.37.tar.gz", hash = "sha256:878b985f1587fa69bbb2193c138c9851b5f0369c9a140b1a33e6a519d1a0a876"},
+]
 "backports.statistics" = [
     {file = "backports.statistics-0.1.0-py2.py3-none-any.whl", hash = "sha256:2732e003151620762ba3ea25b881b5ca0debe2fcbf41b32b6eaff5842a8b99d7"},
     {file = "backports.statistics-0.1.0.tar.gz", hash = "sha256:714ab29b9b9937c6ec65d8c6a3dcc39ee4972f929d55977b018bb9f204ba1f98"},
@@ -2129,10 +2132,22 @@ boto = [
     {file = "boto-2.49.0-py2.py3-none-any.whl", hash = "sha256:147758d41ae7240dc989f0039f27da8ca0d53734be0eb869ef16e3adcfa462e8"},
     {file = "boto-2.49.0.tar.gz", hash = "sha256:ea0d3b40a2d852767be77ca343b58a9e3a4b00d9db440efb8da74b4e58025e5a"},
 ]
-boto3 = []
-boto3-stubs = []
-botocore = []
-botocore-stubs = []
+boto3 = [
+    {file = "boto3-1.24.37-py3-none-any.whl", hash = "sha256:801c64aa3dbeabbf2e06e27bc3530245ebc6b14b6d7e8bcff08ff67ec6e60c88"},
+    {file = "boto3-1.24.37.tar.gz", hash = "sha256:c5f0b44a77d01d6f714f91f181b1e0819fed9b99423234cd4c2cce6704e915b3"},
+]
+boto3-stubs = [
+    {file = "boto3-stubs-1.24.37.tar.gz", hash = "sha256:a14ba5257448d3c2a1077d4ddaca12313abeac0ffc9502bc714acd5c0fb2a065"},
+    {file = "boto3_stubs-1.24.37-py3-none-any.whl", hash = "sha256:18c2e1256f14bcc58923809e2e1fc083599a1644ad197dbc1a522f15e5d25a1f"},
+]
+botocore = [
+    {file = "botocore-1.27.37-py3-none-any.whl", hash = "sha256:4616a7bb869b890c4b582460423e04447dd24b4af76ac761ec68236b6cb0ef7a"},
+    {file = "botocore-1.27.37.tar.gz", hash = "sha256:c73988eff91897fe840ae6a9b459705e3086bc7f62f37a12999a7f4564002f63"},
+]
+botocore-stubs = [
+    {file = "botocore-stubs-1.27.37.tar.gz", hash = "sha256:256332ba82f7723f0896d7b54a349ed6d46e332a94f62f38791424a75823f0d9"},
+    {file = "botocore_stubs-1.27.37-py3-none-any.whl", hash = "sha256:d96ee82d1377a0af6e3e9ea400e706490cb13a54424060301d2b53ae90157efc"},
+]
 certifi = []
 cffi = []
 chardet = [
@@ -2227,10 +2242,13 @@ cryptography = [
     {file = "cryptography-37.0.4.tar.gz", hash = "sha256:63f9c17c0e2474ccbebc9302ce2f07b55b3b3fcb211ded18a42d5764f5c10a82"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-6.0.1-py3-none-any.whl", hash = "sha256:04e6a68c04ecea1ce3ea2e13e7e4c25337f507b00dd780d6901a24af25e56248"},
-    {file = "dcicsnovault-6.0.1.tar.gz", hash = "sha256:add77ed177c0abe48ac0db26e66689d11406171d8a0d1e26c6b4a5d5aa8de53b"},
+    {file = "dcicsnovault-6.0.2-py3-none-any.whl", hash = "sha256:d6546650eab54d9f6ee3a708d6d72b0d236760ed84c6a47db68a65c8677eaa29"},
+    {file = "dcicsnovault-6.0.2.tar.gz", hash = "sha256:df7c93ca30aabfb798497455ac2c29decccea8be66b3dd50c8bb09ac6f06d82c"},
 ]
-dcicutils = []
+dcicutils = [
+    {file = "dcicutils-4.0.1-py3-none-any.whl", hash = "sha256:48e07f909143cc9b73df7534e5315eecb5bd9f302aee36f9d0fbc3b25be28cc9"},
+    {file = "dcicutils-4.0.1.tar.gz", hash = "sha256:0239e311a228b505276561393fbf014fbeaf53faa2653887d42581454b209f48"},
+]
 docker = []
 docopt = [
     {file = "docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"},
@@ -2357,7 +2375,10 @@ markupsafe = [
     {file = "MarkupSafe-2.1.1.tar.gz", hash = "sha256:7f91197cc9e48f989d12e4e6fbc46495c446636dfc81b9ccf50bb0ec74b91d4b"},
 ]
 mccabe = []
-mock = []
+mock = [
+    {file = "mock-4.0.3-py3-none-any.whl", hash = "sha256:122fcb64ee37cfad5b3f48d7a7d51875d7031aaf3d8be7c42e2bee25044eee62"},
+    {file = "mock-4.0.3.tar.gz", hash = "sha256:7d3fbbde18228f4ff2f1f119a45cdffa458b4c0dee32eb4d2bb2f82554bac7bc"},
+]
 more-itertools = []
 moto = [
     {file = "moto-1.3.7-py2.py3-none-any.whl", hash = "sha256:4df37936ff8d6a4b8229aab347a7b412cd2ca4823ff47bd1362ddfbc6c5e4ecf"},
