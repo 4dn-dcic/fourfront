@@ -218,6 +218,7 @@ class Experiment(Item):
         'files.related_files.file.accession',
         'files.related_files.file.paired_end',
         'files.related_files.file.file_type',
+        'files.related_files.file.file_type_detailed',
 
         # FileFormat linkTo
         'files.file_format.file_format',
@@ -236,6 +237,7 @@ class Experiment(Item):
         'processed_files.file_size',
         'processed_files.upload_key',
         'processed_files.file_classification',
+        'processed_files.file_type',
         'processed_files.file_type_detailed',
         'processed_files.external_references.*',
 
@@ -268,6 +270,7 @@ class Experiment(Item):
         "processed_files.upload_key",
         "processed_files.file_format",
         "processed_files.file_classification",
+        "processed_files.file_type",
         "processed_files.file_type_detailed",
         "processed_files.external_references.*",
         "processed_files.quality_metric.url",
@@ -281,6 +284,7 @@ class Experiment(Item):
 
         "other_processed_files.files.accession",
         "other_processed_files.files.href",
+        "other_processed_files.files.file_type",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
@@ -315,8 +319,10 @@ class Experiment(Item):
 
         # FileReference linkTo
         "reference_files.accession",
+        "reference_files.file_type",
         "reference_files.file_type_detailed",
         "reference_files.file_size",
+        "reference_files.file_format.file_format",
         "reference_files.file_classification",
         "reference_files.status",
         "reference_files.notes_to_tsv",

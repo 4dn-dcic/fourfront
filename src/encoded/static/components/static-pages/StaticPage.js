@@ -85,7 +85,7 @@ export const parseSectionsContent = memoize(function(context){
 
 export const StaticEntryContent = React.memo(function StaticEntryContent(props){
     const { section, className } = props;
-    const { content = null, options = {}, filetype = null } = section;
+    const { content = null, content_as_html = null, options = {}, filetype = null } = section;
     let renderedContent;
 
     if (!content) return null;
@@ -96,6 +96,8 @@ export const StaticEntryContent = React.memo(function StaticEntryContent(props){
     } else if (typeof content === 'string' && filetype === 'txt' && content.slice(0,12) === 'placeholder:'){
         // Deprecated older method - to be removed once data.4dn uses filetype=jsx everywhere w/ placeholder
         renderedContent = replacePlaceholderString(content.slice(12).trim(), _.omit(props, 'className', 'section', 'content'));
+    } else if (content_as_html && typeof content_as_html === 'string' && filetype === 'rst'){
+        renderedContent = replacePlaceholderString(content_as_html.trim(), _.omit(props, 'className', 'section', 'content', 'content_as_html'));
     } else {
         renderedContent = content;
     }
