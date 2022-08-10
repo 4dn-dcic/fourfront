@@ -218,7 +218,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
             cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
-                const countRecentItemsToVisit = expSetCount >= 15 ? 5 : Math.min(1, parseInt(expSetCount / 3));
+                const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
 
                 Cypress._.forEach(Cypress._.range(0, countRecentItemsToVisit), function (idx) {
 
