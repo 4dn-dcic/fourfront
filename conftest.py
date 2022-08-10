@@ -2,8 +2,9 @@ import os
 import pytest
 import tempfile
 
-from dcicutils.misc_utils import PRINT
-
+from dcicutils.env_base import EnvBase
+from dcicutils.misc_utils import PRINT, override_environ
+from dcicutils.secrets_utils import assumed_identity
 
 
 def pytest_addoption(parser):
@@ -51,15 +52,24 @@ elif my_selected_env != desired_env:
 else:
     PRINT(f"Leaving ENV_NAME set to {desired_env}.")
 
-old_identity = os.environ.get("IDENTITY")
-new_identity = 'C4AppConfigFourfrontMastertestApplicationConfigurationfourfrontmastertest'
-if old_identity == new_identity:
-    PRINT(f"IDENTITY is already set to the desired value ({new_identity}). That value will be used.")
-elif old_identity:
-    PRINT(f"IDENTITY is set incompatibly for ENV_NAME={desired_env}.")
-    exit(1)
-else:
-    PRINT(f"The IDENTITY environment variable is being set to {new_identity} so you can assume its credentials.")
-    os.environ['IDENTITY'] = new_identity
+if os.environ.get("GLOBAL_BUCKET_ENV"):
+    raise AssertionError("Please do not set GLOBAL_BUCKET_ENV. You should only be using GLOBAL_ENV_BUCKET by now.")
+
+if not os.environ.get("GLOBAL_ENV_BUCKET"):
+
+    existing_identity = os.environ.get("IDENTITY")
+    env_identity = 'C4AppConfigFourfrontMastertestApplicationConfigurationfourfrontmastertest'
+    if existing_identity and existing_identity != env_identity:
+        PRINT(f"IDENTITY is set incompatibly for ENV_NAME={desired_env}.")
+        exit(1)
+    else:
+        PRINT(f"The identity {env_identity} is being temporarily assumed to find a GLOBAL_ENV_BUCKET.")
+        with override_environ(IDENTITY=env_identity):
+            with assumed_identity():
+                global_env_bucket = EnvBase.global_env_bucket_name()
+        # This mustn't be set while the identity is assumed. It needs to be set globally.
+        os.environ['GLOBAL_ENV_BUCKET'] = global_env_bucket
+        print(f"GLOBAL_ENV_BUCKET set to {os.environ['GLOBAL_ENV_BUCKET']!r}")
+
 
 PRINT("=" * 80)
