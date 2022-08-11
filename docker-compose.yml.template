@@ -50,6 +50,8 @@ services:
       # Default to caller's environment
       AWS_ACCESS_KEY_ID:
       AWS_SECRET_ACCESS_KEY:
+      # Needed to resolve env info
+      GLOBAL_ENV_BUCKET:
       # If RUN_TESTS is the empty string (false), tests will not be run. Otherwise, they will.
       # Set RUN_TESTS=true to run tests in the container.
       # (There will be no TEST: line here in the output if that is not set.)
@@ -57,6 +59,7 @@ services:
       # If LOAD_INSERTS is the empty string (false), inserts will not be loaded. Otherwise, they will.
       # Set LOAD_INSERTS=true to load inserts, usually only for the first run.
       # (There will be no LOAD: line here in the output if that is not set.)
+      GLOBAL_ENV_BUCKET: 
       LOAD: "${LOAD_INSERTS}"
       application_type: "local"  # use local entrypoint
       ENCODED_VERSION: "local"

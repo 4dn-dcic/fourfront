@@ -38,7 +38,11 @@ Use the ``prepare-docker`` command to configure ``docker-compose.yml`` and ``doc
     --run-tests           if supplied, causes tests to be run in container
                         (default: not tested)
     --s3-encrypt-key-id S3_ENCRYPT_KEY_ID
-                        an encrypt key id (default: the empty string)
+                        an encrypt key id (default: the empty string), not typically used for FF
+
+
+Note that you must additionally set ``GLOBAL_ENV_BUCKET=foursight-prod-envs``, which will be passed to
+the container to resolve environment information.
 
 Building FF Docker
 ^^^^^^^^^^^^^^^^^^
