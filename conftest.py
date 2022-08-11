@@ -2,6 +2,7 @@ import os
 import pytest
 import tempfile
 
+from dcicutils.env_utils import EnvUtils
 from dcicutils.misc_utils import PRINT
 
 
@@ -61,5 +62,7 @@ elif old_identity:
 else:
     PRINT(f"The IDENTITY environment variable is being set to {new_identity} so you can assume its credentials.")
     os.environ['IDENTITY'] = new_identity
+
+EnvUtils.init(force=True)
 
 PRINT("=" * 80)
