@@ -36,7 +36,6 @@ eb_app_version = app-v-development-simulation
 [pipeline:debug]
 pipeline =
     egg:PasteDeploy#prefix
-    egg:repoze.debug#pdbpm
     app
 set pyramid.includes =
     pyramid_translogger
