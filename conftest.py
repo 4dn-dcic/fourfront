@@ -6,7 +6,6 @@ from dcicutils.env_utils import EnvUtils
 from dcicutils.misc_utils import PRINT
 
 
-
 def pytest_addoption(parser):
     parser.addoption("--es", action="store", default="", dest='es',
         help="use a remote es for testing")
