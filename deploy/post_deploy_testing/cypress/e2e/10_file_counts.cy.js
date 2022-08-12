@@ -215,7 +215,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit experiment set pages, check Warning tab is visible when a biosample in set has a warning badge', function () {
 
-            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end().end()
+            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end()
                 .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
@@ -230,7 +230,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         }).end();
 
                         let biosampleAccesionName;
-                        let badgeItemCount=0;
+                        let badgeItemCount = 0;
                         cy.window().then(function (w) {
                             let currPagePath = "/";
                             cy.location('pathname').should('not.equal', currPagePath)
@@ -242,7 +242,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                 .get('div.rc-tabs span[data-tab-key="badges"]').click({ 'force': true }).end()
                                 .wait(200)
                                 .get('.badge-classification-group .badge-item').then(function ($badgeItems) {
-                                    badgeItemCount =$badgeItems.length;
+                                    badgeItemCount = $badgeItems.length;
                                 })
                                 .get('div.rc-tabs span[data-tab-key="badges"]').should('contain', badgeItemCount > 1 ? 'Warnings' : 'Warning')
                                 .get('.badge-classification-group .badge-item .inner.mb-05 .mt-02 .text-600').first().then(function ($biosampleAccesionName) {
