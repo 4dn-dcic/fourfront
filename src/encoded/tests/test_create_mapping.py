@@ -111,7 +111,7 @@ def test_get_deployment_config_prod():
     assert cfg['ENV_NAME'] == my_env  # sanity
     assert cfg['SKIP'] is False
     assert cfg['WIPE_ES'] is False
-    assert cfg['STRICT'] is True
+    assert cfg['STRICT'] is False
 
 
 @patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
