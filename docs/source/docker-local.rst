@@ -42,7 +42,8 @@ Use the ``prepare-docker`` command to configure ``docker-compose.yml`` and ``doc
 
 
 Note that you must additionally set ``GLOBAL_ENV_BUCKET=foursight-prod-envs``, which will be passed to
-the container to resolve environment information.
+the container to resolve environment information. On initial run, you will want to run with the ``--load-inserts`` option so data is loaded.
+Pass ``--data-set local`` to get local inserts, or ``deploy`` to use the production inserts.
 
 Building FF Docker
 ^^^^^^^^^^^^^^^^^^
