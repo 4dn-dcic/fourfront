@@ -76,12 +76,12 @@ file_workflow_run_embeds = [
     'workflow_run_inputs.input_files.workflow_argument_name',
     'workflow_run_inputs.input_files.value.filename',
     'workflow_run_inputs.input_files.value.display_title',
-    'workflow_run_inputs.input_files.value.file_format',
+    'workflow_run_inputs.input_files.value.file_format.file_format',
     'workflow_run_inputs.input_files.value.uuid',
     'workflow_run_inputs.input_files.value.accession',
     'workflow_run_inputs.output_files.workflow_argument_name',
     'workflow_run_inputs.output_files.value.display_title',
-    'workflow_run_inputs.output_files.value.file_format',
+    'workflow_run_inputs.output_files.value.file_format.file_format',
     'workflow_run_inputs.output_files.value.uuid',
     'workflow_run_inputs.output_files.value.accession',
     'workflow_run_inputs.output_files.value_qc.url',
@@ -265,8 +265,9 @@ class File(Item):
 
     # TODO: embed file_format
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # XXX: Experiment linkTo
+        # Experiment linkTo
         'experiments.accession',
+        'experiments.last_modified.date_modified',
 
         # ExperimentType linkTo
         'experiments.experiment_type.title',
@@ -278,9 +279,6 @@ class File(Item):
 
         # Enzyme linkTo
         'experiments.digestion_enzyme.name',
-
-        # Standard embed
-        'experiments.last_modified.date_modified',
 
         # Biosample linkTo
         'experiments.biosample.accession',
@@ -310,13 +308,13 @@ class File(Item):
         'experiments.biosample.biosource.modifications.override_modification_name',
 
         # BioFeature linkTo
-        'experiments.biosample.biosource.modifications.target_of_mod.feature_type',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_type.uuid',
         'experiments.biosample.biosource.modifications.target_of_mod.preferred_label',
         'experiments.biosample.biosource.modifications.target_of_mod.cellular_structure',
         'experiments.biosample.biosource.modifications.target_of_mod.organism_name',
-        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes',
-        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods',
-        'experiments.biosample.biosource.modifications.target_of_mod.genome_location',
+        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes.uuid',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods.*',
+        'experiments.biosample.biosource.modifications.target_of_mod.genome_location.uuid',
 
         # Individual linkTo
         'experiments.biosample.biosource.individual.protected_data',

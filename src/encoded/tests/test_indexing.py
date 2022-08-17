@@ -390,16 +390,17 @@ class TestInvalidationScopeViewFourfront:
     @pytest.mark.parametrize('source_type, target_type, invalidated', [
         # Test WorkflowRun
         ('FileProcessed', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'filename', 'file_size']
+            DEFAULT_SCOPE + ['accession', 'filename', 'file_format', 'file_size', 'quality_metric']
          ),
         ('Software', 'WorkflowRunAwsem',
             DEFAULT_SCOPE + ['name', 'title', 'version', 'commit', 'source_url']
          ),
         ('Workflow', 'WorkflowRunAwsem',
-            DEFAULT_SCOPE + ['category', 'experiment_types', 'app_name', 'title']
+            DEFAULT_SCOPE + ['title', 'name', 'experiment_types', 'category', 'app_name', 'steps.name']
          ),
-        ('WorkflowRunAwsem', 'FileProcessed',  # no link
-            DEFAULT_SCOPE
+        ('WorkflowRunAwsem', 'FileProcessed',
+            DEFAULT_SCOPE + ['input_files.workflow_argument_name', 'output_files.workflow_argument_name', 'title',
+                             'workflow']
          ),
         # Test FileProcessed
         ('Enzyme', 'FileProcessed',  # embeds 'name'
@@ -409,17 +410,18 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['title']
          ),
         ('ExperimentSet', 'FileProcessed',  # embeds 'title'
-            DEFAULT_SCOPE + ['accession', 'experimentset_type']
+            DEFAULT_SCOPE + ['last_modified.date_modified', 'accession', 'experimentset_type']
          ),
         ('Biosample', 'FileProcessed',  # embeds 'accession' + calc props (not detected)
-            DEFAULT_SCOPE + ['accession']
+            DEFAULT_SCOPE + ['accession', 'biosource', 'cell_culture_details', 'modifications']
          ),
         ('Biosource', 'FileProcessed',
-            DEFAULT_SCOPE + ['biosource_type', 'cell_line_tier', 'override_biosource_name']
+            DEFAULT_SCOPE + ['biosource_type', 'cell_line', 'cell_line_tier', 'individual', 'modifications',
+                             'override_biosource_name', 'tissue']
          ),
         ('BioFeature', 'FileProcessed',
-            DEFAULT_SCOPE + ['preferred_label', 'feature_type', 'organism_name', 'genome_location',
-                             'relevant_genes', 'cellular_structure']
+            DEFAULT_SCOPE + ['cellular_structure', 'feature_mods.mod_position', 'feature_mods.mod_type', 'feature_type',
+                             'genome_location', 'organism_name', 'preferred_label', 'relevant_genes']
          ),
         ('OntologyTerm', 'FileProcessed',
             DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name']
@@ -428,44 +430,47 @@ class TestInvalidationScopeViewFourfront:
             DEFAULT_SCOPE + ['name', 'scientific_name']
          ),
         ('Modification', 'FileProcessed',
-            DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'override_modification_name']
+            DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'target_of_mod', 'override_modification_name']
          ),
         # Test ExperimentSet
         ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'description', 'file_format', 'file_type', 'file_classification',
-                             'md5sum', 'file_size', 'notes_to_tsv', 'higlass_uid',
-                             'genome_assembly', 'dbxrefs']
+            DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
+                             'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
+                             'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
+                             'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
+                             'related_files.relationship_type', 'static_content.description', 'static_content.location']
          ),
         ('User', 'ExperimentSet',
-            DEFAULT_SCOPE + ['email', 'first_name', 'last_name', 'preferred_email',
-                             'job_title', 'timezone']
+            DEFAULT_SCOPE + ['email', 'first_name', 'job_title', 'lab', 'last_name', 'preferred_email', 'submitted_by',
+                             'timezone']
          ),
         ('Badge', 'ExperimentSet',
             DEFAULT_SCOPE + ['title', 'badge_classification', 'badge_icon', 'description']
          ),
         ('TreatmentAgent', 'ExperimentSet',
-            DEFAULT_SCOPE + ['treatment_type', 'description', 'chemical', 'biological_agent',
-                             'duration', 'duration_units', 'concentration', 'concentration_units',
-                             'temperature']
+            DEFAULT_SCOPE + ['biological_agent', 'chemical', 'concentration', 'concentration_units', 'constructs',
+                             'description', 'duration', 'duration_units', 'temperature', 'treatment_type',]
          ),
         ('OntologyTerm', 'ExperimentSet',
-            DEFAULT_SCOPE + ['term_id', 'term_name', 'preferred_name', 'slim_terms', 'synonyms']
+            DEFAULT_SCOPE + ['preferred_name', 'slim_terms', 'synonyms', 'term_id', 'term_name']
          ),
         ('Organism', 'ExperimentSet',
             DEFAULT_SCOPE + ['name', 'scientific_name']
          ),
         ('Modification', 'ExperimentSet',
-            DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'override_modification_name']
+            DEFAULT_SCOPE + ['modification_type', 'genomic_change', 'target_of_mod', 'override_modification_name']
          ),
         ('BioFeature', 'ExperimentSet',
-            DEFAULT_SCOPE + ['feature_type', 'preferred_label', 'cellular_structure', 'organism_name', 'relevant_genes',
-                             'genome_location']
+            DEFAULT_SCOPE + ['cellular_structure', 'feature_mods.mod_position', 'feature_mods.mod_type', 'feature_type',
+                             'genome_location', 'organism_name', 'preferred_label', 'relevant_genes']
          ),
         ('Biosample', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession']  # XXX: this embeds calc props that are not fully reflected IMO - Will 3/31/21
+            DEFAULT_SCOPE + ['accession', 'badges.messages', 'biosource', 'cell_culture_details', 'description',
+                             'modifications', 'treatments']
          ),
         ('Biosource', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line_tier', 'override_biosource_name', 'override_organism_name']
+            DEFAULT_SCOPE + ['accession', 'biosource_type', 'cell_line', 'cell_line_tier', 'override_biosource_name',
+                             'override_organism_name', 'tissue']
          ),
         ('Construct', 'ExperimentSet',
             DEFAULT_SCOPE + ['name']
@@ -473,19 +478,18 @@ class TestInvalidationScopeViewFourfront:
         ('Enzyme', 'ExperimentSet',
             DEFAULT_SCOPE + ['name']
          ),
-        ('FileProcessed', 'ExperimentSet',
-            DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
-                             'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
-         ),
         ('FileReference', 'ExperimentSet',
-         DEFAULT_SCOPE + ['accession', 'file_format', 'file_size', 'file_type', 'description', 'dbxrefs',
-                          'md5sum', 'genome_assembly', 'higlass_uid', 'file_classification', 'notes_to_tsv']
+         DEFAULT_SCOPE + ['accession', 'contributing_labs', 'dbxrefs', 'description', 'extra_files.file_size',
+                          'extra_files.href', 'extra_files.md5sum', 'extra_files.use_for', 'file_classification',
+                          'file_format', 'file_size', 'file_type', 'genome_assembly', 'higlass_uid', 'lab',
+                          'last_modified.date_modified', 'md5sum', 'notes_to_tsv', 'quality_metric',
+                          'related_files.relationship_type', 'static_content.description', 'static_content.location']
          ),
         ('FileFormat', 'ExperimentSet',
             DEFAULT_SCOPE + ['file_format']
          ),
         ('QualityMetricFastqc', 'ExperimentSet',
-            DEFAULT_SCOPE + ['Sequence length', 'Total Sequences', 'overall_quality_status', 'url']
+            DEFAULT_SCOPE + ['overall_quality_status', 'url', 'Total Sequences', 'Sequence length']
          ),
         ('QualityMetricMargi', 'ExperimentSet',
             DEFAULT_SCOPE + ['overall_quality_status', 'url']

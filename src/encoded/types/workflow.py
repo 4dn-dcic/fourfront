@@ -9,7 +9,8 @@ import json
 import pstats
 
 from collections import OrderedDict, deque
-from dcicutils.env_utils import default_workflow_env, is_stg_or_prd_env, prod_bucket_env
+from dcicutils.env_utils import default_workflow_env
+from dcicutils.s3_utils import s3Utils
 from inspect import signature
 from pyramid.httpexceptions import HTTPUnprocessableEntity
 from pyramid.response import Response
@@ -993,7 +994,8 @@ def pseudo_run(context, request):
 
 
 def _wfoutput_bucket_for_env(env):
-    return 'elasticbeanstalk-%s-wfoutput' % (prod_bucket_env(env) if is_stg_or_prd_env(env) else env)
+    s3 = s3Utils(env=env)
+    return s3.outfile_bucket
 
 
 @view_config(name='run', context=WorkflowRun.Collection, request_method='POST',
