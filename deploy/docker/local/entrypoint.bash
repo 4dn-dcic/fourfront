@@ -5,7 +5,7 @@ if [  -z ${TEST+x} ]; then
     if [ ! -z ${LOAD+x} ]; then
 
         # Clear db/es since this is the local entry point
-        poetry run clear-db-es-contents development.ini --app-name app --env "$FOURFRONT_ENV_NAME"
+        poetry run clear-db-es-contents development.ini --app-name app --only-if-env "$FOURFRONT_ENV_NAME"
 
         # Create mapping
         poetry run create-mapping-on-deploy development.ini --app-name app --clear-queue
