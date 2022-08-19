@@ -1,3 +1,4 @@
+import _ from 'underscore';
 
 describe('Processed/Raw/Supplementary Files - Counts', function () {
 
@@ -217,7 +218,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
             cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
-                const countRecentItemsToVisit = expSetCount >= 15 ? 5 : Math.min(1, parseInt(expSetCount / 3));
+                const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
 
                 Cypress._.forEach(Cypress._.range(0, countRecentItemsToVisit), function (idx) {
 
@@ -255,6 +256,71 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                 });
             });
         });
-    });
 
+        it('Visit quality metric tables and check columns whether they are valid and in proper order as it is in Quality Metric Item page', function () {
+
+            cy.visit('browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.quality_metric.display_title!=No+value').end();
+
+            cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
+                const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
+
+                Cypress._.forEach(Cypress._.range(0, countRecentItemsToVisit), function (idx) {
+
+                    context('Experiment Set Replicate - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
+
+                        cy.scrollToBottom().then(() => {
+                            cy.get('.search-results-container .search-result-row[data-row-number="' + (3 * idx) + '"] .search-result-column-block[data-field="display_title"] a').click({ force: true }).wait(500).end();
+                        }).end();
+
+                        //get column headers
+                        const columnNames = [];
+                        cy.get(".exp-table-container.col-12 .stacked-block-table-outer-container.overflow-auto .stacked-block-table.mounted.fade-in.expset-processed-files .headers.stacked-block-table-headers").each(function ($el, headerIdx) {
+                            if (headerIdx === 0) {
+                                const children = $el.children('.heading-block.col-file-detail');
+                                _.each(children, function (item) {
+                                    if (item.innerText !== 'Details') {
+                                        columnNames.push(item.innerText);
+                                    }
+                                });
+                            }
+                        });
+
+                        //get column values
+                        const columnValues = [];
+                        cy.get('.exp-table-container.col-12 .s-block-list.expset-processed-files.stack-depth-0 .s-block-list.files.stack-depth-1 .s-block.file.stack-depth-2').each(function ($el, rowIdx) {
+                            if (rowIdx === 0) {
+                                const children = $el.children('.col-file-detail');
+                                _.each(children, function (item, colIdx) {
+                                    if (item.innerText !== '') {
+                                        columnValues.push(item.innerText);
+                                    }
+                                    if (colIdx === columnNames.length) {
+                                        const href = item.lastChild['href'];
+                                        return cy.visit(href);
+                                    }
+                                });
+                            }
+                        });
+
+                        //qc metric name
+                        cy.get('.overview-list-elements-container .overview-list-element .col-4.text-right .mt-02').each(function ($el, idx) {
+                            cy.get($el[0]).should('contain', columnNames[idx]);
+                        });
+
+                        //qc metric value
+                        cy.get('.overview-list-elements-container .overview-list-element .col-8 .value').each(function ($el, idx) {
+                            if (idx < columnValues.length) {
+                                cy.get($el[0]).should('contain', columnValues[idx]);
+                            }
+                        });
+
+                    });
+                    cy.go(-2).wait(100).end();
+
+                });
+
+            });
+
+        });
+    });
 });
