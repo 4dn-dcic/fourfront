@@ -257,6 +257,7 @@ class MMPlainContainerBody extends React.PureComponent {
                 is4DNPortal: true,
                 hasImport: true,
                 isToolbarHidden: true,
+                isDebug: true,
                 onReturnToMicroscopeList: function () {
                     navigate('/microscope-configurations/');
                 },
