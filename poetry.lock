@@ -602,7 +602,7 @@ test = ["pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest-subtests",
 
 [[package]]
 name = "dcicsnovault"
-version = "6.0.3"
+version = "6.0.4"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
@@ -655,7 +655,7 @@ xlrd = ">=1.0.0,<2.0.0"
 
 [[package]]
 name = "dcicutils"
-version = "4.1.0"
+version = "4.4.0"
 description = "Utility package for interacting with the 4DN Data Portal and other 4DN resources"
 category = "main"
 optional = false
@@ -2336,12 +2336,12 @@ cryptography = [
     {file = "cryptography-37.0.4.tar.gz", hash = "sha256:63f9c17c0e2474ccbebc9302ce2f07b55b3b3fcb211ded18a42d5764f5c10a82"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-6.0.3-py3-none-any.whl", hash = "sha256:7e636a1dda1886c1034db61c84e44df9a2d8809ffaff3c30b524251747ad5d01"},
-    {file = "dcicsnovault-6.0.3.tar.gz", hash = "sha256:954868570242b736b901aac1217ae88af703840c2afdf544a26ccee319468e39"},
+    {file = "dcicsnovault-6.0.4-py3-none-any.whl", hash = "sha256:40caa486b886c539e28da41d91a80f97e0543855bceb23557dc46788c0e70c76"},
+    {file = "dcicsnovault-6.0.4.tar.gz", hash = "sha256:09f56e2614d8b29e95bdea77302d9e6e4c2e0810af6b3bc785477512b005094e"},
 ]
 dcicutils = [
-    {file = "dcicutils-4.1.0-py3-none-any.whl", hash = "sha256:70d5b2e669ac6bee289074da5ec0dc8f3bcfa48f27becad8a33eb420c73cef30"},
-    {file = "dcicutils-4.1.0.tar.gz", hash = "sha256:f55cae4deae692666b8f1b2aaa44e1cd0668f37af0e6d9647dee5481104d793d"},
+    {file = "dcicutils-4.4.0-py3-none-any.whl", hash = "sha256:995a7b0fb68cc2fd3cf886b56e48d9699346d14a212f632f22588b2e1662811d"},
+    {file = "dcicutils-4.4.0.tar.gz", hash = "sha256:bc198aceb9894d9809d12703374cd1e64a10f55ed84fba5555195c6b450c7e9c"},
 ]
 docker = [
     {file = "docker-4.4.4-py2.py3-none-any.whl", hash = "sha256:f3607d5695be025fa405a12aca2e5df702a57db63790c73b927eb6a94aac60af"},
