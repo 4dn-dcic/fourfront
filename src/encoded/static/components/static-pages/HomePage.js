@@ -49,7 +49,7 @@ export default class HomePage extends React.PureComponent {
         );
         const twitterTimelineEmbed = (
             <TwitterTimelineEmbed sourceType="profile" screenName="4dn_dcic"
-                placeholder={twitterPlaceholder} autoHeight noFooter noHeader options={{ id: "profile:4dn_dcic" }} />
+                placeholder={twitterPlaceholder} autoHeight noFooter noHeader options={{ id: "profile:4dn_dcic", tweetLimit: 2 }} />
         );
 
         return (
