@@ -10,6 +10,8 @@ Change Log
 4.5.9
 =====
 
+`PR 1715: Add CHANGELOG.rst <https://github.com/4dn-dcic/fourfront/pull/1715>`_
+
 * Add a CHANGELOG.rst
 
 
