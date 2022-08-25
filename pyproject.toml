@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "4.4.17"  # 4.0.0 introduced containerization
+version = "4.5.6"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -37,14 +37,14 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.7.1,<3.9"
-awscli = ">=1.21.3,!=1.22.52"
-boto3 = "^1.21.5"
-botocore = "^1.24.5"
+awscli = ">=1.25.36"
+boto3 = "^1.24.36"
+botocore = "^1.27.36"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault = "^5.6.1"
-dcicutils = "^3.14.0.2b38"
+dcicsnovault = "^6.0.0"
+dcicutils = "^4.1.0"
 elasticsearch = "6.8.1"
 elasticsearch-dsl = "^6.4.0"  # TODO: port code from cgap-portal to get rid of uses
 execnet = "1.4.1"
@@ -115,8 +115,8 @@ supervisor = "^4.2.4"
 
 [tool.poetry.dev-dependencies]
 # PyCharm says boto3-stubs contains useful type hints
-botocore-stubs = "^1.24.5"
-boto3-stubs = "^1.21.5"
+boto3-stubs = "^1.24.36"
+botocore-stubs = "^1.27.36"
 coverage = ">=6.2"
 codacy-coverage = ">=1.3.11"
 coveralls = ">=3.3.1"
@@ -161,6 +161,12 @@ wheel = ">=0.29.0"  # needed for distribution but not any particular version
 # See details at https://pytest.org/en/stable/customize.html
 
 [tool.poetry.scripts]
+# dcicutils commands
+add-image-tag = "dcicutils.ecr_scripts:add_image_tag_main"
+show-global-env-bucket = "dcicutils.env_scripts:show_global_env_bucket_main"
+show-image-manifest = "dcicutils.ecr_scripts:show_image_manifest_main"
+show-image-catalog = "dcicutils.ecr_scripts:show_image_catalog_main"
+unrelease-most-recent-image = "dcicutils.ecr_scripts:unrelease_most_recent_image_main"
 # snovault commands
 batchupgrade = "snovault.batchupgrade:main"
 create-mapping = "snovault.elasticsearch.create_mapping:main"
@@ -194,7 +200,6 @@ run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
 update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
 verify-item = "encoded.commands.verify_item:main"
-
 
 [paste.app_factory]
 main = "encoded:main"

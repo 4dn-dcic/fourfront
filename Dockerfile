@@ -74,7 +74,7 @@ RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/b
 COPY . .
 
 # Build remaining back-end
-RUN poetry install && \
+RUN poetry install --no-dev -vvv && \
     python setup_eb.py develop && \
     make fix-dist-info
 

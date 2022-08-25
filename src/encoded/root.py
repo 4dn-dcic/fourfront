@@ -141,7 +141,7 @@ def health_check(config):
             app_url = ''.join([app_url, '/'])
 
         env_name = settings.get('env.name')
-        foursight_url = infer_foursight_url_from_env(request, env_name)
+        foursight_url = infer_foursight_url_from_env(request=request, envname=env_name)
 
         response_dict = {
 
@@ -322,7 +322,7 @@ class FourfrontRoot(Root):
         except KeyError:  # Can be caused by 404 / Not Found during indexing
             return []
 
-    # It is no longer used at the moment, replaced by Twitter feed. 
+    # It is no longer used at the moment, replaced by Twitter feed.
     # @calculated_property(schema={
     #     "title": "Announcements",
     #     "type": "array"
