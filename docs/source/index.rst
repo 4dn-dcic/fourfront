@@ -241,8 +241,8 @@ Force compiling
    search_info
    security
    auth
-   beanstalk_deployment
-   apache_modwsgi
+   docker-local
+   docker-production
    database
    higlass-visualization
    inserts
