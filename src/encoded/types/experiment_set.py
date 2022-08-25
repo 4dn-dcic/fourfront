@@ -95,6 +95,7 @@ class ExperimentSet(Item):
         "experiments_in_set.status",
         "experiments_in_set.dbxrefs",
         "experiments_in_set.external_references.*",
+        "experiments_in_set.crosslinking_method",
 
         # ExperimentType linkTo
         "experiments_in_set.experiment_type.title",
