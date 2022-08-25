@@ -13,6 +13,8 @@ Change Log
 `PR 1715: Add CHANGELOG.rst <https://github.com/4dn-dcic/fourfront/pull/1715>`_
 
 * Add a CHANGELOG.rst
+* Also, unrelated, take a newer version of docutils (0.16 instead of 0.12)
+  to get rid of a deprecation warning in testing.
 
 
 4.5.8
