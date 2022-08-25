@@ -10,11 +10,11 @@ Change Log
 4.5.9
 =====
 
-`PR 1715: Add CHANGELOG.rst <https://github.com/4dn-dcic/fourfront/pull/1715>`_
+`PR 1715: Add CHANGELOG.rst and update docutils (C4-888) <https://github.com/4dn-dcic/fourfront/pull/1715>`_
 
 * Add a CHANGELOG.rst
 * Also, unrelated, take a newer version of docutils (0.16 instead of 0.12)
-  to get rid of a deprecation warning in testing.
+  to get rid of a deprecation warning in testing. (`C4-888 <https://hms-dbmi.atlassian.net/browse/C4-888>`_).
 
 
 4.5.8
