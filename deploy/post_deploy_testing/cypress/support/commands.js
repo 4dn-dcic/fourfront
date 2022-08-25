@@ -54,6 +54,14 @@ Cypress.Commands.add('searchPageTotalResultCount', function(options){
     });
 });
 
+// Add iframe support until becomes part of the framework
+Cypress.Commands.add('iframe', { prevSubject: 'element' }, ($iframe) =>
+    new Cypress.Promise((resolve) => {
+        $iframe.on('load', () => {
+            resolve($iframe.contents().find('body'));
+        });
+    })
+);
 
 
 Cypress.Commands.add('scrollToBottom', function(options){
