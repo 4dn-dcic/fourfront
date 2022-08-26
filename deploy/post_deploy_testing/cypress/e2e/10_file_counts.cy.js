@@ -215,7 +215,8 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit experiment set pages, check Warning tab is visible when a biosample in set has a warning badge', function () {
 
-            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end();
+            cy.visit('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.biosample.badges.badge.badge_classification=Warning&status=released').end()
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
                 const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
@@ -229,7 +230,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         }).end();
 
                         let biosampleAccesionName;
-
+                        let badgeItemCount = 0;
                         cy.window().then(function (w) {
                             let currPagePath = "/";
                             cy.location('pathname').should('not.equal', currPagePath)
@@ -238,9 +239,12 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                                     console.log(currPagePath);
                                 }).wait(3000).end()
                                 .get('h1.page-title').should('not.be.empty').end()
-                                .get('div.rc-tabs span[data-tab-key="badges"]').should('contain', 'Warnings')
                                 .get('div.rc-tabs span[data-tab-key="badges"]').click({ 'force': true }).end()
                                 .wait(200)
+                                .get('.badge-classification-group .badge-item').then(function ($badgeItems) {
+                                    badgeItemCount = $badgeItems.length;
+                                })
+                                .get('div.rc-tabs span[data-tab-key="badges"]').should('contain', badgeItemCount > 1 ? 'Warnings' : 'Warning')
                                 .get('.badge-classification-group .badge-item .inner.mb-05 .mt-02 .text-600').first().then(function ($biosampleAccesionName) {
                                     biosampleAccesionName = $biosampleAccesionName.text().trim();
                                 })
@@ -259,7 +263,8 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
 
         it('Visit quality metric tables and check columns whether they are valid and in proper order as it is in Quality Metric Item page', function () {
 
-            cy.visit('browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.quality_metric.display_title!=No+value').end();
+            cy.visit('browse/?type=ExperimentSetReplicate&experimentset_type=replicate&experiments_in_set.files.quality_metric.display_title!=No+value').end()
+                .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).end();
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
                 const countRecentItemsToVisit = expSetCount >= 15 ? 3 : Math.min(1, parseInt(expSetCount / 3));
