@@ -7,14 +7,23 @@ Change Log
 ----------
 
 
-4.5.9
-=====
+4.5.10
+======
 
 `PR 1715: Add CHANGELOG.rst and update docutils (C4-888) <https://github.com/4dn-dcic/fourfront/pull/1715>`_
 
 * Add a CHANGELOG.rst
 * Also, unrelated, take a newer version of docutils (0.16 instead of 0.12)
   to get rid of a deprecation warning in testing. (`C4-888 <https://hms-dbmi.atlassian.net/browse/C4-888>`_).
+
+
+4.5.9
+=====
+
+`PR 1714: Twitter Iframe Updates for Cypress 00_home_page <https://github.com/4dn-dcic/fourfront/pull/1714>`_
+
+* Address `Trello ticket <https://trello.com/c/IOgmbGSB>`_
+  "Cypress test updates for the new MicroMeta app release".
 
 
 4.5.8
