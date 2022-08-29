@@ -7,10 +7,19 @@ Change Log
 ----------
 
 
+4.5.11
+======
+
+
+* Fix a syntax anomaly in ``pyproject.toml``.
+
+
 4.5.10
 ======
 
 `PR 1715: Add CHANGELOG.rst and update docutils (C4-888) <https://github.com/4dn-dcic/fourfront/pull/1715>`_
+
+**NOTE:** This PR has a syntax error and won't load.
 
 * Add a CHANGELOG.rst
 * Also, unrelated, take a newer version of docutils (0.16 instead of 0.12)
