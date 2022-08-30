@@ -273,7 +273,7 @@ function getDetailedVersion(depUsedVersion, depVersion, depInstallVersion) {
         return depUsedVersion || depVersion || "-";
     } else {
         const version = depUsedVersion || depVersion || "-";
-        return 'There is a version incompatibility. Dependecies Version: ' + version + ' Installation Version: ' + depInstallVersion;
+        return 'Ambiguous versions found. Dependencies Version: ' + version + ', Installed Version: ' + depInstallVersion;
     }
 }
 const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
