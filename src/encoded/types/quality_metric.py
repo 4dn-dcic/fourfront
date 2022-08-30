@@ -343,10 +343,10 @@ class QualityMetricChipseqV2(QualityMetric):
                                "tooltip": "one-read non-mito read pairs / distinct non-mito read pairs",
                                "numberType": "float"})
             
-            final_reads = quality_metric.get(
+            final_reads = qc.get(
                 "align")["nodup_samstat"]["rep1"]["read1"]  # PE
             if not final_reads:
-                final_reads = quality_metric.get(
+                final_reads = qc.get(
                     "align")["nodup_samstat"]["total_reads"]  # SE
             qc_summary.append({"title": "Filtered & Deduped Reads",
                                "value": str(final_reads),
