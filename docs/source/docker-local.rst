@@ -80,7 +80,7 @@ Common Issues
 Some notable issues that you may encounter include:
 
     * The NPM build may fail/hang - this can happen when Docker does not have enough resources. Try upping the amount CPU/RAM you are allocating to Docker.
-    This can be done easily from Docker Desktop, opening the Settings and then accessing the Resources panel. Try 6 CPUs and >8 GB RAM.
+      This can be done easily from Docker Desktop, opening the Settings and then accessing the Resources panel. Try 6 CPUs and >8 GB RAM.
     * Nginx install fails to locate GPG key - this happens when the Docker internal cache has run out of space and needs to be cleaned - see documentation on `docker prune <https://docs.docker.com/config/pruning/.>`_.
 
 
