@@ -264,6 +264,9 @@
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
+        "crosslinking_method": {
+            "title": "Crosslinking method"
+        },
         "biosample.modifications.display_title": {
             "title": "Modifications"
         },
