@@ -33,12 +33,18 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Note that the ordering of these operations is intentional to minimize package footprint
 WORKDIR /home/nginx/.nvm
 ENV NVM_DIR=/home/nginx/.nvm
-COPY deploy/docker/production/install_nginx.sh /
+COPY deploy/docker/production/install_nginx.sh /install_nginx.sh
+
+# Temporarily replacing
+#     curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \
+# with
+#     pip install poetry==1.1.15
+# because of a problem with wheel compatibility in 1.2.0. Need to debug that later. -kmp 31-Aug-2022
 RUN apt-get update && apt-get upgrade -y && \
     apt-get install -y --no-install-recommends vim emacs net-tools ca-certificates build-essential \
     gcc zlib1g-dev postgresql-client libpq-dev git make curl libmagic-dev && \
     pip install --upgrade pip && \
-    curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/venv python - && \
+    pip install poetry==1.1.15 && \
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
     . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION} && \
     nvm use v${NODE_VERSION} && \
@@ -53,9 +59,6 @@ RUN apt-get update && apt-get upgrade -y && \
 
 # Link, verify installations
 ENV PATH="/home/nginx/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
-#RUN node --version
-#RUN npm --version
-#RUN nginx --version
 
 # Build application
 WORKDIR /home/nginx/fourfront
@@ -82,9 +85,10 @@ RUN poetry install --no-dev -vvv && \
 ENV NODE_ENV=production
 RUN npm run build && \
     npm run build-scss && \
-    rm -rf node_modules/
+    rm -rf node_modules/ && \
+    apt-get remove --purge --auto-remove -y ca-certificates
 
-# Copy config files in
+# Copy config files in (down here for quick debugging)
 # Remove default configuration from Nginx
 RUN rm /etc/nginx/nginx.conf && \
     rm /etc/nginx/conf.d/default.conf
@@ -114,11 +118,17 @@ RUN chown nginx:nginx development.ini && \
     chmod +x entrypoint_local.bash
 
 # Production setup
-RUN touch production.ini && chown nginx:nginx production.ini && \
-    touch session-secret.b64 && chown nginx:nginx session-secret.b64 && chown nginx:nginx poetry.toml && \
-    touch supervisord.log && chown nginx:nginx supervisord.log && \
-    touch supervisord.sock && chown nginx:nginx supervisord.sock && \
-    touch supervisord.pid && chown nginx:nginx supervisord.pid
+RUN chown nginx:nginx poetry.toml && \
+    touch production.ini && \
+    chown nginx:nginx production.ini && \
+    touch session-secret.b64 && \
+    chown nginx:nginx session-secret.b64 &&  \
+    touch supervisord.log && \
+    chown nginx:nginx supervisord.log && \
+    touch supervisord.sock && \
+    chown nginx:nginx supervisord.sock && \
+    touch supervisord.pid && \
+    chown nginx:nginx supervisord.pid
 COPY deploy/docker/production/$INI_BASE deploy/ini_files/.
 COPY deploy/docker/production/entrypoint.bash .
 COPY deploy/docker/production/entrypoint_portal.bash .
