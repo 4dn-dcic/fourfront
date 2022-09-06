@@ -149,7 +149,7 @@ pytest-timeout = ">=1.0.0"
 pytest-xdist = ">=1.14"
 "repoze.debug" = ">=1.0.2"
 
-wheel = ">=0.29.0"  # needed for distribution but not any particular version
+wheel = "0.37.1"
 
 
 # In pytest 6.0, we'll be able to use this instead of a separate pytest.ini configuration.
