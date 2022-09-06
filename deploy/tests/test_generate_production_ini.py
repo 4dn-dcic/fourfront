@@ -8,7 +8,7 @@ import subprocess
 from io import StringIO
 from unittest import mock
 
-from dcicutils.qa_utils import override_environ
+from dcicutils.misc_utils import override_environ
 from ..generate_production_ini import FourfrontDeployer
 
 
