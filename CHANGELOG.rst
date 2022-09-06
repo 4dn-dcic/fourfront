@@ -7,6 +7,16 @@ Change Log
 ----------
 
 
+4.5.13
+======
+
+* Pin ``poetry`` version in ``Makefile`` to ``1.1.15``
+* Pin ``wheel`` in ``pyproject.toml`` to ``0.37.1``
+* Update ``poetry.lock`` for changes to ``flake8`` and ``wheel``.
+  (The ``flake8`` update is because we needed to pick up a newer
+  version, not because we needed to change ``pyproject.toml``.)
+
+
 4.5.12
 ======
 
