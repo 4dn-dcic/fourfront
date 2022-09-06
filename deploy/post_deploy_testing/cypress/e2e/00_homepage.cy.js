@@ -30,12 +30,10 @@ describe('Home Page', function () {
     });
 
     it('Has Twitter feed w. 5+ tweets', function() {
-        cy.get('.home-content-area div.twitter-timeline-container iframe#twitter-widget-0').then(function($twitterIframe){
-            // SEE: https://github.com/cypress-io/cypress/issues/136#issuecomment-309090376
-            const $iframeBody = $twitterIframe.contents().find("body");
-            // Must use .find here, .get runs off of top level document.
-            cy.wrap($iframeBody).find(".timeline-Tweet").should('have.length.of.at.least', 5);
-        });
+        // https://github.com/cypress-io/cypress/issues/136
+        cy.get('.home-content-area div.twitter-timeline-container iframe#twitter-widget-0')
+            .iframe()
+            .find('[data-testid="default-timeline-divider"]').should('have.length.of.at.least', 5);
     });
 
     it('"Toggle External Data" affects Chart', function () {
