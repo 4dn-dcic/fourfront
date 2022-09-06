@@ -183,6 +183,24 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
+        it('Contains App version and Model version in About ', function(){
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
+
+            //Click info buttton
+            cy.get('div.micro-meta-app-container #microscopy-app-container button.btn.btn-primary.btn-lg img[alt*="about-solid.svg"]').first().click().end().wait(1000);
+
+            //Verify app version
+            cy.get('div#microscopy-app-overlays-container').should('contain.text', 'App version').invoke('text').then((text) => {
+                const appText = "App version";
+                const splittedText = text.slice(text.indexOf(appText) + appText.length);
+            });
+            // Verify modal version
+            cy.get('div#microscopy-app-overlays-container br').should('contain.text', 'Model version').then(($text) => {
+                const modalText = "Model version";
+                const splittedText = text.slice(text.indexOf(modalText) + modalText.length);
+            });
+        });
+
         //Edit clonned microscope configuration
         editMicroscopeConfiguration();
 
@@ -252,21 +270,21 @@ describe('Deployment/CI Search View Tests', function () {
                     cy.get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
                         const tabKey = $tab.children('span.tab').attr('data-tab-key');
                         let termCount = null;
-                        let termName= null;
-                        let facetTotalCount= null;
-                        const nextButtonItems=[];
-                        const backButtonItems=[];
+                        let termName = null;
+                        let facetTotalCount = null;
+                        const nextButtonItems = [];
+                        const backButtonItems = [];
                         if (tabKey === 'hardware-summary') {
                             cy.wrap($tab).click({ 'force': true }).end()
                                 .wait(2000);
-                            let facetItemIndex=1;
+                            let facetItemIndex = 1;
                             cy.get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
                                 facetTotalCount = $facetTotalCount.length;
                                 facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
                             });
-                            cy.get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
+                            cy.get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
                                 .get(".facet.open .facet-list-element a.term .facet-count").first().then(function ($facetCountFile) {
-                                    termCount =parseInt($facetCountFile.text());
+                                    termCount = parseInt($facetCountFile.text());
                                 })
                                 .get(".facet.open .facet-list-element a.term .facet-item").first().then(function ($facetTextFile) {
                                     termName = $facetTextFile.text();
