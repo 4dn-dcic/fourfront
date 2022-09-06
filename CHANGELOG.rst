@@ -7,9 +7,15 @@ Change Log
 ----------
 
 
-4.5.11
+4.5.12
 ======
 
+* Correct some classifiers in ``pyproject.toml``
+* Update ``fix-dist-info`` script to be consistent with ``cgap-portal``
+
+
+4.5.11
+======
 
 * Fix a syntax anomaly in ``pyproject.toml``.
 
