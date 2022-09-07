@@ -7,8 +7,14 @@ Change Log
 ----------
 
 
+4.5.15
+======
+
+* Restore the version of scripts/fix-dist-info from v4.5.11 (undoing change made in v4.5.12).
+
+
 4.5.14
-=====
+======
 
 `PR 1716: embed crosslinking_method in expset <https://github.com/4dn-dcic/fourfront/pull/1716>`_
 
