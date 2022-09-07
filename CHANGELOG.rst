@@ -7,6 +7,12 @@ Change Log
 ----------
 
 
+4.5.14
+======
+
+* Restore the version of scripts/fix-dist-info from v4.5.11 (undoing change made in v4.5.12).
+
+
 4.5.13
 ======
 
