@@ -71,7 +71,7 @@ RUN poetry install --no-root --no-dev
 # Do the front-end dependency install
 COPY package.json .
 COPY package-lock.json .
-RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/bin/python
+RUN npm ci --no-fund --no-progress --no-optional --no-audit --python=/opt/venv/bin/python && npm cache clean --force
 
 # Copy over the rest of the code
 COPY . .
