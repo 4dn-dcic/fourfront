@@ -7,6 +7,16 @@ Change Log
 ----------
 
 
+4.5.14
+=====
+
+`PR 1716: embed crosslinking_method in expset <https://github.com/4dn-dcic/fourfront/pull/1716>`_
+
+* Embed experiments_in_set.crosslinking_method in ExpSet.
+* Add crosslinking_method column in Experiment.
+* Also, unrelated, updated documentation for docker-local deployment.
+
+
 4.5.13
 ======
 
