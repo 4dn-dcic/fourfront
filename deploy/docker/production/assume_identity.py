@@ -6,9 +6,10 @@
 
 import os
 import logging
-from dcicutils.qa_utils import override_environ
+from dcicutils.misc_utils import override_environ
 from dcicutils.deployment_utils import BasicOrchestratedFourfrontIniFileManager
 from dcicutils.secrets_utils import assume_identity
+from dcicutils.env_utils import EnvUtils
 
 
 logging.basicConfig(level=logging.INFO)
@@ -34,6 +35,8 @@ def build_production_ini_from_global_application_configuration():
 
     # build production.ini
     with override_environ(**identity):
+        # load env_utils
+        EnvUtils.init()
 
         # TODO: this probably needs configuring but minimal
         FourfrontDockerIniFileManager.build_ini_file_from_template(

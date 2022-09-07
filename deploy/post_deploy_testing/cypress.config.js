@@ -8,6 +8,7 @@ module.exports = defineConfig({
     responseTimeout: 120000,
     blockHosts: 'www.google-analytics.com',
     video: false,
+    chromeWebSecurity: false,
     e2e: {
         // We've imported your old cypress plugins here.
         // You may want to clean this up later by importing these.

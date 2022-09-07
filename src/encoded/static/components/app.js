@@ -14,6 +14,7 @@ import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
 import { store } from './../store';
+// import { NotLoggedInAlert } from './navigation/components/LoginNavItem';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -200,6 +201,8 @@ export default class App extends React.PureComponent {
      */
     componentDidMount() {
         const { href, context } = this.props;
+        // const { session } = this.state;
+
         ajax.AJAXSettings.addSessionExpiredCallback(this.updateAppSessionState);
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
@@ -299,6 +302,7 @@ export default class App extends React.PureComponent {
 
             // If we have UTM URL parameters in the URI, attempt to set history state (& browser) URL to exclude them after a few seconds
             // after Google Analytics may have stored proper 'source', 'medium', etc. (async)
+            // const { query = null, protocol, host, pathname } = url.parse(windowHref, true);
             const urlParts = url.parse(windowHref, true);
             const paramsToClear = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 
@@ -321,6 +325,50 @@ export default class App extends React.PureComponent {
                     }
                 }, 3000);
             }
+
+            /* BEGIN - CURRENTLY NOT IN USE */
+
+            // // Set Alert if not on homepage and not logged in. This 'if' logic will likely change later
+            // // especially if have multiple 'for-public' pages like blog posts, news, documentation, etc.
+            // if (!session && pathname != "/") {
+            //     // MAYBE TODO next time are working on shared-portal-components (SPC) repository:
+            //     // Put this Alert into SPC as a predefined/constant export, then cancel/remove it (if active) in the callback function
+            //     // upon login success ( https://github.com/4dn-dcic/shared-portal-components/blob/master/src/components/navigation/components/LoginController.js#L111 )
+            //     Alerts.queue(NotLoggedInAlert);
+            // }
+
+            // // Set Alert if user initializes app between 330-830a ET (possibly temporary)
+            // // 12-4 am in ET is either 4am-8am or 5am-9am UTC, depending on daylight savings.
+            // const currTime = new Date();
+            // const currUTCHours = currTime.getUTCHours();
+            // const currUTCMinutes = currTime.getUTCMinutes();
+            // const showAlert = (
+            //     ((currUTCHours >= 4 || (currUTCHours === 3 && currUTCMinutes >= 30))
+            //     && currUTCHours <= 7 || (currUTCHours === 8 && currUTCMinutes <= 30))
+            // );
+            // if (showAlert) {
+            //     const startTime = new Date();
+            //     startTime.setUTCHours(3);
+            //     startTime.setUTCMinutes(30);
+            //     startTime.setUTCSeconds(0);
+            //     const endTime = new Date();
+            //     endTime.setUTCHours(8);
+            //     endTime.setUTCMinutes(30);
+            //     endTime.setUTCSeconds(0);
+            //     let timezoneOffset = endTime.getTimezoneOffset() / 60;
+            //     timezoneOffset = 0 - timezoneOffset;
+            //     if (timezoneOffset > 0) { timezoneOffset = "+" + timezoneOffset; }
+            //     Alerts.queue({
+            //         "title" : "Scheduled Daily Maintenance",
+            //         "style": "warning",
+            //         "message": `4DN is running its daily scheduled maintenance and data indexing. \
+            //                     Some data might not show up between ${startTime.toLocaleTimeString()} and ${endTime.toLocaleTimeString()} (UTC${timezoneOffset}).`
+            //     });
+            // }
+
+            /* END - CURRENTLY NOT IN USE */
+
+
         });
     }
 
@@ -640,7 +688,7 @@ export default class App extends React.PureComponent {
                 // Clear out remaining auth/JWT stuff from localStorage if any
                 JWT.remove();
             } else if (session === true && existingSession === false){
-                Alerts.deQueue(Alerts.LoggedOut);
+                Alerts.deQueue([ Alerts.LoggedOut/*, NotLoggedInAlert*/ ]);
             }
             return { session };
         }, () => {
@@ -1726,6 +1774,8 @@ class BodyElement extends React.PureComponent {
             'experiments_in_set.biosample.biosource.organism.name'
         ];
 
+        const tooltipGlobalEventOff = isMobileBrowser ? 'click' : undefined;
+
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
                 data-pathname={hrefParts.pathname} className={this.bodyClassName()}>
@@ -1778,7 +1828,7 @@ class BodyElement extends React.PureComponent {
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff={tooltipGlobalEventOff} key="tooltip" /> : null }
 
             </body>
         );

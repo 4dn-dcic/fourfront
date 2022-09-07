@@ -1,13 +1,13 @@
 import os
 
 
-_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+REPOSITORY_ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 
 # This fixes bug https://hms-dbmi.atlassian.net/browse/C4-776
 # The problem was a warning about a deprecated use of pkg_resources.resource_filename, using a relative name:
 # _ONTOLOGY_PATH = pkg_resources.resource_filename('encoded', '../../ontology.json'),
 # However, that names a non-existent filename. Does it mean to refer to 'schemas/ontology.json'? -kmp 6-Feb-2022
-_ONTOLOGY_PATH = os.path.join(_ROOT_DIR, 'ontology.json')
+_ONTOLOGY_PATH = os.path.join(REPOSITORY_ROOT_DIR, 'ontology.json')
 
 
 _app_settings = {
@@ -32,6 +32,7 @@ _app_settings = {
     'testing': True,
     'indexer': True,
     'mpindexer': False,
+    'env.name': 'fourfront_mastertest',  # MUST be different than the actual env name
     'production': True,
     'pyramid.debug_authorization': True,
     'postgresql.statement_timeout': 20,

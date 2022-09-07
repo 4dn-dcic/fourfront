@@ -8,7 +8,7 @@ import subprocess
 from io import StringIO
 from unittest import mock
 
-from dcicutils.qa_utils import override_environ
+from dcicutils.misc_utils import override_environ
 from ..generate_production_ini import FourfrontDeployer
 
 
@@ -40,6 +40,7 @@ def test_omittable():
     assert omittable("foo=$X", "foo=   \r\n \r\n ")
 
 
+@pytest.mark.skip(reason="We're not using ini_files/*.ini any more.")
 def test_environment_template_filename():
 
     with pytest.raises(ValueError):
@@ -53,12 +54,14 @@ def test_environment_template_filename():
     assert environment_template_filename('webdev') == environment_template_filename('fourfront-webdev')
 
 
+@pytest.mark.skip(reason="We're not using ini_files/*.ini any more.")
 def test_any_environment_template_filename():
 
     actual = os.path.abspath(any_environment_template_filename())
     assert actual.endswith("/ini_files/any.ini")
 
 
+@pytest.mark.skip(reason="We're not using ini_files/*.ini any more.")
 def test_legacy_template_environment_names():
     # Containerized Fourfront will use a single generic template, but while we're still using beanstalks,
     # we do some minimal testing to make sure all the templates are there. -kmp 4-Oct-2021
