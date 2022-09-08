@@ -149,9 +149,9 @@ serverPlugins.push(new webpack.DefinePlugin({
 }));
 
 // From https://github.com/jsdom/jsdom/issues/3042
-serverPlugins.push(
-    new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
-);
+// serverPlugins.push(
+//     new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
+// );
 
 if (env === 'development'){
     // Skip for `npm run dev-quick` (`env === "quick"`) since takes a while
