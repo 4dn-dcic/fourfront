@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "4.5.11"
+version = "4.5.16"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -31,8 +31,8 @@ classifiers = [
     # Specify the Python versions you support here. In particular, ensure
     # that you indicate whether you support Python 2, Python 3 or both.
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.6',
-    'Programming Language :: Python :: 3.7'
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8'
 ]
 
 [tool.poetry.dependencies]
@@ -149,7 +149,7 @@ pytest-timeout = ">=1.0.0"
 pytest-xdist = ">=1.14"
 "repoze.debug" = ">=1.0.2"
 
-wheel = ">=0.29.0"  # needed for distribution but not any particular version
+wheel = "0.37.1"
 
 
 # In pytest 6.0, we'll be able to use this instead of a separate pytest.ini configuration.
