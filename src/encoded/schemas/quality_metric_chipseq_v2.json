@@ -1105,116 +1105,112 @@
             }
         },
         "align_enrich": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "xcor_score": {
+            "xcor_score": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "type": "object",
-                        "additionalProperties": false,
-                        "properties": {
-                            "rep1": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "subsampled_reads": {
-                                        "title": "Subsampled reads",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "estimated_fragment_len": {
-                                        "title": "Estimated fragment length",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "corr_estimated_fragment_len": {
-                                        "title": "Estimated fragment length correlation",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "phantom_peak": {
-                                        "title": "Phantom peaks",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "corr_phantom_peak": {
-                                        "title": "Phantom peak correlation",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "argmin_corr": {
-                                        "title": "Argmin correlation",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "min_corr": {
-                                        "title": "Min correlation",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    },
-                                    "NSC": {
-                                        "title": "Normalized strand cross-correlation coefficient",
-                                        "type": "number",
-                                        "qc_order": 8
-                                    },
-                                    "RSC": {
-                                        "title": "Relative strand cross-correlation coefficient",
-                                        "type": "number",
-                                        "qc_order": 9
-                                    }
+                        "rep1": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "subsampled_reads": {
+                                    "title": "Subsampled reads",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "estimated_fragment_len": {
+                                    "title": "Estimated fragment length",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "corr_estimated_fragment_len": {
+                                    "title": "Estimated fragment length correlation",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "phantom_peak": {
+                                    "title": "Phantom peaks",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "corr_phantom_peak": {
+                                    "title": "Phantom peak correlation",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "argmin_corr": {
+                                    "title": "Argmin correlation",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "min_corr": {
+                                    "title": "Min correlation",
+                                    "type": "number",
+                                    "qc_order": 7
+                                },
+                                "NSC": {
+                                    "title": "Normalized strand cross-correlation coefficient",
+                                    "type": "number",
+                                    "qc_order": 8
+                                },
+                                "RSC": {
+                                    "title": "Relative strand cross-correlation coefficient",
+                                    "type": "number",
+                                    "qc_order": 9
                                 }
-                            },
-                            "rep2": {
-                                "type": "object",
-                                "additionalProperties": false,
-                                "properties": {
-                                    "subsampled_reads": {
-                                        "title": "Subsampled reads",
-                                        "type": "number",
-                                        "qc_order": 1
-                                    },
-                                    "estimated_fragment_len": {
-                                        "title": "Estimated fragment length",
-                                        "type": "number",
-                                        "qc_order": 2
-                                    },
-                                    "corr_estimated_fragment_len": {
-                                        "title": "Estimated fragment length correlation",
-                                        "type": "number",
-                                        "qc_order": 3
-                                    },
-                                    "phantom_peak": {
-                                        "title": "Phantom peaks",
-                                        "type": "number",
-                                        "qc_order": 4
-                                    },
-                                    "corr_phantom_peak": {
-                                        "title": "Phantom peak correlation",
-                                        "type": "number",
-                                        "qc_order": 5
-                                    },
-                                    "argmin_corr": {
-                                        "title": "Argmin correlation",
-                                        "type": "number",
-                                        "qc_order": 6
-                                    },
-                                    "min_corr": {
-                                        "title": "Min correlation",
-                                        "type": "number",
-                                        "qc_order": 7
-                                    },
-                                    "NSC": {
-                                        "title": "Normalized strand cross-correlation coefficient",
-                                        "type": "number",
-                                        "qc_order": 8
-                                    },
-                                    "RSC": {
-                                        "title": "Relative strand cross-correlation coefficient",
-                                        "type": "number",
-                                        "qc_order": 9
-                                    }
+                            }
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "subsampled_reads": {
+                                    "title": "Subsampled reads",
+                                    "type": "number",
+                                    "qc_order": 1
+                                },
+                                "estimated_fragment_len": {
+                                    "title": "Estimated fragment length",
+                                    "type": "number",
+                                    "qc_order": 2
+                                },
+                                "corr_estimated_fragment_len": {
+                                    "title": "Estimated fragment length correlation",
+                                    "type": "number",
+                                    "qc_order": 3
+                                },
+                                "phantom_peak": {
+                                    "title": "Phantom peaks",
+                                    "type": "number",
+                                    "qc_order": 4
+                                },
+                                "corr_phantom_peak": {
+                                    "title": "Phantom peak correlation",
+                                    "type": "number",
+                                    "qc_order": 5
+                                },
+                                "argmin_corr": {
+                                    "title": "Argmin correlation",
+                                    "type": "number",
+                                    "qc_order": 6
+                                },
+                                "min_corr": {
+                                    "title": "Min correlation",
+                                    "type": "number",
+                                    "qc_order": 7
+                                },
+                                "NSC": {
+                                    "title": "Normalized strand cross-correlation coefficient",
+                                    "type": "number",
+                                    "qc_order": 8
+                                },
+                                "RSC": {
+                                    "title": "Relative strand cross-correlation coefficient",
+                                    "type": "number",
+                                    "qc_order": 9
                                 }
                             }
                         }
