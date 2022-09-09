@@ -1105,10 +1105,10 @@
             }
         },
         "align_enrich": {
-            "xcor_score": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "xcor_score": {
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
