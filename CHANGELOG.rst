@@ -10,6 +10,8 @@ Change Log
 4.6.0
 =====
 
+`PR 1727: Manage development.ini and test.ini outside of source control <https://github.com/4dn-dcic/fourfront/pull/1727>`_
+
 Changes made by this PR:
 
 * Renames ``development.ini`` to ``development.ini.template``, parameterizing ``env.name``.
@@ -41,8 +43,29 @@ that does not collide with other users. To use a different name, though, just ed
 which is no longer in source control.
 
 
+4.5.17
+======
+
+`PR 1721: Twitter Timeline Feeds API Update - Round 2 <https://github.com/4dn-dcic/fourfront/pull/1721>`_
+
+* In ``react-twitter-embed/TwitterTimelineEmbed.js``, add conditional handling of ``options.height``,
+  depending on ``autoHeight``.
+
+
+4.5.16
+======
+
+`PR 1725: Clean NPM Cache in Docker <https://github.com/4dn-dcic/fourfront/pull/1725>`_
+
+* In order to reduce image size, this adds a cache clean during docker build after ``npm ci``.
+
+**Note:** A syntax error in this PR was later corrected by a thug commit that has been tagged ``v4.5.16.1``.
+
+
 4.5.15
 ======
+
+`PR 1724: Rewind fix-dist-info <https://github.com/4dn-dcic/fourfront/pull/1724>`_
 
 * Restore the version of scripts/fix-dist-info from v4.5.11 (undoing change made in v4.5.12).
 
