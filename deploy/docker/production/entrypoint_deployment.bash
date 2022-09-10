@@ -13,7 +13,7 @@ if [ -n "${INITIAL_DEPLOYMENT}" ]; then
 fi
 
 ## Create mapping
-poetry run create-mapping-on-deploy production.ini --app-name app› --clear-queue
+poetry run create-mapping-on-deploy production.ini --app-name app --clear-queue
 
 # Load Data (based on development.ini, for now just master-inserts)
 # Not necessary after first deploy
