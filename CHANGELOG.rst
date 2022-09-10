@@ -7,6 +7,40 @@ Change Log
 ----------
 
 
+4.6.0
+=====
+
+Changes made by this PR:
+
+* Renames ``development.ini`` to ``development.ini.template``, parameterizing ``env.name``.
+* Renames ``test.ini`` to ``test.ini.template``, parameterizing ``env.name``.
+* Adds new script ``prepare-local-dev``.
+* Adjusts ``Makefile`` to run the ``prepare-local-dev`` script in target ``build-after-poetry``.
+* Renames ``commands/prepare_docker.py`` to ``commands/prepare_template.py``
+  so that the two commands ``prepare-docker`` and ``prepare-local-dev`` can live in the same file.
+  They do similar things.
+* There is no change to docker setup, since that already does ``make build``.
+* There is no change to GA workflows, since they already do ``make build``.
+
+**Special Notes for Developers**
+
+This change should **not** affect production builds or GA. You should report problems if you see them.
+
+This change might affect developers who are doing local testing
+(e.g., ``make test`` or a call to ``pytest``) that would use ``test.ini``
+or who are doing local deploys (e.g., ``make deploy1``) that would use ``development.ini``.
+
+Prior to this change, ``development.ini`` and ``test.ini`` were in source control.
+This PR chagnes this so that what's in source control is ``development.ini.template`` and ``test.ini.template``.
+There is a command introduced, ``prepare-local-dev`` that you can run to create a ``development.ini``
+and ``test.ini``. Once the file exists, the ``prepare-local-dev`` command will not touch it,
+so you can do other edits as well without concern that they will get checked in.
+The primary change that this command does is to make a local environment of ``fourfront-devlocal-<yourusername>``
+or ``fourfront-test-<yourusername>`` so that testing and debugging that you do locally will be in an environment
+that does not collide with other users. To use a different name, though, just edit the resulting file,
+which is no longer in source control.
+
+
 4.5.15
 ======
 

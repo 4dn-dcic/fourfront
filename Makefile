@@ -88,6 +88,7 @@ build-after-poetry:  # continuation of build after poetry install
 	make npm-setup-if-needed
 	poetry run python setup_eb.py develop
 	make fix-dist-info
+	poetry run prepare-local-dev
 
 fix-dist-info:
 	@scripts/fix-dist-info
