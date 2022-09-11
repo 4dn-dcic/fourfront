@@ -114,7 +114,7 @@ const optimization = {
     minimizer: [
         new TerserPlugin({
             parallel: false,  // XXX: this option causes docker build to fail - Will 2/25/2021
-            sourceMap: true,
+            // sourceMap: true, // https://github.com/webpack-contrib/terser-webpack-plugin/releases/tag/v5.0.0
             terserOptions:{
                 compress: true,
                 mangle: true,
