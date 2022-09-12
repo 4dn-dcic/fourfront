@@ -6,6 +6,10 @@ fourfront
 Change Log
 ----------
 
+4.5.18
+======
+
+* Added a new user insert in master_inserts/user.json
 
 4.5.15
 ======
