@@ -6,6 +6,10 @@ fourfront
 Change Log
 ----------
 
+4.5.17
+======
+
+* Twitter Timeline Feeds updates based on new/breaking API build options
 
 4.5.15
 ======
