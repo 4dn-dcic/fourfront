@@ -320,7 +320,7 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                         });
 
                     });
-                    cy.go(-2).wait(100).end();
+                    cy.go(-2).wait(500).end();
 
                 });
 
