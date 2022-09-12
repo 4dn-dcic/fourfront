@@ -230,5 +230,16 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "uuid": "1117c645-719d-4062-b0a7-fd3da0b9e782"
+    },
+    {
+        "email": "rahi_navelkar@hms.harvard.edu",
+        "first_name": "Rahi",
+        "job_title": "Data Wrangler",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Navelkar",
+        "uuid": "344acd6e-305d-11ed-a261-0242ac120002",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
     }
 ]
