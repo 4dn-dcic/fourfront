@@ -432,15 +432,15 @@
         },
         "align": {
             "type": "object",
-            "additionalProperties": false,
+            "additionalProperties": true,
             "properties": {
                 "samstat": {
                     "type": "object",
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -561,7 +561,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -684,11 +684,11 @@
                 },
                 "dup": {
                     "type": "object",
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "unpaired_reads": {
                                     "title": "Unpaired reads",
@@ -729,7 +729,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "unpaired_reads": {
                                     "title": "Unpaired reads",
@@ -772,11 +772,11 @@
                 },
                 "nodup_samstat": {
                     "type": "object",
-                    "additionalProperties": false,
+                    "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -897,7 +897,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": false,
+                            "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
