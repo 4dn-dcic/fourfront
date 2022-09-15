@@ -14,7 +14,7 @@ from dcicutils.env_utils import EnvUtils, get_mirror_env_from_context, is_stg_or
 from dcicutils.ff_utils import get_health_page
 from dcicutils.log_utils import set_logging
 from dcicutils.misc_utils import VirtualApp
-from dcicutils.secrets_utils import assumed_identity
+from dcicutils.secrets_utils import assumed_identity, SecretsTable
 from pyramid.config import Configurator
 from pyramid_localroles import LocalRolesAuthorizationPolicy
 from pyramid.settings import asbool
@@ -41,7 +41,8 @@ STATIC_MAX_AGE = DEFAULT_STATIC_MAX_AGE
 #
 # The default value from Sentry seems to be 1.0, but the code is convoluted, so if we set this to None
 # here, it won't get passed and will be allowed to default in whatever manner they select. -kmp 15-Sep-2022
-SENTRY_TRACE_RATE = None  # accept default
+SENTRY_TRACE_RATE = 0.1
+
 DEFAULT_AUTH0_DOMAIN = 'hms-dbmi.auth0.com'
 
 
@@ -130,12 +131,9 @@ def app_version(config):
             config.registry.settings["ga_config"] = json.load(json_file)
 
 
-CLOUD_INFRA_PLACEHOLDER = 'XXX: ENTER VALUE'
-
-
 def init_sentry(dsn):
     """ Helper function that initializes sentry SDK if a dsn is specified. """
-    if dsn and dsn != CLOUD_INFRA_PLACEHOLDER:
+    if not SecretsTable.is_empty_value(dsn):
         options = {}
         if SENTRY_TRACE_RATE is not None:
             options['traces_sample_rate'] = SENTRY_TRACE_RATE
@@ -259,13 +257,6 @@ def main(global_config, **local_config):
     # We either use a "production" DSN or a "mastertest" DSN for real servers.
     # We do nothing in local/testing
     sentry_dsn = settings.get('sentry_dsn', None)
-    # When the GAC has been updated, this can go away. -kmp 15-Sep-2022
-    if not sentry_dsn or sentry_dsn == CLOUD_INFRA_PLACEHOLDER:
-        current_env = settings.get('env.name', None)
-        if is_stg_or_prd_env(current_env):
-            sentry_dsn = "https://0d46fafce1d04ea2bfbe11ff15ca896e@o427308.ingest.sentry.io/5379985"
-        elif current_env is not None and not doing_testing:
-            sentry_dsn = "https://ce359da106854a07aa67aabee873601c@o427308.ingest.sentry.io/5373642"
     init_sentry(sentry_dsn)
 
     # initialize CodeGuru profiling, if set
