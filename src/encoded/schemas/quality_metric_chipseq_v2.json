@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
-    "additionalProperties": true,
+    "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -40,7 +40,7 @@
             "title": "IDR Reproducibility",
             "type": "object",
             "qc_order": 3,
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "reproducibility": {
                     "type": "object",
@@ -136,7 +136,7 @@
             "title": "Peak Statistics",
             "type": "object",
             "qc_order": 2,
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "peak_region_size": {
                     "type": "object",
@@ -254,7 +254,7 @@
             "title": "FRiP MACS2",
             "type": "object",
             "qc_order": 3,
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "frac_reads_in_peaks": {
                     "type": "object",
@@ -278,7 +278,7 @@
                                     "title": "Rep2",
                                     "type": "object",
                                     "qc_order": 2,
-                                    "additionalProperties": true,
+                                    "additionalProperties": false,
                                     "properties": {
                                         "frip": {
                                             "title": "FRiP",
@@ -432,15 +432,15 @@
         },
         "align": {
             "type": "object",
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "samstat": {
                     "type": "object",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -561,7 +561,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -684,11 +684,11 @@
                 },
                 "dup": {
                     "type": "object",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "unpaired_reads": {
                                     "title": "Unpaired reads",
@@ -729,7 +729,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "unpaired_reads": {
                                     "title": "Unpaired reads",
@@ -772,11 +772,11 @@
                 },
                 "nodup_samstat": {
                     "type": "object",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -897,7 +897,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "total_reads": {
                                     "title": "Total read pairs",
@@ -1022,15 +1022,15 @@
         },
         "lib_complexity": {
             "type": "object",
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "lib_complexity": {
                     "type": "object",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "total_fragments": {
                                     "title": "Total fragments",
@@ -1066,7 +1066,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "total_fragments": {
                                     "title": "Total fragments",
@@ -1106,15 +1106,15 @@
         },
         "align_enrich": {
             "type": "object",
-            "additionalProperties": true,
+            "additionalProperties": false,
             "properties": {
                 "xcor_score": {
                     "type": "object",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "subsampled_reads": {
                                     "title": "Subsampled reads",
@@ -1165,7 +1165,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "subsampled_reads": {
                                     "title": "Subsampled reads",
@@ -1219,14 +1219,14 @@
             },
             "jsd": {
                 "type": "object",
-                "additionalProperties": true,
+                "additionalProperties": false,
                 "properties": {
                     "type": "object",
-                    "additionalProperties": true,
+                    "additionalProperties": false,
                     "properties": {
                         "rep1": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "auc": {
                                     "title": "AUC",
@@ -1267,7 +1267,7 @@
                         },
                         "rep2": {
                             "type": "object",
-                            "additionalProperties": true,
+                            "additionalProperties": false,
                             "properties": {
                                 "auc": {
                                     "title": "AUC",
