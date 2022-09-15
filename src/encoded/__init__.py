@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import json  # used only in Fourfront, not CGAP
 import mimetypes
 import netaddr
@@ -161,6 +162,12 @@ def main(global_config, **local_config):
         with assumed_identity():
             # Assume GAC and load env utils (once)
             EnvUtils.init()
+
+    # adjust log levels for some annoying loggers
+    lnames = ['boto', 'urllib', 'elasticsearch', 'dcicutils']
+    for name in logging.Logger.manager.loggerDict:
+        if any(logname in name for logname in lnames):
+            logging.getLogger(name).setLevel(logging.WARNING)
 
     set_logging(in_prod=settings.get('production'))
     # set_logging(settings.get('elasticsearch.server'), settings.get('production'))
