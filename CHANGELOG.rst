@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+4.5.19
+======
+
+* Miscellaneous cosmetics and refactoring to align better with CGAP
+  in how the file src/encoded/__init__.py is arranged.
+
+
 4.5.18
 ======
 
