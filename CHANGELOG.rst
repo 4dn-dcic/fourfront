@@ -11,6 +11,8 @@ Change Log
 
 * Miscellaneous cosmetics and refactoring to align better with CGAP
   in how the file src/encoded/__init__.py is arranged.
+* Pick up ``ENCODED_SENTRY_DSN`` from the GAC (C4-913).
+* Adjust log level for ``boto``, ``urllib``, ``elasticsearch``, and ``dcicutils`` to ``WARNING``.
 
 
 4.5.18
