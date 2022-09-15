@@ -254,8 +254,6 @@ def main(global_config, **local_config):
     config.include('.upgrade')
 
     # initialize sentry reporting
-    # We either use a "production" DSN or a "mastertest" DSN for real servers.
-    # We do nothing in local/testing
     sentry_dsn = settings.get('sentry_dsn', None)
     init_sentry(sentry_dsn)
 
