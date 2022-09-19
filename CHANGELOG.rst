@@ -19,11 +19,13 @@ Change Log
 ======
 
 * Added a new user insert for Rahi in master_inserts/user.json
-=======
+
+
 4.5.17
 ======
 
 * Twitter Timeline Feeds updates based on new/breaking API build options
+
 
 4.5.15
 ======
