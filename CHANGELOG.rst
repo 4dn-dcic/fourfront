@@ -6,15 +6,26 @@ fourfront
 Change Log
 ----------
 
+4.5.19
+======
+
+* Miscellaneous cosmetics and refactoring to align better with CGAP
+  in how the file src/encoded/__init__.py is arranged.
+* Pick up ``ENCODED_SENTRY_DSN`` from the GAC (C4-913).
+* Adjust log level for ``boto``, ``urllib``, ``elasticsearch``, and ``dcicutils`` to ``WARNING``.
+
+
 4.5.18
 ======
 
 * Added a new user insert for Rahi in master_inserts/user.json
-=======
+
+
 4.5.17
 ======
 
 * Twitter Timeline Feeds updates based on new/breaking API build options
+
 
 4.5.15
 ======
