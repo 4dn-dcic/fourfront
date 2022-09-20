@@ -337,13 +337,13 @@ class QualityMetricChipseqV2(QualityMetric):
                                "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["PBC1"])),
                                "tooltip": "one-read non-mito read pairs / distinct non-mito read pairs",
                                "numberType": "float"})
-
-        if 'align' in qc:
             
             qc_summary.append({"title": "Nonredundant Read Fraction (NRF)",
-                               "value": str(round2(qc.get("align")["lib_complexity"]["lib_complexity"]["rep1"]["NRF"])),
+                               "value": str(round2(qc.get("lib_complexity")["lib_complexity"]["rep1"]["NRF"])),
                                "tooltip": "distinct non-mito read pairs / total non-mito read pairs",
                                "numberType": "float"})
+
+        if 'align' in qc:
             
             final_reads = qc.get(
                 "align")["nodup_samstat"]["rep1"]["read1"]  # PE
