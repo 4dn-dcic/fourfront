@@ -119,6 +119,29 @@
 		}
 	}
 
+	/**********************************************************
+		New Home Page Extras
+	***********************************************************/
+	h2.homepage-section-title.new-design {
+		font-size: 24px;
+		line-height: 30px;
+		font-weight: 400;
+		padding-bottom: 8px;
+	}
+	.icon-wrapper {
+		text-align: center;
+		display: inline-block;
+	  }
+	  .icon-wrapper::before,
+	  .icon-wrapper::after {
+		content: '';
+		display: inline-block;
+		width: 47%;
+		height: 1px;
+		background: #DCE2E5;
+		vertical-align: middle;
+		margin-bottom: 10px;
+	  }
 }
 
 .static-section-entry {
@@ -940,7 +963,7 @@ $carousel-height : 240px;
 			> .homepage-section-title {
 				border-bottom: none; // Twitter container has own.
 				margin-bottom: 0;
-				font-weight: 100;
+				//font-weight: 100;
 				display: flex;
 				justify-content: space-between;
 				
