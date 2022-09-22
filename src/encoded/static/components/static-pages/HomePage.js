@@ -55,7 +55,7 @@ export default class HomePage extends React.PureComponent {
         return (
             <div className="homepage-wrapper">
 
-                <HomePageCarousel {...{ windowWidth, context }} />
+                {/* <HomePageCarousel {...{ windowWidth, context }} /> */}
 
                 <div className="container home-content-area" id="content">
 
