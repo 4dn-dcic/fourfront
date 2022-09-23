@@ -68,9 +68,9 @@ export default class HomePage extends React.PureComponent {
                                     <div className="flex-grow-1 mt-2 pt-2 pl-4 pr-4" style={{ backgroundColor: '#BBE3EA', color: '#34646C', fontSize: '1.3rem', lineHeight: '1.3', fontWeight: '400', borderRadius: '0 0 8px 8px' }}>Search all Experiment Sets<br/> in the 4D Nucleome Database</div>
                                 </div>
                                 <div className="col-12 col-md-5 ml-2 text-center mh-100 h-100 m-2 p-0 d-flex flex-column" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
-                                    <div className="mt-3"><i className="icon icon-book-open fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
+                                    <div className="mt-3"><i className="icon icon-book-open fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#C8E3CA' }}></i></div>
                                     <div className="mt-3"><span style={{ fontSize: '1.75rem', fontWeight: '600', color: '#34646C' }}>Browse By Publication</span></div>
-                                    <div className="flex-grow-1 mt-2 pt-2 pl-4 pr-4" style={{ backgroundColor: '#BBE3EA', color: '#34646C', fontSize: '1.3rem', lineHeight: '1.3', fontWeight: '400', borderRadius: '0 0 8px 8px' }}>View Publications<br/> in the 4D Nucleome Database</div>
+                                    <div className="flex-grow-1 mt-2 pt-2 pl-4 pr-4" style={{ backgroundColor: '#B6E0B8', color: '#34646C', fontSize: '1.3rem', lineHeight: '1.3', fontWeight: '400', borderRadius: '0 0 8px 8px' }}>View Publications<br/> in the 4D Nucleome Database</div>
                                 </div>
                             </div>
                         </div>
@@ -186,6 +186,24 @@ export default class HomePage extends React.PureComponent {
                                                                     </div>
                                                                     <div className="search-result-column-block" style={{ width: "200px", fontSize:'14px' }} data-field="lab.display_title" data-column-even="false">
                                                                         <div className="inner text-center"><span className="value text-truncate"><a href="#">3 Experiment Set(s)</a></span></div>
+                                                                    </div>
+                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize:'14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="result-table-detail-container detail-closed">
+                                                                    <div></div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                                <div className="columns clearfix result-table-row" draggable="false">
+                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize:'14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                                        <div className="inner">
+                                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">H3K4me3 PLAC-seq on embryo</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize:'14px' }} data-field="lab.display_title" data-column-even="false">
+                                                                        <div className="inner text-center"><span className="value text-truncate"><a href="#">12 Experiment Set(s)</a></span></div>
                                                                     </div>
                                                                     <div className="search-result-column-block" style={{ width: "200px", fontSize:'14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
                                                                         <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
