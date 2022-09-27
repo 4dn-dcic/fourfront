@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+4.5.20
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+
 4.5.19
 ======
 
