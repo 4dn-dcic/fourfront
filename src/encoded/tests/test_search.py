@@ -610,6 +610,7 @@ class ItemTypeChecker:
 
 
 @pytest.mark.flaky
+@pytest.mark.skip  # this test is redundant with other tests that load the workbook
 def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestapp):
     es = app.registry['elasticsearch']
     # we need to reindex the collections to make sure numbers are correct

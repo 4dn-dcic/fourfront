@@ -18,7 +18,7 @@ from ..commands.create_mapping_on_deploy import (
 # from ..types.experiment import *
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.workbook]
 
 # Using workbook inserts - required for test_run_create_mapping_with_upgrader
 notice_pytest_fixtures(app_settings, app, workbook)
@@ -301,7 +301,7 @@ def test_run_create_mapping_with_upgrader(mock_add_uuids, testapp, workbook):
     item_type_uuids = sorted([x["uuid"] for x in search])
 
     # No schema version change, so nothing needs indexing
-    run_create_mapping(app, check_first=True)
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
     (_, uuids_to_index), _ = mock_add_uuids.call_args
     assert not uuids_to_index
 
@@ -312,7 +312,7 @@ def test_run_create_mapping_with_upgrader(mock_add_uuids, testapp, workbook):
     updated_schema_version = str(int(schema_version_default) + 1)
     registry_schema["properties"]["schema_version"]["default"] = updated_schema_version
 
-    run_create_mapping(app, check_first=True)
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
     (_, uuids_to_index), _ = mock_add_uuids.call_args
     assert sorted(uuids_to_index) == item_type_uuids
 
