@@ -7,6 +7,7 @@ from dcicutils.env_utils import is_stg_or_prd_env
 from dcicutils.lang_utils import disjoined_list
 from pyramid.paster import get_app
 from snovault import DBSESSION
+from snovault.storage import Base
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from sqlalchemy import MetaData
 from typing import Optional, List
@@ -37,9 +38,10 @@ def clear_db_tables(app):
     meta.reflect()
     connection = session.connection().connect()
     try:
-        # truncate tables by only deleting contents
-        for table in meta.sorted_tables:
-            connection.execute(table.delete())
+        # truncate tables by only deleting contents (sqlalchemy 1.4+ compliant)
+        connection.execute('TRUNCATE {} RESTART IDENTITY;'.format(
+            ','.join(table.name
+                     for table in reversed(Base.metadata.sorted_tables))))
     except Exception as e:
         log.error(f"clear_db_es_contents: Error on DB drop_all/create_all. {type(e)}: {e}")
         transaction.abort()

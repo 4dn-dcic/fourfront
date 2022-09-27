@@ -17,6 +17,7 @@ import uuid
 from dcicutils.qa_utils import notice_pytest_fixtures
 from elasticsearch.exceptions import NotFoundError
 from snovault import DBSESSION, TYPES
+from snovault.storage import Base
 from snovault.elasticsearch import create_mapping, ELASTIC_SEARCH
 from snovault.elasticsearch.create_mapping import (
     type_mapping,
@@ -43,7 +44,9 @@ notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 
-POSTGRES_MAJOR_VERSION_EXPECTED = 11
+# These 3 versions are known to be compatible, older versions should not be
+# used, odds are 14 can be used as well - Will Sept 13 2022
+POSTGRES_COMPATIBLE_MAJOR_VERSIONS = ['11', '12', '13']
 
 
 def test_postgres_version(session):
@@ -51,18 +54,18 @@ def test_postgres_version(session):
     (version_info,) = session.query(func.version()).one()
     print("version_info=", version_info)
     assert isinstance(version_info, str)
-    assert re.match("PostgreSQL %s([.][0-9]+)? " % POSTGRES_MAJOR_VERSION_EXPECTED, version_info)
+    assert re.match("PostgreSQL (%s)([.][0-9]+)? " % '|'.join(POSTGRES_COMPATIBLE_MAJOR_VERSIONS), version_info)
 
 
 # subset of collections to run test on
 TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
-@pytest.yield_fixture(scope='session', params=[False])
+@pytest.yield_fixture(scope='session')
 def app(app_settings, request):
     # for now, don't run with mpindexer. Add `True` to params above to do so
-    if request.param:
-        app_settings['mpindexer'] = True
+    # if request.param:
+    #     app_settings['mpindexer'] = True
     app = main({}, **app_settings)
 
     yield app
@@ -91,11 +94,9 @@ def setup_and_teardown(app):
     connection = session.connection().connect()
     meta = MetaData(bind=session.connection())
     meta.reflect()
-    for table in meta.sorted_tables:
-        print('Clear table %s' % table)
-        print('Count before -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)))
-        connection.execute(table.delete())
-        print('Count after -->', str(connection.scalar("SELECT COUNT(*) FROM %s" % table)), '\n')
+    connection.execute('TRUNCATE {} RESTART IDENTITY;'.format(
+        ','.join(table.name
+                 for table in reversed(Base.metadata.sorted_tables))))
     session.flush()
     mark_changed(session())
     transaction.commit()
@@ -106,7 +107,7 @@ def setup_and_teardown(app):
 def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
     es = app.registry['elasticsearch']
     namespaced_ppp = get_namespaced_index(app, 'testing_post_put_patch')
-    doc_count = es.count(index=namespaced_ppp, doc_type='testing_post_put_patch').get('count')
+    doc_count = es.count(index=namespaced_ppp).get('count')
     assert doc_count == 0
     # First post a single item so that subsequent indexing is incremental
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
@@ -118,7 +119,7 @@ def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
     assert res.json['indexing_count'] == 1
     time.sleep(3)
     # check es directly
-    doc_count = es.count(index=namespaced_ppp, doc_type='testing_post_put_patch').get('count')
+    doc_count = es.count(index=namespaced_ppp).get('count')
     assert doc_count == 2
     res = testapp.get('/search/?type=TestingPostPutPatch')
     uuids = [indv_res['uuid'] for indv_res in res.json['@graph']]
@@ -131,7 +132,7 @@ def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
     assert res.json['total'] >= 2
     assert uuid in uuids
     namespaced_indexing = get_namespaced_index(app, 'indexing')
-    indexing_doc = es.get(index=namespaced_indexing, doc_type='indexing', id='latest_indexing')
+    indexing_doc = es.get(index=namespaced_indexing, id='latest_indexing')
     indexing_source = indexing_doc['_source']
     assert 'indexing_count' in indexing_source
     assert 'indexing_finished' in indexing_source
@@ -163,7 +164,7 @@ def test_create_mapping_on_indexing(setup_and_teardown, app, testapp, registry, 
             item_index = es.indices.get(index=namespaced_index)
         except Exception:
             assert False
-        found_index_mapping_emb = item_index[namespaced_index]['mappings'][item_type]['properties']['embedded']
+        found_index_mapping_emb = item_index[namespaced_index]['mappings']['properties']['embedded']
         found_index_settings = item_index[namespaced_index]['settings']
         assert found_index_mapping_emb
         assert found_index_settings
@@ -276,7 +277,7 @@ def test_real_validation_error(setup_and_teardown, app, indexer_testapp, testapp
         time.sleep(2)
         try:
             namespaced_fp = get_namespaced_index(app, 'file_processed')
-            es_res = es.get(index=namespaced_fp, doc_type='file_processed',
+            es_res = es.get(index=namespaced_fp,
                             id=res['@graph'][0]['uuid'])
         except NotFoundError:
             indexer_queue.send_messages([to_queue], target_queue='primary')

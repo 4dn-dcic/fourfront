@@ -413,7 +413,7 @@ def load_all_gen(testapp, inserts, docsdir, overwrite=True, itype=None, from_jso
                     post_first = {key: value for (key, value) in an_item.items() if key in first_fields}
                     post_first = format_for_attachment(post_first, docsdir)
                     try:
-                        res = testapp.post_json('/'+a_type, post_first)
+                        res = testapp.post_json('/'+a_type+'?skip_indexing=true', post_first)
                         assert res.status_code == 201
                         posted += 1
                         # yield bytes to work with Response.app_iter

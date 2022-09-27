@@ -643,7 +643,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         item_type = app.registry[COLLECTIONS][item_name].type_info.item_type
         namespaced_index = get_namespaced_index(app, item_type)
 
-        es_direct_count = es.count(index=namespaced_index, doc_type=item_type).get('count')
+        es_direct_count = es.count(index=namespaced_index).get('count')
         assert es_item_count == es_direct_count
 
         if es_item_count == 0:
@@ -653,7 +653,7 @@ def test_index_data_workbook(app, workbook, testapp, indexer_testapp, htmltestap
         print("search_url=", search_url)
         items = ItemTypeChecker.get_all_items_of_type(client=testapp, item_type=item_type)
         for item_res in items:
-            index_view_res = es.get(index=namespaced_index, doc_type=item_type,
+            index_view_res = es.get(index=namespaced_index,
                                     id=item_res['uuid'])['_source']
             # make sure that the linked_uuids match the embedded data
             assert 'linked_uuids_embedded' in index_view_res
