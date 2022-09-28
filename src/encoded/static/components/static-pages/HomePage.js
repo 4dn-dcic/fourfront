@@ -60,30 +60,34 @@ export default class HomePage extends React.PureComponent {
                 <div className="container home-content-area" id="content">
 
                     <div className="row mt-4 pt-3 pb-3 p-3 browse-data-collection-container">
-                        <div className="col-12 col-md-7 browse-data-collection-col-left">
+                        <div className="col-12 col-md-7 browse-data-collection-col-browse">
                             <div className="row">
                                 <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block">
-                                    <div className="mt-3"><i className="icon icon-database fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                    <div className="mt-3"><span style={{ fontSize: '1.75rem', fontWeight: '500', color: '#34646C' }}>Browse All Data</span></div>
-                                    <div className="flex-grow-1 mt-2 pt-2 pl-4 pr-4" style={{ backgroundColor: '#BBE3EA', color: '#34646C', fontSize: '1.3rem', lineHeight: '1.3', fontWeight: '400', borderRadius: '0 0 8px 8px' }}>Search all Experiment Sets<br/> in the 4D Nucleome Database</div>
+                                    <div className="mt-3"><i className="icon icon-database fas" style={{ color: '#D7EAEE' }}></i></div>
+                                    <div className="mt-3 browse-data-collection-block-title">Browse All Data</div>
+                                    <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc" style={{ backgroundColor: '#BBE3EA' }}>
+                                        Search all Experiment Sets<br /> in the 4D Nucleome Database
+                                    </div>
                                 </div>
                                 <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block">
-                                    <div className="mt-3"><i className="icon icon-book-open fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#C8E3CA' }}></i></div>
-                                    <div className="mt-3"><span style={{ fontSize: '1.75rem', fontWeight: '500', color: '#34646C' }}>Browse By Publication</span></div>
-                                    <div className="flex-grow-1 mt-2 pt-2 pl-4 pr-4" style={{ backgroundColor: '#B6E0B8', color: '#34646C', fontSize: '1.3rem', lineHeight: '1.3', fontWeight: '400', borderRadius: '0 0 8px 8px' }}>View Publications<br/> in the 4D Nucleome Database</div>
+                                    <div className="mt-3"><i className="icon icon-book-open fas" style={{ color: '#C8E3CA' }}></i></div>
+                                    <div className="mt-3 browse-data-collection-block-title">Browse By Publication</div>
+                                    <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc" style={{ backgroundColor: '#B6E0B8' }}>
+                                        View Publications<br /> in the 4D Nucleome Database
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-12 col-md-5 browse-data-collection-col-right">
+                        <div className="col-12 col-md-5 browse-data-collection-col-collections">
                             <h2 className="homepage-section-title new-design">4DN Data Collections</h2>
                             <div>
-                                <a href="/" className="btn btn-primary w-100" style={{ fontSize: '1.4rem', borderRadius: '5px' }}>
+                                <a href="/" className="btn btn-primary w-100">
                                     Hi-C Datasets
                                 </a>
-                                <a href="/" className="btn btn-primary w-100 mt-05" style={{ fontSize: '1.4rem', borderRadius: '5px' }}>
+                                <a href="/" className="btn btn-primary w-100 mt-05">
                                     All Microscopy Datasets
                                 </a>
-                                <a href="/" className="btn btn-primary w-100 mt-05" style={{ fontSize: '1.4rem', borderRadius: '5px' }}>
+                                <a href="/" className="btn btn-primary w-100 mt-05">
                                     Chromatin Tracing Datasets
                                 </a>
                                 <a href="/" className="btn btn-primary w-100 mt-1 btn-all-data-collections">
@@ -251,7 +255,7 @@ export default class HomePage extends React.PureComponent {
                         </div>
                     </div>
                     <div className="row mt-6 mb-3">
-                        <h2 className="homepage-section-title new-design text-center w-100 mb-0" style={{ borderBottom: 'none', fontSize: '28px' }}>Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
+                        <h2 className="homepage-section-title new-design text-center w-100 mb-0" style={{ borderBottom: 'none', fontSize: '28px', lineHeight: '1.3' }}>Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
                         <span className="icon-wrapper w-100 mt-2"><i className="icon icon-tools fas" style={{ fontSize: '2.5rem', opacity: '0.5', color: '#D7EAEE' }}></i></span>
                     </div>
                     <div className="row pl-2 pr-2 pt-4 pb-4" style={{ backgroundColor: '#F5FBF5' }}>
@@ -317,12 +321,10 @@ export default class HomePage extends React.PureComponent {
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" className="btn btn-primary w-100 mt-1" style={{ fontSize: '1.1rem', borderWidth: '0px', borderRadius: '10px', backgroundColor: '#ECF8EC', color: '#34646C' }}>
-                                    {/* <i className="mr-05 icon icon-fw icon-check-square far"></i><span className="d-none d-md-inline text-400">Select </span>
-                                    <span className="text-600">All</span> */}
+                                <a href="/resources" className="btn btn-primary w-100 mt-1" style={{ fontSize: '1.1rem', borderWidth: '0px', borderRadius: '10px', backgroundColor: '#ECF8EC', color: '#34646C' }}>
                                     <span className="float-left">View All Available Resources</span>
                                     <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -336,7 +338,7 @@ export default class HomePage extends React.PureComponent {
                         </div>
                     </div>
 
-                    <div className="row mt-3">
+                    <div className="row mt-3 pl-2 pr-2">
                         <div className="col-12 col-md-7 px-5 py-3 data-use-guidelines-container">
                             <h2 className="homepage-section-title new-design">Data Use Guidelines</h2>
                             <p>The data at the 4DN Data Portal is generated by the 4DN Network and made freely available to the scientific community.</p>
