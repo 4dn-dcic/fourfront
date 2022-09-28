@@ -167,6 +167,10 @@
 			.browse-data-collection-block {
 				background-color: #FFFFFF;
 				border-radius: 8px;
+
+				@include media-breakpoint-down(sm){
+					margin-bottom: 25px;
+				}
 			}
 		}
 	}
@@ -202,6 +206,41 @@
 			}
 		}
 	}
+
+	.data-use-guidelines-container {
+		background-color: #F5FBF5;
+		border-radius: 10px;
+		border-width: 3px;
+		border-color: #99C79C;
+		border-style: solid;
+		color: #0D4129;
+
+		h2.homepage-section-title {
+			border-bottom: none;
+			color: #0D4129;
+			margin-bottom: 5px;
+		}
+	}
+
+	.the-4dn-help-container {
+		
+		a.btn-4dn-help {
+			font-size: 1.5rem;
+			border-width: 0px;
+			border-radius: 10px;
+			background-color: #EFF7F8;
+			color: #34646C;
+			font-weight: 400;
+
+			.btn-4dn-help-icon {
+				font-size: 2.5rem;
+			}
+			.btn-4dn-help-arrow {
+				opacity: 0.3;
+			}
+		}
+	}
+
 	.icon-wrapper {
 		text-align: center;
 		display: inline-block;
