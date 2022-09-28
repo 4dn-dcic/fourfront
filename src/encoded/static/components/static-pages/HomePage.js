@@ -55,8 +55,6 @@ export default class HomePage extends React.PureComponent {
         return (
             <div className="homepage-wrapper">
 
-                {/* <HomePageCarousel {...{ windowWidth, context }} /> */}
-
                 <div className="container home-content-area" id="content">
 
                     <div className="row mt-4 pt-3 pb-3 p-3 browse-data-collection-container">
@@ -254,74 +252,75 @@ export default class HomePage extends React.PureComponent {
                             </div>
                         </div>
                     </div>
-                    <div className="row mt-6 mb-3">
-                        <h2 className="homepage-section-title new-design text-center w-100 mb-0" style={{ borderBottom: 'none', fontSize: '28px', lineHeight: '1.3' }}>Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
-                        <span className="icon-wrapper w-100 mt-2"><i className="icon icon-tools fas" style={{ fontSize: '2.5rem', opacity: '0.5', color: '#D7EAEE' }}></i></span>
-                    </div>
-                    <div className="row pl-2 pr-2 pt-4 pb-4" style={{ backgroundColor: '#F5FBF5' }}>
-                        <div className="col-12 col-md-8">
-                            <div className="row mh-100 h-100">
-                                <div className="col-12 col-md-4 pr-8">
-                                    <div className="mh-100 h-100 p-2 d-flex flex-column" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
-                                        <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                        <div className="mt-8 pl-2"><span style={{ fontSize: '1.6rem', fontWeight: '600', color: '#34646C' }}>HiGlass</span></div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2" style={{ color: '#34646C', fontSize: '1.2rem', lineHeight: '1.3', fontWeight: '200', borderRadius: '0 0 8px 8px' }}>Use the 4DN visualization workspace to browse data</div>
-                                        <button type="button" className="btn btn-primary w-100 mt-1 mb-1" style={{ fontSize: '1.1rem', borderWidth: '0px', borderRadius: '10px', backgroundColor: '#ECF8EC', color: '#34646C' }}>
-                                            <span className="float-left">Learn More</span>
-                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                                        </button>
+
+                    <div className="tools-and-resources-container">
+                        <div className="row mt-6 mb-3 tools-and-resources-container-title">
+                            <h2 className="homepage-section-title new-design text-center w-100 mb-0">Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
+                            <span className="icon-wrapper w-100 mt-2"><i className="icon icon-tools fas"></i></span>
+                        </div>
+                        <div className="row pl-2 pr-2 pt-4 pb-4 tools-and-resources-container-inner">
+                            <div className="col-12 col-md-8 tools-and-resources-col-tools">
+                                <div className="row mh-100 h-100">
+                                    <div className="col-12 col-md-4 pr-8">
+                                        <div className="h-100 p-2 d-flex flex-column tool-detail">
+                                            <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
+                                            <div className="mt-8 pl-2 tool-detail-title">HiGlass</div>
+                                            <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
+                                            <a href="/tools/visualization" className="btn btn-primary w-100 mt-1 mb-1">
+                                                <span className="float-left">Learn More</span>
+                                                <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="col-12 col-md-4 pr-8">
-                                    <div className="mh-100 h-100 p-2 d-flex flex-column" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
-                                        <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                        <div className="mt-8 pl-2"><span style={{ fontSize: '1.6rem', fontWeight: '600', color: '#34646C' }}>JupyterHub</span></div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2" style={{ color: '#34646C', fontSize: '1.2rem', lineHeight: '1.3', fontWeight: '200', borderRadius: '0 0 8px 8px' }}>Explore data in the cloud using python and the 4DN jupyter hub</div>
-                                        <button type="button" className="btn btn-primary w-100 mt-1 mb-1" style={{ fontSize: '1.1rem', borderWidth: '0px', borderRadius: '10px', backgroundColor: '#ECF8EC', color: '#34646C' }}>
-                                            <span className="float-left">Learn More</span>
-                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                                        </button>
+                                    <div className="col-12 col-md-4 pr-8">
+                                        <div className="h-100 p-2 d-flex flex-column tool-detail">
+                                            <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
+                                            <div className="mt-8 pl-2 tool-detail-title">JupyterHub</div>
+                                            <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python and the 4DN jupyter hub</div>
+                                            <a href="/tools/jupyterhub" className="btn btn-primary w-100 mt-1 mb-1">
+                                                <span className="float-left">Learn More</span>
+                                                <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="col-12 col-md-4 pr-8">
-                                    <div className="mh-100 h-100 p-2 d-flex flex-column" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
-                                        <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                        <div className="mt-8 pl-2"><span style={{ fontSize: '1.6rem', fontWeight: '600', color: '#34646C' }}>MicroMeta</span></div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2" style={{ color: '#34646C', fontSize: '1.2rem', lineHeight: '1.3', fontWeight: '200', borderRadius: '0 0 8px 8px' }}>Enter and access microscope metadata with Micrometa</div>
-                                        <button type="button" className="btn btn-primary w-100 mt-1 mb-1" style={{ fontSize: '1.1rem', borderWidth: '0px', borderRadius: '10px', backgroundColor: '#ECF8EC', color: '#34646C' }}>
-                                            <span className="float-left">Learn More</span>
-                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                                        </button>
+                                    <div className="col-12 col-md-4 pr-8">
+                                        <div className="h-100 p-2 d-flex flex-column tool-detail">
+                                            <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
+                                            <div className="mt-8 pl-2 tool-detail-title">MicroMeta</div>
+                                            <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
+                                            <a href="/tools/micro-meta-app" className="btn btn-primary w-100 mt-1 mb-1">
+                                                <span className="float-left">Learn More</span>
+                                                <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="col-12 col-md-4 pl-8">
-                            <div className="p-3" style={{ backgroundColor: '#CCE9CE', color: '#0D4129', borderRadius: '10px' }}>
-                                <h2 className="homepage-section-title new-design" style={{ color: '#0D4129' }}>Portal Resources</h2>
-                                <div className="p-3 d-flex flex-column" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+                            <div className="col-12 col-md-4 pl-8 p-3 tools-and-resources-col-resources">
+                                <h2 className="homepage-section-title new-design">Portal Resources</h2>
+                                <div className="p-3 d-flex flex-column resource-detail">
                                     <div className="row">
                                         <div className="col-3 text-center">
-                                            <div className="mt-2"><i className="icon icon-database fas" style={{ fontSize: '3rem', opacity: '0.8', color: '#E5F4E5' }}></i></div>
+                                            <div className="mt-2"><i className="icon icon-database fas"></i></div>
                                         </div>
                                         <div className="col-9">
-                                            <div className="mt-1"><span style={{ fontSize: '1.4rem', fontWeight: '500', color: '#34646C' }}>Experimental Resources</span></div>
-                                            <div className="flex-grow-1 mt-1" style={{ color: '#6C886E', fontSize: '1.1rem', lineHeight: '1.2', fontWeight: '200' }}>View Protocols, Cell Lines, Assays &amp; File Formats</div>
+                                            <div className="mt-1 resource-detail-title">Experimental Resources</div>
+                                            <div className="flex-grow-1 mt-1 resource-detail-description">View Protocols, Cell Lines, Assays &amp; File Formats</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-3 d-flex flex-column mt-1" style={{ backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+                                <div className="p-3 d-flex flex-column mt-1 resource-detail">
                                     <div className="row">
                                         <div className="col-3 text-center">
-                                            <div className="mt-2"><i className="icon icon-project-diagram fas" style={{ fontSize: '3rem', opacity: '0.8', color: '#E5F4E5' }}></i></div>
+                                            <div className="mt-2"><i className="icon icon-project-diagram fas"></i></div>
                                         </div>
                                         <div className="col-9">
-                                            <div className="mt-1"><span style={{ fontSize: '1.4rem', fontWeight: '500', color: '#34646C' }}>Data Analysis</span></div>
-                                            <div className="flex-grow-1 mt-1" style={{ color: '#6C886E', fontSize: '1.1rem', lineHeight: '1.2', fontWeight: '200' }}>Learn about our standardized bioinformatic analysis pipelines</div>
+                                            <div className="mt-1 resource-detail-title">Data Analysis</div>
+                                            <div className="flex-grow-1 mt-1 resource-detail-description">Learn about our standardized bioinformatic analysis pipelines</div>
                                         </div>
                                     </div>
                                 </div>
-                                <a href="/resources" className="btn btn-primary w-100 mt-1" style={{ fontSize: '1.1rem', borderWidth: '0px', borderRadius: '10px', backgroundColor: '#ECF8EC', color: '#34646C' }}>
+                                <a href="/resources" className="btn btn-primary w-100 mt-1 resource-all">
                                     <span className="float-left">View All Available Resources</span>
                                     <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
                                 </a>
