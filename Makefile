@@ -45,7 +45,9 @@ configure:  # does any pre-requisite installs
 	@#pip install --upgrade pip==21.0.1
 	pip install --upgrade pip
 	@#pip install poetry==1.1.9  # this version is known to work. -kmp 11-Mar-2021
-	pip install poetry
+	# Pin to version 1.1.15 for now to avoid this error:
+	#   Because encoded depends on wheel (>=0.29.0) which doesn't match any versions, version solving failed.
+	pip install poetry==1.1.15
 	pip install setuptools==57.5.0 # this version allows 2to3, any later will break -wrr 20-Sept-2021
 	poetry config virtualenvs.create false --local # do not create a virtualenv - the user should have already done this -wrr 20-Sept-2021
 
@@ -143,7 +145,7 @@ test-any:
 
 
 test-npm:
-	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook"
+	bin/test -vv --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook"
 
 test-unit:
 	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"

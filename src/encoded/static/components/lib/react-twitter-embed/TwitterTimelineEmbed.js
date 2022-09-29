@@ -42,9 +42,12 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
     }
 
     buildOptions() {
-        const { options: propOptions, theme, linkColor, borderColor, lang} = this.props;
+        const { options: propOptions, autoHeight = false, theme, linkColor, borderColor, lang} = this.props;
         let options = Object.assign({}, propOptions, { theme, linkColor, borderColor, lang })
-        return options
+        if (autoHeight) {
+            options.height = this.embedContainerRef.current.parentNode.offsetHeight;
+        }
+        return options;
     }
 
     /** Experimental and probably against Twitter's Developer Policy / Terms. Not used b.c. of this. */
