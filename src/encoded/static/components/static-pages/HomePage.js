@@ -60,17 +60,17 @@ export default class HomePage extends React.PureComponent {
                     <div className="row mt-4 pt-3 pb-3 p-3 browse-data-collection-container">
                         <div className="col-12 col-md-7 browse-data-collection-col-browse">
                             <div className="row">
-                                <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block">
-                                    <div className="mt-3"><i className="icon icon-database fas" style={{ color: '#D7EAEE' }}></i></div>
-                                    <div className="mt-3 browse-data-collection-block-title">Browse All Data</div>
-                                    <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc" style={{ backgroundColor: '#BBE3EA' }}>
+                                <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block browse-all-data">
+                                    <div className="mt-2"><i className="icon icon-database fas"></i></div>
+                                    <div className="mt-2 browse-data-collection-block-title">Browse All Data</div>
+                                    <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
                                         Search all Experiment Sets<br /> in the 4D Nucleome Database
                                     </div>
                                 </div>
-                                <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block">
-                                    <div className="mt-3"><i className="icon icon-book-open fas" style={{ color: '#C8E3CA' }}></i></div>
-                                    <div className="mt-3 browse-data-collection-block-title">Browse By Publication</div>
-                                    <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc" style={{ backgroundColor: '#B6E0B8' }}>
+                                <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block browse-by-publication">
+                                    <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
+                                    <div className="mt-2 browse-data-collection-block-title">Browse By Publication</div>
+                                    <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
                                         View Publications<br /> in the 4D Nucleome Database
                                     </div>
                                 </div>
@@ -301,7 +301,7 @@ export default class HomePage extends React.PureComponent {
                                 <div className="p-3 d-flex flex-column resource-detail">
                                     <div className="row">
                                         <div className="col-3 text-center">
-                                            <div className="mt-2"><i className="icon icon-database fas"></i></div>
+                                            <div className="mt-1"><i className="icon icon-flask fas"></i></div>
                                         </div>
                                         <div className="col-9">
                                             <div className="mt-1 resource-detail-title">Experimental Resources</div>
@@ -309,10 +309,10 @@ export default class HomePage extends React.PureComponent {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="p-3 d-flex flex-column mt-1 resource-detail">
+                                <div className="p-3 d-flex flex-column mt-1 resource-detail data-analysis">
                                     <div className="row">
                                         <div className="col-3 text-center">
-                                            <div className="mt-2"><i className="icon icon-project-diagram fas"></i></div>
+                                            <div className="mt-1"><i className="icon icon-project-diagram fas"></i></div>
                                         </div>
                                         <div className="col-9">
                                             <div className="mt-1 resource-detail-title">Data Analysis</div>
@@ -328,7 +328,7 @@ export default class HomePage extends React.PureComponent {
                         </div>
                     </div>
 
-                    <div className="row mt-3 p-3 the-4dn-mission-container">
+                    <div className="row mt-6 mb-6 p-3 the-4dn-mission-container">
                         <div className="col-12 p-5 the-4dn-mission-content">
                             <h2 className="homepage-section-title new-design text-center">The 4DN Mission</h2>
                             <div className="the-4dn-mission-text">
@@ -351,30 +351,30 @@ export default class HomePage extends React.PureComponent {
                         </div>
                         <div className="col-12 col-md-4 offset-md-1 pt-3 the-4dn-help-container">
                             <h2 className="homepage-section-title new-design">4DN Help</h2>
-                            <a href="/help/user-guide" className="btn btn-primary w-100 mt-2 p-1 btn-4dn-help">
+                            <a href="/help/user-guide" className="btn btn-primary w-100 mt-1 p-2 btn-4dn-help">
                                 <span className="float-left ml-1 mt-05 btn-4dn-help-icon">
-                                    <i className="icon icon-user-circle fas"></i>
+                                    <i className="icon icon-user fas"></i>
                                 </span>
-                                <span className="float-left ml-2 mt-15">User Guide</span>
-                                <span className="float-right mr-2 mt-15 btn-4dn-help-arrow">
+                                <span className="float-left ml-2 mt-12">User Guide</span>
+                                <span className="float-right mr-2 mt-12 btn-4dn-help-arrow">
                                     <i className="icon icon-arrow-right fas"></i>
                                 </span>
                             </a>
-                            <a href="/help/submitter-guide" className="btn btn-primary w-100 mt-2 p-1 btn-4dn-help">
+                            <a href="/help/submitter-guide" className="btn btn-primary w-100 mt-2 p-2 btn-4dn-help">
                                 <span className="float-left ml-1 mt-05 btn-4dn-help-icon">
                                     <i className="icon icon-file-import fas"></i>
                                 </span>
-                                <span className="float-left ml-2 mt-15">Submitter Guide</span>
-                                <span className="float-right mr-2 mt-15 btn-4dn-help-arrow">
+                                <span className="float-left ml-2 mt-12">Submitter Guide</span>
+                                <span className="float-right mr-2 mt-12 btn-4dn-help-arrow">
                                     <i className="icon icon-arrow-right fas"></i>
                                 </span>
                             </a>
-                            <a href="/help/about/contact-us" className="btn btn-primary w-100 mt-2 p-1 btn-4dn-help">
+                            <a href="/help/about/contact-us" className="btn btn-primary w-100 mt-2 p-2 btn-4dn-help">
                                 <span className="float-left ml-1 mt-05 btn-4dn-help-icon">
                                     <i className="icon icon-envelope fas"></i>
                                 </span>
-                                <span className="float-left ml-2 mt-15">Contact Us</span>
-                                <span className="float-right mr-2 mt-15 btn-4dn-help-arrow">
+                                <span className="float-left ml-2 mt-12">Contact Us</span>
+                                <span className="float-right mr-2 mt-12 btn-4dn-help-arrow">
                                     <i className="icon icon-arrow-right fas"></i>
                                 </span>
                             </a>

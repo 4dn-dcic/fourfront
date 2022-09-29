@@ -174,8 +174,33 @@
 					border-radius: 0 0 8px 8px;
 				}
 				i.icon {
-					font-size: 4rem;
-					opacity: 0.5;
+					font-size: 3rem;
+					opacity: 0.7;
+					box-shadow: 0 0 3px #BBE3EA;
+					width: 80px;
+					height: 80px;
+					border-radius: 50%;
+					text-align: center;
+					line-height: 80px;
+					vertical-align: middle;
+					// padding: 30px;
+				}
+				&.browse-all-data {
+					i.icon {
+						color: #D7EAEE;
+					}
+					.browse-data-collection-block-desc {
+						background-color: #BBE3EA;
+					}
+				}
+				&.browse-by-publication {
+					i.icon {
+						color: #C8E3CA;
+						box-shadow: 0 0 3px #B6E0B8;
+					}
+					.browse-data-collection-block-desc {
+						background-color: #B6E0B8;
+					}
 				}
 			}
 		}
@@ -274,9 +299,16 @@
 					border-radius: 8px;
 
 					.icon {
-						font-size: 3rem;
-						opacity: 0.8;
-						color: #E5F4E5;
+						font-size: 2.2rem;
+						opacity: 1;
+						color: #99C79C;
+						box-shadow: 0 0 3px #99C79C;
+						width: 60px;
+						height: 60px;
+						border-radius: 50%;
+						text-align: center;
+						line-height: 60px;
+						vertical-align: middle;
 					}
 					
 					.resource-detail-title {
@@ -290,6 +322,12 @@
 						font-size: 1.1rem;
 						line-height: 1.2;
 						font-weight: 200;
+					}
+
+					&.data-analysis {
+						.icon {
+							line-height: 70px;
+						}
 					}
 				}
 
@@ -361,14 +399,23 @@
 		a.btn-4dn-help {
 			font-size: 1.5rem;
 			border-width: 0px;
-			border-radius: 10px;
+			border-radius: 15px;
 			background-color: #EFF7F8;
 			color: #34646C;
 			font-weight: 400;
 
 			.btn-4dn-help-icon {
-				font-size: 2.5rem;
+				font-size: 1.7rem;
+				opacity: 0.7;
+				box-shadow: 0 0 2px $brand-primary-dark;
+				width: 45px;
+				height: 45px;
+				border-radius: 50%;
+				text-align: center;
+				line-height: 45px;
+				vertical-align: middle;
 			}
+
 			.btn-4dn-help-arrow {
 				opacity: 0.3;
 			}
@@ -376,6 +423,10 @@
 			&:hover {
 				background-color: $brand-primary-dark !important;
 				color: #FFFFFF !important;
+
+				.btn-4dn-help-icon {
+					box-shadow: 0 0 2px #FFFFFF;
+				}
 			}
 		}
 	}
@@ -383,9 +434,9 @@
 	.icon-wrapper {
 		text-align: center;
 		display: inline-block;
-	  }
-	  .icon-wrapper::before,
-	  .icon-wrapper::after {
+	}
+	.icon-wrapper::before,
+	.icon-wrapper::after {
 		content: '';
 		display: inline-block;
 		width: 45%;
@@ -393,7 +444,14 @@
 		background: #DCE2E5;
 		vertical-align: middle;
 		margin-bottom: 10px;
-	  }
+	}
+
+	.icon.circle-around {
+		display: inline-block;
+  		border-radius: 60px;
+  		box-shadow: 0 0 2px #888;
+  		padding: 0.5em 0.6em;
+	}
 }
 
 .static-section-entry {
