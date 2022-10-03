@@ -13,6 +13,7 @@ import re
 import time
 import transaction
 import uuid
+from unittest.mock import patch
 
 from dcicutils.qa_utils import notice_pytest_fixtures
 from elasticsearch.exceptions import NotFoundError
@@ -27,6 +28,7 @@ from snovault.elasticsearch.create_mapping import (
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index, compute_invalidation_scope
+from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from sqlalchemy import MetaData, func
 from timeit import default_timer as timer
 from unittest import mock
@@ -34,11 +36,11 @@ from zope.sqlalchemy import mark_changed
 from .. import main
 from ..util import delay_rerun
 from ..verifier import verify_item
-from .workbook_fixtures import app_settings  # why does this care?? does it? -kmp 12-Mar-2021
+#from .workbook_fixtures import es_app_settings, es_app, es_testapp  # why does this care?? does it? -kmp 12-Mar-2021
 from .test_permissions import wrangler, wrangler_testapp
 
 
-notice_pytest_fixtures(app_settings, wrangler, wrangler_testapp)
+# notice_pytest_fixtures(es_app_settings, wrangler, wrangler_testapp)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
@@ -62,11 +64,11 @@ TEST_COLLECTIONS = ['testing_post_put_patch', 'file_processed']
 
 
 @pytest.yield_fixture(scope='session')
-def app(app_settings, request):
+def app(es_app_settings, request):
     # for now, don't run with mpindexer. Add `True` to params above to do so
     # if request.param:
-    #     app_settings['mpindexer'] = True
-    app = main({}, **app_settings)
+    #     es_app_settings['mpindexer'] = True
+    app = main({}, **es_app_settings)
 
     yield app
 
@@ -77,20 +79,20 @@ def app(app_settings, request):
 
 # explicitly specify now (invalidation scope tests don't need this)
 @pytest.yield_fixture
-def setup_and_teardown(app):
+def setup_and_teardown(es_app):
     """
     Run create mapping and purge queue before tests and clear out the
     DB tables after the test
     """
 
     # BEFORE THE TEST - run create mapping for tests types and clear queues
-    create_mapping.run(app, collections=TEST_COLLECTIONS, skip_indexing=True)
-    app.registry[INDEXER_QUEUE].clear_queue()
+    create_mapping.run(es_app, collections=TEST_COLLECTIONS, skip_indexing=True)
+    es_app.registry[INDEXER_QUEUE].clear_queue()
 
     yield  # run the test
 
     # AFTER THE TEST
-    session = app.registry[DBSESSION]
+    session = es_app.registry[DBSESSION]
     connection = session.connection().connect()
     meta = MetaData(bind=session.connection())
     meta.reflect()
@@ -104,16 +106,16 @@ def setup_and_teardown(app):
 
 @pytest.mark.slow
 @pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
-def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
-    es = app.registry['elasticsearch']
-    namespaced_ppp = get_namespaced_index(app, 'testing_post_put_patch')
+def test_indexing_simple(setup_and_teardown, es_app, es_testapp, indexer_testapp):
+    es = es_app.registry['elasticsearch']
+    namespaced_ppp = get_namespaced_index(es_app, 'testing_post_put_patch')
     doc_count = es.count(index=namespaced_ppp).get('count')
     assert doc_count == 0
     # First post a single item so that subsequent indexing is incremental
-    testapp.post_json('/testing-post-put-patch/', {'required': ''})
+    es_testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexing_count'] == 1
-    res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
+    res = es_testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexing_count'] == 1
@@ -121,17 +123,17 @@ def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
     # check es directly
     doc_count = es.count(index=namespaced_ppp).get('count')
     assert doc_count == 2
-    res = testapp.get('/search/?type=TestingPostPutPatch')
+    res = es_testapp.get('/search/?type=TestingPostPutPatch')
     uuids = [indv_res['uuid'] for indv_res in res.json['@graph']]
     count = 0
     while uuid not in uuids and count < 20:
         time.sleep(1)
-        res = testapp.get('/search/?type=TestingPostPutPatch')
+        res = es_testapp.get('/search/?type=TestingPostPutPatch')
         uuids = [indv_res['uuid'] for indv_res in res.json['@graph']]
         count += 1
     assert res.json['total'] >= 2
     assert uuid in uuids
-    namespaced_indexing = get_namespaced_index(app, 'indexing')
+    namespaced_indexing = get_namespaced_index(es_app, 'indexing')
     indexing_doc = es.get(index=namespaced_indexing, id='latest_indexing')
     indexing_source = indexing_doc['_source']
     assert 'indexing_count' in indexing_source
@@ -148,7 +150,7 @@ def test_indexing_simple(setup_and_teardown, app, testapp, indexer_testapp):
 
 
 @pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
-def test_create_mapping_on_indexing(setup_and_teardown, app, testapp, registry, elasticsearch):
+def test_create_mapping_on_indexing(setup_and_teardown, es_app, es_testapp, registry, elasticsearch):
     """
     Test overall create_mapping functionality using app.
     Do this by checking es directly before and after running mapping.
@@ -160,7 +162,7 @@ def test_create_mapping_on_indexing(setup_and_teardown, app, testapp, registry, 
     for item_type in item_types:
         item_mapping = type_mapping(registry[TYPES], item_type)
         try:
-            namespaced_index = get_namespaced_index(app, item_type)
+            namespaced_index = get_namespaced_index(es_app, item_type)
             item_index = es.indices.get(index=namespaced_index)
         except Exception:
             assert False
@@ -178,7 +180,7 @@ def test_create_mapping_on_indexing(setup_and_teardown, app, testapp, registry, 
 @pytest.mark.broken  # Doesn't work on GitHub Actions
 @pytest.mark.skip
 @pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
-def test_file_processed_detailed(setup_and_teardown, app, testapp, indexer_testapp, award, lab, file_formats):
+def test_file_processed_detailed(setup_and_teardown, es_app, es_testapp, indexer_testapp, award, lab, file_formats):
     # post file_processed
     item = {
         'award': award['uuid'],
@@ -187,13 +189,13 @@ def test_file_processed_detailed(setup_and_teardown, app, testapp, indexer_testa
         'filename': 'test.pairs.gz',
         'status': 'uploading'
     }
-    fp_res = testapp.post_json('/file_processed', item)
+    fp_res = es_testapp.post_json('/file_processed', item)
     test_fp_uuid = fp_res.json['@graph'][0]['uuid']
-    res = testapp.post_json('/file_processed', item)
+    res = es_testapp.post_json('/file_processed', item)
     indexer_testapp.post_json('/index', {'record': True})
 
     # Todo, input a list of accessions / uuids:
-    verify_item(test_fp_uuid, indexer_testapp, testapp, app.registry)
+    verify_item(test_fp_uuid, indexer_testapp, es_testapp, app.registry)
     # While we're here, test that _update of the file properly
     # queues the file with given relationship
     indexer_queue = app.registry[INDEXER_QUEUE]
@@ -202,12 +204,12 @@ def test_file_processed_detailed(setup_and_teardown, app, testapp, indexer_testa
         'lab': lab['uuid'],
         'file_format': file_formats.get('pairs').get('@id')
     }
-    rel_res = testapp.post_json('/file_processed', rel_file)
+    rel_res = es_testapp.post_json('/file_processed', rel_file)
     rel_uuid = rel_res.json['@graph'][0]['uuid']
     # now update the original file with the relationship
     # ensure rel_file is properly queued
     related_files = [{'relationship_type': 'derived from', 'file': rel_uuid}]
-    testapp.patch_json('/' + test_fp_uuid, {'related_files': related_files}, status=200)
+    es_testapp.patch_json('/' + test_fp_uuid, {'related_files': related_files}, status=200)
     time.sleep(2)
     # may need to make multiple calls to indexer_queue.receive_messages
     received = []
@@ -239,13 +241,13 @@ def test_file_processed_detailed(setup_and_teardown, app, testapp, indexer_testa
 
 
 @pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
-def test_real_validation_error(setup_and_teardown, app, indexer_testapp, testapp, lab, award, file_formats):
+def test_real_validation_error(setup_and_teardown, es_app, indexer_testapp, es_testapp, lab, award, file_formats):
     """
     Create an item (file-processed) with a validation error and index,
     to ensure that validation errors work
     """
-    indexer_queue = app.registry[INDEXER_QUEUE]
-    es = app.registry[ELASTIC_SEARCH]
+    indexer_queue = es_app.registry[INDEXER_QUEUE]
+    es = es_app.registry[ELASTIC_SEARCH]
     fp_body = {
         'schema_version': '3',
         'uuid': str(uuid.uuid4()),
@@ -255,10 +257,10 @@ def test_real_validation_error(setup_and_teardown, app, indexer_testapp, testapp
         'accession': '4DNFIBBBBBBB',
         'higlass_uid': 1  # validation error -- higlass_uid should be string
     }
-    res = testapp.post_json('/files-processed/?validate=false&upgrade=False',
-                            fp_body, status=201).json
+    res = es_testapp.post_json('/files-processed/?validate=false&upgrade=False',
+                               fp_body, status=201).json
     fp_id = res['@graph'][0]['@id']
-    val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
+    val_err_view = es_testapp.get(fp_id + '@@validation-errors', status=200).json
     assert val_err_view['@id'] == fp_id
     assert val_err_view['validation_errors'] == []
 
@@ -276,7 +278,7 @@ def test_real_validation_error(setup_and_teardown, app, indexer_testapp, testapp
     while not es_res and counts < 15:
         time.sleep(2)
         try:
-            namespaced_fp = get_namespaced_index(app, 'file_processed')
+            namespaced_fp = get_namespaced_index(es_app, 'file_processed')
             es_res = es.get(index=namespaced_fp,
                             id=res['@graph'][0]['uuid'])
         except NotFoundError:
@@ -286,14 +288,14 @@ def test_real_validation_error(setup_and_teardown, app, indexer_testapp, testapp
     assert es_res
     assert len(es_res['_source'].get('validation_errors', [])) == 1
     # check that validation-errors view works
-    val_err_view = testapp.get(fp_id + '@@validation-errors', status=200).json
+    val_err_view = es_testapp.get(fp_id + '@@validation-errors', status=200).json
     assert val_err_view['@id'] == fp_id
     assert val_err_view['validation_errors'] == es_res['_source']['validation_errors']
 
 
 # @pytest.mark.performance
 @pytest.mark.skip(reason="need to update perf-testing inserts")
-def test_load_and_index_perf_data(setup_and_teardown, testapp, indexer_testapp):
+def test_load_and_index_perf_data(setup_and_teardown, es_testapp, indexer_testapp):
     '''
     ~~ CURRENTLY NOT WORKING ~~
 
@@ -324,10 +326,9 @@ def test_load_and_index_perf_data(setup_and_teardown, testapp, indexer_testapp):
     # load -em up
     start = timer()
     with mock.patch('encoded.loadxl.get_app') as mocked_app:
-        mocked_app.return_value = testapp.app
+        mocked_app.return_value = es_testapp.app
         data = {'store': json_inserts}
-        res = testapp.post_json('/load_data', data,  # status=200
-                                )
+        res = es_testapp.post_json('/load_data', data)
         assert res.json['status'] == 'success'
     stop_insert = timer()
     print("PERFORMANCE: Time to load data is %s" % (stop_insert - start))
@@ -339,12 +340,12 @@ def test_load_and_index_perf_data(setup_and_teardown, testapp, indexer_testapp):
     # check a couple random inserts
     for item in test_inserts:
         start = timer()
-        assert testapp.get("/" + item['data']['uuid'] + "?frame=raw").json['uuid']
+        assert es_testapp.get("/" + item['data']['uuid'] + "?frame=raw").json['uuid']
         stop = timer()
         frame_time = stop - start
 
         start = timer()
-        assert testapp.get("/" + item['data']['uuid']).follow().json['uuid']
+        assert es_testapp.get("/" + item['data']['uuid']).follow().json['uuid']
         stop = timer()
         embed_time = stop - start
 
@@ -354,26 +355,42 @@ def test_load_and_index_perf_data(setup_and_teardown, testapp, indexer_testapp):
     # assert False
 
 
-@pytest.mark.flaky(rerun_filter=delay_rerun, max_runs=2)
-def test_permissions_database_applies_permissions(setup_and_teardown, award, lab, file_formats, wrangler_testapp, anontestapp, indexer_testapp):
-    """ Tests that anontestapp gets view denied when using datastore=database """
-    file_item_body = {
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'file_format': file_formats.get('fastq').get('uuid'),
-        'paired_end': '1',
-        'status': 'released',
-        'uuid': 'f40ecbb0-294f-4a51-9b1b-effaddb14b1d',
-        'accession': '4DNFIFGXXBKV'
-    }
-    res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
-    item_id = res['@graph'][0]['@id']
-    indexer_testapp.post_json('/index', {'record': True})
-    time.sleep(1)  # let es catch up
-    res = anontestapp.get('/' + item_id).json
-    assert res['file_format'] == {'error': 'no view permissions'}
-    res = anontestapp.get('/' + item_id + '?datastore=database').json
-    assert res['file_format'] == {'error': 'no view permissions'}
+@patch("snovault.elasticsearch.indexer_queue.QueueManager.add_uuids")
+def test_run_create_mapping_with_upgrader(mock_add_uuids, es_testapp, workbook):
+    """
+    Test for catching items in need of upgrading when running
+    create_mapping.
+
+    Indexer queue method mocked to check correct calls, so no items
+    actually indexed/upgraded.
+
+    Moved to this file so fixtures interact cleanly - Will Sept 28 2022
+    """
+    app = es_testapp.app
+    type_to_upgrade = "Biosample"
+
+    search_query = "/search/?type=" + type_to_upgrade + "&frame=object"
+    search = es_testapp.get(search_query, status=200).json["@graph"]
+    item_type_uuids = sorted([x["uuid"] for x in search])
+
+    # No schema version change, so nothing needs indexing
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
+    (_, uuids_to_index), _ = mock_add_uuids.call_args
+    assert not uuids_to_index
+
+    # Change schema version in registry so all posted items of this type
+    # "need" to be upgraded
+    registry_schema = app.registry[TYPES][type_to_upgrade].schema
+    schema_version_default = registry_schema["properties"]["schema_version"]["default"]
+    updated_schema_version = str(int(schema_version_default) + 1)
+    registry_schema["properties"]["schema_version"]["default"] = updated_schema_version
+
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
+    (_, uuids_to_index), _ = mock_add_uuids.call_args
+    assert sorted(uuids_to_index) == item_type_uuids
+
+    # Revert item type schema version
+    registry_schema["properties"]["schema_version"]["default"] = schema_version_default
 
 
 class TestInvalidationScopeViewFourfront:
