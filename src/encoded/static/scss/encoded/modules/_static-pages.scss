@@ -175,8 +175,8 @@
 				}
 				i.icon {
 					font-size: 3rem;
-					opacity: 0.7;
-					box-shadow: 0 0 3px #BBE3EA;
+					opacity: 1;
+					box-shadow: 0 0 4px #BBE3EA;
 					width: 80px;
 					height: 80px;
 					border-radius: 50%;
@@ -201,6 +201,9 @@
 					.browse-data-collection-block-desc {
 						background-color: #B6E0B8;
 					}
+				}
+				&:hover {
+					opacity: 0.8;
 				}
 			}
 		}
@@ -270,16 +273,23 @@
 						border-radius: 0 0 8px 8px;
 					}
 
-					a.btn {
+					.btn {
 						font-size: 1.1rem;
 						border-width: 0px;
 						border-radius: 10px;
 						background-color: #ECF8EC;
 						color: #34646C;
+						opacity: 1;
 
 						&:hover {
 							background-color: $brand-primary-dark !important;
 							color: #FFFFFF !important;
+						}
+					}
+
+					&:hover {
+						.tool-detail-title, .tool-detail-description {
+								opacity: 0.8;
 						}
 					}
 				}
@@ -328,6 +338,10 @@
 						.icon {
 							line-height: 70px;
 						}
+					}
+
+					&:hover {
+						opacity: 0.8;
 					}
 				}
 
