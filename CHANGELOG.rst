@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+4.5.21
+======
+
+`PR add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`
+
+* Added a new user insert for Gulsah (UI dev on Utku's team) in master_inserts/user.json
+
 4.5.20
 ======
 
