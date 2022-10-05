@@ -1,11 +1,11 @@
 'use strict';
 
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import TwitterTimelineEmbed from '../lib/react-twitter-embed/TwitterTimelineEmbed';
 
-import { console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -254,138 +254,194 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
     );
 });
 
-const RecentlyReleasedDataSets = React.memo(function RecentlyReleasedDataSets(props) {
-    const { showAll } = props;
+class RecentlyReleasedDataSets extends React.PureComponent {
+    constructor(props) {
+        super(props);
+        this.state = {
+            'mounted': false,
+        };
+    }
 
-    return (
-        <React.Fragment>
-            <div className="embedded-search-view-outer-container">
-                <div className="embedded-search-container">
-                    <div className="row search-view-controls-and-results" data-search-item-type="File" data-search-abstract-type="File">
-                        <div className="col-12">
-                            <div className="search-results-outer-container is-within-page" data-context-loading="false">
-                                <div className="search-results-container fully-loaded">
-                                    <div className="search-headers-row" style={{ backgroundColor: '#EFF7F8' }}>
-                                        <div className="headers-columns-overflow-container">
-                                            <div className="columns clearfix" style={{ left: "0px" }}>
-                                                <div data-field="display_title" data-column-key="display_title" className="search-headers-column-block" style={{ width: "280px" }} data-first-visible-column="true">
-                                                    <div className="inner" style={{ color: '#34646C' }}>
-                                                        <div className="column-title"><span data-html="true">Dataset</span></div>
-                                                        <span className="column-sort-icon" data-html="true"><i className="sort-icon icon icon-fw icon-sort-down fas align-top"></i></span>
+    componentDidMount() {
+        this.setState({ 'mounted': true, 'loading': true }, () => {
+            ajax.load('/recently_released_datasets', (res) => {
+                if (res && res.terms && typeof res.terms === 'object') {
+                    this.setState({ 'datasets': res.terms, 'loading': false });
+                }
+            }, 'GET', () => {
+                this.setState({ 'datasets': [], 'loading': false });
+            });
+        });
+    }
+
+    render() {
+        const { showAll } = this.props;
+        const { mounted, loading, datasets } = this.state;
+
+        if (!mounted) {
+            return null;
+        }
+        if (loading) {
+            return (
+                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                    <i className="icon icon-fw fas icon-spin icon-circle-notch" />
+                </div>
+            );
+        }
+        console.log('xxx datasets:', datasets);
+        return (
+            <React.Fragment>
+                <div className="embedded-search-view-outer-container">
+                    <div className="embedded-search-container">
+                        <div className="row search-view-controls-and-results" data-search-item-type="File" data-search-abstract-type="File">
+                            <div className="col-12">
+                                <div className="search-results-outer-container is-within-page" data-context-loading="false">
+                                    <div className="search-results-container fully-loaded">
+                                        <div className="search-headers-row" style={{ backgroundColor: '#EFF7F8' }}>
+                                            <div className="headers-columns-overflow-container">
+                                                <div className="columns clearfix" style={{ left: "0px" }}>
+                                                    <div data-field="display_title" data-column-key="display_title" className="search-headers-column-block" style={{ width: "280px" }} data-first-visible-column="true">
+                                                        <div className="inner" style={{ color: '#34646C' }}>
+                                                            <div className="column-title"><span data-html="true">Dataset</span></div>
+                                                            <span className="column-sort-icon" data-html="true"><i className="sort-icon icon icon-fw icon-sort-down fas align-top"></i></span>
+                                                        </div>
+                                                        <div className="width-adjuster react-draggable" style={{ transform: "translate(280px)", borderColor: '#34646C' }}></div>
                                                     </div>
-                                                    <div className="width-adjuster react-draggable" style={{ transform: "translate(280px)", borderColor: '#34646C' }}></div>
-                                                </div>
-                                                <div data-field="lab.display_title" data-column-key="lab.display_title" className="search-headers-column-block" style={{ width: "200px" }}>
-                                                    <div className="inner" style={{ color: '#34646C' }}>
-                                                        <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
-                                                        <span className="column-sort-icon" data-html="true"><i className="sort-icon icon icon-fw icon-sort-down fas align-top"></i></span>
+                                                    <div data-field="lab.display_title" data-column-key="lab.display_title" className="search-headers-column-block" style={{ width: "200px" }}>
+                                                        <div className="inner" style={{ color: '#34646C' }}>
+                                                            <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
+                                                            <span className="column-sort-icon" data-html="true"><i className="sort-icon icon icon-fw icon-sort-down fas align-top"></i></span>
+                                                        </div>
+                                                        <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div>
                                                     </div>
-                                                    <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div>
-                                                </div>
-                                                <div data-field="track_and_facet_info.experiment_type" data-column-key="track_and_facet_info.experiment_type" className="search-headers-column-block" style={{ width: "200px" }}>
-                                                    <div className="inner" style={{ color: '#34646C' }}>
-                                                        <div className="column-title"><span data-tip="Type of experiment to which this file belongs" data-html="true">Lab</span></div>
-                                                        <span className="column-sort-icon" data-html="true"><i className="sort-icon icon icon-fw icon-sort-down fas align-top"></i></span>
+                                                    <div data-field="track_and_facet_info.experiment_type" data-column-key="track_and_facet_info.experiment_type" className="search-headers-column-block" style={{ width: "200px" }}>
+                                                        <div className="inner" style={{ color: '#34646C' }}>
+                                                            <div className="column-title"><span data-tip="Type of experiment to which this file belongs" data-html="true">Lab</span></div>
+                                                            <span className="column-sort-icon" data-html="true"><i className="sort-icon icon icon-fw icon-sort-down fas align-top"></i></span>
+                                                        </div>
+                                                        <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div>
                                                     </div>
-                                                    <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div className="react-infinite-container" style={{ overflow: "auto", maxHeight: "400px;" }}>
-                                        <div>
-                                            <div style={{ width: "100%", height: "0px;" }}></div>
-                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
-                                                <div className="columns clearfix result-table-row" draggable="false">
-                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
-                                                        <div className="inner">
-                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">Chromatin tracing of chRX</div>
+                                        <div className="react-infinite-container" style={{ overflow: "auto", maxHeight: "400px;" }}>
+                                            <div>
+                                                {
+                                                    _.map(datasets, function (item, datasetName) {
+                                                        const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + datasetName;
+                                                        return (
+                                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                                <div className="columns clearfix result-table-row" draggable="false">
+                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                                        <div className="inner">
+                                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">{datasetName}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
+                                                                        <div className="inner text-center"><span className="value text-truncate"><a href={searchUrl}>{item.experiment_sets || '-'} Experiment Set(s)</a></span></div>
+                                                                    </div>
+                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"<small>Submitted by</small>" + item.labs}></i> <a href={searchUrl}>{item.labs || '-'}</a></span></div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="result-table-detail-container detail-closed">
+                                                                    <div></div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })
+                                                }
+                                                {/* <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                    <div className="columns clearfix result-table-row" draggable="false">
+                                                        <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                            <div className="inner">
+                                                                <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">Chromatin tracing of chRX</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
+                                                            <div className="inner text-center"><span className="value text-truncate"><a href="#">9 Experiment Set(s)</a></span></div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                            <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
-                                                        <div className="inner text-center"><span className="value text-truncate"><a href="#">9 Experiment Set(s)</a></span></div>
-                                                    </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
-                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
+                                                    <div className="result-table-detail-container detail-closed">
+                                                        <div></div>
                                                     </div>
                                                 </div>
-                                                <div className="result-table-detail-container detail-closed">
-                                                    <div></div>
-                                                </div>
-                                            </div>
-                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
-                                                <div className="columns clearfix result-table-row" draggable="false">
-                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
-                                                        <div className="inner">
-                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">Chromatin tracing in mouse brain</div>
+                                                <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                    <div className="columns clearfix result-table-row" draggable="false">
+                                                        <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                            <div className="inner">
+                                                                <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">Chromatin tracing in mouse brain</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
+                                                            <div className="inner text-center"><span className="value text-truncate"><a href="#">4 Experiment Set(s)</a></span></div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                            <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
-                                                        <div className="inner text-center"><span className="value text-truncate"><a href="#">4 Experiment Set(s)</a></span></div>
-                                                    </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
-                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
+                                                    <div className="result-table-detail-container detail-closed">
+                                                        <div></div>
                                                     </div>
                                                 </div>
-                                                <div className="result-table-detail-container detail-closed">
-                                                    <div></div>
-                                                </div>
-                                            </div>
-                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
-                                                <div className="columns clearfix result-table-row" draggable="false">
-                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
-                                                        <div className="inner">
-                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">Chromatin tracing in mESCs</div>
+                                                <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                    <div className="columns clearfix result-table-row" draggable="false">
+                                                        <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                            <div className="inner">
+                                                                <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">Chromatin tracing in mESCs</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
+                                                            <div className="inner text-center"><span className="value text-truncate"><a href="#">3 Experiment Set(s)</a></span></div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                            <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
-                                                        <div className="inner text-center"><span className="value text-truncate"><a href="#">3 Experiment Set(s)</a></span></div>
-                                                    </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
-                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
+                                                    <div className="result-table-detail-container detail-closed">
+                                                        <div></div>
                                                     </div>
                                                 </div>
-                                                <div className="result-table-detail-container detail-closed">
-                                                    <div></div>
-                                                </div>
-                                            </div>
-                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
-                                                <div className="columns clearfix result-table-row" draggable="false">
-                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
-                                                        <div className="inner">
-                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">H3K4me3 PLAC-seq on embryo</div>
+                                                <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                    <div className="columns clearfix result-table-row" draggable="false">
+                                                        <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                            <div className="inner">
+                                                                <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">H3K4me3 PLAC-seq on embryo</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
+                                                            <div className="inner text-center"><span className="value text-truncate"><a href="#">12 Experiment Set(s)</a></span></div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                            <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
-                                                        <div className="inner text-center"><span className="value text-truncate"><a href="#">12 Experiment Set(s)</a></span></div>
-                                                    </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
-                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
+                                                    <div className="result-table-detail-container detail-closed">
+                                                        <div></div>
                                                     </div>
                                                 </div>
-                                                <div className="result-table-detail-container detail-closed">
-                                                    <div></div>
-                                                </div>
-                                            </div>
-                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
-                                                <div className="columns clearfix result-table-row" draggable="false">
-                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
-                                                        <div className="inner">
-                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">H3K4me3 PLAC-seq on embryo</div>
+                                                <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                    <div className="columns clearfix result-table-row" draggable="false">
+                                                        <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-field="display_title" data-first-visible-column="true" data-column-even="true">
+                                                            <div className="inner">
+                                                                <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">H3K4me3 PLAC-seq on embryo</div>
+                                                            </div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
+                                                            <div className="inner text-center"><span className="value text-truncate"><a href="#">12 Experiment Set(s)</a></span></div>
+                                                        </div>
+                                                        <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
+                                                            <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
                                                         </div>
                                                     </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="lab.display_title" data-column-even="false">
-                                                        <div className="inner text-center"><span className="value text-truncate"><a href="#">12 Experiment Set(s)</a></span></div>
+                                                    <div className="result-table-detail-container detail-closed">
+                                                        <div></div>
                                                     </div>
-                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-field="track_and_facet_info.experiment_type" data-column-even="true">
-                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip="<small>Submitted by</small> 4dn DCIC"></i> <a href="/labs/4dn-dcic-lab/">4DN DCIC, HMS</a></span></div>
-                                                    </div>
-                                                </div>
-                                                <div className="result-table-detail-container detail-closed">
-                                                    <div></div>
-                                                </div>
+                                                </div> */}
                                             </div>
-                                            <div style={{ width: "100%", height: "0px;" }}></div>
                                         </div>
                                     </div>
                                 </div>
@@ -393,17 +449,17 @@ const RecentlyReleasedDataSets = React.memo(function RecentlyReleasedDataSets(pr
                         </div>
                     </div>
                 </div>
-            </div>
-            {
-                showAll ?
-                    <a href="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" className="btn btn-primary mt-1 float-right btn-browse-all-exp-sets">
-                        <span className="float-left">Browse All Experiment Sets</span>
-                        <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                    </a> : null
-            }
-        </React.Fragment>
-    );
-});
+                {
+                    showAll ?
+                        <a href="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" className="btn btn-primary mt-1 float-right btn-browse-all-exp-sets">
+                            <span className="float-left">Browse All Experiment Sets</span>
+                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                        </a> : null
+                }
+            </React.Fragment>
+        );
+    }
+}
 
 const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
     return (

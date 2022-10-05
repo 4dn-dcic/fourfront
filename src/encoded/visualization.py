@@ -31,6 +31,7 @@ from .types.base import get_item_or_none
 def includeme(config):
     config.add_route('trace_workflow_runs',         '/trace_workflow_run_steps/{file_uuid}/', traverse='/{file_uuid}')
     config.add_route('bar_plot_chart',              '/bar_plot_aggregations')
+    config.add_route('recently_released_datasets',  '/recently_released_datasets')
     config.add_route('date_histogram_aggregations', '/date_histogram_aggregations/')
     config.add_route('add_files_to_higlass_viewconf', '/add_files_to_higlass_viewconf/')
     config.scan(__name__)
@@ -191,6 +192,19 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 }
 
 
+RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION = {
+    "all_labs" : {
+        "terms" : { 
+            "field": "embedded.lab.display_title.raw"
+        }
+    },
+    "public_release" : {
+        "max": { 
+            "field": "embedded.public_release",
+            "format": "yyyy-MM-dd"
+        }
+    }
+}
 
 
 @view_config(route_name='bar_plot_chart', request_method=['GET', 'POST'])
@@ -297,6 +311,64 @@ def bar_plot_chart(context, request):
     for bucket in search_result['aggregations']['field_0']['buckets']:
         format_bucket_result(bucket, ret_result['terms'], 0)
 
+    return ret_result
+
+
+@view_config(route_name='recently_released_datasets', request_method=['GET'])
+@debug_log
+def recently_released_datasets(context, request):
+    MAX_BUCKET_COUNT = 6 # Max rows
+
+    search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
+    fields_to_aggregate_for = ['dataset_label']
+
+    primary_agg = {
+        "field_0" : {
+            "terms" : {
+                "field" : "embedded." + fields_to_aggregate_for[0] + '.raw',
+                # "missing" : TERM_NAME_FOR_NO_VALUE,
+                "order": { "public_release": "asc"},
+                "size" : MAX_BUCKET_COUNT
+            },
+            "aggs" : deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION)
+        }
+    }
+
+    primary_agg.update(deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION))
+
+    search_param_lists['limit'] = search_param_lists['from'] = [0]
+    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    search_result   = perform_search_request(None, subreq, custom_aggregations=primary_agg)
+
+    for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:
+        if search_result.get(field_to_delete) is None:
+            continue
+        del search_result[field_to_delete]
+
+
+    ret_result = { # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
+        "field" : fields_to_aggregate_for[0],
+        "terms" : {},
+        "total" : {
+            "experiment_sets" : search_result['total']
+        },
+        "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
+        "time_generated" : str(datetime.utcnow())
+    }
+
+
+    def format_bucket_result(bucket_result, returned_buckets):
+        curr_bucket_totals = {
+            'experiment_sets'   : int(bucket_result['doc_count']), 
+            'labs'              : ", ".join([str(item['key']) for item in bucket_result['all_labs']['buckets']]),
+            'public_release'    : bucket_result['public_release']['value_as_string']
+        }
+        returned_buckets[bucket_result['key']] = curr_bucket_totals
+
+    for bucket in search_result['aggregations']['field_0']['buckets']:
+        format_bucket_result(bucket, ret_result['terms'])
+
+    # return [ret_result, search_result]
     return ret_result
 
 
