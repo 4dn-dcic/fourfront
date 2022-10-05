@@ -327,7 +327,7 @@ def recently_released_datasets(context, request):
             "terms" : {
                 "field" : "embedded." + fields_to_aggregate_for[0] + '.raw',
                 # "missing" : TERM_NAME_FOR_NO_VALUE,
-                "order": { "public_release": "asc"},
+                "order": { "public_release": "desc"},
                 "size" : MAX_BUCKET_COUNT
             },
             "aggs" : deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION)

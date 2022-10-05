@@ -473,8 +473,8 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                     <div className="row mh-100 h-100">
                         <div className="col-12 col-md-4 pr-8">
                             <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                <div className="mt-8 pl-2 tool-detail-title">HiGlass</div>
+                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" /></div>
+                                <div className="mt-4 pl-2 tool-detail-title">HiGlass</div>
                                 <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
                                 <div className="btn btn-primary w-100 mt-1 mb-1">
                                     <span className="float-left">Learn More</span>
@@ -484,8 +484,8 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         </div>
                         <div className="col-12 col-md-4 pr-8">
                             <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                <div className="mt-8 pl-2 tool-detail-title">JupyterHub</div>
+                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" /></div>
+                                <div className="mt-4 pl-2 tool-detail-title">JupyterHub</div>
                                 <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python and the 4DN jupyter hub</div>
                                 <div className="btn btn-primary w-100 mt-1 mb-1">
                                     <span className="float-left">Learn More</span>
@@ -495,8 +495,8 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         </div>
                         <div className="col-12 col-md-4 pr-8">
                             <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="mt-3 text-center w-100"><i className="icon icon-lock fas" style={{ fontSize: '4rem', opacity: '0.5', color: '#D7EAEE' }}></i></div>
-                                <div className="mt-8 pl-2 tool-detail-title">MicroMeta</div>
+                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" /></div>
+                                <div className="mt-4 pl-2 tool-detail-title">MicroMeta</div>
                                 <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
                                 <div className="btn btn-primary w-100 mt-1 mb-1">
                                     <span className="float-left">Learn More</span>
