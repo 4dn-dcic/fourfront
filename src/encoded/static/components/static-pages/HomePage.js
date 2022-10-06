@@ -64,7 +64,9 @@ export default class HomePage extends React.PureComponent {
                     <div className="row mt-3">
                         <div className="col-12 col-md-8">
                             <h2 className="homepage-section-title new-design">Recently Released Datasets</h2>
-                            <RecentlyReleasedDataSets showAll />
+                            <div className="recently-released-datasets-container" style={{ minHeight: '380px' }}>
+                                <RecentlyReleasedDataSets showAll />
+                            </div>
                         </div>
                         <div className="col-12 col-md-4 social-connections-column">
                             <h2 className="homepage-section-title new-design">
@@ -74,7 +76,7 @@ export default class HomePage extends React.PureComponent {
                                     <i className="icon icon-fw icon-info-circle fas" data-tip="Cookie & Privacy Information for Twitter" />
                                 </a>
                             </h2>
-                            <div className="twitter-timeline-container">
+                            <div className="twitter-timeline-container" style={{ minHeight: '380px' }}>
                                 {twitterTimelineEmbed}
                             </div>
                         </div>
@@ -291,7 +293,6 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                 </div>
             );
         }
-        console.log('xxx datasets:', datasets);
         return (
             <React.Fragment>
                 <div className="embedded-search-view-outer-container">
@@ -307,19 +308,19 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-html="true">Dataset</span></div>
                                                         </div>
-                                                        <div className="width-adjuster react-draggable" style={{ transform: "translate(280px)", borderColor: '#34646C' }}></div>
+                                                        {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(280px)", borderColor: '#34646C' }}></div> */}
                                                     </div>
                                                     <div data-field="lab.display_title" data-column-key="lab.display_title" className="search-headers-column-block" style={{ width: "200px" }}>
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
                                                         </div>
-                                                        <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div>
+                                                        {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
                                                     <div data-field="track_and_facet_info.experiment_type" data-column-key="track_and_facet_info.experiment_type" className="search-headers-column-block" style={{ width: "200px" }}>
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-tip="Type of experiment to which this file belongs" data-html="true">Lab</span></div>
                                                         </div>
-                                                        <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div>
+                                                        {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
                                                 </div>
                                             </div>
@@ -328,20 +329,20 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                             <div>
                                                 {
                                                     _.map(datasets, function (item, datasetName) {
-                                                        const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + datasetName;
+                                                        const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
                                                         return (
                                                             <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
                                                                 <div className="columns clearfix result-table-row" draggable="false">
                                                                     <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-first-visible-column="true" data-column-even="true">
                                                                         <div className="inner">
-                                                                            <div className="title-block text-truncate" data-tip="4DNFIO67AFHX.fastq.gz" data-delay-show="750">{datasetName}</div>
+                                                                            <div className="title-block text-truncate" data-tip={datasetName} data-delay-show="750">{datasetName}</div>
                                                                         </div>
                                                                     </div>
                                                                     <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-column-even="false">
                                                                         <div className="inner text-center"><span className="value text-truncate"><a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a></span></div>
                                                                     </div>
                                                                     <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-column-even="true">
-                                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl}>{item.labs || '-'}</a></span></div>
+                                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a></span></div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="result-table-detail-container detail-closed">
@@ -383,11 +384,11 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                     <div className="row mh-100 h-100">
                         <div className="col-12 col-md-4 pr-8">
                             <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" /></div>
-                                <div className="mt-1 w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" style={{ height: '30px' }} /></div>
+                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" alt="HiGlass" /></div>
+                                <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" alt="HiGlass logo" /></div>
                                 <div className="mt-2 pl-2 tool-detail-title">HiGlass</div>
                                 <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
-                                <div className="btn btn-primary w-100 mt-1 mb-1">
+                                <div className="btn btn-primary w-100 mt-1 mb-05">
                                     <span className="float-left">Learn More</span>
                                     <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
                                 </div>
@@ -395,11 +396,11 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         </div>
                         <div className="col-12 col-md-4 pr-8">
                             <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" /></div>
-                                <div className="mt-1 w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" style={{ height: '30px' }} /></div>
+                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" alt="4DN Jupyter Hub" /></div>
+                                <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
                                 <div className="mt-2 pl-2 tool-detail-title">JupyterHub</div>
                                 <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python and the 4DN jupyter hub</div>
-                                <div className="btn btn-primary w-100 mt-1 mb-1">
+                                <div className="btn btn-primary w-100 mt-1 mb-05">
                                     <span className="float-left">Learn More</span>
                                     <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
                                 </div>
@@ -407,11 +408,11 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                         </div>
                         <div className="col-12 col-md-4 pr-8">
                             <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" /></div>
-                                <div className="mt-1 w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" style={{ height: '30px' }} /></div>
+                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" alt="Micro Meta App" /></div>
+                                <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" alt="Micro Meta App logo" /></div>
                                 <div className="mt-2 pl-2 tool-detail-title">MicroMeta</div>
                                 <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
-                                <div className="btn btn-primary w-100 mt-1 mb-1">
+                                <div className="btn btn-primary w-100 mt-1 mb-05">
                                     <span className="float-left">Learn More</span>
                                     <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
                                 </div>
