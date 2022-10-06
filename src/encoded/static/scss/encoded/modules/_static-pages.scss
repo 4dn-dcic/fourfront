@@ -165,6 +165,14 @@
 					font-size: 1.75rem;
 					font-weight: 500;
 					color: #34646C;
+
+					@include media-breakpoint-only(lg){
+						font-size: 1.4rem;
+					}
+					@include media-breakpoint-only(md){
+						font-size: 1.2rem;
+						font-weight: 400;
+					}
 				}
 				.browse-data-collection-block-desc {
 					color: #34646C;
@@ -172,6 +180,22 @@
 					line-height: 1.3;
 					font-weight: 400;
 					border-radius: 0 0 8px 8px;
+
+					@include media-breakpoint-only(lg){
+						font-size: 0.9rem;
+						
+						br {
+							display: none;
+						}
+					}
+
+					@include media-breakpoint-only(md){
+						font-size: 1rem;
+						
+						br {
+							display: none;
+						}
+					}
 				}
 				i.icon {
 					font-size: 3rem;
@@ -191,6 +215,15 @@
 					}
 					.browse-data-collection-block-desc {
 						background-color: #BBE3EA;
+
+						@include media-breakpoint-only(md){
+							&.pl-4 {
+								padding-left: 0.5rem !important;	
+							}
+							&.pr-4 {
+								padding-right: 0.5rem !important;	
+							}
+						}
 					}
 				}
 				&.browse-by-publication {
@@ -230,6 +263,17 @@
 						margin-top: 30px;
 				}
 			}
+			@include media-breakpoint-only(lg){
+				h2.homepage-section-title {
+						padding-bottom: 4px;
+				}
+			}
+		}
+	}
+
+	.recently-released-datasets-container {
+		@include media-breakpoint-up(lg){
+			min-height: 380px;
 		}
 	}
 
@@ -329,6 +373,10 @@
 						font-size: 1.4rem;
 						font-weight: 500;
 						color: #34646C;
+
+						@include media-breakpoint-only(lg){
+							font-size: 1.3rem;
+						}
 					}
 
 					.resource-detail-description {
