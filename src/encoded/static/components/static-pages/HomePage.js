@@ -333,7 +333,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                         return (
                                                             <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
                                                                 <div className="columns clearfix result-table-row" draggable="false">
-                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-first-visible-column="true" data-column-even="true">
+                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-column-even="true">
                                                                         <div className="inner">
                                                                             <div className="title-block text-truncate" data-tip={datasetName} data-delay-show="750">{datasetName}</div>
                                                                         </div>
