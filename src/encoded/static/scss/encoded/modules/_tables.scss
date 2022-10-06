@@ -368,6 +368,16 @@ table.matrix {
 
 		}
 
+		.s-block.file.stack-depth-2.single-item {
+			> .name.col-file {
+				overflow-x: hidden;
+				@include media-breakpoint-down(sm) {
+					white-space: normal;
+					overflow-wrap: break-word;
+				}
+			}
+		}
+
 		.external-references-stacked-table {
 			.s-block {
 				&.experiment.stack-depth-1 {

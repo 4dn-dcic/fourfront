@@ -1434,6 +1434,12 @@ $badge-item-min-height: 90px;
 				margin-top: 8px;
 			}
 		}
+
+		@include media-breakpoint-down(sm) {
+		    > .inner > .static-section-header img {
+				max-width: 100% !important;
+			}
+		}
 	}
 
 	.supplementary-files-section-part {
