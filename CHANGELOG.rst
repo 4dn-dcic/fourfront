@@ -6,10 +6,75 @@ fourfront
 Change Log
 ----------
 
+4.5.21
+======
+
+`PR add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`
+
+* Added a new user insert for Gulsah (UI dev on Utku's team) in master_inserts/user.json
+
+4.5.20
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+
+4.5.19
+======
+
+* Miscellaneous cosmetics and refactoring to align better with CGAP
+  in how the file src/encoded/__init__.py is arranged.
+* Pick up ``ENCODED_SENTRY_DSN`` from the GAC (C4-913).
+* Adjust log level for ``boto``, ``urllib``, ``elasticsearch``, and ``dcicutils`` to ``WARNING``.
+
+
+4.5.18
+======
+
+* Added a new user insert for Rahi in master_inserts/user.json
+
+
+4.5.17
+======
+
+* Twitter Timeline Feeds updates based on new/breaking API build options
+
+
+4.5.15
+======
+
+* Restore the version of scripts/fix-dist-info from v4.5.11 (undoing change made in v4.5.12).
+
+
+4.5.14
+======
+
+`PR 1716: embed crosslinking_method in expset <https://github.com/4dn-dcic/fourfront/pull/1716>`_
+
+* Embed experiments_in_set.crosslinking_method in ExpSet.
+* Add crosslinking_method column in Experiment.
+* Also, unrelated, updated documentation for docker-local deployment.
+
+
+4.5.13
+======
+
+* Pin ``poetry`` version in ``Makefile`` to ``1.1.15``
+* Pin ``wheel`` in ``pyproject.toml`` to ``0.37.1``
+* Update ``poetry.lock`` for changes to ``flake8`` and ``wheel``.
+  (The ``flake8`` update is because we needed to pick up a newer
+  version, not because we needed to change ``pyproject.toml``.)
+
+
+4.5.12
+======
+
+* Correct some classifiers in ``pyproject.toml``
+* Update ``fix-dist-info`` script to be consistent with ``cgap-portal``
+
 
 4.5.11
 ======
-
 
 * Fix a syntax anomaly in ``pyproject.toml``.
 
