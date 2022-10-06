@@ -331,17 +331,17 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                     _.map(datasets, function (item, datasetName) {
                                                         const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
                                                         return (
-                                                            <div className="search-result-row detail-closed" data-row-number="0" style={{ minWidth: "696px" }}>
+                                                            <div className="search-result-row" style={{ minWidth: "696px" }}>
                                                                 <div className="columns clearfix result-table-row" draggable="false">
                                                                     <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-column-even="true">
                                                                         <div className="inner">
-                                                                            <div className="title-block text-truncate" data-tip={datasetName} data-delay-show="750">{datasetName}</div>
+                                                                            <div className="title-block text-truncate" data-tip={datasetName}>{datasetName}</div>
                                                                         </div>
                                                                     </div>
                                                                     <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-column-even="false">
                                                                         <div className="inner text-center"><span className="value text-truncate"><a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a></span></div>
                                                                     </div>
-                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-column-even="true">
+                                                                    <div className="search-result-column-block" style={{ width: "240px", fontSize: '14px' }} data-column-even="true">
                                                                         <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a></span></div>
                                                                     </div>
                                                                 </div>
