@@ -114,7 +114,7 @@ const optimization = {
     minimizer: [
         new TerserPlugin({
             parallel: false,  // XXX: this option causes docker build to fail - Will 2/25/2021
-            sourceMap: true,
+            // sourceMap: true, // https://github.com/webpack-contrib/terser-webpack-plugin/releases/tag/v5.0.0
             terserOptions:{
                 compress: true,
                 mangle: true,
@@ -149,9 +149,9 @@ serverPlugins.push(new webpack.DefinePlugin({
 }));
 
 // From https://github.com/jsdom/jsdom/issues/3042
-serverPlugins.push(
-    new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
-);
+// serverPlugins.push(
+//     new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
+// );
 
 if (env === 'development'){
     // Skip for `npm run dev-quick` (`env === "quick"`) since takes a while
@@ -236,6 +236,9 @@ module.exports = [
                 "events": false
             }
         },
+        ignoreWarnings: [
+            /only default export is available soon/,
+        ],
         //resolveLoader : resolve,
         devtool: devTool,
         plugins: webPlugins

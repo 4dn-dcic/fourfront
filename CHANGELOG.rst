@@ -6,6 +6,15 @@ fourfront
 Change Log
 ----------
 
+4.5.22
+======
+
+`PR dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`
+
+* Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
+* Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
+* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
+
 4.5.21
 ======
 
