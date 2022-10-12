@@ -859,7 +859,7 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
     print("Will obsolete {} TERMS".format(obsoletes))
     print("{} TERMS ARE NEW".format(len(to_post)))
     print("{} LIVE TERMS WILL BE PATCHED".format(to_patch - obsoletes))
-    return to_update
+    return to_update, to_post
 
 
 def _get_uuids_for_linked(term, idmap):
@@ -910,11 +910,12 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, connection, terms, deprecated, simple=False):
+def download_and_process_owl(ontology, terms, deprecated, simple=False):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
-    ont_prefix = ontology.get('ontology_prefix')
+    print("have data to process")
+    ont_prefix =  ontology.get('ontology_prefix')
     if not terms:
         terms = {}
     if not deprecated:
@@ -946,6 +947,33 @@ def download_and_process_owl(ontology, connection, terms, deprecated, simple=Fal
         terms = {k: v for k, v in terms.items() if k in ['SO:0000001', 'SO:0000104', 'SO:0000673', 'SO:0000704']}
     return terms, data.version, list(set(deprecated))
 
+
+def _split_oterm_required_from_other_props(term):
+    '''internal function that assumes we are dealing with OntologyTerm items only'''
+    required_props = ['term_id', 'source_ontologies']
+    tid = term.get('uuid')
+    post_first = {key:value for (key,value) in term.items() if key in required_props}
+    patch_second = {key:value for (key,value) in term.items() if key not in required_props}
+    post_first['uuid'] = patch_second['uuid'] = tid
+    return post_first, patch_second
+
+
+def order_terms_by_phasing(post_ids, terms2upd):
+    """ ensure that required props for new terms are ordered before other props
+        of those terms as well as terms that exist that need patching 
+    """
+    phased_info = {'phase1': [], 'phase2': []}
+    for term in terms2upd:
+        tid = term.get('term_id')
+        if tid in post_ids:
+            print('splitting')
+            req_info, other_info = _split_oterm_required_from_other_props(term)
+            phased_info['phase1'].append(req_info)
+            phased_info['phase2'].append(other_info)
+        else:
+            print('patch term')
+            phased_info['phase2'].append(term)
+    return phased_info['phase1'] + phased_info['phase2']
 
 def write_outfile(to_write, filename, pretty=False):
     """terms is a list of dicts
@@ -987,6 +1015,10 @@ def parse_args(args):
                         action='store_true',
                         help="Default False - set True to generate full file to load"
                              " - do not filter out existing unchanged terms")
+    parser.add_argument('--nophasing',
+                        default=False,
+                        action='store_true',
+                        help="Default False - set True to not phase the result into posts of only required fields and then patches of all else")
     parser.add_argument('--env',
                         default='data',
                         help="The environment to use i.e. data, webdev, mastertest.\
@@ -1053,7 +1085,7 @@ def main():
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
-            terms, v, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, simple=args.simple)
+            terms, v, deprecated = download_and_process_owl(ontology, terms, deprecated, simple=args.simple)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
                     result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
@@ -1084,20 +1116,31 @@ def main():
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
-        updates = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology,
+        print("FINDING TERMS TO UPDATE")
+        updates, post_ids = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology,
                                     simple=args.simple, connection=connection)
         print("DONE FINDING UPDATES")
 
         pretty = False
+        phasing = True
         if args.pretty:
             pretty = True
+        if args.nophasing:
+            phasing = False
         out_dict = {
             'ontologies': {
                 o['uuid']: {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
                 for o in new_versions
-            },
-            'terms': updates
+            }
         }
+        if phasing:
+            print("PHASING TERM INFO")
+            phased_terms = order_terms_by_phasing(post_ids, updates)
+            out_dict['terms'] = phased_terms
+        else:
+            out_dict['terms']: updates
+
+        print("WRITING OUTPUT")
         write_outfile(out_dict, postfile, pretty)
 
         obsoletes = [term for term in updates if term.get('status') == 'obsolete']
