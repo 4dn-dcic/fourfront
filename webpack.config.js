@@ -236,6 +236,9 @@ module.exports = [
                 "events": false
             }
         },
+        ignoreWarnings: [
+            /only default export is available soon/,
+        ],
         //resolveLoader : resolve,
         devtool: devTool,
         plugins: webPlugins
