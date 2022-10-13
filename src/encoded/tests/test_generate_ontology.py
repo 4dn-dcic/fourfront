@@ -16,8 +16,14 @@ def test_parse_args_defaults():
     args = []
     args = go.parse_args(args)
     assert args.ontology == 'all'
-    assert args.key is None
     assert args.env == 'data'
+    assert args.simple is False
+    assert args.full is False
+    assert args.pretty is False
+    assert args.nophasing is False
+    assert not args.keyfile
+    assert args.key is None
+    assert args.keyname == 'default'
 
 
 @pytest.fixture
@@ -997,35 +1003,37 @@ def db_terms(ont_terms):
 
 
 def test_id_post_and_patch_filter(ont_terms, db_terms, ontology_list):
+    id2chk = 'NN:t3'
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result) == 1
-    assert 'NN:t3' == result[0].get('term_id')
-    # assert len(idmap) == 3
-    # for k, v in idmap.items():
-    #     assert k in ['t1', 't2', 't3']
-    #     if k != 't3':  # t1 and t2 already had uuids
-    #         assert v in ['1234', '5678']
+    assert len(result[0]) == 1
+    assert id2chk == result[0][0].get('term_id')
+    assert id2chk in result[1]
 
 
 def test_id_post_and_patch_no_filter(ont_terms, db_terms, ontology_list):
     tids = ['TO:t1', 'TO:t2', 'NN:t3']
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, False)
-    assert len(result) == 3
-    for t in result:
-        # assert t.get('term_id') in idmap
+    assert len(result[0]) == 3
+    for t in result[0]:
         assert t.get('term_id') in tids
+    for t in result[1]:
+        assert t in tids
 
 
 def test_id_post_and_patch_id_obs(ont_terms, db_terms, ontology_list):
+    ''' term in db is no longer in ontology - tests that status of term will be set to obsolete'''
     db_terms['TO:t4'] = {
         'term_id': 'TO:t4',
         'source_ontologies': [{'uuid': '1', 'ontology_name': 'ont1', 'ontology_prefix': 'TO'}],
         'uuid': '7890',
         'status': 'released'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-    assert len(result) == 2
-    assert '7890' in [t.get('uuid') for t in result]
-    # assert 't4' in idmap
+    result_terms = result[0]
+    assert len(result_terms) == 2
+    assert '7890' in [tid.get('uuid') for tid in result_terms]
+    for t in result_terms:
+        if t.get('uuid') == '7890':
+            assert t.get('status') == 'obsolete'
 
 
 def test_id_post_and_patch_id_obs_simple(ont_terms, db_terms, ontology_list):
@@ -1035,23 +1043,48 @@ def test_id_post_and_patch_id_obs_simple(ont_terms, db_terms, ontology_list):
         'uuid': '7890',
         'status': 'released'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, ontarg='1', simple=True)
-    assert len(result) == 2
-    assert '7890' in [t.get('uuid') for t in result]
+    result_terms = result[0]
+    assert len(result_terms) == 2
+    assert '7890' in [tid.get('uuid') for tid in result_terms]
+    for t in result_terms:
+        if t.get('uuid') == '7890':
+            assert t.get('status') == 'obsolete'
 
 
 def test_id_post_and_patch_donot_obs(ont_terms, db_terms, ontology_list):
     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '1', 'ontology_name': 'ont1'}, 'uuid': '7890'}
     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list, True, False)
-    assert 't4' not in [t.get('term_id') for t in result]
-    # assert 't4' not in idmap
+    assert 't4' not in [t.get('term_id') for t in result[0]]
 
 
-# def test_id_post_and_patch_ignore_4dn(ont_terms, db_terms, ontology_list):
-#     db_terms['t4'] = {'term_id': 't4', 'source_ontologies': {'uuid': '4', 'ontology_name': '4DN ont'}, 'uuid': '7890'}
-#     result = go.id_post_and_patch(ont_terms, db_terms, ontology_list)
-#     print(result)
-#     assert 't4' not in [t.get('term_id') for t in result]
-#     # assert 't4' not in idmap
+def test_order_terms_by_phasing_no_terms():
+    assert not go.order_terms_by_phasing([], [])
+
+
+def test_order_terms_by_phasing_no_new_terms(db_terms):
+    term_list = db_terms.values()
+    res = go.order_terms_by_phasing([], term_list)
+    for r in res:
+        assert r in term_list
+
+
+def test_order_terms_by_phasing_only_new_terms(db_terms):
+    id_list = db_terms.keys()
+    term_list = db_terms.values()
+    res = go.order_terms_by_phasing(id_list, term_list)
+    #import pdb; pdb.set_trace()
+    assert len(res) == 4
+    assert all([v in r for v in ['term_id', 'source_ontologies', 'uuid'] for r in res[:2]])
+    assert all([v in r for v in ['a', 'b', 'c', 'status', 'uuid'] for r in res[2:]])
+
+
+def test_order_terms_by_phasing_both_new_and_existing(db_terms):
+    term_list = db_terms.values()
+    new_id = list(term_list)[0].get('term_id')
+    res = go.order_terms_by_phasing([new_id], term_list)
+    assert len(res) == 3
+    assert all([v in res[0] for v in ['term_id', 'source_ontologies', 'uuid']])
+    assert all([v in r for v in ['a', 'b', 'c', 'status', 'uuid'] for r in res[1:]])
 
 
 def valid_uuid(uid):
