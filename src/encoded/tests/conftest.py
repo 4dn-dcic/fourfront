@@ -9,8 +9,9 @@ import os
 import pkg_resources
 import pytest
 import webtest
+from sqlalchemy import exc
 
-
+from dcicutils.ff_mocks import NO_SERVER_FIXTURES
 from dcicutils.qa_utils import notice_pytest_fixtures, MockFileSystem
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest
@@ -30,6 +31,34 @@ README:
     * There are "app" based fixtures that rely only on postgres, "es_app" fixtures that 
       use both postgres and ES (for search/ES related testing)
 """
+
+
+# hacked version
+@pytest.yield_fixture
+def external_tx(request, conn):
+    # overridden from snovault to detect and continue from savepoint error
+    if NO_SERVER_FIXTURES:
+        yield 'NO_SERVER_FIXTURES'
+        return
+
+    notice_pytest_fixtures(request)
+    # print('BEGIN external_tx')
+    try:
+        tx = conn.begin_nested()
+    except exc.PendingRollbackError as e:
+        if 'inactive savepoint transaction' in str(e):
+            conn._nested_transaction.rollback()
+            tx = conn.begin_nested()
+        else:
+            raise
+    try:
+        yield tx
+        tx.rollback()
+    except exc.InternalError as e:
+        if 'savepoint' in str(e) and 'does not exist' in str(e):
+            pass
+        else:
+            raise
 
 
 @pytest.fixture(autouse=True)
