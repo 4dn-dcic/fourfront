@@ -382,7 +382,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
             <div className="row pl-2 pr-2 pt-4 pb-4 tools-and-resources-container-inner">
                 <div className="col-12 col-lg-8 tools-and-resources-col-tools">
                     <div className="row mh-100 h-100">
-                        <div className="col-12 col-md-4 pr-8">
+                        <div className="col-12 col-md-4 pr-8 tool-detail-col">
                             <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
                                 <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" alt="HiGlass" /></div>
                                 <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" alt="HiGlass logo" /></div>
@@ -394,7 +394,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                 </div>
                             </a>
                         </div>
-                        <div className="col-12 col-md-4 pr-8">
+                        <div className="col-12 col-md-4 pr-8 tool-detail-col">
                             <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
                                 <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" alt="4DN Jupyter Hub" /></div>
                                 <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
@@ -406,7 +406,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                 </div>
                             </a>
                         </div>
-                        <div className="col-12 col-md-4 pr-8">
+                        <div className="col-12 col-md-4 pr-8 tool-detail-col">
                             <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
                                 <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" alt="Micro Meta App" /></div>
                                 <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" alt="Micro Meta App logo" /></div>
