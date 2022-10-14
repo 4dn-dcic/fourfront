@@ -8,5 +8,5 @@ updates:
       time: "05:00"
     reviewers:
       - "utku-ozturk"
-      - "ugur-camoglu"
+      - "gsabanci"
     open-pull-requests-limit: 5   
