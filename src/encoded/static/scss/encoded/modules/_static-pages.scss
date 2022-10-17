@@ -303,6 +303,8 @@
 						
 						@include media-breakpoint-down(sm) {
 							margin-bottom: 15px;
+							margin-right: 0px;
+							margin-left: 0px;
 						}
 			
 						.tool-detail {
@@ -428,19 +430,20 @@
 
 	.fourdn-mission-container {
 		background-color: #EFF7F8;
-		border-radius: 16px;
+		border-radius: 30px;
 
 		>.fourdn-mission-content {
 			background-color: #FFFFFF;
-			border-radius: 16px;
+			border-radius: 15px;
 
 			.fourdn-mission-text {
-				width: 90%;
+				width: 88%;
 				margin: 0 auto;
-				font-size: 2rem;
+				font-size: 1.8rem;
 				text-align: center;
 				line-height: 1.2;
 				font-weight: 100;
+				padding: 0 6rem 1.5rem 6rem;
 
 				@include media-breakpoint-down(sm){
 					font-size: 1.5rem;
@@ -449,7 +452,9 @@
 			}
 			h2.homepage-section-title {
 				border-bottom: none;
-				font-size: 3rem;
+				font-size: 2.5rem;
+				font-weight: 500;
+				margin-bottom: 0.5px;
 
 				.navbar-prefix {
 					margin-right: 10px;
@@ -467,20 +472,40 @@
 
 	.data-use-guidelines-container {
 		background-color: #F5FBF5;
-		border-radius: 10px;
-		border-width: 3px;
+		border-radius: 20px;
+		border-width: 2px;
 		border-color: #99C79C;
 		border-style: solid;
 		color: #0D4129;
+		font-size: 15px;
 
 		h2.homepage-section-title {
 			border-bottom: none;
 			color: #0D4129;
-			margin-bottom: 5px;
+			margin-top: 5px;
+			margin-bottom: 0px;
+			font-size: 26px;
+			font-weight: 600;
+		}
+
+		> p {
+			padding-left: 15px;
 		}
 	}
 
 	.fourdn-help-container {
+
+		@include media-breakpoint-up(lg)
+		{
+			padding-left: 60px;
+		}
+		
+		h2.homepage-section-title {
+			border-bottom: 1px solid #eee;
+			border-bottom-color: rgba(15,70,100,.12);
+			font-weight: 500;
+			font-size: 25px;
+		}
 		
 		a.btn-4dn-help {
 			font-size: 1.5rem;
@@ -489,6 +514,7 @@
 			background-color: #EFF7F8;
 			color: #34646C;
 			font-weight: 400;
+			
 
 			.btn-4dn-help-icon {
 				font-size: 1.7rem;
@@ -514,6 +540,10 @@
 					box-shadow: 0 0 2px #FFFFFF;
 				}
 			}
+		}
+
+		.help-button-text {
+			font-weight: 600;
 		}
 	}
 
