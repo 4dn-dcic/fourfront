@@ -127,6 +127,7 @@
 		line-height: 30px;
 		font-weight: 400;
 		padding-bottom: 8px;
+		color: #34646C;
 	}
 	.btn-browse-all-exp-sets {
 		width: 35%;
@@ -146,7 +147,6 @@
 
 	.browse-data-collection-container {
 		background-color: #EFF7F8;
-		
 		.browse-data-collection-col-browse {
 			.row {
 				@include media-breakpoint-up(md){
@@ -164,7 +164,7 @@
 				.browse-data-collection-block-title {
 					font-size: 1.75rem;
 					font-weight: 500;
-					color: #34646C;
+					color: #346C52;
 
 					@include media-breakpoint-only(lg){
 						font-size: 1.4rem;
@@ -175,7 +175,7 @@
 					}
 				}
 				.browse-data-collection-block-desc {
-					color: #34646C;
+					color: #346C52;
 					font-size: 1.3rem;
 					line-height: 1.3;
 					font-weight: 400;
@@ -209,12 +209,18 @@
 					vertical-align: middle;
 					// padding: 30px;
 				}
-				&.browse-all-data {
+				&.browse-all-data {	
 					i.icon {
 						color: #D7EAEE;
 					}
+
+					.browse-data-collection-block-title {
+						color: #34646C;
+					}
+			
 					.browse-data-collection-block-desc {
 						background-color: #BBE3EA;
+						color: #34646C;
 
 						@include media-breakpoint-only(md){
 							&.pl-4 {
@@ -227,6 +233,8 @@
 					}
 				}
 				&.browse-by-publication {
+					color: #346C52;
+					
 					i.icon {
 						color: #C8E3CA;
 						box-shadow: 0 0 3px #B6E0B8;
@@ -249,7 +257,7 @@
 			a.btn-all-data-collections {
 				font-size: 1.1rem !important;
 				border-width: 0px;
-				border-radius: 10px !important;
+				border-radius: 20px !important;
 				background-color: #D5E9EB;
 				color: #34646C;
 		

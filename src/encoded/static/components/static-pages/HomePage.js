@@ -216,45 +216,53 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
         <div className="row mt-4 pt-3 pb-3 p-3 browse-data-collection-container">
             <div className="col-12 col-md-7 browse-data-collection-col-browse">
                 <div className="row">
-                    <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block browse-all-data">
-                        <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="text-decoration-none">
-                            <div className="mt-2"><i className="icon icon-database fas"></i></div>
-                            <div className="mt-2 browse-data-collection-block-title">Browse All Data</div>
-                            <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
-                                Search all Experiment Sets<br /> in the 4D Nucleome Database
+                    <div className="col-12">
+                        <div className='row'>
+                            <div className="col-12 col-md-6 pr-md-4 text-center">
+                                <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-all-data">
+                                    <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="text-decoration-none">
+                                        <div className="mt-2"><i className="icon icon-database fas"></i></div>
+                                        <div className="mt-2 browse-data-collection-block-title">Browse All Data</div>
+                                        <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
+                                            Search all Experiment Sets<br /> in the 4D Nucleome Database
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
-                        </a>
-                    </div>
-                    <div className="col-12 col-md-5 ml-md-4 text-center h-100 p-0 d-flex flex-column browse-data-collection-block browse-by-publication">
-                        <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="text-decoration-none">
-                            <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
-                            <div className="mt-2 browse-data-collection-block-title">Browse By Publication</div>
-                            <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
-                                View Publications<br /> in the 4D Nucleome Database
+                            <div className="col-12 col-md-6 text-center">
+                                <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-by-publication">
+                                    <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="text-decoration-none">
+                                        <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
+                                        <div className="mt-2 browse-data-collection-block-title">Browse By Publication</div>
+                                        <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
+                                            View Publications<br /> in the 4D Nucleome Database
+                                        </div>
+                                    </a>
+                                </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div className="col-12 col-md-5 browse-data-collection-col-collections">
-                <h2 className="homepage-section-title new-design">4DN Data Collections</h2>
-                <div>
-                    <a href="/hic-data-overview" className="btn btn-primary w-100">
-                        Hi-C Datasets
-                    </a>
-                    <a href="/microscopy-data-overview" className="btn btn-primary w-100 mt-05">
-                        All Microscopy Datasets
-                    </a>
-                    <a href="/resources/data-collections/chromatin-tracing-datasets" className="btn btn-primary w-100 mt-05">
-                        Chromatin Tracing Datasets
-                    </a>
-                    <a href="/resources/data-collections" className="btn btn-primary w-100 mt-1 btn-all-data-collections">
-                        <span className="float-left">View All Data Collections</span>
-                        <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                    </a>
+            <div className="col-12 col-md-5 pl-md-5 d-flex flex-column browse-data-collection-col-collections">
+                <div className="flex-grow-1 mt-1">
+                    <h2 className="homepage-section-title new-design">4DN Data Collections</h2>
+                        <a href="/hic-data-overview" className="btn btn-primary w-100">
+                            Hi-C Datasets
+                        </a>
+                        <a href="/microscopy-data-overview" className="btn btn-primary w-100 mt-05">
+                            All Microscopy Datasets
+                        </a>
+                        <a href="/resources/data-collections/chromatin-tracing-datasets" className="btn btn-primary w-100 mt-05">
+                            Chromatin Tracing Datasets
+                        </a>
+                            <a href="/resources/data-collections" className="btn btn-primary w-100 mt-1 btn-all-data-collections">
+                                <span className="float-left ml-1">View All Data Collections</span>
+                                <span className="float-right mr-1"><i className="icon icon-arrow-right fas"></i></span>
+                            </a>
+                    </div>
                 </div>
             </div>
-        </div>
     );
 });
 
@@ -322,7 +330,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                         </div>
                                                         {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
-                                                </div>
+                                                </div>x"
                                             </div>
                                         </div>
                                         <div className="react-infinite-container" style={{ overflow: "auto", maxHeight: "400px;" }}>
