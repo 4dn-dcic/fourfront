@@ -61,9 +61,9 @@ export default class HomePage extends React.PureComponent {
 
                     <CollectionsRow />
 
-                    <div className="row mt-3">
-                        <div className="col-12 col-lg-8">
-                            <h2 className="homepage-section-title new-design">Recently Released Datasets</h2>
+                    <div className="row mt-8">
+                        <div className="col-12 col-lg-8 recently-released-datasets-section">
+                            <h2 className="homepage-section-title new-design ">Recently Released Datasets</h2>
                             <div className="recently-released-datasets-container">
                                 <RecentlyReleasedDataSets showAll />
                             </div>
@@ -88,7 +88,7 @@ export default class HomePage extends React.PureComponent {
 
                     <HelpRow />
 
-                    <div className="mt-4">
+                    <div className="mt-8">
                         <h3 className="homepage-section-title text-500">External Links</h3>
                         <ExternalLinksRow />
                     </div>
@@ -213,7 +213,7 @@ const GettingStartedLinksRow = React.memo(function GettingStartedLinksRow(props)
 
 const CollectionsRow = React.memo(function CollectionsRow(props) {
     return (
-        <div className="row mt-4 pt-3 pb-3 p-3 browse-data-collection-container">
+        <div className="row mt-6 mb-6 pt-3 pb-3 p-3 browse-data-collection-container">
             <div className="col-12 col-md-7 browse-data-collection-col-browse">
                 <div className="row">
                     <div className="col-12">
@@ -330,7 +330,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                         </div>
                                                         {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
-                                                </div>x"
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="react-infinite-container" style={{ overflow: "auto", maxHeight: "400px;" }}>
@@ -371,7 +371,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                 {
                     showAll ?
                         <a href="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate" className="btn btn-primary mt-1 float-right btn-browse-all-exp-sets">
-                            <span className="float-left">Browse All Experiment Sets</span>
+                            <span className="float-left px-2">Browse All Experiment Sets</span>
                             <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
                         </a> : null
                 }
@@ -383,9 +383,9 @@ class RecentlyReleasedDataSets extends React.PureComponent {
 const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
     return (
         <div className="tools-and-resources-container">
-            <div className="row mt-6 mb-3 tools-and-resources-container-title">
+            <div className="row mt-8 mb-3 tools-and-resources-container-title">
                 <h2 className="homepage-section-title new-design text-center w-100 mb-0">Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
-                <span className="icon-wrapper w-100 mt-2"><i className="icon icon-tools fas"></i></span>
+                <span className="icon-wrapper w-100 mt-1"><i className="icon icon-tools fas"></i></span>
             </div>
             <div className="row pl-2 pr-2 pt-4 pb-4 tools-and-resources-container-inner">
                 <div className="col-12 col-lg-8 tools-and-resources-col-tools">
@@ -468,7 +468,7 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
 
 const FourDNMissonRow = React.memo(function FourDNMissonRow(props) {
     return (
-        <div className="row mt-6 mb-6 p-3 fourdn-mission-container">
+        <div className="row mt-8 mb-8 p-3 fourdn-mission-container">
             <div className="col-12 p-4 fourdn-mission-content">
                 <h2 className="homepage-section-title new-design text-center"><FourfrontLogo prefix="The" title="Mission"/></h2>
                 <div className="fourdn-mission-text">
