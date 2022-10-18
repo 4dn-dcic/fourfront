@@ -152,6 +152,20 @@
 		}
 	}
 
+	.browse-data-collection-fullwidth-container {
+		position: relative;
+		overflow-x: hidden;
+	}
+	.browse-data-collection-fullwidth-container::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		background-color: #EFF7F8;
+	}
+
 	.browse-data-collection-container {
 		background-color: #EFF7F8;
 		.browse-data-collection-col-browse {
@@ -273,6 +287,9 @@
 					background-color: $brand-primary-dark;
 				}
 			}
+			h2.homepage-section-title {
+				color: #34646C;
+			}
 			@include media-breakpoint-down(sm){
 				h2.homepage-section-title {
 						margin-top: 30px;
@@ -292,6 +309,19 @@
 		}
 	}
 
+	.tools-and-resources-fullwidth-container {
+		position: relative;
+		overflow-x: hidden;
+	}
+	.tools-and-resources-fullwidth-container::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		background-color: #F5FBF5;
+	}
 	.tools-and-resources-container {
 		
 		.tools-and-resources-container-title {
@@ -300,6 +330,11 @@
 				border-bottom: none;
 				font-size: 30px;
 				line-height: 1.3;
+
+				@include media-breakpoint-down(sm) {
+					padding-left: 0.5rem;
+					padding-right: 0.5rem;
+				}
 			}
 			
 			.icon {
@@ -429,7 +464,7 @@
 				.resource-all {
 					font-size: 1.1rem;
 					border-width: 0px;
-					border-radius: 10px;
+					border-radius: 20px;
 					background-color: #ECF8EC;
 					color: #0D4129;;
 
@@ -1492,6 +1527,7 @@ $carousel-height : 240px;
 			&.external-link {
 				padding-right: 36px !important;
 				font-size: 0.925em;
+				border-radius: 5px;
 				&:after {
 					font-family: $fa-font-family;
 					font-weight: 900;

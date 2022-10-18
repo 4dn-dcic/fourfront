@@ -12,7 +12,6 @@ import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/e
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { navigate } from'./../util';
-import { Announcements, HomePageCarousel } from './components';
 import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs } from './../PageTitle';
 
 
@@ -57,40 +56,47 @@ export default class HomePage extends React.PureComponent {
         return (
             <div className="homepage-wrapper">
 
-                <div className="container home-content-area" id="content">
+                <div className="home-content-area">
 
                     <CollectionsRow />
 
-                    <div className="row mt-8">
-                        <div className="col-12 col-lg-8 recently-released-datasets-section">
-                            <h2 className="homepage-section-title new-design ">Recently Released Datasets</h2>
-                            <div className="recently-released-datasets-container">
-                                <RecentlyReleasedDataSets showAll />
+                    <div className="container" id="content">
+
+                        <div className="row mt-8">
+                            <div className="col-12 col-lg-8 recently-released-datasets-section">
+                                <h2 className="homepage-section-title new-design ">Recently Released Datasets</h2>
+                                <div className="recently-released-datasets-container">
+                                    <RecentlyReleasedDataSets showAll />
+                                </div>
+                            </div>
+                            <div className="col-12 col-lg-4 social-connections-column">
+                                <h2 className="homepage-section-title new-design">
+                                    <span>Tweets</span>
+                                    <a href="https://help.twitter.com/en/twitter-for-websites-ads-info-and-privacy" target="_blank"
+                                        rel="noopener noreferrer" className="right privacy-ext">
+                                        <i className="icon icon-fw icon-info-circle fas" data-tip="Cookie & Privacy Information for Twitter" />
+                                    </a>
+                                </h2>
+                                <div className="twitter-timeline-container" style={{ minHeight: '380px' }}>
+                                    {twitterTimelineEmbed}
+                                </div>
                             </div>
                         </div>
-                        <div className="col-12 col-lg-4 social-connections-column">
-                            <h2 className="homepage-section-title new-design">
-                                <span>Tweets</span>
-                                <a href="https://help.twitter.com/en/twitter-for-websites-ads-info-and-privacy" target="_blank"
-                                    rel="noopener noreferrer" className="right privacy-ext">
-                                    <i className="icon icon-fw icon-info-circle fas" data-tip="Cookie & Privacy Information for Twitter" />
-                                </a>
-                            </h2>
-                            <div className="twitter-timeline-container" style={{ minHeight: '380px' }}>
-                                {twitterTimelineEmbed}
-                            </div>
-                        </div>
+
                     </div>
 
                     <ToolsAndResourcesRow />
 
-                    <FourDNMissonRow />
+                    <div className="container">
+                        <FourDNMissonRow />
 
-                    <HelpRow />
+                        <HelpRow />
 
-                    <div className="mt-8">
-                        <h3 className="homepage-section-title text-500">External Links</h3>
-                        <ExternalLinksRow />
+                        <div className="mt-8">
+                            <h3 className="homepage-section-title text-500">External Links</h3>
+                            <ExternalLinksRow />
+                        </div>
+
                     </div>
 
                 </div>
@@ -213,56 +219,60 @@ const GettingStartedLinksRow = React.memo(function GettingStartedLinksRow(props)
 
 const CollectionsRow = React.memo(function CollectionsRow(props) {
     return (
-        <div className="row mt-6 mb-6 pt-3 pb-3 p-3 browse-data-collection-container">
-            <div className="col-12 col-md-7 browse-data-collection-col-browse">
-                <div className="row">
-                    <div className="col-12">
-                        <div className='row'>
-                            <div className="col-12 col-md-6 pr-md-4 text-center">
-                                <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-all-data">
-                                    <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="text-decoration-none">
-                                        <div className="mt-2"><i className="icon icon-database fas"></i></div>
-                                        <div className="mt-2 browse-data-collection-block-title">Browse All Data</div>
-                                        <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
-                                            Search all Experiment Sets<br /> in the 4D Nucleome Database
+        <div className="mt-6 mb-6 browse-data-collection-fullwidth-container">
+            <div className="container">
+                <div className="row pt-3 pb-3 p-3 browse-data-collection-container">
+                    <div className="col-12 col-md-7 browse-data-collection-col-browse">
+                        <div className="row">
+                            <div className="col-12">
+                                <div className='row'>
+                                    <div className="col-12 col-md-6 pr-md-4 text-center">
+                                        <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-all-data">
+                                            <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="text-decoration-none">
+                                                <div className="mt-2"><i className="icon icon-database fas"></i></div>
+                                                <div className="mt-2 browse-data-collection-block-title">Browse All Data</div>
+                                                <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
+                                                    Search all Experiment Sets<br /> in the 4D Nucleome Database
+                                                </div>
+                                            </a>
                                         </div>
-                                    </a>
-                                </div>
-                            </div>
-                            <div className="col-12 col-md-6 text-center">
-                                <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-by-publication">
-                                    <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="text-decoration-none">
-                                        <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
-                                        <div className="mt-2 browse-data-collection-block-title">Browse By Publication</div>
-                                        <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
-                                            View Publications<br /> in the 4D Nucleome Database
+                                    </div>
+                                    <div className="col-12 col-md-6 text-center">
+                                        <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-by-publication">
+                                            <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="text-decoration-none">
+                                                <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
+                                                <div className="mt-2 browse-data-collection-block-title">Browse By Publication</div>
+                                                <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
+                                                    View Publications<br /> in the 4D Nucleome Database
+                                                </div>
+                                            </a>
                                         </div>
-                                    </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div className="col-12 col-md-5 pl-md-5 d-flex flex-column browse-data-collection-col-collections">
-                <div className="flex-grow-1 mt-1">
-                    <h2 className="homepage-section-title new-design">4DN Data Collections</h2>
-                        <a href="/hic-data-overview" className="btn btn-primary w-100">
-                            Hi-C Datasets
-                        </a>
-                        <a href="/microscopy-data-overview" className="btn btn-primary w-100 mt-05">
-                            All Microscopy Datasets
-                        </a>
-                        <a href="/resources/data-collections/chromatin-tracing-datasets" className="btn btn-primary w-100 mt-05">
-                            Chromatin Tracing Datasets
-                        </a>
+                    <div className="col-12 col-md-5 pl-md-5 d-flex flex-column browse-data-collection-col-collections">
+                        <div className="flex-grow-1 mt-1">
+                            <h2 className="homepage-section-title new-design text-500">4DN Data Collections</h2>
+                            <a href="/hic-data-overview" className="btn btn-primary w-100">
+                                Hi-C Datasets
+                            </a>
+                            <a href="/microscopy-data-overview" className="btn btn-primary w-100 mt-05">
+                                All Microscopy Datasets
+                            </a>
+                            <a href="/resources/data-collections/chromatin-tracing-datasets" className="btn btn-primary w-100 mt-05">
+                                Chromatin Tracing Datasets
+                            </a>
                             <a href="/resources/data-collections" className="btn btn-primary w-100 mt-1 btn-all-data-collections">
                                 <span className="float-left ml-1">View All Data Collections</span>
                                 <span className="float-right mr-1"><i className="icon icon-arrow-right fas"></i></span>
                             </a>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
     );
 });
 
@@ -382,84 +392,89 @@ class RecentlyReleasedDataSets extends React.PureComponent {
 
 const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
     return (
+      
         <div className="tools-and-resources-container">
             <div className="row mt-8 mb-3 tools-and-resources-container-title">
                 <h2 className="homepage-section-title new-design text-center w-100 mb-0">Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
                 <span className="icon-wrapper w-100 mt-1"><i className="icon icon-tools fas"></i></span>
             </div>
-            <div className="row pl-2 pr-2 pt-4 pb-4 tools-and-resources-container-inner">
-                <div className="col-12 col-lg-8 tools-and-resources-col-tools">
-                    <div className="row mh-100 h-100">
-                        <div className="col-12 col-md-4 pr-8 tool-detail-col">
-                            <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" alt="HiGlass" /></div>
-                                <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" alt="HiGlass logo" /></div>
-                                <div className="mt-2 pl-2 tool-detail-title">HiGlass</div>
-                                <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
-                                <div className="btn btn-primary w-100 mt-1 mb-05">
-                                    <span className="float-left">Learn More</span>
-                                    <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+            <div className="tools-and-resources-fullwidth-container">
+                <div className="container">
+                    <div className="row pl-2 pr-2 pt-4 pb-4 tools-and-resources-container-inner">
+                        <div className="col-12 col-lg-8 tools-and-resources-col-tools">
+                            <div className="row mh-100 h-100">
+                                <div className="col-12 col-md-4 pr-8 tool-detail-col">
+                                    <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
+                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" alt="HiGlass" /></div>
+                                        <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" alt="HiGlass logo" /></div>
+                                        <div className="mt-2 pl-2 tool-detail-title">HiGlass</div>
+                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
+                                        <div className="btn btn-primary w-100 mt-1 mb-05">
+                                            <span className="float-left">Learn More</span>
+                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div className="col-12 col-md-4 pr-8 tool-detail-col">
-                            <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" alt="4DN Jupyter Hub" /></div>
-                                <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
-                                <div className="mt-2 pl-2 tool-detail-title">JupyterHub</div>
-                                <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python and the 4DN jupyter hub</div>
-                                <div className="btn btn-primary w-100 mt-1 mb-05">
-                                    <span className="float-left">Learn More</span>
-                                    <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                <div className="col-12 col-md-4 pr-8 tool-detail-col">
+                                    <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
+                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" alt="4DN Jupyter Hub" /></div>
+                                        <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
+                                        <div className="mt-2 pl-2 tool-detail-title">JupyterHub</div>
+                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python and the 4DN jupyter hub</div>
+                                        <div className="btn btn-primary w-100 mt-1 mb-05">
+                                            <span className="float-left">Learn More</span>
+                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <div className="col-12 col-md-4 pr-8 tool-detail-col">
-                            <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" alt="Micro Meta App" /></div>
-                                <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" alt="Micro Meta App logo" /></div>
-                                <div className="mt-2 pl-2 tool-detail-title">MicroMeta</div>
-                                <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
-                                <div className="btn btn-primary w-100 mt-1 mb-05">
-                                    <span className="float-left">Learn More</span>
-                                    <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-12 col-lg-4 pl-8 p-3 mt-sm-3 mt-lg-0 tools-and-resources-col-resources">
-                    <h2 className="homepage-section-title new-design">Portal Resources</h2>
-                    <div className="p-3 d-flex flex-column resource-detail">
-                        <a href="/resources/experimental-resources" className="text-decoration-none">
-                            <div className="row">
-                                <div className="col-3 text-center">
-                                    <div className="mt-1"><i className="icon icon-flask fas"></i></div>
-                                </div>
-                                <div className="col-9">
-                                    <div className="mt-1 resource-detail-title">Experimental Resources</div>
-                                    <div className="flex-grow-1 mt-1 resource-detail-description">View Protocols, Cell Lines, Assays &amp; File Formats</div>
+                                <div className="col-12 col-md-4 pr-8 tool-detail-col">
+                                    <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
+                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" alt="Micro Meta App" /></div>
+                                        <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" alt="Micro Meta App logo" /></div>
+                                        <div className="mt-2 pl-2 tool-detail-title">MicroMeta</div>
+                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
+                                        <div className="btn btn-primary w-100 mt-1 mb-05">
+                                            <span className="float-left">Learn More</span>
+                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                        </div>
+                                    </a>
                                 </div>
                             </div>
-                        </a>
-                    </div>
-                    <div className="p-3 d-flex flex-column mt-1 resource-detail data-analysis">
-                        <a href="/resources/data-analysis" className="text-decoration-none">
-                            <div className="row">
-                                <div className="col-3 text-center">
-                                    <div className="mt-1"><i className="icon icon-project-diagram fas"></i></div>
-                                </div>
-                                <div className="col-9">
-                                    <div className="mt-1 resource-detail-title">Data Analysis</div>
-                                    <div className="flex-grow-1 mt-1 resource-detail-description">Learn about our standardized bioinformatic analysis pipelines</div>
-                                </div>
+                        </div>
+                        <div className="col-12 col-lg-4 pl-8 p-3 mt-sm-3 mt-lg-0 tools-and-resources-col-resources">
+                            <h2 className="homepage-section-title new-design">Portal Resources</h2>
+                            <div className="p-3 d-flex flex-column resource-detail">
+                                <a href="/resources/experimental-resources" className="text-decoration-none">
+                                    <div className="row">
+                                        <div className="col-3 text-center">
+                                            <div className="mt-1"><i className="icon icon-flask fas"></i></div>
+                                        </div>
+                                        <div className="col-9">
+                                            <div className="mt-1 resource-detail-title">Experimental Resources</div>
+                                            <div className="flex-grow-1 mt-1 resource-detail-description">View Protocols, Cell Lines, Assays &amp; File Formats</div>
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
-                        </a>
+                            <div className="p-3 d-flex flex-column mt-1 resource-detail data-analysis">
+                                <a href="/resources/data-analysis" className="text-decoration-none">
+                                    <div className="row">
+                                        <div className="col-3 text-center">
+                                            <div className="mt-1"><i className="icon icon-project-diagram fas"></i></div>
+                                        </div>
+                                        <div className="col-9">
+                                            <div className="mt-1 resource-detail-title">Data Analysis</div>
+                                            <div className="flex-grow-1 mt-1 resource-detail-description">Learn about our standardized bioinformatic analysis pipelines</div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <a href="/resources" className="btn btn-primary w-100 mt-1 resource-all">
+                                <span className="float-left">View All Available Resources</span>
+                                <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                            </a>
+                        </div>
                     </div>
-                    <a href="/resources" className="btn btn-primary w-100 mt-1 resource-all">
-                        <span className="float-left">View All Available Resources</span>
-                        <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
-                    </a>
                 </div>
             </div>
         </div>
@@ -532,7 +547,7 @@ const HelpRow = React.memo(function HelpRow(props) {
 const ExternalLinksRow = React.memo(function LinksRow(props){
     return (
         <div className="homepage-links-row external-links">
-            <div className="links-wrapper row">
+            <div className="links-wrapper row mb-2">
                 <div className="col-12 col-md-3">
                     <a className="link-block external-link" href="http://www.4dnucleome.org/" target="_blank" rel="noopener noreferrer">
                         <span>Main 4DN Portal</span>
