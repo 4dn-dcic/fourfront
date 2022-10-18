@@ -1,31 +1,22 @@
 import argparse
 import ast
 import json
-import pkg_resources
 import re
-import requests
 import sys
-
 from collections import Counter
-from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata, unified_authentication
-from rdflib.collection import Collection
 from uuid import uuid4
-from ..commands.owltools import (
-    Namespace,
-    Owler,
-    OBO,
-    splitNameFromNamespace,
-    convert2URIRef,
-    isURIRef,
-    isBlankNode,
-    getObjectLiteralsOfType,
-    subClassOf,
-    SomeValuesFrom,
-    IntersectionOf,
-    OnProperty,
-    Deprecated
-)
 
+import pkg_resources
+import requests
+from dcicutils.ff_utils import (get_authentication_with_server, get_metadata,
+                                search_metadata)
+from rdflib.collection import Collection
+
+from ..commands.owltools import (OBO, Deprecated, IntersectionOf, Namespace,
+                                 OnProperty, Owler, SomeValuesFrom,
+                                 convert2URIRef, getObjectLiteralsOfType,
+                                 isBlankNode, isURIRef, splitNameFromNamespace,
+                                 subClassOf)
 
 EPILOG = __doc__
 
@@ -915,7 +906,7 @@ def download_and_process_owl(ontology, terms, deprecated, simple=False):
     definition_terms = get_definition_term_uris(ontology)
     data = Owler(ontology['download_url'])
     print("have data to process")
-    ont_prefix =  ontology.get('ontology_prefix')
+    ont_prefix = ontology.get('ontology_prefix')
     if not terms:
         terms = {}
     if not deprecated:
@@ -936,7 +927,8 @@ def download_and_process_owl(ontology, terms, deprecated, simple=False):
             else:
                 if 'term_name' not in terms[termid] or not terms[termid].get('term_name'):
                     terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                if not terms[termid].get('source_ontologies') or ontology.get('uuid') not in terms[termid]['source_ontologies']:
+                if (not terms[termid].get('source_ontologies') or
+                        ontology.get('uuid') not in terms[termid]['source_ontologies']):
                     terms[termid].setdefault('source_ontologies', []).append(ontology['uuid'])
             # deal with parents
             if ontology.get('ontology_name') != 'Sequence Ontology':
@@ -952,28 +944,27 @@ def _split_oterm_required_from_other_props(term):
     '''internal function that assumes we are dealing with OntologyTerm items only'''
     required_props = ['term_id', 'source_ontologies']
     tid = term.get('uuid')
-    post_first = {key:value for (key,value) in term.items() if key in required_props}
-    patch_second = {key:value for (key,value) in term.items() if key not in required_props}
+    post_first = {key: value for (key, value) in term.items() if key in required_props}
+    patch_second = {key: value for (key, value) in term.items() if key not in required_props}
     post_first['uuid'] = patch_second['uuid'] = tid
     return post_first, patch_second
 
 
 def order_terms_by_phasing(post_ids, terms2upd):
     """ ensure that required props for new terms are ordered before other props
-        of those terms as well as terms that exist that need patching 
+        of those terms as well as terms that exist that need patching
     """
     phased_info = {'phase1': [], 'phase2': []}
     for term in terms2upd:
         tid = term.get('term_id')
         if tid in post_ids:
-            print('splitting')
             req_info, other_info = _split_oterm_required_from_other_props(term)
             phased_info['phase1'].append(req_info)
             phased_info['phase2'].append(other_info)
         else:
-            print('patch term')
             phased_info['phase2'].append(term)
     return phased_info['phase1'] + phased_info['phase2']
+
 
 def write_outfile(to_write, filename, pretty=False):
     """terms is a list of dicts
@@ -1018,7 +1009,8 @@ def parse_args(args):
     parser.add_argument('--nophasing',
                         default=False,
                         action='store_true',
-                        help="Default False - set True to not phase the result into posts of only required fields and then patches of all else")
+                        help="Default False - set True to not phase the result into posts of only required fields \
+                                and then patches of all else")
     parser.add_argument('--env',
                         default='data',
                         help="The environment to use i.e. data, webdev, mastertest.\
@@ -1118,7 +1110,7 @@ def main():
             filter_unchanged = False
         print("FINDING TERMS TO UPDATE")
         updates, post_ids = id_post_and_patch(terms, db_terms, ontologies, filter_unchanged, ontarg=args.ontology,
-                                    simple=args.simple, connection=connection)
+                                              simple=args.simple, connection=connection)
         print("DONE FINDING UPDATES")
 
         pretty = False
@@ -1145,6 +1137,7 @@ def main():
 
         obsoletes = [term for term in updates if term.get('status') == 'obsolete']
         if obsoletes:
+            print("CHECKING OBSOLETES FOR LINKS")
             problems = []
             for obsolete in obsoletes:
                 result = get_metadata(obsolete['uuid'] + '/@@links', connection)
@@ -1158,6 +1151,8 @@ def main():
                 print('term uuid\t\t\t\titem uuid\t\t\t\titem display title')
                 for problem in problems:
                     print('\t'.join(problem))
+            else:
+                print("NO LINKED TERMS FOUND TO BE UPDATED")
 
 
 if __name__ == '__main__':

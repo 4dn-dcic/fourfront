@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import argparse
-import logging
-import os
 import json
+import logging
 from datetime import datetime
-from dcicutils import ff_utils
 
+from dcicutils import ff_utils
 
 logger = logging.getLogger(__name__)
 EPILOG = __doc__
@@ -59,8 +58,8 @@ def main():
     start = datetime.now()
     try:
         # sustained by returning Response.app_iter from loadxl.load_data
-        res =  ff_utils.authorized_request(load_endpoint, auth=auth, verb='POST',
-                                           timeout=None, json=json_data)
+        res = ff_utils.authorized_request(load_endpoint, auth=auth, verb='POST',
+                                          timeout=None, json=json_data)
     except Exception as exc:
         logger.error('Error on POST: %s' % str(exc))
     else:
@@ -103,6 +102,7 @@ def main():
                 ))
     logger.info("Finished request in %s" % str(datetime.now() - start))
     logger.info("DONE!")
+
 
 if __name__ == "__main__":
     main()
