@@ -229,7 +229,7 @@ export default class App extends React.PureComponent {
         //Load up sentry io
         const dsn = sentryDsn(href);
         if (dsn) {
-            logger.initializeLogger(dsn);
+            logger.initializeLogger(dsn, 0.1);
         }
 
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
