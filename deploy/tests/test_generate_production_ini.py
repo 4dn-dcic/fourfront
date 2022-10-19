@@ -8,7 +8,7 @@ import subprocess
 from io import StringIO
 from unittest import mock
 
-from dcicutils.qa_utils import override_environ
+from dcicutils.misc_utils import override_environ
 from ..generate_production_ini import FourfrontDeployer
 
 
@@ -25,11 +25,6 @@ EB_MANIFEST_FILENAME = FourfrontDeployer.EB_MANIFEST_FILENAME
 PYPROJECT_FILE_NAME = FourfrontDeployer.PYPROJECT_FILE_NAME
 omittable = FourfrontDeployer.omittable
 
-# TODO: Maybe this should move to env_utils? If not, at least to a non-test file.
-#       Then again, if we used the "single parameterized ini file" we could side-step that. -kmp 3-Apr-2020
-
-FOURFRONT_DEPLOY_NAMES = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
-
 
 def test_omittable():
 
@@ -45,6 +40,7 @@ def test_omittable():
     assert omittable("foo=$X", "foo=   \r\n \r\n ")
 
 
+@pytest.mark.skip(reason="We're not using ini_files/*.ini any more.")
 def test_environment_template_filename():
 
     with pytest.raises(ValueError):
@@ -58,17 +54,21 @@ def test_environment_template_filename():
     assert environment_template_filename('webdev') == environment_template_filename('fourfront-webdev')
 
 
+@pytest.mark.skip(reason="We're not using ini_files/*.ini any more.")
 def test_any_environment_template_filename():
 
     actual = os.path.abspath(any_environment_template_filename())
     assert actual.endswith("/ini_files/any.ini")
 
 
-def test_template_environment_names():
+@pytest.mark.skip(reason="We're not using ini_files/*.ini any more.")
+def test_legacy_template_environment_names():
+    # Containerized Fourfront will use a single generic template, but while we're still using beanstalks,
+    # we do some minimal testing to make sure all the templates are there. -kmp 4-Oct-2021
 
     names = template_environment_names()
 
-    required_names = FOURFRONT_DEPLOY_NAMES
+    required_names = ['blue', 'green', 'hotseat', 'mastertest', 'webdev', 'webprod', 'webprod2']
 
     for required_name in required_names:
         assert required_name in names

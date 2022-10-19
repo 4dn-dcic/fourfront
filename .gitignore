@@ -51,6 +51,7 @@ beanstalk.cfg
 +.pydevproject
 *.log
 .python-version
+.python-cmd
 ~$*
 .~*#
 production.ini
@@ -66,8 +67,17 @@ elasticsearch-*.deb
 # Emacs backup files
 *~
 
+# PyCharm metadata
+.idea/
+
 # Virtual environments
+# Conventions vary, including env, venv, or longer names like cgap_env,
+# but typically they end in "env".
 *env/
 
-# PyCharm
-.idea/
+# Used for some kinds of debugging in dcicutils, snovault, cgap & ff.
+DEBUGLOG-*
+
+# These files are now generated from templates:
+deploy/docker/local/docker_development.ini
+docker-compose.yml

@@ -22,5 +22,27 @@
         "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
         "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
         "status" : "released"
+    },
+    {
+        "title" : "Experiment Set Matrix Examples",
+        "description" : "Configuration and examples",
+        "name" : "demos.experiment-set-matrix",
+        "uuid" : "eef41c6d-a8c9-4e4e-8a8e-e44df2ad3dc3",
+        "file" : "/src/encoded/static/data/experiment-set-matrix-demo.jsx",
+        "section_type" : "Page Section",
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "status" : "released"
+    },
+    {
+        "title" : "HiGlass Embedded Instance Examples",
+        "description" : "Configuration and examples",
+        "name" : "demos.higlass-embbedded-instance",
+        "uuid" : "8e30ba74-734d-4a87-bd9f-228233ce200d",
+        "file" : "/src/encoded/static/data/higlass-embedded-instance-demo.jsx",
+        "section_type" : "Page Section",
+        "submitted_by" : "986b362f-4eb6-4a9c-8173-3ab267307e3a",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461334b",
+        "status" : "released"
     }
 ]

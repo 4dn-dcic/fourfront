@@ -29,6 +29,7 @@ from .base import (
     lab_award_attribution_embed_list,
     get_item_or_none
 )
+from .dependencies import DependencyEmbedder
 import datetime
 
 
@@ -92,7 +93,9 @@ class ExperimentSet(Item):
         "experiments_in_set.@type",
         "experiments_in_set.accession",
         "experiments_in_set.status",
+        "experiments_in_set.dbxrefs",
         "experiments_in_set.external_references.*",
+        "experiments_in_set.crosslinking_method",
 
         # ExperimentType linkTo
         "experiments_in_set.experiment_type.title",
@@ -131,32 +134,35 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.tissue_organ_info.tissue_source",
 
         # Biosource linkTo
+        "experiments_in_set.biosample.biosource.accession",
         "experiments_in_set.biosample.biosource.biosource_type",
         "experiments_in_set.biosample.biosource.cell_line_tier",
         "experiments_in_set.biosample.biosource.override_biosource_name",
+        "experiments_in_set.biosample.biosource.override_organism_name",  # do we need this?
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.biosource.cell_line.term_id",
         "experiments_in_set.biosample.biosource.cell_line.term_name",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
-        "experiments_in_set.biosample.biosource.cell_line.slim_terms",
+        "experiments_in_set.biosample.biosource.cell_line.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.biosource.tissue.term_id",
         "experiments_in_set.biosample.biosource.tissue.term_name",
         "experiments_in_set.biosample.biosource.tissue.preferred_name",
-        "experiments_in_set.biosample.biosource.tissue.slim_terms",
+        "experiments_in_set.biosample.biosource.tissue.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.biosource.tissue.synonyms",
 
         # Organism linkTo
-        "experiments_in_set.biosample.biosource.individual.organism.name",
+        "experiments_in_set.biosample.biosource.organism.name",  # calc prop
+        "experiments_in_set.biosample.biosource.organism.scientific_name",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_id",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_name",
-        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms",
+        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.synonyms",
 
         # Modification linkTo
@@ -166,13 +172,13 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.modifications.override_modification_name",
 
         # BioFeature linkTo
-        "experiments_in_set.biosample.modifications.target_of_mod.feature_type",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_type.uuid",
         "experiments_in_set.biosample.modifications.target_of_mod.preferred_label",
         "experiments_in_set.biosample.modifications.target_of_mod.cellular_structure",
         "experiments_in_set.biosample.modifications.target_of_mod.organism_name",
-        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes",
-        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods",
-        "experiments_in_set.biosample.modifications.target_of_mod.genome_location",
+        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes.uuid",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods.*",
+        "experiments_in_set.biosample.modifications.target_of_mod.genome_location.uuid",
 
         # Treatment linkTo
         "experiments_in_set.biosample.treatments.treatment_type",
@@ -212,6 +218,7 @@ class ExperimentSet(Item):
         #     ExperimentSet.embedded_list.append("experiments_in_set.processed_files." + f) ...
 
         # File linkTo
+        "experiments_in_set.files",
         "experiments_in_set.files.href",
         "experiments_in_set.files.accession",
         "experiments_in_set.files.uuid",
@@ -224,11 +231,16 @@ class ExperimentSet(Item):
         "experiments_in_set.files.paired_end",
         "experiments_in_set.files.status",
         "experiments_in_set.files.notes_to_tsv",
+        "experiments_in_set.files.dbxrefs",
         "experiments_in_set.files.external_references.*",
         "experiments_in_set.files.open_data_url",
         "experiments_in_set.files.contributing_labs.display_title",
         "experiments_in_set.files.lab.display_title",
         "experiments_in_set.files.track_and_facet_info.*",
+
+        # MicroscopeConfiguration linkTo
+        "experiments_in_set.files.microscope_configuration.title",
+        "experiments_in_set.files.microscope_configuration.microscope.Name",
 
         # FileFormat linkTo
         "experiments_in_set.files.file_format.file_format",
@@ -271,6 +283,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.related_files.file.accession",
         "experiments_in_set.files.related_files.file.paired_end",
         "experiments_in_set.files.related_files.file.file_type",
+        "experiments_in_set.files.related_files.file.file_type_detailed",
+        "experiments_in_set.files.related_files.file.file_format.file_format",
 
         # ProcessedFile linkTo
         "processed_files.href",
@@ -297,7 +311,6 @@ class ExperimentSet(Item):
 
         # FileFormat linkTo
         "processed_files.extra_files.file_format.file_format",
-
         "processed_files.last_modified.date_modified",
 
         # StaticSection linkTo
@@ -357,6 +370,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.related_files.relationship_type",
         "experiments_in_set.processed_files.related_files.file.accession",
         "experiments_in_set.processed_files.related_files.file.file_type",
+        "experiments_in_set.processed_files.related_files.file.file_type_detailed",
 
         # StaticSection linkTo
         "experiments_in_set.processed_files.static_content.location",
@@ -373,6 +387,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.track_and_facet_info.*",
 
         "other_processed_files.files.accession",
+        "other_processed_files.files.file_type",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
@@ -391,6 +406,9 @@ class ExperimentSet(Item):
         "other_processed_files.files.quality_metric.url",
         "other_processed_files.files.quality_metric.overall_quality_status",
         "other_processed_files.files.quality_metric.quality_metric_summary.*",
+        "other_processed_files.files.static_content.location",
+        "other_processed_files.files.static_content.description",
+        "other_processed_files.files.static_content.content.@type",
         "other_processed_files.files.notes_to_tsv",
 
         # Lab linkTo
@@ -406,6 +424,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.description",
         "experiments_in_set.other_processed_files.type",
         "experiments_in_set.other_processed_files.files.accession",
+        "experiments_in_set.other_processed_files.files.file_type",
         "experiments_in_set.other_processed_files.files.file_type_detailed",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
@@ -416,6 +435,9 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.files.quality_metric.url",
         "experiments_in_set.other_processed_files.files.quality_metric.overall_quality_status",
         "experiments_in_set.other_processed_files.files.quality_metric.quality_metric_summary.*",
+        "experiments_in_set.other_processed_files.files.static_content.location",
+        "experiments_in_set.other_processed_files.files.static_content.description",
+        "experiments_in_set.other_processed_files.files.static_content.content.@type",
         "experiments_in_set.other_processed_files.files.notes_to_tsv",
         "experiments_in_set.other_processed_files.files.open_data_url",
         "experiments_in_set.other_processed_files.files.contributing_labs.display_title",
@@ -432,14 +454,20 @@ class ExperimentSet(Item):
         # File linkTo
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
-        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_type",
+        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_size",
         "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
         "experiments_in_set.reference_files.md5sum",
         "experiments_in_set.reference_files.lab.name",
         "experiments_in_set.reference_files.contributing_labs.name",
+        "experiments_in_set.reference_files.notes_to_tsv",
+
+        # Static Section linkTo
+        "experiments_in_set.reference_files.static_content.location",
+        "experiments_in_set.reference_files.static_content.description",
+        "experiments_in_set.reference_files.static_content.content.@type",
 
         # FileFormat linkTo
         "experiments_in_set.reference_files.file_format.file_format",
@@ -506,6 +534,24 @@ class ExperimentSet(Item):
             return len(experiments_in_set)
 
 
+def _build_experiment_set_replicate_embedded_list():
+    """ Helper function intended to be used to create the embedded list for Replicate Experiment Sets.
+        All types should implement a function like this going forward.
+    """
+    imaging_path_embeds = DependencyEmbedder.embed_for_type(
+        base_path='imaging_paths.path',
+        t='imaging_path',
+        additional_embeds=['imaging_rounds', 'experiment_type.title'])
+    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='imaging_paths.path.target',
+        t='bio_feature')
+    return (
+            ExperimentSet.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+                'replicate_exps.replicate_exp.accession',
+            ]
+    )
+
+
 @collection(
     name='experiment-set-replicates',
     unique_key='accession',
@@ -519,12 +565,7 @@ class ExperimentSetReplicate(ExperimentSet):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded_list = ExperimentSet.embedded_list + [
-        "experiments_in_set.imaging_paths.path.*",  # imaging_paths calc prop
-        "experiments_in_set.imaging_paths.path.primary_antibodies.antibody_name",
-        "experiments_in_set.imaging_paths.path.secondary_antibody.antibody_name",
-        "replicate_exps.replicate_exp.accession"
-    ]
+    embedded_list = _build_experiment_set_replicate_embedded_list()
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties.get('replicate_exps', [])]

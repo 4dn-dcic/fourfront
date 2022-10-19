@@ -11,12 +11,15 @@ import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 import Modal from 'react-bootstrap/esm/Modal';
 import Fade from 'react-bootstrap/esm/Fade';
 
-import { JWT, console, object, ajax, layout, navigate } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { JWT, console, object, ajax, layout, navigate, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { LinkToSelector } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/LinkToSelector';
 import { Detail } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 
 import { HiGlassPlainContainer } from './components/HiGlass/HiGlassPlainContainer';
+import { HiGlassAjaxLoadContainer } from './components/HiGlass/HiGlassAjaxLoadContainer';
+import { EmbeddedHiglassActions } from './../static-pages/components';
+import { AdjustableDividerRow } from './components/AdjustableDividerRow';
 import { CollapsibleItemViewButtonToolbar } from './components/CollapsibleItemViewButtonToolbar';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { EmbeddedItemSearchTable } from './components/tables/ItemPageTable';
@@ -248,6 +251,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
             const hgc = this.getHiGlassComponent();
             const currentViewConf = this.getHiGlassViewConfig(hgc);
             if (!currentViewConf) {
+                logger.error('Could not get current view configuration.');
                 throw new Error('Could not get current view configuration.');
             }
 
@@ -293,6 +297,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf) {
+            logger.error('Could not get current view configuration.');
             throw new Error('Could not get current view configuration.');
         }
         const track = currentViewConf.views[trackInfo.vIndex].tracks[trackInfo.track];
@@ -324,6 +329,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf) {
+            logger.error('Could not get current view configuration.');
             throw new Error('Could not get current view configuration.');
         }
 
@@ -370,6 +376,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf) {
+            logger.error("Could not get current view configuration.");
             throw new Error("Could not get current view configuration.");
         }
 
@@ -402,10 +409,12 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
+            logger.error('Could not get current view configuration.');
             throw new Error('Could not get current view configuration.');
         }
 
         if (!this.havePermissionToEdit()){
+            logger.error('No edit permissions.');
             // I guess would also get caught in ajax error callback.
             throw new Error('No edit permissions.');
         }
@@ -477,6 +486,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
+            logger.error('Could not get current view configuration.');
             throw new Error('Could not get current view configuration.');
         }
 
@@ -587,6 +597,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         const currentViewConf = this.getHiGlassViewConfig(hgc);
 
         if (!currentViewConf){
+            logger.error('Could not get current view configuration.');
             throw new Error('Could not get current view configuration.');
         }
 
@@ -693,6 +704,7 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
         }
 
         if (!this.havePermissionToEdit()){
+            logger.error('No edit permissions.');
             throw new Error('No edit permissions.');
         }
 
@@ -940,9 +952,9 @@ export class HiGlassViewConfigTabView extends React.PureComponent {
                             {hgcHeightField}
                             {filesTableSearchHref ?
                                 (
-                                    <div className="raw-files-table-section">
+                                    <div className="higlass-files-table-section">
                                         <h3 className="tab-section-title">
-                                            <span>
+                                            <span className="float-none">
                                                 <span className="text-400">{_.keys(tilesetUids).length}</span> File(s) {viewConfigModified ? notPersistentMessage : null}
                                             </span>
                                         </h3>
@@ -973,18 +985,15 @@ function HiGlassFileDetailPane(props) {
         if (item.track === 'top' || item.track === 'bottom') {
             width = (item.width) ? (item.width || '-') : "-";
             height =
-                <FieldSet context={item}
-                    schemas={schemas} href={href}>
-                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible={true}>
-                    </EditableField>
+                <FieldSet context={item} schemas={schemas} href={href}>
+                    <EditableField labelID="height" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} dataType="int" buttonAlwaysVisible />
                 </FieldSet>;
         }
         else if (item.track === 'left' || item.track === 'right') {
             height = (item.height) ? (item.height || '-') : "-";
             width =
-                <FieldSet context={item}>
-                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible={true}>
-                    </EditableField>
+                <FieldSet context={item} schemas={schemas} href={href}>
+                    <EditableField labelID="width" fallbackText="-" style="inline" fieldType="numeric" handleCustomSave={handleCustomSave} valueConvertType="int" buttonAlwaysVisible />
                 </FieldSet>;
         }
         return (
@@ -1001,15 +1010,15 @@ function HiGlassFileDetailPane(props) {
                         }}
                         windowWidth={windowWidth}
                         schemas={schemas} href={href}>
-                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible={true}>
-                        </EditableField>
+                        <EditableField labelID="name" fallbackText="no data" fieldType="text" style="inline" handleCustomSave={handleCustomSave} outerClassName="w-100" buttonAlwaysVisible />
                     </FieldSet>
                 </td>
-            </tr>);
+            </tr>
+        );
     });
 
     return (
-        <div className="mr-1">
+        <div className="mr-1" style={{ minWidth: '90%' }}>
             {!viewConfigTracks ? null : (
                 <div className="flex-description-container">
                     <h5><i className="icon icon-fw icon-align-left mr-08 fas" />Tracks</h5>
@@ -1126,15 +1135,116 @@ function StatusMenuItem(props){
 }
 
 
+export class HiGlassAdjustableWidthRow extends React.PureComponent {
+
+    static propTypes = {
+        'width' : PropTypes.number.isRequired,
+        'mounted' : PropTypes.bool.isRequired,
+        'renderRightPanel' : PropTypes.func,
+        'windowWidth' : PropTypes.number.isRequired,
+        'higlassItem' : PropTypes.object,
+        'minOpenHeight' : PropTypes.number,
+        'maxOpenHeight' : PropTypes.number,
+        'renderLeftPanelPlaceholder' : PropTypes.func,
+        'leftPanelCollapseHeight' : PropTypes.number,
+        'leftPanelCollapseWidth' : PropTypes.number,
+        'leftPanelDefaultCollapsed' : PropTypes.bool
+    };
+
+    static defaultProps = {
+        'minOpenHeight' : 300,
+        'maxOpenHeight' : 800
+    };
+
+    constructor(props){
+        super(props);
+        _.bindAll(this, 'correctHiGlassTrackDimensions', 'renderLeftPanel');
+        this.correctHiGlassTrackDimensions = _.debounce(this.correctHiGlassTrackDimensions, 100);
+        this.higlassContainerRef = React.createRef();
+    }
+
+    componentDidUpdate(pastProps){
+        const { width } = this.props;
+        if (pastProps.width !== width){
+            this.correctHiGlassTrackDimensions();
+        }
+    }
+
+    /**
+     * This is required because HiGlass doesn't always update all of own tracks' widths (always updates header, tho)
+     */
+    correctHiGlassTrackDimensions(){
+        var internalHiGlassComponent = this.higlassContainerRef.current && this.higlassContainerRef.current.getHiGlassComponent();
+        if (!internalHiGlassComponent) {
+            console.warn('Internal HiGlass Component not accessible.');
+            return;
+        }
+        setTimeout(HiGlassPlainContainer.correctTrackDimensions, 10, internalHiGlassComponent);
+    }
+
+    renderLeftPanel(leftPanelWidth, resetXOffset, collapsed, rightPanelHeight){
+        const { renderLeftPanelPlaceholder, leftPanelCollapseHeight, higlassItem, minOpenHeight, maxOpenHeight } = this.props;
+        if (collapsed){
+            var useHeight = leftPanelCollapseHeight || rightPanelHeight || minOpenHeight;
+            if (typeof renderLeftPanelPlaceholder === 'function'){
+                return renderLeftPanelPlaceholder(leftPanelWidth, resetXOffset, collapsed, useHeight);
+            } else {
+                return (
+                    <h5 className="placeholder-for-higlass text-center clickable mb-0 mt-0" style={{ 'lineHeight': useHeight + 'px', 'height': useHeight }} onClick={resetXOffset}
+                        data-html data-place="right" data-tip="Open HiGlass Visualization for file(s)">
+                        <i className="icon icon-fw fas icon-tv"/>
+                    </h5>
+                );
+            }
+        } else {
+            return (
+                <React.Fragment>
+                    <EmbeddedHiglassActions context={higlassItem} showDescription={false} />
+                    <HiGlassAjaxLoadContainer higlassItem={higlassItem} className={collapsed ? 'disabled' : null} height={Math.min(Math.max(rightPanelHeight - 16, minOpenHeight - 16), maxOpenHeight)} ref={this.higlassContainerRef} />
+                </React.Fragment>
+            );
+        }
+    }
+
+    render(){
+        const { mounted, minOpenHeight, leftPanelCollapseWidth, windowWidth } = this.props;
+
+        // Don't render the HiGlass view if it isn't mounted yet or there is nothing to display.
+        if (!mounted) {
+            return (
+                <div className="adjustable-divider-row text-center py-5">
+                    <div className="text-center my-5">
+                        <i className="icon icon-spin icon-circle-notch fas text-secondary icon-2x"/>
+                    </div>
+                </div>
+            );
+        }
+
+        // Pass (almost) all props down so that re-renders are triggered of AdjustableDividerRow PureComponent
+        const passProps = _.omit(this.props, 'higlassItem', 'minOpenHeight', 'maxOpenHeight', 'leftPanelCollapseWidth');
+        const rgs = layout.responsiveGridState(windowWidth);
+        const leftPanelDefaultWidth = rgs === 'xl' ? 400 : 300;
+
+        return (
+            <AdjustableDividerRow {...passProps} height={minOpenHeight} leftPanelClassName="expset-higlass-panel" leftPanelDefaultWidth={leftPanelDefaultWidth}
+                leftPanelCollapseWidth={leftPanelCollapseWidth || 240} // TODO: Change to 240 after updating to HiGlass version w/ resize viewheader stuff fixed.
+                renderLeftPanel={this.renderLeftPanel} rightPanelClassName="exp-table-container" onDrag={this.correctHiGlassTrackDimensions} />
+        );
+    }
+}
+
+
 /**
  * Generic modal dialog popup. Customizable title, confirm/cancel button's text.
  * TODO: this component can be moved to another file for generic use in portal.
  */
 export const ConfirmModal = React.memo(function (props) {
-    const { handleConfirm, handleCancel, modalTitle, confirmButtonText = "OK", cancelButtonText = "Cancel" } = props;
+    const { handleConfirm, handleCancel, modalTitle, confirmButtonText = "OK", cancelButtonText = "Cancel", confirmButtonVisible = true, cancelButtonVisible=true } = props;
     const confirmButtonEl = useRef(null);
     useEffect(() => {
-        confirmButtonEl.current.focus();
+        if (confirmButtonEl && confirmButtonEl.current) {
+            confirmButtonEl.current.focus();
+        }
     }, []);
     return (
         <Modal show onHide={handleCancel}>
@@ -1145,19 +1255,30 @@ export const ConfirmModal = React.memo(function (props) {
                 {props.children || ''}
             </Modal.Body>
             <Modal.Footer>
-                <button type="button" onClick={handleConfirm} className="btn btn-success" ref={confirmButtonEl}>
-                    <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
-                </button>
-                <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
-                    <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
-                </button>
+                {confirmButtonVisible ?
+                    <button type="button" onClick={handleConfirm} className="btn btn-success" ref={confirmButtonEl}>
+                        <i className="icon icon-fw icon-check mr-05 fas" />{confirmButtonText || 'OK'}
+                    </button> : null}
+                {cancelButtonVisible ?
+                    <button type="button" onClick={handleCancel} className="btn btn-outline-warning">
+                        <i className="icon icon-fw icon-times mr-05 fas" />{cancelButtonText || 'Cancel'}
+                    </button> : null}
             </Modal.Footer>
-        </Modal>);
+        </Modal>
+    );
 });
-ConfirmModal.PropTypes = {
+ConfirmModal.propTypes = {
     'handleConfirm': PropTypes.func.isRequired,
     'handleCancel': PropTypes.func.isRequired,
     'modalTitle': PropTypes.string,
     'confirmButtonText': PropTypes.string,
-    'cancelButtonText': PropTypes.string
+    'cancelButtonText': PropTypes.string,
+    'confirmButtonVisible': PropTypes.bool,
+    'cancelButtonVisible': PropTypes.bool
+};
+ConfirmModal.defaultProps = {
+    'confirmButtonText': 'OK',
+    'cancelButtonText': 'Cancel',
+    'confirmButtonVisible': true,
+    'cancelButtonVisible': true
 };

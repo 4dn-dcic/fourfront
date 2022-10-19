@@ -17,7 +17,8 @@ def _build_image_embedded_list():
     """
     return Item.embedded_list + lab_award_attribution_embed_list + [
         'microscopy_file.accession',
-        'microscopy_file.omerolink'
+        'microscopy_file.omerolink',
+        'microscopy_file.thumbnail'
     ]
 
 

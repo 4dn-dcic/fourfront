@@ -46,7 +46,9 @@
                 "genomic reads",
                 "iPCR reads",
                 "cDNA reads",
-                "squiggles"
+                "squiggles",
+                "barcode reads",
+                "index reads"
             ]
         },
         "file_classification": {

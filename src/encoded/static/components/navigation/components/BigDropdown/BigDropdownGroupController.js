@@ -72,8 +72,11 @@ export class BigDropdownGroupController extends React.PureComponent {
 
     onCloseDropdown(mouseEvt = null, cb){
         if (mouseEvt){
-            mouseEvt.stopPropagation && mouseEvt.stopPropagation();
-            mouseEvt.preventDefault && mouseEvt.preventDefault();
+            const escalateToAppJs = mouseEvt.target && mouseEvt.target.escalateToAppJs && mouseEvt.target.escalateToAppJs === true;
+            if (!escalateToAppJs) {
+                mouseEvt.stopPropagation && mouseEvt.stopPropagation();
+                mouseEvt.preventDefault && mouseEvt.preventDefault();
+            }
         }
         this.setState(function({ visibleDropdownID, closingDropdown }){
             if (visibleDropdownID === null && !closingDropdown) return null;

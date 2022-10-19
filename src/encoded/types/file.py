@@ -15,9 +15,7 @@ from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPTemporaryRedirect,
     HTTPNotFound,
-    # HTTPBadRequest
 )
-from pyramid.response import Response
 from pyramid.settings import asbool
 from pyramid.threadlocal import get_current_request
 from pyramid.traversal import resource_path
@@ -49,6 +47,8 @@ from snovault.validators import (
     no_validate_item_content_put,
     no_validate_item_content_patch
 )
+from dcicutils.secrets_utils import assume_identity
+from dcicutils.misc_utils import override_environ
 from urllib.parse import (
     parse_qs,
     urlparse,
@@ -56,7 +56,7 @@ from urllib.parse import (
 from uuid import uuid4
 from ..authentication import session_properties
 from ..search import make_search_subreq
-# from . import TrackingItem
+from ..util import check_user_is_logged_in
 from .base import (
     Item,
     ALLOW_SUBMITTER_ADD,
@@ -64,7 +64,6 @@ from .base import (
     lab_award_attribution_embed_list
 )
 from .dependencies import DependencyEmbedder
-from ..util import check_user_is_logged_in
 
 
 logging.getLogger('boto3').setLevel(logging.CRITICAL)
@@ -77,19 +76,21 @@ file_workflow_run_embeds = [
     'workflow_run_inputs.input_files.workflow_argument_name',
     'workflow_run_inputs.input_files.value.filename',
     'workflow_run_inputs.input_files.value.display_title',
-    'workflow_run_inputs.input_files.value.file_format',
+    'workflow_run_inputs.input_files.value.file_format.file_format',
     'workflow_run_inputs.input_files.value.uuid',
     'workflow_run_inputs.input_files.value.accession',
     'workflow_run_inputs.output_files.workflow_argument_name',
     'workflow_run_inputs.output_files.value.display_title',
-    'workflow_run_inputs.output_files.value.file_format',
+    'workflow_run_inputs.output_files.value.file_format.file_format',
     'workflow_run_inputs.output_files.value.uuid',
     'workflow_run_inputs.output_files.value.accession',
     'workflow_run_inputs.output_files.value_qc.url',
     'workflow_run_inputs.output_files.value_qc.overall_quality_status'
 ]
 
-file_workflow_run_embeds_processed = file_workflow_run_embeds + [e.replace('workflow_run_inputs.', 'workflow_run_outputs.') for e in file_workflow_run_embeds]
+file_workflow_run_embeds_processed = (file_workflow_run_embeds
+                                      + [e.replace('workflow_run_inputs.', 'workflow_run_outputs.')
+                                         for e in file_workflow_run_embeds])
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -114,17 +115,28 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 {
                     'Effect': 'Allow',
                     'Action': 's3:PutObject',
-                    'Resource': 'arn:aws:s3:::{bucket}/{key}'.format(bucket=bucket, key=key),
+                    'Resource': f'arn:aws:s3:::{bucket}/{key}',
                 }
             ]
         }
-        # boto.set_stream_logger('boto3')
-        conn = boto3.client('sts')
-        token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
+        if 'IDENTITY' in os.environ:
+            identity = assume_identity()
+            with override_environ(**identity):
+                conn = boto3.client('sts',
+                                    aws_access_key_id=os.environ.get('S3_AWS_ACCESS_KEY_ID'),
+                                    aws_secret_access_key=os.environ.get('S3_AWS_SECRET_ACCESS_KEY'))
+                token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
+        else:
+            # boto.set_stream_logger('boto3')
+            conn = boto3.client('sts')
+            token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
+        # Convert Expiration datetime object to string via cast
+        # Uncaught serialization error picked up by Docker - Will 2/25/2021
+        credentials['Expiration'] = str(credentials['Expiration'])
         credentials.update({
-            'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
+            'upload_url': f's3://{bucket}/{key}',
             'federated_user_arn': token.get('FederatedUser').get('Arn'),
             'federated_user_id': token.get('FederatedUser').get('FederatedUserId'),
             'request_id': token.get('ResponseMetadata').get('RequestId'),
@@ -253,8 +265,9 @@ class File(Item):
 
     # TODO: embed file_format
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # XXX: Experiment linkTo
+        # Experiment linkTo
         'experiments.accession',
+        'experiments.last_modified.date_modified',
 
         # ExperimentType linkTo
         'experiments.experiment_type.title',
@@ -266,9 +279,6 @@ class File(Item):
 
         # Enzyme linkTo
         'experiments.digestion_enzyme.name',
-
-        # Standard embed
-        'experiments.last_modified.date_modified',
 
         # Biosample linkTo
         'experiments.biosample.accession',
@@ -298,17 +308,20 @@ class File(Item):
         'experiments.biosample.biosource.modifications.override_modification_name',
 
         # BioFeature linkTo
-        'experiments.biosample.biosource.modifications.target_of_mod.feature_type',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_type.uuid',
         'experiments.biosample.biosource.modifications.target_of_mod.preferred_label',
         'experiments.biosample.biosource.modifications.target_of_mod.cellular_structure',
         'experiments.biosample.biosource.modifications.target_of_mod.organism_name',
-        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes',
-        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods',
-        'experiments.biosample.biosource.modifications.target_of_mod.genome_location',
+        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes.uuid',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods.*',
+        'experiments.biosample.biosource.modifications.target_of_mod.genome_location.uuid',
+
+        # Individual linkTo
+        'experiments.biosample.biosource.individual.protected_data',
 
         # Organism linkTo
-        'experiments.biosample.biosource.individual.organism.name',
-        'experiments.biosample.biosource.individual.organism.scientific_name',
+        'experiments.biosample.biosource.organism.name',
+        'experiments.biosample.biosource.organism.scientific_name',
 
         # FileFormat linkTo
         'file_format.file_format',
@@ -330,6 +343,10 @@ class File(Item):
         'quality_metric.qc_list.value.url',
         'quality_metric.qc_list.value.@type',
         'quality_metric.qc_list.value.Total reads'
+    ]
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = [
+        # open_data_url,  # consistency reliant on CNAME swap (full reindex) after transfer to open-data - uncomment if inconsistency with linking items becomes problematic
     ]
     name_key = 'accession'
     rev = {
@@ -370,14 +387,14 @@ class File(Item):
         "type": "string"
     })
     def file_type_detailed(self, request, file_format, file_type=None):
-        outString = (file_type or 'other')
+        out_string = (file_type or 'other')
         file_format_item = get_item_or_none(request, file_format, 'file-formats')
         try:
             fformat = file_format_item.get('file_format')
-            outString = outString + ' (' + fformat + ')'
+            out_string = out_string + ' (' + fformat + ')'
         except AttributeError:
             pass
-        return outString
+        return out_string
 
     def generate_track_title(self, track_info, props):
         if not props.get('higlass_uid'):
@@ -413,7 +430,9 @@ class File(Item):
         elab = get_item_or_none(request, repset.get('lab'))
         if elab:
             elab = elab.get('display_title')
-        return (repset.get('dataset_label', None), repset.get('condition', None), elab)
+        return (repset.get('dataset_label', None),
+                repset.get('condition', None),
+                elab)
 
     def _get_file_experiment_info(self, request, currinfo):
         """
@@ -500,7 +519,7 @@ class File(Item):
                         rep_exps = rep_set_info.get('replicate_exps', [])
                         for rep in rep_exps:
                             if rep.get('replicate_exp') == expid:
-                                repstring = 'Biorep ' + str(rep.get('bio_rep_no')) + ', Techrep ' + str(rep.get('tec_rep_no'))
+                                repstring = f"Biorep {rep.get('bio_rep_no')}, Techrep {rep.get('tec_rep_no')}"
                                 info['replicate_info'] = repstring
             if 'biosource_name' not in currinfo:
                 sample_id = exp_info.get('biosample')
@@ -560,7 +579,7 @@ class File(Item):
         if biosource_name and 'biosource_name' not in track_info:
             track_info['biosource_name'] = biosource_name
 
-        if len(track_info) != len(fields):  # if track_info has same number of items as fields we have everything we need
+        if len(track_info) != len(fields):  # if track_info has same number of items as fields we have all we need
             if not (len(track_info) == len(fields) - 1 and 'lab_name' not in track_info):
                 # only if everything but lab exists can we avoid getting expt
                 einfo = self._get_file_experiment_info(request, track_info)
@@ -756,16 +775,18 @@ class File(Item):
         "title": "Upload Key",
         "type": "string",
     })
-    def upload_key(self, request):
+    def upload_key(self, request, filename=None):
         properties = self.properties
         external = self.propsheets.get('external', {})
-        if not external:
+        extkey = external.get('key')
+        # od_url = self._open_data_url(self.properties['status'], filename=filename)
+        # if od_url:
+        #     return f'No upload key for open data file {filename}'
+        if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError:
-                log.error(os.environ)
-                log.error(properties)
-                return 'UPLOAD KEY FAILED'
+            except ClientError as e:
+                return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
         return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
@@ -806,6 +827,7 @@ class File(Item):
         }
         if request.range:
             param_get_object.update({'Range': request.headers.get('Range')})
+            del param_get_object['ResponseContentDisposition']
         location = conn.generate_presigned_url(
             ClientMethod='get_object',
             Params=param_get_object,
@@ -882,8 +904,7 @@ class File(Item):
         return registry.settings['file_upload_bucket']
 
     @classmethod
-    def build_external_creds(cls, registry, uuid, properties):
-        bucket = cls.get_bucket(registry)
+    def build_key(cls, registry, uuid, properties):
         fformat = properties.get('file_format')
         if fformat.startswith('/file-formats/'):
             fformat = fformat[len('/file-formats/'):-1]
@@ -892,9 +913,14 @@ class File(Item):
             file_extension = prop_format.properties['standard_file_extension']
         except KeyError:
             raise Exception('File format not in list of supported file types')
-        key = '{uuid}/{accession}.{file_extension}'.format(
+        return '{uuid}/{accession}.{file_extension}'.format(
             file_extension=file_extension, uuid=uuid,
             accession=properties.get('accession'))
+
+    @classmethod
+    def build_external_creds(cls, registry, uuid, properties):
+        bucket = cls.get_bucket(registry)
+        key = cls.build_key(registry, uuid, properties)
 
         # remove the path from the file name and only take first 32 chars
         fname = properties.get('filename')
@@ -1062,7 +1088,8 @@ class FileProcessed(File):
         }
     })
     def experiment_sets(self, request):
-        return list(set(self.rev_link_atids(request, "experiment_sets") + self.rev_link_atids(request, "other_experiment_sets")))
+        return list(set(self.rev_link_atids(request, "experiment_sets")
+                        + self.rev_link_atids(request, "other_experiment_sets")))
 
     @calculated_property(schema={
         "title": "Experiments",
@@ -1075,7 +1102,8 @@ class FileProcessed(File):
         }
     })
     def experiments(self, request):
-        return list(set(self.rev_link_atids(request, "experiments") + self.rev_link_atids(request, "other_experiments")))
+        return list(set(self.rev_link_atids(request, "experiments")
+                        + self.rev_link_atids(request, "other_experiments")))
 
     @calculated_property(schema={
         "title": "Pairsqc Quality Metric Table",
@@ -1114,9 +1142,9 @@ class FileProcessed(File):
                    self.rev_link_atids(request, "other_experiments"))
         if not exps == []:
             for exp in exps:
-                expData = request.embed(exp, '@@object')
-                if not expData['experiment_sets'] == []:
-                    exp_sets.update(expData['experiment_sets'])
+                exp_data = request.embed(exp, '@@object')
+                if not exp_data['experiment_sets'] == []:
+                    exp_sets.update(exp_data['experiment_sets'])
         return list(exp_sets)
 
 
@@ -1133,6 +1161,13 @@ class FileReference(File):
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded_list = File.embedded_list
     name_key = 'accession'
+
+    # reference files don't want md5 as unique key
+    def unique_keys(self, properties):
+        keys = super(FileReference, self).unique_keys(properties)
+        if keys.get('alias'):
+            keys['alias'] = [k for k in keys['alias'] if not k.startswith('md5:')]
+        return keys
 
 
 @collection(
@@ -1255,6 +1290,10 @@ def _build_file_microscopy_embedded_list():
         'experiments.files.microscope_settings.ch02_lasers_diodes',
         'experiments.files.microscope_settings.ch03_lasers_diodes',
         'experiments.files.microscope_settings.ch04_lasers_diodes',
+
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration.title',
+        'microscope_configuration.microscope.Name',
         ]
     )
 
@@ -1386,7 +1425,8 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
         raise Exception("No valid tracker id found in ga_config.json > hostnameTrackerIDMapping")
 
     # We're sending 2 things here, an Event and a Transaction of a Product. (Reason 1 for redundancies)
-    # Some fields/names are re-used for multiple things, such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
+    # Some fields/names are re-used for multiple things,
+    # such as filename for event label + item name dimension + product name + page title dimension (unusued) + ...
     ga_payload = {
         "v": 1,
         "tid": ga_tid,
@@ -1421,7 +1461,8 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
         "pr1ca": "/".join([ty for ty in reversed(context.jsonld_type()[:-1])]),
         # Product "Variant" (supposed to be like black, gray, etc), we repurpose for filetype for reporting
         "pr1va": file_type
-        # "other" MATCHES THAT IN `file_type_detaild` calc property, since file_type_detailed is used on frontend when performing "Select All" files.
+        # "other" MATCHES THAT IN `file_type_detaild` calc property,
+        # since file_type_detailed is used on frontend when performing "Select All" files.
     }
 
     # Custom dimensions
@@ -1443,7 +1484,8 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
         ga_payload["pr1cm" + str(ga_config["metricNameMap"]["downloads"])] = 0 if request.range else 1
 
     # client id (`cid`) or user id (`uid`) is required. uid shall be user uuid.
-    # client id might be gotten from Google Analytics cookie, but not stable to use and wont work on programmatic requests...
+    # client id might be gotten from Google Analytics cookie,
+    # but not stable to use and won't work on programmatic requests...
     if user_uuid:
         ga_payload['uid'] = user_uuid
 
@@ -1472,7 +1514,11 @@ def update_google_analytics(context, request, ga_config, filename, file_size_dow
 @debug_log
 def download(context, request):
     """ Endpoint for handling /@@download/ URLs """
-    check_user_is_logged_in(request)
+
+    # download is resricted for anonymous users unless it is
+    # for vitessce range requests
+    if not is_range_request_for_vitessce(context, request):
+        check_user_is_logged_in(request)
 
     # first check for restricted status
     if context.properties.get('status') == 'restricted':
@@ -1488,7 +1534,8 @@ def download(context, request):
         user_groups.sort()
 
     # TODO:
-    # if not user_uuid or file_size_downloaded < 25 * (1024**2): # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
+    # if not user_uuid or file_size_downloaded < 25 * (1024**2):  # TODO: Should this be greater-than? -kmp 1-Feb-2022
+    #     # Downloads, mostly for range queries (HiGlass, etc), are allowed if less than 25mb
     #     raise HTTPForbidden("Must login or provide access keys to download files larger than 5mb")
 
     # proxy triggers if we should use Axel-redirect, useful for s3 range byte queries
@@ -1510,6 +1557,7 @@ def download(context, request):
     filename = is_file_to_download(properties, file_format, _filename)
     if not filename:
         found = False
+        external = None  # in case none found
         for extra in properties.get('extra_files', []):
             eformat = get_item_or_none(request, extra.get('file_format'), 'file-formats')
             filename = is_file_to_download(extra, eformat, _filename)
@@ -1640,7 +1688,7 @@ def validate_file_format_validity_for_file_type(context, request):
 
 
 def validate_file_filename(context, request):
-    ''' validator for filename field '''
+    """ validator for filename field """
     found_match = False
     data = request.json
     if 'filename' not in data:
@@ -1687,10 +1735,10 @@ def validate_file_filename(context, request):
 
 
 def validate_processed_file_unique_md5_with_bypass(context, request):
-    '''validator to check md5 on processed files, unless you tell it
-       not to'''
-    # skip validator if not file processed
-    if context.type_info.item_type != 'file_processed':
+    """validator to check md5 on processed files and reference files, unless
+    you tell it not to"""
+    # skip validator if not file processed or file reference
+    if context.type_info.item_type not in ['file_processed', 'file_reference']:
         return
     data = request.json
     if 'md5sum' not in data or not data['md5sum']:
@@ -1720,8 +1768,8 @@ def validate_processed_file_unique_md5_with_bypass(context, request):
 
 
 def validate_processed_file_produced_from_field(context, request):
-    '''validator to make sure that the values in the
-    produced_from field are valid file identifiers'''
+    """validator to make sure that the values in the
+    produced_from field are valid file identifiers"""
     # skip validator if not file processed
     if context.type_info.item_type != 'file_processed':
         return
@@ -1747,9 +1795,9 @@ def validate_processed_file_produced_from_field(context, request):
 
 
 def validate_extra_file_format(context, request):
-    '''validator to check to be sure that file_format of extrafile is not the
+    """validator to check to be sure that file_format of extrafile is not the
        same as the file and is a known format for the schema
-    '''
+    """
     files_ok = True
     data = request.json
     if not data.get('extra_files'):
@@ -1821,6 +1869,13 @@ def validate_extra_file_format(context, request):
             files_ok = False
     if files_ok:
         request.validated.update({})
+
+
+def is_range_request_for_vitessce(context, request) -> bool:
+    tags = context.properties.get('tags', [])
+    if 'vitessce' in tags and request.range:
+        return True
+    return False
 
 
 @view_config(context=File.Collection, permission='add', request_method='POST',

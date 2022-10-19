@@ -113,42 +113,27 @@ def fetch_pubmed(PMID):
     return {k: v for k, v in pub_data.items() if v is not None}
 
 
-class BioRxivExtractor(HTMLParser):
-    def __init__(self):
-        HTMLParser.__init__(self)
-        self.title = ''
-        self.abstract = ''
-        self.authors = []
-        self.date_published = ''
-
-    def handle_starttag(self, tag, attrs):
-        attr = ''
-        if tag == 'meta':
-            attr = {k[0]: k[1] for k in attrs}
-            if attr.get('name') == "DC.Title":
-                self.title = attr.get('content')
-            if attr.get('name') == "DC.Description":
-                self.abstract = attr.get('content')
-            if attr.get('name') == "DC.Contributor":
-                self.authors.append(attr.get('content'))
-            if attr.get('name') == "DC.Date":
-                self.date_published = attr.get('content')
-
-
-def fetch_biorxiv(url):
-    """Takes Url, uses the BioRxivExtractor class and returns title abstract authors url"""
-    parserfields = ['title', 'abstract', 'authors', 'date_published']
+def fetch_biorxiv(url, doi):
+    """Takes url and doi, returns title abstract authors date url journal version"""
+    fdn2biorxiv = {
+        'title': 'title',
+        'abstract': 'abstract',
+        'authors': 'authors',
+        'date_published': 'date',
+        'version': 'version'
+    }
+    biorxiv_api = 'https://api.biorxiv.org/details/biorxiv/'
     # try fetching data 5 times and return empty if fails
     for count in range(5):
-        r = requests.get(url)
+        r = requests.get(biorxiv_api + doi)
         if r.status_code == 200:
             break
         if count == 4:
             return
-    resp = r.text.encode('utf-8').decode('ascii', 'ignore')
-    parser = BioRxivExtractor()
-    parser.feed(resp)
-    pub_data = {f: getattr(parser, f) for f in parserfields if hasattr(parser, f)}
+    record_dict = r.json()['collection'][-1]  # get latest version
+    pub_data = {k: record_dict.get(v) for k,v in fdn2biorxiv.items() if record_dict.get(v)}
+    if pub_data.get('authors'):  # format authors according to 4DN schema
+        pub_data['authors'] = [a.replace(" ", "").replace(".", "").replace(",", " ") for a in pub_data['authors'].split(";") if a]
     pub_data['url'] = url
     pub_data['journal'] = 'bioRxiv'
     return pub_data
@@ -175,14 +160,18 @@ def map_doi_pmid(doi):
 
 def map_doi_biox(doi):
     "If a doi is not mapped to pubmed, check where it goes"
-    DOIad = "https://doi.org/"
-    www = "{DOIad}{doi}".format(DOIad=DOIad, doi=doi)
+    DOIapi = "https://doi.org/api/handles/"
+    www = "{DOIapi}{doi}".format(DOIapi=DOIapi, doi=doi)
     for count in range(5):
         resp = requests.get(www)
         if resp.status_code == 200:
             break
-    landing_page = resp.url
-    if "biorxiv" in landing_page.lower():
+    if resp.json().get('values'):
+        for value in resp.json()['values']:
+            if value.get('type', '') == 'URL':
+                landing_page = value['data']['value']
+                break
+    if "biorxiv" in landing_page:
         return landing_page
     else:
         return
@@ -202,6 +191,7 @@ def _build_publication_embedded_list():
 
         # ExperimentType linkTo
         "exp_sets_prod_in_pub.experimentset_type",
+        "exp_sets_used_in_pub.experimentset_type",
 
         # ExperimentType linkTo
         "exp_sets_prod_in_pub.experiments_in_set.experiment_type.title",
@@ -219,6 +209,16 @@ class Publication(Item, ItemWithAttachment):
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
     embedded_list = _build_publication_embedded_list()
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = [
+        'title',
+        'abstract',
+        'authors',
+        'date_published',
+        'journal',
+        'version',
+        'url'
+    ]
 
     class Collection(Item.Collection):
         pass
@@ -248,7 +248,7 @@ class Publication(Item, ItemWithAttachment):
                 else:
                     biox_url = map_doi_biox(doi_id)
                     if biox_url:
-                        pub_data = fetch_biorxiv(biox_url)
+                        pub_data = fetch_biorxiv(biox_url, doi_id)
                     else:
                         pass
         except Exception:

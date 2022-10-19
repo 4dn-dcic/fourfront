@@ -56,13 +56,13 @@ export class UIControlsWrapper extends React.PureComponent {
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.organism.name" },
             { title : "Project", field : "award.project" },
             { title : "Lab", field : "lab.display_title" },
             { title : "Status", field : "status" }
         ],
         'availableFields_Subdivision' : [
-            { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
+            { title : "Organism", field : "experiments_in_set.biosample.biosource.organism.name" },
             { title : "Experiment Type", field : 'experiments_in_set.experiment_type.display_title' },
             //{ title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
             { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },

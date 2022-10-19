@@ -4,18 +4,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import url from 'url';
 import DropdownButton from 'react-bootstrap/esm/DropdownButton';
 import DropdownItem from 'react-bootstrap/esm/DropdownItem';
 
 import { StackedBlockTable, StackedBlock, StackedBlockList, StackedBlockName, StackedBlockNameLabel } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 
-import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isServerSide, analytics, object, commonFileUtil, navigate, memoizedUrlParse, logger, schemaTransforms, valueTransforms } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 
 import { FileEntryBlock, FilePairBlock, FileHeaderWithCheckbox, handleFileCheckboxChangeFxn } from './FileEntryBlock';
 import { SelectedFilesController } from './SelectedFilesController';
 import { expFxn, Schemas, typedefs, fileUtil } from './../../util';
-import { Item, ExperimentSet } from '../../util/typedefs';
 
 
 
@@ -97,19 +95,21 @@ class FileColumnActionsBtn extends React.PureComponent {
     }
 
     juiceboxButton(){
-        const { file, href } = this.props;
-        const host = FileColumnActionsBtn.hostFromHref(href);
+        const { file } = this.props;
+        const { open_data_url } = file || {};
 
-        if (!host || !file.href) return null; // Needed for a link to be made
+        // open_data_url should exist to render the button
+        if (!open_data_url) return null;
 
-        if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
+        // Juicebox & epigenome browser can only viz HIC files at moment?
+        if (!this.isFileHIC()){
             return null;
         }
 
         function onClick(){
             // If we're server-side, there is access to the global browser window object/API.
             if (isServerSide()) return null;
-            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + host + file.href;
+            var targetLocation = "http://aidenlab.org/juicebox/?hicUrl=" + open_data_url;
             var win = window.open(targetLocation, '_blank');
             win.focus();
         }
@@ -123,13 +123,14 @@ class FileColumnActionsBtn extends React.PureComponent {
     }
 
     epigenomeButton(){
-        const { file, href } = this.props;
-        const host = FileColumnActionsBtn.hostFromHref(href);
+        const { file } = this.props;
+        const { open_data_url } = file || {};
+
         const genomeAssembly = file.genome_assembly || null;
         const epiGenomeMapping = (genomeAssembly && FileColumnActionsBtn.epiGenomeAssemblyMapping[genomeAssembly]) || null;
 
         // If the file lacks a genome assembly or it isn't in the expected mappings, do not show the button.
-        if (!epiGenomeMapping || !host || !file.href) return null; // Needed for a link to be made
+        if (!epiGenomeMapping || !open_data_url) return null; // Needed for a link to be made
 
         if (!this.isFileHIC()){ // Juicebox & epigenome browser can only viz HIC files at moment?
             return null;
@@ -138,7 +139,7 @@ class FileColumnActionsBtn extends React.PureComponent {
         function onClick(){
             // If we're server-side, there is access to the global browser window object/API.
             if (isServerSide()) return null;
-            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + host + file.href;
+            var targetLocation  = "http://epigenomegateway.wustl.edu/browser/?genome=" + epiGenomeMapping + "&hicUrl=" + open_data_url;
             var win = window.open(targetLocation, '_blank');
             win.focus();
         }
@@ -154,7 +155,8 @@ class FileColumnActionsBtn extends React.PureComponent {
         const { file, href } = this.props;
         const fileIsPublic = (file.status === 'archived' || file.status === 'released');
         if (!fileIsPublic){ // If not public, then 3rd-party service such as JuiceBox cannot access file to viz it.
-            return null;
+            const higlassBtn = this.higlassButton(false);
+            return higlassBtn || null;
         }
 
         //const higlassBtn = this.higlassButton();
@@ -239,19 +241,17 @@ export function renderFileTitleColumn(file, field, detailIndex, fileEntryBlockPr
     );
 }
 
-export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps){
-    const fileFormat = commonFileUtil.getFileFormatStr(file);
-    const summary = (
-        file.file_type_detailed ||
-        ((file.file_type && fileFormat && (file.file_type + ' (' + fileFormat + ')')) || file.file_type) ||
-        fileFormat ||
-        '-'
-    );
-    // Remove 'other', if present, because it just takes up horizontal space.
-    if (summary.slice(0, 6).toLowerCase() === 'other '){
-        return summary.slice(7).slice(0, -1);
+export function renderFileTypeSummaryColumn(file, field, detailIndex, fileEntryBlockProps) {
+    if (!file) {
+        return '-';
     }
-    return summary;
+    const fileFormat = commonFileUtil.getFileFormatStr(file);
+    const { file_type, file_type_detailed } = file;
+    if (fileFormat && file_type === 'other') {
+        return fileFormat;
+    }
+
+    return file_type_detailed || '-';
 }
 
 export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockProps) {
@@ -261,6 +261,22 @@ export function renderFileNotesColumn(file, field, detailIndex, fileEntryBlockPr
     } else {
         return "-";
     }
+}
+
+export function renderFileMicroscopeConfigurationLinkButton(file, field, detailIndex, fileEntryBlockProps) {
+    if (!file || !file.microscope_configuration) {
+        return '-';
+    }
+    const href = object.atIdFromObject(file.microscope_configuration);
+    if (!href) {
+        return '-';
+    }
+    return (
+        <a className="btn btn-xs btn-primary" data-tip="View microscope configuration details"
+            href={href}>
+            <i className="icon icon-fw icon-microscope fas" />
+        </a>
+    );
 }
 
 export function renderFileQCReportLinkButton(file, field, detailIndex, fileEntryBlockProps){
@@ -319,12 +335,13 @@ function renderFileHeaderWithCheckbox(stackedBlockProps){
 
 export class RawFilesStackedTable extends React.PureComponent {
 
-    static StackedBlock = StackedBlock
+    static StackedBlock = StackedBlock;
 
     static builtInHeaders(expSetType = 'replicate'){
         switch (expSetType){
             case 'replicate':
             case 'custom':
+            case 'experiment':
                 return [
                     { columnClass: 'biosample',     className: 'text-left',     title: 'Biosample',     initialWidth: 115   },
                     { columnClass: 'experiment',    className: 'text-left',     title: 'Experiment',    initialWidth: 145   },
@@ -347,8 +364,9 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
-    static staticColumnHeaders(columnHeaders, experimentSet){
-        return _.map(RawFilesStackedTable.builtInHeaders(experimentSet.experimentset_type), function(staticCol){
+    static staticColumnHeaders(columnHeaders, expOrExpSet){
+        const expSetType = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expOrExpSet.experimentset_type : 'experiment';
+        return _.map(RawFilesStackedTable.builtInHeaders(expSetType), function(staticCol){
             return _.extend(
                 _.clone(staticCol),
                 _.findWhere(columnHeaders, { 'title' : staticCol.title }) || {}
@@ -357,26 +375,26 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
-    static customColumnHeaders(columnHeaders, experimentSet){
+    static customColumnHeaders(columnHeaders, expOrExpSet){
+        const expSetType = RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expOrExpSet.experimentset_type : 'experiment';
         return _.filter(columnHeaders, function(col){
-            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(experimentSet.experimentset_type), 'title'), col.title);
+            return  !_.contains(_.pluck(RawFilesStackedTable.builtInHeaders(expSetType), 'title'), col.title);
         });
     }
 
     /**
-     * Adds Total Sequences metric column if any raw files in expSet have a `quality_metric`.
+     * Adds Total Sequences metric column if any raw files in expOrExpSet have a `quality_metric`.
      * Or if param `showMetricColumns` is set to true;
      *
      * @see fileUtil.filterFilesWithEmbeddedMetricItem
      *
      * @param {boolean} showMetricColumns - Skips check for quality_metric and returns column if true.
-     * @param {ExperimentSet} experimentSet - ExperimentSet Item.
+     * @param {ExperimentSet} expOrExpSet - Experiment or ExperimentSet Item.
      */
-    static metricColumnHeaders(showMetricColumns, experimentSet){
+    static metricColumnHeaders(showMetricColumns, expOrExpSet){
+        const allFiles = RawFilesStackedTable.allRawFiles(expOrExpSet);
         // Ensure we have explicit boolean (`false`), else figure out if to show metrics columns from contents of exp array.
-        showMetricColumns = (typeof showMetricColumns === 'boolean' && showMetricColumns) || commonFileUtil.filterFilesWithEmbeddedMetricItem(
-            expFxn.allFilesFromExperimentSet(experimentSet, false), true
-        ) ? true : false;
+        showMetricColumns = (typeof showMetricColumns === 'boolean') ? showMetricColumns : commonFileUtil.filterFilesWithEmbeddedMetricItem(allFiles, true);
 
         if (!showMetricColumns) return null;
 
@@ -385,17 +403,41 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
     /**
-     * Adds Notes column if any raw files in expSet have a `notes_to_tsv`.
+     * Adds Microscope Configuration column if any raw files in expOrExpSet have a `microscope_configuration`.
+     * Or if param `showMicroscopeConfigurationColumns` is set to true;
+     *
+     * @param {*} showNotesColumns - Skips check for microscope_configuration and returns column if true.
+     * @param {*} expOrExpSet - Experiment or ExperimentSet Item.
+     */
+    static microscopeConfigurationColumnHeaders(showMicroscopeConfigurationColumns, expOrExpSet) {
+        const allFiles = RawFilesStackedTable.allRawFiles(expOrExpSet);
+        // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
+        showMicroscopeConfigurationColumns =
+            (typeof showMicroscopeConfigurationColumns === 'boolean') ?
+                showMicroscopeConfigurationColumns : _.any(allFiles, (f) => f.microscope_configuration);
+
+        if (!showMicroscopeConfigurationColumns) return null;
+
+        return [
+            {
+                columnClass: 'file-detail', title: 'Microscope Configuration', initialWidth: 40, render: renderFileMicroscopeConfigurationLinkButton,
+                visibleTitle: function () {
+                    return <i className="icon icon-fw icon-microscope fas" data-tip="Microscope Configuration" />;
+                }
+            }
+        ];
+    }
+    /**
+     * Adds Notes column if any raw files in expOrExpSet have a `notes_to_tsv`.
      * Or if param `showNotesColumns` is set to true;
      *
      * @param {*} showNotesColumns - Skips check for notes_to_tsv and returns column if true.
-     * @param {*} experimentSet - ExperimentSet Item.
+     * @param {*} expOrExpSet - Experiment or ExperimentSet Item.
      */
-    static notesColumnHeaders(showNotesColumns, experimentSet) {
+    static notesColumnHeaders(showNotesColumns, expOrExpSet) {
+        const allFiles = RawFilesStackedTable.allRawFiles(expOrExpSet);
         // Ensure we have explicit boolean (`false`), else figure out if to show notes columns from contents of exp array.
-        showNotesColumns =
-            (typeof showNotesColumns === 'boolean' && showNotesColumns) ||
-                _.any(expFxn.allFilesFromExperimentSet(experimentSet, false), (f) => f.notes_to_tsv) ? true : false;
+        showNotesColumns = (typeof showNotesColumns === 'boolean') ? showNotesColumns : _.any(allFiles, (f) => f.notes_to_tsv);
 
         if (!showNotesColumns) return null;
 
@@ -404,12 +446,22 @@ export class RawFilesStackedTable extends React.PureComponent {
         ];
     }
 
-    static columnHeaders = memoize(function(columnHeaders, showMetricColumns, showNotesColumns, experimentSet){
-        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, experimentSet) || [])
-            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, experimentSet) || [])
-            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet) || [])
-            .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, experimentSet) || []);
-    });
+    static columnHeaders(columnHeaders, showMetricColumns, showMicroscopeConfigurationColumns, showNotesColumns, expOrExpSet){
+        return (RawFilesStackedTable.staticColumnHeaders(columnHeaders, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.customColumnHeaders(columnHeaders, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.metricColumnHeaders(showMetricColumns, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.microscopeConfigurationColumnHeaders(showMicroscopeConfigurationColumns, expOrExpSet) || [])
+            .concat(RawFilesStackedTable.notesColumnHeaders(showNotesColumns, expOrExpSet) || []);
+    }
+
+    static isExperimentSet(expOrExpSet) {
+        const itemType = schemaTransforms.getItemType(expOrExpSet);
+        return itemType && itemType.indexOf('ExperimentSet') >= 0;
+    }
+
+    static allRawFiles(expOrExpSet) {
+        return RawFilesStackedTable.isExperimentSet(expOrExpSet) ? expFxn.allFilesFromExperimentSet(expOrExpSet, false) : expOrExpSet.files;
+    }
 
     static propTypes = {
         'columnHeaders'             : PropTypes.array,
@@ -440,6 +492,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         ],
         'collapseLongLists' : true,
         'showMetricColumns' : null,
+        'showMicroscopeConfigurationColumns' : null,
         'showNotesColumns'  : null,
         'preventExpand'     : false
     };
@@ -466,13 +519,23 @@ export class RawFilesStackedTable extends React.PureComponent {
                 );
                 const allRawFiles = expFxn.allFilesFromExperimentSet(experimentSet, false);
                 return { experimentsGroupedByBiosample, allRawFiles };
-            })
+            }),
+            columnHeaders: memoize(RawFilesStackedTable.columnHeaders)
         };
     }
 
     analyticsImpression(){
-        const { experimentSet } = this.props;
-        const { allRawFiles, experimentsGroupedByBiosample } = this.memoized.groupedData(experimentSet);
+        const { experimentSet, experiment: propExperiment } = this.props;
+        let experimentsGroupedByBiosample, allRawFiles;
+        if (experimentSet) {
+            ({ experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet));
+        } else {
+            const experiment = _.extend({}, propExperiment, { tech_rep_no: 'N/A', bio_rep_no: 'N/A', from_experiment_set: { 'accession': 'NONE' } });
+            experimentsGroupedByBiosample = [[experiment]];
+            allRawFiles = _.map(experiment.files, function (f) {
+                return _.extend({}, f, { 'from_experiment': f.from_experiment || experiment });
+            });
+        }
 
         const biosamples = [];
         let exps = [];
@@ -487,7 +550,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             analytics.impressionListOfItems(biosamples, null, "RawFilesStackedTable");
             analytics.impressionListOfItems(exps, null, "RawFilesStackedTable");
             analytics.impressionListOfItems(allRawFiles, null, "RawFilesStackedTable");
-            analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet.display_title });
+            analytics.event("RawFilesStackedTable", "Mounted", { eventLabel: experimentSet ? experimentSet.display_title : propExperiment.display_title });
         }, 250);
     }
 
@@ -504,7 +567,7 @@ export class RawFilesStackedTable extends React.PureComponent {
 
     renderExperimentBlock(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showNotesColumns, href, preventExpand } = this.props;
+        const { experimentSet, collapseLongLists, collapseShow = 3, collapseLimit = 2, columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, href, preventExpand, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
 
         const allRawFiles = exp.files || [];
 
@@ -514,7 +577,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         const haveUngroupedFiles = Array.isArray(ungroupedFiles) && ungroupedFiles.length > 0;
         const haveGroups = Array.isArray(fileGroups) && fileGroups.length > 0;
 
-        var fullColumnHeaders   = RawFilesStackedTable.columnHeaders(columnHeaders, showMetricsColumns, showNotesColumns, experimentSet),
+        var fullColumnHeaders   = this.memoized.columnHeaders(columnHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || exp),
             contentsClassName   = 'files',
             contents            = [];
 
@@ -523,7 +586,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             contents = contents.concat(_.map(fileGroups, function(group, j){
                 // Ensure can be converted to accessionTriple
                 group = _.map(group, function(f){
-                    return fileUtil.extendFile(f, exp, experimentSet);
+                    return fileUtil.extendFile(f, exp, experimentSet || { accession: 'NONE' });
                 });
                 // Find relation/group type(s)
                 const relationshipTypes = new Set(_.pluck(_.flatten(_.pluck(group, 'related_files'), true), 'relationship_type'));
@@ -544,7 +607,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         // Add in remaining unpaired files, if any.
         if (haveUngroupedFiles){
             contents = contents.concat(_.map(ungroupedFiles, function(file, j){
-                const extendedFile = fileUtil.extendFile(file, exp, experimentSet);
+                const extendedFile = fileUtil.extendFile(file, exp, experimentSet || { accession: 'NONE' });
 
                 return (
                     <FilePairBlock key={object.atIdFromObject(extendedFile) || j} files={[extendedFile]}
@@ -584,7 +647,7 @@ export class RawFilesStackedTable extends React.PureComponent {
         );
 
 
-        const showMoreExtTitle = preventExpand ? (
+        const showMoreExtTitle = preventExpand && experimentSet ? (
             <a href={object.itemUtil.atId(experimentSet)}>(view in Experiment Set)</a>
         ) : null;
 
@@ -594,7 +657,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                 <StackedBlockName relativePosition={expFxn.fileCountFromSingleExperiment(exp) > 6}>
                     { experimentAtId ? <a href={experimentAtId} className="name-title">{ linkTitle }</a> : <span className="name-title">{ linkTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle }} title={listTitle} className={contentsClassName}>
+                <StackedBlockList {...{ collapseLimit, collapseShow, collapseLongLists, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }} title={listTitle} className={contentsClassName}>
                     { contents }
                 </StackedBlockList>
             </StackedBlock>
@@ -602,7 +665,7 @@ export class RawFilesStackedTable extends React.PureComponent {
     }
 
     renderBiosampleStackedBlockOfExperiments(expsWithBiosample,i){
-        const { collapseLimit = 3, collapseShow = 2, experimentSet, preventExpand = false } = this.props;
+        const { collapseLimit = 3, collapseShow = 2, experimentSet, preventExpand = false, collapseShowMoreLimit, collapseItemsIncrement } = this.props;
         this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
         const [ { biosample } ] = expsWithBiosample; // From first exp, grab out biosample (all exps should have same 1).
         const bioRepTitle = biosample.bio_rep_no ? 'Bio Replicate ' + biosample.bio_rep_no : biosample.biosource_summary;
@@ -629,7 +692,7 @@ export class RawFilesStackedTable extends React.PureComponent {
                         <a href={biosampleAtId} className="name-title">{ biosampleTitle }</a>
                         : <span className="name-title">{ biosampleTitle }</span> }
                 </StackedBlockName>
-                <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle }}>
+                <StackedBlockList className="experiments" title="Experiments" {...{ collapseLimit, collapseShow, showMoreExtTitle, collapseShowMoreLimit, collapseItemsIncrement }}>
                     { _.map(expsWithBiosample, this.renderExperimentBlock) }
                 </StackedBlockList>
             </StackedBlock>
@@ -653,8 +716,17 @@ export class RawFilesStackedTable extends React.PureComponent {
      * Much of styling/layouting is defined in CSS.
      */
     render(){
-        const { experimentSet, columnHeaders: propColHeaders, showMetricsColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
-        const { experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet);
+        const { experimentSet, experiment: propExperiment, columnHeaders: propColHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, collapseLongLists, width, preventExpand } = this.props;
+        let experimentsGroupedByBiosample, allRawFiles, experiment;
+        if (experimentSet) {
+            ({ experimentsGroupedByBiosample, allRawFiles } = this.memoized.groupedData(experimentSet));
+        } else {
+            experiment = _.extend({}, propExperiment, { tech_rep_no: 'N/A', bio_rep_no: 'N/A', from_experiment_set: { 'accession': 'NONE' } });
+            experimentsGroupedByBiosample = [[experiment]];
+            allRawFiles = _.map(experiment.files, function (f) {
+                return _.extend({}, f, { 'from_experiment': f.from_experiment || experiment });
+            });
+        }
 
         const appendCountStr = experimentsGroupedByBiosample.length > 5 ?
             'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments' : null;
@@ -668,7 +740,7 @@ export class RawFilesStackedTable extends React.PureComponent {
             </React.Fragment>
         );
 
-        const columnHeaders = RawFilesStackedTable.columnHeaders(propColHeaders, showMetricsColumns, showNotesColumns, experimentSet);
+        const columnHeaders = this.memoized.columnHeaders(propColHeaders, showMetricsColumns, showMicroscopeConfigurationColumns, showNotesColumns, experimentSet || experiment);
 
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
@@ -697,32 +769,26 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
      */
     static notesColumnHeaders(showNotesColumns, processedFiles) {
 
-        switch (showNotesColumns) {
+        showNotesColumns = (typeof showNotesColumns === 'boolean') ? showNotesColumns : _.any(processedFiles || [], (f) => f.notes_to_tsv);
 
-            case 'always':
-                return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
-            case 'conditional':
-                if (_.any(processedFiles || [], (f) => f.notes_to_tsv)) {
-                    return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
-                }
-                return null;
-            case 'never':
-            default:
-                return null;
+        if(!showNotesColumns) {
+            return null;
         }
+
+        return [{ columnClass: 'file-detail', title: 'Notes', initialWidth: 20, render: renderFileNotesColumn }];
     }
 
-    static columnHeaders = memoize(function (columnHeaders, showNotesColumns, processedFiles) {
+    static columnHeaders(columnHeaders, showNotesColumns, processedFiles) {
         let clonedColumnHeaders = columnHeaders.slice(0);
         clonedColumnHeaders = clonedColumnHeaders.concat(ProcessedFilesStackedTable.notesColumnHeaders(showNotesColumns, processedFiles) || []);
         return clonedColumnHeaders;
-    });
+    }
 
     static propTypes = {
         // These must have .experiments property, which itself should have .experiment_sets property. There's a utility function to get all files
         'files' : PropTypes.array.isRequired,
         'analyticsImpressionOnMount' : PropTypes.bool,
-        'showNotesColumns': PropTypes.oneOf(['always', 'never', 'conditional'])
+        'showNotesColumns': PropTypes.bool
     };
 
     static defaultProps = {
@@ -736,7 +802,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         'collapseLongLists' : true,
         'nonFileHeaderCols' : ['experiment', 'file'],
         'titleForFiles'     : 'Processed Files',
-        'showNotesColumns'  : 'conditional'
+        'showNotesColumns'  : null
     };
 
     /**
@@ -756,7 +822,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
             filesGroupedByExperimentOrGlobal.global = groupedFiles.experiment_sets[expSetAccessions[0]].slice();
         }
         if (expSetAccessions.length > 1) {
-            console.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
+            logger.error('Theres more than 1 ExpSet for these files/sets - ', expSetAccessions, groupedFiles);
         }
 
         return _.pairs(filesGroupedByExperimentOrGlobal).sort(function ([ expAAccesion, filesForExpA ], [ expBAccesion, filesForExpB ]){
@@ -775,7 +841,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         this.oddExpRow = false;
 
         this.memoized = {
-            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal)
+            filesGroupedByExperimentOrGlobal: memoize(ProcessedFilesStackedTable.filesGroupedByExperimentOrGlobal),
+            columnHeaders: memoize(ProcessedFilesStackedTable.columnHeaders)
         };
     }
 
@@ -844,8 +911,8 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
     }
 
     renderExperimentBlocks(filesGroupedByExperimentOrGlobal){
-        const { collapseLongLists, titleForFiles } = this.props;
-        return filesGroupedByExperimentOrGlobal.map(([ experimentAccession, filesForExperiment ])=>{
+        const { titleForFiles, collapseLongLists, preventExpand } = this.props;
+        return filesGroupedByExperimentOrGlobal.map(([experimentAccession, filesForExperiment]) => {
 
             const experiment = filesForExperiment[0].from_experiment; // All should have same 1
 
@@ -863,14 +930,17 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
 
             const replicateNumbersExists = experiment && experiment.bio_rep_no && experiment.tec_rep_no;
 
-            var nameBlock = (
+            const nameBlock = (
                 <StackedBlockName className={replicateNumbersExists ? "double-line" : ""}>
                     { replicateNumbersExists ? <div>Bio Rep <b>{ experiment.bio_rep_no }</b>, Tec Rep <b>{ experiment.tec_rep_no }</b></div> : <div/> }
                     { experimentAtId ? <a href={experimentAtId} className="name-title text-500">{ nameTitle }</a> : <div className="name-title">{ nameTitle }</div> }
                 </StackedBlockName>
             );
 
-            var expSetAccession = filesForExperiment[0].from_experiment.from_experiment_set.accession;
+            const expSetAccession = experiment.from_experiment_set.accession;
+            const showMoreExtTitle = preventExpand && expSetAccession ? (
+                <a href={object.itemUtil.atId(experiment.from_experiment_set)}>(view in Experiment Set)</a>
+            ) : null;
 
             return (
                 <StackedBlock columnClass="experiment" hideNameOnHover={experimentAccession === 'global'}
@@ -879,7 +949,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
                             accession={experimentAccession === 'global' ? expSetAccession : experimentAccession} subtitleVisible />
                     }>
                     { nameBlock }
-                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={null}>
+                    <StackedBlockList className="files" title={titleForFiles} showMoreExtTitle={showMoreExtTitle}>
                         { this.renderFileBlocksForExperiment(filesForExperiment) }
                     </StackedBlockList>
                 </StackedBlock>
@@ -892,7 +962,7 @@ export class ProcessedFilesStackedTable extends React.PureComponent {
         const { files, columnHeaders: propColHeaders, showNotesColumns, collapseLongLists } = this.props;
         const filesGroupedByExperimentOrGlobal = this.memoized.filesGroupedByExperimentOrGlobal(files);
         const experimentBlocks = this.renderExperimentBlocks(filesGroupedByExperimentOrGlobal);
-        const columnHeaders = ProcessedFilesStackedTable.columnHeaders(propColHeaders, showNotesColumns, files);
+        const columnHeaders = this.memoized.columnHeaders(propColHeaders, showNotesColumns, files);
         return (
             <div className="stacked-block-table-outer-container overflow-auto">
                 <StackedBlockTable {..._.omit(this.props, 'children', 'files', 'columnHeaders')} columnHeaders={columnHeaders}
@@ -934,10 +1004,10 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
     }
 
     render(){
-        const { columnHeaders, showMetricColumns, experimentSet } = this.props;
+        const { columnHeaders, showMetricColumns, experimentSet, experiment } = this.props;
         let extendedPropColHeaders = columnHeaders;
 
-        const origMetricHeaders = RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet);
+        const origMetricHeaders = RawFilesStackedTable.metricColumnHeaders(showMetricColumns, experimentSet || experiment);
         if (Array.isArray(origMetricHeaders) && origMetricHeaders.length > 0){
             extendedPropColHeaders = columnHeaders.slice().concat([
                 {
@@ -976,3 +1046,213 @@ export class RawFilesStackedTableExtendedColumns extends React.PureComponent {
     }
 }
 
+export class QCMetricsTable extends React.PureComponent {
+
+    static qcSummaryItemTitleTooltipsByTitle(fileGroup) {
+        const tooltipsByTitle = {};
+        fileGroup.forEach(function ({ title: qmsTitle, quality_metric_summary: { title_tooltip = null } = {} }) {
+            if (typeof tooltipsByTitle[qmsTitle] === "string") {
+                return; // skip/continue; already found a tooltip_title for this qms title.
+            }
+            if (title_tooltip && typeof title_tooltip === "string") {
+                tooltipsByTitle[qmsTitle] = title_tooltip;
+            }
+        });
+        return tooltipsByTitle;
+    }
+
+    static renderForFileColValue(file) {
+        const fileAtId = file && object.atIdFromObject(file);
+        let fileTitleString;
+        if (file.accession) {
+            fileTitleString = file.accession;
+        }
+        if (!fileTitleString && fileAtId) {
+            var idParts = _.filter(fileAtId.split('/'));
+            if (idParts[1].slice(0, 5) === '4DNFI') {
+                fileTitleString = idParts[1];
+            }
+        }
+        if (!fileTitleString) {
+            fileTitleString = file.uuid || fileAtId || 'N/A';
+        }
+        return (
+            <React.Fragment>
+                <div>{Schemas.Term.toName("file_type_detailed", file.file_type_detailed, true)}</div>
+                <a className="text-500 name-title" href={fileAtId}>
+                    {fileTitleString}
+                </a>
+            </React.Fragment>
+        );
+    }
+
+    static generateAlignedColumnHeaders(fileGroups) {
+        return fileGroups.map(function (fileGroup) {
+            const titleTooltipsByQMSTitle = QCMetricsTable.qcSummaryItemTitleTooltipsByTitle(fileGroup);
+            const columnHeaders = [ // Static / present-for-each-table headers
+                { columnClass: 'experiment', title: 'Experiment', initialWidth: 145, className: 'text-left' },
+                { columnClass: 'file', className: 'double-height-block', title: 'For File', initialWidth: 100, render: QCMetricsTable.renderForFileColValue }
+            ].concat(fileGroup[0].quality_metric.quality_metric_summary.map(function (qmsObj, qmsIndex) { // Dynamic Headers
+                const { title, title_tooltip } = qmsObj;
+                // title tooltip: if missing in the first item then try to get it from the first valid one in array
+                return {
+                    columnClass: 'file-detail',
+                    title,
+                    title_tooltip: title_tooltip || titleTooltipsByQMSTitle[title] || null,
+                    initialWidth: 80,
+                    render: function renderColHeaderValue(file, field, colIndex, fileEntryBlockProps) {
+                        const qmsItem = file.quality_metric.quality_metric_summary[qmsIndex];
+                        const { value, tooltip } = QCMetricFromSummary.formatByNumberType(qmsItem);
+                        return <span className="d-inline-block" data-tip={tooltip}>{value}</span>;
+                    }
+                };
+            }));
+
+            // Add 'Link to Report' column, if any files w/ one. Else include blank one so columns align with any other stacked ones.
+            const anyFilesWithMetricURL = _.any(fileGroup, function (f) {
+                return f && f.quality_metric && f.quality_metric.url;
+            });
+
+            if (anyFilesWithMetricURL) {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Report', initialWidth: 35, render: renderFileQCReportLinkButton });
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 35, render: renderFileQCDetailLinkButton });
+            } else {
+                columnHeaders.push({ columnClass: 'file-detail', title: 'Details', initialWidth: 50, render: renderFileQCDetailLinkButton });
+            }
+            return columnHeaders;
+        });
+    }
+
+    /**
+     * commonFileUtil.groupFilesByQCSummaryTitles function is wrapped to allow
+     * custom sorting by QC schema's qc_order and @type Atacseq or Chipseq specific QCS items
+     */
+    static groupFilesByQCSummaryTitles(filesWithMetrics, schemas) {
+        let filesByTitles = commonFileUtil.groupFilesByQCSummaryTitles(filesWithMetrics);
+
+        const comparerFunc = (filesA, filesB) => {
+            const [fileA] = filesA; //assumption: 1st file's QC is adequate to define order
+            const [fileB] = filesB; //assumption: 1st file's QC is adequate to define order
+
+            let orderA, orderB;
+            if (schemas) {
+                const itemTypeA = schemaTransforms.getItemType(fileA.quality_metric);
+                if (itemTypeA && schemas[itemTypeA]) {
+                    const { qc_order } = schemas[itemTypeA];
+                    if (typeof qc_order === 'number') {
+                        orderA = qc_order;
+                    }
+                }
+                const itemTypeB = schemaTransforms.getItemType(fileB.quality_metric);
+                if (itemTypeB && schemas[itemTypeB]) {
+                    const { qc_order } = schemas[itemTypeB];
+                    if (typeof qc_order === 'number') {
+                        orderB = qc_order;
+                    }
+                }
+            }
+
+            if (orderA && orderB && orderA !== orderB) {
+                return orderA - orderB;
+            }
+
+            //custom comparison for @type Atacseq or Chipseq specific QCS items
+            if (_.any(fileA.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return -1;
+            } else if (_.any(fileB.quality_metric.quality_metric_summary, (qcs) => qcs.title === 'Nonredundant Read Fraction (NRF)')) {
+                return 1;
+            }
+
+            return 0;
+        };
+
+        if (filesByTitles) {
+            filesByTitles = filesByTitles.slice();
+            filesByTitles.sort(comparerFunc);
+        }
+
+        return filesByTitles;
+    }
+
+    static defaultProps = {
+        heading: (
+            <h3 className="tab-section-title mt-12">
+                <span>Quality Metrics</span>
+            </h3>
+        )
+    };
+
+    constructor(props) {
+        super(props);
+        this.memoized = {
+            filterFilesWithQCSummary: memoize(commonFileUtil.filterFilesWithQCSummary),
+            groupFilesByQCSummaryTitles: memoize(QCMetricsTable.groupFilesByQCSummaryTitles),
+            generateAlignedColumnHeaders: memoize(QCMetricsTable.generateAlignedColumnHeaders)
+        };
+    }
+
+    render() {
+        const { width, files, windowWidth, href, heading, schemas } = this.props;
+        const filesWithMetrics = this.memoized.filterFilesWithQCSummary(files);
+        const filesWithMetricsLen = filesWithMetrics.length;
+
+        if (!filesWithMetrics || filesWithMetricsLen === 0) return null;
+
+        const filesByTitles = this.memoized.groupFilesByQCSummaryTitles(filesWithMetrics, schemas);
+        const columnHeadersForFileGroups = this.memoized.generateAlignedColumnHeaders(filesByTitles);
+        const commonTableProps = {
+            width, windowWidth, href,
+            collapseLongLists: true, collapseLimit: 10, collapseShow: 7,
+            analyticsImpressionOnMount: false, titleForFiles: "Processed File Metrics",
+            showNotesColumns: false
+        };
+
+        return (
+            <div className="row">
+                <div className="exp-table-container col-12">
+                    {heading}
+                    {filesByTitles.map(function (fileGroup, i) {
+                        return (
+                            <ProcessedFilesStackedTable {...commonTableProps} key={i} files={fileGroup} columnHeaders={columnHeadersForFileGroups[i]} />
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
+}
+
+export function QCMetricFromSummary(props){
+    const { title } = props;
+    const { value, tooltip } = QCMetricFromSummary.formatByNumberType(props);
+
+    return (
+        <div className="overview-list-element">
+            <div className="row">
+                <div className="col-4 text-right">
+                    <h5 className="mb-0 mt-02">{ title }</h5>
+                </div>
+                <div className="col-8">
+                    <div className="inner value">
+                        { tooltip ? <i className="icon icon-fw icon-info-circle mr-05 fas" data-tip={tooltip} /> : null }
+                        { value }
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+QCMetricFromSummary.formatByNumberType = function({ value, tooltip, numberType }){
+    // We expect these values to always be strings or undefined which are passed by value (not reference).\
+    // Hence we use var instead of const and safely overwrite them.
+    if (numberType === 'percent'){
+        value += '%';
+    } else if (numberType && ['number', 'integer'].indexOf(numberType) > -1) {
+        value = parseFloat(value);
+        if (!tooltip && value >= 1000) {
+            tooltip = valueTransforms.decorateNumberWithCommas(value);
+        }
+        value = valueTransforms.roundLargeNumber(value);
+    }
+    return { value, tooltip };
+};

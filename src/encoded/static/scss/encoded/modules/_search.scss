@@ -66,6 +66,7 @@ $facetlist-term-block-height: 22px;
 .facets-container .facets-body .facet a.term .facet-selector {
 	transform: translate(0, 1px);
 	transform: translate(0, 0.5px);
+	line-height: unset; /* Overrides SPC's line-height: 1 to vertically center better re: 4DN font */
 }
 
 
@@ -94,7 +95,8 @@ $search-results-above-results-row-height: 40px;
 		}
 	}
 	&[data-field="lab.display_title"],
-	&[data-field="track_and_facet_info.lab_name"]{
+	&[data-field="track_and_facet_info.lab_name"],
+	&[data-field="track_and_facet_info.experimental_lab"]{
 		> .inner {
 			text-align: left;
 		}

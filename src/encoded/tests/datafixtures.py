@@ -29,7 +29,7 @@ ORDER = [
     'workflow_mapping', 'workflow_run_sbg', 'workflow_run_awsem',
     'tracking_item', 'quality_metric_flag',
     'summary_statistic', 'summary_statistic_hi_c', 'workflow_run',
-    'microscope_configuration'
+    'microscope_configuration', 'image_setting', 'quality_metric_mcool'
 ]
 
 

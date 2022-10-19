@@ -1,0 +1,96 @@
+###
+# Docker App Configuration for local deployment
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/environment.html
+# NOTE: Still needs to be customized for (automated use by) multiple users
+###
+
+[app:app]
+use = config:base.ini#app
+session.secret = %(here)s/session-secret.b64
+env.name = ff-docker-${USER}-test
+sqlalchemy.url = postgres://postgres:postgres@db:5432/postgres
+elasticsearch.server = search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+elasticsearch.aws_auth = true
+#elasticsearch.server = es:9200
+blob_bucket = encoded-4dn-blobs
+load_test_only = true
+create_tables = true
+testing = true
+postgresql.statement_timeout = 20
+mpindexer = false
+indexer = true
+indexer.namespace = ff-docker-${USER}-test
+pyramid.reload_templates = true
+pyramid.debug_authorization = false
+pyramid.debug_notfound = false
+pyramid.debug_routematch = false
+pyramid.default_locale_name = en
+# this line determines which load function is used in load_data
+# most deployments use: "load_test_data = encoded.loadxl:load_test_data"
+load_test_data = encoded.loadxl:load_${DATA_SET}_data
+encoded_version = 100.200.300
+snovault_version = 200.300.400
+utils_version = 300.400.500
+eb_app_version = app-v-development-simulation
+
+[pipeline:debug]
+pipeline =
+    egg:PasteDeploy#prefix
+    app
+set pyramid.includes =
+    pyramid_translogger
+
+[composite:main]
+use = egg:rutter#urlmap
+/ = debug
+/_indexer = indexer
+
+[composite:indexer]
+use = config:base.ini#indexer
+
+###
+# wsgi server configuration
+###
+
+[server:main]
+use = egg:waitress#main
+host = 0.0.0.0
+port = 6543
+threads = 1
+
+###
+# logging configuration
+# http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/logging.html
+###
+
+[loggers]
+keys = root, wsgi, encoded
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = INFO
+handlers = console
+
+[logger_wsgi]
+level = DEBUG
+handlers =
+qualname = wsgi
+
+[logger_encoded]
+level = DEBUG
+handlers =
+qualname = encoded
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(asctime)s %(levelname)-5.5s [%(name)s][%(threadName)s] %(message)s

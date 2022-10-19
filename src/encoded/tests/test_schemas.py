@@ -127,7 +127,8 @@ def test_load_schema(schema, master_mixins, registry):
                 'user.json', 'award.json', 'lab.json', 'organism.json',
                 'ontology.json', 'ontology_term.json', 'page.json',
                 'static_section.json', 'badge.json', 'tracking_item.json',
-                'file_format.json', 'experiment_type.json', 'higlass_view_config.json'
+                'file_format.json', 'experiment_type.json', 'higlass_view_config.json',
+                'microscope_configuration.json', 'image_setting.json'
             ]
             for prop in shared_properties:
                 if schema == 'experiment.json':
@@ -196,3 +197,21 @@ def test_fourfront_crawl_schemas(testapp, registry):
     field_schema = crawl_schema(registry[TYPES], field_path, schema)
     assert isinstance(field_schema, dict)
     assert field_schema['title'] == 'File Size'
+
+
+def test_schema_version_present_on_items(app):
+    """Test a valid schema version is present on all non-test item
+    types.
+    Expecting positive integer values for non-abstract items, and empty
+    string for all abstract items.
+    """
+    all_types = app.registry.get(TYPES).by_item_type
+    for type_name, item_type in all_types.items():
+        if type_name.startswith("testing"):
+            continue
+        schema_version = item_type.schema_version
+        if item_type.is_abstract:
+            assert schema_version == ""
+        else:
+            assert schema_version, f'failed for {item_type.name}'
+            assert int(schema_version) >= 1

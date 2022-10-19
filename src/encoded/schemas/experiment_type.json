@@ -30,6 +30,17 @@
                 "deleted"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "title": {
             "title": "Experiment Type",
             "description": "The display name for the experiment type",
@@ -82,6 +93,7 @@
                 "Replication Timing",
                 "Proximity to Cellular Component",
                 "DNA Binding",
+                "DNA Damage Detection",
                 "Open Chromatin",
                 "Open Chromatin - Single Cell",
                 "DNA-DNA Pairwise Interactions",
@@ -114,6 +126,7 @@
                 "Replication timing",
                 "Proximity-seq",
                 "DNA binding",
+                "DNA damage detection",
                 "Open Chromatin",
                 "Hi-C",
                 "Hi-C (single cell)",

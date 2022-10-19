@@ -56,7 +56,8 @@ def _build_biosample_embedded_list():
             # Biosource linkTo - many calc prop dependencies
             'biosource.*',
             'biosource.individual.sex',
-            'biosource.individual.organism.name',
+            'biosource.organism.name',
+            'biosource.override_organism_name',
             'biosource.biosource_vendor.name',  # display_title uses this
 
             # BiosampleCellCulture linkTo + Image linkTo
@@ -145,7 +146,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             for tmt in treatments:
                 treat_props = get_item_or_none(request, tmt, 'treatments')
                 treat_list.append(treat_props.get('display_title'))
-            return ' and '.join(sorted([t for t in treat_list if t]))
+            return ' and '.join([t for t in treat_list if t])
         return 'None'
 
     @calculated_property(schema={

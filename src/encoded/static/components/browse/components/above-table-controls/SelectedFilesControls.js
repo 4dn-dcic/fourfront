@@ -8,7 +8,7 @@ import _ from 'underscore';
 import memoize from 'memoize-one';
 
 import { Checkbox } from '@hms-dbmi-bgm/shared-portal-components/es/components/forms/components/Checkbox';
-import { console, object, ajax, analytics, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, ajax, analytics, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { Schemas, typedefs } from './../../../util';
@@ -81,6 +81,7 @@ export class SelectAllFilesButton extends React.PureComponent {
     handleSelectAll(evt){
         const { selectFile, selectedFiles, resetSelectedFiles, href, context, totalFilesCount } = this.props;
         if (typeof selectFile !== 'function' || typeof resetSelectedFiles !== 'function'){
+            logger.error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
             throw new Error("No 'selectFiles' or 'resetSelectedFiles' function prop passed to SelectedFilesController.");
         }
 
@@ -99,10 +100,10 @@ export class SelectAllFilesButton extends React.PureComponent {
                     if (extData.list === 'browse') {
 
                         allExtendedFiles = _.reduce(resp['@graph'] || [], (m, v) => m.concat(allFilesFromExperimentSet(v, true)), []);
-                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,true, true), allExtendedFiles);
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, true, true), allExtendedFiles);
                     } else {
                         allExtendedFiles =(resp['@graph'] || []);
-                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles,false, true), resp['@graph'] );
+                        filesToSelect = _.zip(filesToAccessionTriples(allExtendedFiles, false, true), resp['@graph'] );
                     }
                     selectFile(filesToSelect);
                     this.setState({ 'selecting' : false });

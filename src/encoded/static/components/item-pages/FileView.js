@@ -101,11 +101,24 @@ function FileViewOverview (props) {
         experimentSets && experimentSets.length > 0 ?
             '/search/?type=ExperimentSet&accession=' + _.pluck(experimentSets, 'accession').join('&accession=')
             : null;
+    const { track_and_facet_info: { experiment_bucket = null } = {} } = context || {};
+
+    let targetTabKey = null;
+    if (experiment_bucket && typeof experiment_bucket === 'string') {
+        if (experiment_bucket === 'raw file') {
+            targetTabKey = 'raw-files';
+        } else if (experiment_bucket === 'processed file') {
+            targetTabKey = 'processed-files';
+        } else {
+            targetTabKey = 'supplementary-files';
+        }
+    }
     const expSetTableProps = {
         searchHref,
         facets: null,
         defaultOpenIndices: [0],
-        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />
+        title: <SearchTableTitle title="Experiment Set" externalSearchLinkVisible={false} />,
+        targetTabKey
     };
     return (
         <div>
@@ -155,6 +168,18 @@ export class FileOverviewHeading extends React.PureComponent {
     static fileSizeTitleRenderFxn(field, value){
         return <span className="text-400"><i className="icon icon-fw icon-hdd far"/> { Schemas.Term.toName(field, value) }</span>;
     }
+    static fileClassificationRenderFxn(field, value, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+        const classification = Schemas.Term.toName(field, value);
+        const { track_and_facet_info: { experiment_bucket = null } = {} } = fullObject || {};
+        const isSupplementary  = experiment_bucket &&  typeof experiment_bucket === 'string' && experiment_bucket != 'raw file' && experiment_bucket != 'processed file';
+        return (
+            <React.Fragment>
+                {classification}
+                {isSupplementary ? <br /> : null}
+                {isSupplementary ? '(Supplementary)' : null}
+            </React.Fragment>
+        );
+    }
 
     constructor(props){
         super(props);
@@ -186,9 +211,12 @@ export class FileOverviewHeading extends React.PureComponent {
                     <OverviewHeadingContainer onStartClose={this.onTransitionUnsetOpen} onFinishOpen={this.onTransitionSetOpen}>
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_format" property="file_format" fallbackTitle="File Format" />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_type" property="file_type" fallbackTitle="File Type" />
-                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification" fallbackTitle="General Classification" />
+                        <OverViewBodyItem {...commonHeadingBlockProps} key="file_classification" property="file_classification"
+                            fallbackTitle="General Classification" titleRenderFxn={FileOverviewHeading.fileClassificationRenderFxn} />
                         <OverViewBodyItem {...commonHeadingBlockProps} key="file_size" property="file_size"
                             fallbackTitle="File Size" titleRenderFxn={FileOverviewHeading.fileSizeTitleRenderFxn} />
+                        {/* <OverViewBodyItem {...commonHeadingBlockProps} key="microscope_configuration" property="microscope_configuration"
+                            fallbackTitle="Microscope Configuration" wrapInColumn={"col-12 col-md-6"} /> */}
                     </OverviewHeadingContainer>
                 </div>
                 <div className="col-12 col-md-4 mt-1 mb-3">
@@ -263,24 +291,21 @@ export class ExternalVisualizationButtons extends React.PureComponent {
     }
 
     render(){
-        const { file, href, wrapInColumn, className } = this.props;
+        const { file, wrapInColumn, className } = this.props;
+        const { open_data_url } = file || {};
         let epigenomeBtn, juiceBoxBtn;
 
         if (!(file.status === 'archived' || file.status === 'released')){
             return null; // External tools cannot access non-released files.
         }
-        if (!file.href){
+        if (!open_data_url){
             return null;
         }
 
         const fileFormat = commonFileUtil.getFileFormatStr(file);
-        const hrefParts = memoizedUrlParse(href || (store && store.getState().href));
-        const fileUrl = (hrefParts.protocol + '//' + hrefParts.host) + file.href;
-
-
         if (fileFormat === 'hic'){
-            juiceBoxBtn = this.renderJuiceboxBtn(fileUrl);
-            epigenomeBtn = this.renderEpigenomeBtn(fileUrl, file.genome_assembly || null);
+            juiceBoxBtn = this.renderJuiceboxBtn(open_data_url);
+            epigenomeBtn = this.renderEpigenomeBtn(open_data_url, file.genome_assembly || null);
         }
 
         if (!juiceBoxBtn && !epigenomeBtn){

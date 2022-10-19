@@ -7,7 +7,7 @@ import url from 'url';
 import memoize from 'memoize-one';
 import queryString from 'querystring';
 import { get as getSchemas, Term } from './../../../util/Schemas';
-import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, ajax, layout, isServerSide, schemaTransforms, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import {
     ResultRowColumnBlockValue, columnsToColumnDefinitions, HeadersRow, TableRowToggleOpenButton,
     DisplayTitleColumnWrapper, DisplayTitleColumnDefault
@@ -58,11 +58,13 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             aboveTableComponent,
             aboveFacetListComponent,
             filterFacetFxn, hideFacets,
-            filterColumnFxn, hideColumns
+            filterColumnFxn, hideColumns,
+            targetTabKey,
         } = this.props;
         const { totalCount } = this.state;
 
         if (typeof searchHref !== "string") {
+            logger.error("Expected a string 'searchHref'");
             throw new Error("Expected a string 'searchHref'");
         }
 
@@ -74,6 +76,7 @@ export class EmbeddedItemSearchTable extends React.PureComponent {
             aboveTableComponent, aboveFacetListComponent,
             filterFacetFxn, hideFacets,
             filterColumnFxn, hideColumns,
+            targetTabKey,
             onLoad: this.getCountCallback,
             termTransformFxn: Term.toName
         };
@@ -219,7 +222,7 @@ export class ItemPageTable extends React.Component {
             "display_title" : { "title" : "Title" },
             "number_of_experiments" : { "title" : "Exps" },
             "experiments_in_set.experiment_type.display_title": { "title" : "Experiment Type" },
-            "experiments_in_set.biosample.biosource.individual.organism.name": { "title" : "Organism" },
+            "experiments_in_set.biosample.biosource.organism.name": { "title" : "Organism" },
             "experiments_in_set.biosample.biosource_summary": { "title" : "Biosource Summary" },
             "experiments_in_set.experiment_categorizer.combined" : { "title" : "Assay Details" }
         },
@@ -257,6 +260,7 @@ export class ItemPageTable extends React.Component {
         const useWidth = Math.max(minWidth, (width || layout.gridContainerWidth(windowWidth) || 0));
 
         if (!useWidth || isNaN(useWidth)){
+            logger.error("Make sure width or windowWidth is passed in through props.");
             throw new Error("Make sure width or windowWidth is passed in through props.");
         }
 
@@ -311,7 +315,7 @@ class ItemPageTableRow extends React.PureComponent {
         const { open } = this.state;
 
         if (!Array.isArray(columnDefinitions)) {
-            console.error('No columns defined.');
+            logger.error('No columns defined.');
             return null;
         }
 

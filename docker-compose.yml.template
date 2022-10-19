@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+
+  # Postgres Component
+  # Connect to it in development.ini with
+  # sqlalchemy.url = postgresql://postgres:postgres@db:5432/postgres
+  db:
+    build: ./deploy/docker/postgres
+    container_name: fourfront-postgres
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+    # Enable to get verbose logs from postgres
+    #command: ["postgres", "-c", "log_statement=all"]
+
+  # ElasticSearch Component
+  # Disabled for now as too compute intensive, but feel free to try it if you dont need
+  # to test any search APIs
+  # To connect use:
+  # elasticsearch.server = es:9200
+#  es:
+#    build: ./deploy/docker/elasticsearch
+#    container_name: fourfront-es1
+#    environment:
+#      - node.name=es01
+#      - cluster.name=es-docker-cluster
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    ports:
+#      - "9200:9200"
+
+  # Main Application Component
+  # Options:
+  #   * TEST - Just build (and not serve the app). Comment this to enable local deployment.
+  #   * LOAD - Trigger a reload of the inserts in the database.
+  #            After running once, comment this out so the container will serve without reloading inserts.
+  #            Has no effect if TEST is specified.
+  app-portal:
+    build: .
+    container_name: fourfront
+    command: "/home/nginx/fourfront/entrypoint.sh"
+    environment:
+      # Default to caller's environment
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      # Needed to resolve env info
+      GLOBAL_ENV_BUCKET:
+      Auth0Client:
+      Auth0Secret:
+      # If RUN_TESTS is the empty string (false), tests will not be run. Otherwise, they will.
+      # Set RUN_TESTS=true to run tests in the container.
+      # (There will be no TEST: line here in the output if that is not set.)
+      TEST: "${RUN_TESTS}"
+      # If LOAD_INSERTS is the empty string (false), inserts will not be loaded. Otherwise, they will.
+      # Set LOAD_INSERTS=true to load inserts, usually only for the first run.
+      # (There will be no LOAD: line here in the output if that is not set.)
+      LOAD: "${LOAD_INSERTS}"
+      application_type: "local"  # use local entrypoint
+      ENCODED_VERSION: "local"
+      FOURFRONT_ENV_NAME: "ff-docker-${USER}-test"
+    ports:
+      - "8000:8000"  # nginx proxy port (note application traffic is not forwarded)
+    depends_on:
+      - db
+      #- es

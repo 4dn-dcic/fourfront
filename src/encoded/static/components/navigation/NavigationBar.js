@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import url from 'url';
 import _ from 'underscore';
 import Navbar from 'react-bootstrap/esm/Navbar';
-import { console, isSelectAction, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, isSelectAction, memoizedUrlParse, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { portalConfig } from './../globals';
 import { SearchBar, TestWarning, LeftNav, AccountNav, BigDropdownGroupController } from './components';
@@ -40,6 +40,8 @@ export class NavigationBar extends React.PureComponent {
         this.hideTestWarning = this.hideTestWarning.bind(this);
         this.closeMobileMenu = this.closeMobileMenu.bind(this);
         this.onToggleNavBar = this.onToggleNavBar.bind(this);
+        this.handleOpenSearchPanelClick = this.handleOpenSearchPanelClick.bind(this);
+        this.searchNavItemRef = React.createRef();
 
         let testWarning = true;
         const initHostName = memoizedUrlParse(props.href).hostname;
@@ -117,14 +119,26 @@ export class NavigationBar extends React.PureComponent {
         this.setState({ 'mobileDropdownOpen' : open });
     }
 
+    handleOpenSearchPanelClick(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.searchNavItemRef && this.searchNavItemRef.current) {
+            this.searchNavItemRef.current.handleToggle();
+        }
+    }
+
     render() {
         const { testWarning, mobileDropdownOpen, mounted } = this.state;
-        const { href, context, schemas, browseBaseState, isFullscreen, currentAction } = this.props;
+        const { href, context, schemas, browseBaseState, isFullscreen, windowWidth, currentAction } = this.props;
         const testWarningVisible = !!(testWarning & !isFullscreen & !isSelectAction(currentAction) ); // Hidden on full screen mode.
         const navClassName = (
             "navbar-container" +
             (testWarningVisible ? ' test-warning-visible' : '')
         );
+        const searchBarProps = {
+            currentAction, handleOpenSearchPanelClick: this.handleOpenSearchPanelClick,
+            href, browseBaseState, windowWidth, inCollapsible: false
+        };
 
         return (
             <div className={navClassName}>
@@ -138,11 +152,13 @@ export class NavigationBar extends React.PureComponent {
                                 <FourfrontLogo />
                             </a>
 
+                            <TopSearchBarItem {...searchBarProps} />
+
                             <Navbar.Toggle>
                                 <i className="icon icon-bars fas icon-fw align-middle" />
                             </Navbar.Toggle>
 
-                            <CollapsedNav {...this.props} {...{ testWarningVisible, mounted }} />
+                            <CollapsedNav {...this.props} {...{ testWarningVisible, mounted, handleOpenSearchPanelClick: this.handleOpenSearchPanelClick }} ref={this.searchNavItemRef} />
                         </Navbar>
                     </div>
                     <ChartDataController.Provider id="quick_info_bar1">
@@ -153,19 +169,20 @@ export class NavigationBar extends React.PureComponent {
         );
     }
 }
+const CollapsedNav = React.forwardRef((props, ref) => <CollapsedNavBody {...props} forwardRef={ref} />);
 
-const CollapsedNav = React.memo(function CollapsedNav(props) {
+const CollapsedNavBody = React.memo(function CollapsedNav(props) {
     const {
         href, currentAction, session, mounted,
         overlaysContainer, windowWidth, windowHeight,
         browseBaseState, testWarningVisible,
         addToBodyClassList, removeFromBodyClassList,
-        schemas, updateAppSessionState
+        schemas, updateAppSessionState, handleOpenSearchPanelClick, forwardRef
     } = props;
 
     const leftNavProps = {
         windowWidth, windowHeight, href, mounted, overlaysContainer, session,
-        testWarningVisible, browseBaseState//, addToBodyClassList, removeFromBodyClassList
+        testWarningVisible, browseBaseState, searchNavItemRef: forwardRef//, addToBodyClassList, removeFromBodyClassList
     };
 
     const userActionNavProps = {
@@ -173,13 +190,49 @@ const CollapsedNav = React.memo(function CollapsedNav(props) {
         schemas, updateAppSessionState, testWarningVisible
     };
 
+    const searchBarProps = {
+        currentAction, handleOpenSearchPanelClick,
+        href, browseBaseState, windowWidth, inCollapsible: true
+    };
+
     return (
         <Navbar.Collapse>
             <BigDropdownGroupController {...{ addToBodyClassList, removeFromBodyClassList }}>
                 <LeftNav {...leftNavProps} />
-                <SearchBar {...{ href, currentAction, browseBaseState }} />
+                <TopSearchBarItem {...searchBarProps} />
                 <AccountNav {...userActionNavProps} />
             </BigDropdownGroupController>
         </Navbar.Collapse>
     );
+});
+
+const TopSearchBarItem = React.memo(function (props) {
+    const { currentAction, href, browseBaseState, handleOpenSearchPanelClick, windowWidth, inCollapsible } = props;
+
+    if(isSelectAction(currentAction)){
+        return inCollapsible ? <SearchBar {...{ href, currentAction, browseBaseState }} /> : null;
+    }
+
+    const gridState = layout.responsiveGridState(windowWidth);
+    const isMobile = gridState === 'sm' || gridState === 'xs';
+    const isTablet = gridState === 'md';
+
+    const largeBar = (
+        <div className="desktop-search-bar-icon border border-secondary rounded p-2 mr-lg-5" onClick={handleOpenSearchPanelClick}>
+            <span className="text-black">Search ...</span>
+            <i className="icon icon-fw icon-search fas align-middle ml-auto order-2" />
+        </div>
+    );
+
+    const smallBar = (
+        <button className="mobile-search-bar-icon" type="button" onClick={handleOpenSearchPanelClick}>
+            <i className="icon icon-fw icon-search fas align-middle"></i>
+        </button>
+    );
+
+    if (inCollapsible) {
+        return isMobile ? null : (isTablet ? smallBar : largeBar);
+    } else {
+        return isMobile ? smallBar : null;
+    }
 });

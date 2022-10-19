@@ -224,7 +224,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             auth0_secret = registry.settings.get('auth0.secret')
             if auth0_client and auth0_secret:
                 # leeway accounts for clock drift between us and auth0
-                payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
+                payload = jwt.decode(token, auth0_secret,
                                      algorithms=JWT_DECODING_ALGORITHMS,
                                      audience=auth0_client, leeway=30)
                 if 'email' in payload and payload.get('email_verified') is True:
@@ -293,10 +293,7 @@ def login(context, request):
     if request_token is None:
         request_token = request.json_body.get("id_token", None)
 
-    request_parts = urlparse(request.referrer)
-    request_domain = request_parts.hostname
-
-    is_https = request_parts.scheme == "https"
+    is_https = request.scheme == "https"
 
 
     # The below 'check' is disabled to provide less feedback than possible
@@ -314,8 +311,7 @@ def login(context, request):
     request.response.set_cookie(
         "jwtToken",
         value=request_token,
-        # THE BELOW NEEDS TESTING RE: CLOUD ENVIRONMENT:
-        domain=request_domain,
+        domain=request.domain,
         path="/",
         httponly=True,
         samesite="strict",
@@ -340,14 +336,12 @@ def logout(context, request):
     The front-end handles logging out by discarding the locally-held JWT from
     browser cookies and re-requesting the current 4DN URL.
     """
-    request_parts = urlparse(request.referrer)
-    request_domain = request_parts.hostname
 
     # Deletes the cookie
     request.response.set_cookie(
         name='jwtToken',
         value=None,
-        domain=request_domain,
+        domain=request.domain,
         max_age=0,
         path='/',
         overwrite=True
@@ -495,20 +489,17 @@ def impersonate_user(context, request):
 
     id_token = jwt.encode(
         jwt_contents,
-        b64decode(auth0_secret, '-_'),
+        auth0_secret,
         algorithm=JWT_ENCODING_ALGORITHM
 	)
 
-    # Better place to get this maybe?
-    request_parts = urlparse(request.referrer)
-    request_domain = request_parts.hostname
-    is_https = request_parts.scheme == "https"
+    is_https = request.scheme == "https"
 
     request.response.set_cookie(
         "jwtToken",
         value=id_token.decode('utf-8'),
         # THE BELOW NEEDS TESTING RE: CLOUD ENVIRONMENT:
-        domain=request_domain,
+        domain=request.domain,
         path="/",
         httponly=True,
         samesite="strict",
@@ -566,7 +557,7 @@ def create_unauthorized_user(context, request):
         raise LoginDenied()
 
     email = "<no auth0 authenticated e-mail supplied>"
-    if hasattr(request, "_auth0_authenticated"):       
+    if hasattr(request, "_auth0_authenticated"):
         email = request._auth0_authenticated # equal to: jwt_info['email'].lower()
     user_props = request.json
     user_props_email = user_props.get("email", "<no e-mail supplied>").lower()

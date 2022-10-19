@@ -1,0 +1,133 @@
+#!/bin/bash -f
+
+aws_account=
+env_name=
+do_login=
+do_help=
+do_debug=
+env_name_is_ecosystem=
+do_simulated=
+creds_file=$HOME/.aws_test/test_creds.sh
+
+if [ -f "${creds_file}" ]; then
+  # Default the values of these variables by peeking in the test_creds.sh script
+  aws_account=`grep 'export ACCOUNT_NUMBER=' ${creds_file} | sed -E 's|^export ACCOUNT_NUMBER=(.*)$|\1|'`
+  env_name=`grep 'export ENV_NAME=' ${creds_file} | sed -E 's|^export ENV_NAME=(.*)$|\1|'`
+fi
+
+while [ $# -gt 0 ]; do
+  if [ "$1" = "--aws_account" ]; then
+    aws_account=$2
+    shift 2
+  elif [ "$1" = "--env_name" ]; then
+    env_name=$2
+    shift 2
+  elif [ "$1" = "--login" ]; then
+    do_login=TRUE
+    shift 1
+  elif [ "$1" = "--ecosystem" ]; then
+      # Everything in the rest of this really thinks this is an env_name,
+      # but that's OK for our purposes as long as we don't try to check
+      # it's the same as some declared thing.
+    env_name=$2
+    env_name_is_ecosystem=TRUE
+    shift 2
+  elif [ "$1" = "--help" ]; then
+    do_help=TRUE
+    shift 1
+  elif [ "$1" = "--debug" ]; then
+    do_debug=TRUE
+    shift 1
+  elif [ "$1" = "--simulated" ]; then
+    do_simulated=TRUE
+    shift 1
+  else
+    do_help=TRUE
+    break
+  fi
+done
+
+if [ -n "${do_debug}" ]; then
+  echo ""
+  echo " aws_account=${aws_account}"
+  echo " env_name=${env_name}"
+  echo " env_name_is_ecosystem=${env_name_is_ecosystem}"
+  echo " do_login=${do_login}"
+  echo " do_debug=${do_debug}"
+  echo " do_simulated=${do_simulated}"
+  echo ""
+fi
+
+if [ -n "${do_help}" ]; then
+  echo "Syntax: $0 { --aws_account <account> | --env_name <env> | --ecosystem <ecosystem> | --login | --debug | --simulated | --help }"
+  echo ""
+  echo " This will execute 'make build-docker-production AWS_ACCOUNT=<account> ENV_NAME=<env>'."
+  echo " If --login is given, 'make ecr-login AWS_ACCOUNT=<account>' will be done first."
+  echo " If --debug is given, additional instrumentation output will happen as it goes."
+  echo " if --simulated is given, no action will be taken."
+  echo " If --ecosystem is given, tries to upload to the repo's shared ECR repo by the indicated name, rather than to a specific environment."
+  echo " If unspecified, <account> defaults to '${aws_account}' (from 'export ACCOUNT_NUMBER=...' in ${creds_file})."
+  echo " If unspecified, <env> defaults to '${env_name}' (from 'export ENV_NAME=...' in ${creds_file}.)"
+  if [ ! -f "${creds_file}" ]; then
+    echo " NOTE: The file ${creds_file} does not exist."
+  fi
+  echo ""
+  exit 1
+fi
+
+if [ -z "${aws_account}" ]; then
+  echo "--aws_account was not given to $0 and could not be found in ~/.aws_test/test_creds.sh"
+  exit 1
+fi
+
+if [ -z "${env_name}" ]; then
+  echo "--env_name was not given to $0 and could not be found in ~/.aws_test/test_creds.sh."
+  exit 1
+fi
+
+if [ -n "${do_debug}" ]; then
+  echo "Using settings from ${creds_file} ..."
+fi
+
+if [ -e ${creds_file} ]; then
+
+    . ${creds_file}
+
+else
+
+    echo "Missing file ${creds_file}. You may need to activate test credentials."
+    exit 1
+
+fi
+
+
+if [ "${aws_account}" != "${ACCOUNT_NUMBER}" ]; then
+    echo "Data mismatch. \$aws_account='${aws_account}' but \$ACCOUNT_NUMBER='${ACCOUNT_NUMBER}'."
+    exit 1
+fi
+
+if [ "${env_name_is_ecosystem}" != "TRUE" ]; then
+
+    # We don't have clarity about what ecosystem variable to use yet,
+    # but definitely don't expect ENV_NAME to be set to it.
+    if [ "${env_name}" != "${ENV_NAME}" ]; then
+	echo "Data mismatch. \$env_name='${env_name}' but \$ENV_NAME='${ENV_NAME}'."
+	exit 1
+    fi
+
+fi
+
+if [ -n "${do_login}" ]; then
+  options=
+  if [ -n "${do_debug}" ]; then
+    options="${options} --debug"
+  fi
+  $(dirname $0)/ecr-test-login --aws_account "${aws_account}" ${options}
+fi
+
+if [ "${do_simulated}" = "TRUE" ]; then
+  echo "SIMULATED BUILD"
+  exit 0
+fi
+
+make build-docker-production AWS_ACCOUNT="${aws_account}" ENV_NAME="${env_name}"

@@ -15,6 +15,7 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/external_submission" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/modified" },
         { "$ref": "mixins.json#/release_dates" },
@@ -155,7 +156,7 @@
         "dataset_label" : {
             "title" : "Dataset"
         },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
+        "experiments_in_set.biosample.biosource.organism.name": {
             "title": "Organism"
         },
         "experiments_in_set.biosample.biosample_type": {
@@ -245,7 +246,7 @@
         "experiments_in_set.experiment_categorizer.combined" : {
             "title" : "Assay Details"
         },
-        "experiments_in_set.biosample.biosource.individual.organism.name": {
+        "experiments_in_set.biosample.biosource.organism.name": {
             "title" : "Organism",
             "default_hidden": true
         },

@@ -63,7 +63,6 @@ h4.tab-section-title {
 			padding-right: 18px;
 			margin-right: 0px;
 			height: 38px;
-			line-height: 36px;
 			padding-top: 0px;
 			padding-bottom: 0px;
 			border-bottom: 1px solid transparent;
@@ -122,6 +121,9 @@ h4.tab-section-title {
 				user-select: none;
 				font-weight: 500;
 				font-size: 1.05rem;
+				height: 100%;
+				display: flex;
+				align-items: center;
 
 				i.icon {
 					margin-right: 3px;
@@ -145,6 +147,7 @@ h4.tab-section-title {
 		.rc-tabs-tab-prev {
 
 			display: none;
+			transition: none;
 
 			&.rc-tabs-tab-arrow-show {
 				display: block;
@@ -835,6 +838,29 @@ $download-button-width : 100px;
     margin-bottom: 2px;
     border-bottom: 1px solid #f4f4f4;
 	margin-top: 20px;
+}
+
+/*** metadata.tsv modal ***/
+pre.curl-command {
+	border: 1px dashed #dedede;
+	padding: 5px;
+	text-overflow: ellipsis;
+}
+.curl-command-wrapper i.icon-copy {
+	margin-left: 5px;
+
+	&:after {
+		content : "Copy";
+		font-family: $font-family-base;
+		font-weight: 600;
+		padding-left: 6px;
+	}
+}
+.important-notes-section {
+	margin-bottom: 25px;
+	@include media-breakpoint-only(xs){
+		margin-bottom: 15px !important;
+	}
 }
 
 /**********************************************************
@@ -1626,6 +1652,10 @@ $badge-item-min-height: 90px;
 					}
 				}
 
+				div.view-more-button {
+					font-size: 0.9rem;
+					padding-left: 10px;
+				}
 			}
 		}
 	}
@@ -1806,7 +1836,6 @@ $badge-item-min-height: 90px;
 			padding-left: 16px;
 			padding-right: 16px;
 			body:not(.is-full-screen) & {
-				@include make-max-widths-container-width();
 				@include media-breakpoint-up(md) {
 					padding-left: 0;
 					padding-right: 0;
@@ -1984,7 +2013,9 @@ $badge-item-min-height: 90px;
 }
 
 
-/** HiGlass Views **/
+/**********************************************************
+			HiGlass + MicroMeta + Vitessce Tabs
+**********************************************************/
 
 .higlass-wrapper {
 
@@ -2058,11 +2089,169 @@ $badge-item-min-height: 90px;
 	}
 }
 
+.vitessce-wrapper {
+	.vitessce-container.vitessce-theme-light {
+		.bg-primary, .bg-secondary {
+			background-color: #F1F1F1 !important;
+		}
+	}
+	.vitessce-container.vitessce-theme-dark {
+		.bg-primary, .bg-secondary {
+			background-color: #222 !important;
+		}
+	}
+}
+
+// .micro-meta-app-wrapper {
+// 	.micro-meta-app-instance {
+// 		transition: opacity 1s;
+// 		opacity: 0;
+// 	}
+// }
+
 /* override default editable field css for HiGlass Views */
 .higlass-editable-page-title.editable-field-entry.editing,
-.higlass-item-page-heading .editable-field-entry.editing {
+.higlass-item-page-heading .editable-field-entry.editing,
+.micro-meta-editable-page-title.editable-field-entry.editing,
+.micro-meta-item-page-heading .editable-field-entry.editing {
 	.input-text {
 		width: 100% !important;
+	}
+}
+.full-screen-view .micrometa-container-container {
+	padding-left: 17px;
+}
+.micro-meta-zoom {
+	height: 30px;
+	&:before {
+		content: "";
+  		display: inline-block;
+  		vertical-align: middle;
+  		height: 100%;
+	}
+	> div {
+		display: inline-block !important;
+		vertical-align: middle;
+	}
+}
+.microscopy-create-modal {
+	input.has-error {
+		border-color: red;
+	}
+	input.has-success {
+		border-color: #5b8c55;
+	}
+}
+.micro-meta-summary-results {
+	.row {
+		margin-left: 0px !important;
+	}
+
+	.summary-header {
+		background-color: #22656d;
+		border-bottom: none;
+		color: #fff;
+		height: 46px;
+	}
+	.summary-sub-header {
+		border-bottom: none;
+		height: 46px;
+		font-size: 1.25rem;
+		font-weight: 500;
+		@include media-breakpoint-down(sm){
+			.text-truncate {
+				overflow-y: auto !important;
+			}
+		}
+	}
+	.summary-section-header {
+		background-color: #22656d;
+		border-bottom: none;
+		color: #fff;
+		height: 36px;
+
+		h4 {
+			font-size: 1.1rem;
+		}
+		i {
+			cursor: pointer;
+		}
+	}
+	.summary-title-column {
+		display: flex;
+		align-items: center;
+	}
+	.summary-title {
+		font-weight: 300;
+		margin: 0;
+		line-height: inherit;
+		color: inherit;
+		display: inline;
+	}
+	.summary-item-row {
+		border-bottom: none;
+		height: 36px;
+		font-size: 1rem;
+		font-weight: 300;
+		border-bottom: 1px solid #dcdcdc;
+
+		.summary-item-row-header {
+			font-weight: 500;
+			background-color: #dedede;
+			padding-top: 10px;
+
+			@include media-breakpoint-down(sm){
+				max-width: 33% !important;
+			}
+		}
+		.summary-item-column {
+			padding-top: 10px;
+			font-weight: 300;
+			border-right: 1px dotted rgba(0,0,0,.075);
+			
+			@include media-breakpoint-down(sm){
+				max-width: 66% !important;
+			}
+		}
+	}
+	.prev-next-button-container {
+		position: absolute;
+		top: 5px;
+		bottom: 5px;
+		right: 10px;
+		z-index: 10;
+
+		> button {
+			padding-left: 0;
+			padding-right: 0;
+			position: relative;
+			height: 100%;
+			width: 36px;
+			border: 1px solid #343A40;
+			background: transparent;
+			border-radius: 3px;
+			outline: none;
+			transition: background-color .3s;
+
+			> .icon-container {
+				width: 100%;
+				text-align: center;
+				> i.icon {
+					position: relative;
+					display: block;
+					margin: 0 auto;
+				}
+			}
+
+			&:hover {
+				background-color: #eee;
+			}
+		}
+	}
+}
+.higlass-files-table-section {
+	h3.tab-section-title {
+		line-height: 40px;
 	}
 }
 
@@ -2086,49 +2275,6 @@ $badge-item-min-height: 90px;
 	}
 }
 
-/* Disabled for now - can't reliably target menu items (same classNames)
-.hg-popup {
-
-	.context-menu-item > div {
-		> .ContextMenu-module_context-menu-hr-3yapb:nth-child(4),
-		> .ContextMenu-module_context-menu-item-1HeVv:nth-child(5) {
-			display: none;
-		}
-	}
-
-	> .ContextMenu-module_context-menu-2OwvL {
-		.ContextMenu-module_context-menu-item-1HeVv:nth-child(6),
-		.ContextMenu-module_context-menu-item-1HeVv:nth-child(8) {
-			display: none;
-		}
-	}
-
-}
-*/
-
-/** Microscopy Configuration **/
-#microscopy-app-container {
-	.droptarget{
-		img { 
-			height: 100%;
-		}
-		> div > div:first-child {
-			top: -3px !important;
-		}
-	}
-	.rc-tabs-content {
-		margin-left: 0px !important;
-	}
-
-	.rc-tabs-tab-btn {
-		outline: none;
-	}
-
-	#microscopy-app-overlays-container > div:first-child > div:first-child > div:first-child {
-		padding-bottom: 20px;
-	}
-}
-.microscopy-create-modal .modal-body .btn {width: 100% !important;}
 
 /**********************************************************
 		User Profile Page

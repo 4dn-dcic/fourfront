@@ -36,6 +36,17 @@
                 "archived to project"
             ]
         },
+        "viewable_by": {
+            "title": "Viewable By",
+            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "View Group",
+                "type": "string"
+            }
+        },
         "accession": {
             "accessionType": "EX"
         },
@@ -218,7 +229,7 @@
         "experiment_type.display_title" : {
             "title" : "Experiment Type"
         },
-        "biosample.biosource.individual.organism.name": {
+        "biosample.biosource.organism.name": {
             "title": "Organism"
         },
         "biosample.biosample_type": {
@@ -241,17 +252,20 @@
         }
     },
     "columns": {
-        "biosample.biosource.individual.organism.name": {
+        "biosample.biosource.organism.name": {
             "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
+            "title": "Biosource Type"
         },
         "biosample.biosource_summary": {
             "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
+        },
+        "crosslinking_method": {
+            "title": "Crosslinking Method"
         },
         "biosample.modifications.display_title": {
             "title": "Modifications"

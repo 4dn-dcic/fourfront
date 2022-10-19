@@ -49,7 +49,7 @@ export default class HomePage extends React.PureComponent {
         );
         const twitterTimelineEmbed = (
             <TwitterTimelineEmbed sourceType="profile" screenName="4dn_dcic"
-                placeholder={twitterPlaceholder} autoHeight noFooter noHeader />
+                placeholder={twitterPlaceholder} autoHeight noFooter noHeader options={{ id: "profile:4dn_dcic" }} />
         );
 
         return (
@@ -115,7 +115,7 @@ class BigBrowseButton extends React.Component {
         'element' : 'a',
         'className' : "btn btn-block btn-primary btn-lg text-400",
         'children' : 'Browse 4DN Data'
-    }
+    };
 
     constructor(props){
         super(props);

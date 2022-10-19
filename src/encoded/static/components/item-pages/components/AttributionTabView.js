@@ -7,6 +7,8 @@ import ReactTooltip from 'react-tooltip';
 import { FormattedInfoBlock, WrappedCollapsibleList } from './FormattedInfoBlock';
 import { Publications } from './Publications';
 import { ItemFooterRow } from './ItemFooterRow';
+import { getTabStaticContent } from './TabbedView';
+import { UserContentBodyList } from './../../static-pages/components';
 
 
 // TODO memoized component
@@ -76,6 +78,7 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
     const awardExists = (award && !award.error);
     const labsExist = (lab && !lab.error) || contributing_labs.length > 0;
     const submittedByExists = submitted_by && !submitted_by.error;
+    const staticContent = getTabStaticContent(context, 'tab:attribution');
 
     return (
         <div className="info-area">
@@ -103,6 +106,13 @@ export const AttributionTabView = React.memo(function AttributionTabView({ conte
                     : null }
 
             </div>
+
+            { staticContent.length > 0 ?
+                <div className="mt-2">
+                    <hr />
+                    <UserContentBodyList contents={staticContent} />
+                </div>
+                : null}
 
             <ItemFooterRow {...{ context, schemas, width }} />
         </div>

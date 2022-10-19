@@ -39,13 +39,13 @@
             "description": "The method used to make the treatment.",
             "type": "string",
             "lookup": 20,
-            "enum" : [
+            "suggested_enum" : [
                 "Biological",
                 "Transient Transfection",
                 "Chemical",
                 "Heat Shock",
                 "Cold Shock",
-                "Other"
+                "Light"
             ]
         },
         "chemical": {
@@ -94,8 +94,12 @@
                 "units",
                 "U/mL",
                 "MOI",
-                "PFU"
-              ]
+                "PFU",
+                "lux"
+            ],
+            "ignored_enum": [
+                "μl"
+            ]
         },
         "duration": {
             "title": "Duration",

@@ -40,11 +40,24 @@ LoginNavItem.propTypes = {
  * and not require to move up and pass down login-related stuff like `showLock()`.
  */
 export const onLoginNavItemClick = function(e) {
-    e.preventDefault();
+    if (e) {
+        e.preventDefault();
+    }
     const btnElem = document.getElementById("loginbtn");
-    if (btnElem && typeof btnElem.click === "function"){
+    if (btnElem && typeof btnElem.click === "function") {
         // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click
         btnElem.click();
     }
     return false;
+};
+
+export const NotLoggedInAlert = {
+    "title" : "Not Logged In",
+    "message" : (
+        <span>
+            You are currently browsing as guest, please <a onClick={onLoginNavItemClick} href="#loginbtn">login</a> if you have an account.
+        </span>
+    ),
+    "style" : "warning",
+    "navigateDisappearThreshold" : 2
 };

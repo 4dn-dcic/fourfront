@@ -1,6 +1,7 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
 import itertools
+import re
 
 from snovault import (
     abstract_collection,
@@ -151,9 +152,11 @@ class Experiment(Item):
         'biosample.biosource.tissue.term_name',
         'biosample.biosource.tissue.term_id',
 
+        # Individual linkTo
+        'biosample.biosource.individual.protected_data',
+
         # Organism linkTo
-        'biosample.biosource.individual.organism.name',
-        'biosample.biosource.individual.organism.scientific_name',
+        'biosample.biosource.organism.name',
 
         # Modification linkTo
         'biosample.modifications.modification_type',
@@ -205,9 +208,17 @@ class Experiment(Item):
         'files.file_size',
         'files.upload_key',
         'files.file_classification',
+        'files.file_type',
         'files.file_type_detailed',
         'files.paired_end',
+        'files.notes_to_tsv',
+        'files.dbxrefs',
         'files.external_references.*',
+        'files.related_files.relationship_type',
+        'files.related_files.file.accession',
+        'files.related_files.file.paired_end',
+        'files.related_files.file.file_type',
+        'files.related_files.file.file_type_detailed',
 
         # FileFormat linkTo
         'files.file_format.file_format',
@@ -226,6 +237,7 @@ class Experiment(Item):
         'processed_files.file_size',
         'processed_files.upload_key',
         'processed_files.file_classification',
+        'processed_files.file_type',
         'processed_files.file_type_detailed',
         'processed_files.external_references.*',
 
@@ -238,6 +250,11 @@ class Experiment(Item):
         'processed_files.quality_metric.quality_metric_summary.*',
         'processed_files.quality_metric.Total reads',
         'processed_files.quality_metric.qc_list.value.Total reads',
+
+        # Static Section linkTo
+        'processed_files.static_content.location',
+        'processed_files.static_content.description',
+        'processed_files.static_content.content.@type',
 
         # Object
         'other_processed_files.title',
@@ -253,6 +270,7 @@ class Experiment(Item):
         "processed_files.upload_key",
         "processed_files.file_format",
         "processed_files.file_classification",
+        "processed_files.file_type",
         "processed_files.file_type_detailed",
         "processed_files.external_references.*",
         "processed_files.quality_metric.url",
@@ -264,7 +282,9 @@ class Experiment(Item):
         "processed_files.open_data_url",
         "processed_files.track_and_facet_info.*",
 
+        "other_processed_files.files.accession",
         "other_processed_files.files.href",
+        "other_processed_files.files.file_type",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_size",
         "other_processed_files.files.higlass_uid",
@@ -280,6 +300,11 @@ class Experiment(Item):
         # FileFormat linkTo
         "other_processed_files.files.file_format.file_format",
 
+        # Static Section linkTo
+        "other_processed_files.files.static_content.location",
+        "other_processed_files.files.static_content.description",
+        "other_processed_files.files.static_content.content.@type",
+
         # last modification (since just time, no invalidation)
         "other_processed_files.files.last_modified.date_modified",
 
@@ -288,12 +313,24 @@ class Experiment(Item):
         'other_processed_files.files.quality_metric.overall_quality_status',
         'other_processed_files.files.quality_metric.quality_metric_summary.*',
 
+        # higlass view config linkTO
+        "other_processed_files.higlass_view_config.description",
+        "other_processed_files.higlass_view_config.last_modified.date_modified",
+
         # FileReference linkTo
         "reference_files.accession",
+        "reference_files.file_type",
         "reference_files.file_type_detailed",
         "reference_files.file_size",
+        "reference_files.file_format.file_format",
         "reference_files.file_classification",
-        "reference_files.status"
+        "reference_files.status",
+        "reference_files.notes_to_tsv",
+
+        # Static Section linkTo
+        "reference_files.static_content.location",
+        "reference_files.static_content.description",
+        "reference_files.static_content.content.@type"
     ]
 
     def generate_mapid(self, experiment_type, num):
@@ -613,6 +650,18 @@ class ExperimentCaptureC(Experiment):
         return super(ExperimentCaptureC, self).experiment_categorizer(request, experiment_type, digestion_enzyme)
 
 
+def _build_experiment_repliseq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentRepliseq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-repliseq',
     unique_key='accession',
@@ -624,7 +673,7 @@ class ExperimentRepliseq(Experiment):
     """The experiment class for Repli-seq experiments."""
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_repliseq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -706,6 +755,18 @@ class ExperimentAtacseq(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample))
 
 
+def _build_experiment_chiapet_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentChiapet.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-chiapet',
     unique_key='accession',
@@ -718,7 +779,7 @@ class ExperimentChiapet(Experiment):
 
     item_type = 'experiment_chiapet'
     schema = load_schema('encoded:schemas/experiment_chiapet.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_chiapet_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -795,6 +856,18 @@ class ExperimentDamid(Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
+def _build_experiment_seq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentSeq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds
+    )
+
+
 @collection(
     name='experiments-seq',
     unique_key='accession',
@@ -807,7 +880,7 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
 
     item_type = 'experiment_seq'
     schema = load_schema('encoded:schemas/experiment_seq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_seq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -839,6 +912,21 @@ class ExperimentSeq(ItemWithAttachment, Experiment):
         return self.add_accession_to_title(self.experiment_summary(request, experiment_type, biosample, targeted_factor))
 
 
+def _build_experiment_tsaseq_embedded_list():
+    """ Helper function intended to be used to create the embedded list for ExperimentTsaseq.
+        All types should implement a function like this going forward.
+    """
+    antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='antibody',
+        t='antibody')
+    secondary_antibody_embeds = DependencyEmbedder.embed_defaults_for_type(
+        base_path='secondary_antibody',
+        t='antibody')
+    return (
+        Experiment.embedded_list + antibody_embeds + secondary_antibody_embeds
+    )
+
+
 @collection(
     name='experiments-tsaseq',
     unique_key='accession',
@@ -851,7 +939,7 @@ class ExperimentTsaseq(ItemWithAttachment, Experiment):
 
     item_type = 'experiment_tsaseq'
     schema = load_schema('encoded:schemas/experiment_tsaseq.json')
-    embedded_list = Experiment.embedded_list
+    embedded_list = _build_experiment_tsaseq_embedded_list()
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -891,10 +979,7 @@ def _build_experiment_mic_embedded_list():
         base_path='imaging_paths.path',
         t='imaging_path',
         additional_embeds=['imaging_rounds', 'experiment_type.title'])
-    imaging_path_target_embeds = DependencyEmbedder.embed_defaults_for_type(
-        base_path='imaging_paths.path.target',
-        t='bio_feature')
-    return (Experiment.embedded_list + imaging_path_embeds + imaging_path_target_embeds + [
+    return (Experiment.embedded_list + imaging_path_embeds + [
         # Files linkTo
         'files.accession',  # detect display_title diff
 
@@ -909,6 +994,12 @@ def _build_experiment_mic_embedded_list():
         'files.microscope_settings.ch02_lasers_diodes',
         'files.microscope_settings.ch03_lasers_diodes',
         'files.microscope_settings.ch04_lasers_diodes',
+
+        # MicroscopeConfiguration linkTo
+        'microscope_configuration_master.title',
+        'microscope_configuration_master.microscope.Name',
+        'files.microscope_configuration.title',
+        'files.microscope_configuration.microscope.Name',
 
         # Image linkTo
         'sample_image.title',
@@ -964,14 +1055,30 @@ class ExperimentMic(Experiment):
     def experiment_categorizer(self, request, experiment_type, biosample, imaging_paths=None):
         ''' Use the target(s) in the imaging path'''
         if imaging_paths:
+            unique_targets = []
             path_targets = []
             for pathobj in imaging_paths:
-                path = request.embed('/', pathobj['path'], '@@object')
+                path = get_item_or_none(request, pathobj['path'], 'imaging_path')
                 for target in path.get('target', []):
-                    summ = request.embed('/', target, '@@object')['display_title']
-                    path_targets.append(summ)
+                    biofeature = get_item_or_none(request, target, 'bio_feature')
+                    if biofeature['@id'] not in unique_targets:
+                        unique_targets.append(biofeature['@id'])
+                        path_targets.append(biofeature['display_title'])
             if path_targets:
-                value = ', '.join(list(set(path_targets)))
+                value = []
+                sum_targets = {}
+                for target in path_targets:
+                    # check if target starts with numbers, e.g. '50 TADs', '40 TADs'
+                    # sum them if there are more: '90 TADs'
+                    split_target = re.split(r'(^[0-9]+)', target, maxsplit=1)
+                    if len(split_target) > 1:
+                        t_num, t_name = split_target[1:3]
+                        sum_targets[t_name] = sum_targets.setdefault(t_name, 0) + int(t_num)
+                    elif target not in value:
+                        value.append(target)
+                if sum_targets:
+                    value = [str(n) + t for t, n in sum_targets.items()] + value
+                value = ', '.join(value)
                 return {
                     'field': 'Target',
                     'value': value,

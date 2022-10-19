@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import _ from 'underscore';
-import moment from 'moment';
+import { format } from "date-fns";
 import ReactTooltip from 'react-tooltip';
 
 import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -98,7 +98,7 @@ export default class WorkflowRunTracingView extends DefaultItemView {
         const opts = {};
 
         if (!cache) {
-            opts.timestamp = moment.utc().unix();
+            opts.timestamp = format(new Date(), 't');
         }
         if (this.state.allRuns === true){
             opts.all_runs = true;

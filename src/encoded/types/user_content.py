@@ -1,11 +1,14 @@
 """Abstract collection for UserContent and sub-classes of StaticSection, HiglassViewConfig, etc."""
 
+from argparse import FileType
+from uuid import uuid4
 from snovault import (
     abstract_collection,
     calculated_property,
     collection,
     load_schema
 )
+import docutils.core
 from snovault.interfaces import STORAGE
 from .base import (
     Item,
@@ -33,6 +36,8 @@ class UserContent(Item):
     base_types = ['UserContent'] + Item.base_types
     schema = load_schema('encoded:schemas/user_content.json')
     embedded_list = lab_award_attribution_embed_list
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['name']
 
     STATUS_ACL = {              # Defaults + allow owner to edit (in case owner has no labs or submit_for)
         'released'              : ALLOW_OWNER_EDIT + ALLOW_CURRENT,
@@ -129,6 +134,20 @@ class StaticSection(UserContent):
         return None
 
     @calculated_property(schema={
+        "title": "Content as HTML",
+        "description": "Converted content into HTML (Currently, only RST content is supported)",
+        "type": "string"
+    })
+    def content_as_html(self, request, body=None, file=None, options=None):
+        file_type = self.filetype(request, body, file, options)
+        if file_type == 'rst':
+            content = self.content(request, body, file)
+            if content is not None:
+                output = docutils.core.publish_parts(content, writer_name='html')
+                return output["html_body"]
+        return None
+
+    @calculated_property(schema={
         "title": "File Type",
         "description": "Type of file used for content",
         "type": "string"
@@ -214,6 +233,83 @@ class HiglassViewConfig(UserContent):
             super(HiglassViewConfig.Collection, self).__init__(*args, **kw)
             self.__acl__ = ALLOW_ANY_USER_ADD
 
+
+@collection(
+    name='microscope-configurations',
+    properties={
+        'title': 'Microscope Configurations',
+        'description': 'Collection of Metadata for microscope configurations of various Tiers',
+    })
+class MicroscopeConfiguration(UserContent):
+    """The MicroscopeConfiguration class that holds configuration of a microscope."""
+
+    item_type = 'microscope_configuration'
+    schema = load_schema('encoded:schemas/microscope_configuration.json')
+    # the following fields are patched by the update method and should always be included in the invalidation diff
+    default_diff = ['description']
+
+    STATUS_ACL = {
+        'released'              : ALLOW_CURRENT,
+        'deleted'               : DELETED,
+        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
+        'released to project'   : ALLOW_VIEWING_GROUP_VIEW
+    }
+
+    def _update(self, properties, sheets=None):
+        if properties.get('microscope'):
+            microscope = properties.get('microscope')
+            # set microscope ID if empty
+            if not microscope.get('ID'):
+                microscope['ID'] = str(uuid4())
+            # always sync item's description to microscope's description
+            microscopeDesc = microscope.get('Description', '')
+            properties['description'] = microscopeDesc
+        super(MicroscopeConfiguration, self)._update(properties, sheets)
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, microscope, title=None):
+        return title or microscope.get("Name")
+
+    class Collection(Item.Collection):
+        '''
+        This extension of the default Item collection allows any User to create a new version of these.
+        Emulates base.py Item collection setting of self.__acl__
+        '''
+        def __init__(self, *args, **kw):
+            super(MicroscopeConfiguration.Collection, self).__init__(*args, **kw)
+            self.__acl__ = ALLOW_ANY_USER_ADD
+
+
+@collection(
+    name='image-settings',
+    properties={
+        'title': 'Image Settings',
+        'description': 'Listing of ImageSetting Items.',
+    })
+class ImageSetting(UserContent):
+    """Image Settings class."""
+
+    item_type = 'image_setting'
+    schema = load_schema('encoded:schemas/image_setting.json')
+    STATUS_ACL = {
+        'released'              : ALLOW_CURRENT,
+        'deleted'               : DELETED,
+        'draft'                 : ALLOW_OWNER_EDIT + ALLOW_LAB_SUBMITTER_EDIT,
+        'released to project'   : ALLOW_VIEWING_GROUP_VIEW
+    }
+
+    class Collection(Item.Collection):
+        '''
+        This extension of the default Item collection allows any User to create a new version of these.
+        Emulates base.py Item collection setting of self.__acl__
+        '''
+        def __init__(self, *args, **kw):
+            super(ImageSetting.Collection, self).__init__(*args, **kw)
+            self.__acl__ = ALLOW_ANY_USER_ADD
 
 
 def get_local_file_contents(filename, contentFilesLocation=None):

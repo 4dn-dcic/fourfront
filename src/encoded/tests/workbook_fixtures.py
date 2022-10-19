@@ -1,10 +1,12 @@
 import os
 import pkg_resources
 import pytest
+import time
 import webtest
 
 from snovault import DBSESSION
 from snovault.elasticsearch import create_mapping
+from snovault.util import generate_indexer_namespace_for_testing
 from .. import main
 from ..loadxl import load_all
 from .conftest_settings import make_app_settings_dictionary
@@ -19,6 +21,9 @@ def external_tx():
     pass
 
 
+INDEXER_NAMESPACE_FOR_TESTING = generate_indexer_namespace_for_testing('ff')
+
+
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server, aws_auth):
     settings = make_app_settings_dictionary()
@@ -29,7 +34,7 @@ def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server,
     settings['collection_datastore'] = 'elasticsearch'
     settings['item_datastore'] = 'elasticsearch'
     settings['indexer'] = True
-    settings['indexer.namespace'] = os.environ.get('TRAVIS_JOB_ID', '') # set namespace for tests
+    settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
 
     # use aws auth to access elasticsearch
     if aws_auth:
@@ -67,6 +72,8 @@ def workbook(app):
     if load_res:
         raise(load_res)
 
+    time.sleep(3)  # Fixture is time-consuming anyway, so indulge a sleep to let SQS internals to catch up
     testapp.post_json('/index', {})
     yield
-    # XXX cleanup
+    # There is no cleanup because this fixture is designed to leave data in effect for reuse.
+    # Tt's expected all tests are read-only. -kmp 28-Sep-2021

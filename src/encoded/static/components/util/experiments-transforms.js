@@ -1,11 +1,13 @@
 'use strict';
 
+import React from 'react';
 import _ from 'underscore';
 import { atIdFromObject } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/object';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
 
 // eslint-disable-next-line no-unused-vars
 import { Item, File, Experiment, ExperimentSet } from './typedefs';
+import { Schemas } from './';
 
 
 
@@ -100,10 +102,11 @@ export function fileToAccessionTriple(file, hasExperiment = true, toString = fal
  * properties, into a list of strings which represent them.
  *
  * @param {File[]} files                        Files which to convert to accession triples. Must have 'from_experiment' properties (provided by other funcs).
+ * @param {boolean} hasExperiment
  * @param {boolean|string} [toString=false]     Whether to concatanate resulting accession items into strings delimited by a tilde (`~`). If string is supplied, it is used as delimiter instead.
  * @returns {string[]} List of arrays or strings in form of EXPSETACCESSION~EXPACESSION~FILEACCESSION. EXPACESSION may be "NONE".
  */
-export function filesToAccessionTriples(files,hasExperiment = true, toString = false){
+export function filesToAccessionTriples(files, hasExperiment = true, toString = false){
     return _.map(files || [], function(file){
         return fileToAccessionTriple(file, hasExperiment, toString);
     });
@@ -459,7 +462,9 @@ export function flattenFileSetsToFilesIfNoFilesForEachExperiment(experiments){
 export function groupExperimentsByBiosampleRepNo(experiments){
     return _(experiments || []).chain()
         .groupBy(function(exp){
-            return exp.biosample.bio_rep_no;
+            // if experimentset_type is not replicate then experiments lack bio_rep_no
+            // so as fallback case we also group by @id
+            return exp.biosample.bio_rep_no || exp.biosample['@id'];
         })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
         .pairs()    // Creates [['1', [expObjWBiosample1-1, expObjWBiosample1-2]], ['2', [expObjWBiosample2-1, expObjWBiosample2-2]], ...]
         .sortBy(function(expSet){ return parseInt(expSet[0]); }) // Sort outer list (biosamples) by bio_rep_no
@@ -478,4 +483,23 @@ export function groupExperimentsByBiosample(experiments){
         .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
         .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
         .value();
+}
+
+/**
+ * append status column to columnHeaders if it is not included already and there are multiple status found in files
+ * @param {{ columnClass: string, title: string, field: string, initialWidth: number }[]} columnHeaders 
+ * @param {File[]} files 
+ * @returns object of { status, columnHeaders }. status field is string if all files have the same status otherwise string[]
+ */
+ export function addFilesStackedTableStatusColHeader(columnHeaders, files, collectionStatus) {
+    if (Array.isArray(columnHeaders) && Array.isArray(collectionStatus) && !_.any(columnHeaders, (colHeader) => colHeader.field === 'status')) {
+        return [ ...columnHeaders, {
+            columnClass: 'file-detail', title: 'Status', initialWidth: 30, field: "status",
+            render: function (file, field, detailIndex, fileEntryBlockProps) {
+                const capitalizedStatus = Schemas.Term.toName("status", file.status);
+                return <i className="item-status-indicator-dot" data-status={file.status} data-tip={capitalizedStatus} />;
+            }
+        } ];
+    }
+    return columnHeaders;
 }

@@ -4,7 +4,7 @@ const { spawn } = require('child_process');
 const PluginError = require('plugin-error');
 const log = require('fancy-log');
 const webpack = require('webpack');
-const sass = require('node-sass');
+const sass = require('sass');
 const fs = require('fs');
 
 
@@ -167,7 +167,7 @@ function watchSharedPortalComponents(done){
 }
 
 function getMicroscopyMetadataToolLink(){
-    let metadataToolPath = path.resolve(__dirname, 'node_modules/4dn-microscopy-metadata-tool');
+    let metadataToolPath = path.resolve(__dirname, 'node_modules/micro-meta-app-react');
     const origPath = metadataToolPath;
 
     // Follow any symlinks to get to real path.
@@ -176,7 +176,7 @@ function getMicroscopyMetadataToolLink(){
     const isLinked = origPath !== metadataToolPath;
 
     console.log(
-        "`4dn-microscopy-metadata-tool` directory is",
+        "`micro-meta-app-react` directory is",
         isLinked ? "sym-linked to `" + metadataToolPath + "`." : "NOT sym-linked."
     );
 
@@ -191,7 +191,7 @@ function buildMicroscopyMetadataTool(done){
         return;
     }
 
-    // Same as 4dn-microscopy-metadata-tool own build method, but with "--watch"
+    // Same as micro-meta-app-react own build method, but with "--watch"
     const subP = spawn(
         path.join(metadataToolPath, 'node_modules/.bin/babel'),
         [
@@ -223,7 +223,7 @@ function watchMicroscopyMetadataTool(done){
         return;
     }
 
-    // Same as 4dn-microscopy-metadata-tool own build method, but with "--watch"
+    // Same as micro-meta-app-react own build method, but with "--watch"
     const subP = spawn(
         path.join(metadataToolPath, 'node_modules/.bin/babel'),
         [
@@ -249,7 +249,7 @@ function watchMicroscopyMetadataTool(done){
 }
 
 
-// TODO: Just use command-line `node-sass` ?
+// TODO: Just use command-line `sass` ?
 
 const cssOutputLocation = './src/encoded/static/css/style.css';
 const sourceMapLocation = "./src/encoded/static/css/style.css.map";
@@ -309,7 +309,7 @@ const devQuick = gulp.series(
     doWebpack,
     gulp.parallel(watch, watchSharedPortalComponents, watchMicroscopyMetadataTool)
     // `watchSharedPortalComponents` will update @hms-dbmi-bgm/shared-portal-components/es/,
-    // `watchMicroscopyMetadataTool` will update 4dn-microscopy-metadata-tool/es/,
+    // `watchMicroscopyMetadataTool` will update micro-meta-app-react/es/,
     // which will be picked up by `watch` and recompiled into bundle.js
 );
 

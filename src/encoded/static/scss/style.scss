@@ -8,7 +8,7 @@
 
 @import "encoded/base";
 
-@import "bootstrap/bootstrap";
+@import "../../../../node_modules/bootstrap/scss/bootstrap";
 
 // Some are used in shared-portal-components scss
 @import "encoded/bootstrap-theme-overrides";
@@ -32,7 +32,7 @@
 // @import "../../../../node_modules/@hms-dbmi-bgm/shared-portal-components/scss/active-filters-bar.scss"; is imported in encoded/modules/search.scss
 
 // Micrometa App scss
-@import "../../../../node_modules/4dn-microscopy-metadata-tool/public/assets/scss/style-new.scss";
+@import "../../../../node_modules/micro-meta-app-react/public/assets/scss/style-new-2.scss";
 
 // ENCODE Layout etc.
 

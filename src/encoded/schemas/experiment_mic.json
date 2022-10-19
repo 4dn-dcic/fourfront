@@ -53,6 +53,7 @@
                 "Swept-Field Confocal",
                 "STED",
                 "STORM",
+                "dSTORM",
                 "Light-Sheet",
                 "Electron Microscopy",
                 "TIRF",
@@ -70,7 +71,7 @@
             "title": "Imaging Paths",
             "description": "Target to label connections in each channel.",
             "type":  "array",
-            "lookup": 63,
+            "lookup": 62,
             "items": {
                 "title": "Imaging path",
                 "type": "object",
@@ -93,9 +94,22 @@
         },
         "microscope_settings_master": {
             "type": "string",
-            "lookup": 62,
+            "lookup": 71,
             "title": "Master Microscope Settings",
             "linkTo": "MicroscopeSetting"
+        },
+        "microscope_configuration_master": {
+            "type": "string",
+            "lookup": 72,
+            "title": "Master Microscope Configuration",
+            "description": "Hardware configuration for the microscope instrument",
+            "linkTo": "MicroscopeConfiguration"
+        },
+        "image_settings_master": {
+            "type": "string",
+            "lookup": 73,
+            "title": "Master Image Settings",
+            "linkTo": "ImageSetting"
         },
         "plate_id": {
             "title": "Plate ID",
@@ -130,6 +144,11 @@
                 "fluorophore cleavage",
                 "photobleaching",
                 "strand displacement"
+            ],
+            "ignored_enum": [
+                "fluorophore cleavage and photobleaching",
+                "strand displacement and photobleaching",
+                "55% wash buffer and 4x saline sodium citrate"
             ]
         },
         "fiducial_label": {
@@ -137,11 +156,7 @@
             "description": "Type of fiducial label used for drift correction during sequential imaging",
             "type": "string",
             "lookup": 69,
-            "use_for": ["sequential imaging"],
-            "suggested_enum": [
-                "beads",
-                "oligos"
-            ]
+            "use_for": ["sequential imaging"]
         }
     },
     "columns": {

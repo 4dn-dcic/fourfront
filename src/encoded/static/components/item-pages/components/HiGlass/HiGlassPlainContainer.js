@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
 import memoize from 'memoize-one';
-import { console, object, ajax, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, ajax, isServerSide, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 import { PackageLockLoader } from './../../../util/package-lock-loader';
 
@@ -156,7 +156,7 @@ export class HiGlassPlainContainer extends React.PureComponent {
         if (hgc){
             HiGlassPlainContainer.correctTrackDimensions(hgc);
         } else {
-            console.error('NO HGC');
+            logger.error('NO HGC');
         }
     }
 
@@ -255,8 +255,8 @@ const HiGlassPlainContainerBody = React.forwardRef(function HiGlassPlainContaine
     const { HiGlassComponent } = higlassDependencies || {};
 
     let hiGlassInstance = null;
+    const placeholderStyle = { width: width || null };
     if (isValidating || !mounted){
-        const placeholderStyle = { width: width || null };
         if (typeof height === 'number' && height >= 140){
             placeholderStyle.height = height;
             placeholderStyle.paddingTop = (height / 2) - 40;

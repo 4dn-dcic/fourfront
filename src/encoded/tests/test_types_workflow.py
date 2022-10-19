@@ -1,8 +1,7 @@
 import json
 import pytest
 
-from dcicutils.env_utils import is_stg_or_prd_env, CGAP_ENV_PRODUCTION_BLUE_NEW, CGAP_ENV_PRODUCTION_GREEN_NEW
-from dcicutils.ff_utils import patch_metadata
+from dcicutils.ff_utils import patch_metadata, purge_metadata
 from ..types.workflow import _wfoutput_bucket_for_env
 
 
@@ -62,6 +61,7 @@ def workflow(testapp, software, award, lab):
     workflow_uuid = '023bfb3e-9a8b-42b9-a9d4-216079526f68'
     return workflow_uuid
 
+
 @pytest.mark.broken
 @pytest.mark.skip
 def test_pseudo_run(testapp, input_json):
@@ -76,37 +76,20 @@ def test_pseudo_run(testapp, input_json):
     patch_metadata({'status':'deleted'}, output['ff_meta']['uuid'], ff_env='fourfront-webdev')
     purge_metadata(output['ff_meta']['uuid'], ff_env='fourfront-webdev')
 
+
 def test_workflow_for_env():
 
     # These tests will want to become more abstract sometime, but for transition they test that
     # we're getting obvious values we expect. -kmp 1-Apr-2020
 
     # Fourfront prod environments
-
-    assert _wfoutput_bucket_for_env('fourfront-webprod') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-webprod2') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-blue') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-green') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
+    assert _wfoutput_bucket_for_env('data') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
+    assert _wfoutput_bucket_for_env('staging') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
+    assert _wfoutput_bucket_for_env('fourfront-production-blue') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
+    assert _wfoutput_bucket_for_env('fourfront-production-green') == 'elasticbeanstalk-fourfront-webprod-wfoutput'
 
     # Other (non-prod) Fourfront environments
-
     assert _wfoutput_bucket_for_env('fourfront-mastertest') == 'elasticbeanstalk-fourfront-mastertest-wfoutput'
     assert _wfoutput_bucket_for_env('fourfront-webdev') == 'elasticbeanstalk-fourfront-webdev-wfoutput'
-
-    # CGAP prod environments
-
-    assert _wfoutput_bucket_for_env('fourfront-cgap') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-cgap-green') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-cgap-blue') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
-
-    # There is a bug in is_stg_or_prd_env that needs to be fixed before these tests can run right:
-    if is_stg_or_prd_env(CGAP_ENV_PRODUCTION_BLUE_NEW) and is_stg_or_prd_env(CGAP_ENV_PRODUCTION_GREEN_NEW):
-        assert _wfoutput_bucket_for_env('cgap-blue') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
-        assert _wfoutput_bucket_for_env('cgap-green') == 'elasticbeanstalk-fourfront-cgap-wfoutput'
-
-    # Other (non-prod) CGAP environments
-
-    assert _wfoutput_bucket_for_env('fourfront-cgapwolf') == 'elasticbeanstalk-fourfront-cgapwolf-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-cgaptest') == 'elasticbeanstalk-fourfront-cgaptest-wfoutput'
-    assert _wfoutput_bucket_for_env('fourfront-yellow') == 'elasticbeanstalk-fourfront-yellow-wfoutput'
+    assert _wfoutput_bucket_for_env('fourfront-hotseat') == 'elasticbeanstalk-fourfront-hotseat-wfoutput'
 

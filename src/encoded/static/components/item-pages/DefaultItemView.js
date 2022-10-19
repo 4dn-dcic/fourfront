@@ -9,8 +9,9 @@ import _ from 'underscore';
 import { ItemDetailList } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/ItemDetailList';
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { LocalizedTime } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/LocalizedTime';
-import { console, object, layout, ajax, commonFileUtil, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, object, layout, ajax, commonFileUtil, memoizedUrlParse, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { ViewFileButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/FileDownloadButton';
+import { StackedBlockListViewMoreButton } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/StackedBlockTable';
 import { Schemas, fileUtil, typedefs } from './../util';
 
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
@@ -133,11 +134,11 @@ export default class DefaultItemView extends React.PureComponent {
             ajax.load('/search/?type=Item&field=@id&field=uuid&field=accession&status=replaced&accession=' + redirected_from_accession, (r)=>{
                 const ourOldItem = _.findWhere(r['@graph'], { 'accession' : redirected_from_accession });
                 if (!ourOldItem){
-                    console.error('Couldnt find correct Item in list of results.');
+                    logger.error('Couldnt find correct Item in list of results.');
                     return;
                 }
                 if (!object.itemUtil.atId(ourOldItem)){
-                    console.error('Couldnt find @id of Item.');
+                    logger.error('Couldnt find @id of Item.');
                     return;
                 }
                 Alerts.queue({
@@ -146,7 +147,7 @@ export default class DefaultItemView extends React.PureComponent {
                     'style': 'warning'
                 });
             }, 'GET', (err)=>{
-                console.error('No results found');
+                logger.error('No results found');
             });
         }
     }
@@ -246,10 +247,10 @@ export default class DefaultItemView extends React.PureComponent {
             try {
                 tabbedView.setActiveKey(nextKey);
             } catch (e) {
-                console.warn('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
+                logger.warning('Could not switch TabbedView to key "' + nextKey + '", perhaps no longer supported by rc-tabs.');
             }
         } else {
-            console.error('Cannot access tabbedView.setActiveKey()');
+            logger.error('Cannot access tabbedView.setActiveKey()');
         }
     }
 
@@ -514,9 +515,43 @@ const EmbeddedItemWithImageAttachment = React.memo(function EmbeddedItemWithImag
     );
 });
 
+/** Used in OverViewBodyItem.titleRenderPresets */
+const SampleBiosourceItem = React.memo(function SampleBiosourceItem(props) {
+    const { item, index, fullObject } = props;
 
+    const matchingExps = _.filter(fullObject.experiments_in_set || [], function (exp) {
+        const { biosample: { biosource_summary } = {} } = exp;
+        return biosource_summary === item;
+    });
+
+    // fallback
+    if (matchingExps.length === 0) {
+        return item;
+    }
+
+    const biosources = _.uniq(_.reduce(matchingExps, function (m, exp) {
+        const { biosample: { biosource = [] } = {} } = exp;
+        return m.concat(biosource.map(function (bs) {
+            return { accession: bs.accession, atId: object.atIdFromObject(bs) };
+        }));
+    }, []), function (bs) { return bs.accession; });
+
+    // create a link to the item page for a single item, whereas a link to search page for multiple items results
+    const style = { 'overflowWrap': 'break-word' };
+    if (biosources.length === 1) {
+        const [bs] = biosources;
+        return <a href={bs.atId} style={style} data-tip="View Biosource Details">{item}</a>;
+    } else if (biosources.length > 1) {
+        const link = '/search/?type=Biosource&accession=' + _.pluck(biosources, 'accession').join('&accession=');
+        return <a href={link} style={style} data-tip="Multiple Biosources Found. View in Search Page.">{item}</a>;
+    }
+
+    return item;
+});
 
 export class OverViewBodyItem extends React.PureComponent {
+
+    static ViewMoreButton = StackedBlockListViewMoreButton;
 
     /** Preset Functions to render various Items or property types. Feed in via titleRenderFxn prop. */
     static titleRenderPresets = {
@@ -580,8 +615,11 @@ export class OverViewBodyItem extends React.PureComponent {
                     <div className={"imaging-path col-6"}>{ 'Path' }</div>
                 </div>
             );
+        },
+        'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
+            return <SampleBiosourceItem {...{ item, index, fullObject }} />;
         }
-    }
+    };
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null, origResult = null){
@@ -636,19 +674,32 @@ export class OverViewBodyItem extends React.PureComponent {
         'singleItemClassName'           : null,
         'fallbackTitle'                 : null,
         'propertyForLabel'              : null,
-        'property'                      : null
+        'property'                      : null,
+        'collapseShow'                  : 0,
+        'collapseLimit'                 : 0,
     };
 
     constructor(props){
         super(props);
         this.createList = memoize(OverViewBodyItem.createList);
+        this.handleCollapseToggle = this.handleCollapseToggle.bind(this);
+        this.state = {
+            'collapsed': true
+        };
+    }
+
+    handleCollapseToggle(){
+        this.setState(function({ collapsed }){
+            return { 'collapsed' : !collapsed };
+        });
     }
 
     render(){
         const {
             result, property, fallbackValue, titleRenderFxn, addDescriptionTipForLinkTos, wrapInColumn,
-            singleItemClassName, overrideTitle: propOverrideTitle, hideIfNoValue
+            singleItemClassName, overrideTitle: propOverrideTitle, hideIfNoValue, collapseLimit, collapseShow
         } = this.props;
+        const { collapsed } = this.state;
         let { propertyForLabel, listItemElement, listWrapperElement, listItemElementProps, listWrapperElementProps } = this.props;
 
         function fallbackify(val){
@@ -665,8 +716,9 @@ export class OverViewBodyItem extends React.PureComponent {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
+
         const overrideTitle = typeof propOverrideTitle === 'function' ? propOverrideTitle() : propOverrideTitle;
-        const resultPropertyValue = property && this.createList(
+        let resultPropertyValue = property && this.createList(
             object.getNestedProperty(result, property),
             property,
             titleRenderFxn,
@@ -684,6 +736,16 @@ export class OverViewBodyItem extends React.PureComponent {
         propertyForLabel = propertyForLabel || property;
 
         if (Array.isArray(resultPropertyValue)){
+            let viewMoreButton = null;
+            if (collapseLimit && collapseShow && (resultPropertyValue.length >= collapseLimit) && (collapseLimit >= collapseShow)) {
+                const collapsibleChildren = collapsed ? resultPropertyValue.slice(collapseShow) : resultPropertyValue;
+                resultPropertyValue = collapsed ? resultPropertyValue.slice(0, collapseShow) : resultPropertyValue;
+                viewMoreButton = (
+                    <OverViewBodyItem.ViewMoreButton {...this.props} collapsibleChildren={collapsibleChildren}
+                        collapsed={collapsed} handleCollapseToggle={this.handleCollapseToggle}
+                    />);
+            }
+
             innerBlockReturned = (
                 <div className="inner" key="inner" data-field={property}>
                     <object.TooltipInfoIconContainerAuto
@@ -692,11 +754,12 @@ export class OverViewBodyItem extends React.PureComponent {
                         title={overrideTitle}
                         elementType="h5" />
                     { resultPropertyValue ?
-                        (resultPropertyValue.length > 1 ?
+                        (resultPropertyValue.length > 1 || viewMoreButton ?
                             React.createElement(listWrapperElement, listWrapperElementProps || null, fallbackify(resultPropertyValue))
                             : fallbackify(resultPropertyValue) )
                         : fallbackify(null)
                     }
+                    { viewMoreButton }
                 </div>
             );
         } else {

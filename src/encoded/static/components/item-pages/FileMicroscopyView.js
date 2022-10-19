@@ -1,15 +1,17 @@
 'use strict';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { isServerSide, console, object } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import url from 'url';
+import { isServerSide, console, object, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { expFxn } from './../util';
 import { SearchTableTitle } from './components/tables/ItemPageTable';
 import { EmbeddedExperimentSetSearchTable } from './components/tables/ExperimentSetTables';
 import { OverViewBodyItem } from './DefaultItemView';
 import FileView, { RelatedFilesOverViewBlock } from './FileView';
 import { QualityControlResults } from './QualityMetricView';
+import { VitesscePlainContainer } from './components/Vitessce/VitesscePlainContainer';
 
 export default class FileMicroscopyView extends FileView {
 
@@ -19,6 +21,11 @@ export default class FileMicroscopyView extends FileView {
 
         // Replace default FileOverview (1st tab) with FileMicroscopyViewOverview
         tabs[0] = FileMicroscopyViewOverview.getTabObject(this.props, width);
+
+        const { context: { tags = [] } = {} } = this.props;
+        if (Array.isArray(tags) && tags.indexOf('vitessce') !== -1) {
+            tabs.splice(1, 0, FileViewVitessce.getTabObject(this.props, width));
+        }
 
         return tabs;
     }
@@ -87,6 +94,7 @@ class FileMicroscopyViewOverview extends React.Component {
 const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
     const { context, schemas, windowWidth } = props;
     const file = context;
+    const { microscope_configuration } = file;
 
     const parentExperimentsReversed = (file.experiments || []).slice(0).reverse(); // Last is newest.
 
@@ -125,12 +133,20 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
 
                 { thumbnailLink ? <div className="col-sm-4">{ thumbnailLink }</div> : null }
 
-                { parentExperimentWithImagingPaths ?
-                    <OverViewBodyItem
-                        result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas, parentExperimentWithImagingPaths)}
-                        wrapInColumn={"col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} property="imaging_paths" fallbackTitle="Imaging Paths" overrideTitle={OverViewBodyItem.titleRenderPresets.imaging_paths_header_from_exp}
-                        listItemElement="div" listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
-                    : null }
+                {microscope_configuration || parentExperimentWithImagingPaths ?
+                    <div className={"overview-blocks col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')}>
+                        {microscope_configuration ?
+                            <OverViewBodyItem result={file} property="microscope_configuration" fallbackTitle="Microscope Configuration" wrapInColumn="col-12" />
+                            : null}
+
+                        {parentExperimentWithImagingPaths ?
+                            <OverViewBodyItem
+                                result={parentExperimentWithImagingPaths} tips={object.tipsFromSchema(schemas, parentExperimentWithImagingPaths)}
+                                wrapInColumn={"col-12 pull-right col-sm-" + (thumbnailLink ? '8' : '12')} property="imaging_paths" fallbackTitle="Imaging Paths" overrideTitle={OverViewBodyItem.titleRenderPresets.imaging_paths_header_from_exp}
+                                listItemElement="div" listWrapperElement="div" singleItemClassName="block" titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} />
+                            : null}
+                    </div>
+                    : null}
 
             </div>
             <div className="row overview-blocks">
@@ -140,3 +156,87 @@ const FileMicOverViewBody = React.memo(function FileMicOverViewBody(props){
         </React.Fragment>
     );
 });
+
+function FileViewVitessce (props) {
+    const { context, windowWidth, width, schemas, href } = props;
+    const { href: fileHref, display_title: name, description = null } = context || {};
+
+    const config = useMemo(function () {
+        const urlParts = url.parse(href, true);
+        const baseHref = (urlParts.protocol && urlParts.host) ? urlParts.protocol + '//' + urlParts.host : '';
+
+        return {
+            "version": "1.0.1",
+            "name": name,
+            "description": description,
+            "datasets": [
+                {
+                    "uid": "A",
+                    "name": "image stack",
+                    "files": [
+                        {
+                            "type": "raster",
+                            "fileType": "raster.json",
+                            "options": {
+                                "schemaVersion": "0.0.2",
+                                "images": [
+                                    {
+                                        "name": name,
+                                        "type": "ome-tiff",
+                                        "url": baseHref + fileHref
+                                    }
+                                ],
+                                "usePhysicalSizeScaling": true,
+                                "renderLayers": [
+                                    name
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ],
+            "layout": [
+                {
+                    "component": "spatial",
+                    "x": 0,
+                    "y": 0,
+                    "w": 9,
+                    "h": 12
+                },
+                {
+                    "component": "layerController",
+                    "x": 9,
+                    "y": 0,
+                    "w": 3,
+                    "h": 12
+                }
+            ],
+            "initStrategy": "auto"
+        };
+    }, [href, fileHref, name, description]);
+    return (
+        <div>
+            <div className="row overview-blocks">
+                <VitesscePlainContainer height={800} width={1120} theme="light" config={config} />
+            </div>
+        </div>
+    );
+}
+FileViewVitessce.propTypes = {
+};
+FileViewVitessce.getTabObject = function({ context, schemas, windowWidth, href }, width){
+    return {
+        'tab' : <span><i className="icon icon-project-diagram fas icon-fw"/> Vitessce</span>,
+        'key' : 'file-vitessce',
+        //'disabled' : !Array.isArray(context.experiments),
+        'content' : (
+            <div className="overflow-hidden">
+                <h3 className="tab-section-title">
+                    <span>Vitessce Visualization</span>
+                </h3>
+                <hr className="tab-section-title-horiz-divider"/>
+                <FileViewVitessce {...{ context, width, windowWidth, schemas, href }} />
+            </div>
+        )
+    };
+};

@@ -54,6 +54,14 @@ Cypress.Commands.add('searchPageTotalResultCount', function(options){
     });
 });
 
+// Add iframe support until becomes part of the framework
+Cypress.Commands.add('iframe', { prevSubject: 'element' }, ($iframe) =>
+    new Cypress.Promise((resolve) => {
+        $iframe.on('load', () => {
+            resolve($iframe.contents().find('body'));
+        });
+    })
+);
 
 
 Cypress.Commands.add('scrollToBottom', function(options){
@@ -73,7 +81,10 @@ Cypress.Commands.add('scrollToCenterElement', { prevSubject : true }, (subject, 
     });
 });
 
-
+const auth0UserIds = {
+    'ud4dntest@gmail.com':'google-oauth2|116789716005557674891',
+    'u4dntestcypress@gmail.com': 'google-oauth2|104145819796576369116'
+};
 
 /**
  * This emulates login.js. Perhaps we should adjust login.js somewhat to match this better re: navigate.then(...) .
@@ -145,10 +156,11 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
         'email': email,
         'email_verified': true,
         'aud': auth0client,
-        "iss": "https://hms-dbmi.auth0.com/"
+        "iss": "https://hms-dbmi.auth0.com/",
+        "sub": auth0UserIds[email] || ''
     };
 
-    jwt_token = jwt.sign(jwtPayload, new Buffer(auth0secret, 'base64'));
+    jwt_token = jwt.sign(jwtPayload, Buffer.from(auth0secret, 'utf-8'));
     expect(jwt_token).to.have.length.greaterThan(0);
     Cypress.log({
         'name' : "Login 4DN",
@@ -159,7 +171,7 @@ Cypress.Commands.add('login4DN', function(options = { 'useEnvToken' : true }){
 });
 
 Cypress.Commands.add('logout4DN', function(options = { 'useEnvToken' : true }){
-    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().wait(100).end()
+    cy.wait(500).end().get(navUserAcctDropdownBtnSelector).click().wait(300).end()
         .get('#logoutbtn').click().end()
         .get(navUserAcctLoginBtnSelector).should('contain', 'Log In').wait(300).end()
         .get('#slow-load-container').should('not.have.class', 'visible').end();

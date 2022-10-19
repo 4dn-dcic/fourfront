@@ -9,6 +9,8 @@ var domready = require('domready');
 import { store, mapStateToProps } from './store';
 import { Provider, connect } from 'react-redux';
 import { patchedConsoleInstance as console } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/patched-console';
+import { logger }  from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+
 import * as JWT from '@hms-dbmi-bgm/shared-portal-components/es/components/util/json-web-token';
 import { BrowserFeat } from '@hms-dbmi-bgm/shared-portal-components/es/components/util/layout';
 
@@ -28,7 +30,7 @@ function updateSessionInfo(){
     try {
         props = App.getRenderedPropValues(document, 'user_info');
     } catch(e) {
-        console.error(e);
+        logger.error(e);
         return false;
     }
 
@@ -49,6 +51,11 @@ function updateSessionInfo(){
 // point should be definitions.
 if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
 
+    window.onload = function(){
+        console.log("Window Loaded");
+        window._onload_event_fired = true;
+    };
+
     updateSessionInfo();
 
     domready(function(){
@@ -66,7 +73,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) {
         try {
             app = ReactDOM.hydrate(<Provider store={store}><AppWithReduxProps /></Provider>, document);
         } catch (e) {
-            console.error("INVARIANT ERROR", e); // To debug
+            logger.error("INVARIANT ERROR",e); // To debug
             // So we can get printout and compare diff of renders.
             app = require('react-dom/server').renderToString(<Provider store={store}><AppWithReduxProps /></Provider>);
         }

@@ -3,10 +3,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'underscore';
-import { object, analytics, isServerSide } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { object, analytics, isServerSide, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { replaceString as placeholderReplacementFxn } from './../../static-pages/placeholders';
 import { HiGlassAjaxLoadContainer, isHiglassViewConfigItem } from './../../item-pages/components/HiGlass';
+import { MicroMetaAjaxLoadContainer, isMicroscopeConfigurationItem } from './../../item-pages/components/MicroMeta';
 import { OverviewHeadingContainer } from './../../item-pages/components/OverviewHeadingContainer';
 
 
@@ -25,7 +26,7 @@ export class BasicUserContentBody extends React.PureComponent {
                 var storeState = store && store.getState();
                 href = storeState && storeState.href;
             }
-            analytics.exception('Client Error - ' + href + ': ' + err, false);
+            logger.error('Client Error - ' + href + ': ' + err);
         });
     }
 
@@ -38,6 +39,8 @@ export class BasicUserContentBody extends React.PureComponent {
             return 'StaticSection';
         } else if (isHiglassViewConfigItem(context)){ // Func internally checks context['@type'].indexOf('HiglassViewConfig') > -1 also
             return 'HiglassViewConfig';
+        } else if (isMicroscopeConfigurationItem(context)){ // Func internally checks context['@type'].indexOf('MicroscopeConfiguration') > -1 also
+            return 'MicroscopeConfiguration';
         } else {
             // TODO: Case for JupyterNotebook (?) and/or yet-to-be-created ones.
             throw new Error('Unsupported Item type.');
@@ -64,6 +67,12 @@ export class BasicUserContentBody extends React.PureComponent {
                 <React.Fragment>
                     <EmbeddedHiglassActions context={context} parentComponentType={parentComponentType || BasicUserContentBody} />
                     <HiGlassAjaxLoadContainer {..._.omit(this.props, 'context', 'higlassItem')} higlassItem={context} scale1dTopTrack={false} />
+                </React.Fragment>
+            );
+        } else if (itemType === 'MicroscopeConfiguration') {
+            return (
+                <React.Fragment>
+                    <MicroMetaAjaxLoadContainer {..._.omit(this.props, 'context', 'microscopeItem')} microscopeItem={context} height={800} />
                 </React.Fragment>
             );
         } else {
@@ -129,8 +138,6 @@ export class ExpandableStaticHeader extends OverviewHeadingContainer {
 
     renderInnerBody() {
         const { context, itemType, href, windowWidth } = this.props;
-        const { open } = this.state;
-        const isHiGlass = isHiglassViewConfigItem(context);
 
         return (
             <div className="static-section-header pt-1 clearfix">
