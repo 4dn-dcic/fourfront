@@ -593,26 +593,26 @@ export class OverViewBodyItem extends React.PureComponent {
         'imaging_paths_from_exp': function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'div', fullObject = null){
             if (!value || typeof value !== 'object') return null;
             const { channel, path } = value;
-            const { imaging_rounds, experiment_type } = path || {};
+            const { imaging_rounds = '' } = path || {};
 
             const matchingFile = _.find(fullObject.files || [], fileUtil.getLightSourceCenterMicroscopeSettingFromFile.bind(this, channel));
+            const hasImagingRounds = imaging_rounds.length > 0 || _.any(fullObject.imaging_paths || [], function (imgPath) { const { path: { imaging_rounds = '' } = {} } = imgPath; return typeof imaging_rounds === 'string' && imaging_rounds.length > 0; });
             return (
                 <div className="imaging-path-item-wrapper row">
                     <div className="index-num col-1 text-monospace text-500"><small>{ channel }</small></div>
-                    <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div>
-                    <div className={"imaging-path col-3"}>{ object.itemUtil.generateLink(experiment_type, true) || '-' }</div>
-                    <div className={"imaging-path col-" + (matchingFile ? '5' : '6')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    { hasImagingRounds ? <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div> : null }
+                    <div className={"imaging-path col-" + (matchingFile ? '8' : '9')}>{ object.itemUtil.generateLink(path, true) }</div>
                     { matchingFile ? <div className="microscope-setting col-1 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
                 </div>
             );
         },
-        'imaging_paths_header_from_exp': function(){
+        'imaging_paths_header_from_exp': function(fullObject = null){
+            const hasImagingRounds = fullObject && _.any(fullObject.imaging_paths || [], function (imgPath) { const { path: { imaging_rounds = '' } = {} } = imgPath; return typeof imaging_rounds === 'string' && imaging_rounds.length > 0; });
             return (
                 <div className="imaging-path-item-wrapper row">
                     <div className={"imaging-path col-1"}>{ 'Channel' }</div>
-                    <div className={"imaging-path col-2"}>{ 'Imaging Rounds' }</div>
-                    <div className={"imaging-path col-3"}>{ 'Experiment Type' }</div>
-                    <div className={"imaging-path col-6"}>{ 'Path' }</div>
+                    { hasImagingRounds ? <div className={"imaging-path col-2"}>{ 'Imaging Rounds' }</div> : null }
+                    <div className={"imaging-path col-9"}>{ 'Path' }</div>
                 </div>
             );
         },
@@ -717,7 +717,7 @@ export class OverViewBodyItem extends React.PureComponent {
             listWrapperElement = 'div';
         }
 
-        const overrideTitle = typeof propOverrideTitle === 'function' ? propOverrideTitle() : propOverrideTitle;
+        const overrideTitle = typeof propOverrideTitle === 'function' ? propOverrideTitle(result) : propOverrideTitle;
         let resultPropertyValue = property && this.createList(
             object.getNestedProperty(result, property),
             property,
