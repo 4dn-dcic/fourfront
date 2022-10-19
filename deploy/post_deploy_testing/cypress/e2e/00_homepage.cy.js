@@ -33,7 +33,7 @@ describe('Home Page', function () {
         // https://github.com/cypress-io/cypress/issues/136
         cy.get('.home-content-area div.twitter-timeline-container iframe#twitter-widget-0')
             .iframe()
-            .find('[data-testid="default-timeline-divider"]').should('have.length.of.at.least', 5);
+            .find('[data-testid="tweetText"]').should('have.length.of.at.least', 5);
     });
 
     it('"Toggle External Data" affects Chart', function () {
