@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+4.5.24
+======
+
+* SPC is upgraded to 0.1.57.
+* Until SPC 0.1.56, Sentry API log almost any incidents and obliterates the quota quickly. 0.1.57 allows tuning the sampling rate. (default is 0.1))
+
 4.5.22
 ======
 
