@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+4.5.25
+======
+
+`PR imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`
+
+* Imaging paths list is converted to table
+
 4.5.24
 ======
 
