@@ -226,23 +226,23 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
                         <div className="row">
                             <div className="col-12">
                                 <div className='row'>
-                                    <div className="col-12 col-md-6 pr-md-4 text-center">
-                                        <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-all-data">
-                                            <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="text-decoration-none">
+                                    <div className="col-12 col-md-6 text-center">
+                                        <div className="h-100 p-0 browse-data-collection-block browse-all-data">
+                                            <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="h-100 d-flex flex-column text-decoration-none">
                                                 <div className="mt-2"><i className="icon icon-database fas"></i></div>
-                                                <div className="mt-2 browse-data-collection-block-title">Browse All Data</div>
-                                                <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
+                                                <div className="flex-grow-1 mt-2 browse-data-collection-block-title">Browse All Data</div>
+                                                <div className="mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
                                                     Search all Experiment Sets<br /> in the 4D Nucleome Database
                                                 </div>
                                             </a>
                                         </div>
                                     </div>
                                     <div className="col-12 col-md-6 text-center">
-                                        <div className="h-100 p-0 d-flex flex-column browse-data-collection-block browse-by-publication">
-                                            <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="text-decoration-none">
+                                        <div className="h-100 p-0 browse-data-collection-block browse-by-publication">
+                                            <a href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets&number_of_experiment_sets.from=1" className="h-100 d-flex flex-column text-decoration-none">
                                                 <div className="mt-2"><i className="icon icon-book-open fas"></i></div>
-                                                <div className="mt-2 browse-data-collection-block-title">Browse By Publication</div>
-                                                <div className="flex-grow-1 mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
+                                                <div className="flex-grow-1 mt-2 browse-data-collection-block-title">Browse By Publication</div>
+                                                <div className="mt-2 pt-2 pb-2 pl-4 pr-4 browse-data-collection-block-desc">
                                                     View Publications<br /> in the 4D Nucleome Database
                                                 </div>
                                             </a>
@@ -252,7 +252,7 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
                             </div>
                         </div>
                     </div>
-                    <div className="col-12 col-md-5 pl-md-5 d-flex flex-column browse-data-collection-col-collections">
+                    <div className="col-12 col-md-5 pl-lg-5 d-flex flex-column browse-data-collection-col-collections">
                         <div className="flex-grow-1 mt-1">
                             <h2 className="homepage-section-title new-design text-500">4DN Data Collections</h2>
                             <a href="/hic-data-overview" className="btn btn-primary w-100">
@@ -334,7 +334,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                         </div>
                                                         {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
-                                                    <div data-field="track_and_facet_info.experiment_type" data-column-key="track_and_facet_info.experiment_type" className="search-headers-column-block" style={{ width: "200px" }}>
+                                                    <div data-field="track_and_facet_info.experiment_type" data-column-key="track_and_facet_info.experiment_type" className="search-headers-column-block" style={{ width: "280px" }}>
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-tip="Type of experiment to which this file belongs" data-html="true">Lab</span></div>
                                                         </div>
@@ -360,7 +360,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                                         <div className="inner text-center"><span className="value text-truncate"><a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a></span></div>
                                                                     </div>
                                                                     <div className="search-result-column-block" style={{ width: "240px", fontSize: '14px' }} data-column-even="true">
-                                                                        <div className="inner"><span className="value text-center"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a></span></div>
+                                                                        <div className="inner"><span className="value text-left"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a></span></div>
                                                                     </div>
                                                                 </div>
                                                                 <div className="result-table-detail-container detail-closed">
@@ -410,8 +410,8 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                         <div className="mt-2 pl-2 tool-detail-title">HiGlass</div>
                                         <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
                                         <div className="btn btn-primary w-100 mt-1 mb-05">
-                                            <span className="float-left">Learn More</span>
-                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                            <span className="float-left pl-2">Learn More</span>
+                                            <span className="float-right pr-2"><i className="icon icon-arrow-right fas"></i></span>
                                         </div>
                                     </a>
                                 </div>
@@ -420,10 +420,10 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                         <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" alt="4DN Jupyter Hub" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
                                         <div className="mt-2 pl-2 tool-detail-title">JupyterHub</div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python and the 4DN jupyter hub</div>
+                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python & the 4DN jupyter hub</div>
                                         <div className="btn btn-primary w-100 mt-1 mb-05">
-                                            <span className="float-left">Learn More</span>
-                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                            <span className="float-left pl-2">Learn More</span>
+                                            <span className="float-right pr-2"><i className="icon icon-arrow-right fas"></i></span>
                                         </div>
                                     </a>
                                 </div>
@@ -434,8 +434,8 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                                         <div className="mt-2 pl-2 tool-detail-title">MicroMeta</div>
                                         <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
                                         <div className="btn btn-primary w-100 mt-1 mb-05">
-                                            <span className="float-left">Learn More</span>
-                                            <span className="float-right"><i className="icon icon-arrow-right fas"></i></span>
+                                            <span className="float-left pl-2">Learn More</span>
+                                            <span className="float-right pr-2"><i className="icon icon-arrow-right fas"></i></span>
                                         </div>
                                     </a>
                                 </div>
@@ -485,7 +485,7 @@ const FourDNMissonRow = React.memo(function FourDNMissonRow(props) {
     return (
         <div className="row mt-8 mb-8 p-3 fourdn-mission-container">
             <div className="col-12 p-4 fourdn-mission-content">
-                <h2 className="homepage-section-title new-design text-center"><FourfrontLogo prefix="The" title="Mission"/></h2>
+                <h2 className="homepage-section-title new-design text-center"><FourfrontLogo id="mission_fourfront_logo_svg" prefix="The" title="Mission"/></h2>
                 <div className="fourdn-mission-text">
                     The 4D Nucleome Data Portal hosts data generated by the 4DN Network and other reference nucleomics data sets, and an expanding tool set for open data processing and visualization.
                 </div>
@@ -512,29 +512,29 @@ const HelpRow = React.memo(function HelpRow(props) {
                 <div className='flex-grow-1'>
                     <h2 className="homepage-section-title new-design">4DN Help</h2>
                     <a href="/help/user-guide" className="btn btn-primary w-100 mt-1 p-2 btn-4dn-help">
-                        <span className="float-left ml-1 mt-1 btn-4dn-help-icon">
+                        <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-user fas"></i>
                         </span>
-                        <span className="float-left ml-2 mt-12 help-button-text">User Guide</span>
-                        <span className="float-right mr-2 mt-12 btn-4dn-help-arrow">
+                        <span className="float-left ml-2 mt-13 help-button-text">User Guide</span>
+                        <span className="float-right mr-2 mt-13 btn-4dn-help-arrow">
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
                     </a>
                     <a href="/help/submitter-guide" className="btn btn-primary w-100 mt-2 p-2 btn-4dn-help">
-                        <span className="float-left ml-1 mt-1 btn-4dn-help-icon">
+                        <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-file-import fas"></i>
                         </span>
-                        <span className="float-left ml-2 mt-12 help-button-text">Submitter Guide</span>
-                        <span className="float-right mr-2 mt-12 btn-4dn-help-arrow">
+                        <span className="float-left ml-2 mt-13 help-button-text">Submitter Guide</span>
+                        <span className="float-right mr-2 mt-13 btn-4dn-help-arrow">
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
                     </a>
                     <a href="/help/about/contact-us" className="btn btn-primary w-100 mt-2 p-2 btn-4dn-help">
-                        <span className="float-left ml-1 mt-1 btn-4dn-help-icon">
+                        <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-envelope fas"></i>
                         </span>
-                        <span className="float-left ml-2 mt-12 help-button-text">Contact Us</span>
-                        <span className="float-right mr-2 mt-12 btn-4dn-help-arrow">
+                        <span className="float-left ml-2 mt-13 help-button-text">Contact Us</span>
+                        <span className="float-right mr-2 mt-13 btn-4dn-help-arrow">
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
                     </a>

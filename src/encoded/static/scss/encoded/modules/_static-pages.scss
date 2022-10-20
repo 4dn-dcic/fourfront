@@ -164,6 +164,12 @@
 					@include media-breakpoint-up(md) {
 						height: 100%;
 					}
+
+					.text-center { 
+						@include media-breakpoint-down(sm) {
+							margin-bottom: 15px;
+						}
+					}
 				}
 	
 				.browse-data-collection-block {
@@ -197,7 +203,7 @@
 						border-radius: 0 0 8px 8px;
 	
 						@include media-breakpoint-only(lg) {
-							font-size: 0.9rem;
+							font-size: 1.1rem;
 	
 							br {
 								display: none;
@@ -205,8 +211,8 @@
 						}
 	
 						@include media-breakpoint-only(md) {
-							font-size: 1rem;
-	
+							font-size: 0.9rem;
+
 							br {
 								display: none;
 							}
@@ -247,6 +253,11 @@
 								&.pr-4 {
 									padding-right: 0.5rem !important;
 								}
+							}
+
+							@include media-breakpoint-down(lg) {
+								padding-top: 2px;
+								padding-bottom: 2px;
 							}
 						}
 					}
@@ -452,7 +463,7 @@
 							color: #6C886E;
 							font-size: 1.1rem;
 						line-height: 1.2;
-						font-weight: 200;
+						font-weight: 400;
 					}
 
 					&.data-analysis {
@@ -500,6 +511,11 @@
 		>.fourdn-mission-content {
 			background-color: #FFFFFF;
 			border-radius: 15px;
+
+			.svg {
+				padding-bottom: 0px;
+				padding-top: 0px;
+			}
 
 			.fourdn-mission-text {
 				width: 88%;
