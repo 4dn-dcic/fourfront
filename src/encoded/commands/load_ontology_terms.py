@@ -86,7 +86,7 @@ def main():
             logger.error("The following items passed round I (POST/skip) but not round II (PATCH): %s"
                          % (set(load_res['POST'] + load_res['SKIP']) - set(load_res['PATCH'])))
         elif not load_res['ERROR']:
-            if all_items['ontologies']:
+            if all_items.get('ontologies'):
                 o = {'patched': 0, 'not patched': 0}
                 for k, v in all_items['ontologies'].items():
                     try:
