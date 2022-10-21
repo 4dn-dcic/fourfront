@@ -11,8 +11,14 @@ import pyramid.request
 import tempfile
 import time
 import re
+import boto3
+import structlog
+from botocore.client import Config
+from typing import Optional
 
-from dcicutils.misc_utils import check_true, url_path_join, ignored, find_association
+from dcicutils.ecs_utils import ECSUtils
+from dcicutils.misc_utils import check_true, url_path_join, ignored, find_association, VirtualApp, count_if, identity
+from dcicutils.secrets_utils import assume_identity
 from io import BytesIO
 from pyramid.httpexceptions import HTTPUnprocessableEntity, HTTPForbidden, HTTPServerError
 from snovault import COLLECTIONS, Collection
@@ -20,6 +26,9 @@ from snovault.crud_views import collection_add as sno_collection_add
 from snovault.embed import make_subrequest
 from snovault.schema_utils import validate_request
 from .types.base import get_item_or_none
+
+
+log = structlog.getLogger(__name__)
 
 
 ENCODED_ROOT_DIR = os.path.dirname(__file__)
@@ -160,12 +169,12 @@ def subrequest_item_creation(request: pyramid.request.Request, item_type: str, j
 # For now, for expedience, they can live here and we can refactor later. -kmp 25-Jul-2020
 
 @contextlib.contextmanager
-def s3_output_stream(s3_client, bucket: str, key: str):
+def s3_output_stream(s3_client, bucket: str, key: str, s3_encrypt_key_id: Optional[str] = None):
     """
     This context manager allows one to write:
 
         with s3_output_stream(s3_client, bucket, key) as fp:
-            print("foo", file=fp)
+            ... fp.write("foo") ...
 
     to do output to an s3 bucket.
 
@@ -179,13 +188,16 @@ def s3_output_stream(s3_client, bucket: str, key: str):
         s3_client: a client object that results from a boto3.client('s3', ...) call.
         bucket: an S3 bucket name
         key: the name of a key within the given S3 bucket
+        s3_encrypt_key_id: a KMS encryption key id or None
     """
 
     tempfile_name = tempfile.mktemp()
     try:
         with io.open(tempfile_name, 'w') as fp:
             yield fp
-        s3_client.upload_file(Filename=tempfile_name, Bucket=bucket, Key=key)
+        extra_kwargs = extra_kwargs_for_s3_encrypt_key_id(s3_encrypt_key_id=s3_encrypt_key_id,
+                                                          client_name='s3_output_stream')
+        s3_client.upload_file(Filename=tempfile_name, Bucket=bucket, Key=key, **extra_kwargs)
     finally:
         try:
             os.remove(tempfile_name)
@@ -245,15 +257,65 @@ def s3_input_stream(s3_client, bucket: str, key: str, mode: str = 'r'):
             yield fp
 
 
-def create_empty_s3_file(s3_client, bucket: str, key: str):
+class SettingsKey:
+    APPLICATION_BUCKET_PREFIX = 'application_bucket_prefix'
+    BLOB_BUCKET = 'blob_bucket'
+    EB_APP_VERSION = 'eb_app_version'
+    ELASTICSEARCH_SERVER = 'elasticsearch.server'
+    ENCODED_VERSION = 'encoded_version'
+    FILE_UPLOAD_BUCKET = 'file_upload_bucket'
+    FILE_WFOUT_BUCKET = 'file_wfout_bucket'
+    FOURSIGHT_BUCKET_PREFIX = 'foursight_bucket_prefix'
+    IDENTITY = 'identity'
+    INDEXER = 'indexer'
+    INDEXER_NAMESPACE = 'indexer.namespace'
+    INDEX_SERVER = 'index_server'
+    LOAD_TEST_DATA = 'load_test_data'
+    METADATA_BUNDLES_BUCKET = 'metadata_bundles_bucket'
+    S3_ENCRYPT_KEY_ID = 's3_encrypt_key_id'
+    SNOVAULT_VERSION = 'snovault_version'
+    SQLALCHEMY_URL = 'sqlalchemy.url'
+    SYSTEM_BUCKET = 'system_bucket'
+    TIBANNA_CWLS_BUCKET = 'tibanna_cwls_bucket'
+    TIBANNA_OUTPUT_BUCKET = 'tibanna_output_bucket'
+    UTILS_VERSION = 'utils_version'
+
+
+class ExtraArgs:
+    SERVER_SIDE_ENCRYPTION = "ServerSideEncryption"
+    SSE_KMS_KEY_ID = "SSEKMSKeyId"
+
+
+def extra_kwargs_for_s3_encrypt_key_id(s3_encrypt_key_id, client_name):
+
+    extra_kwargs = {}
+    if s3_encrypt_key_id:
+        log.error(f"{client_name} adding SSEKMSKeyId ({s3_encrypt_key_id}) arguments in upload_fileobj call.")
+        extra_kwargs["ExtraArgs"] = {
+            ExtraArgs.SERVER_SIDE_ENCRYPTION: "aws:kms",
+            ExtraArgs.SSE_KMS_KEY_ID: s3_encrypt_key_id,
+        }
+    else:
+        log.error(f"{client_name} found no s3 encrypt key id ({SettingsKey.S3_ENCRYPT_KEY_ID})"
+                  f" in request.registry.settings.")
+
+    return extra_kwargs
+
+
+def create_empty_s3_file(s3_client, bucket: str, key: str, s3_encrypt_key_id: Optional[str] = None):
     """
     Args:
         s3_client: a client object that results from a boto3.client('s3', ...) call.
         bucket: an S3 bucket name
         key: the name of a key within the given S3 bucket
+        s3_encrypt_key_id: the name of a KMS encrypt key id, or None
     """
     empty_file = "/dev/null"
-    s3_client.upload_file(empty_file, Bucket=bucket, Key=key)
+
+    extra_kwargs = extra_kwargs_for_s3_encrypt_key_id(s3_encrypt_key_id=s3_encrypt_key_id,
+                                                      client_name='create_empty_s3_file')
+
+    s3_client.upload_file(empty_file, Bucket=bucket, Key=key, **extra_kwargs)
 
 
 def get_trusted_email(request, context=None, raise_errors=True):
@@ -408,6 +470,93 @@ def is_mobile_browser(request):
             b = _IS_MOBILE_BROWSER_MATCH_B.search(user_agent)
             v = _IS_MOBILE_BROWSER_MATCH_V.search(user_agent[0:4])
             if b or v:
-                return True      
+                return True
         # fallback
     return False
+
+
+def _app_from_clues(app=None, registry=None, context=None):
+    if count_if(identity, [app, registry, context]) != 1:
+        raise RuntimeError("Expected exactly one of app, registry, or context.")
+    if not app:
+        app = (registry or context).app
+    return app
+
+
+EMAIL_PATTERN = re.compile(r'[^@]+[@][^@]+')
+
+
+def make_vapp_for_email(*, email, app=None, registry=None, context=None):
+    app = _app_from_clues(app=app, registry=registry, context=context)
+    if not isinstance(email, str) or not EMAIL_PATTERN.match(email):
+        # It's critical to check that the pattern has an '@' so we know it's not a system account (injection).
+        raise RuntimeError("Expected email to be a string of the form 'user@host'.")
+    user_environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': email,
+    }
+    vapp = VirtualApp(app, user_environ)
+    return vapp
+
+
+@contextlib.contextmanager
+def vapp_for_email(email, app=None, registry=None, context=None):
+    yield make_vapp_for_email(email=email, app=app, registry=registry, context=context)
+
+
+def make_vapp_for_ingestion(*, app=None, registry=None, context=None):
+    app = _app_from_clues(app=app, registry=registry, context=context)
+    user_environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'INGESTION',
+    }
+    vapp = VirtualApp(app, user_environ)
+    return vapp
+
+
+@contextlib.contextmanager
+def vapp_for_ingestion(app=None, registry=None, context=None):
+    yield make_vapp_for_ingestion(app=app, registry=registry, context=context)
+
+
+def make_s3_client():
+    s3_client_extra_args = {}
+    if 'IDENTITY' in os.environ:
+        identity = assume_identity()
+        s3_client_extra_args['aws_access_key_id'] = key_id = identity.get('S3_AWS_ACCESS_KEY_ID')
+        s3_client_extra_args['aws_secret_access_key'] = identity.get('S3_AWS_SECRET_ACCESS_KEY')
+        s3_client_extra_args['region_name'] = ECSUtils.REGION
+        log.info(f"make_s3_client using S3 entity ID {key_id[:10]} arguments in `boto3 client creation call.")
+        if 'ENCODED_S3_ENCRYPT_KEY_ID' in identity:
+            # This setting is required when testing locally and encrypted buckets need to be accessed.
+            s3_client_extra_args['config'] = Config(signature_version='s3v4')
+    else:
+        log.info(f'make_s3_client called with no identity')
+
+    s3_client = boto3.client('s3', **s3_client_extra_args)
+    return s3_client
+
+
+def build_s3_presigned_get_url(*, params):
+    """ Helper function that builds a presigned URL. """
+    s3_client = make_s3_client()
+    return s3_client.generate_presigned_url(
+        ClientMethod='get_object',
+        Params=params,
+        ExpiresIn=36 * 60 * 60
+    )
+
+
+def convert_integer_to_comma_string(value):
+    """Convert integer to comma-formatted string for displaying SV
+    position.
+
+    :param value: Value to format.
+    :type value: int
+    :returns: Comma-formatted integer or None
+    :rtype: str or None
+    """
+    result = None
+    if isinstance(value, int):
+        result = format(value, ",d")
+    return result

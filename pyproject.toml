@@ -184,6 +184,7 @@ es-index-data = "snovault.commands.es_index_data:main"
 export-data = "encoded.commands.export_data:main"
 extract-test-data = "encoded.commands.extract_test_data:main"
 import-data = "encoded.commands.import_data:main"
+ingestion-listener = "encoded.ingestion_listener:main"
 jsonld-rdf = "encoded.commands.jsonld_rdf:main"
 load-access-keys = "encoded.commands.load_access_keys:main"
 load-data = "encoded.commands.load_data:main"
@@ -206,6 +207,7 @@ main = "encoded:main"
 
 [paste.composite_factory]
 indexer = "snovault.elasticsearch.es_index_listener:composite"
+ingester = "encoded.ingestion_listener:composite"
 
 [paste.filter_app_factory]
 memlimit = "encoded.memlimit:filter_app"
