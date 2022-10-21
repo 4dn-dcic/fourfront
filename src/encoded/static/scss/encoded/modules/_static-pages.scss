@@ -512,9 +512,9 @@
 			background-color: #FFFFFF;
 			border-radius: 15px;
 
-			.svg {
-				padding-bottom: 0px;
-				padding-top: 0px;
+			svg#mission_fourfront_logo_svg {
+				padding-bottom: 0px !important;
+				padding-top: 0px !important;
 			}
 
 			.fourdn-mission-text {
@@ -548,6 +548,11 @@
 
 				@include media-breakpoint-down(sm){
 					font-size: 2rem;
+
+					svg#mission_fourfront_logo_svg {
+						padding-bottom: 5px !important;
+						padding-top: 5px !important;
+					}
 				}
 			}
 		}
