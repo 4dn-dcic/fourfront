@@ -392,7 +392,6 @@ class RecentlyReleasedDataSets extends React.PureComponent {
 
 const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
     return (
-      
         <div className="tools-and-resources-container">
             <div className="row mt-8 mb-3 tools-and-resources-container-title">
                 <h2 className="homepage-section-title new-design text-center w-100 mb-0">Explore Our Tools and Resources for Data Visualization &amp; Analysis</h2>
@@ -402,37 +401,37 @@ const ToolsAndResourcesRow = React.memo(function ToolsAndResourcesRow(props) {
                 <div className="container">
                     <div className="row pl-2 pr-2 pt-4 pb-4 tools-and-resources-container-inner">
                         <div className="col-12 col-lg-8 tools-and-resources-col-tools">
-                            <div className="row mh-100 h-100">
-                                <div className="col-12 col-md-4 pr-8 tool-detail-col">
+                            <div className="row mh-100 h-100 mr-lg-1">
+                                <div className="col-12 col-md-4 px-0 px-md-1 px-lg-2 tool-detail-col">
                                     <a href="/tools/visualization" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass.jpg" alt="HiGlass" /></div>
+                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-tools-4dn-higlass.jpg" alt="HiGlass" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-higlass-logo.png" alt="HiGlass logo" /></div>
-                                        <div className="mt-2 pl-2 tool-detail-title">HiGlass</div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
+                                        <div className="mt-1 pl-1 tool-detail-title">HiGlass</div>
+                                        <div className="flex-grow-1 mt-1 pl-1 tool-detail-description">Use the 4DN visualization workspace to browse data</div>
                                         <div className="btn btn-primary w-100 mt-1 mb-05">
                                             <span className="float-left pl-2">Learn More</span>
                                             <span className="float-right pr-2"><i className="icon icon-arrow-right fas"></i></span>
                                         </div>
                                     </a>
                                 </div>
-                                <div className="col-12 col-md-4 pr-8 tool-detail-col">
+                                <div className="col-12 col-md-4 px-0 px-md-1 px-lg-2 tool-detail-col">
                                     <a href="/tools/jupyterhub" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter.png" alt="4DN Jupyter Hub" /></div>
+                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-tools-4dn-jupyter.jpg" alt="4DN Jupyter Hub" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-jupyter-logo.png" alt="4DN Jupyter Hub logo" /></div>
-                                        <div className="mt-2 pl-2 tool-detail-title">JupyterHub</div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Explore data in the cloud using python & the 4DN jupyter hub</div>
+                                        <div className="mt-1 pl-1 tool-detail-title">JupyterHub</div>
+                                        <div className="flex-grow-1 mt-1 pl-1 tool-detail-description">Explore data in the cloud using python & the 4DN jupyter hub</div>
                                         <div className="btn btn-primary w-100 mt-1 mb-05">
                                             <span className="float-left pl-2">Learn More</span>
                                             <span className="float-right pr-2"><i className="icon icon-arrow-right fas"></i></span>
                                         </div>
                                     </a>
                                 </div>
-                                <div className="col-12 col-md-4 pr-8 tool-detail-col">
+                                <div className="col-12 col-md-4 px-0 px-md-1 px-lg-2 tool-detail-col">
                                     <a href="/tools/micro-meta-app" className="h-100 p-2 d-flex flex-column tool-detail text-decoration-none">
-                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa.png" alt="Micro Meta App" /></div>
+                                        <div className="text-center w-100"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-tools-4dn-micrometa.jpg" alt="Micro Meta App" /></div>
                                         <div className="mt-1 w-100 tool-logo"><img src="https://4dn-dcic-public.s3.amazonaws.com/static-pages/home-4dn-micrometa-logo.png" alt="Micro Meta App logo" /></div>
-                                        <div className="mt-2 pl-2 tool-detail-title">MicroMeta</div>
-                                        <div className="flex-grow-1 mt-1 pl-2 pr-2 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
+                                        <div className="mt-1 pl-1 tool-detail-title">MicroMeta</div>
+                                        <div className="flex-grow-1 mt-1 pl-1 tool-detail-description">Enter and access microscope metadata with Micrometa</div>
                                         <div className="btn btn-primary w-100 mt-1 mb-05">
                                             <span className="float-left pl-2">Learn More</span>
                                             <span className="float-right pr-2"><i className="icon icon-arrow-right fas"></i></span>
@@ -509,7 +508,7 @@ const HelpRow = React.memo(function HelpRow(props) {
                 </p>
             </div>
             <div className="col-12 col-lg-5 pt-3 d-flex flex-column fourdn-help-container">
-                <div className='flex-grow-1'>
+                <div className="flex-grow-1">
                     <h2 className="homepage-section-title new-design">4DN Help</h2>
                     <a href="/help/user-guide" className="btn btn-primary w-100 mt-1 p-2 btn-4dn-help">
                         <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
