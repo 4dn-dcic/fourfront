@@ -315,30 +315,27 @@ class RecentlyReleasedDataSets extends React.PureComponent {
             <React.Fragment>
                 <div className="embedded-search-view-outer-container">
                     <div className="embedded-search-container">
-                        <div className="row search-view-controls-and-results" data-search-item-type="File" data-search-abstract-type="File">
+                        <div className="row search-view-controls-and-results">
                             <div className="col-12">
-                                <div className="search-results-outer-container is-within-page" data-context-loading="false">
+                                <div className="search-results-outer-container is-within-page">
                                     <div className="search-results-container fully-loaded">
                                         <div className="search-headers-row" style={{ backgroundColor: '#EFF7F8' }}>
                                             <div className="headers-columns-overflow-container">
                                                 <div className="columns clearfix" style={{ left: "0px" }}>
-                                                    <div data-field="display_title" data-column-key="display_title" className="search-headers-column-block" style={{ width: "280px" }} data-first-visible-column="true">
+                                                    <div className="search-headers-column-block" style={{ width: "280px" }}>
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-html="true">Dataset</span></div>
                                                         </div>
-                                                        {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(280px)", borderColor: '#34646C' }}></div> */}
                                                     </div>
-                                                    <div data-field="lab.display_title" data-column-key="lab.display_title" className="search-headers-column-block" style={{ width: "200px" }}>
+                                                    <div className="search-headers-column-block" style={{ width: "200px" }}>
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
                                                         </div>
-                                                        {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
-                                                    <div data-field="track_and_facet_info.experiment_type" data-column-key="track_and_facet_info.experiment_type" className="search-headers-column-block" style={{ width: "280px" }}>
+                                                    <div className="search-headers-column-block" style={{ width: "240px" }}>
                                                         <div className="inner" style={{ color: '#34646C' }}>
                                                             <div className="column-title"><span data-tip="Type of experiment to which this file belongs" data-html="true">Lab</span></div>
                                                         </div>
-                                                        {/* <div className="width-adjuster react-draggable" style={{ transform: "translate(200px)" }}></div> */}
                                                     </div>
                                                 </div>
                                             </div>
@@ -350,21 +347,18 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                         const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
                                                         return (
                                                             <div className="search-result-row" style={{ minWidth: "696px" }}>
-                                                                <div className="columns clearfix result-table-row" draggable="false">
-                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }} data-column-even="true">
+                                                                <div className="columns clearfix result-table-row">
+                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }}>
                                                                         <div className="inner">
                                                                             <div className="title-block text-truncate" data-tip={datasetName}>{datasetName}</div>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }} data-column-even="false">
+                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }}>
                                                                         <div className="inner text-center"><span className="value text-truncate"><a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a></span></div>
                                                                     </div>
-                                                                    <div className="search-result-column-block" style={{ width: "240px", fontSize: '14px' }} data-column-even="true">
+                                                                    <div className="search-result-column-block" style={{ width: "240px", fontSize: '14px' }}>
                                                                         <div className="inner"><span className="value text-left"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a></span></div>
                                                                     </div>
-                                                                </div>
-                                                                <div className="result-table-detail-container detail-closed">
-                                                                    <div></div>
                                                                 </div>
                                                             </div>
                                                         );
