@@ -7,7 +7,7 @@ import ReactTooltip from 'react-tooltip';
 import TwitterTimelineEmbed from '../lib/react-twitter-embed/TwitterTimelineEmbed';
 
 import { FourfrontLogo } from './../viz/FourfrontLogo';
-import { console, ajax } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { console, ajax, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
 import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
 import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
@@ -66,7 +66,7 @@ export default class HomePage extends React.PureComponent {
                             <div className="col-12 col-lg-8 recently-released-datasets-section">
                                 <h2 className="homepage-section-title new-design ">Recently Released Datasets</h2>
                                 <div className="recently-released-datasets-container">
-                                    <RecentlyReleasedDataSets showAll />
+                                    <RecentlyReleasedDataSets {...{ windowWidth, showAll: true }} />
                                 </div>
                             </div>
                             <div className="col-12 col-lg-4 social-connections-column">
@@ -225,7 +225,7 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
                     <div className="col-12 col-md-7 browse-data-collection-col-browse">
                         <div className="row">
                             <div className="col-12">
-                                <div className='row'>
+                                <div className="row">
                                     <div className="col-12 col-md-6 text-center">
                                         <div className="h-100 p-0 browse-data-collection-block browse-all-data">
                                             <a href="/browse/?experimentset_type=replicate&type=ExperimentSetReplicate" className="h-100 d-flex flex-column text-decoration-none">
@@ -298,7 +298,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
     }
 
     render() {
-        const { showAll } = this.props;
+        const { showAll, windowWidth } = this.props;
         const { mounted, loading, datasets } = this.state;
 
         if (!mounted) {
@@ -311,6 +311,107 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                 </div>
             );
         }
+
+        const gridState = layout.responsiveGridState(windowWidth);
+        const isMobileSize = gridState && ['xs', 'sm'].indexOf(gridState) > -1;
+
+        console.log('xxx isMobileSize:', isMobileSize);
+
+        let colHeaders = null;
+        let rows = null;
+        if (!isMobileSize) {
+            colHeaders = (
+                <div className="columns clearfix" style={{ left: "0px" }}>
+                    <div className="search-headers-column-block" data-col="dataset">
+                        <div className="inner" style={{ color: '#34646C' }}>
+                            <div className="column-title"><span data-html="true">Dataset</span></div>
+                        </div>
+                    </div>
+                    <div className="search-headers-column-block" data-col="expset_count">
+                        <div className="inner" style={{ color: '#34646C' }}>
+                            <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
+                        </div>
+                    </div>
+                    <div className="search-headers-column-block" data-col="lab">
+                        <div className="inner" style={{ color: '#34646C' }}>
+                            <div className="column-title"><span data-html="true">Lab</span></div>
+                        </div>
+                    </div>
+                </div>
+            );
+            rows = (
+                <div style={{ overflow: "auto", maxHeight: "400px;" }}>
+                    {
+                        _.map(datasets, function (item, datasetName) {
+                            const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
+                            return (
+                                <div className="search-result-row">
+                                    <div className="columns clearfix result-table-row">
+                                        <div className="search-result-column-block" data-col="dataset">
+                                            <div className="inner">
+                                                <div className="title-block text-truncate" data-tip={datasetName}>{datasetName}</div>
+                                            </div>
+                                        </div>
+                                        <div className="search-result-column-block" data-col="expset_count">
+                                            <div className="inner text-center">
+                                                <span className="value text-truncate">
+                                                    <a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="search-result-column-block" data-col="lab">
+                                            <div className="inner">
+                                                <span className="value text-left"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    }
+                </div>
+            );
+        }
+        else {
+            colHeaders = (
+                <div className="columns clearfix" style={{ left: "0px" }}>
+                    <div className="search-headers-column-block" style={{ width: "100%" }}>
+                        <div className="inner" style={{ color: '#34646C' }}>
+                            <div className="column-title"><span data-html="true">Dataset</span></div>
+                        </div>
+                    </div>
+                </div>
+            );
+            rows = (
+                <div style={{ overflow: "auto", maxHeight: "400px;" }}>
+                    {
+                        _.map(datasets, function (item, datasetName) {
+                            const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
+                            return (
+                                <div className="search-result-row" style={{ width: "100%" }}>
+                                    <div className="columns clearfix result-table-row">
+                                        <div className="search-result-column-block" style={{ width: "100%", fontSize: '16px' }}>
+                                            <div className="inner">
+                                                <div className="title-block text-truncate">
+                                                    <a href={searchUrl} data-tip={datasetName + " (released on " + item.public_release + ")"}>{datasetName}</a>
+                                                </div>
+                                            </div>
+                                            <div className="inner" style={{ fontSize: '13px', height: '30px' }}>
+                                                <span className="value text-truncate">
+                                                    {item.experiment_sets || '-'} Exp. Set(s) by {item.labs || '-'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    }
+                </div>
+            );
+        }
+
         return (
             <React.Fragment>
                 <div className="embedded-search-view-outer-container">
@@ -318,54 +419,13 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                         <div className="row search-view-controls-and-results">
                             <div className="col-12">
                                 <div className="search-results-outer-container is-within-page">
-                                    <div className="search-results-container fully-loaded">
+                                    <div className="search-results-container">
                                         <div className="search-headers-row" style={{ backgroundColor: '#EFF7F8' }}>
                                             <div className="headers-columns-overflow-container">
-                                                <div className="columns clearfix" style={{ left: "0px" }}>
-                                                    <div className="search-headers-column-block" style={{ width: "280px" }}>
-                                                        <div className="inner" style={{ color: '#34646C' }}>
-                                                            <div className="column-title"><span data-html="true">Dataset</span></div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="search-headers-column-block" style={{ width: "200px" }}>
-                                                        <div className="inner" style={{ color: '#34646C' }}>
-                                                            <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="search-headers-column-block" style={{ width: "240px" }}>
-                                                        <div className="inner" style={{ color: '#34646C' }}>
-                                                            <div className="column-title"><span data-tip="Type of experiment to which this file belongs" data-html="true">Lab</span></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                {colHeaders}
                                             </div>
                                         </div>
-                                        <div className="react-infinite-container" style={{ overflow: "auto", maxHeight: "400px;" }}>
-                                            <div>
-                                                {
-                                                    _.map(datasets, function (item, datasetName) {
-                                                        const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
-                                                        return (
-                                                            <div className="search-result-row" style={{ minWidth: "696px" }}>
-                                                                <div className="columns clearfix result-table-row">
-                                                                    <div className="search-result-column-block" style={{ width: "280px", fontSize: '14px' }}>
-                                                                        <div className="inner">
-                                                                            <div className="title-block text-truncate" data-tip={datasetName}>{datasetName}</div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="search-result-column-block" style={{ width: "200px", fontSize: '14px' }}>
-                                                                        <div className="inner text-center"><span className="value text-truncate"><a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a></span></div>
-                                                                    </div>
-                                                                    <div className="search-result-column-block" style={{ width: "240px", fontSize: '14px' }}>
-                                                                        <div className="inner"><span className="value text-left"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a></span></div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })
-                                                }
-                                            </div>
-                                        </div>
+                                        {rows}
                                     </div>
                                 </div>
                             </div>

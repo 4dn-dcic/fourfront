@@ -151,6 +151,42 @@
 			font-weight: 400;
 			padding-bottom: 8px;
 		}
+
+		.search-result-row {
+			min-width: 696px;
+			@include media-breakpoint-down(lg){
+				min-width: 620px;
+			}
+			@include media-breakpoint-down(md){
+				min-width: 100%;
+			}
+		}
+		
+		.search-result-column-block {
+			font-size: 14px;
+		}
+
+		.search-headers-column-block[data-col="dataset"],
+		.search-result-column-block[data-col="dataset"] {
+			width: 280px;
+			@include media-breakpoint-down(lg){
+				width: 250px;
+			}
+		}
+		.search-headers-column-block[data-col="expset_count"],
+		.search-result-column-block[data-col="expset_count"]{
+			width: 200px;
+			@include media-breakpoint-down(lg){
+				width: 170px;
+			}
+		}
+		.search-headers-column-block[data-col="lab"],
+		.search-result-column-block[data-col="lab"]{
+			width: 240px;
+			@include media-breakpoint-down(lg){
+				width: 200px;
+			}
+		}
 	}
 
 	.browse-data-collection-fullwidth-container {
@@ -339,6 +375,9 @@
 	.tools-and-resources-container {
 		
 		.tools-and-resources-container-title {
+			
+			margin-right: 0;
+			margin-left: 0;
 			
 			h2.homepage-section-title {
 				border-bottom: none;
@@ -1521,7 +1560,7 @@ $carousel-height : 240px;
 
 			@include media-breakpoint-down(sm){
 				// Add top margin for spacing on mobile
-				margin-top: 20px;
+				margin-top: 50px;
 			}
 		}
 

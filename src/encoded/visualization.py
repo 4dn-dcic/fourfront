@@ -317,18 +317,31 @@ def bar_plot_chart(context, request):
 @view_config(route_name='recently_released_datasets', request_method=['GET'])
 @debug_log
 def recently_released_datasets(context, request):
-    MAX_BUCKET_COUNT = 6 # Max rows
+    
+    MAX_BUCKET_COUNT = 6 # default max rows
+    
+    size = request.params.get("max_row_count", MAX_BUCKET_COUNT)
 
+    # default parameters
     search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
+    # append any other search parameters
+    for k,v in request.params.items():
+        if k == 'sort':
+            continue
+        if k not in search_param_lists:
+            search_param_lists[k] = [v]
+        else:
+            search_param_lists[k].append(v)
+
     fields_to_aggregate_for = ['dataset_label']
 
     primary_agg = {
         "field_0" : {
             "terms" : {
-                "field" : "embedded." + fields_to_aggregate_for[0] + '.raw',
+                "field" : "embedded." + fields_to_aggregate_for[0] + ".raw",
                 # "missing" : TERM_NAME_FOR_NO_VALUE,
                 "order": { "public_release": "desc"},
-                "size" : MAX_BUCKET_COUNT
+                "size" : size
             },
             "aggs" : deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION)
         }
@@ -336,7 +349,8 @@ def recently_released_datasets(context, request):
 
     primary_agg.update(deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION))
 
-    search_param_lists['limit'] = search_param_lists['from'] = [0]
+    search_param_lists['limit'] = [0]
+    search_param_lists['from'] = [0]
     subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
     search_result   = perform_search_request(None, subreq, custom_aggregations=primary_agg)
 
@@ -368,7 +382,6 @@ def recently_released_datasets(context, request):
     for bucket in search_result['aggregations']['field_0']['buckets']:
         format_bucket_result(bucket, ret_result['terms'])
 
-    # return [ret_result, search_result]
     return ret_result
 
 
