@@ -6,6 +6,40 @@ fourfront
 Change Log
 ----------
 
+4.6.1
+======
+
+`PR MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`
+
+* New MicroMeta App release
+
+4.5.26
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+4.5.25
+======
+
+`PR imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`
+
+* Imaging paths list is converted to table
+
+4.5.24
+======
+
+* SPC is upgraded to 0.1.57.
+* Until SPC 0.1.56, Sentry API log almost any incidents and obliterates the quota quickly. 0.1.57 allows tuning the sampling rate. (default is 0.1))
+
+4.5.22
+======
+
+`PR dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`
+
+* Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
+* Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
+* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
+
 4.5.21
 ======
 
