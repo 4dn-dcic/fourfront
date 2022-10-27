@@ -81,7 +81,7 @@ pytz = ">=2021.3"
 rdflib = "^4.2.2"
 rdflib-jsonld = ">=0.5.0,<1.0.0"
 requests = "^2.26.0"
-rsa = "3.3"
+rsa = "4.7"
 rutter = ">=0.3,<1"
 semantic_version = ">=2.9.0"
 # We don't use this directly. It's part of boto3. It slows down solving to pin.
