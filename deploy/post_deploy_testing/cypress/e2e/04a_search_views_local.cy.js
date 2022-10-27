@@ -183,22 +183,34 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
-        it('Contains App version and Model version in About ', function(){
+        it('Contains App and Model version in "About" popup ', function(){
             cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Click info buttton
             cy.get('div.micro-meta-app-container #microscopy-app-container button.btn.btn-primary.btn-lg img[alt*="about-solid.svg"]').first().click().end().wait(1000);
 
+            const appModelRegEx = /App version: (?<app>\S*)Model version: (?<model>\S*)\(c\)/;
             //Verify app version
-            cy.get('div#microscopy-app-overlays-container').should('contain.text', 'App version').invoke('text').then((text) => {
-                const appText = "App version";
-                const splittedText = text.slice(text.indexOf(appText) + appText.length);
-            });
-            // Verify modal version
-            cy.get('div#microscopy-app-overlays-container br').should('contain.text', 'Model version').then(($text) => {
-                const modalText = "Model version";
-                const splittedText = text.slice(text.indexOf(modalText) + modalText.length);
-            });
+            cy.get('div#microscopy-app-overlays-container p')
+                .invoke('text')
+                .should('match', appModelRegEx)
+                // extract the app and model version
+                .invoke('match', appModelRegEx)
+                // grab the named group - app
+                .its('groups.app')
+                // and confirm its value
+                .should('have.length.least', 3);
+
+            //verify model version
+            cy.get('div#microscopy-app-overlays-container p')
+                .invoke('text')
+                .should('match', appModelRegEx)
+                // extract the app and model version
+                .invoke('match', appModelRegEx)
+                // grab the named group - model
+                .its('groups.model')
+                // and confirm its value
+                .should('have.length.least', 3);
         });
 
         //Edit clonned microscope configuration
