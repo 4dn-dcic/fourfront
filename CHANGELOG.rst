@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+4.6.3
+======
+
+* Cypress test updates for the new MicroMeta App features
+
 4.6.1
 ======
 
