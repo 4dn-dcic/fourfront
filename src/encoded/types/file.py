@@ -879,7 +879,7 @@ class File(Item):
                 # If the file exists in the Open Data S3 bucket, client.head_object will succeed (not throw ClientError)
                 # Returning a valid S3 URL to the public url of the file
                 try:
-                    self._head_s3(client, open_data_bucket, open_data_key)
+                    self._head_s3(client, open_data_bucket, key)
                 except ClientError:
                     continue  # try the other key
                 location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
