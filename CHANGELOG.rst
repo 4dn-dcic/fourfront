@@ -6,6 +6,23 @@ fourfront
 Change Log
 ----------
 
+4.6.3
+======
+
+* Cypress test updates for the new MicroMeta App features
+
+4.6.1
+======
+
+`PR MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`
+
+* New MicroMeta App release
+
+4.5.26
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
 4.5.25
 ======
 

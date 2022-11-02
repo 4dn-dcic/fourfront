@@ -61,7 +61,7 @@ export function transformedFacets(href, context, currentAction, session, schemas
     const searchItemTypes = getAllSchemaTypesFromSearchContext(context); // "Item" is excluded
 
     if (searchItemTypes.length > 0) {
-        logger.info("A (non-'Item') type filter is present. Will skip filtering Item types in Facet.");
+        console.info("A (non-'Item') type filter is present. Will skip filtering Item types in Facet.");
         // Keep all terms/leaf-types - backend should already filter down to only valid sub-types through
         // nature of search itself.
 

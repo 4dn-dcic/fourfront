@@ -105,7 +105,7 @@
     "webpack-deadcode-plugin": "^0.1.15"
   },
   "dependencies": {
-    "micro-meta-app-react": "git+https:github.com/WU-BIMAC/MicroMetaApp-React#0.0.0.21",
+    "micro-meta-app-react": "git+https:github.com/WU-BIMAC/MicroMetaApp-React#1.7.25-b1",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@hms-dbmi-bgm/react-workflow-viz": "0.1.7",
     "@hms-dbmi-bgm/shared-portal-components": "git+https:github.com/4dn-dcic/shared-portal-components#0.1.57",

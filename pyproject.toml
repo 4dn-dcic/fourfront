@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "4.5.25"
+version = "4.6.3"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -149,7 +149,6 @@ pytest-mock = ">=0.11.0"
 pytest-timeout = ">=1.0.0"
 pytest-xdist = ">=1.14"
 "repoze.debug" = ">=1.0.2"
-
 
 
 # In pytest 6.0, we'll be able to use this instead of a separate pytest.ini configuration.
