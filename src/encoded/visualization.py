@@ -195,7 +195,8 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION = {
     "all_labs" : {
         "terms" : { 
-            "field": "embedded.lab.display_title.raw"
+            #"field": "embedded.lab.@id.raw",
+            "script": "return doc['embedded.lab.@id.raw'].getValue().concat('~').concat(doc['embedded.lab.display_title.raw'].getValue());"
         }
     },
     "public_release" : {
@@ -370,11 +371,16 @@ def recently_released_datasets(context, request):
         "time_generated" : str(datetime.utcnow())
     }
 
+    def convert_to_item(str):
+        fragments = str.split('~')
+        if len(fragments) == 2:
+            return {'@id': fragments[0], 'display_title': fragments[1]}
+        return {}
 
     def format_bucket_result(bucket_result, returned_buckets):
         curr_bucket_totals = {
             'experiment_sets'   : int(bucket_result['doc_count']), 
-            'labs'              : ", ".join([str(item['key']) for item in bucket_result['all_labs']['buckets']]),
+            'labs'              : [convert_to_item(str(item['key'])) for item in bucket_result['all_labs']['buckets']],
             'public_release'    : bucket_result['public_release']['value_as_string']
         }
         returned_buckets[bucket_result['key']] = curr_bucket_totals

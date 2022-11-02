@@ -8,8 +8,6 @@ import TwitterTimelineEmbed from '../lib/react-twitter-embed/TwitterTimelineEmbe
 
 import { FourfrontLogo } from './../viz/FourfrontLogo';
 import { console, ajax, layout } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
-import { BasicStaticSectionBody } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/BasicStaticSectionBody';
-import { requestAnimationFrame } from '@hms-dbmi-bgm/shared-portal-components/es/components/viz/utilities';
 
 import { navigate } from'./../util';
 import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, StaticPageBreadcrumbs } from './../PageTitle';
@@ -24,10 +22,7 @@ import { pageTitleViews, PageTitleContainer, TitleAndSubtitleUnder, StaticPageBr
 export default class HomePage extends React.PureComponent {
 
     static propTypes = {
-        "context" : PropTypes.shape({
-            "content" : PropTypes.array.isRequired,
-            "announcements" : PropTypes.arrayOf(PropTypes.object)
-        }).isRequired,
+        "context" : PropTypes.object.isRequired,
         "session": PropTypes.bool.isRequired
     };
 
@@ -37,12 +32,6 @@ export default class HomePage extends React.PureComponent {
      */
     render() {
         const { windowWidth, context, session } = this.props;
-        const { announcements = null, content = [] } = context || {};
-        const introContent = _.findWhere(content, { 'name' : 'home.introduction' }); // Content
-        const introToShow = introContent ?
-            <BasicStaticSectionBody {..._.pick(introContent, 'content', 'filetype')} />
-            : <p className="text-center">Introduction content not yet indexed.</p>;
-
         const twitterPlaceholder = (
             <div className="twitter-loading-placeholder">
                 <i className="icon icon-twitter icon-2x fab"/>
@@ -108,114 +97,6 @@ export default class HomePage extends React.PureComponent {
 }
 
 
-
-class BigBrowseButton extends React.Component {
-
-    static defaultProps = {
-        'element' : 'a',
-        'className' : "btn btn-block btn-primary btn-lg text-400",
-        'children' : 'Browse 4DN Data'
-    };
-
-    constructor(props){
-        super(props);
-        this.handleMouseEnter = this.handleMouseEnter.bind(this);
-        this.handleMouseLeave = this.handleMouseLeave.bind(this);
-    }
-
-    handleMouseEnter(){
-        requestAnimationFrame(function(){
-            const [ topMenuBrowseButton ] = document.getElementsByClassName('browse-nav-btn');
-            if (topMenuBrowseButton){
-                topMenuBrowseButton.style.textShadow = "0 0 0 #000";
-                topMenuBrowseButton.style.color = "#000";
-                topMenuBrowseButton.style.backgroundColor = "#e7e7e7";
-            }
-        });
-    }
-
-    handleMouseLeave(e){
-        requestAnimationFrame(function(){
-            const [ topMenuBrowseButton ] = document.getElementsByClassName('browse-nav-btn');
-            if (topMenuBrowseButton){
-                topMenuBrowseButton.style.textShadow = '';
-                topMenuBrowseButton.style.color = '';
-                topMenuBrowseButton.style.backgroundColor = '';
-            }
-        });
-    }
-
-    render(){
-        var children = this.props.children,
-            element = this.props.element,
-            propsToPass = {
-                'onMouseEnter' : this.handleMouseEnter,
-                'onMouseLeave' : this.handleMouseLeave,
-                'onClick' : this.handleMouseLeave,
-                'href' : navigate.getBrowseBaseHref()
-            };
-
-        return React.createElement(element, _.extend(_.omit(this.props, 'element', 'children'), propsToPass), children);
-    }
-}
-
-/** NOT USED FOR NOW - NEEDS UPDATES IF TO BE REINTRODUCED */
-const GettingStartedLinksRow = React.memo(function GettingStartedLinksRow(props){
-    const { linkBoxVerticalPaddingOffset, session } = props;
-    let jointAnalysisPageLink = null;
-    let nofisAicsCollaborationPageLink = null;
-    if (session) {
-        jointAnalysisPageLink = (
-            <div className="col-3">
-                <a className="link-block" href="/joint-analysis">
-                    <span>Joint Analysis Page</span>
-                </a>
-            </div>
-        );
-        nofisAicsCollaborationPageLink = (
-            <div className="col-3">
-                <a className="link-block" href="/4DN-AICS-Collaboration">
-                    <span>NOFIC-AICS Collaboration</span>
-                </a>
-            </div>
-        );
-    }
-    return (
-        <div className="homepage-links-row getting-started-links">
-            <div className="links-wrapper row">
-                <div className="col-3">
-                    <BigBrowseButton className="browse-btn link-block">
-                        <span>{ BigBrowseButton.defaultProps.children }</span>
-                    </BigBrowseButton>
-                </div>
-                <div className="col-3">
-                    <a className="link-block" href="/search/?type=Publication&sort=static_content.location&sort=-number_of_experiment_sets">
-                        <span>Browse Publications</span>
-                    </a>
-                </div>
-                <div className="col-3">
-                    <a className="link-block" href="/tools/jupyterhub">
-                        <span>Explore 4DN Data (JupyterHub)</span>
-                    </a>
-                </div>
-                <div className="col-3">
-                    <a className="link-block" href="/tools/visualization">
-                        <span>Visualize 4DN Data (HiGlass)</span>
-                    </a>
-                </div>
-                {/*
-                <div className="link-block">
-                    <a href="/help/user-guide/data-organization">
-                        <span>Introduction to 4DN Metadata</span>
-                    </a>
-                </div>
-                */}
-                { jointAnalysisPageLink }
-                { nofisAicsCollaborationPageLink }
-            </div>
-        </div>
-    );
-});
 
 const CollectionsRow = React.memo(function CollectionsRow(props) {
     return (
@@ -297,30 +178,9 @@ class RecentlyReleasedDataSets extends React.PureComponent {
         });
     }
 
-    render() {
-        const { showAll, windowWidth } = this.props;
-        const { mounted, loading, datasets } = this.state;
-
-        if (!mounted) {
-            return null;
-        }
-        if (loading) {
+    getHeaders(isMobile) {
+        if (!isMobile) {
             return (
-                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
-                    <i className="icon icon-fw fas icon-spin icon-circle-notch" />
-                </div>
-            );
-        }
-
-        const gridState = layout.responsiveGridState(windowWidth);
-        const isMobileSize = gridState && ['xs', 'sm'].indexOf(gridState) > -1;
-
-        console.log('xxx isMobileSize:', isMobileSize);
-
-        let colHeaders = null;
-        let rows = null;
-        if (!isMobileSize) {
-            colHeaders = (
                 <div className="columns clearfix" style={{ left: "0px" }}>
                     <div className="search-headers-column-block" data-col="dataset">
                         <div className="inner" style={{ color: '#34646C' }}>
@@ -339,11 +199,55 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                     </div>
                 </div>
             );
-            rows = (
+        } else {
+            return (
+                <div className="columns clearfix" style={{ left: "0px" }}>
+                    <div className="search-headers-column-block" style={{ width: "100%" }}>
+                        <div className="inner" style={{ color: '#34646C' }}>
+                            <div className="column-title"><span data-html="true">Dataset</span></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    getRows(datasets, isMobile){
+        if(!isMobile){
+            return (
                 <div style={{ overflow: "auto", maxHeight: "400px;" }}>
                     {
                         _.map(datasets, function (item, datasetName) {
+
                             const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
+                            const { public_release, experiment_sets, labs: propLabs = [] } = item;
+                            let labs = null;
+                            if (propLabs.length === 1) {
+                                const [lab] = propLabs;
+                                const labUrl = lab['@id'];
+                                const { display_title: labTitle = 'N/A' } = lab;
+                                labs = (
+                                    <React.Fragment>
+                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + labTitle}></i> {labUrl ? (<a href={labUrl} data-tip={"Submitted by " + labTitle}>{labTitle}</a>) : labTitle}
+                                    </React.Fragment>);
+                            } else if (propLabs.length > 1) {
+                                labs = (
+                                    <ul className="mb-0 mt-01 list-inline">
+                                        {
+                                            propLabs.map(function (lab, index) {
+                                                const labUrl = lab['@id'];
+                                                const { display_title: labTitle = 'N/A' } = lab;
+                                                return (
+                                                    <li key={"lab-" + index}>
+                                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + labTitle}></i> {labUrl ? (<a href={labUrl} data-tip={"Submitted by " + labTitle}>{labTitle}</a>) : labTitle}
+                                                    </li>
+                                                );
+                                            })
+                                        }
+                                    </ul>
+                                );
+                            }
+
                             return (
                                 <div className="search-result-row">
                                     <div className="columns clearfix result-table-row">
@@ -355,14 +259,13 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                         <div className="search-result-column-block" data-col="expset_count">
                                             <div className="inner text-center">
                                                 <span className="value text-truncate">
-                                                    <a href={searchUrl} data-tip={"Released on " + item.public_release}>{item.experiment_sets || '-'} Experiment Set(s)</a>
+                                                    <a href={searchUrl} data-tip={"Released on " + public_release}>{experiment_sets || '-'} Experiment Set(s)</a>
                                                 </span>
                                             </div>
                                         </div>
                                         <div className="search-result-column-block" data-col="lab">
                                             <div className="inner">
-                                                <span className="value text-left"><i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + item.labs}></i> <a href={searchUrl} data-tip={"Submitted by " + item.labs}>{item.labs || '-'}</a>
-                                                </span>
+                                                <span className="value text-left">{labs}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -372,34 +275,28 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                     }
                 </div>
             );
-        }
-        else {
-            colHeaders = (
-                <div className="columns clearfix" style={{ left: "0px" }}>
-                    <div className="search-headers-column-block" style={{ width: "100%" }}>
-                        <div className="inner" style={{ color: '#34646C' }}>
-                            <div className="column-title"><span data-html="true">Dataset</span></div>
-                        </div>
-                    </div>
-                </div>
-            );
-            rows = (
+        } else {
+            return (
                 <div style={{ overflow: "auto", maxHeight: "400px;" }}>
                     {
                         _.map(datasets, function (item, datasetName) {
+
+                            const { public_release, experiment_sets, labs: propLabs = [] } = item;
                             const searchUrl = "/browse/?experimentset_type=replicate&type=ExperimentSetReplicate&dataset_label=" + encodeURIComponent(datasetName);
+                            const labs = propLabs && propLabs.length > 0 ? _.compact(_.pluck(propLabs, 'display_title')).join(", ") : null;
+
                             return (
                                 <div className="search-result-row" style={{ width: "100%" }}>
                                     <div className="columns clearfix result-table-row">
                                         <div className="search-result-column-block" style={{ width: "100%", fontSize: '16px' }}>
                                             <div className="inner">
                                                 <div className="title-block text-truncate">
-                                                    <a href={searchUrl} data-tip={datasetName + " (released on " + item.public_release + ")"}>{datasetName}</a>
+                                                    <a href={searchUrl} data-tip={datasetName + " (released on " + public_release + ")"}>{datasetName}</a>
                                                 </div>
                                             </div>
                                             <div className="inner" style={{ fontSize: '13px', height: '30px' }}>
                                                 <span className="value text-truncate">
-                                                    {item.experiment_sets || '-'} Exp. Set(s) by {item.labs || '-'}
+                                                    {experiment_sets || '-'} Exp. Set(s){labs ? ' by ' + labs : null}
                                                 </span>
                                             </div>
                                         </div>
@@ -411,6 +308,28 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                 </div>
             );
         }
+    }
+
+    render() {
+        const { showAll, windowWidth } = this.props;
+        const { mounted, loading, datasets } = this.state;
+
+        if (!mounted) {
+            return null;
+        }
+        if (loading) {
+            return (
+                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                    <i className="icon icon-fw fas icon-spin icon-circle-notch" />
+                </div>
+            );
+        }
+
+        const gridState = layout.responsiveGridState(windowWidth);
+        const isMobileSize = gridState && ['xs', 'sm'].indexOf(gridState) > -1;
+
+        const colHeaders = this.getHeaders(isMobileSize);
+        const rows = this.getRows(datasets, isMobileSize);
 
         return (
             <React.Fragment>
