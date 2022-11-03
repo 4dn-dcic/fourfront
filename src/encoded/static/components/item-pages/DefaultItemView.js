@@ -17,7 +17,7 @@ import { Schemas, fileUtil, typedefs } from './../util';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { TabbedView } from './components/TabbedView';
 import { Publications } from './components/Publications';
-import { AttributionTabView } from './components/AttributionTabView';
+import { AttributionTabView, ContactPersonListItem } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
 import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
 
@@ -618,6 +618,15 @@ export class OverViewBodyItem extends React.PureComponent {
         },
         'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             return <SampleBiosourceItem {...{ item, index, fullObject }} />;
+        },
+        'contact_person': function (field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+            if (!value || typeof value !== 'object') return null;
+            const { '@id': cpID, contact_email, display_title } = value;
+            if (cpID, contact_email && display_title) {
+                return <ContactPersonListItem contactPerson={item} key={cpID} />;
+            } else {
+                return (<li>{display_title || 'N/A'}</li>);
+            }
         }
     };
 
