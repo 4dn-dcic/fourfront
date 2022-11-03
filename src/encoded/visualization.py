@@ -327,7 +327,7 @@ def recently_released_datasets(context, request):
     search_param_lists = deepcopy(DEFAULT_BROWSE_PARAM_LISTS)
     # append any other search parameters
     for k,v in request.params.items():
-        if k == 'sort':
+        if k == 'sort' or k == 'max_row_count':
             continue
         if k not in search_param_lists:
             search_param_lists[k] = [v]
@@ -335,7 +335,7 @@ def recently_released_datasets(context, request):
             search_param_lists[k].append(v)
     #override
     search_param_lists['status'] = ['released']
-    search_param_lists['!dataset_label'] = ['No value']
+    search_param_lists['dataset_label!'] = ['No value']
 
     fields_to_aggregate_for = ['dataset_label']
 
