@@ -17,16 +17,9 @@ describe('Home Page', function () {
     });
 
 
-    it('Has introduction (indexed)', function () {
-
-        cy.get('.home-content-area h2.homepage-section-title').should('contain', 'Introduction').end()
-            .get('.home-content-area h2.homepage-section-title + div').should('contain', "The 4D Nucleome Network aims to understand the principles");
-
-    });
-
-
-    it('Has carousel', function() {
-        cy.get('.homepage-carousel-wrapper .slider-frame .slider-list .slider-slide').should('have.length.of.at.least', 2);
+    it('Has recently released datasets has 2+ rows', function() {
+        cy.get('.recently-released-datasets-section .search-results-container')
+            .find('.search-result-row div.search-result-column-block[data-col="dataset"]').should('have.length.of.at.least', 2);
     });
 
     it('Has Twitter feed w. 5+ tweets', function() {
