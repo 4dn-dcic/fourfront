@@ -763,25 +763,46 @@ def test_barplot_aggregation_endpoint(workbook, testapp):
     # assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] > 0
     # assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] < count_exp_set_test_inserts
 
-def test_recently_released_datasets_endpoint(workbook, testapp):
+# def test_recently_released_datasets_endpoint(testapp, lab, award):
+def test_recently_released_datasets_endpoint(testapp):
 
     max_row_count = 3
 
-    # Check what we get back -
+    # exp_set1 = {
+    #     'lab': lab['@id'],
+    #     'award': award['@id'],
+    #     'experimentset_type': 'replicates',
+    #     'status': 'released',
+    #     'dataset_label': 'test dataset 1',
+    #     'date_released': '2022-11-01'
+    # }
+    # exp_set2 = {
+    #     'lab': lab['@id'],
+    #     'award': award['@id'],
+    #     'experimentset_type': 'replicates',
+    #     'status': 'released',
+    #     'dataset_label': 'test dataset 2',
+    #     'date_released': '2022-11-01'
+    # }
+
+    # res1 = testapp.post_json('/experiment_set_replicate', exp_set1).json['graph'][0]
+    # res2 = testapp.post_json('/experiment_set_replicate', exp_set2).json['graph'][0]
+
+    # get experiment sets count that are released and are included in a dataset
     search_result = testapp.get('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&status=released&dataset_label!=No+value').json
     search_result_count = len(search_result['@graph'])
 
     # Test the endpoint after ensuring we have the data correctly loaded into ES.
     # We should get back same count as from search results here.
-    res = testapp.get('/recently_released_datasets?max_row_count=' + max_row_count).json
+    datasets_res = testapp.get('/recently_released_datasets?max_row_count=' + max_row_count).json
 
-    assert (res['total']['experiment_sets'] == search_result_count)
+    assert (datasets_res['total']['experiment_sets'] == search_result_count)
 
-    assert isinstance(res['terms'], dict) is True
+    assert isinstance(datasets_res['terms'], dict) is True
 
-    assert len(res["terms"].keys()) > 0
+    assert len(datasets_res["terms"].keys()) > 0
 
-    assert len(res["terms"].keys()) <= 1
+    assert len(datasets_res["terms"].keys()) <= max_row_count
 
 
 @pytest.fixture(scope='session')
