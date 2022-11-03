@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+4.6.4
+======
+
+* Bug fix - cannot clear q= if top bar "Within Results" option is selected
+
 4.6.3
 ======
 

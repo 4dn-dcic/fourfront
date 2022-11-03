@@ -310,7 +310,7 @@ const SearchNavItemBody = React.memo(function SearchNavItemBody(props) {
     const selectedItem = AvailableSearchTypes[searchType];
     const action = (searchType === 'Within' && isBrowsePage) ? '/browse/' : ((selectedItem && selectedItem.action) || '/search/');
     const btnIconClassName = 'icon icon-fw fas ' + (searchType === 'ByAccession' ? 'icon-arrow-right' : 'icon-search');
-    const btnDisabled = !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
+    const btnDisabled = (searchType !== 'Within') && !(searchText &&  typeof searchText === 'string' && searchText.length > 0);
     const searchTextClassName = 'form-control' + (!searchInputIsValid ? ' border border-danger' : '');
 
     return (//Form submission gets serialized and AJAXed via onSubmit handlers in App.js
