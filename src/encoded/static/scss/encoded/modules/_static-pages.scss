@@ -419,6 +419,13 @@
 							border-color: #C8E3CA;
 							border-style: solid;
 							border-width: 2px;
+
+							.tool-image img {
+
+								@include media-breakpoint-down(sm) {
+									width: 100%;
+								}
+							}
 			
 							.tool-logo img {
 								height: 30px;
@@ -449,6 +456,10 @@
 								&:hover {
 									background-color: $brand-primary-dark !important;
 									color: #FFFFFF !important;
+								}
+
+								@include media-breakpoint-down(sm) {
+									margin-top: 30px !important;
 								}
 							}
 			
