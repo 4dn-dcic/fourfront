@@ -333,6 +333,9 @@ def recently_released_datasets(context, request):
             search_param_lists[k] = [v]
         else:
             search_param_lists[k].append(v)
+    #override
+    search_param_lists['status'] = ['released']
+    search_param_lists['!dataset_label'] = ['No value']
 
     fields_to_aggregate_for = ['dataset_label']
 
