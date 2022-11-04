@@ -29,7 +29,10 @@ export default class LabView extends DefaultItemView {
 
         initTabs.push(ExperimentSetsTableTabView.getTabObject(expSetTableProps));
 
-        return initTabs.concat(this.getCommonTabs());
+        return initTabs.concat(_.filter(this.getCommonTabs(), function(tabObj){
+            if (tabObj.key === 'attribution') return false;
+            return true;
+        }));
     }
 
 }
