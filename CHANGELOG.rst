@@ -19,7 +19,7 @@ Change Log
 4.6.1
 ======
 
-`PR MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`
+`PR 1712: MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`_
 
 * New MicroMeta App release
 
@@ -31,7 +31,7 @@ Change Log
 4.5.25
 ======
 
-`PR imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`
+`PR 1472: imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`_
 
 * Imaging paths list is converted to table
 
@@ -44,7 +44,7 @@ Change Log
 4.5.22
 ======
 
-`PR dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`
+`PR 1723: dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`_
 
 * Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
 * Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
@@ -53,7 +53,7 @@ Change Log
 4.5.21
 ======
 
-`PR add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`
+`PR 1734: add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`_
 
 * Added a new user insert for Gulsah (UI dev on Utku's team) in master_inserts/user.json
 
