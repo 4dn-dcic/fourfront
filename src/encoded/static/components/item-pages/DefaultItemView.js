@@ -620,12 +620,12 @@ export class OverViewBodyItem extends React.PureComponent {
             return <SampleBiosourceItem {...{ item, index, fullObject }} />;
         },
         'contact_person': function (field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
-            if (!value || typeof value !== 'object') return null;
-            const { '@id': cpID, contact_email, display_title } = value;
-            if (cpID, contact_email && display_title) {
-                return <ContactPersonListItem contactPerson={item} key={cpID} />;
+            if (!item || typeof item !== 'object') return null;
+            const { '@id': cpID, contact_email, display_title } = item;
+            if (cpID && contact_email && display_title) {
+                return <ContactPersonListItem contactPerson={item} key={cpID} wrapInListItem={false} />;
             } else {
-                return (<li>{display_title || 'N/A'}</li>);
+                return display_title || 'N/A';
             }
         }
     };

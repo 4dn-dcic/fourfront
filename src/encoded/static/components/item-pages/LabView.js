@@ -85,8 +85,8 @@ const OverViewBody = React.memo(function OverViewBody(props) {
         <div className="row">
             <div className="col-12">
                 <div className="row overview-blocks">
-                    <OverViewBodyItem {...commonProps} property="pi" fallbackTitle="P.I." />
-                    <OverViewBodyItem {...commonProps} property="correspondence" fallbackTitle="Correspondence" />
+                    <OverViewBodyItem {...commonProps} property="pi" fallbackTitle="P.I." titleRenderFxn={OverViewBodyItem.titleRenderPresets.contact_person} />
+                    <OverViewBodyItem {...commonProps} property="correspondence" fallbackTitle="Correspondence" titleRenderFxn={OverViewBodyItem.titleRenderPresets.contact_person} />
                     <OverViewBodyItem {...commonProps} property="institute_name" fallbackTitle="Institute" />
                 </div>
                 <div className="row overview-blocks">
