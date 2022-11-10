@@ -58,6 +58,13 @@ $facetlist-term-block-height: 22px;
 		}
 
     }
+
+	.search-view-controls-and-results {
+		/* fix for: date range popup gets hidden under search results column bug */
+		.facet-result-table-fix {
+			z-index: 1000;
+		}
+	}
 }
 
 
