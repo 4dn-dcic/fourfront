@@ -259,7 +259,7 @@
 					i.icon {
 						font-size: 3rem;
 						opacity: 1;
-						box-shadow: 0 0 4px #BBE3EA;
+						// box-shadow: 0 0 4px #BBE3EA;
 						width: 80px;
 						height: 80px;
 						border-radius: 50%;
@@ -272,6 +272,7 @@
 					&.browse-all-data {
 						i.icon {
 							color: #D7EAEE;
+							box-shadow: 0 0 2px #3E8A98;
 						}
 	
 						.browse-data-collection-block-title {
@@ -304,7 +305,7 @@
 	
 						i.icon {
 							color: #C8E3CA;
-							box-shadow: 0 0 3px #B6E0B8;
+							box-shadow: 0 0 2px #2D8031;
 						}
 	
 						.browse-data-collection-block-desc {
@@ -491,7 +492,7 @@
 							font-size: 2.2rem;
 							opacity: 1;
 							color: #99C79C;
-							box-shadow: 0 0 3px #99C79C;
+							box-shadow: 0 0 2px #2D8031;
 							width: 60px;
 							height: 60px;
 							border-radius: 50%;
@@ -657,8 +658,8 @@
 
 			.btn-4dn-help-icon {
 				font-size: 1.7rem;
-				opacity: 0.7;
-				box-shadow: 0 0 2px $brand-primary-dark;
+				opacity: 0.9;
+				box-shadow: 0 0 2px #3E8A98;
 				width: 45px;
 				height: 45px;
 				border-radius: 50%;
