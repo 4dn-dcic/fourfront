@@ -256,7 +256,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                                 <div className="title-block text-truncate" data-tip={datasetName}>{datasetName}</div>
                                             </div>
                                         </div>
-                                        <div className="search-result-column-block" data-col="expset_count">
+                                        <div className="search-result-column-block" data-col="expset_count" data-exp-set-count={experiment_sets || 0}>
                                             <div className="inner text-center">
                                                 <span className="value text-truncate">
                                                     <a href={searchUrl} data-tip={"Released on " + public_release}>{experiment_sets || '-'} Experiment Set(s)</a>

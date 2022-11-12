@@ -10,8 +10,8 @@ describe('Processed/Raw/Supplementary Files - Counts', function () {
                 .login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(500);
 
             cy.getQuickInfoBarCounts().its('experiment_sets').then((expSetCount) => {
-                const countRecentItemsToVisit = expSetCount >= 15 ? 5 : Math.min(1, parseInt(expSetCount / 3));
 
+                const countRecentItemsToVisit = expSetCount >= 15 ? 5 : Math.min(1, parseInt(expSetCount / 3));
                 Cypress._.forEach(Cypress._.range(0, countRecentItemsToVisit), function (idx) {
 
                     context('Experiment Set Replicate - #' + (idx + 1) + '/' + countRecentItemsToVisit, function () {
