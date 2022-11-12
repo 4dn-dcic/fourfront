@@ -11,7 +11,7 @@ describe('Home Page', function () {
     });
 
 
-    it.skip('Has log in/register button having #loginbtn', function() {
+    it('Has log in/register button having #loginbtn', function() {
         cy.get('#loginbtn').should('contain', 'Log In');
     });
 
@@ -38,18 +38,20 @@ describe('Home Page', function () {
                 cy.wrap(links).each(function ({ href, expSetCount }) {
                     cy.visit(href).end();
                     cy.getQuickInfoBarCounts().its('experiment_sets').should('equal', expSetCount).end();
+                    cy.go('back');
                 });
             });
     });
 
-    it.skip('Has Twitter feed w. 5+ tweets', function() {
+    it('Has Twitter feed w. 5+ tweets', function() {
+        cy.visit('/').end();
         // https://github.com/cypress-io/cypress/issues/136
         cy.get('.home-content-area div.twitter-timeline-container iframe#twitter-widget-0')
             .iframe()
             .find('[data-testid="tweetText"]').should('have.length.of.at.least', 5);
     });
 
-    it.skip('"Toggle External Data" affects Chart', function () {
+    it('"Toggle External Data" affects Chart', function () {
 
         cy.window().scrollTo('top').wait(100).end()
             .getQuickInfoBarCounts().then((initialCounts) =>
