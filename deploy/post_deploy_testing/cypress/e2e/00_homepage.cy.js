@@ -16,10 +16,12 @@ describe('Home Page', function () {
     });
 
 
-    it('Has recently released datasets has 2+ rows', function() {
+    it('Has recently released datasets has 2+ rows', function () {
         cy.get('.recently-released-datasets-section .search-results-container')
             .find('.search-result-row div.search-result-column-block[data-col="dataset"]').should('have.length.of.at.least', 2);
+    });
 
+    it('Recently released dataset\'s exp. set count and browse page\'s result count matches', function () {
         cy.get('.recently-released-datasets-section .search-results-container')
             .find('.search-result-row div.search-result-column-block[data-col="expset_count"]').then(function ($colExpSetCount) {
                 const links = [];
