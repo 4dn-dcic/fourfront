@@ -68,8 +68,7 @@ describe('Home Page', function () {
                 cy.wrap(links).each(function ({ href, labName }) {
                     cy.visit(href).end();
                     cy.location('pathname').should('include', '/labs/').end()
-                        .get('h1.page-title .title').should('have.text', 'Lab').end()
-                        .get('h1.page-title .subtitle').should('have.text', labName).end()
+                        .get('h1.page-title').should('contain', labName).end()
                         .get('div.rc-tabs span[data-tab-key="expsets-table"]').wait(200).click().end().wait(500)
                         .get('.rc-tabs-tabpane.rc-tabs-tabpane-active .search-results-container .search-result-row[data-row-number]').should('have.length.greaterThan', 0).end();
                 });
