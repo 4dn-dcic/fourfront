@@ -1,3 +1,4 @@
+import _ from 'underscore';
 
 describe('Home Page', function () {
 
@@ -29,6 +30,9 @@ describe('Home Page', function () {
                 Cypress._.forEach($colExpSetCount, function (col) {
                     const $col = Cypress.$(col);
                     const expSetCount = parseInt($col.attr('data-exp-set-count'));
+
+                    expect(expSetCount).to.be.greaterThan(0);
+
                     cy.wrap(col).within(() => {
                         cy.get('a').then(($a) => {
                             const href = $a.attr('href');
@@ -40,7 +44,34 @@ describe('Home Page', function () {
                 cy.wrap(links).each(function ({ href, expSetCount }) {
                     cy.visit(href).end();
                     cy.getQuickInfoBarCounts().its('experiment_sets').should('equal', expSetCount).end();
-                    cy.go('back');
+                });
+            });
+    });
+
+    it('Recently released dataset\'s lab navigates to the lab page, and the experiment sets tab has data', function () {
+
+        cy.visit('/').end();
+
+        cy.get('.recently-released-datasets-section .search-results-container')
+            .find('.search-result-row div.search-result-column-block[data-col="lab"] a').then(function ($labs) {
+                const links = [];
+
+                Cypress._.forEach($labs, function (lab) {
+                    const $a = Cypress.$(lab);
+                    const href = $a.attr('href');
+                    const labName = $a.text();
+                    if (!_.any(links, (link) => link.href == href)) {
+                        links.push({ href, labName });
+                    }
+                }).end();
+
+                cy.wrap(links).each(function ({ href, labName }) {
+                    cy.visit(href).end();
+                    cy.location('pathname').should('include', '/labs/').end()
+                        .get('h1.page-title .title').should('have.text', 'Lab').end()
+                        .get('h1.page-title .subtitle').should('have.text', labName).end()
+                        .get('div.rc-tabs span[data-tab-key="expsets-table"]').wait(200).click().end().wait(500)
+                        .get('.rc-tabs-tabpane.rc-tabs-tabpane-active .search-results-container .search-result-row[data-row-number]').should('have.length.greaterThan', 0).end();
                 });
             });
     });
