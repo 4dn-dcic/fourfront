@@ -61,7 +61,6 @@ class LabViewOverview extends React.PureComponent {
         return (
             <div>
                 <OverViewBody {...propsToPass} />
-                <DetailsViewBody {...propsToPass} />
             </div>
         );
 
@@ -85,39 +84,13 @@ const OverViewBody = React.memo(function OverViewBody(props) {
         <div className="row">
             <div className="col-12">
                 <div className="row overview-blocks">
-                    <OverViewBodyItem {...commonProps} property="pi" fallbackTitle="P.I." titleRenderFxn={OverViewBodyItem.titleRenderPresets.contact_person} />
+                    <OverViewBodyItem {...commonProps} property="pi" fallbackTitle="P.I." titleRenderFxn={OverViewBodyItem.titleRenderPresets.pi_name} />
                     <OverViewBodyItem {...commonProps} property="correspondence" fallbackTitle="Correspondence" titleRenderFxn={OverViewBodyItem.titleRenderPresets.contact_person} />
                     <OverViewBodyItem {...commonProps} property="institute_name" fallbackTitle="Institute" />
                 </div>
                 <div className="row overview-blocks">
-                    <OverViewBodyItem {...commonProps} property="country" fallbackTitle="Country" />
-                    <OverViewBodyItem {...commonProps} property="state" fallbackTitle="State" />
-                    <OverViewBodyItem {...commonProps} property="city" fallbackTitle="City" />
+                    <OverViewBodyItem {...commonProps} property="awards" wrapInColumn="col-12 col-md-8" listItemElement="div" listWrapperElement="div" singleItemClassName="block" fallbackTitle="Awards" />
                 </div>
-            </div>
-        </div>
-    );
-});
-
-const DetailsViewBody = React.memo(function DetailsViewBody(props) {
-    const { context, schemas } = props;
-    const tips = object.tipsFromSchema(schemas, context);
-    const commonProps = {
-        'result' : context, tips,
-        'wrapInColumn' : true,
-        //'listItemElement' : 'div',
-        //'listWrapperElement' : 'div',
-        //'singleItemClassName' : 'block'
-    };
-
-    return (
-        <div className="mt-3">
-            <h3 className="tab-section-title">
-                <span>Details</span>
-            </h3>
-            <hr className="tab-section-title-horiz-divider" />
-            <div className="row overview-blocks">
-                <OverViewBodyItem {...commonProps} property="awards" listItemElement="div" listWrapperElement="div" singleItemClassName="block" fallbackTitle="Awards" />
             </div>
         </div>
     );

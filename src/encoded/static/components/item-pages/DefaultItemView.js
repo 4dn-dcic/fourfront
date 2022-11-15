@@ -627,6 +627,16 @@ export class OverViewBodyItem extends React.PureComponent {
             } else {
                 return display_title || 'N/A';
             }
+        },
+        'pi_name': function (field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+            if (!item || typeof item !== 'object') return null;
+            const { '@id': cpID, contact_email, display_title } = item;
+            const { pi_name } = fullObject || {};
+            if (cpID && contact_email && display_title) {
+                return <ContactPersonListItem contactPerson={item} key={cpID} wrapInListItem={false} />;
+            } else {
+                return display_title || pi_name || 'N/A';
+            }
         }
     };
 
