@@ -224,22 +224,20 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                             let labs = null;
                             if (propLabs.length === 1) {
                                 const [lab] = propLabs;
-                                const labUrl = lab['@id'];
-                                const { display_title: labTitle = 'N/A' } = lab;
+                                const labUrl = '/labs/' + encodeURIComponent(lab);
                                 labs = (
                                     <React.Fragment>
-                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + labTitle}></i> {labUrl ? (<a href={labUrl} data-tip={"Submitted by " + labTitle}>{labTitle}</a>) : labTitle}
+                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + lab}></i> {lab ? (<a href={labUrl} data-tip={"Submitted by " + lab}>{lab}</a>) : '-'}
                                     </React.Fragment>);
                             } else if (propLabs.length > 1) {
                                 labs = (
                                     <ul className="mb-0 mt-01 list-inline">
                                         {
                                             propLabs.map(function (lab, index) {
-                                                const labUrl = lab['@id'];
-                                                const { display_title: labTitle = 'N/A' } = lab;
+                                                const labUrl = '/labs/' + encodeURIComponent(lab);
                                                 return (
                                                     <li key={"lab-" + index}>
-                                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + labTitle}></i> {labUrl ? (<a href={labUrl} data-tip={"Submitted by " + labTitle}>{labTitle}</a>) : labTitle}
+                                                        <i className="icon icon-fw icon-user far user-icon" data-html="true" data-tip={"Submitted by " + lab}></i> {lab ? (<a href={labUrl} data-tip={"Submitted by " + lab}>{lab}</a>) : '-'}
                                                     </li>
                                                 );
                                             })
@@ -259,7 +257,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                         <div className="search-result-column-block" data-col="expset_count" data-exp-set-count={experiment_sets || 0}>
                                             <div className="inner text-center">
                                                 <span className="value text-truncate">
-                                                    <a href={searchUrl} data-tip={"Released on " + public_release}>{experiment_sets || '-'} Experiment Set(s)</a>
+                                                    <a href={searchUrl} data-tip={"Released on " + public_release}>{experiment_sets || '-'} Experiment Sets</a>
                                                 </span>
                                             </div>
                                         </div>
@@ -296,7 +294,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                                             </div>
                                             <div className="inner" style={{ fontSize: '13px', height: '30px' }}>
                                                 <span className="value text-truncate">
-                                                    {experiment_sets || '-'} Exp. Set(s){labs ? ' by ' + labs : null}
+                                                    {experiment_sets || '-'} Exp. Sets{labs ? ' by ' + labs : null}
                                                 </span>
                                             </div>
                                         </div>

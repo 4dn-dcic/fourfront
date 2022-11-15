@@ -195,8 +195,7 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION = {
     "all_labs" : {
         "terms" : { 
-            #"field": "embedded.lab.@id.raw",
-            "script": "return doc['embedded.lab.@id.raw'].getValue().concat('~').concat(doc['embedded.lab.display_title.raw'].getValue());"
+            "field": "embedded.lab.display_title.raw"
         }
     },
     "public_release" : {
@@ -337,21 +336,19 @@ def recently_released_datasets(context, request):
     search_param_lists['status'] = ['released']
     search_param_lists['dataset_label!'] = ['No value']
 
-    fields_to_aggregate_for = ['dataset_label']
-
     primary_agg = {
         "field_0" : {
             "terms" : {
-                "field" : "embedded." + fields_to_aggregate_for[0] + ".raw",
+                "field" : "embedded.dataset_label.raw",
                 # "missing" : TERM_NAME_FOR_NO_VALUE,
                 "order": { "public_release": "desc"},
                 "size" : size
             },
-            "aggs" : deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION)
+            "aggs" : RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION
         }
     }
 
-    primary_agg.update(deepcopy(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION))
+    primary_agg.update(RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION)
 
     search_param_lists['limit'] = [0]
     search_param_lists['from'] = [0]
@@ -365,7 +362,7 @@ def recently_released_datasets(context, request):
 
 
     ret_result = { # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
-        "field" : fields_to_aggregate_for[0],
+        "field" : "dataset_label",
         "terms" : {},
         "total" : {
             "experiment_sets" : search_result['total']
@@ -374,16 +371,10 @@ def recently_released_datasets(context, request):
         "time_generated" : str(datetime.utcnow())
     }
 
-    def convert_to_item(str):
-        fragments = str.split('~')
-        if len(fragments) == 2:
-            return {'@id': fragments[0], 'display_title': fragments[1]}
-        return {}
-
     def format_bucket_result(bucket_result, returned_buckets):
         curr_bucket_totals = {
             'experiment_sets'   : int(bucket_result['doc_count']), 
-            'labs'              : [convert_to_item(str(item['key'])) for item in bucket_result['all_labs']['buckets']],
+            'labs'              : [str(item['key']) for item in bucket_result['all_labs']['buckets']],
             'public_release'    : bucket_result['public_release']['value_as_string']
         }
         returned_buckets[bucket_result['key']] = curr_bucket_totals
