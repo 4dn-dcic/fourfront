@@ -31,8 +31,8 @@ export function generateAddressString(lab) {
  * @param {Object} contactPerson - Faux Item representation of User.
  * @param {string} contactPerson.display_title - Name of User
  * @param {string} contactPerson.contact_email - Base64-encoded email of User.
- * @param {number} [idx] - Index of person in correspondence list.
- * @returns {JSX.Element} A `li` JSX element (optional - default is true).
+ * @param {number} wrapInListItem - Wraps return value with <li> (optional - default is true)
+ * @returns {JSX.Element} A clickable JSX contact item
  */
 export const ContactPersonListItem = React.memo(function ContactPersonListItem({ contactPerson, wrapInListItem = true }){
     const { contact_email = null, display_title = "Unknown Person" } = contactPerson;
@@ -56,8 +56,7 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
 
     const clickableItem = (
         <div className="d-inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
-            <i className="icon icon-fw icon-envelope far" />
-            &nbsp;&nbsp;
+            <i className="icon icon-fw icon-envelope far mr-05" />
             {display_title}
         </div>
     );

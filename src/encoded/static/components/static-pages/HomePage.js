@@ -66,7 +66,7 @@ export default class HomePage extends React.PureComponent {
                                         <i className="icon icon-fw icon-info-circle fas" data-tip="Cookie & Privacy Information for Twitter" />
                                     </a>
                                 </h2>
-                                <div className="twitter-timeline-container" style={{ minHeight: '380px' }}>
+                                <div className="twitter-timeline-container">
                                     {twitterTimelineEmbed}
                                 </div>
                             </div>
@@ -158,10 +158,12 @@ const CollectionsRow = React.memo(function CollectionsRow(props) {
 });
 
 class RecentlyReleasedDataSets extends React.PureComponent {
+
     constructor(props) {
         super(props);
         this.state = {
             'mounted': false,
+            'loading': false
         };
     }
 
@@ -181,19 +183,19 @@ class RecentlyReleasedDataSets extends React.PureComponent {
     getHeaders(isMobile) {
         if (!isMobile) {
             return (
-                <div className="columns clearfix" style={{ left: "0px" }}>
+                <div className="columns clearfix left-0">
                     <div className="search-headers-column-block" data-col="dataset">
-                        <div className="inner" style={{ color: '#34646C' }}>
+                        <div className="inner">
                             <div className="column-title"><span data-html="true">Dataset</span></div>
                         </div>
                     </div>
                     <div className="search-headers-column-block" data-col="expset_count">
-                        <div className="inner" style={{ color: '#34646C' }}>
+                        <div className="inner">
                             <div className="column-title"><span data-html="true"># of Experiment Sets</span></div>
                         </div>
                     </div>
                     <div className="search-headers-column-block" data-col="lab">
-                        <div className="inner" style={{ color: '#34646C' }}>
+                        <div className="inner">
                             <div className="column-title"><span data-html="true">Lab</span></div>
                         </div>
                     </div>
@@ -201,9 +203,9 @@ class RecentlyReleasedDataSets extends React.PureComponent {
             );
         } else {
             return (
-                <div className="columns clearfix" style={{ left: "0px" }}>
-                    <div className="search-headers-column-block" style={{ width: "100%" }}>
-                        <div className="inner" style={{ color: '#34646C' }}>
+                <div className="columns clearfix left-0">
+                    <div className="search-headers-column-block w-100">
+                        <div className="inner">
                             <div className="column-title"><span data-html="true">Dataset</span></div>
                         </div>
                     </div>
@@ -215,7 +217,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
     getRows(datasets, isMobile){
         if(!isMobile){
             return (
-                <div style={{ overflow: "auto", maxHeight: "400px;" }}>
+                <div className="search-result-rows-container">
                     {
                         _.map(datasets, function (item, datasetName) {
 
@@ -275,7 +277,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
             );
         } else {
             return (
-                <div style={{ overflow: "auto", maxHeight: "400px;" }}>
+                <div className="search-result-rows-container">
                     {
                         _.map(datasets, function (item, datasetName) {
 
@@ -284,9 +286,9 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                             const labs = propLabs && propLabs.length > 0 ? _.compact(_.pluck(propLabs, 'display_title')).join(", ") : null;
 
                             return (
-                                <div className="search-result-row" style={{ width: "100%" }}>
+                                <div className="search-result-row w-100">
                                     <div className="columns clearfix result-table-row">
-                                        <div className="search-result-column-block" style={{ width: "100%", fontSize: '16px' }}>
+                                        <div className="search-result-column-block w-100" style={{ fontSize: '16px' }}>
                                             <div className="inner">
                                                 <div className="title-block text-truncate">
                                                     <a href={searchUrl} data-tip={datasetName + " (released on " + public_release + ")"}>{datasetName}</a>
@@ -317,7 +319,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
         }
         if (loading) {
             return (
-                <div className="text-center" style={{ paddingTop: 20, paddingBottom: 20, fontSize: '2rem', opacity: 0.5 }}>
+                <div className="text-center search-result-loading">
                     <i className="icon icon-fw fas icon-spin icon-circle-notch" />
                 </div>
             );
@@ -337,7 +339,7 @@ class RecentlyReleasedDataSets extends React.PureComponent {
                             <div className="col-12">
                                 <div className="search-results-outer-container is-within-page">
                                     <div className="search-results-container">
-                                        <div className="search-headers-row" style={{ backgroundColor: '#EFF7F8' }}>
+                                        <div className="search-headers-row">
                                             <div className="headers-columns-overflow-container">
                                                 {colHeaders}
                                             </div>

@@ -161,7 +161,20 @@
 				min-width: 100%;
 			}
 		}
+
+		.search-headers-row {
+			background-color: #EFF7F8;
+		}
 		
+		.search-headers-column-block .inner {
+			color: #34646C !important;
+		}
+
+		.search-result-rows-container {
+			overflow: auto;
+			max-height: 400px;
+		}
+
 		.search-result-column-block {
 			font-size: 14px;
 		}
@@ -186,6 +199,13 @@
 			@include media-breakpoint-down(lg){
 				width: 200px;
 			}
+		}
+
+		.search-result-loading {
+			padding-top: 20;
+			padding-bottom: 20;
+			font-size: 2rem;
+			opacity: 0.5;
 		}
 	}
 
@@ -1543,6 +1563,7 @@ $carousel-height : 240px;
 
 			> .twitter-timeline-container {
 				flex-grow: 1;
+				min-height: 380px;
 			}
 
 			.twitter-loading-placeholder {
