@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+4.7.0
+======
+
+`PR pi_name calc prop <https://github.com/4dn-dcic/fourfront/pull/1746>`
+
+* add pi_name calculated property to lab and award items
+* remove Sarah from contact_persons field for 4DN-DCIC lab in master-inserts
+
 4.6.4
 ======
 
