@@ -120,9 +120,10 @@
 	}
 
 	/**********************************************************
-		New Home Page Extras
+		Home Page Extras
 	***********************************************************/
-	h2.homepage-section-title.title-alt {
+	/* overrides default rules */
+	h2.homepage-section-title {
 		font-size: 24px;
 		line-height: 30px;
 		font-weight: 400;
@@ -147,11 +148,8 @@
 	}
 
 	.recently-released-datasets-section {
-		h2.homepage-section-title.new-design {
+		h2.homepage-section-title {
 			font-size: 30px;
-			line-height: 30px;
-			font-weight: 400;
-			padding-bottom: 8px;
 		}
 
 		.search-result-row {
@@ -367,6 +365,7 @@
 	
 				h2.homepage-section-title {
 					color: #34646C;
+					font-weight: 500;
 				}
 	
 				@include media-breakpoint-down(sm) {
@@ -651,8 +650,10 @@
 			color: #0D4129;
 			margin-top: 5px;
 			margin-bottom: 0px;
+			padding-bottom: 15px;
 			font-size: 26px;
 			font-weight: 600;
+			line-height: 38px;
 		}
 
 		> p {
