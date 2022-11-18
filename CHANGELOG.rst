@@ -6,6 +6,17 @@ fourfront
 Change Log
 ----------
 
+4.7.1
+======
+
+`PR new home page design <https://github.com/4dn-dcic/fourfront/pull/1733>`
+
+* redesign of home page including content and look-and-feel
+* add /recently_released_datasets endpoint
+* add new lab view page
+* new unit test for /recently_released_datasets endpoint
+* new Cypress tests for home page and lab view
+
 4.7.0
 ======
 

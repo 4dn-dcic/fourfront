@@ -31,10 +31,10 @@ export function generateAddressString(lab) {
  * @param {Object} contactPerson - Faux Item representation of User.
  * @param {string} contactPerson.display_title - Name of User
  * @param {string} contactPerson.contact_email - Base64-encoded email of User.
- * @param {number} [idx] - Index of person in correspondence list.
- * @returns {JSX.Element} A `li` JSX element.
+ * @param {number} wrapInListItem - Wraps return value with <li> (optional - default is true)
+ * @returns {JSX.Element} A clickable JSX contact item
  */
-export const ContactPersonListItem = React.memo(function ContactPersonListItem({ contactPerson }){
+export const ContactPersonListItem = React.memo(function ContactPersonListItem({ contactPerson, wrapInListItem = true }){
     const { contact_email = null, display_title = "Unknown Person" } = contactPerson;
     const decodedEmail = (typeof atob === 'function' && contact_email && atob(contact_email)) || null;
     const decodedEmailParts = decodedEmail && decodedEmail.split('@');
@@ -54,15 +54,14 @@ export const ContactPersonListItem = React.memo(function ContactPersonListItem({
         '</div>'
     )) || null;
 
-    return (
-        <li className="contact-person">
-            <div className="d-inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
-                <i className="icon icon-fw icon-envelope far" />
-                &nbsp;&nbsp;
-                { display_title }
-            </div>
-        </li>
+    const clickableItem = (
+        <div className="d-inline-block clickable" data-html data-tip={dataTip} onClick={onClick}>
+            <i className="icon icon-fw icon-envelope far mr-05" />
+            {display_title}
+        </div>
     );
+
+    return (wrapInListItem ? (<li className="contact-person">{clickableItem}</li>) : clickableItem );
 });
 
 export const AttributionTabView = React.memo(function AttributionTabView({ context, schemas, width }){
