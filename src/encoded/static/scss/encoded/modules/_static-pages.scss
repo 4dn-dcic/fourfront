@@ -122,12 +122,13 @@
 	/**********************************************************
 		New Home Page Extras
 	***********************************************************/
-	h2.homepage-section-title.new-design {
+	h2.homepage-section-title.title-alt {
 		font-size: 24px;
 		line-height: 30px;
 		font-weight: 400;
 		padding-bottom: 8px;
 	}
+
 	.btn-browse-all-exp-sets {
 		width: 35%;
 		min-width: 240px;
@@ -144,6 +145,7 @@
 			color: #FFFFFF;
 		}
 	}
+
 	.recently-released-datasets-section {
 		h2.homepage-section-title.new-design {
 			font-size: 30px;
@@ -164,6 +166,11 @@
 
 		.search-headers-row {
 			background-color: #EFF7F8;
+
+			/* column sorter not exists, so ignore padding */
+			.search-headers-column-block .inner {
+				padding-right: 0px;
+			}
 		}
 		
 		.search-headers-column-block .inner {
@@ -728,6 +735,11 @@
   		box-shadow: 0 0 2px #888;
   		padding: 0.5em 0.6em;
 	}
+
+	.btn:not(.btn-sm):not(.btn-xs):not(.btn-lg) {
+        // revert the overrides in _bootstrap-theme-overrides.scss
+        padding-top: .375rem;
+    }
 }
 
 .static-section-entry {
