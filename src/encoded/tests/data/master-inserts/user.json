@@ -222,6 +222,17 @@
         "submits_for": ["4dn-dcic-lab"]
     },
     {
+        "email": "gulsahsabanci@gmail.com",
+        "first_name": "Gülşah",
+        "job_title": "Software Developer",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Sabanci",
+        "uuid": "9b9e9ad7-48bf-4a07-a9d9-190884d969a0",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
+    },
+    {
         "lab": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc989",
         "email": "michele_berselli@hms.harvard.edu",
         "job_title": "Software Developer",
@@ -230,5 +241,16 @@
         "viewing_groups": ["4DN"],
         "groups": ["admin"],
         "uuid": "1117c645-719d-4062-b0a7-fd3da0b9e782"
+    },
+    {
+        "email": "rahi_navelkar@hms.harvard.edu",
+        "first_name": "Rahi",
+        "job_title": "Data Wrangler",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Navelkar",
+        "uuid": "344acd6e-305d-11ed-a261-0242ac120002",
+        "viewing_groups": ["4DN"],
+        "groups": ["admin"],
+        "submits_for": ["4dn-dcic-lab"]
     }
 ]

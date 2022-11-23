@@ -211,7 +211,7 @@ export class FacetCharts extends React.PureComponent {
         const cursorDetailActions = this.cursorDetailActions();
         const browseBaseParams = navigate.getBrowseBaseParams();
         const expSetFilters = searchFilters.contextFiltersToExpSetFilters(context && context.filters, browseBaseParams);
-        let height = show === 'small' ? 300 : 450;
+        let height = show === 'small' ? 300 : 370;
         let width;
 
         if (gridState === 'xs'){

@@ -134,7 +134,7 @@ def test_s3_utils_bare(env):
 
     if env:
 
-        assert s.url is not ''
+        assert s.url != ''
 
         health = _health_page(url=s.url)
 

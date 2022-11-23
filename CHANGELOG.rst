@@ -6,6 +6,102 @@ fourfront
 Change Log
 ----------
 
+4.7.1
+======
+
+`PR new home page design <https://github.com/4dn-dcic/fourfront/pull/1733>`
+
+* redesign of home page including content and look-and-feel
+* add /recently_released_datasets endpoint
+* add new lab view page
+* new unit test for /recently_released_datasets endpoint
+* new Cypress tests for home page and lab view
+
+4.7.0
+======
+
+`PR pi_name calc prop <https://github.com/4dn-dcic/fourfront/pull/1746>`
+
+* add pi_name calculated property to lab and award items
+* remove Sarah from contact_persons field for 4DN-DCIC lab in master-inserts
+
+4.6.4
+======
+
+* Bug fix - cannot clear q= if top bar "Within Results" option is selected
+
+4.6.3
+======
+
+* Cypress test updates for the new MicroMeta App features
+
+4.6.1
+======
+
+`PR MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`
+
+* New MicroMeta App release
+
+4.5.26
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+4.5.25
+======
+
+`PR imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`
+
+* Imaging paths list is converted to table
+
+4.5.24
+======
+
+* SPC is upgraded to 0.1.57.
+* Until SPC 0.1.56, Sentry API log almost any incidents and obliterates the quota quickly. 0.1.57 allows tuning the sampling rate. (default is 0.1))
+
+4.5.22
+======
+
+`PR dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`
+
+* Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
+* Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
+* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
+
+4.5.21
+======
+
+`PR add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`
+
+* Added a new user insert for Gulsah (UI dev on Utku's team) in master_inserts/user.json
+
+4.5.20
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+
+4.5.19
+======
+
+* Miscellaneous cosmetics and refactoring to align better with CGAP
+  in how the file src/encoded/__init__.py is arranged.
+* Pick up ``ENCODED_SENTRY_DSN`` from the GAC (C4-913).
+* Adjust log level for ``boto``, ``urllib``, ``elasticsearch``, and ``dcicutils`` to ``WARNING``.
+
+
+4.5.18
+======
+
+* Added a new user insert for Rahi in master_inserts/user.json
+
+
+4.5.17
+======
+
+* Twitter Timeline Feeds updates based on new/breaking API build options
+
 
 4.5.15
 ======

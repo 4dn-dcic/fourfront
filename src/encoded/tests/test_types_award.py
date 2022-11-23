@@ -40,3 +40,14 @@ def test_award_center_title_w_center(testapp, maward, submitter):
     maward['center'] = ctr
     res = testapp.post_json('/award', maward).json['@graph'][0]
     assert res['center_title'] == ctr
+
+
+def test_award_pi_name_w_pi(testapp, maward, pi):
+    maward['pi'] = pi['@id']
+    res = testapp.post_json('/award', maward).json['@graph'][0]
+    assert res['pi_name'] == pi['display_title']
+
+
+def test_award_pi_name_w_no_pi(testapp, maward):
+    res = testapp.post_json('/award', maward).json['@graph'][0]
+    assert 'pi_name' not in res
