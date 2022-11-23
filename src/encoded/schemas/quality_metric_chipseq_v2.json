@@ -109,6 +109,7 @@
                 },
                 "num_peaks": {
                     "type": "object",
+                    "additionalProperties": true,
                     "rep1": {
                         "type": "object",
                         "properties": {
@@ -140,6 +141,7 @@
             "properties": {
                 "peak_region_size": {
                     "type": "object",
+                    "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
@@ -261,6 +263,7 @@
                     "properties": {
                         "macs2": {
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": {
                                 "rep1": {
                                     "title": "Rep1",
@@ -375,6 +378,7 @@
                         },
                         "overlap": {
                             "type": "object",
+                            "additionalProperties": true,
                             "properties": {
                                 "rep1_vs_rep2": {
                                     "title": "Rep1 vs Rep2",
