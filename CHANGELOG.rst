@@ -9,6 +9,12 @@ Change Log
 4.6.4
 ======
 
+* Use ``name`` as unique identifier for MicroscopeConfiguration items.
+* Bug fix: remove ``aliases`` from unique identifiers, as Mic Conf do not have aliases.
+
+4.6.4
+======
+
 * Bug fix - cannot clear q= if top bar "Within Results" option is selected
 
 4.6.3
