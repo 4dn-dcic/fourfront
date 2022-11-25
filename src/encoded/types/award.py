@@ -13,7 +13,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    get_item_or_none,
 )
 import re
 
@@ -88,3 +89,14 @@ class Award(Item):
             # default to award number
             center = name
         return center
+
+
+    @calculated_property(schema={
+        "title": "P.I. Name",
+        "description": "Name of the lab principal investigator.",
+        "type": "string",
+    })
+    def pi_name(self, request, pi=None):
+        if pi:
+            return get_item_or_none(request, pi, 'users').get('display_title')
+        return None

@@ -315,7 +315,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         const { isFullscreen, toggleFullScreen, href, context, currentAction, session, schemas } = this.props;
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+        const facetColumnClassName = "facet-result-table-fix col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         const aboveTableComponent = (
             <AboveSearchViewTableControls {...{ isFullscreen, toggleFullScreen }}
                 topLeftChildren={this.createNewMicroscopeConfiguration()} />

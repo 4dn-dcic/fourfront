@@ -16,5 +16,37 @@
         "accession": "4DNESAAAAAA1",
         "badges": [{"badge": "24a64a84-3c33-4d76-aaf2-e5ef45eff347"}],
         "processed_files": ["4DNFIAAAAAA4", "4DNFIAAAAAA5"]
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b261",
+        "submitted_by": "wrangler@wrangler.com",
+        "description": "This is a Hi-C replicate set that should fail some audits",
+        "experimentset_type": "replicate",
+        "dataset_label": "X et al. HiC - ligation volumes",
+        "condition": "Lower ligation volume",
+        "public_release" : "2017-11-04",
+        "replicate_exps": [
+            {"replicate_exp": "4DNEXO67APU1", "bio_rep_no": 1, "tec_rep_no": 1}
+        ],
+        "lab": "test-4dn-lab",
+        "award": "1U01CA200059-02",
+        "status": "released",
+        "date_created" : "2011-03-24"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b222",
+        "submitted_by": "wrangler@wrangler.com",
+        "public_release" : "2017-12-04",
+        "description": "Test replicate experiment set for Repliseq experiments",
+        "dataset_label": "Z et al. 2-Stage Repliseq",
+        "condition": "Early Stage",
+        "experimentset_type": "replicate",
+        "replicate_exps": [
+            {"replicate_exp": "4DNEXO67APU1", "bio_rep_no": 1, "tec_rep_no": 1}
+        ],
+        "lab": "test-4dn-lab",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
+        "status": "released",
+        "date_created" : "2011-02-01"
     }
 ]
