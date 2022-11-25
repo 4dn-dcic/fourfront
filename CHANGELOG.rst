@@ -6,10 +6,16 @@ fourfront
 Change Log
 ----------
 
+4.7.2
+======
+
+* Use ``name`` as unique identifier for MicroscopeConfiguration items.
+* Bug fix: remove ``aliases`` from unique identifiers, as MicroscopeConfigurations do not have aliases.
+
 4.7.1
 ======
 
-`PR new home page design <https://github.com/4dn-dcic/fourfront/pull/1733>`
+`PR new home page design <https://github.com/4dn-dcic/fourfront/pull/1733>`_
 
 * redesign of home page including content and look-and-feel
 * add /recently_released_datasets endpoint
@@ -20,16 +26,10 @@ Change Log
 4.7.0
 ======
 
-`PR pi_name calc prop <https://github.com/4dn-dcic/fourfront/pull/1746>`
+`PR pi_name calc prop <https://github.com/4dn-dcic/fourfront/pull/1746>`_
 
 * add pi_name calculated property to lab and award items
 * remove Sarah from contact_persons field for 4DN-DCIC lab in master-inserts
-
-4.6.4
-======
-
-* Use ``name`` as unique identifier for MicroscopeConfiguration items.
-* Bug fix: remove ``aliases`` from unique identifiers, as Mic Conf do not have aliases.
 
 4.6.4
 ======
