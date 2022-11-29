@@ -6,7 +6,7 @@
     "type": "object",
     "required": ["microscope"],
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "name"],
+    "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
