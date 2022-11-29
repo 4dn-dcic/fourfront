@@ -9,8 +9,7 @@ Change Log
 4.7.2
 ======
 
-* Use ``name`` as unique identifier for MicroscopeConfiguration items.
-* Bug fix: remove ``aliases`` from unique identifiers, as MicroscopeConfigurations do not have aliases.
+* Add ``aliases`` to MicroscopeConfiguration items.
 * Add neural progenitor cell as tissue enum in BiosampleCellCulture
 
 4.7.1
