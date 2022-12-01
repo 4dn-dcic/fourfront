@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+4.7.3
+=====
+
+* Embed Microscope Configuration items from Experiments in ExpSets
+
 4.7.2
 ======
 
