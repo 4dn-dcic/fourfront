@@ -9,6 +9,8 @@ Change Log
 4.7.3
 =====
 
+`PR 1753: embed microscope_configuration_master in ExperimentSet <https://github.com/4dn-dcic/fourfront/pull/1753>`_
+
 * Embed Microscope Configuration items from Experiments in ExpSets
 
 4.7.2
