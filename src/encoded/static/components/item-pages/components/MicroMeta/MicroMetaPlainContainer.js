@@ -169,8 +169,8 @@ export class MicroMetaPlainContainer extends React.PureComponent {
 }
 
 /** Path to images directory/CDN. Once is published to NPM, will change to unpkg CDN URL. */
-const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/images/svg/";
-const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/images/png/";
+const imagesPathSVG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/images/svg/";
+const imagesPathPNG = "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/images/png/";
 
 const MicroMetaPlainContainerBody = React.forwardRef((props, ref) => <MMPlainContainerBody {...props} forwardRef={ref} />);
 class MMPlainContainerBody extends React.PureComponent {
@@ -257,13 +257,14 @@ class MMPlainContainerBody extends React.PureComponent {
                 is4DNPortal: true,
                 hasImport: true,
                 isToolbarHidden: true,
+                isDebug: true,
                 onReturnToMicroscopeList: function () {
                     navigate('/microscope-configurations/');
                 },
                 onLoadSchema: function (complete, resolve) {
                     window
                         .fetch(
-                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/fullSchema.json"
                         )
                         .then(function (resp) {
                             return resp.text();
@@ -276,7 +277,7 @@ class MMPlainContainerBody extends React.PureComponent {
                 onLoadDimensions: function (complete, resolve) {
                     window
                         .fetch(
-                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/dimensions/MicroscopeDimensions.json"
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/dimensions/MicroscopeDimensions.json"
                         )
                         .then(function (resp) {
                             return resp.text();
@@ -285,7 +286,21 @@ class MMPlainContainerBody extends React.PureComponent {
                             const dimensions = JSON.parse(respText);
                             complete(dimensions, resolve);
                         });
-                }
+                },
+                onLoadTierList: function (complete, resolve) {
+                    window
+                        .fetch(
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/tiers/TierList.json"
+                        )
+                        .then(function (resp) {
+                            console.log(resp);
+                            return resp.text();
+                        })
+                        .then(function (respText) {
+                            var tierList = JSON.parse(respText);
+                            complete(tierList, resolve);
+                        });
+                },
             };
 
             /**
