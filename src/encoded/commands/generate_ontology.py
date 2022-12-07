@@ -901,10 +901,13 @@ def _is_deprecated(class_, data):
     return False
 
 
-def download_and_process_owl(ontology, terms, deprecated, simple=False):
+def download_and_process_owl(ontology, terms, deprecated, simple=False, owlfile=None):
     synonym_terms = get_synonym_term_uris(ontology)
     definition_terms = get_definition_term_uris(ontology)
-    data = Owler(ontology['download_url'])
+    input_source = ontology.get('download_url')
+    if owlfile:  # parse terms from provided local file
+        input_source = owlfile
+    data = Owler(input_source)
     print("have data to process")
     ont_prefix = ontology.get('ontology_prefix')
     if not terms:
@@ -995,6 +998,9 @@ def parse_args(args):
                         help="Default false - WARNING can only be used if processing a single ontology!!! \
                         - will process only terms that share the prefix ontology"
                              " and skip terms imported from other ontologies")
+    parser.add_argument('--owlfile',
+                        default=None,
+                        help="Path to local owl file to use instead of downloading - can only be used to process a single ontology")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -1062,6 +1068,9 @@ def main():
     if len(ontologies) > 1 and args.simple:
         print("INVALID USAGE - simple can only be used while processing a single ontology")
         sys.exit(1)
+    if len(ontologies) > 1 and args.owlfile:
+        print("INVALID USAGE - path to local owlfile can only be used while processing a single ontology")
+        sys.exit(1)
     for i, o in enumerate(ontologies):
         if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
@@ -1077,7 +1086,7 @@ def main():
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
-            terms, v, deprecated = download_and_process_owl(ontology, terms, deprecated, simple=args.simple)
+            terms, v, deprecated = download_and_process_owl(ontology, terms, deprecated, simple=args.simple, owlfile=args.owlfile)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
                     result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
