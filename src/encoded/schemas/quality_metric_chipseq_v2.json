@@ -44,9 +44,11 @@
             "properties": {
                 "reproducibility": {
                     "type": "object",
+                    "qc_order": 1,
                     "properties": {
                         "overlap": {
                             "type": "object",
+                            "qc_order": 1,
                             "properties": {
                                 "Nt": {
                                     "title": "Nt",
@@ -109,27 +111,33 @@
                 },
                 "num_peaks": {
                     "type": "object",
+                    "qc_order": 2,
                     "additionalProperties": true,
-                    "rep1": {
-                        "type": "object",
-                        "properties": {
-                            "num_peaks": {
-                                "title": "Number of peaks",
-                                "type": "number",
-                                "qc_order": 1
+                    "properties": {
+                        "rep1": {
+                            "type": "object",
+                            "qc_order": 1,
+                            "properties": {
+                                "num_peaks": {
+                                    "title": "Number of peaks",
+                                    "type": "number",
+                                    "qc_order": 1
+                                }
                             }
-                        }
-                    },
-                    "rep2": {
-                        "type": "object",
-                        "properties": {
-                            "num_peaks": {
-                                "title": "Number of peaks",
-                                "type": "number",
-                                "qc_order": 1
+                        },
+                        "rep2": {
+                            "type": "object",
+                            "qc_order": 2,
+                            "properties": {
+                                "num_peaks": {
+                                    "title": "Number of peaks",
+                                    "type": "number",
+                                    "qc_order": 1
+                                }
                             }
                         }
                     }
+                    
                 }
             }
         },
@@ -141,10 +149,12 @@
             "properties": {
                 "peak_region_size": {
                     "type": "object",
+                    "qc_order": 1,
                     "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
+                            "qc_order": 1,
                             "properties": {
                                 "min_size": {
                                     "title": "Min Size",
@@ -180,6 +190,7 @@
                         },
                         "rep2": {
                             "type": "object",
+                            "qc_order": 2,
                             "properties": {
                                 "min_size": {
                                     "title": "Min Size",
@@ -215,6 +226,7 @@
                         },
                         "overlap_opt": {
                             "type": "object",
+                            "qc_order": 3,
                             "properties": {
                                 "min_size": {
                                     "title": "Min Size",
@@ -260,9 +272,11 @@
             "properties": {
                 "frac_reads_in_peaks": {
                     "type": "object",
+                    "qc_order": 1,
                     "properties": {
                         "macs2": {
                             "type": "object",
+                            "qc_order": 1,
                             "additionalProperties": true,
                             "properties": {
                                 "rep1": {
@@ -378,6 +392,7 @@
                         },
                         "overlap": {
                             "type": "object",
+                            "qc_order": 2,
                             "additionalProperties": true,
                             "properties": {
                                 "rep1_vs_rep2": {
@@ -436,14 +451,17 @@
         },
         "align": {
             "type": "object",
+            "qc_order": 4,
             "additionalProperties": true,
             "properties": {
                 "samstat": {
                     "type": "object",
+                    "qc_order": 1,
                     "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
+                            "qc_order": 1,
                             "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
@@ -565,6 +583,7 @@
                         },
                         "rep2": {
                             "type": "object",
+                            "qc_order": 2,
                             "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
@@ -688,10 +707,12 @@
                 },
                 "dup": {
                     "type": "object",
+                    "qc_order": 2,
                     "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
+                            "qc_order": 1,
                             "additionalProperties": true,
                             "properties": {
                                 "unpaired_reads": {
@@ -733,6 +754,7 @@
                         },
                         "rep2": {
                             "type": "object",
+                            "qc_order": 2,
                             "additionalProperties": true,
                             "properties": {
                                 "unpaired_reads": {
@@ -776,10 +798,12 @@
                 },
                 "nodup_samstat": {
                     "type": "object",
+                    "qc_order": 3,
                     "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
+                            "qc_order": 1,
                             "additionalProperties": false,
                             "properties": {
                                 "total_reads": {
@@ -901,6 +925,7 @@
                         },
                         "rep2": {
                             "type": "object",
+                            "qc_order": 2,
                             "additionalProperties": true,
                             "properties": {
                                 "total_reads": {
@@ -1026,14 +1051,17 @@
         },
         "lib_complexity": {
             "type": "object",
+            "qc_order": 5,
             "additionalProperties": true,
             "properties": {
                 "lib_complexity": {
                     "type": "object",
+                    "qc_order": 1,
                     "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
+                            "qc_order": 1,
                             "additionalProperties": true,
                             "properties": {
                                 "total_fragments": {
@@ -1070,6 +1098,7 @@
                         },
                         "rep2": {
                             "type": "object",
+                            "qc_order": 2,
                             "additionalProperties": true,
                             "properties": {
                                 "total_fragments": {
@@ -1110,14 +1139,17 @@
         },
         "align_enrich": {
             "type": "object",
+            "qc_order": 6,
             "additionalProperties": true,
             "properties": {
                 "xcor_score": {
                     "type": "object",
+                    "qc_order": 1,
                     "additionalProperties": true,
                     "properties": {
                         "rep1": {
                             "type": "object",
+                            "qc_order": 1,
                             "additionalProperties": true,
                             "properties": {
                                 "subsampled_reads": {
@@ -1169,6 +1201,7 @@
                         },
                         "rep2": {
                             "type": "object",
+                            "qc_order": 2,
                             "additionalProperties": true,
                             "properties": {
                                 "subsampled_reads": {
