@@ -1252,94 +1252,94 @@
                             }
                         }
                     }
-                }
-            },
-            "jsd": {
-                "type": "object",
-                "additionalProperties": true,
-                "properties": {
+                },
+                "jsd": {
                     "type": "object",
                     "additionalProperties": true,
                     "properties": {
-                        "rep1": {
-                            "type": "object",
-                            "additionalProperties": true,
-                            "properties": {
-                                "auc": {
-                                    "title": "AUC",
-                                    "type": "number",
-                                    "qc_order": 1
-                                },
-                                "syn_auc": {
-                                    "title": "Syn AUC",
-                                    "type": "number",
-                                    "qc_order": 2
-                                },
-                                "x_intercept": {
-                                    "title": "X intercept",
-                                    "type": "number",
-                                    "qc_order": 3
-                                },
-                                "syn_x_intercept": {
-                                    "title": "Syn x intercept",
-                                    "type": "number",
-                                    "qc_order": 4
-                                },
-                                "elbow_pt": {
-                                    "title": "Elbow point",
-                                    "type": "number",
-                                    "qc_order": 5
-                                },
-                                "syn_elbow_pt": {
-                                    "title": "Syn elbow point",
-                                    "type": "number",
-                                    "qc_order": 6
-                                },
-                                "syn_jsd": {
-                                    "title": "Syn jsd",
-                                    "type": "number",
-                                    "qc_order": 7
+                        "type": "object",
+                        "additionalProperties": true,
+                        "properties": {
+                            "rep1": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "properties": {
+                                    "auc": {
+                                        "title": "AUC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "syn_auc": {
+                                        "title": "Syn AUC",
+                                        "type": "number",
+                                        "qc_order": 2
+                                    },
+                                    "x_intercept": {
+                                        "title": "X intercept",
+                                        "type": "number",
+                                        "qc_order": 3
+                                    },
+                                    "syn_x_intercept": {
+                                        "title": "Syn x intercept",
+                                        "type": "number",
+                                        "qc_order": 4
+                                    },
+                                    "elbow_pt": {
+                                        "title": "Elbow point",
+                                        "type": "number",
+                                        "qc_order": 5
+                                    },
+                                    "syn_elbow_pt": {
+                                        "title": "Syn elbow point",
+                                        "type": "number",
+                                        "qc_order": 6
+                                    },
+                                    "syn_jsd": {
+                                        "title": "Syn jsd",
+                                        "type": "number",
+                                        "qc_order": 7
+                                    }
                                 }
-                            }
-                        },
-                        "rep2": {
-                            "type": "object",
-                            "additionalProperties": true,
-                            "properties": {
-                                "auc": {
-                                    "title": "AUC",
-                                    "type": "number",
-                                    "qc_order": 1
-                                },
-                                "syn_auc": {
-                                    "title": "Syn AUC",
-                                    "type": "number",
-                                    "qc_order": 2
-                                },
-                                "x_intercept": {
-                                    "title": "X intercept",
-                                    "type": "number",
-                                    "qc_order": 3
-                                },
-                                "syn_x_intercept": {
-                                    "title": "Syn x intercept",
-                                    "type": "number",
-                                    "qc_order": 4
-                                },
-                                "elbow_pt": {
-                                    "title": "Elbow point",
-                                    "type": "number",
-                                    "qc_order": 5
-                                },
-                                "syn_elbow_pt": {
-                                    "title": "Syn elbow point",
-                                    "type": "number",
-                                    "qc_order": 6
-                                },
-                                "syn_jsd": {
-                                    "title": "Syn jsd",
-                                    "type": "number",
-                                    "qc_order": 7
+                            },
+                            "rep2": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "properties": {
+                                    "auc": {
+                                        "title": "AUC",
+                                        "type": "number",
+                                        "qc_order": 1
+                                    },
+                                    "syn_auc": {
+                                        "title": "Syn AUC",
+                                        "type": "number",
+                                        "qc_order": 2
+                                    },
+                                    "x_intercept": {
+                                        "title": "X intercept",
+                                        "type": "number",
+                                        "qc_order": 3
+                                    },
+                                    "syn_x_intercept": {
+                                        "title": "Syn x intercept",
+                                        "type": "number",
+                                        "qc_order": 4
+                                    },
+                                    "elbow_pt": {
+                                        "title": "Elbow point",
+                                        "type": "number",
+                                        "qc_order": 5
+                                    },
+                                    "syn_elbow_pt": {
+                                        "title": "Syn elbow point",
+                                        "type": "number",
+                                        "qc_order": 6
+                                    },
+                                    "syn_jsd": {
+                                        "title": "Syn jsd",
+                                        "type": "number",
+                                        "qc_order": 7
+                                    }
                                 }
                             }
                         }
