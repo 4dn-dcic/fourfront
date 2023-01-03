@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+4.7.4
+======
+
+`PR static content location in pages <https://github.com/4dn-dcic/fourfront/pull/1759>`_
+
+* new content_location property is added to the Page item to let customize static content location with respect to child pages
+
 4.7.3
 ======
 
