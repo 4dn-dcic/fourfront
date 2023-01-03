@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+4.7.3
+======
+
+`PR jwtToken cookie <https://github.com/4dn-dcic/fourfront/pull/1758>`_
+
+* jwtToken cookie's SameSite=Strict attribute changed as SameSite=Lax
+
 4.7.2
 ======
 
