@@ -510,7 +510,7 @@ const HelpRow = React.memo(function HelpRow(props) {
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
                     </a>
-                    <a href="https://www.nature.com/articles/s41467-022-29697-4" className="btn btn-primary w-100 mt-1 px-2 py-1 btn-4dn-help">
+                    <a href="https://www.nature.com/articles/s41467-022-29697-4" target="_blank" rel="noopener noreferrer" className="btn btn-primary w-100 mt-1 px-2 py-1 btn-4dn-help">
                         <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-book-open fas"></i>
                         </span>
