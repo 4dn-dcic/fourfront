@@ -483,7 +483,7 @@ const HelpRow = React.memo(function HelpRow(props) {
             <div className="col-12 col-lg-5 pt-3 d-flex flex-column fourdn-help-container">
                 <div className="flex-grow-1">
                     <h2 className="homepage-section-title">4DN Help</h2>
-                    <a href="/help/user-guide" className="btn btn-primary w-100 mt-1 p-2 btn-4dn-help">
+                    <a href="/help/user-guide" className="btn btn-primary w-100 px-2 py-1 btn-4dn-help">
                         <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-user fas"></i>
                         </span>
@@ -492,7 +492,7 @@ const HelpRow = React.memo(function HelpRow(props) {
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
                     </a>
-                    <a href="/help/submitter-guide" className="btn btn-primary w-100 mt-2 p-2 btn-4dn-help">
+                    <a href="/help/submitter-guide" className="btn btn-primary w-100 mt-1 px-2 py-1 btn-4dn-help">
                         <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-file-import fas"></i>
                         </span>
@@ -501,11 +501,20 @@ const HelpRow = React.memo(function HelpRow(props) {
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
                     </a>
-                    <a href="/help/about/contact-us" className="btn btn-primary w-100 mt-2 p-2 btn-4dn-help">
+                    <a href="/help/about/contact-us" className="btn btn-primary w-100 mt-1 px-2 py-1 btn-4dn-help">
                         <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
                             <i className="icon icon-envelope fas"></i>
                         </span>
                         <span className="float-left ml-2 mt-13 help-button-text">Contact Us</span>
+                        <span className="float-right mr-2 mt-13 btn-4dn-help-arrow">
+                            <i className="icon icon-arrow-right fas"></i>
+                        </span>
+                    </a>
+                    <a href="https://www.nature.com/articles/s41467-022-29697-4" className="btn btn-primary w-100 mt-1 px-2 py-1 btn-4dn-help">
+                        <span className="float-left ml-2 mt-05 mb-05 btn-4dn-help-icon">
+                            <i className="icon icon-book-open fas"></i>
+                        </span>
+                        <span className="float-left ml-2 mt-13 help-button-text">4DN Data Portal Paper</span>
                         <span className="float-right mr-2 mt-13 btn-4dn-help-arrow">
                             <i className="icon icon-arrow-right fas"></i>
                         </span>
