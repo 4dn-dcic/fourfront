@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+4.7.5
+======
+
+`PR jsonwebtoken npm package downgrade <https://github.com/4dn-dcic/fourfront/pull/1763>`_
+
+* jsonwebtoken 9.0.0 has breaking changes that prevents Cypress test's authentication. It is downgraded to a compatible version.
+
 4.7.4
 ======
 
