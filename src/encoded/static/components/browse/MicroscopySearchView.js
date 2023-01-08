@@ -325,7 +325,8 @@ export default class MicroscopySearchView extends React.PureComponent {
             // TODO (low-ish priority): Pass in props.aboveTableComponent =  instead of props.topLeftChildren
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets, aboveTableComponent }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets keepSelectionInStorage
+                    columnExtensionMap={microscopyColExtensionMap} />
             </div>
         );
     }
