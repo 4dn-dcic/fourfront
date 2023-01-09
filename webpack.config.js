@@ -231,7 +231,7 @@ module.exports = [
             fallback: {
                 stream: require.resolve('stream-browserify'),
                 process: require.resolve('process/browser'),
-                util: require.resolve('util/'),
+                // util: require.resolve('util/'),
                 "crypto": false,
                 "events": false
             }

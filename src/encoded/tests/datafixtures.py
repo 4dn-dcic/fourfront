@@ -95,6 +95,20 @@ def submitter(testapp, lab, award):
 
 
 @pytest.fixture
+def pi(testapp, lab, award):
+    item = {
+        'first_name': 'ENCODE',
+        'last_name': 'PI',
+        'email': 'encode_pi@example.org',
+        'submits_for': [lab['@id']],
+        'viewing_groups': [award['viewing_group']],
+        'status': "current"
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+@pytest.fixture
 def access_key(testapp, submitter):
     description = 'My programmatic key'
     item = {

@@ -110,6 +110,14 @@
             },
             "lookup" : 60
         },
+        "content_location": {
+            "title": "Content Location",
+            "description": "Content sections' location with respect to child pages",
+            "type": "string",
+            "enum": ["top", "bottom"],
+            "default": "bottom",
+            "lookup": 80
+        },
         "redirect" : {
             "title" : "Redirect",
             "type" : "object",
@@ -133,7 +141,7 @@
                     "enum" : [301, 302, 303, 307]
                 }
             },
-            "lookup" : 80
+            "lookup" : 90
         }
     },
     "columns" : {

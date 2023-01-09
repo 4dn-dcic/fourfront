@@ -318,7 +318,7 @@ export default function PublicationSearchView(props){
         return <PublicationDetailPane schemas={schemas} />;
     }, [ schemas ]);
     const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-    const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+    const facetColumnClassName = "facet-result-table-fix col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
     return (
         <div className="container" id="content">
             <CommonSearchView {...props} {...{ tableColumnClassName, facetColumnClassName, facets, detailPane }}

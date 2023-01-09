@@ -111,6 +111,7 @@ xlwt = "1.2.0"
 "zope.sqlalchemy" = "1.6"
 codeguru-profiler-agent = "^1.2.4"
 supervisor = "^4.2.4"
+wheel = "0.37.1"
 
 
 [tool.poetry.dev-dependencies]
@@ -148,8 +149,6 @@ pytest-mock = ">=0.11.0"
 pytest-timeout = ">=1.0.0"
 pytest-xdist = ">=1.14"
 "repoze.debug" = ">=1.0.2"
-
-wheel = "0.37.1"
 
 
 # In pytest 6.0, we'll be able to use this instead of a separate pytest.ini configuration.

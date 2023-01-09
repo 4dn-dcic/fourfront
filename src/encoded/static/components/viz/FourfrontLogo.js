@@ -16,7 +16,8 @@ export class FourfrontLogo extends React.PureComponent {
         'fgCircleTransformOrig'     : "translate(50, 20) scale(0.35, 0.35) rotate(-135)",
         'fgCircleTransformHover'    : "translate(36, 28) scale(0.7, 0.65) rotate(-135)",
         'hoverDelayUntilTransform'  : 400,
-        'title'                     : "Data Portal"
+        'title'                     : "Data Portal",
+        'prefix'                    : null
     };
 
     static svgElemStyle = {
@@ -160,11 +161,12 @@ export class FourfrontLogo extends React.PureComponent {
     }
 
     render(){
-        const { id, circlePathDefinitionOrig, textTransformOrig, fgCircleTransformOrig, onClick, title } = this.props;
+        const { id, circlePathDefinitionOrig, textTransformOrig, fgCircleTransformOrig, onClick, title, prefix } = this.props;
         const { hover } = this.state;
 
         return (
             <div className={"img-container" + (hover ? " is-hovering" : "")} onClick={onClick} onMouseEnter={this.setHoverStateOn} onMouseLeave={this.setHoverStateOff}>
+                {prefix ? <span className="navbar-prefix">{prefix}</span> : null}
                 <svg id={id} ref={this.svgRef} viewBox="0 0 60 60" style={FourfrontLogo.svgElemStyle}>
                     { this.renderDefs() }
                     <path d={circlePathDefinitionOrig} style={FourfrontLogo.svgBGCircleStyle} ref={this.bgCircleRef} />
@@ -175,7 +177,7 @@ export class FourfrontLogo extends React.PureComponent {
                         O
                     </text>
                 </svg>
-                <span className="navbar-title">Data Portal</span>
+                {title ? <span className="navbar-title">{title}</span> : null}
             </div>
         );
     }
