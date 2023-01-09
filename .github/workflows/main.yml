@@ -20,7 +20,7 @@ jobs:
     name: Test Suite for fourfront (Python 3.8, Node 16)
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     # Build matrix
     strategy:
@@ -51,9 +51,9 @@ jobs:
           curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           sudo apt-get update
-          sudo apt-get install postgresql-11 postgresql-client-11
-          echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
-          sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
+          sudo apt-get install postgresql-14 postgresql-client-14
+          echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
+          sudo ln -s /usr/lib/postgresql/14/bin/initdb /usr/local/bin/initdb
       - name: Install Deps
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |

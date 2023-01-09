@@ -46,9 +46,9 @@ from .test_permissions import wrangler, wrangler_testapp
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 
-# These 3 versions are known to be compatible, older versions should not be
-# used, odds are 14 can be used as well - Will Sept 13 2022
-POSTGRES_COMPATIBLE_MAJOR_VERSIONS = ['11', '12', '13']
+# These 4 versions are known to be compatible, older versions should not be
+# used, odds are 15 can be used as well - Will Jan 7 2023
+POSTGRES_COMPATIBLE_MAJOR_VERSIONS = ['11', '12', '13', '14']
 
 
 def test_postgres_version(session):
@@ -84,18 +84,14 @@ def setup_and_teardown(es_app):
     Run create mapping and purge queue before tests and clear out the
     DB tables after the test
     """
-
     # BEFORE THE TEST - run create mapping for tests types and clear queues
-    create_mapping.run(es_app, collections=TEST_COLLECTIONS, skip_indexing=True)
-    es_app.registry[INDEXER_QUEUE].clear_queue()
+    create_mapping.run(es_app, collections=TEST_COLLECTIONS, skip_indexing=True, purge_queue=True)
 
     yield  # run the test
 
     # AFTER THE TEST
     session = es_app.registry[DBSESSION]
     connection = session.connection().connect()
-    meta = MetaData(bind=session.connection())
-    meta.reflect()
     connection.execute('TRUNCATE {} RESTART IDENTITY;'.format(
         ','.join(table.name
                  for table in reversed(Base.metadata.sorted_tables))))
