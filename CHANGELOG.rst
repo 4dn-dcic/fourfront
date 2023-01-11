@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+4.7.6
+======
+
+* Deleted 'DAPI' from suggested_enums list from imaging_path schema
+
 4.7.5
 ======
 
