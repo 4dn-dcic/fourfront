@@ -369,7 +369,7 @@ def test_run_create_mapping_with_upgrader(mock_add_uuids, es_testapp, workbook):
     item_type_uuids = sorted([x["uuid"] for x in search])
 
     # No schema version change, so nothing needs indexing
-    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True, purge_queue=True)
     (_, uuids_to_index), _ = mock_add_uuids.call_args
     assert not uuids_to_index
 
