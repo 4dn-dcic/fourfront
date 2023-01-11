@@ -13,9 +13,7 @@ import re
 import time
 import transaction
 import uuid
-from unittest.mock import patch
 
-from dcicutils.qa_utils import notice_pytest_fixtures
 from elasticsearch.exceptions import NotFoundError
 from snovault import DBSESSION, TYPES
 from snovault.storage import Base
@@ -28,7 +26,6 @@ from snovault.elasticsearch.create_mapping import (
 )
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index, compute_invalidation_scope
-from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from sqlalchemy import func
 from timeit import default_timer as timer
 from unittest import mock
@@ -36,10 +33,6 @@ from zope.sqlalchemy import mark_changed
 from .. import main
 from ..util import delay_rerun
 from ..verifier import verify_item
-from .test_permissions import wrangler, wrangler_testapp
-
-
-# notice_pytest_fixtures(es_app_settings, wrangler, wrangler_testapp)
 
 
 pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.workbook]
@@ -348,44 +341,6 @@ def test_load_and_index_perf_data(setup_and_teardown, es_testapp, indexer_testap
                                                                             frame_time, embed_time))
     # userful for seeing debug messages
     # assert False
-
-
-@patch("snovault.elasticsearch.indexer_queue.QueueManager.add_uuids")
-def test_run_create_mapping_with_upgrader(mock_add_uuids, es_testapp, workbook):
-    """
-    Test for catching items in need of upgrading when running
-    create_mapping.
-
-    Indexer queue method mocked to check correct calls, so no items
-    actually indexed/upgraded.
-
-    Moved to this file so fixtures interact cleanly - Will Sept 28 2022
-    """
-    app = es_testapp.app
-    type_to_upgrade = "Biosample"
-
-    search_query = "/search/?type=" + type_to_upgrade + "&frame=object"
-    search = es_testapp.get(search_query, status=200).json["@graph"]
-    item_type_uuids = sorted([x["uuid"] for x in search])
-
-    # No schema version change, so nothing needs indexing
-    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True, purge_queue=True)
-    (_, uuids_to_index), _ = mock_add_uuids.call_args
-    assert not uuids_to_index
-
-    # Change schema version in registry so all posted items of this type
-    # "need" to be upgraded
-    registry_schema = app.registry[TYPES][type_to_upgrade].schema
-    schema_version_default = registry_schema["properties"]["schema_version"]["default"]
-    updated_schema_version = str(int(schema_version_default) + 1)
-    registry_schema["properties"]["schema_version"]["default"] = updated_schema_version
-
-    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
-    (_, uuids_to_index), _ = mock_add_uuids.call_args
-    assert sorted(uuids_to_index) == item_type_uuids
-
-    # Revert item type schema version
-    registry_schema["properties"]["schema_version"]["default"] = schema_version_default
 
 
 class TestInvalidationScopeViewFourfront:

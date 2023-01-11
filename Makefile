@@ -145,20 +145,20 @@ test-any:
 
 
 test-npm:
-	bin/test -vv --durations=50 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook"
+	bin/test -xvv --durations=50 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook"
 
 test-unit:
-	bin/test -vv --durations=50 --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"
+	bin/test -xvv --durations=50 --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"
 
 remote-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
 	make remote-test-npm
 	make remote-test-unit
 
 remote-test-npm:  # Note this only does the 'not indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
+	bin/test -xvv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
 remote-test-unit:  # Note this does the 'indexing' tests
-	bin/test -vv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
+	bin/test -xvv --force-flaky --max-runs=3 --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook" --aws-auth --durations=10 --cov src/encoded --es search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
 update:  # updates dependencies
 	poetry update
