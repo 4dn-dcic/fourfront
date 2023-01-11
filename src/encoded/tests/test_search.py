@@ -764,18 +764,18 @@ def test_barplot_aggregation_endpoint(workbook, es_testapp):
     # assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] > 0
     # assert res["terms"]["CHIP-seq"]["terms"]["4DN"]["experiment_sets"] < count_exp_set_test_inserts
 
-# def test_recently_released_datasets_endpoint(testapp, lab, award):
-def test_recently_released_datasets_endpoint(workbook, testapp):
+
+def test_recently_released_datasets_endpoint(workbook, es_testapp):
 
     max_row_count = 1
 
     # get experiment sets count that are released and are included in a dataset
-    search_result = testapp.get('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&status=released&dataset_label%21=No+value').json
+    search_result = es_testapp.get('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&status=released&dataset_label%21=No+value').json
     search_result_count = len(search_result['@graph'])
 
     # Test the endpoint after ensuring we have the data correctly loaded into ES.
     # We should get back same count as from search results here.
-    datasets_res = testapp.get('/recently_released_datasets?max_row_count=' + str(max_row_count)).json
+    datasets_res = es_testapp.get('/recently_released_datasets?max_row_count=' + str(max_row_count)).json
 
     assert (datasets_res['total']['experiment_sets'] == search_result_count)
 

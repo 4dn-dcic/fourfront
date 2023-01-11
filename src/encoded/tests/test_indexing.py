@@ -29,21 +29,20 @@ from snovault.elasticsearch.create_mapping import (
 from snovault.elasticsearch.interfaces import INDEXER_QUEUE
 from snovault.elasticsearch.indexer_utils import get_namespaced_index, compute_invalidation_scope
 from snovault.elasticsearch.create_mapping import run as run_create_mapping
-from sqlalchemy import MetaData, func
+from sqlalchemy import func
 from timeit import default_timer as timer
 from unittest import mock
 from zope.sqlalchemy import mark_changed
 from .. import main
 from ..util import delay_rerun
 from ..verifier import verify_item
-#from .workbook_fixtures import es_app_settings, es_app, es_testapp  # why does this care?? does it? -kmp 12-Mar-2021
 from .test_permissions import wrangler, wrangler_testapp
 
 
 # notice_pytest_fixtures(es_app_settings, wrangler, wrangler_testapp)
 
 
-pytestmark = [pytest.mark.working, pytest.mark.indexing]
+pytestmark = [pytest.mark.working, pytest.mark.indexing, pytest.mark.workbook]
 
 
 # These 4 versions are known to be compatible, older versions should not be

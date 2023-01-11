@@ -119,7 +119,7 @@ def test_get_help_page(testapp, help_page):
     # assert 'StaticPage' in res.json['@type']
     #assert res.json['content'] == help_page['content'] # No longer works latter is set to an @id of static_section
     assert 'Accession and uuid are automatically assigned during initial posting' in res.json['content'][0]['content'] # Instead lets check what we have embedded on GET request is inside our doc file (rest_api_submission.md).
-    assert res.json['toc'] == help_page['table-of-contents']
+    assert res.json['table-of-contents'] == help_page['table-of-contents']
 
 
 def test_get_help_page_deleted(anonhtmltestapp, help_page_deleted):

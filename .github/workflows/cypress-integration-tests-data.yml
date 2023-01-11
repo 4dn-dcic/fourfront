@@ -1,8 +1,8 @@
 # Action that Runs Cypress Tests
 
-name: Cypress Tests - Data 
+name: Cypress Tests - Data
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   schedule:
     - cron: '0 5 * * 1-5'
@@ -14,7 +14,7 @@ on:
 jobs:
   cypress-run:
     # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: false  # suggested by Cypress
       matrix:
@@ -34,7 +34,7 @@ jobs:
           npm config set python /usr/bin/python3.7
           npm ci
           $(npm bin)/cypress install
-      
+
       - name: Cypress
         env:
           CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
