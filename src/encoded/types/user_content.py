@@ -148,12 +148,13 @@ class StaticSection(UserContent):
                 return output["html_body"]
         elif file_type == 'html':
             content = self.content(request, body, file)
-            matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
-            for match in matches:
-                if request.domain not in match[1]:
-                    external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
-                    content = content.replace(match[0], external_link)
-            return content
+            if content:
+                matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
+                for match in matches:
+                    if request.domain not in match[1]:
+                        external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
+                        content = content.replace(match[0], external_link)
+                return content
         return None
 
     @calculated_property(schema={
