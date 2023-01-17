@@ -6,6 +6,40 @@ fourfront
 Change Log
 ----------
 
+4.7.7
+======
+
+`PR home page updates - data use guidelines & 4DN help <https://github.com/4dn-dcic/fourfront/pull/1767>`_
+
+* Data Use Guidelines content updated.
+* 4DN Data Portal Paper link added under 4DN Help section.
+
+4.7.6
+======
+
+* Deleted 'DAPI' from suggested_enums list from imaging_path schema
+
+4.7.5
+======
+
+`PR jsonwebtoken npm package downgrade <https://github.com/4dn-dcic/fourfront/pull/1763>`_
+
+* jsonwebtoken 9.0.0 has breaking changes that prevents Cypress test's authentication. It is downgraded to a compatible version.
+
+4.7.4
+======
+
+`PR static content location in pages <https://github.com/4dn-dcic/fourfront/pull/1759>`_
+
+* new content_location property is added to the Page item to let customize static content location with respect to child pages
+
+4.7.3
+======
+
+`PR jwtToken cookie <https://github.com/4dn-dcic/fourfront/pull/1758>`_
+
+* jwtToken cookie's SameSite=Strict attribute changed as SameSite=Lax
+
 4.7.2
 ======
 
