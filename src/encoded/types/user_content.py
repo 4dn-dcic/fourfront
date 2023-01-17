@@ -147,14 +147,15 @@ class StaticSection(UserContent):
                 output = docutils.core.publish_parts(content, writer_name='html')
                 return output["html_body"]
         elif file_type == 'html':
+            link_conversion = True if options and options.get('ext_links_conversion') is not None and options.get('ext_links_conversion') == True else False
             content = self.content(request, body, file)
-            if content:
-                matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
-                for match in matches:
-                    if request.domain not in match[1]:
-                        external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
-                        content = content.replace(match[0], external_link)
-                return content
+            if content and link_conversion:
+                    matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
+                    for match in matches:
+                        if request.domain not in match[1]:
+                            external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
+                            content = content.replace(match[0], external_link)
+                    return content
         return None
 
     @calculated_property(schema={

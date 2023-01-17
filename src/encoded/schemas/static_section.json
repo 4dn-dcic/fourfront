@@ -60,6 +60,12 @@
                     "lookup" : 1,
                     "enum" : [ "md", "html", "txt", "csv", "jsx" , "rst"]
                 },
+                "ext_links_conversion" : {
+                    "title": "External Links",
+                    "type": "boolean",
+                    "description": "If it's true, force external links to be opened in a new tab.",
+                    "default": true
+                },
                 "collapsible" : {
                     "title" : "Is Collapsible",
                     "type" : "boolean",
