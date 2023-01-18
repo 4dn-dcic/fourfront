@@ -343,7 +343,7 @@ def get_pagination(request):
 def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
     from_ = 0
     while extra_requests_needed_count > 0:
-        # print(str(extra_requests_needed_count) + " requests left to get all results.")
+        # print(f"{extra_requests_needed_count} requests left to get all results.")
         from_ = from_ + size_increment
         subsequent_search = search[from_:from_ + size_increment]
         subsequent_search_result = execute_search(subsequent_search)
@@ -351,17 +351,18 @@ def get_all_subsequent_results(initial_search_result, search, extra_requests_nee
         for hit in subsequent_search_result['hits'].get('hits', []):
             yield hit
 
-def execute_search_for_all_results(search):
-    size_increment = 100  # Decrease this to like 5 or 10 to test.
 
-    first_search = search[0:size_increment]  # get aggregations from here
+def execute_search_for_all_results(search):
+    chunk_size = 100  # Decrease this to like 5 or 10 to test.
+
+    first_search = search[0:chunk_size]  # get aggregations from here
     es_result = execute_search(first_search)
 
     total_results_expected = es_result['hits'].get('total', {}).get('value', 0)
-    extra_requests_needed_count = int(math.ceil(total_results_expected / size_increment)) - 1  # Decrease by 1 (first es_result already happened)
+    extra_requests_needed_count = int(math.ceil(total_results_expected / chunk_size)) - 1  # Decrease by 1 (first es_result already happened)
 
     if extra_requests_needed_count > 0:
-        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, size_increment))
+        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, chunk_size))
     return es_result
 
 

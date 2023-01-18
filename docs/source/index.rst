@@ -62,6 +62,9 @@ NOTES:
 
     $ brew cask install homebrew/cask-versions/adoptopenjdk8
 
+* Latest version of OpenSearch should be compatible, but if a new version is released that is
+  incompatible the documentation may need to be updated.
+
 * If you try to invoke elasticsearch and it is not found,
   you may need to link the brew-installed elasticsearch::
 
