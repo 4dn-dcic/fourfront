@@ -1054,84 +1054,77 @@
             "qc_order": 5,
             "additionalProperties": true,
             "properties": {
-                "lib_complexity": {
+                "rep1": {
                     "type": "object",
                     "qc_order": 1,
                     "additionalProperties": true,
                     "properties": {
-                        "rep1": {
-                            "type": "object",
-                            "qc_order": 1,
-                            "additionalProperties": true,
-                            "properties": {
-                                "total_fragments": {
-                                    "title": "Total fragments",
-                                    "type": "number",
-                                    "qc_order": 1
-                                },
-                                "distinct_fragments": {
-                                    "title": "Distinct fragments",
-                                    "type": "number",
-                                    "qc_order": 2
-                                },
-                                "positions_with_one_read": {
-                                    "title": "Positions with one read",
-                                    "type": "number",
-                                    "qc_order": 3
-                                },
-                                "NRF": {
-                                    "title": "NRF",
-                                    "type": "number",
-                                    "qc_order": 4
-                                },
-                                "PBC1": {
-                                    "title": "PBC1",
-                                    "type": "number",
-                                    "qc_order": 5
-                                },
-                                "PBC2": {
-                                    "title": "PBC2",
-                                    "type": "number",
-                                    "qc_order": 6
-                                }
-                            }
+                        "total_fragments": {
+                            "title": "Total fragments",
+                            "type": "number",
+                            "qc_order": 1
                         },
-                        "rep2": {
-                            "type": "object",
-                            "qc_order": 2,
-                            "additionalProperties": true,
-                            "properties": {
-                                "total_fragments": {
-                                    "title": "Total fragments",
-                                    "type": "number",
-                                    "qc_order": 1
-                                },
-                                "distinct_fragments": {
-                                    "title": "Distinct fragments",
-                                    "type": "number",
-                                    "qc_order": 2
-                                },
-                                "positions_with_one_read": {
-                                    "title": "Positions with one read",
-                                    "type": "number",
-                                    "qc_order": 3
-                                },
-                                "NRF": {
-                                    "title": "NRF",
-                                    "type": "number",
-                                    "qc_order": 4
-                                },
-                                "PBC1": {
-                                    "title": "PBC1",
-                                    "type": "number",
-                                    "qc_order": 5
-                                },
-                                "PBC2": {
-                                    "title": "PBC2",
-                                    "type": "number",
-                                    "qc_order": 6
-                                }
-                            }
+                        "distinct_fragments": {
+                            "title": "Distinct fragments",
+                            "type": "number",
+                            "qc_order": 2
+                        },
+                        "positions_with_one_read": {
+                            "title": "Positions with one read",
+                            "type": "number",
+                            "qc_order": 3
+                        },
+                        "NRF": {
+                            "title": "NRF",
+                            "type": "number",
+                            "qc_order": 4
+                        },
+                        "PBC1": {
+                            "title": "PBC1",
+                            "type": "number",
+                            "qc_order": 5
+                        },
+                        "PBC2": {
+                            "title": "PBC2",
+                            "type": "number",
+                            "qc_order": 6
+                        }
+                    }
+                },
+                "rep2": {
+                    "type": "object",
+                    "qc_order": 2,
+                    "additionalProperties": true,
+                    "properties": {
+                        "total_fragments": {
+                            "title": "Total fragments",
+                            "type": "number",
+                            "qc_order": 1
+                        },
+                        "distinct_fragments": {
+                            "title": "Distinct fragments",
+                            "type": "number",
+                            "qc_order": 2
+                        },
+                        "positions_with_one_read": {
+                            "title": "Positions with one read",
+                            "type": "number",
+                            "qc_order": 3
+                        },
+                        "NRF": {
+                            "title": "NRF",
+                            "type": "number",
+                            "qc_order": 4
+                        },
+                        "PBC1": {
+                            "title": "PBC1",
+                            "type": "number",
+                            "qc_order": 5
+                        },
+                        "PBC2": {
+                            "title": "PBC2",
+                            "type": "number",
+                            "qc_order": 6
                         }
                     }
                 }
