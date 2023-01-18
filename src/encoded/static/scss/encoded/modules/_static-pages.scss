@@ -145,6 +145,9 @@
 		&:hover {
 			color: #FFFFFF;
 		}
+		&:focus {
+			box-shadow: none !important;
+		} 
 	}
 
 	.recently-released-datasets-section {
@@ -348,6 +351,10 @@
 				a.btn {
 					font-size: 1.4rem;
 					border-radius: 5px;
+
+					&:focus {
+						box-shadow: none !important;
+					}
 				}
 	
 				a.btn-all-data-collections {
@@ -566,6 +573,9 @@
 						background-color: $brand-primary-dark !important;
 						color: #FFFFFF !important;
 					}
+					&:focus {
+						box-shadow: none !important;
+					} 
 				}
 			}
 		}
@@ -676,24 +686,28 @@
 		}
 		
 		a.btn-4dn-help {
-			font-size: 1.5rem;
+			font-size: 1.3rem;
 			border-width: 0px;
 			border-radius: 15px;
 			background-color: #EFF7F8;
 			color: #34646C;
 			font-weight: 400;
-			
+
+			&:focus {
+				box-shadow: none !important;
+			}
 
 			.btn-4dn-help-icon {
-				font-size: 1.7rem;
+				font-size: 1.5rem;
 				opacity: 0.9;
 				box-shadow: 0 0 2px #3E8A98;
-				width: 45px;
-				height: 45px;
+				width: 39px;
+				height: 39px;
 				border-radius: 50%;
 				text-align: center;
-				line-height: 48px;
+				line-height: 42px;
 				vertical-align: middle;
+				padding-left: 1px;
 			}
 
 			.btn-4dn-help-arrow {
