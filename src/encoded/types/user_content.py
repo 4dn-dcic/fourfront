@@ -141,21 +141,17 @@ class StaticSection(UserContent):
     })
     def content_as_html(self, request, body=None, file=None, options=None):
         file_type = self.filetype(request, body, file, options)
+        link_conversion = True if options and options.get('ext_links_conversion') is not None and options.get('ext_links_conversion') == True else False
         if file_type == 'rst':
             content = self.content(request, body, file)
             if content is not None:
                 output = docutils.core.publish_parts(content, writer_name='html')
-                return output["html_body"]
+                if link_conversion:
+                    return convert_links_in_html(request.domain, output["html_body"])
         elif file_type == 'html':
-            link_conversion = True if options and options.get('ext_links_conversion') is not None and options.get('ext_links_conversion') == True else False
             content = self.content(request, body, file)
             if content and link_conversion:
-                    matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
-                    for match in matches:
-                        if request.domain not in match[1]:
-                            external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
-                            content = content.replace(match[0], external_link)
-                    return content
+                return convert_links_in_html(request.domain, content)
         return None
 
     @calculated_property(schema={
@@ -339,3 +335,16 @@ def get_local_file_contents(filename, contentFilesLocation=None):
 def get_remote_file_contents(uri):
     resp = requests.get(uri)
     return resp.text
+
+
+def convert_links_in_html(domain, content):
+    """
+    Seeks hyperlinks within string content and adds 'target="_blank"' and 'rel="noopener noreferrer"' attributes for external links.
+    """
+    matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
+    for match in matches:
+        # compares the found links with domain
+        if domain not in match[1]:
+            external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
+            content = content.replace(match[0], external_link)
+    return content
