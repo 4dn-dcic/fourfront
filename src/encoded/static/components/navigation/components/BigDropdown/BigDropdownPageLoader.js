@@ -43,7 +43,7 @@ export class BigDropdownPageLoader extends React.PureComponent {
         const { isLoadingMenuTree } = this.state;
         const { treeURL } = this.props;
         if (isLoadingMenuTree) {
-            logger.error("Already loading Help tree");
+            console.error("Already loading Help tree");
             return;
         }
         this.setState({ 'isLoadingMenuTree' : true }, ()=>{
