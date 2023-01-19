@@ -43,7 +43,7 @@ botocore = "^1.27.36"
 certifi = ">=2021.5.30"
 chardet = "3.0.4"
 colorama = "0.3.3"
-dcicsnovault = "^7.0.0"
+dcicsnovault = "^7.1.1"
 dcicutils = "^6.0.0"
 elasticsearch = "7.13.4"
 elasticsearch-dsl = "^7.0.0"  # TODO: port code from cgap-portal to get rid of uses
