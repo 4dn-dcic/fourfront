@@ -6,6 +6,19 @@ fourfront
 Change Log
 ----------
 
+4.7.7
+======
+
+`PR home page updates - data use guidelines & 4DN help <https://github.com/4dn-dcic/fourfront/pull/1767>`_
+
+* Data Use Guidelines content updated.
+* 4DN Data Portal Paper link added under 4DN Help section.
+
+4.7.6
+======
+
+* Deleted 'DAPI' from suggested_enums list from imaging_path schema
+
 4.7.5
 ======
 
