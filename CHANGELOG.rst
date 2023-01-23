@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+4.7.8
+======
+
+`PR selection popup navigation updates <https://github.com/4dn-dcic/fourfront/pull/1766>`_
+
+* Show footer having "back to selection list" button, even if user navigates other pages in popup  
+* Restore selections when returned to selection page in popup
+
 4.7.7
 ======
 
