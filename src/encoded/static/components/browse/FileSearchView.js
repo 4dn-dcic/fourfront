@@ -91,7 +91,8 @@ function FileTableWithSelectedFilesCheckboxes(props){
         navigate: propNavigate,
         toggleFullScreen, isFullscreen, // todo: remove maybe, pass only to AboveTableControls
         // selectedFiles, selectFile, unselectFile, resetSelectedFiles, // todo: remove and pass only to AboveTableControls, detailPane, and colExtensionMap
-        totalExpected: total // todo: remove, deprecated
+        totalExpected: total, // todo: remove, deprecated
+        keepSelectionInStorage: true
     };
 
     return <CommonSearchView {...passProps} termTransformFxn={Schemas.Term.toName} />;
