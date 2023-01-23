@@ -20,7 +20,7 @@ jobs:
     name: Test Suite for fourfront (Python 3.8, Node 16)
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     # Build matrix
     strategy:
@@ -51,9 +51,9 @@ jobs:
           curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           sudo apt-get update
-          sudo apt-get install postgresql-11 postgresql-client-11
-          echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
-          sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
+          sudo apt-get install postgresql-14 postgresql-client-14
+          echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
+          sudo ln -s /usr/lib/postgresql/14/bin/initdb /usr/local/bin/initdb
       - name: Install Deps
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
@@ -94,7 +94,7 @@ jobs:
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
         run: |
-          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: QA (UNIT)
         if: ${{ matrix.test_type == 'UNIT' }}
@@ -118,7 +118,7 @@ jobs:
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
-          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: Docker Build
         if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '16' && matrix.python_version == '3.8' }}

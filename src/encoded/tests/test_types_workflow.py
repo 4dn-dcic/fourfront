@@ -77,6 +77,7 @@ def test_pseudo_run(testapp, input_json):
     purge_metadata(output['ff_meta']['uuid'], ff_env='fourfront-webdev')
 
 
+@pytest.mark.skip  # no longer should be used
 def test_workflow_for_env():
 
     # These tests will want to become more abstract sometime, but for transition they test that

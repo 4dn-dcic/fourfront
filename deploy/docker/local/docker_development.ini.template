@@ -8,7 +8,7 @@
 use = config:base.ini#app
 session.secret = %(here)s/session-secret.b64
 env.name = ff-docker-${USER}-test
-sqlalchemy.url = postgres://postgres:postgres@db:5432/postgres
+sqlalchemy.url = postgresql://postgres:postgres@db:5432/postgres
 elasticsearch.server = search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
 elasticsearch.aws_auth = true
 #elasticsearch.server = es:9200
