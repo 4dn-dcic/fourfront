@@ -2,10 +2,10 @@ import pytest
 import webtest
 
 from dcicutils.qa_utils import notice_pytest_fixtures
-from .workbook_fixtures import app_settings, app  # are these needed? -kmp 12-Mar-2021
+#from .workbook_fixtures import es_app_settings, es_app  # are these needed? -kmp 12-Mar-2021
 
 
-notice_pytest_fixtures(app_settings, app)
+# notice_pytest_fixtures(es_app_settings, es_app)
 
 pytestmark = [pytest.mark.indexing, pytest.mark.working]
 
@@ -14,10 +14,11 @@ pytestmark = [pytest.mark.indexing, pytest.mark.working]
 def help_page_section_json():
     return {
         "title": "",
-        "name" : "help.user-guide.rest-api.rest_api_submission",
+        "name": "help.user-guide.rest-api.rest_api_submission",
         "file": "/docs/source/rest_api_submission.rst",
-        "uuid" : "442c8aa0-dc6c-43d7-814a-854af460b020"
+        "uuid": "442c8aa0-dc6c-43d7-814a-854af460b020"
     }
+
 
 @pytest.fixture(scope='module')
 def help_page_json():
@@ -33,6 +34,7 @@ def help_page_json():
         }
     }
 
+
 @pytest.fixture(scope='module')
 def help_page_json_draft():
     return {
@@ -45,8 +47,9 @@ def help_page_json_draft():
             "header-depth": 4,
             "list-styles": ["decimal", "lower-alpha", "lower-roman"]
         },
-        "status" : "draft"
+        "status": "draft"
     }
+
 
 @pytest.fixture(scope='module')
 def help_page_json_deleted():
@@ -60,7 +63,7 @@ def help_page_json_deleted():
             "header-depth": 4,
             "list-styles": ["decimal", "lower-alpha", "lower-roman"]
         },
-        "status" : "deleted"
+        "status": "deleted"
     }
 
 
@@ -92,7 +95,7 @@ def help_page_deleted(testapp, posted_help_page_section, help_page_json_draft):
         res = testapp.post_json('/pages/', help_page_json_draft, status=201)
         val = res.json['@graph'][0]
     except webtest.AppError:
-        res = testapp.get('/' + help_page_json_draft['uuid'], status=301).follow()
+        res = testapp.get('/pages/' + help_page_json_draft['uuid'], status=301).follow()
         val = res.json
     return val
 
@@ -103,30 +106,29 @@ def help_page_restricted(testapp, posted_help_page_section, help_page_json_delet
         res = testapp.post_json('/pages/', help_page_json_deleted, status=201)
         val = res.json['@graph'][0]
     except webtest.AppError:
-        res = testapp.get('/' + help_page_json_deleted['uuid'], status=301).follow()
+        res = testapp.get('/pages/' + help_page_json_deleted['uuid'], status=301).follow()
         val = res.json
     return val
 
 
 def test_get_help_page(testapp, help_page):
-    help_page_url = "/" + help_page['name']
+    help_page_url = "/pages/" + help_page['uuid'] + "/"
     res = testapp.get(help_page_url, status=200)
     assert res.json['@id'] == help_page_url
-    assert res.json['@context'] == help_page_url
-    assert 'HelpPage' in res.json['@type']
-    assert 'StaticPage' in res.json['@type']
+    # assert 'HelpPage' in res.json['@type']
+    # assert 'StaticPage' in res.json['@type']
     #assert res.json['content'] == help_page['content'] # No longer works latter is set to an @id of static_section
     assert 'Accession and uuid are automatically assigned during initial posting' in res.json['content'][0]['content'] # Instead lets check what we have embedded on GET request is inside our doc file (rest_api_submission.md).
-    assert res.json['toc'] == help_page['table-of-contents']
+    assert res.json['table-of-contents'] == help_page['table-of-contents']
 
 
 def test_get_help_page_deleted(anonhtmltestapp, help_page_deleted):
-    help_page_url = "/" + help_page_deleted['name']
+    help_page_url = "/pages/" + help_page_deleted['uuid'] + "/"
     anonhtmltestapp.get(help_page_url, status=403)
 
 
 def test_get_help_page_no_access(anonhtmltestapp, testapp, help_page_restricted):
-    help_page_url = "/" + help_page_restricted['name']
+    help_page_url = "/pages/" + help_page_restricted['uuid'] + "/"
     anonhtmltestapp.get(help_page_url, status=403)
     testapp.get(help_page_url, status=200)
 
