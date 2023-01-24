@@ -9,7 +9,7 @@ from ..tests import datafixtures
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture
 def minitestdata(app, conn):
     tx = conn.begin_nested()
 
@@ -30,8 +30,7 @@ def minitestdata(app, conn):
     tx.rollback()
 
 
-
-@pytest.yield_fixture(scope='session')
+@pytest.yield_fixture
 def minitestdata2(app, conn):
     tx = conn.begin_nested()
 

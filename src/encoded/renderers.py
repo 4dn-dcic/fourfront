@@ -407,7 +407,7 @@ def should_transform(request, response):
     # and return False, so should return False notwithstanding the format=html.
     # Another alternative would be for this conflict to return an error.
     # But Fourfront thinks it should just go ahead and try the transform.
-    # Note that uncommenting this logic will require uncommenting the corresponding line in 
+    # Note that uncommenting this logic will require uncommenting the corresponding line in
     # test_should_transform that is presently marked as a bug we should fix.
     #
     # About the commented-out code that follows below, Will says in code review (9-Feb-2022,
@@ -466,13 +466,10 @@ def render_page_html_tween_factory(handler, registry):
     # tricky to enforce (we would need to create one cgroup per process.)
     # So we just manually check the resource usage after each transform.
 
-    # In code review (9-Feb-2022,
-    # https://github.com/4dn-dcic/fourfront/pull/1597#discussion_r802944325),
-    # Will says:
-    # > Looking at this now, I think this number rss_limit should be reconsidered
-    # > in the context of Fargate (much higher).
-    # -kmp 15-Feb-2022
-    rss_limit = 256 * (1024 ** 2)  # MB
+    # This has been adjusted upward to account for larger memory availability with nginx/Fargate - Will Jan 13 2023
+    kilo_bytes = 1024
+    mega_bytes = 1024 * kilo_bytes
+    rss_limit = 512 * mega_bytes
 
     reload_process = (True
                       if registry.settings.get('reload_templates', False)
