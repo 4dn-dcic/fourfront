@@ -12,7 +12,7 @@ from pyramid.security import ALL_PERMISSIONS, Allow, Authenticated, Deny, Everyo
 from snovault import Root, calculated_property, root, COLLECTIONS, STORAGE
 from .appdefs import APP_VERSION_REGISTRY_KEY, ITEM_INDEX_ORDER
 from .schema_formats import is_accession
-
+from .util import is_mobile_browser
 
 def includeme(config):
     config.include(health_check)
@@ -141,7 +141,7 @@ def health_check(config):
             app_url = ''.join([app_url, '/'])
 
         env_name = settings.get('env.name')
-        foursight_url = infer_foursight_url_from_env(request, env_name)
+        foursight_url = infer_foursight_url_from_env(request=request, envname=env_name)
 
         response_dict = {
 
@@ -322,7 +322,7 @@ class FourfrontRoot(Root):
         except KeyError:  # Can be caused by 404 / Not Found during indexing
             return []
 
-    # It is no longer used at the moment, replaced by Twitter feed. 
+    # It is no longer used at the moment, replaced by Twitter feed.
     # @calculated_property(schema={
     #     "title": "Announcements",
     #     "type": "array"
@@ -341,3 +341,11 @@ class FourfrontRoot(Root):
     })
     def app_version(self, registry):
         return registry.settings[APP_VERSION_REGISTRY_KEY]
+
+    @calculated_property(schema={
+        "title": "Is request initiated by a mobile device",
+        "description": "The calculation is based on request.user_agent that is not reliable source. It is for server-side rendering, passing as a prop is not recommended.",
+        "type": "boolean"
+    })
+    def is_mobile_browser(self, request):
+        return is_mobile_browser(request)

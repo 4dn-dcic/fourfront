@@ -81,7 +81,7 @@ const rules = [
 ];
 
 const resolve = {
-    extensions : [".webpack.js", ".web.js", ".js", ".json", '.jsx'],
+    extensions : [".webpack.js", ".web.js", ".js", ".json", ".jsx"],
     //symlinks: false,
     //modules: [
     //    path.resolve(__dirname, '..', 'node_modules'),
@@ -98,7 +98,9 @@ const resolve = {
 spcPackageJson = require("@hms-dbmi-bgm/shared-portal-components/package.json");
 spcPeerDependencies = spcPackageJson.peerDependencies || {};
 Object.keys(spcPeerDependencies).forEach(function(packageName) {
-    resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+    if (packageName !== 'auth0-lock') {
+        resolve.alias[packageName] = path.resolve("./node_modules/" + packageName);
+    }
 });
 
 // Exclusion -- higlass needs react-bootstrap 0.x but we want 1.x; can remove this line below
@@ -112,7 +114,7 @@ const optimization = {
     minimizer: [
         new TerserPlugin({
             parallel: false,  // XXX: this option causes docker build to fail - Will 2/25/2021
-            sourceMap: true,
+            // sourceMap: true, // https://github.com/webpack-contrib/terser-webpack-plugin/releases/tag/v5.0.0
             terserOptions:{
                 compress: true,
                 mangle: true,
@@ -147,9 +149,9 @@ serverPlugins.push(new webpack.DefinePlugin({
 }));
 
 // From https://github.com/jsdom/jsdom/issues/3042
-serverPlugins.push(
-    new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
-);
+// serverPlugins.push(
+//     new webpack.IgnorePlugin(/canvas/,/konva/, /jsdom$/)
+// );
 
 if (env === 'development'){
     // Skip for `npm run dev-quick` (`env === "quick"`) since takes a while
@@ -229,10 +231,14 @@ module.exports = [
             fallback: {
                 stream: require.resolve('stream-browserify'),
                 process: require.resolve('process/browser'),
-                util: require.resolve('util/'),
-                "crypto": false
+                // util: require.resolve('util/'),
+                "crypto": false,
+                "events": false
             }
         },
+        ignoreWarnings: [
+            /only default export is available soon/,
+        ],
         //resolveLoader : resolve,
         devtool: devTool,
         plugins: webPlugins

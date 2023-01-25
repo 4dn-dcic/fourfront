@@ -38,7 +38,12 @@ Use the ``prepare-docker`` command to configure ``docker-compose.yml`` and ``doc
     --run-tests           if supplied, causes tests to be run in container
                         (default: not tested)
     --s3-encrypt-key-id S3_ENCRYPT_KEY_ID
-                        an encrypt key id (default: the empty string)
+                        an encrypt key id (default: the empty string), not typically used for FF
+
+
+Note that you must additionally set ``GLOBAL_ENV_BUCKET=foursight-prod-envs``, which will be passed to
+the container to resolve environment information. On initial run, you will want to run with the ``--load-inserts`` option so data is loaded.
+Pass ``--data-set local`` to get local inserts, or ``deploy`` to use the production inserts.
 
 Building FF Docker
 ^^^^^^^^^^^^^^^^^^
@@ -74,7 +79,7 @@ Common Issues
 
 Some notable issues that you may encounter include:
 
-    * The NPM build may fail/hang - this can happen when Docker does not have enough resources. Try upping the amount CPU/RAM you are allocating to Docker.
+    * The NPM build may fail/hang - this can happen when Docker does not have enough resources. Try upping the amount CPU/RAM you are allocating to Docker. This can be done easily from Docker Desktop, opening the Settings and then accessing the Resources panel. Try 6 CPUs and >8 GB RAM.
     * Nginx install fails to locate GPG key - this happens when the Docker internal cache has run out of space and needs to be cleaned - see documentation on `docker prune <https://docs.docker.com/config/pruning/.>`_.
 
 

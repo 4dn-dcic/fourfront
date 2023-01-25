@@ -105,7 +105,18 @@ table.matrix {
 	margin-bottom: 0px;
 }
 
+.processed-files-table-section {
+	h3.tab-section-title .tab-section-subtitle::before{
+		content: " • ";
+		margin-left: 5px;
+	}
 
+	@include media-breakpoint-down(sm){
+		h3.tab-section-title .tab-section-subtitle {
+			display: none;
+		}
+	}
+}
 
 /** Experiment Set Detail Pane **/
 
@@ -146,6 +157,12 @@ table.matrix {
 		.raw-files-table-section,
 		.processed-files-table-section {
 			border-top: 1px solid #ddd;
+
+			@include media-breakpoint-down(sm){
+				h3.tab-section-title .tab-section-subtitle {
+					display: none;
+				}
+			}
 		}
 
 		h4.pane-section-title {
@@ -177,8 +194,6 @@ table.matrix {
 		}
 
 	}
-
-
 
 }
 

@@ -127,6 +127,14 @@ export default class HealthView extends React.PureComponent {
                 title : "Shared Portal Components Version",
                 description : "Software version of shared-portal-components package being used."
             },
+            'micro_meta_version': {
+                title : "MicroMeta Version",
+                description : "Software version of MicroMeta package being used."
+            },
+            'vitessce_version': {
+                title : "Vitessce Version",
+                description : "Software version of Vitessce package being used."
+            },
             'snovault_version': {
                 title : "Snovault Version",
                 description : "Software version of dcicsnovault being used."
@@ -216,11 +224,31 @@ export default class HealthView extends React.PureComponent {
         const width = layout.gridContainerWidth(windowWidth);
         // extend context to include shared-portal-components version
         const { dependencies: { '@hms-dbmi-bgm/shared-portal-components': { version: spcVersion, from: spcFrom } = {} } } = installedPackageLockJson;
+        const { packages: { 'node_modules/@hms-dbmi-bgm/shared-portal-components': { version: spcInstallVersion } = {} } } = installedPackageLockJson;
         let spcVersionUsed;
         if (spcFrom && spcFrom.indexOf('#') > -1) { //e.g. github:4dn-dcic/shared-portal-components#0.0.2.70
             [ spcVersionUsed ] = spcFrom.split('#').splice(-1);
         }
-        const context = { ...propContext, "spc_version": spcVersionUsed || spcVersion || "-" };
+        // extend context to include micro-meta-app-react version
+        const { dependencies: { 'micro-meta-app-react': { version: microMetaVersion, from: microMetaFrom } = {} } } = installedPackageLockJson;
+        let microMetaVersionUsed;
+        if (microMetaFrom && microMetaFrom.indexOf('#') > -1) {
+            [ microMetaVersionUsed ] = microMetaFrom.split('#').splice(-1);
+        }
+        //extend context to include vitessce version
+        const { dependencies } = installedPackageLockJson;
+        let vitessceVersion;
+        if (dependencies && dependencies.vitessce) {
+            vitessceVersion = dependencies.vitessce.version;
+        }
+
+        const spcVersionDetailed = getDetailedVersion(spcVersionUsed, spcVersion, spcInstallVersion);
+        const context = {
+            ...propContext,
+            'spc_version': spcVersionDetailed,
+            'micro_meta_version': microMetaVersionUsed || microMetaVersion || "-",
+            'vitessce_version': vitessceVersion || "-"
+        };
 
         return (
             <div className="view-item container" id="content">
@@ -240,6 +268,14 @@ export default class HealthView extends React.PureComponent {
     }
 }
 
+function getDetailedVersion(depUsedVersion, depVersion, depInstallVersion) {
+    if (depUsedVersion === depInstallVersion) {
+        return depUsedVersion || depVersion || "-";
+    } else {
+        const version = depUsedVersion || depVersion || "-";
+        return 'Ambiguous versions found. Dependencies Version: ' + version + ', Installed Version: ' + depInstallVersion;
+    }
+}
 const DatabaseCountsInfo = React.memo(function DatabaseCountsInfo(props){
     const { notYetLoaded, excludedKeys, schemas, db_es_compare, db_es_total, session, mounted, context, width, getCounts, keyTitleDescriptionMapCounts } = props;
     const userGroups = (session && JWT.getUserGroups()) || null;

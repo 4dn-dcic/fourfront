@@ -314,7 +314,7 @@ def login(context, request):
         domain=request.domain,
         path="/",
         httponly=True,
-        samesite="strict",
+        samesite="lax",
         overwrite=True,
         secure=is_https
     )

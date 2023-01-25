@@ -142,9 +142,13 @@
             "suggested_enum": [
                 "DNase treatment",
                 "fluorophore cleavage",
-                "fluorophore cleavage and photobleaching",
                 "photobleaching",
                 "strand displacement"
+            ],
+            "ignored_enum": [
+                "fluorophore cleavage and photobleaching",
+                "strand displacement and photobleaching",
+                "55% wash buffer and 4x saline sodium citrate"
             ]
         },
         "fiducial_label": {

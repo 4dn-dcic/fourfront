@@ -54,7 +54,7 @@ Install or update dependencies::
     $ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
     $ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
     $ brew cask install adoptopenjdk8
-    $ brew install elasticsearch@5.6 node@10
+    $ brew install opensearch node@16
 
 NOTES:
 
@@ -62,10 +62,13 @@ NOTES:
 
     $ brew cask install homebrew/cask-versions/adoptopenjdk8
 
+* Latest version of OpenSearch should be compatible, but if a new version is released that is
+  incompatible the documentation may need to be updated.
+
 * If you try to invoke elasticsearch and it is not found,
   you may need to link the brew-installed elasticsearch::
 
-    $ brew link --force elasticsearch@5.6
+    $ brew link --force opensearch
 
 * If you need to update dependencies::
 
@@ -241,8 +244,8 @@ Force compiling
    search_info
    security
    auth
-   beanstalk_deployment
-   apache_modwsgi
+   docker-local
+   docker-production
    database
    higlass-visualization
    inserts

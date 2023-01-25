@@ -37,6 +37,7 @@ from collections import OrderedDict
 from copy import deepcopy
 import uuid
 import structlog
+from .util import is_mobile_browser
 
 log = structlog.getLogger(__name__)
 
@@ -171,7 +172,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         es_results = execute_search(size_search)
 
     ### Record total number of hits
-    result['total'] = total = es_results['hits']['total']
+    result['total'] = total = es_results['hits']['total']['value']
     result['facets'] = format_facets(es_results, facets, total, additional_facets, search_frame)
     result['aggregations'] = format_extra_aggregations(es_results)
 
@@ -216,6 +217,10 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     result['@graph'] = list(graph)
     if created_new_search_session_id:
         request.response.set_cookie('searchSessionID', search_session_id) # Save session ID for re-requests / subsequent pages.
+
+    #misc
+    result['is_mobile_browser'] = is_mobile_browser(request)
+
     return result
 
 
@@ -338,7 +343,7 @@ def get_pagination(request):
 def get_all_subsequent_results(initial_search_result, search, extra_requests_needed_count, size_increment):
     from_ = 0
     while extra_requests_needed_count > 0:
-        #print(str(extra_requests_needed_count) + " requests left to get all results.")
+        # print(f"{extra_requests_needed_count} requests left to get all results.")
         from_ = from_ + size_increment
         subsequent_search = search[from_:from_ + size_increment]
         subsequent_search_result = execute_search(subsequent_search)
@@ -346,17 +351,18 @@ def get_all_subsequent_results(initial_search_result, search, extra_requests_nee
         for hit in subsequent_search_result['hits'].get('hits', []):
             yield hit
 
-def execute_search_for_all_results(search):
-    size_increment = 100 # Decrease this to like 5 or 10 to test.
 
-    first_search = search[0:size_increment] # get aggregations from here
+def execute_search_for_all_results(search):
+    chunk_size = 100  # Decrease this to like 5 or 10 to test.
+
+    first_search = search[0:chunk_size]  # get aggregations from here
     es_result = execute_search(first_search)
 
-    total_results_expected = es_result['hits'].get('total',0)
-    extra_requests_needed_count = int(math.ceil(total_results_expected / size_increment)) - 1 # Decrease by 1 (first es_result already happened)
+    total_results_expected = es_result['hits'].get('total', {}).get('value', 0)
+    extra_requests_needed_count = int(math.ceil(total_results_expected / chunk_size)) - 1  # Decrease by 1 (first es_result already happened)
 
     if extra_requests_needed_count > 0:
-        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, size_increment))
+        es_result['hits']['hits'] = itertools.chain(es_result['hits']['hits'], get_all_subsequent_results(es_result, search, extra_requests_needed_count, chunk_size))
     return es_result
 
 
@@ -734,7 +740,7 @@ def set_sort_order(request, search, search_term, types, doc_types, result, schem
         search = search.sort(                   # Multi-level sort. See http://www.elastic.co/guide/en/elasticsearch/guide/current/_sorting.html#_multilevel_sorting & https://stackoverflow.com/questions/46458803/python-elasticsearch-dsl-sorting-with-multiple-fields
             { '_score' : { "order": "desc" } },
             { 'embedded.date_created.raw' : { 'order': 'desc', 'unmapped_type': 'keyword' }, 'embedded.label.raw' : { 'order': 'asc',  'unmapped_type': 'keyword', 'missing': '_last' } },
-            { '_uid' : { 'order': 'asc' } }     # 'embedded.uuid.raw' (instd of _uid) sometimes results in 400 bad request : 'org.elasticsearch.index.query.QueryShardException: No mapping found for [embedded.uuid.raw] in order to sort on'
+            { '_id' : { 'order': 'asc' } }     # 'embedded.uuid.raw' (instd of _uid) sometimes results in 400 bad request : 'org.elasticsearch.index.query.QueryShardException: No mapping found for [embedded.uuid.raw] in order to sort on'
         )
         result['sort'] = result_sort = { '_score' : { "order" : "desc" } }
         return search
@@ -1633,7 +1639,7 @@ def build_table_columns(request, schemas, doc_types):
                 # add tooltip
                 if columns[name].get('tooltip') is None:
                     columns[name]['tooltip'] = True
-                # iterate through sort_fields and set data type from schema if not already defined            
+                # iterate through sort_fields and set data type from schema if not already defined
                 if 'sort_fields' in columns[name]:
                     sort_fields = columns[name].get('sort_fields')
                     for sort_field in sort_fields:
@@ -1658,7 +1664,7 @@ def build_table_columns(request, schemas, doc_types):
             "order"             : 510,
             "type"              : "date"
         }
-    # Add modified date column, if not present, at end.   
+    # Add modified date column, if not present, at end.
     if 'last_modified.date_modified' not in columns:
         columns['last_modified.date_modified'] = {
             "title"             : "Date Modified",

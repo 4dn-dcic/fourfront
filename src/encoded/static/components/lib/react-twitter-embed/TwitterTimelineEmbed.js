@@ -42,12 +42,12 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
     }
 
     buildOptions() {
-        const { options: propOptions, autoHeight = false, theme, linkColor, borderColor, lang } = this.props;
+        const { options: propOptions, autoHeight = false, theme, linkColor, borderColor, lang} = this.props;
         let options = Object.assign({}, propOptions, { theme, linkColor, borderColor, lang })
         if (autoHeight) {
-            options.height = this.embedContainerRef.current.parentNode.offsetHeight
+            options.height = this.embedContainerRef.current.parentNode.offsetHeight;
         }
-        return options
+        return options;
     }
 
     /** Experimental and probably against Twitter's Developer Policy / Terms. Not used b.c. of this. */
@@ -82,9 +82,14 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
     }
 
     renderWidget(options) {
-        const { onLoad, sourceType, screenName, userId, ownerScreenName, slug, id, widgetId, url } = this.props;
+        const { onLoad, sourceType, screenName, userId, ownerScreenName, slug, id, widgetId, url, autoHeight } = this.props;
 
         if (this.isMountCanceled) return;
+
+        let height = null;
+        if (autoHeight) {
+            height = this.embedContainerRef.current.parentNode.offsetHeight
+        }
 
         window.twttr.widgets.createTimeline(
             {
@@ -94,7 +99,8 @@ export default class TwitterTimelineEmbed extends React.PureComponent {
                 ownerScreenName,
                 slug,
                 id: id || widgetId,
-                url
+                url,
+                height
             },
             this.embedContainerRef.current,
             options

@@ -76,12 +76,12 @@ file_workflow_run_embeds = [
     'workflow_run_inputs.input_files.workflow_argument_name',
     'workflow_run_inputs.input_files.value.filename',
     'workflow_run_inputs.input_files.value.display_title',
-    'workflow_run_inputs.input_files.value.file_format',
+    'workflow_run_inputs.input_files.value.file_format.file_format',
     'workflow_run_inputs.input_files.value.uuid',
     'workflow_run_inputs.input_files.value.accession',
     'workflow_run_inputs.output_files.workflow_argument_name',
     'workflow_run_inputs.output_files.value.display_title',
-    'workflow_run_inputs.output_files.value.file_format',
+    'workflow_run_inputs.output_files.value.file_format.file_format',
     'workflow_run_inputs.output_files.value.uuid',
     'workflow_run_inputs.output_files.value.accession',
     'workflow_run_inputs.output_files.value_qc.url',
@@ -125,10 +125,11 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 conn = boto3.client('sts',
                                     aws_access_key_id=os.environ.get('S3_AWS_ACCESS_KEY_ID'),
                                     aws_secret_access_key=os.environ.get('S3_AWS_SECRET_ACCESS_KEY'))
+                token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         else:
             # boto.set_stream_logger('boto3')
             conn = boto3.client('sts')
-        token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
+            token = conn.get_federation_token(Name=name, Policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.get('Credentials')
         # Convert Expiration datetime object to string via cast
@@ -264,8 +265,9 @@ class File(Item):
 
     # TODO: embed file_format
     embedded_list = Item.embedded_list + lab_award_attribution_embed_list + [
-        # XXX: Experiment linkTo
+        # Experiment linkTo
         'experiments.accession',
+        'experiments.last_modified.date_modified',
 
         # ExperimentType linkTo
         'experiments.experiment_type.title',
@@ -277,9 +279,6 @@ class File(Item):
 
         # Enzyme linkTo
         'experiments.digestion_enzyme.name',
-
-        # Standard embed
-        'experiments.last_modified.date_modified',
 
         # Biosample linkTo
         'experiments.biosample.accession',
@@ -309,13 +308,13 @@ class File(Item):
         'experiments.biosample.biosource.modifications.override_modification_name',
 
         # BioFeature linkTo
-        'experiments.biosample.biosource.modifications.target_of_mod.feature_type',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_type.uuid',
         'experiments.biosample.biosource.modifications.target_of_mod.preferred_label',
         'experiments.biosample.biosource.modifications.target_of_mod.cellular_structure',
         'experiments.biosample.biosource.modifications.target_of_mod.organism_name',
-        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes',
-        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods',
-        'experiments.biosample.biosource.modifications.target_of_mod.genome_location',
+        'experiments.biosample.biosource.modifications.target_of_mod.relevant_genes.uuid',
+        'experiments.biosample.biosource.modifications.target_of_mod.feature_mods.*',
+        'experiments.biosample.biosource.modifications.target_of_mod.genome_location.uuid',
 
         # Individual linkTo
         'experiments.biosample.biosource.individual.protected_data',
@@ -776,17 +775,18 @@ class File(Item):
         "title": "Upload Key",
         "type": "string",
     })
-    def upload_key(self, request):
+    def upload_key(self, request, filename=None):
         properties = self.properties
         external = self.propsheets.get('external', {})
         extkey = external.get('key')
+        # od_url = self._open_data_url(self.properties['status'], filename=filename)
+        # if od_url:
+        #     return f'No upload key for open data file {filename}'
         if not external or not extkey or extkey != self.build_key(self.registry, self.uuid, properties):
             try:
                 external = self.build_external_creds(self.registry, self.uuid, properties)
-            except ClientError:
-                log.error(os.environ)
-                log.error(properties)
-                return 'UPLOAD KEY FAILED'
+            except ClientError as e:
+                return f'Failed to acquire upload credentials for {self.uuid} with error {e}'
         return external['key']
 
     @calculated_property(condition=show_upload_credentials, schema={
@@ -836,7 +836,7 @@ class File(Item):
         return location
 
     def get_open_data_url_or_presigned_url_location(self, external, request, filename, datastore_is_database) -> str:
-        """  Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
+        """ Returns the Open Data S3 url for the file if present (as a calculated property), and otherwise returns
             a presigned S3 URL to a 4DN bucket. """
         open_data_url = None
         if datastore_is_database:  # view model came from DB - must compute calc prop
@@ -866,25 +866,28 @@ class File(Item):
             return None
         if status in ['released', 'archived']:
             open_data_bucket = '4dn-open-data-public'
-            if 'wfoutput' in self.get_bucket(self.registry):
-                bucket_type = 'wfoutput'
-            else:
-                bucket_type = 'files'
+            bucket_type = 'wfoutput'  # almost always going to be wfoutput
             open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
                 bucket_type=bucket_type, uuid=self.uuid, filename=filename,
             )
-            # Check if the file exists in the Open Data S3 bucket
+            extra_open_data_key = 'fourfront-webprod/{bucket_type}/{uuid}/{filename}'.format(
+                bucket_type='files', uuid=self.uuid, filename=filename,
+            )
+            # Check if the file exists in the Open Data S3 bucket under both wfoutput and files paths
             client = boto3.client('s3')
-            try:
+            for key in [open_data_key, extra_open_data_key]:
                 # If the file exists in the Open Data S3 bucket, client.head_object will succeed (not throw ClientError)
                 # Returning a valid S3 URL to the public url of the file
-                self._head_s3(client, open_data_bucket, open_data_key)
+                try:
+                    self._head_s3(client, open_data_bucket, key)
+                except ClientError:
+                    continue  # try the other key
                 location = 'https://{open_data_bucket}.s3.amazonaws.com/{open_data_key}'.format(
-                    open_data_bucket=open_data_bucket, open_data_key=open_data_key,
+                    open_data_bucket=open_data_bucket, open_data_key=key,
                 )
                 return location
-            except ClientError:
-                return None
+            else:
+                return None  # got client error for both possibilities
         else:
             return None
 
@@ -919,8 +922,32 @@ class File(Item):
 
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
-        bucket = cls.get_bucket(registry)
+        """ This function is very important in that it determines both the upload
+            and download location of files - so we have two distinct cases to handle.
+
+            It is sometimes the case that we build_external_creds for extra files that
+            may not be in the same bucket as the source file. So we first assume the
+            common (download) case and check for file presence in both buckets and use
+            the one where the file actually is (prioritizing the wfoutput bucket).
+
+            We could also be doing an upload, in which case we will do two head requests
+            that will give us nothing and we should fallback to the bucket associated
+            with the type.
+        """
+        conn = boto3.client('s3')
+        bucket = None
         key = cls.build_key(registry, uuid, properties)
+        # _head_s3 for both files and wfoutput buckets if we are doing a download
+        for b in [registry.settings['file_wfout_bucket'], registry.settings['file_upload_bucket']]:
+            try:
+                cls._head_s3(conn, b, key)
+                bucket = b
+            except ClientError:
+                continue  # try other key
+
+        # file doesn't exist, so we are doing an upload, use bucket consistent with type
+        if not bucket:
+            bucket = cls.get_bucket(registry)
 
         # remove the path from the file name and only take first 32 chars
         fname = properties.get('filename')

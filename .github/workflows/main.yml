@@ -17,17 +17,17 @@ on:
 jobs:
   # This workflow contains a single job called "build"
   build:
-    name: Test Suite for fourfront (Python 3.7, Node 16)
+    name: Test Suite for fourfront (Python 3.8, Node 16)
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     # Build matrix
     strategy:
       matrix:
         test_type: ['UNIT', 'NPM', 'Docker']
         # We are really not set up for these next two to be multiplicative, so be careful adding more.
-        python_version: ['3.7']
+        python_version: ['3.8']
         node_version: ['16']
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -51,9 +51,9 @@ jobs:
           curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           sudo apt-get update
-          sudo apt-get install postgresql-11 postgresql-client-11
-          echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
-          sudo ln -s /usr/lib/postgresql/11/bin/initdb /usr/local/bin/initdb
+          sudo apt-get install postgresql-14 postgresql-client-14
+          echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
+          sudo ln -s /usr/lib/postgresql/14/bin/initdb /usr/local/bin/initdb
       - name: Install Deps
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
@@ -77,6 +77,8 @@ jobs:
           TRAVIS_JOB_ID: ff-npm-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
+          # set global_env_bucket
+          GLOBAL_ENV_BUCKET: ${{ secrets.GLOBAL_ENV_BUCKET }}
         run: |
           make remote-test-npm
 
@@ -92,7 +94,7 @@ jobs:
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
         run: |
-          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: QA (UNIT)
         if: ${{ matrix.test_type == 'UNIT' }}
@@ -102,6 +104,8 @@ jobs:
           TRAVIS_JOB_ID: ff-unit-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
+          # set global_env_bucket
+          GLOBAL_ENV_BUCKET: ${{ secrets.GLOBAL_ENV_BUCKET }}
         run: |
           make remote-test-unit
 
@@ -114,11 +118,11 @@ jobs:
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
         run: |
-          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-6-8-kncqa2za2r43563rkcmsvgn2fq.us-east-1.es.amazonaws.com:443
+          poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
       - name: Docker Build
-        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '16' && matrix.python_version == '3.7' }}
+        if: ${{ matrix.test_type == 'Docker' && matrix.node_version == '16' && matrix.python_version == '3.8' }}
         run: |
-          # The docker_development.ini has node 16 and Python 3.7 wired into it.
+          # The docker_development.ini has node 16 and Python 3.8 wired into it.
           touch deploy/docker/local/docker_development.ini  # cheap substitute for prepare-docker to make ignored file
           docker build .

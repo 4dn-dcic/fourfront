@@ -1,13 +1,12 @@
 import pytest
 
 from dcicutils.deployment_utils import CreateMappingOnDeployManager
-from dcicutils.qa_utils import notice_pytest_fixtures
 from snovault import COLLECTIONS, TYPES
-from snovault.elasticsearch.create_mapping import type_mapping, run as run_create_mapping
+from snovault.elasticsearch.create_mapping import type_mapping
+from snovault.elasticsearch.create_mapping import run as run_create_mapping
 from snovault.util import add_default_embeds
 from unittest.mock import patch, MagicMock
 from .datafixtures import ORDER
-from .workbook_fixtures import workbook, app_settings, app
 from ..commands import create_mapping_on_deploy
 from ..commands.create_mapping_on_deploy import (
     ITEM_INDEX_ORDER,
@@ -18,10 +17,9 @@ from ..commands.create_mapping_on_deploy import (
 # from ..types.experiment import *
 
 
-pytestmark = [pytest.mark.setone, pytest.mark.working]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.workbook]
 
 # Using workbook inserts - required for test_run_create_mapping_with_upgrader
-notice_pytest_fixtures(app_settings, app, workbook)
 
 
 @pytest.mark.parametrize('item_type', ORDER)
@@ -88,12 +86,12 @@ class MockedLog:
 # These next are more extensively tested in dcicutils.
 # This is just plausibility checking that we've received things OK.
 
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-blue'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-production-blue'))
 def test_get_deployment_config_staging():
     """ Tests get_deployment_config in the new staging case """
     my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
-    assert my_env == 'fourfront-blue'
+    assert my_env == 'fourfront-production-blue'
     cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
     assert cfg['ENV_NAME'] == my_env  # sanity
     assert cfg['SKIP'] is False
@@ -101,14 +99,17 @@ def test_get_deployment_config_staging():
     assert cfg['STRICT'] is True
 
 
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
+@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-production-green'))
+@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-production-green'))
 def test_get_deployment_config_prod():
-    """ Tests get_deployment_config in the new production case """
+    """ Tests get_deployment_config in the new production case (should always proceed) """
     my_env = create_mapping_on_deploy.get_my_env('ignored-for-mock')
-    assert my_env == 'fourfront-green'
-    with pytest.raises(RuntimeError):
-        CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
+    assert my_env == 'fourfront-production-green'
+    cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
+    assert cfg['ENV_NAME'] == my_env  # sanity
+    assert cfg['SKIP'] is False
+    assert cfg['WIPE_ES'] is False
+    assert cfg['STRICT'] is False
 
 
 @patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
@@ -120,6 +121,7 @@ def test_get_deployment_config_hotseat():
     cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=MockedCommandArgs(), log=MockedLog())
     assert cfg['ENV_NAME'] == my_env  # sanity
     assert cfg['SKIP'] is True  # The other values (WIPE_ES and STRICT) don't matter if this is set.
+
 
 @patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
 @patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
@@ -167,138 +169,26 @@ class Simulation:
         assert strict is self.expect_strict, "strict is not False: %s" % strict
 
 
-@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
-def test_run_create_mapping_production(mock_run_create_mapping, app):
-
-    simulation = Simulation(mocked_app=app)  # Expectations don't matter because we're not expecting to get called.
-    mocked_log = create_mapping_on_deploy.log
-    try:
-        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
-        _run_create_mapping(app, MockedCommandArgs())
-    except SystemExit as e:
-        print(e)
-        assert e.code == 1
-    assert simulation.run_has_been_called is False
-    assert mocked_log.log == [
-        ('info', 'Environment fourfront-green is currently the production environment.'
-                 ' Something is definitely wrong. We never deploy there, we always CNAME swap.'
-                 ' This deploy cannot proceed. DeploymentFailure will be raised.'),
-        ('error', 'Exception encountered while gathering deployment information or running create_mapping'),
-        ('error', 'DeploymentFailure: Tried to run create_mapping_on_deploy on production.'),
-    ]
-
-
-@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-blue'))
-@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
-def test_run_create_mapping_staging(mock_run_create_mapping, app):
-
-    simulation = Simulation(mocked_app=app, expect_check_first=False, expect_purge_queue=False, expect_strict=True)
-    mocked_log = create_mapping_on_deploy.log
-    exit_condition = None
-    try:
-        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
-        _run_create_mapping(app, MockedCommandArgs())
-    except SystemExit as e:
-        exit_condition = e
-        print(exit_condition)
-    except Exception as e:
-        print("log =", mocked_log.log)
-        raise AssertionError("Unexpected error exit (%s): %s" % (e.__class__.__name__, e))
-    assert simulation.run_has_been_called is True
-    assert mocked_log.log == [
-        ('info', 'Environment fourfront-blue is currently the staging environment. Processing mode: STRICT,WIPE_ES'),
-        ('info', 'Calling run_create_mapping for env fourfront-blue.')
-    ]
-    assert exit_condition, "Unexpected non-error exit."
-    assert exit_condition.code == 0
-
-
-@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-hotseat'))
-@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
-def test_run_create_mapping_hotseat(mock_run_create_mapping, app):
-
-    simulation = Simulation(mocked_app=app)  # Expectations don't matter because we're not expecting to get called.
-    mocked_log = create_mapping_on_deploy.log
-    try:
-        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
-        _run_create_mapping(app, MockedCommandArgs())
-    except SystemExit as e:
-        print(e)
-        assert e.code == 0
-    assert simulation.run_has_been_called is False
-    assert mocked_log.log == [
-        ('info', 'Environment fourfront-hotseat is a hotseat test environment. Processing mode: SKIP'),
-        ('info', 'NOT calling run_create_mapping for env fourfront-hotseat.')
-    ]
-
-
-@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
-@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
-def test_run_create_mapping_mastertest(mock_run_create_mapping, app):
-
-    simulation = Simulation(mocked_app=app, expect_check_first=False, expect_purge_queue=False, expect_strict=False)
-    mocked_log = create_mapping_on_deploy.log
-    try:
-        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
-        _run_create_mapping(app, MockedCommandArgs())
-    except SystemExit as e:
-        print(e)
-        assert e.code == 0
-    assert simulation.run_has_been_called is True
-    assert mocked_log.log == [
-        ('info', 'Environment fourfront-mastertest is a non-hotseat test environment. Processing mode: WIPE_ES'),
-        ('info', 'Calling run_create_mapping for env fourfront-mastertest.')
-    ]
-
-
-@patch('encoded.commands.create_mapping_on_deploy.log', MockedLog())
-@patch('dcicutils.deployment_utils.compute_ff_prd_env', MagicMock(return_value='fourfront-green'))
-@patch('encoded.commands.create_mapping_on_deploy.get_my_env', MagicMock(return_value='fourfront-mastertest'))
-@patch('encoded.commands.create_mapping_on_deploy.run_create_mapping')
-def test_run_create_mapping_mastertest_with_clear_queue(mock_run_create_mapping, app):
-
-    simulation = Simulation(mocked_app=app, expect_check_first=False, expect_purge_queue=True, expect_strict=False)
-    mocked_log = create_mapping_on_deploy.log
-    try:
-        mock_run_create_mapping.side_effect = simulation.mocked_run_create_mapping
-        _run_create_mapping(app, MockedCommandArgs(clear_queue=True))
-    except SystemExit as e:
-        print(e)
-        assert e.code == 0
-    assert simulation.run_has_been_called is True
-    assert mocked_log.log == [
-        ('info', 'Environment fourfront-mastertest is a non-hotseat test environment. Processing mode: WIPE_ES'),
-        ('info', 'Calling run_create_mapping for env fourfront-mastertest.')
-    ]
-
-
 @patch("snovault.elasticsearch.indexer_queue.QueueManager.add_uuids")
-def test_run_create_mapping_with_upgrader(mock_add_uuids, testapp, workbook):
+def test_run_create_mapping_with_upgrader(mock_add_uuids, es_testapp, workbook):
     """
     Test for catching items in need of upgrading when running
     create_mapping.
 
     Indexer queue method mocked to check correct calls, so no items
     actually indexed/upgraded.
+
+    Moved to this file so fixtures interact cleanly - Will Sept 28 2022
     """
-    app = testapp.app
+    app = es_testapp.app
     type_to_upgrade = "Biosample"
 
     search_query = "/search/?type=" + type_to_upgrade + "&frame=object"
-    search = testapp.get(search_query, status=200).json["@graph"]
+    search = es_testapp.get(search_query, status=200).json["@graph"]
     item_type_uuids = sorted([x["uuid"] for x in search])
 
     # No schema version change, so nothing needs indexing
-    run_create_mapping(app, check_first=True)
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True, purge_queue=True, strict=True)
     (_, uuids_to_index), _ = mock_add_uuids.call_args
     assert not uuids_to_index
 
@@ -309,9 +199,11 @@ def test_run_create_mapping_with_upgrader(mock_add_uuids, testapp, workbook):
     updated_schema_version = str(int(schema_version_default) + 1)
     registry_schema["properties"]["schema_version"]["default"] = updated_schema_version
 
-    run_create_mapping(app, check_first=True)
+    run_create_mapping(app, item_order=[type_to_upgrade], check_first=True)
     (_, uuids_to_index), _ = mock_add_uuids.call_args
     assert sorted(uuids_to_index) == item_type_uuids
 
     # Revert item type schema version
     registry_schema["properties"]["schema_version"]["default"] = schema_version_default
+
+

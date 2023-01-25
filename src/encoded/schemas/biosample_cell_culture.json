@@ -83,6 +83,17 @@
             "type": "string",
             "lookup": 90
         },
+        "fbs_vendor_lot": {
+            "title": "FBS Vendor and Lot",
+            "description": "Indicates the FBS vendor, catalog number and lot used for the data production culture - NOTE must be from provided selections for Gold status",
+            "type": "string",
+            "suggested_enum": [
+                "VWR 97068-091 Lot 035B15 (phase 1)",
+                "Peak Serum PS-FBS2 Lot 21E1202 (phase 2)",
+                "VWR 89510-184 lot 310B19 (phase 2)"
+            ],
+            "lookup": 92
+        },
         "protocols_additional": {
             "title": "Additional Protocols used in Cell Culture",
             "description": "Protocols including additional culture manipulations such as stem cell differentiation or cell cycle synchronization.",
@@ -123,11 +134,17 @@
                 "cardiac muscle myoblast",
                 "cardiac muscle cell",
                 "cardiogenic mesoderm",
+                "cranial neural crest",
                 "definitive endoderm",
                 "embryoid body",
                 "endoderm of foregut",
+                "endothelial cell",
+                "endothelial progenitor cell",
                 "epiblast cell",
+                "hepatoblast",
+                "hepatocyte",
                 "mesoderm",
+                "neural progenitor cell",
                 "neuronal stem cell",
                 "pancreatic endoderm",
                 "primitive cardiac myocyte",
@@ -158,7 +175,6 @@
             "type": "string",
             "lookup": 120,
             "suggested_enum": [
-                "non synchronized",
                 "G1",
                 "early G1",
                 "mid G1",
@@ -176,6 +192,7 @@
                 "1h after mitotic shakeoff"
             ],
             "ignored_enum": [
+                "non synchronized",
                 "3h after mitotic shakeoff",
                 "6h after mitotic shakeoff",
                 "10h after mitotic shakeoff",

@@ -95,6 +95,7 @@ class ExperimentSet(Item):
         "experiments_in_set.status",
         "experiments_in_set.dbxrefs",
         "experiments_in_set.external_references.*",
+        "experiments_in_set.crosslinking_method",
 
         # ExperimentType linkTo
         "experiments_in_set.experiment_type.title",
@@ -143,14 +144,14 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.biosource.cell_line.term_id",
         "experiments_in_set.biosample.biosource.cell_line.term_name",
         "experiments_in_set.biosample.biosource.cell_line.preferred_name",
-        "experiments_in_set.biosample.biosource.cell_line.slim_terms",
+        "experiments_in_set.biosample.biosource.cell_line.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.biosource.cell_line.synonyms",
 
         # OntologyTerm linkTo
         "experiments_in_set.biosample.biosource.tissue.term_id",
         "experiments_in_set.biosample.biosource.tissue.term_name",
         "experiments_in_set.biosample.biosource.tissue.preferred_name",
-        "experiments_in_set.biosample.biosource.tissue.slim_terms",
+        "experiments_in_set.biosample.biosource.tissue.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.biosource.tissue.synonyms",
 
         # Organism linkTo
@@ -161,7 +162,7 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.cell_culture_details.tissue.preferred_name",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_id",
         "experiments_in_set.biosample.cell_culture_details.tissue.term_name",
-        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms",
+        "experiments_in_set.biosample.cell_culture_details.tissue.slim_terms.uuid",  # nested linkTo
         "experiments_in_set.biosample.cell_culture_details.tissue.synonyms",
 
         # Modification linkTo
@@ -171,13 +172,13 @@ class ExperimentSet(Item):
         "experiments_in_set.biosample.modifications.override_modification_name",
 
         # BioFeature linkTo
-        "experiments_in_set.biosample.modifications.target_of_mod.feature_type",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_type.uuid",
         "experiments_in_set.biosample.modifications.target_of_mod.preferred_label",
         "experiments_in_set.biosample.modifications.target_of_mod.cellular_structure",
         "experiments_in_set.biosample.modifications.target_of_mod.organism_name",
-        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes",
-        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods",
-        "experiments_in_set.biosample.modifications.target_of_mod.genome_location",
+        "experiments_in_set.biosample.modifications.target_of_mod.relevant_genes.uuid",
+        "experiments_in_set.biosample.modifications.target_of_mod.feature_mods.*",
+        "experiments_in_set.biosample.modifications.target_of_mod.genome_location.uuid",
 
         # Treatment linkTo
         "experiments_in_set.biosample.treatments.treatment_type",
@@ -282,6 +283,8 @@ class ExperimentSet(Item):
         "experiments_in_set.files.related_files.file.accession",
         "experiments_in_set.files.related_files.file.paired_end",
         "experiments_in_set.files.related_files.file.file_type",
+        "experiments_in_set.files.related_files.file.file_type_detailed",
+        "experiments_in_set.files.related_files.file.file_format.file_format",
 
         # ProcessedFile linkTo
         "processed_files.href",
@@ -308,7 +311,6 @@ class ExperimentSet(Item):
 
         # FileFormat linkTo
         "processed_files.extra_files.file_format.file_format",
-
         "processed_files.last_modified.date_modified",
 
         # StaticSection linkTo
@@ -368,6 +370,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.related_files.relationship_type",
         "experiments_in_set.processed_files.related_files.file.accession",
         "experiments_in_set.processed_files.related_files.file.file_type",
+        "experiments_in_set.processed_files.related_files.file.file_type_detailed",
 
         # StaticSection linkTo
         "experiments_in_set.processed_files.static_content.location",
@@ -384,6 +387,7 @@ class ExperimentSet(Item):
         "experiments_in_set.processed_files.track_and_facet_info.*",
 
         "other_processed_files.files.accession",
+        "other_processed_files.files.file_type",
         "other_processed_files.files.file_type_detailed",
         "other_processed_files.files.file_format",
         "other_processed_files.files.file_size",
@@ -420,6 +424,7 @@ class ExperimentSet(Item):
         "experiments_in_set.other_processed_files.description",
         "experiments_in_set.other_processed_files.type",
         "experiments_in_set.other_processed_files.files.accession",
+        "experiments_in_set.other_processed_files.files.file_type",
         "experiments_in_set.other_processed_files.files.file_type_detailed",
         "experiments_in_set.other_processed_files.files.file_size",
         "experiments_in_set.other_processed_files.files.higlass_uid",
@@ -449,14 +454,15 @@ class ExperimentSet(Item):
         # File linkTo
         "experiments_in_set.reference_files.accession",
         "experiments_in_set.reference_files.file_classification",
-        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_type",
+        "experiments_in_set.reference_files.file_type_detailed",
         "experiments_in_set.reference_files.file_size",
         "experiments_in_set.reference_files.href",
         "experiments_in_set.reference_files.status",
         "experiments_in_set.reference_files.md5sum",
         "experiments_in_set.reference_files.lab.name",
         "experiments_in_set.reference_files.contributing_labs.name",
+        "experiments_in_set.reference_files.notes_to_tsv",
 
         # Static Section linkTo
         "experiments_in_set.reference_files.static_content.location",

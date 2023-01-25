@@ -1240,3 +1240,23 @@ def test_permissions_validate_false(award, lab, file_formats, submitter_testapp,
                                   file_item_body, status=200)
     except TypeError:  # thrown from open_data_url, but should make it there
         pass  # we are ok, any other exception should be thrown
+
+
+def test_permissions_database_applies_permissions(award, lab, file_formats, wrangler_testapp, anontestapp):
+    """ Tests that anon_testapp gets view denied when using datastore=database
+        moved from test_indexing as this test has no bearing on ES """
+    file_item_body = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': file_formats.get('fastq').get('uuid'),
+        'paired_end': '1',
+        'status': 'released',
+        'uuid': 'f40ecbb0-294f-4a51-9b1b-effaddb14b1d',
+        'accession': '4DNFIFGXXBKV'
+    }
+    res = wrangler_testapp.post_json('/file_fastq', file_item_body, status=201).json
+    item_id = res['@graph'][0]['@id']
+    res = anontestapp.get('/' + item_id).json
+    assert res['file_format'] == {'error': 'no view permissions'}
+    res = anontestapp.get('/' + item_id + '?datastore=database').json
+    assert res['file_format'] == {'error': 'no view permissions'}

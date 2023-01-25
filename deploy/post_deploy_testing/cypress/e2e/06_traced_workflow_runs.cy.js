@@ -7,7 +7,7 @@
  * - SelectedNode -> graph visually adjusts correctly (edge classes/colors, node classes/colors) & shows appropriate detailPane.
  */
 
-import { testGraphTabClick, testNodesTextGlobalInputs } from './../support/macros';
+import { testGraphTabClick, testNodesTextGlobalInputs } from '../support/macros';
 
 function getRowIndexFromNode(node){
     return (parseInt(node.style.top) - 60) / 75;
@@ -26,6 +26,21 @@ describe("WorkflowRun traced graphs for selected ExperimentSets", function(){
         testGraphTabClick();
 
         testNodesTextGlobalInputs(global_input_file_accessions);
+
+        it('Check node is clickable and details are visible', function () {
+            cy.get('.graph-wrapper .nodes-layer .node[data-node-type="input"]').first().then(function ($inputNode) {
+                Cypress._.forEach($inputNode, function (inputNode) {
+                    const selectedNodeText = Cypress.$(inputNode).find('.node-name').text();
+                    cy.get('.graph-wrapper .nodes-layer .node[data-node-type="input"] .innermost').first().click({ force: true }).end();
+
+                    //Node detail pane
+                    cy.get('.detail-pane-body .information .node-file-title').then(function ($nodeDetail) {
+                        const nodeDetailText = $nodeDetail.text().trim().split('.');
+                        cy.expect(selectedNodeText).equal(nodeDetailText[0]);
+                    });
+                });
+            });
+        });
 
         it.skip('1st column of steps is aligned to input nodes', function(){
             // Wait for node.nodeData.node to exist on each DOM node before proceeding w/ further tests.

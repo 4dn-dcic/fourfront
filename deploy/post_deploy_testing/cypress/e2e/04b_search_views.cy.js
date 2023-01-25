@@ -17,17 +17,33 @@ describe('Post-Deployment Search View Tests', function () {
 
             cy.location('search').should('include', 'type=Item');
 
-            cy.searchPageTotalResultCount().then((totalCountExpected)=>{
+            cy.searchPageTotalResultCount().then((totalCountExpected) => {
                 const intervalCount = Math.min(20, parseInt(totalCountExpected / 25));
 
-                for (let interval = 0; interval < intervalCount; interval++){
-                    cy.scrollToBottom().then(()=>{
+                for (let interval = 0; interval < intervalCount; interval++) {
+                    cy.scrollToBottom().then(() => {
                         cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
                     });
                 }
 
             });
 
+        });
+
+        it('Filter by "Type" filter icon within search results', function () {
+            cy.visit('/search/').wait(1000);
+            let typeTitle;
+            cy.searchPageTotalResultCount().then((totalCountExpected) => {
+                const intervalCount = Math.min(5, parseInt(totalCountExpected / 25));
+                cy.get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .item-type-title').then(function ($typeTitle) {
+                    typeTitle = $typeTitle.text().trim();
+                })
+                    .get('.search-result-row.detail-closed[data-row-number="' + intervalCount + '"] .search-result-column-block[data-field="@type"] .icon-container .icon').click({ force: true }).end()
+                    .get('.facets-body .facet.open[data-field="type"] .term[data-selected=true] .facet-item').then(function ($selectedTypeTitle) {
+                        const selectedTypeTitle = $selectedTypeTitle.text().trim();
+                        cy.expect(typeTitle).equal(selectedTypeTitle);
+                    });
+            });
         });
 
     });
@@ -62,9 +78,8 @@ describe('Post-Deployment Search View Tests', function () {
                 const intervalCount = parseInt(resultCount / 25) - ( resultCount % 25 > 0 ? 0 : 1); // Skip last interval if no more to load.
 
                 for (let interval = 0; interval < intervalCount; interval++){
-                    cy.scrollToBottom().then(()=>{
-                        cy.get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
-                    });}
+                    cy.scrollToBottom().end().get('.search-results-container .search-result-row[data-row-number="' + (25 * (interval + 1)) + '"]').should('have.length', 1);
+                }
             });
 
         });

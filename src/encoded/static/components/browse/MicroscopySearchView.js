@@ -95,7 +95,7 @@ export default class MicroscopySearchView extends React.PureComponent {
                     const tempMicroMetaDependencies = loadedDeps;
                     window
                         .fetch(
-                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/fullSchema.json"
                         )
                         .then(function (resp) {
                             return resp.text();
@@ -315,7 +315,7 @@ export default class MicroscopySearchView extends React.PureComponent {
         const { isFullscreen, toggleFullScreen, href, context, currentAction, session, schemas } = this.props;
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+        const facetColumnClassName = "facet-result-table-fix col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         const aboveTableComponent = (
             <AboveSearchViewTableControls {...{ isFullscreen, toggleFullScreen }}
                 topLeftChildren={this.createNewMicroscopeConfiguration()} />
@@ -325,7 +325,8 @@ export default class MicroscopySearchView extends React.PureComponent {
             // TODO (low-ish priority): Pass in props.aboveTableComponent =  instead of props.topLeftChildren
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ tableColumnClassName, facetColumnClassName, facets, aboveTableComponent }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets columnExtensionMap={microscopyColExtensionMap} />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets keepSelectionInStorage
+                    columnExtensionMap={microscopyColExtensionMap} />
             </div>
         );
     }
@@ -337,7 +338,7 @@ const CreateNewConfigurationDropDownButton = React.memo(function (props) {
     const tierOptions = _.range(startTier, endTier + 1);
     return (
         <DropdownButton id="tier-selector" onSelect={handleChangeMicroscopeTier}
-            title="Create New Configuration" size="xs" disabled={disabled}>
+            title="Create New" size="xs" disabled={disabled}>
             {tierOptions.map((opt, i) => (
                 <DropdownItem key={opt} eventKey={opt} data-key={opt}>
                     {'Tier ' + opt}

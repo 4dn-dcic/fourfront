@@ -50,6 +50,10 @@ services:
       # Default to caller's environment
       AWS_ACCESS_KEY_ID:
       AWS_SECRET_ACCESS_KEY:
+      # Needed to resolve env info
+      GLOBAL_ENV_BUCKET:
+      Auth0Client:
+      Auth0Secret:
       # If RUN_TESTS is the empty string (false), tests will not be run. Otherwise, they will.
       # Set RUN_TESTS=true to run tests in the container.
       # (There will be no TEST: line here in the output if that is not set.)

@@ -37,11 +37,18 @@ def _run_create_mapping(app, args):
 
     try:
         my_env = get_my_env(app)
-        deploy_cfg = {'SKIP': True}  # default
+        deploy_cfg = {'SKIP': True, 'ENV_NAME': my_env}  # default
         if is_beanstalk_env(my_env):
             deploy_cfg = CreateMappingOnDeployManager.get_deploy_config(env=my_env, args=args, log=log,
                                                                         client='create_mapping_on_deploy')
         elif is_stg_or_prd_env(my_env):
+            deploy_cfg['SKIP'] = False
+            deploy_cfg['WIPE_ES'] = True
+            deploy_cfg['STRICT'] = True
+            deploy_cfg['ENV_NAME'] = my_env
+
+        # TODO: handle these better
+        elif my_env in ['fourfront-hotseat', 'fourfront-webdev', 'fourfront-mastertest']:
             deploy_cfg['SKIP'] = False
             deploy_cfg['WIPE_ES'] = True
             deploy_cfg['STRICT'] = True

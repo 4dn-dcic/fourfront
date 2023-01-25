@@ -17,7 +17,7 @@ import { Schemas, fileUtil, typedefs } from './../util';
 import { Wrapper as ItemHeaderWrapper, TopRow, MiddleRow, BottomRow } from './components/ItemHeader';
 import { TabbedView } from './components/TabbedView';
 import { Publications } from './components/Publications';
-import { AttributionTabView } from './components/AttributionTabView';
+import { AttributionTabView, ContactPersonListItem } from './components/AttributionTabView';
 import { BadgesTabView } from './components/BadgesTabView';
 import { standardizeUserIconString } from '@hms-dbmi-bgm/shared-portal-components/es/components/static-pages/standardizeUserIconString';
 
@@ -592,22 +592,53 @@ export class OverViewBodyItem extends React.PureComponent {
         },
         'imaging_paths_from_exp': function(field, value, allowJSX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'div', fullObject = null){
             if (!value || typeof value !== 'object') return null;
-            var { channel, path } = value;
+            const { channel, path } = value;
+            const { imaging_rounds = '' } = path || {};
 
-            var matchingFile = _.find(fullObject.files || [], fileUtil.getLightSourceCenterMicroscopeSettingFromFile.bind(this, channel));
-
+            const matchingFile = _.find(fullObject.files || [], fileUtil.getLightSourceCenterMicroscopeSettingFromFile.bind(this, channel));
+            const hasImagingRounds = imaging_rounds.length > 0 || _.any(fullObject.imaging_paths || [], function (imgPath) { const { path: { imaging_rounds = '' } = {} } = imgPath; return typeof imaging_rounds === 'string' && imaging_rounds.length > 0; });
             return (
                 <div className="imaging-path-item-wrapper row">
-                    <div className="index-num col-2 text-monospace text-500"><small>{ channel }</small></div>
-                    <div className={"imaging-path col-" + (matchingFile ? '7' : '10')}>{ object.itemUtil.generateLink(path, true) }</div>
-                    { matchingFile ? <div className="microscope-setting col-3 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                    <div className="index-num col-1 text-monospace text-500"><small>{ channel }</small></div>
+                    { hasImagingRounds ? <div className="index-num col-2 text-monospace text-500"><small>{ imaging_rounds || '-' }</small></div> : null }
+                    <div className={"imaging-path col-" + (matchingFile ? '8' : '9')}>{ object.itemUtil.generateLink(path, true) }</div>
+                    { matchingFile ? <div className="microscope-setting col-1 text-right" data-tip="Light Source Center Wavelength">{ fileUtil.getLightSourceCenterMicroscopeSettingFromFile(channel, matchingFile) }nm</div> : null }
+                </div>
+            );
+        },
+        'imaging_paths_header_from_exp': function(fullObject = null){
+            const hasImagingRounds = fullObject && _.any(fullObject.imaging_paths || [], function (imgPath) { const { path: { imaging_rounds = '' } = {} } = imgPath; return typeof imaging_rounds === 'string' && imaging_rounds.length > 0; });
+            return (
+                <div className="imaging-path-item-wrapper row">
+                    <div className={"imaging-path col-1"}>{ 'Channel' }</div>
+                    { hasImagingRounds ? <div className={"imaging-path col-2"}>{ 'Imaging Rounds' }</div> : null }
+                    <div className={"imaging-path col-9"}>{ 'Path' }</div>
                 </div>
             );
         },
         'biosource_summary': function(field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null){
             return <SampleBiosourceItem {...{ item, index, fullObject }} />;
+        },
+        'contact_person': function (field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+            if (!item || typeof item !== 'object') return null;
+            const { '@id': cpID, contact_email, display_title } = item;
+            if (cpID && contact_email && display_title) {
+                return <ContactPersonListItem contactPerson={item} key={cpID} wrapInListItem={false} />;
+            } else {
+                return display_title || 'N/A';
+            }
+        },
+        'pi_name': function (field, item, allowJX = true, includeDescriptionTips = true, index = null, wrapperElementType = 'li', fullObject = null) {
+            if (!item || typeof item !== 'object') return null;
+            const { '@id': cpID, contact_email, display_title } = item;
+            const { pi_name } = fullObject || {};
+            if (cpID && contact_email && display_title) {
+                return <ContactPersonListItem contactPerson={item} key={cpID} wrapInListItem={false} />;
+            } else {
+                return display_title || pi_name || 'N/A';
+            }
         }
-    }
+    };
 
     /** If we have a list, wrap each in a <li> and calculate value, else return items param as it was passed in. */
     static createList(items, property, titleRenderFxn = OverViewBodyItem.titleRenderPresets.default, addDescriptionTipForLinkTos = true, listItemElement = 'li', listItemElementProps = null, origResult = null){
@@ -685,7 +716,7 @@ export class OverViewBodyItem extends React.PureComponent {
     render(){
         const {
             result, property, fallbackValue, titleRenderFxn, addDescriptionTipForLinkTos, wrapInColumn,
-            singleItemClassName, overrideTitle, hideIfNoValue, collapseLimit, collapseShow
+            singleItemClassName, overrideTitle: propOverrideTitle, hideIfNoValue, collapseLimit, collapseShow
         } = this.props;
         const { collapsed } = this.state;
         let { propertyForLabel, listItemElement, listWrapperElement, listItemElementProps, listWrapperElementProps } = this.props;
@@ -704,6 +735,8 @@ export class OverViewBodyItem extends React.PureComponent {
             listItemElement = 'div';
             listWrapperElement = 'div';
         }
+
+        const overrideTitle = typeof propOverrideTitle === 'function' ? propOverrideTitle(result) : propOverrideTitle;
         let resultPropertyValue = property && this.createList(
             object.getNestedProperty(result, property),
             property,
@@ -751,7 +784,7 @@ export class OverViewBodyItem extends React.PureComponent {
         } else {
             innerBlockReturned = (
                 <div className="inner" key="inner" data-field={property}>
-                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} title={this.props.overrideTitle} />
+                    <object.TooltipInfoIconContainerAuto {..._.pick(this.props, 'result', 'tips', 'fallbackTitle', 'schemas')} elementType="h5" property={propertyForLabel} title={overrideTitle} />
                     <div key="single-value" className={"overview-single-element" + (singleItemClassName ? ' ' + singleItemClassName : '') + ((!resultPropertyValue && property) ? ' no-value' : '')}>
                         { fallbackify(resultPropertyValue) }
                     </div>

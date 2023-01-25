@@ -58,7 +58,7 @@
                     "description": "What type of file or content is contained. If not set, HTML or format of file (if any) is used.",
                     "type" : "string",
                     "lookup" : 1,
-                    "enum" : [ "md", "html", "txt", "csv", "jsx" ]
+                    "enum" : [ "md", "html", "txt", "csv", "jsx" , "rst"]
                 },
                 "collapsible" : {
                     "title" : "Is Collapsible",
@@ -155,6 +155,9 @@
     "facets" : {
         "section_type" : {
             "title" : "Type"
+        },
+        "filetype" : {
+            "title" : "File Type"
         }
     },
     "columns" : {
@@ -163,6 +166,10 @@
         },
         "section_type" : {
             "title" : "Type"
+        },
+        "filetype" : {
+            "title" : "File Type",
+            "width" : 100
         }
     },
     "excludedColumns" : ["lab.display_title"]

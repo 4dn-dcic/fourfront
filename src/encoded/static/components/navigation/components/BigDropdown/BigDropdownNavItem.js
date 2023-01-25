@@ -32,7 +32,7 @@ export class BigDropdownNavItem extends React.PureComponent {
     /** Number comparisons are slightly faster than reference comparisons in JS so no point in memoizing. */
     static isDesktopView = function(windowWidth = 0){
         return windowWidth > 768;
-    }
+    };
 
     constructor(props){
         super(props);

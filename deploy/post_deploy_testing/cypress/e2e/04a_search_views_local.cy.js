@@ -11,13 +11,15 @@ describe('Deployment/CI Search View Tests', function () {
             const contextData = JSON.parse(context);
             const atId = contextData['@id'];
             console.log('DELETING atId', atId);
-            testItemsToDelete.push(atId);
+            if (atId !== '/search/?type=MicroscopeConfiguration') {
+                testItemsToDelete.push(atId);
+            }
         });
     }
 
     function editMicroscopeConfiguration() {
         it('Edit microscope configuration - add deleted_by_cypress_test tag', function () {
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Edit click
             cy.get(".action-button[data-action='edit'] a").click({ force: true }).end();
@@ -124,12 +126,12 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Can add new tier-1 microscope configuration', function(){
 
-            cy.login4DN({ 'email' : '4dndcic@gmail.com', 'useEnvToken' : false }).end()
+            cy.login4DN({ 'email' : 'ud4dntest@gmail.com', 'useEnvToken' : false }).end()
                 .visit('/search/?type=MicroscopeConfiguration').end()
                 .get('.search-results-container .search-result-row').then(($searchResultElems)=>{
                     expect($searchResultElems.length).to.be.greaterThan(0);
                 }).end()
-                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New Configuration").click().end().wait(1000)
+                .get('.above-results-table-row .results-count.box button.btn-xs').contains("Create New").click().end().wait(1000)
                 .get('a.dropdown-item').contains('Tier 1').click().end();
 
             // set microscope conf. name
@@ -169,7 +171,7 @@ describe('Deployment/CI Search View Tests', function () {
         editMicroscopeConfiguration();
 
         it('Can save as microscope configuration', function () {
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             //Clone microscope data
             cy.get("div.dropup button#dropdown-basic-button.dropdown-toggle.btn.btn-dark.btn-lg div").contains('Save').click().wait(1000).end()
@@ -181,13 +183,43 @@ describe('Deployment/CI Search View Tests', function () {
             addAtIdToDeletedItems();
         });
 
+        it('Contains App and Model version in "About" popup ', function(){
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
+
+            //Click info buttton
+            cy.get('div.micro-meta-app-container #microscopy-app-container button.btn.btn-primary.btn-lg img[alt*="about-solid.svg"]').first().click().end().wait(1000);
+
+            const appModelRegEx = /App version: (?<app>\S*)Model version: (?<model>\S*)\(c\)/;
+            //Verify app version
+            cy.get('div#microscopy-app-overlays-container p')
+                .invoke('text')
+                .should('match', appModelRegEx)
+                // extract the app and model version
+                .invoke('match', appModelRegEx)
+                // grab the named group - app
+                .its('groups.app')
+                // and confirm its value
+                .should('have.length.least', 3);
+
+            //verify model version
+            cy.get('div#microscopy-app-overlays-container p')
+                .invoke('text')
+                .should('match', appModelRegEx)
+                // extract the app and model version
+                .invoke('match', appModelRegEx)
+                // grab the named group - model
+                .its('groups.model')
+                // and confirm its value
+                .should('have.length.least', 3);
+        });
+
         //Edit clonned microscope configuration
         editMicroscopeConfiguration();
-        
+
         it('Delete microscope configuration', function () {
 
             // Log in _as admin_.
-            cy.login4DN({ 'email': '4dndcic@gmail.com', 'useEnvToken': true }).wait(1000);
+            cy.login4DN({ 'email': 'ud4dntest@gmail.com', 'useEnvToken': true }).wait(1000);
 
             // Delete microscope configuration
             cy.wrap(testItemsToDelete).each(function (testItemURL) { // Synchronously process async stuff.
@@ -195,15 +227,16 @@ describe('Deployment/CI Search View Tests', function () {
                 cy.getCookie('jwtToken')
                     .then((cookie) => {
                         const token = cookie.value;
+                        // cy.request({
+                        //     method: "DELETE",
+                        //     url: testItemURL,
+                        //     headers: {
+                        //         'Authorization': 'Bearer ' + token,
+                        //         "Content-Type": "application/json",
+                        //         "Accept": "application/json"
+                        //     }
+                        // }).end().request({
                         cy.request({
-                            method: "DELETE",
-                            url: testItemURL,
-                            headers: {
-                                'Authorization': 'Bearer ' + token,
-                                "Content-Type": "application/json",
-                                "Accept": "application/json"
-                            }
-                        }).end().request({
                             method: "PATCH",
                             url: testItemURL,
                             headers: {
@@ -249,21 +282,21 @@ describe('Deployment/CI Search View Tests', function () {
                     cy.get('h1.page-title').should('not.be.empty').end().get('.rc-tabs-nav-scroll .rc-tabs-nav.rc-tabs-nav-animated .rc-tabs-tab-active.rc-tabs-tab').each(function ($tab) {
                         const tabKey = $tab.children('span.tab').attr('data-tab-key');
                         let termCount = null;
-                        let termName= null;
-                        let facetTotalCount= null;
-                        const nextButtonItems=[];
-                        const backButtonItems=[];
+                        let termName = null;
+                        let facetTotalCount = null;
+                        const nextButtonItems = [];
+                        const backButtonItems = [];
                         if (tabKey === 'hardware-summary') {
                             cy.wrap($tab).click({ 'force': true }).end()
                                 .wait(2000);
-                            let facetItemIndex=1;
+                            let facetItemIndex = 1;
                             cy.get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
                                 facetTotalCount = $facetTotalCount.length;
                                 facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
                             });
-                            cy.get(".facets-body div.facet:not([data-field='']):nth-child("+facetItemIndex+") > h5").scrollToCenterElement().click({ force: true }).end()
+                            cy.get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
                                 .get(".facet.open .facet-list-element a.term .facet-count").first().then(function ($facetCountFile) {
-                                    termCount =parseInt($facetCountFile.text());
+                                    termCount = parseInt($facetCountFile.text());
                                 })
                                 .get(".facet.open .facet-list-element a.term .facet-item").first().then(function ($facetTextFile) {
                                     termName = $facetTextFile.text();
@@ -357,8 +390,6 @@ describe('Deployment/CI Search View Tests', function () {
         });
 
         it('SearchBox input works, goes to /browse/ on submit', function(){
-            //cy.get('input[name="q"]').focus().type('mouse').wait(10).end()
-            //.get('form.navbar-search-form-container').submit().end()
             cy.get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="ExperimentSetReplicate"]').click().end()
@@ -371,7 +402,7 @@ describe('Deployment/CI Search View Tests', function () {
                 .should('include', 'q=mouse');
         });
 
-        it('"All Items" option works, takes us to search page', function(){
+        it('"General (All Item Types)" option works, takes us to search page', function(){
             cy.get("a#search-menu-item").click().end()
                 .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
                 .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
@@ -393,11 +424,6 @@ describe('Deployment/CI Search View Tests', function () {
 
         it('Wildcard query string returns all results.', function(){
             cy.window().screenshot('Before text search "*"').end().searchPageTotalResultCount().then((origTotalResults)=>{
-                //cy.get('#top-nav input[name="q"]').focus().clear().type('*').wait(10).end()
-                //.get('form.navbar-search-form-container').submit().end()
-                //.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
-                //.get('form.navbar-search-form-container div.dropdown-menu a[data-key="all"]').click().end()
-                //.get('form.navbar-search-form-container').submit().end()
                 cy.get("a#search-menu-item").click().end()
                     .get('.big-dropdown-menu-background .form-control').focus().clear().type('*').wait(10).end()
                     .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
@@ -408,8 +434,7 @@ describe('Deployment/CI Search View Tests', function () {
             });
         });
 
-
-        it('SearchBox placeholder control', function () {
+        it('Change search type, and check SearchBox placeholder', function () {
             cy.visit('/').get("a#search-menu-item").click().end();
             for (let interval = 1; interval < 7; interval++) {
                 cy.get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end();
@@ -440,8 +465,8 @@ describe('Deployment/CI Search View Tests', function () {
             }
         });
 
-        it('SearchBox accesion id control', function () {
-            cy.visit('/search/?type=ExperimentSet')
+        it('"By Accession" option works, takes us the item page', function () {
+            cy.visit('/browse')
                 .get(".title-block.text-truncate.text-monospace.text-small").first().then(($accesion) => {
                     const accesion = $accesion.text();
                     cy.get("a#search-menu-item").click().end()
@@ -451,6 +476,72 @@ describe('Deployment/CI Search View Tests', function () {
                         .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
                         .get('.clickable.copy-wrapper.accession.inline-block').should('contain', accesion).end();
                 });
+        });
+
+        it('"Within Results" option works for Search view', function () {
+            let facetItemIndex = 1;
+            let facetTotalCount = null;
+            cy.visit('/search')
+                .get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
+                    facetTotalCount = $facetTotalCount.length;
+                    facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
+                })
+                .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
+                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end()
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
+                .get('input[name="q"]').focus().type('gene').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Search').end()
+                .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
+                    expect($selectedFacet.length).to.be.greaterThan(0);
+                });
+        });
+
+        it('"Within Results" option works for Browse view', function () {
+            let facetItemIndex = 1;
+            let facetTotalCount = null;
+            cy.visit('/browse')
+                .get(".facets-body .facet.closed").first().click({ force: true }).end()
+                .get(".facets-body div.facet:not([data-field=''])").then(function ($facetTotalCount) {
+                    facetTotalCount = $facetTotalCount.length;
+                    facetItemIndex = Math.min(1, parseInt(facetTotalCount / 3));
+                })
+                .get(".facets-body div.facet:not([data-field='']):nth-child(" + facetItemIndex + ") > h5").scrollToCenterElement().click({ force: true }).end()
+                .get(".facet.open .facet-list-element a.term .facet-item").first().click({ force: true }).end().wait(300)
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Within"]').click().end()
+                .get('input[name="q"]').focus().type('human').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get(".facet-list-element.selected .facet-item").then(function ($selectedFacet) {
+                    expect($selectedFacet.length).to.be.greaterThan(0);
+                });
+        });
+
+        it('"Biosource" option works, takes us to biosource search results', function () {
+            cy.visit('/')
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Item"]').click().end()
+                .get('input[name="q"]').focus().type('hamster').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Search').end();
+        });
+
+        it('"Publication" option works, takes us to publication search results', function () {
+            cy.visit('/')
+                .get("a#search-menu-item").click().end()
+                .get('form.navbar-search-form-container button#search-item-type-selector').click().wait(100).end()
+                .get('form.navbar-search-form-container div.dropdown-menu a[data-key="Publication"]').click().end()
+                .get('input[name="q"]').focus().type('nature').wait(10).end()
+                .get(".btn.btn-outline-light.w-100[data-id='global-search-button']").click().end()
+                .wait(300).get('#slow-load-container').should('not.have.class', 'visible').end()
+                .get('#page-title-container .page-title').should('contain', 'Publications').end();
         });
 
         it('SearchBox input works, goes to /search', function () {

@@ -14,6 +14,7 @@ import ErrorPage from './static-pages/ErrorPage';
 import { NavigationBar } from './navigation/NavigationBar';
 import { Footer } from './Footer';
 import { store } from './../store';
+// import { NotLoggedInAlert } from './navigation/components/LoginNavItem';
 
 import { Alerts } from '@hms-dbmi-bgm/shared-portal-components/es/components/ui/Alerts';
 import { ajax, JWT, console, isServerSide, object, layout, analytics, isSelectAction, memoizedUrlParse, WindowEventDelegator, logger } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
@@ -23,6 +24,7 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import { PageTitleSection } from './PageTitle';
+import { BackNavigationStickyFooter } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SelectedItemsController';
 
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
@@ -200,6 +202,8 @@ export default class App extends React.PureComponent {
      */
     componentDidMount() {
         const { href, context } = this.props;
+        // const { session } = this.state;
+
         ajax.AJAXSettings.addSessionExpiredCallback(this.updateAppSessionState);
         // The href prop we have was from serverside. It would not have a hash in it, and might be shortened.
         // Here we grab full-length href from window and then update props.href (via Redux), if it is different.
@@ -226,7 +230,7 @@ export default class App extends React.PureComponent {
         //Load up sentry io
         const dsn = sentryDsn(href);
         if (dsn) {
-            logger.initializeLogger(dsn);
+            logger.initializeLogger(dsn, 0.1);
         }
 
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
@@ -240,11 +244,12 @@ export default class App extends React.PureComponent {
                 window.history.replaceState(null, '', window.location.href);
             }
             // Avoid popState on load, see: http://stackoverflow.com/q/6421769/199100
-            var register = window.addEventListener.bind(window, 'popstate', this.handlePopState, true);
+            // We don't use WindowEventDelegator here since we intend to `useCapture` to prevent default browser handling from being triggered for this.
+            const registerWindowOnPopState = () => { window.addEventListener("popstate", this.handlePopState, true); };
             if (window._onload_event_fired) {
-                register();
+                registerWindowOnPopState();
             } else {
-                window.addEventListener('load', setTimeout.bind(window, register));
+                window.addEventListener("load", function () { setTimeout(registerWindowOnPopState, 10); });
             }
         } else {
             window.onhashchange = this.onHashChange;
@@ -272,7 +277,7 @@ export default class App extends React.PureComponent {
                 'message' : (
                     <div>
                         <p className="mb-0">
-                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank" className="text-500">Google Chrome</a>
+                            <a href="https://www.google.com/chrome/" rel="noopener noreferrer" target="_blank" className="text-500">Google Chrome</a>&nbsp;
                             or <a href="https://www.mozilla.org/en-US/firefox/" rel="noopener noreferrer" target="_blank" className="text-500">Mozilla Firefox</a> are
                             the recommended browser(s) for using the 4DN Data Portal.
                         </p>
@@ -292,12 +297,13 @@ export default class App extends React.PureComponent {
             // DEPRECATED:
             // Emit event from our window object to notify that fourfront JS has initialized.
             // This is to be used by, e.g. submissions view which might control a child window.
-            window.dispatchEvent(new Event('fourfrontinitialized'));
+            //window.dispatchEvent(new Event('fourfrontinitialized'));
             // CURRENT: If we have parent window, post a message to it as well.
             if (window.opener) window.opener.postMessage({ 'eventType' : 'fourfrontinitialized' }, '*');
 
             // If we have UTM URL parameters in the URI, attempt to set history state (& browser) URL to exclude them after a few seconds
             // after Google Analytics may have stored proper 'source', 'medium', etc. (async)
+            // const { query = null, protocol, host, pathname } = url.parse(windowHref, true);
             const urlParts = url.parse(windowHref, true);
             const paramsToClear = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
 
@@ -320,6 +326,50 @@ export default class App extends React.PureComponent {
                     }
                 }, 3000);
             }
+
+            /* BEGIN - CURRENTLY NOT IN USE */
+
+            // // Set Alert if not on homepage and not logged in. This 'if' logic will likely change later
+            // // especially if have multiple 'for-public' pages like blog posts, news, documentation, etc.
+            // if (!session && pathname != "/") {
+            //     // MAYBE TODO next time are working on shared-portal-components (SPC) repository:
+            //     // Put this Alert into SPC as a predefined/constant export, then cancel/remove it (if active) in the callback function
+            //     // upon login success ( https://github.com/4dn-dcic/shared-portal-components/blob/master/src/components/navigation/components/LoginController.js#L111 )
+            //     Alerts.queue(NotLoggedInAlert);
+            // }
+
+            // // Set Alert if user initializes app between 330-830a ET (possibly temporary)
+            // // 12-4 am in ET is either 4am-8am or 5am-9am UTC, depending on daylight savings.
+            // const currTime = new Date();
+            // const currUTCHours = currTime.getUTCHours();
+            // const currUTCMinutes = currTime.getUTCMinutes();
+            // const showAlert = (
+            //     ((currUTCHours >= 4 || (currUTCHours === 3 && currUTCMinutes >= 30))
+            //     && currUTCHours <= 7 || (currUTCHours === 8 && currUTCMinutes <= 30))
+            // );
+            // if (showAlert) {
+            //     const startTime = new Date();
+            //     startTime.setUTCHours(3);
+            //     startTime.setUTCMinutes(30);
+            //     startTime.setUTCSeconds(0);
+            //     const endTime = new Date();
+            //     endTime.setUTCHours(8);
+            //     endTime.setUTCMinutes(30);
+            //     endTime.setUTCSeconds(0);
+            //     let timezoneOffset = endTime.getTimezoneOffset() / 60;
+            //     timezoneOffset = 0 - timezoneOffset;
+            //     if (timezoneOffset > 0) { timezoneOffset = "+" + timezoneOffset; }
+            //     Alerts.queue({
+            //         "title" : "Scheduled Daily Maintenance",
+            //         "style": "warning",
+            //         "message": `4DN is running its daily scheduled maintenance and data indexing. \
+            //                     Some data might not show up between ${startTime.toLocaleTimeString()} and ${endTime.toLocaleTimeString()} (UTC${timezoneOffset}).`
+            //     });
+            // }
+
+            /* END - CURRENTLY NOT IN USE */
+
+
         });
     }
 
@@ -639,7 +689,7 @@ export default class App extends React.PureComponent {
                 // Clear out remaining auth/JWT stuff from localStorage if any
                 JWT.remove();
             } else if (session === true && existingSession === false){
-                Alerts.deQueue(Alerts.LoggedOut);
+                Alerts.deQueue([ Alerts.LoggedOut/*, NotLoggedInAlert*/ ]);
             }
             return { session };
         }, () => {
@@ -1710,6 +1760,8 @@ class BodyElement extends React.PureComponent {
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
         const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
+        const isSelectPopupWindow = typeof window !== 'undefined' && window.opener && window.opener !== window && window.name === 'selection-search';
+        const { is_mobile_browser: isMobileBrowser = false } = context;
 
         if (hasError) return this.renderErrorState();
 
@@ -1718,6 +1770,13 @@ class BodyElement extends React.PureComponent {
             browseBaseState, updateAppSessionState, addToBodyClassList, removeFromBodyClassList,
             windowWidth, windowHeight, isFullscreen, overlaysContainer
         };
+
+        const initialFields = [
+            isMobileBrowser ? 'experiments_in_set.biosample.biosource.biosource_type' : 'experiments_in_set.experiment_type.display_title',
+            'experiments_in_set.biosample.biosource.organism.name'
+        ];
+
+        const tooltipGlobalEventOff = isMobileBrowser ? 'click' : undefined;
 
         return (
             <body data-current-action={currentAction} onClick={onBodyClick} onSubmit={onBodySubmit} data-path={hrefParts.path}
@@ -1754,7 +1813,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="facet-charts-container" className="container">
                                 <FacetCharts {..._.pick(this.props, 'context', 'href', 'session', 'schemas', 'browseBaseState')}
-                                    {...{ windowWidth, windowHeight, navigate, isFullscreen }} />
+                                    {...{ windowWidth, windowHeight, navigate, isFullscreen, initialFields }} />
                             </div>
 
                             <ContentErrorBoundary canonical={canonical} href={href}>
@@ -1765,13 +1824,13 @@ class BodyElement extends React.PureComponent {
 
                             <div id="layout-footer"/>
                         </div>
-                        {!isSelectPage ? <Footer version={context.app_version} /> : null}
+                        {!isSelectPage && !isSelectPopupWindow ? <Footer version={context.app_version} /> : (isSelectPopupWindow && !isSelectPage ? <BackNavigationStickyFooter /> : null)}
                     </div>
                 </div>
 
                 <div id="overlays-container" key="overlaysContainer" ref={this.overlaysContainerRef}/>
 
-                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff="click" key="tooltip" /> : null }
+                { mounted ? <ReactTooltip effect="solid" ref={this.tooltipRef} globalEventOff={tooltipGlobalEventOff} key="tooltip" /> : null }
 
             </body>
         );

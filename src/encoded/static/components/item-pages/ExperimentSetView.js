@@ -186,6 +186,7 @@ export default class ExperimentSetView extends WorkflowRunTracingView {
 const OverviewHeading = React.memo(function OverviewHeading(props){
     const { context, schemas } = props;
     const tips = object.tipsFromSchema(schemas, context);
+
     const commonProps = { 'result' : context, 'tips' : tips, 'wrapInColumn' : 'col-sm-6 col-md-3' };
     return (
         <OverviewHeadingContainer {...props}>
@@ -206,7 +207,7 @@ const OverviewHeading = React.memo(function OverviewHeading(props){
                 wrapInColumn="col-sm-6 col-md-3" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.embedded_item_with_image_attachment} hideIfNoValue />
 
-            <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths"
+            <OverViewBodyItem {...commonProps} property="imaging_paths" fallbackTitle="Imaging Paths" overrideTitle={OverViewBodyItem.titleRenderPresets.imaging_paths_header_from_exp}
                 wrapInColumn="col-sm-6 col-md-9" listItemElement="div" listWrapperElement="div" singleItemClassName="block"
                 titleRenderFxn={OverViewBodyItem.titleRenderPresets.imaging_paths_from_exp} collapseLimit={5} collapseShow={4} hideIfNoValue />
 
@@ -244,7 +245,7 @@ export class RawFilesStackedTableSection extends React.PureComponent {
             <h3 className="tab-section-title">
                 <span className="text-400">{ allFilesUniqueCount }</span>{ ' Raw File' + (allFilesUniqueCount !== 1 ? 's' : '')}
                 { selectedFiles ? // Make sure data structure is present (even if empty)
-                    <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                    <div className="download-button-container pull-right" style={{ marginTop : -5 }}>
                         <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                             id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
                             <i className="icon icon-download fas icon-fw mr-07 align-baseline"/>
@@ -376,7 +377,7 @@ const ProcessedFilesTableSectionHeader = React.memo(function ProcessedFilesTable
                 <span className="text-400">{ allFilesUniqueCount }</span> { 'Processed File' + (allFilesUniqueCount !== 1 ? 's' : '') }
             </span>
             { selectedFiles ? // Make sure data structure is present (even if empty)
-                <div className="download-button-container pull-right" style={{ marginTop : -10 }}>
+                <div className="download-button-container pull-right" style={{ marginTop : -5 }}>
                     <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                         id="expset-processed-files-download-files-btn" analyticsAddFilesToCart>
                         <i className="icon icon-download icon-fw fas mr-07 align-baseline"/>
@@ -737,9 +738,9 @@ class SupplementaryFilesTabView extends React.PureComponent {
             <div className="processed-files-table-section">
                 <h3 className="tab-section-title">
                     Supplementary Files
-                    { titleDetailString.length > 0 ? <span className="small">&nbsp;&nbsp; &bull; {titleDetailString}</span> : null }
+                    { titleDetailString.length > 0 ? <span className="small tab-section-subtitle">{titleDetailString}</span> : null }
                     {selectedFiles ? // Make sure data structure is present (even if empty)
-                        <div className="download-button-container pull-right" style={{ marginTop: -10 }}>
+                        <div className="download-button-container pull-right" style={{ marginTop: -5 }}>
                             <SelectedFilesDownloadButton {...{ selectedFiles, filenamePrefix, context, session }} disabled={selectedFilesUniqueCount === 0}
                                 id="expset-raw-files-download-files-btn" analyticsAddFilesToCart>
                                 <i className="icon icon-download fas icon-fw mr-07 align-baseline" />
