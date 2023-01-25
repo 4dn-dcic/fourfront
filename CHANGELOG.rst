@@ -6,12 +6,27 @@ fourfront
 Change Log
 ----------
 
+5.0.1
+=====
+
+* Updates sentry-sdk version
+
+
+5.0.0
+=====
+
+* Opensearch update
+* Integrates new SQLAlchemy version
+* Repairs broken test segmentation (should reduce test time)
+* Add ?skip_indexing parameter
+* Adds B-Tree index on max_sid to optimize indexing
+
 4.7.8
 ======
 
 `PR selection popup navigation updates <https://github.com/4dn-dcic/fourfront/pull/1766>`_
 
-* Show footer having "back to selection list" button, even if user navigates other pages in popup  
+* Show footer having "back to selection list" button, even if user navigates other pages in popup
 * Restore selections when returned to selection page in popup
 
 4.7.7
@@ -115,7 +130,7 @@ Change Log
 
 * Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
 * Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
-* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
+* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking
 
 4.5.21
 ======

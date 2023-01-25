@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "5.0.0"
+version = "5.0.1"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -86,7 +86,7 @@ rutter = ">=0.3,<1"
 semantic_version = ">=2.9.0"
 # We don't use this directly. It's part of boto3. It slows down solving to pin.
 # s3transfer = ">=0.3.7,<0.4.0"
-sentry-sdk = "^1.5.6"
+sentry-sdk = "^1.14.0"
 simplejson = "^3.17.0"
 SPARQLWrapper = "^1.8.5"
 SQLAlchemy = "1.4.41"  # latest stable version we can take - Will Jan 13 2023
