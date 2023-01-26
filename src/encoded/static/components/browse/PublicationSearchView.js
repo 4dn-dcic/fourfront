@@ -322,7 +322,8 @@ export default function PublicationSearchView(props){
     return (
         <div className="container" id="content">
             <CommonSearchView {...props} {...{ tableColumnClassName, facetColumnClassName, facets, detailPane }}
-                termTransformFxn={Schemas.Term.toName} separateSingleTermFacets rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
+                termTransformFxn={Schemas.Term.toName} separateSingleTermFacets keepSelectionInStorage
+                rowHeight={150} openRowHeight={150} columnExtensionMap={publicationColExtensionMap} />
         </div>
     );
 }
