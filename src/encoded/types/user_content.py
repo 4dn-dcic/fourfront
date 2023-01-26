@@ -9,6 +9,7 @@ from snovault import (
     load_schema
 )
 import docutils.core
+import markdown
 from snovault.interfaces import STORAGE
 from .base import (
     Item,
@@ -136,22 +137,29 @@ class StaticSection(UserContent):
 
     @calculated_property(schema={
         "title": "Content as HTML",
-        "description": "Converted content into HTML (Currently, only RST content is supported)",
+        "description": "Converted content into HTML (Currently, RST, HTML and MD content is supported)",
         "type": "string"
     })
     def content_as_html(self, request, body=None, file=None, options=None):
+        content = self.content(request, body, file)
         file_type = self.filetype(request, body, file, options)
-        link_conversion = True if options and options.get('ext_links_conversion') is not None and options.get('ext_links_conversion') == True else False
+        link_conversion = True if options and (options.get('ext_links_conversion') is None or options.get('ext_links_conversion') == True) else False
+
         if file_type == 'rst':
-            content = self.content(request, body, file)
             if content is not None:
                 output = docutils.core.publish_parts(content, writer_name='html')
                 if link_conversion:
                     return convert_links_in_html(request.domain, output["html_body"])
+                return output["html_body"]
         elif file_type == 'html':
-            content = self.content(request, body, file)
             if content and link_conversion:
                 return convert_links_in_html(request.domain, content)
+        elif file_type == 'md':
+            if content is not None:
+                output = markdown.markdown(content)
+                if output is not None and link_conversion:
+                    return convert_links_in_html(request.domain, output)
+                return output
         return None
 
     @calculated_property(schema={
