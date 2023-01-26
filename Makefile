@@ -145,10 +145,10 @@ test-any:
 
 
 test-npm:
-	bin/test -vv --timeout=300 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook"
+	bin/test -vv --timeout=300 --durations=50 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and workbook"
 
 test-unit:
-	bin/test -vv --timeout=200 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"
+	bin/test -vv --timeout=200 --durations=50 -m "working and not manual and not integratedx and not performance and not broken and not sloppy and not workbook"
 
 remote-test:  # Actually, we don't normally use this. Instead the GA workflow sets up two parallel tests.
 	make remote-test-npm

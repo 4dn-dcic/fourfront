@@ -1089,9 +1089,8 @@ def main():
             terms, v, deprecated = download_and_process_owl(ontology, terms, deprecated, simple=args.simple, owlfile=args.owlfile)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
-                    result = requests.get('http://svn.code.sf.net/p/obo/svn/uberon/releases/')
-                    release = result._content.decode('utf-8').split('</li>\n  <li>')[-1]
-                    v = release[release.index('>') + 1: release.index('</a>')].rstrip('/')
+                    result = requests.get('https://api.github.com/repos/obophenotype/uberon/git/refs/tags')
+                    v = result.json()[-1].get('ref').split('/v')[-1]
                 except Exception:
                     print('Unable to fetch Uberon version')
             if v and v != ontology.get('current_ontology_version', ''):
