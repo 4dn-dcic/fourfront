@@ -84,7 +84,7 @@ def test_experiment_update_experiment_relation(testapp, base_experiment, experim
     res = testapp.patch_json(base_experiment['@id'], {'experiment_relation': relation})
     assert res.json['@graph'][0]['experiment_relation'] == relation
 
-    # patching an experiement should also update the related experiement
+    # patching an experiment should also update the related experiement
     exp_res = testapp.get(experiment['@id'])
     exp_res_id = exp_res.json['experiment_relation'][0]['experiment']['@id']
     assert exp_res_id == base_experiment['@id']

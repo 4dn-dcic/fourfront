@@ -194,12 +194,12 @@ SUM_FILES_EXPS_AGGREGATION_DEFINITION = {
 
 RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION = {
     "all_labs" : {
-        "terms" : { 
+        "terms" : {
             "field": "embedded.lab.display_title.raw"
         }
     },
     "public_release" : {
-        "max": { 
+        "max": {
             "field": "embedded.public_release",
             "format": "yyyy-MM-dd"
         }
@@ -211,7 +211,7 @@ RECENTLY_RELEASED_EXPSETS_AGGREGATION_DEFINITION = {
 @debug_log
 def bar_plot_chart(context, request):
 
-    MAX_BUCKET_COUNT = 30 # Max amount of bars or bar sections to return, excluding 'other'.
+    MAX_BUCKET_COUNT = 30  # Max amount of bars or bar sections to return, excluding 'other'.
 
     try:
         json_body = request.json_body
@@ -226,61 +226,59 @@ def bar_plot_chart(context, request):
         raise HTTPBadRequest(detail="No fields supplied to aggregate for.")
 
     primary_agg = {
-        "field_0" : {
-            "terms" : {
-                "field" : "embedded." + fields_to_aggregate_for[0] + '.raw',
-                "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : MAX_BUCKET_COUNT
+        "field_0": {
+            "terms": {
+                "field": "embedded." + fields_to_aggregate_for[0] + '.raw',
+                "missing": TERM_NAME_FOR_NO_VALUE,
+                "size": MAX_BUCKET_COUNT
             },
-            "aggs" : deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
+            "aggs": deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
         }
     }
 
     primary_agg.update(deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION))
-    del primary_agg['total_files'] # "bucket_script" not supported on root-level aggs
+    del primary_agg['total_files']  # "bucket_script" not supported on root-level aggs
 
     # Nest in additional fields, if any
     curr_field_aggs = primary_agg['field_0']['aggs']
     for field_index, field in enumerate(fields_to_aggregate_for):
         if field_index == 0:
             continue
-        curr_field_aggs['field_' + str(field_index)] = {
-            'terms' : {
-                "field" : "embedded." + field + '.raw',
-                "missing" : TERM_NAME_FOR_NO_VALUE,
-                "size" : MAX_BUCKET_COUNT
+        curr_field_aggs["field_" + str(field_index)] = {
+            "terms": {
+                "field": "embedded." + field + '.raw',
+                "missing": TERM_NAME_FOR_NO_VALUE,
+                "size": MAX_BUCKET_COUNT
             },
-            "aggs" : deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
+            "aggs": deepcopy(SUM_FILES_EXPS_AGGREGATION_DEFINITION)
         }
         curr_field_aggs = curr_field_aggs['field_' + str(field_index)]['aggs']
 
 
     search_param_lists['limit'] = search_param_lists['from'] = [0]
-    subreq          = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
-    search_result   = perform_search_request(None, subreq, custom_aggregations=primary_agg)
+    subreq = make_search_subreq(request, '{}?{}'.format('/browse/', urlencode(search_param_lists, True)) )
+    search_result = perform_search_request(None, subreq, custom_aggregations=primary_agg)
 
     for field_to_delete in ['@context', '@id', '@type', '@graph', 'title', 'filters', 'facets', 'sort', 'clear_filters', 'actions', 'columns']:
         if search_result.get(field_to_delete) is None:
             continue
         del search_result[field_to_delete]
 
-
-    ret_result = { # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
-        "field" : fields_to_aggregate_for[0],
-        "terms" : {},
-        "total" : {
-            "experiment_sets" : search_result['total'],
-            "experiments" : search_result['aggregations']['total_experiments']['value'],
-            "files" : (
+    ret_result = {  # We will fill up the "terms" here from our search_result buckets and then return this dictionary.
+        "field": fields_to_aggregate_for[0],
+        "terms": {},
+        "total": {
+            "experiment_sets": search_result['total'],
+            "experiments": search_result['aggregations']['total_experiments']['value'],
+            "files": (
                 search_result['aggregations']['total_expset_processed_files']['value'] +
                 search_result['aggregations']['total_exp_raw_files']['value'] +
                 search_result['aggregations']['total_exp_processed_files']['value']
             )
         },
         "other_doc_count": search_result['aggregations']['field_0'].get('sum_other_doc_count', 0),
-        "time_generated" : str(datetime.utcnow())
+        "time_generated": str(datetime.utcnow())
     }
-
 
     def format_bucket_result(bucket_result, returned_buckets, curr_field_depth = 0):
 
@@ -307,7 +305,6 @@ def bar_plot_chart(context, request):
             # Terminal field aggregation -- return just totals, nothing else.
             returned_buckets[bucket_result['key']] = curr_bucket_totals
 
-
     for bucket in search_result['aggregations']['field_0']['buckets']:
         format_bucket_result(bucket, ret_result['terms'], 0)
 
@@ -317,9 +314,9 @@ def bar_plot_chart(context, request):
 @view_config(route_name='recently_released_datasets', request_method=['GET'])
 @debug_log
 def recently_released_datasets(context, request):
-    
+
     MAX_BUCKET_COUNT = 6 # default max rows
-    
+
     size = request.params.get("max_row_count", MAX_BUCKET_COUNT)
 
     # default parameters
@@ -373,7 +370,7 @@ def recently_released_datasets(context, request):
 
     def format_bucket_result(bucket_result, returned_buckets):
         curr_bucket_totals = {
-            'experiment_sets'   : int(bucket_result['doc_count']), 
+            'experiment_sets'   : int(bucket_result['doc_count']),
             'labs'              : [str(item['key']) for item in bucket_result['all_labs']['buckets']],
             'public_release'    : bucket_result['public_release']['value_as_string']
         }
@@ -533,9 +530,9 @@ def add_files_to_higlass_viewconf(context, request):
     """
 
     # Get the view config and its genome assembly. (Use a fall back if none was provided.)
-    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)    
+    higlass_viewconfig = request.json_body.get('higlass_viewconfig', None)
     if not higlass_viewconfig:
-        
+
         # @todo: this block will be removed when a workaround to run tests correctly.
         default_higlass_viewconf = get_item_or_none(request, "00000000-1111-0000-1111-000000000000")
         higlass_viewconfig = default_higlass_viewconf["viewconfig"]
@@ -550,7 +547,7 @@ def add_files_to_higlass_viewconf(context, request):
             "errors": "No view config found.",
             "new_viewconfig": None,
             "new_genome_assembly" : None
-        }    
+        }
 
     # Get the list of files.
     file_uuids = request.json_body.get('files')
@@ -1319,7 +1316,7 @@ def add_chromsizes_file(views, file, genome_assembly, viewconfig_info, maximum_h
     new_tracks_by_side["left"]["uid"] = uuid.uuid4()
 
     del new_tracks_by_side["center"]["options"]["name"]
-   
+
 
     # For each view:
     for view in views:
@@ -1528,7 +1525,7 @@ def copy_top_reference_tracks_into_left(target_view, views):
         elif temp_width:
             track["width"] = temp_width
             del track["height"]
-        
+
     # Add the copied tracks to the left side of this view if it doesn't have the track already.
     for track in reversed(new_tracks):
         if any([t for t in target_view["tracks"]["left"] if t["type"] == track["type"]] ) == False:

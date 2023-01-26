@@ -6,6 +6,34 @@ fourfront
 Change Log
 ----------
 
+5.0.1
+======
+
+`PR Cypress tests for Vitessce integration  <https://github.com/4dn-dcic/fourfront/pull/1640>`_
+
+* Adds new tests for FileMicroscopy items having vitessce-compatible file
+* Checks Vitessce tab is visible
+* Checks the Vitessce viewer is loaded correctly and it is able to display image and settings pane
+
+5.0.0
+======
+
+`PR ElasticSearch 7 support <https://github.com/4dn-dcic/fourfront/pull/1732>`_
+
+* Adds support for ES7
+* Integrates new SQLAlchemy version
+* Repairs broken test segmentation (should reduce test time)
+* Add ?skip_indexing parameter
+* Adds B-Tree index on max_sid to optimize indexing
+
+4.7.8
+======
+
+`PR selection popup navigation updates <https://github.com/4dn-dcic/fourfront/pull/1766>`_
+
+* Show footer having "back to selection list" button, even if user navigates other pages in popup  
+* Restore selections when returned to selection page in popup
+
 4.7.7
 ======
 

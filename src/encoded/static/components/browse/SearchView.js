@@ -110,7 +110,7 @@ export default class SearchView extends React.PureComponent {
         return (
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets, placeholderReplacementFxn }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets keepSelectionInStorage />
             </div>
         );
     }
@@ -142,7 +142,7 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
             <PageTitleContainer alerts={alerts}>
                 <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleUnder subtitle="Select an Item and click the Apply button." subTitleClassName="smaller">
-                    <span className="title">Selecting</span><span className="prominent subtitle">{thisTypeTitle}</span>
+                    <span className="title">Selecting</span> <span className="prominent subtitle">{thisTypeTitle}</span>
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
@@ -152,7 +152,7 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
             <PageTitleContainer alerts={alerts}>
                 <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleUnder subtitle="Select one or more Items and click the Apply button." subTitleClassName="smaller">
-                    <span className="title">Selecting</span><span className="prominent subtitle">{thisTypeTitle}</span>
+                    <span className="title">Selecting</span> <span className="prominent subtitle">{thisTypeTitle}</span>
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
