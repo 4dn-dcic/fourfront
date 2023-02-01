@@ -60,10 +60,10 @@
                     "lookup" : 1,
                     "enum" : [ "md", "html", "txt", "csv", "jsx" , "rst"]
                 },
-                "ext_links_conversion" : {
-                    "title": "External Links",
+                "convert_ext_links" : {
+                    "title": "Convert External Links",
                     "type": "boolean",
-                    "description": "If it's true, force external links to be opened in a new tab.",
+                    "description": "For true, force external links to be opened in a new tab. Otherwise, leave it as is.",
                     "default": true
                 },
                 "collapsible" : {

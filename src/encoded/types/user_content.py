@@ -137,29 +137,30 @@ class StaticSection(UserContent):
 
     @calculated_property(schema={
         "title": "Content as HTML",
-        "description": "Converted content into HTML (Currently, RST, HTML and MD content is supported)",
+        "description": "Convert RST, HTML and MD content into HTML",
         "type": "string"
     })
     def content_as_html(self, request, body=None, file=None, options=None):
         content = self.content(request, body, file)
+        if not content:
+            return None
+        
         file_type = self.filetype(request, body, file, options)
-        link_conversion = True if options and (options.get('ext_links_conversion') is None or options.get('ext_links_conversion') == True) else False
+        convert_ext_links = request and request.domain and options and options.get('convert_ext_links', True)
 
         if file_type == 'rst':
-            if content is not None:
-                output = docutils.core.publish_parts(content, writer_name='html')
-                if link_conversion:
-                    return convert_links_in_html(request.domain, output["html_body"])
-                return output["html_body"]
+            output = docutils.core.publish_parts(content, writer_name='html')
+            if convert_ext_links:
+                return convert_external_links(output["html_body"], request.domain)
+            return output["html_body"]
         elif file_type == 'html':
-            if content and link_conversion:
-                return convert_links_in_html(request.domain, content)
+            if convert_ext_links:
+                return convert_external_links(content, request.domain)
         elif file_type == 'md':
-            if content is not None:
-                output = markdown.markdown(content)
-                if output is not None and link_conversion:
-                    return convert_links_in_html(request.domain, output)
-                return output
+            output = markdown.markdown(content)
+            if output and convert_ext_links:
+                return convert_external_links(output, request.domain)
+            return output
         return None
 
     @calculated_property(schema={
@@ -345,14 +346,14 @@ def get_remote_file_contents(uri):
     return resp.text
 
 
-def convert_links_in_html(domain, content):
+def convert_external_links(content, reference_domain):
     """
     Seeks hyperlinks within string content and adds 'target="_blank"' and 'rel="noopener noreferrer"' attributes for external links.
     """
     matches = re.findall(r"(<a[^>]*href=[\"\']https?://(?P<domain>[\w\-\.]+)(?:\S*)[\"\'][^>]*>[^<]+</a>)", content, re.DOTALL)
     for match in matches:
         # compares the found links with domain
-        if domain not in match[1]:
+        if reference_domain not in match[1]:
             external_link = re.sub(r'<a(?P<in_a>[^>]+)>(?P<in_link>[^<]+)</a>',r'<a\g<in_a> target="_blank" rel="noopener noreferrer">\g<in_link></a>', match[0])
             content = content.replace(match[0], external_link)
     return content
