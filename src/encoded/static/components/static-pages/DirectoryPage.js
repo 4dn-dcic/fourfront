@@ -13,6 +13,7 @@ export default class DirectoryPage extends React.PureComponent {
 
     render(){
         const { context } = this.props;
+        const { content_location = 'bottom' } = context;
         const childrenHaveChildren = _.any(context.children || [], function(c){
             return c && c.children && c.children.length > 0;
         });
@@ -27,9 +28,20 @@ export default class DirectoryPage extends React.PureComponent {
         return (
             <div id="content" className="container">
                 <div className={"static-page static-directory-page" + (childrenHaveChildren ? " directory-page-of-directories" : " leaf-directory")} key="wrapper">
-                    <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
+                    {
+                        content_location === 'bottom' ? (
+                            <React.Fragment>
+                                <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
+                                {content}
+                            </React.Fragment>
+                        ) : (
+                            <React.Fragment>
+                                {content}
+                                <DirectoryBodyGrid {...this.props} childrenHaveChildren={childrenHaveChildren} />
+                            </React.Fragment>
+                        )
+                    }
                     { !childrenHaveChildren ? <NextPreviousPageSection context={context} nextTitle="Next Section" previousTitle="Previous Section" /> : null }
-                    { content }
                 </div>
             </div>
         );

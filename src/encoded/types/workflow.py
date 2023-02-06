@@ -20,6 +20,7 @@ from snovault.util import debug_log
 from time import sleep
 from .base import Item, lab_award_attribution_embed_list
 from .dependencies import DependencyEmbedder
+from encoded.root import SettingsKey
 
 TIBANNA_CODE_NAME = 'pony'
 TIBANNA_WORKFLOW_RUNNER_LAMBDA_FUNCTION = 'run_workflow_pony'
@@ -953,7 +954,7 @@ def pseudo_run(context, request):
     # for testing
     if not env:
         env = ENV_WEBDEV
-    input_json['output_bucket'] = _wfoutput_bucket_for_env(env)
+    input_json['output_bucket'] = request.registry.settings[SettingsKey.FILE_WFOUT_BUCKET]
     input_json['env_name'] = env
     if input_json.get('app_name', None) is None:
         input_json['app_name'] = 'pseudo-workflow-run'
@@ -994,8 +995,7 @@ def pseudo_run(context, request):
 
 
 def _wfoutput_bucket_for_env(env):
-    s3 = s3Utils(env=env)
-    return s3.outfile_bucket
+    raise NotImplementedError("_wfoutput_bucket_for_env is a beanstalk operation that shouldn't be used.")
 
 
 @view_config(name='run', context=WorkflowRun.Collection, request_method='POST',
@@ -1009,7 +1009,7 @@ def run_workflow(context, request):
     # for testing
     if not env:
         env = ENV_WEBDEV
-    input_json['output_bucket'] = _wfoutput_bucket_for_env(env)
+    input_json['output_bucket'] = request.registry.settings[SettingsKey.FILE_WFOUT_BUCKET]
     input_json['env_name'] = env
 
     # hand-off to tibanna for further processing

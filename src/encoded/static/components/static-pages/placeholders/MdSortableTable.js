@@ -619,7 +619,8 @@ function SortableTableSubTitle(props) {
                         </div>
                     </div>
                 </div>
-            </div>);
+            </div>
+        );
     } else {
         return null;
     }

@@ -753,7 +753,7 @@ export class MicroMetaSummaryTabView extends React.PureComponent {
                     const tempMicroMetaDependencies = loadedDeps;
                     window
                         .fetch(
-                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/v02-01/fullSchema.json"
+                            "https://raw.githubusercontent.com/WU-BIMAC/4DNMetadataSchemaXSD2JSONConverter/master/versions/2-01-1/fullSchema.json"
                         )
                         .then(function (resp) {
                             return resp.text();

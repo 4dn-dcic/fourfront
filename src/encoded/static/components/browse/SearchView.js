@@ -61,7 +61,7 @@ export function transformedFacets(href, context, currentAction, session, schemas
     const searchItemTypes = getAllSchemaTypesFromSearchContext(context); // "Item" is excluded
 
     if (searchItemTypes.length > 0) {
-        logger.info("A (non-'Item') type filter is present. Will skip filtering Item types in Facet.");
+        console.info("A (non-'Item') type filter is present. Will skip filtering Item types in Facet.");
         // Keep all terms/leaf-types - backend should already filter down to only valid sub-types through
         // nature of search itself.
 
@@ -106,11 +106,11 @@ export default class SearchView extends React.PureComponent {
         const { isFullscreen, href, context, currentAction, session, schemas } = this.props;
         const facets = this.memoized.transformedFacets(href, context, currentAction, session, schemas);
         const tableColumnClassName = "expset-result-table-fix col-12" + (facets.length > 0 ? " col-sm-7 col-lg-8 col-xl-" + (isFullscreen ? '10' : '9') : "");
-        const facetColumnClassName = "col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
+        const facetColumnClassName = "facet-result-table-fix col-12 col-sm-5 col-lg-4 col-xl-" + (isFullscreen ? '2' : '3');
         return (
             <div className="container" id="content">
                 <CommonSearchView {...this.props} {...{ columnExtensionMap, tableColumnClassName, facetColumnClassName, facets, placeholderReplacementFxn }}
-                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets />
+                    termTransformFxn={Schemas.Term.toName} separateSingleTermFacets keepSelectionInStorage />
             </div>
         );
     }
@@ -142,7 +142,7 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
             <PageTitleContainer alerts={alerts}>
                 <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleUnder subtitle="Select an Item and click the Apply button." subTitleClassName="smaller">
-                    <span className="title">Selecting</span><span className="prominent subtitle">{thisTypeTitle}</span>
+                    <span className="title">Selecting</span> <span className="prominent subtitle">{thisTypeTitle}</span>
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
@@ -152,7 +152,7 @@ const SearchViewPageTitle = React.memo(function SearchViewPageTitle(props) {
             <PageTitleContainer alerts={alerts}>
                 <StaticPageBreadcrumbs {...{ context, session, href }} key="breadcrumbs" />
                 <TitleAndSubtitleUnder subtitle="Select one or more Items and click the Apply button." subTitleClassName="smaller">
-                    <span className="title">Selecting</span><span className="prominent subtitle">{thisTypeTitle}</span>
+                    <span className="title">Selecting</span> <span className="prominent subtitle">{thisTypeTitle}</span>
                 </TitleAndSubtitleUnder>
             </PageTitleContainer>
         );
