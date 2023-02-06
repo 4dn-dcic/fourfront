@@ -6,6 +6,14 @@ fourfront
 Change Log
 ----------
 
+5.0.2
+======
+
+`PR Sentry upgrades  <https://github.com/4dn-dcic/fourfront/pull/1774>`_
+
+* Removes unnecessary log statements
+* Upgrades @sentry/react and @sentry/tracing npm packages to 7.35.0
+
 5.0.1
 ======
 
