@@ -179,7 +179,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     # After ES7 upgrade, 'total' does not return the exact count if it is >10000. This restriction
     # requires many UI components' and tests' update. So, we attempt to get a more precise result
-    # from facets. (It is interesting that type=Item's doc_count is calculated correctyl whereas the 'total'
+    # from facets. (It is interesting that type=Item's doc_count is calculated correctly whereas the 'total'
     # is not.)
     if total == ES_MAX_HIT_TOTAL:
         result['total'] = total = get_total_from_facets(result['facets'], total)
