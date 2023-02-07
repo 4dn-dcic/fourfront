@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+5.0.3
+======
+
+* Added install of wheel to Makefile.
+
 5.0.2
 ======
 
