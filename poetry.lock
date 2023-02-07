@@ -624,7 +624,7 @@ test = ["hypothesis (>=1.11.4,!=3.79.2)", "iso8601", "pretend", "pytest (>=6.2.0
 
 [[package]]
 name = "dcicsnovault"
-version = "7.1.2.1b0"
+version = "7.1.3"
 description = "Storage support for 4DN Data Portals."
 category = "main"
 optional = false
@@ -2192,7 +2192,7 @@ test = ["zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8.1,<3.9"
-content-hash = "6b9bb17d06cd2bb0ea3276f44a7207dfd093b41fdd24f4ccd57b3b291a8a4215"
+content-hash = "bfeba583531afb931867493975a48d4ab8ec4f7086ab02e0d363d2a602e339a1"
 
 [metadata.files]
 apipkg = [
@@ -2504,8 +2504,8 @@ cryptography = [
     {file = "cryptography-39.0.0.tar.gz", hash = "sha256:f964c7dcf7802d133e8dbd1565914fa0194f9d683d82411989889ecd701e8adf"},
 ]
 dcicsnovault = [
-    {file = "dcicsnovault-7.1.2.1b0-py3-none-any.whl", hash = "sha256:d553d5dca187d9c762500290f4cf825af52cd3fc6d8074576754f90e22a18df3"},
-    {file = "dcicsnovault-7.1.2.1b0.tar.gz", hash = "sha256:fc48a58998b5ccae65798ff73b78301ad2cce497b7c1331e16b963598e6ce267"},
+    {file = "dcicsnovault-7.1.3-py3-none-any.whl", hash = "sha256:e7723215338b9aee8093dbfed8464930e524ccec03ac2d71ddc7982ffa99b7b2"},
+    {file = "dcicsnovault-7.1.3.tar.gz", hash = "sha256:17570533244f644a4445a779a7a4b6602b82e96000faadaff811d74dab5a702a"},
 ]
 dcicutils = [
     {file = "dcicutils-6.8.0-py3-none-any.whl", hash = "sha256:adbeb2beb60840954a0531399822f4b06dd0fab8a7c7e6a9e258c649906338c0"},
