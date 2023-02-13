@@ -264,5 +264,56 @@
         "assay_subclassification": {
             "title": "Assay Subclassification"
         }
+    },
+    “cfde_term” : {
+        "2-stage Repli-seq": "DNA replication timing by sequencing assay", #OBI:0001920
+        "ATAC-seq": "bulk assay for transposase-accessible chromatin using sequencing", #OBI:0003089
+        "Bru-seq":  "RNA sequencing assay", #OBI:0001177
+        "Capture Hi-C": "capture Hi-C assay", #OBI:0002984"
+        "ChIA-Drop": "DNA sequencing assay",#OBI:0000626
+        "ChIA-PET":  "chromatin interaction analysis by paired-end tag sequencing assay" , #OBI:0001848
+        "ChIP-seq": "ChIP-seq assay" , #OBI:0000716
+        "CUT&RUN":  "cleavage under targets and release using nuclease assay, #OBI:0003033
+        "CUT&Tag": "cleavage under targets and tagmentation" , #OBI:0003034
+        "DamID-seq": "DamID-seq" , #OBI:0003299
+        "Dilution Hi-C": "bulk Hi-C assay" , #OBI:0003306
+        "DNA FISH": "fluorescence in-situ hybridization assay" , #OBI:0003094
+        "DNA SPRITE": "DNA split-pool recognition of interactions and tag extension assay", #OBI:0003311
+        "DNase Hi-C":  "DNase Hi-C assay" , #OBI:0003301"
+        "Electron Tomography":  "electron microscopy imaging assay", #OBI:0001631
+        "GAM":  "genome architecture mapping assay", #OBI:0003313
+        "HiChIP": "chromatin interaction analysis by paired-end tag sequencing assay", #OBI:0001848
+        "Immunofluorescence": "fluorescence microscopy assay", #CHMO:0000087
+        "in situ ChIA-PET":  chromatin interaction analysis by paired-end tag sequencing assay , #OBI:0001848
+        "in situ Hi-C": "bulk Hi-C assay", #OBI:0003306
+        "MARGI": "mapping RNA-genome interactions assay (provisional term)", #OBI:0003314"
+        "MC-3C": "multi-contact Hi-C assay", #OBI:0003307
+        "MC-Hi-C": "multi-contact Hi-C assay", #OBI:0003307
+        "Methyl Hi-C": "bulk Hi-C assay (provisional term)", #OBI:0003306
+        "Micro-C": "micro-C assay (provisional term)", #OBI:0003302
+        "Multi-stage Repli-seq": "DNA replication timing by sequencing assay", #OBI:0001920
+        "multiplexed FISH": "imaging assay", #OBI:0000185
+        "NAD-seq": "nucleolus-associated domain sequencing assay (provisional term)", #OBI:0003300
+        "OptoDroplet": "fluorescence microscopy assay", #CHMO:0000087
+        "pA-DamID": "DamID-seq (provisional term)", #OBI:0003299
+        "PLAC-seq": "chromatin interaction analysis by paired-end tag sequencing assay", #OBI:0001848
+        "RE-seq": "DNA sequencing assay", #OBI:0000626
+        "RNA FISH": "fluorescence in-situ hybridization assay", #OBI:0003094
+        "RNA-DNA SPRITE": "RNA-DNA split-pool recognition of interactions and tag extension assay (provisional term)", #OBI:0003312
+        "RNA-seq": "RNA-seq assay", #OBI:0001271
+        "sci-ATAC-seq": "single cell combinatorial indexing assay for transposase-accessessable chromatin using sequencing", #OBI:0003104
+        "sci-Hi-C": "single cell combinatorial indexing Hi-C assay (provisional term)", #OBI:0003303
+        "sci-RNA-seq": "single-cell combinatorial indexing RNA sequencing assay", #OBI:0003105
+        "single cell ATAC-seq": ""  # single-cell ATAC-seq ,
+        "single cell Hi-C": "single cell Hi-C assay (provisional term)" , #OBI:0003305
+        "single cell Methyl Hi-C":"single cell Hi-C assay (provisional term)" , #OBI:0003305
+        "single cell RNA-seq":"single-cell RNA sequencing assay" , #OBI:0002631
+        "sn-Hi-C": "single nucleus Hi-C assay (provisional term)", #OBI:0003304
+        "SPT": "imaging assay", #OBI:0000185
+        "TCC": "bulk Hi-C assay (provisional term)", #OBI:0003306
+        "TrAC-loop": "transposase-mediated analysis of chromatin looping assay", #OBI:0003309
+        "TRIP": "sequencing assay", #OBI:0600047
+        "TSA-seq": "tyramide signal amplification sequencing assay (provisional term)" #OBI:0003297
     }
+
 }
