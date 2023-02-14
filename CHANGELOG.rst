@@ -6,10 +6,15 @@ fourfront
 Change Log
 ----------
 
-5.0.3
+5.0.4
 ======
 
 * Added install of wheel to Makefile.
+
+5.0.3
+======
+
+* Updates to experiment_type.json file to include cfde term based on the experiment name to obi mapping.
 
 5.0.2
 ======
