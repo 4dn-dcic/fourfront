@@ -6,6 +6,13 @@ fourfront
 Change Log
 ----------
 
+5.0.4
+======
+
+`PR Cypress tests fail due to change in search result's total count  <https://github.com/4dn-dcic/fourfront/pull/1777>`_
+
+* Gets search results' exact count from facet terms where type=Item's doc_count is available
+
 5.0.3
 ======
 
