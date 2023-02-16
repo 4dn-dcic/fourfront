@@ -44,7 +44,7 @@ jobs:
           node-version: ${{ matrix.node_version }}
           check-latest: false
 
-      - name: Install/Link Postgres
+      - name: Install/Link Postgres and Redis
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |
           sudo apt-get install curl ca-certificates gnupg
@@ -54,6 +54,9 @@ jobs:
           sudo apt-get install postgresql-14 postgresql-client-14
           echo "/usr/lib/postgresql/14/bin" >> $GITHUB_PATH
           sudo ln -s /usr/lib/postgresql/14/bin/initdb /usr/local/bin/initdb
+          sudo apt install redis-server
+          sudo ln -s /usr/bin/redis-server /usr/local/bin/redis-server
+          sudo ln -s /usr/bin/redis-cli /usr/local/bin/redis-cli
       - name: Install Deps
         if: ${{ matrix.test_type == 'NPM' || matrix.test_type == 'UNIT' }}
         run: |

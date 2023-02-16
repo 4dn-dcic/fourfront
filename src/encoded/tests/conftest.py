@@ -13,12 +13,14 @@ from sqlalchemy import exc
 
 from dcicutils.ff_mocks import NO_SERVER_FIXTURES
 from dcicutils.qa_utils import notice_pytest_fixtures, MockFileSystem
+from dcicutils.redis_utils import create_redis_client
 from pyramid.request import apply_request_extensions
 from pyramid.testing import DummyRequest
 from pyramid.threadlocal import get_current_registry, manager as threadlocal_manager
 from snovault import DBSESSION, ROOT, UPGRADER
 from snovault.elasticsearch import ELASTIC_SEARCH, create_mapping
 from snovault.util import generate_indexer_namespace_for_testing
+from pytest_redis import factories
 from .conftest_settings import make_app_settings_dictionary
 from .. import main
 from ..loadxl import load_all
@@ -97,6 +99,24 @@ def es_app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_serv
     return settings
 
 
+# special redis fixture for the session
+redis_proc = factories.redis_proc(port=8888)
+
+
+@pytest.fixture(scope='session')
+def redis_app_settings(wsgi_server_host_port, postgresql_server, redis_proc):
+    settings = make_app_settings_dictionary()
+    settings['create_tables'] = True
+    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port  # 2-tuple such as: ('localhost', '5000')
+    settings['sqlalchemy.url'] = postgresql_server
+    settings['collection_datastore'] = 'elasticsearch'
+    settings['item_datastore'] = 'elasticsearch'
+    settings['indexer'] = True
+    settings['indexer.namespace'] = INDEXER_NAMESPACE_FOR_TESTING
+    settings['redis.server'] = f'redis://127.0.0.1:8888'
+    return settings
+
+
 def pytest_configure():
     logging.basicConfig(format='%(message)s')
     logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
@@ -167,6 +187,13 @@ def es_app(es_app_settings, **kwargs):
     app = main({}, **es_app_settings)
     create_mapping.run(app, **kwargs)
 
+    return app
+
+
+@pytest.fixture(scope='session')
+def redis_app(redis_app_settings, **kwargs):
+    """ App that uses Redis and Postgres for testing session tokens """
+    app = main({}, **redis_app_settings)
     return app
 
 
@@ -282,6 +309,16 @@ def es_testapp(es_app):
         'REMOTE_USER': 'TEST',
     }
     return webtest.TestApp(es_app, environ)
+
+
+@pytest.fixture(scope='session')
+def redis_testapp(redis_app):
+    """ Testapp with Postgres and Redis """
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    return webtest.TestApp(redis_app, environ)
 
 
 @pytest.fixture

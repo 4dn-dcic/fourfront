@@ -237,6 +237,9 @@ def main(global_config, **local_config):
         config.include('snovault.elasticsearch')
         config.include('.search')
 
+    if 'redis.server' in config.registry.settings:
+        config.include('snovault.redis')
+
     # this contains fall back url, so make sure it comes just before static_resoruces
     config.include('.types.page')
     config.include(static_resources)
