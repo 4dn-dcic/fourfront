@@ -15,7 +15,8 @@ from snovault import (
     calculated_property
 )
 from .base import (
-    Item
+    Item,
+    get_item_or_none,
 )
 
 
@@ -129,6 +130,16 @@ class Lab(Item):
         if contact_people is not None:
             contact_people_dicts = [ fetch_and_pick_embedded_properties(person) for person in contact_people ]
             return [ person for person in contact_people_dicts if person is not None ]
+
+    @calculated_property(schema={
+        "title": "P.I. Name",
+        "description": "Name of the lab principal investigator.",
+        "type": "string",
+    })
+    def pi_name(self, request, pi=None):
+        if pi:
+            return get_item_or_none(request, pi, 'users').get('display_title')
+        return None
 
     def __init__(self, registry, models):
         super().__init__(registry, models)

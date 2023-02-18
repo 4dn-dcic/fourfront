@@ -24,6 +24,7 @@ import { requestAnimationFrame as raf } from '@hms-dbmi-bgm/shared-portal-compon
 import { FacetCharts } from './browse/components/FacetCharts';
 import { ChartDataController } from './viz/chart-data-controller';
 import { PageTitleSection } from './PageTitle';
+import { BackNavigationStickyFooter } from '@hms-dbmi-bgm/shared-portal-components/es/components/browse/components/SelectedItemsController';
 
 // eslint-disable-next-line no-unused-vars
 const { NavigateOpts } = typedefs;
@@ -229,7 +230,7 @@ export default class App extends React.PureComponent {
         //Load up sentry io
         const dsn = sentryDsn(href);
         if (dsn) {
-            logger.initializeLogger(dsn);
+            logger.initializeLogger(dsn, 0.1);
         }
 
         // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
@@ -1759,6 +1760,7 @@ class BodyElement extends React.PureComponent {
         const appClass = slowLoad ? 'communicating' : 'done';
         const overlaysContainer = this.overlaysContainerRef.current;
         const isSelectPage = isSelectAction(currentAction) && this.memoized.isSearchPage(href);
+        const isSelectPopupWindow = typeof window !== 'undefined' && window.opener && window.opener !== window && window.name === 'selection-search';
         const { is_mobile_browser: isMobileBrowser = false } = context;
 
         if (hasError) return this.renderErrorState();
@@ -1822,7 +1824,7 @@ class BodyElement extends React.PureComponent {
 
                             <div id="layout-footer"/>
                         </div>
-                        {!isSelectPage ? <Footer version={context.app_version} /> : null}
+                        {!isSelectPage && !isSelectPopupWindow ? <Footer version={context.app_version} /> : (isSelectPopupWindow && !isSelectPage ? <BackNavigationStickyFooter /> : null)}
                     </div>
                 </div>
 

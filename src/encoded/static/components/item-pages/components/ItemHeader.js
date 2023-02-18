@@ -240,7 +240,8 @@ export class TopRow extends React.Component {
 export class MiddleRow extends React.Component {
 
     static defaultProps = {
-        'isInlineEditable': false
+        'isInlineEditable': false,
+        'descriptionExpanded': null,
     };
 
     shouldComponentUpdate(nextProps) {
@@ -253,6 +254,7 @@ export class MiddleRow extends React.Component {
     render() {
         const {
             isInlineEditable,
+            descriptionExpanded,
             children = null,
             text: propText = null, // if present, takes priority over context description.
             context = {},
@@ -278,6 +280,12 @@ export class MiddleRow extends React.Component {
             return <div className={baseClass + " no-description"} />;
         }
 
+        let expanded;
+        if (typeof descriptionExpanded === 'boolean') {
+            expanded = descriptionExpanded;
+        } else {
+            expanded = (textDescription || '').length < 600;
+        }
         return (
             <FlexibleDescriptionBox
                 context={context}
@@ -285,7 +293,7 @@ export class MiddleRow extends React.Component {
                 description={textDescription || <em>No description provided.</em>}
                 className={baseClass}
                 textClassName="text-medium"
-                defaultExpanded={(textDescription || '').length < 600}
+                defaultExpanded={expanded}
                 fitTo="self"
                 lineHeight={22}
                 isInlineEditable={isInlineEditable}
