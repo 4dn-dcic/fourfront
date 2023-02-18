@@ -2,11 +2,14 @@ import random
 import uuid
 
 from datetime import datetime
+from dcicutils.env_utils import EnvUtils
+from dcicutils.misc_utils import ignored
 from jsonschema_serialize_fork import NO_DEFAULT
 from pyramid.path import DottedNameResolver
 from pyramid.threadlocal import get_current_request
+from snovault import COLLECTIONS  # , ROOT
 from snovault.schema_utils import server_default
-from string import digits, ascii_uppercase
+from string import digits  # , ascii_uppercase
 
 
 ACCESSION_FACTORY = __name__ + ':accession_factory'
@@ -24,11 +27,12 @@ def includeme(config):
 
 
 # XXX: This stuff is all added based on the serverDefault identifier in the schemas
-# removing it altogether will totally break our code
+#      removing it altogether will totally break our code
 
 
 @server_default
 def userid(instance, subschema):  # args required by jsonschema-serialize-fork
+    ignored(instance, subschema)
     return _userid()
 
 
@@ -42,16 +46,18 @@ def _userid():
 
 @server_default
 def now(instance, subschema):  # args required by jsonschema-serialize-fork
+    ignored(instance, subschema)
     return utc_now_str()
 
 
-def utc_now_str():
+def utc_now_str():  # TODO: Move to dcicutils.misc_utils
     # from jsonschema_serialize_fork date-time format requires a timezone
     return datetime.utcnow().isoformat() + '+00:00'
 
 
 @server_default
 def uuid4(instance, subschema):
+    ignored(instance, subschema)
     return str(uuid.uuid4())
 
 
@@ -71,9 +77,38 @@ def accession(instance, subschema):
     raise AssertionError("Free accession not found in %d attempts" % ATTEMPTS)
 
 
+@server_default  # CGAP-only. Projects are not a Fourfront concept.
+def userproject(instance, subschema):
+    ignored(instance, subschema)
+    user = get_user_resource()
+    if user == NO_DEFAULT:
+        return NO_DEFAULT
+    project_roles = user.properties.get("project_roles", [])
+    if len(project_roles) > 0:
+        return project_roles[0]["project"]
+    return NO_DEFAULT
+
+
+@server_default  # CGAP-only. Projects are not a Fourfront concept.
+def userinstitution(instance, subschema):
+    ignored(instance, subschema)
+    user = get_user_resource()
+    if user == NO_DEFAULT:
+        return NO_DEFAULT
+    return user.properties.get("user_institution", NO_DEFAULT)
+
+
 def get_userid():
     """ Wrapper for the server_default 'userid' above so it is not called through SERVER_DEFAULTS in our code """
     return _userid()
+
+
+def get_user_resource():
+    request = get_current_request()
+    userid_found = _userid()
+    if userid_found == NO_DEFAULT:
+        return NO_DEFAULT
+    return request.registry[COLLECTIONS]['user'][userid_found]
 
 
 def get_now():
@@ -81,32 +116,43 @@ def get_now():
     return utc_now_str()
 
 
-def add_last_modified(properties, userid=None):
+def add_last_modified(properties, userid=None, field_name_portion=None, modified='modified'):
     """
         Uses the above two functions to add the last_modified information to the item
         May have no effect
         Allow someone to override the request userid (none in this case) by passing in a different uuid
+        CONSIDER: `last_modified` (and `last_text_edited`) are not really 'server defaults'
+                  but rather system-managed fields.
     """
+
+    # The field_name_portion= argument is deprecated, but for now OK to use. Please use modified=
+    field_name_portion = field_name_portion or modified
+
+    last_field_name = "last_" + field_name_portion  # => last_modified
+    by_field_name = field_name_portion + "_by"      # => modified_by
+    date_field_name = "date_" + field_name_portion  # => date_modified
+
     try:
         last_modified = {
-            'modified_by': get_userid(),
-            'date_modified': get_now(),
+            by_field_name: get_userid(),
+            date_field_name: get_now(),
         }
     except AttributeError:  # no request in scope ie: we are outside the core application.
         if userid:
             last_modified = {
-                'modified_by': userid,
-                'date_modified': get_now(),
+                by_field_name: userid,
+                date_field_name: get_now(),
             }
-            properties['last_modified'] = last_modified
+            properties[last_field_name] = last_modified
     else:
         # get_userid returns NO_DEFAULT if no userid
-        if last_modified['modified_by'] != NO_DEFAULT:
-            properties['last_modified'] = last_modified
+        if last_modified[by_field_name] != NO_DEFAULT:
+            properties[last_field_name] = last_modified
 
 
-#FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
-FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
+# FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
+FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789'] * 7
+
 
 def enc_accession(accession_type):
     random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
