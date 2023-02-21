@@ -6,192 +6,8 @@ fourfront
 Change Log
 ----------
 
-5.0.4
-======
 
-`PR Cypress tests fail due to change in search result's total count  <https://github.com/4dn-dcic/fourfront/pull/1777>`_
-
-* Gets search results' exact count from facet terms where type=Item's doc_count is available
-
-5.0.3
-======
-
-* Updates to experiment_type.json file to include cfde term based on the experiment name to obi mapping.
-
-5.0.2
-======
-
-`PR Sentry upgrades  <https://github.com/4dn-dcic/fourfront/pull/1774>`_
-
-* Removes unnecessary log statements
-* Upgrades @sentry/react and @sentry/tracing npm packages to 7.35.0
-
-5.0.1
-======
-
-`PR Cypress tests for Vitessce integration  <https://github.com/4dn-dcic/fourfront/pull/1640>`_
-
-* Adds new tests for FileMicroscopy items having vitessce-compatible file
-* Checks Vitessce tab is visible
-* Checks the Vitessce viewer is loaded correctly and it is able to display image and settings pane
-
-5.0.0
-======
-
-`PR ElasticSearch 7 support <https://github.com/4dn-dcic/fourfront/pull/1732>`_
-
-* Adds support for ES7
-* Integrates new SQLAlchemy version
-* Repairs broken test segmentation (should reduce test time)
-* Add ?skip_indexing parameter
-* Adds B-Tree index on max_sid to optimize indexing
-
-4.7.8
-======
-
-`PR selection popup navigation updates <https://github.com/4dn-dcic/fourfront/pull/1766>`_
-
-* Show footer having "back to selection list" button, even if user navigates other pages in popup  
-* Restore selections when returned to selection page in popup
-
-4.7.7
-======
-
-`PR home page updates - data use guidelines & 4DN help <https://github.com/4dn-dcic/fourfront/pull/1767>`_
-
-* Data Use Guidelines content updated.
-* 4DN Data Portal Paper link added under 4DN Help section.
-
-4.7.6
-======
-
-* Deleted 'DAPI' from suggested_enums list from imaging_path schema
-
-4.7.5
-======
-
-`PR jsonwebtoken npm package downgrade <https://github.com/4dn-dcic/fourfront/pull/1763>`_
-
-* jsonwebtoken 9.0.0 has breaking changes that prevents Cypress test's authentication. It is downgraded to a compatible version.
-
-4.7.4
-======
-
-`PR static content location in pages <https://github.com/4dn-dcic/fourfront/pull/1759>`_
-
-* new content_location property is added to the Page item to let customize static content location with respect to child pages
-
-4.7.3
-======
-
-`PR jwtToken cookie <https://github.com/4dn-dcic/fourfront/pull/1758>`_
-
-* jwtToken cookie's SameSite=Strict attribute changed as SameSite=Lax
-
-4.7.2
-======
-
-* Add ``aliases`` to MicroscopeConfiguration items.
-* Add neural progenitor cell as tissue enum in BiosampleCellCulture
-
-4.7.1
-======
-
-`PR new home page design <https://github.com/4dn-dcic/fourfront/pull/1733>`_
-
-* redesign of home page including content and look-and-feel
-* add /recently_released_datasets endpoint
-* add new lab view page
-* new unit test for /recently_released_datasets endpoint
-* new Cypress tests for home page and lab view
-
-4.7.0
-======
-
-`PR pi_name calc prop <https://github.com/4dn-dcic/fourfront/pull/1746>`_
-
-* add pi_name calculated property to lab and award items
-* remove Sarah from contact_persons field for 4DN-DCIC lab in master-inserts
-
-4.6.4
-======
-
-* Bug fix - cannot clear q= if top bar "Within Results" option is selected
-
-4.6.3
-======
-
-* Cypress test updates for the new MicroMeta App features
-
-4.6.1
-======
-
-`PR 1712: MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`_
-
-* New MicroMeta App release
-
-4.5.26
-======
-
-* Add suggested enums for BiosampleCellCulture.
-
-4.5.25
-======
-
-`PR 1472: imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`_
-
-* Imaging paths list is converted to table
-
-4.5.24
-======
-
-* SPC is upgraded to 0.1.57.
-* Until SPC 0.1.56, Sentry API log almost any incidents and obliterates the quota quickly. 0.1.57 allows tuning the sampling rate. (default is 0.1))
-
-4.5.22
-======
-
-`PR 1723: dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`_
-
-* Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
-* Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
-* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
-
-4.5.21
-======
-
-`PR 1734: add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`_
-
-* Added a new user insert for Gulsah (UI dev on Utku's team) in master_inserts/user.json
-
-4.5.20
-======
-
-* Add suggested enums for BiosampleCellCulture.
-
-
-4.5.19
-======
-
-* Miscellaneous cosmetics and refactoring to align better with CGAP
-  in how the file src/encoded/__init__.py is arranged.
-* Pick up ``ENCODED_SENTRY_DSN`` from the GAC (C4-913).
-* Adjust log level for ``boto``, ``urllib``, ``elasticsearch``, and ``dcicutils`` to ``WARNING``.
-
-
-4.5.18
-======
-
-* Added a new user insert for Rahi in master_inserts/user.json
-
-
-4.5.17
-======
-
-* Twitter Timeline Feeds updates based on new/breaking API build options
-
-
-4.6.0
+5.1.0
 =====
 
 `PR 1727: Manage development.ini and test.ini outside of source control <https://github.com/4dn-dcic/fourfront/pull/1727>`_
@@ -225,6 +41,207 @@ The primary change that this command does is to make a local environment of ``fo
 or ``fourfront-test-<yourusername>`` so that testing and debugging that you do locally will be in an environment
 that does not collide with other users. To use a different name, though, just edit the resulting file,
 which is no longer in source control.
+
+
+5.0.4
+=====
+
+`PR Cypress tests fail due to change in search result's total count  <https://github.com/4dn-dcic/fourfront/pull/1777>`_
+
+* Gets search results' exact count from facet terms where type=Item's doc_count is available
+
+
+5.0.3
+=====
+
+* Updates to experiment_type.json file to include cfde term based on the experiment name to obi mapping.
+
+
+5.0.2
+=====
+
+`PR Sentry upgrades  <https://github.com/4dn-dcic/fourfront/pull/1774>`_
+
+* Removes unnecessary log statements
+* Upgrades @sentry/react and @sentry/tracing npm packages to 7.35.0
+
+
+5.0.1
+=====
+
+`PR Cypress tests for Vitessce integration  <https://github.com/4dn-dcic/fourfront/pull/1640>`_
+
+* Adds new tests for FileMicroscopy items having vitessce-compatible file
+* Checks Vitessce tab is visible
+* Checks the Vitessce viewer is loaded correctly and it is able to display image and settings pane
+
+
+5.0.0
+=====
+
+`PR ElasticSearch 7 support <https://github.com/4dn-dcic/fourfront/pull/1732>`_
+
+* Adds support for ES7
+* Integrates new SQLAlchemy version
+* Repairs broken test segmentation (should reduce test time)
+* Add ?skip_indexing parameter
+* Adds B-Tree index on max_sid to optimize indexing
+
+
+4.7.8
+=====
+
+`PR selection popup navigation updates <https://github.com/4dn-dcic/fourfront/pull/1766>`_
+
+* Show footer having "back to selection list" button, even if user navigates other pages in popup  
+* Restore selections when returned to selection page in popup
+
+
+4.7.7
+=====
+
+`PR home page updates - data use guidelines & 4DN help <https://github.com/4dn-dcic/fourfront/pull/1767>`_
+
+* Data Use Guidelines content updated.
+* 4DN Data Portal Paper link added under 4DN Help section.
+
+
+4.7.6
+=====
+
+* Deleted 'DAPI' from suggested_enums list from imaging_path schema
+
+
+4.7.5
+=====
+
+`PR jsonwebtoken npm package downgrade <https://github.com/4dn-dcic/fourfront/pull/1763>`_
+
+* jsonwebtoken 9.0.0 has breaking changes that prevents Cypress test's authentication. It is downgraded to a compatible version.
+
+
+4.7.4
+=====
+
+`PR static content location in pages <https://github.com/4dn-dcic/fourfront/pull/1759>`_
+
+* new content_location property is added to the Page item to let customize static content location with respect to child pages
+
+
+4.7.3
+=====
+
+`PR jwtToken cookie <https://github.com/4dn-dcic/fourfront/pull/1758>`_
+
+* jwtToken cookie's SameSite=Strict attribute changed as SameSite=Lax
+
+
+4.7.2
+=====
+
+* Add ``aliases`` to MicroscopeConfiguration items.
+* Add neural progenitor cell as tissue enum in BiosampleCellCulture
+
+
+4.7.1
+=====
+
+`PR new home page design <https://github.com/4dn-dcic/fourfront/pull/1733>`_
+
+* redesign of home page including content and look-and-feel
+* add /recently_released_datasets endpoint
+* add new lab view page
+* new unit test for /recently_released_datasets endpoint
+* new Cypress tests for home page and lab view
+
+
+4.7.0
+=====
+
+`PR pi_name calc prop <https://github.com/4dn-dcic/fourfront/pull/1746>`_
+
+* add pi_name calculated property to lab and award items
+* remove Sarah from contact_persons field for 4DN-DCIC lab in master-inserts
+
+
+4.6.4
+=====
+
+* Bug fix - cannot clear q= if top bar "Within Results" option is selected
+
+
+4.6.3
+=====
+
+* Cypress test updates for the new MicroMeta App features
+
+
+4.6.1
+=====
+
+`PR 1712: MicroMeta app integration <https://github.com/4dn-dcic/fourfront/pull/1712>`_
+
+* New MicroMeta App release
+
+
+4.5.26
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+
+4.5.25
+======
+
+`PR 1472: imaging paths table edits <https://github.com/4dn-dcic/fourfront/pull/1472>`_
+
+* Imaging paths list is converted to table
+
+
+4.5.24
+======
+
+* SPC is upgraded to 0.1.57.
+* Until SPC 0.1.56, Sentry API log almost any incidents and obliterates the quota quickly. 0.1.57 allows tuning the sampling rate. (default is 0.1))
+
+
+4.5.22
+======
+
+`PR 1723: dependabot security updates <https://github.com/4dn-dcic/fourfront/pull/1723>`_
+
+* Miscellaneous vulnerable npm packages - reported by dependabot - are upgraded
+* Webpack is upgraded to 5.74 (has breaking changes that prevent building bundle.js, all fixed)
+* SPC is upgraded to 0.1.56 that has Sentry.js updates that support tree shaking 
+
+
+4.5.21
+======
+
+`PR 1734: add gulsah user insert <https://github.com/4dn-dcic/fourfront/pull/1734>`_
+
+* Added a new user insert for Gulsah (UI dev on Utku's team) in master_inserts/user.json
+
+
+4.5.20
+======
+
+* Add suggested enums for BiosampleCellCulture.
+
+
+4.5.19
+======
+
+* Miscellaneous cosmetics and refactoring to align better with CGAP
+  in how the file src/encoded/__init__.py is arranged.
+* Pick up ``ENCODED_SENTRY_DSN`` from the GAC (C4-913).
+* Adjust log level for ``boto``, ``urllib``, ``elasticsearch``, and ``dcicutils`` to ``WARNING``.
+
+
+4.5.18
+======
+
+* Added a new user insert for Rahi in master_inserts/user.json
 
 
 4.5.17
