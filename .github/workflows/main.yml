@@ -77,8 +77,8 @@ jobs:
           TRAVIS_JOB_ID: ff-npm-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
-          # set global_env_bucket
           GLOBAL_ENV_BUCKET: ${{ secrets.GLOBAL_ENV_BUCKET }}
+          ACCOUNT_NUMBER: $ {{ secrets.ACCOUNT_NUMBER }}
         run: |
           make remote-test-npm
 
@@ -93,6 +93,8 @@ jobs:
           TRAVIS_JOB_ID: ff-npm-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-npm-test-${{ github.run_number }}-
+          GLOBAL_ENV_BUCKET: ${{ secrets.GLOBAL_ENV_BUCKET }}
+          ACCOUNT_NUMBER: $ {{ secrets.ACCOUNT_NUMBER }}
         run: |
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 
@@ -104,8 +106,8 @@ jobs:
           TRAVIS_JOB_ID: ff-unit-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
-          # set global_env_bucket
           GLOBAL_ENV_BUCKET: ${{ secrets.GLOBAL_ENV_BUCKET }}
+          ACCOUNT_NUMBER: $ {{ secrets.ACCOUNT_NUMBER }}
         run: |
           make remote-test-unit
 
@@ -117,6 +119,8 @@ jobs:
           TRAVIS_JOB_ID: ff-unit-x-test-${{ github.run_number }}-
           # This will be the new environment variable name.
           TEST_JOB_ID: ff-unit-test-${{ github.run_number }}-
+          GLOBAL_ENV_BUCKET: ${{ secrets.GLOBAL_ENV_BUCKET }}
+          ACCOUNT_NUMBER: $ {{ secrets.ACCOUNT_NUMBER }}
         run: |
           poetry run wipe-test-indices $TEST_JOB_ID search-fourfront-testing-opensearch-kqm7pliix4wgiu4druk2indorq.us-east-1.es.amazonaws.com:443
 

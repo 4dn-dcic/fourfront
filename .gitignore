@@ -81,3 +81,8 @@ DEBUGLOG-*
 # These files are now generated from templates:
 deploy/docker/local/docker_development.ini
 docker-compose.yml
+
+# No longer in source control. development.ini.template is there instead.
+development.ini
+# No longer in source control. test.ini.template is there instead.
+test.ini
