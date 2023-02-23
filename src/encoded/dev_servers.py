@@ -123,7 +123,7 @@ def main():
             process.wait()
 
     if not args.no_ingest:
-        ingestion_listener = ingestion_listener_process(config_uri, app_name)
+        ingestion_listener = ingestion_listener_process(args.config_uri, args.app_name)
         processes.append(ingestion_listener)
 
     app = get_app(args.config_uri, args.app_name)
