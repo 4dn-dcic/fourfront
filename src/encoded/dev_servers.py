@@ -46,6 +46,29 @@ def nginx_server_process(prefix='', echo=False):
     return process
 
 
+def ingestion_listener_compute_command(config_uri, app_name):
+    return [
+        'poetry', 'run', 'ingestion-listener', config_uri, '--app-name', app_name
+    ]
+
+
+def ingestion_listener_process(config_uri, app_name, echo=True):
+    """ Uses Popen to start up the ingestion-listener. """
+    args = ingestion_listener_compute_command(config_uri, app_name)
+
+    process = subprocess.Popen(
+        args,
+        close_fds=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+
+    if echo:
+        PRINT('Starting Ingestion Listener...')
+
+    return process
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Run development servers", epilog=EPILOG,
@@ -57,6 +80,7 @@ def main():
     parser.add_argument('--init', action="store_true", help="Init database")
     parser.add_argument('--load', action="store_true", help="Load test set")
     parser.add_argument('--datadir', default='/tmp/snovault', help="path to datadir")
+    parser.add_argument('--no_ingest', action="store_true", default=False, help="Don't start the ingestion process.")
     args = parser.parse_args()
 
     logging.basicConfig(format='')
@@ -98,6 +122,9 @@ def main():
                 pass
             process.wait()
 
+    if not args.no_ingest:
+        ingestion_listener = ingestion_listener_process(config_uri, app_name)
+        processes.append(ingestion_listener)
 
     app = get_app(args.config_uri, args.app_name)
 

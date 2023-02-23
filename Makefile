@@ -105,11 +105,19 @@ macbuild-dev:  # same as macbuild, but sets up locust as well
 build-locust:  # just pip installs locust - may cause instability
 	pip install locust
 
-deploy1:  # starts postgres/ES locally and loads inserts
-	@SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers development.ini --app-name app --clear --init --load
+deploy1:  # starts postgres/ES locally and loads inserts, and also starts ingestion engine
+	@DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers development.ini --app-name app --clear --init --load
+
+deploy1a:  # starts postgres/ES locally and loads inserts, but does not start the ingestion engine
+	@DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` dev-servers development.ini --app-name app --clear --init --load --no_ingest
+
+deploy1b:  # starts ingestion engine separately so it can be easily stopped and restarted for debugging in foreground
+	@echo "Starting ingestion listener. Press ^C to exit." && DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` poetry run ingestion-listener development.ini --app-name app
 
 deploy2:  # spins up waittress to serve the application
-	pserve development.ini
+	@DEBUGLOG=`pwd` pserve development.ini
+	# TODO/QUESTION: SHould the above be more like this (from cgap-portal)?
+	# @DEBUGLOG=`pwd` SNOVAULT_DB_TEST_PORT=`grep 'sqlalchemy[.]url =' development.ini | sed -E 's|.*:([0-9]+)/.*|\1|'` pserve development.ini
 
 psql-dev:  # starts psql with the url after 'sqlalchemy.url =' in development.ini
 	@psql `grep 'sqlalchemy[.]url =' development.ini | sed -E 's/^.* = (.*)/\1/'`

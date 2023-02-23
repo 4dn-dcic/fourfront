@@ -5,6 +5,7 @@
 # This script resolves which application type is desired based on
 # the "$application_type" environment variable. Possible options are:
 #  * "deployment" to run the deployment
+#  * "ingester" to run the production ingester (forever)
 #  * "indexer" to run the production indexer (forever)
 #  * "portal" to run the production portal worker (API back-end)
 #  * "local" to run a local deployment
@@ -13,6 +14,7 @@
 # but the same image build is run across the entire local/production stack.
 
 deployment="deployment"
+ingester="ingester"
 indexer="indexer"
 portal="portal"
 local="local"
@@ -25,6 +27,8 @@ echo "Resolving which entrypoint is desired"
 # shellcheck disable=SC2154
 if [ "$application_type" = $deployment ]; then
   /bin/bash entrypoint_deployment.bash
+elif [ "$application_type" = $ingester ]; then
+  sh entrypoint_ingester.sh
 elif [ "$application_type" = $indexer ]; then
   /bin/bash entrypoint_indexer.bash
 elif [ "$application_type" = $portal ]; then
