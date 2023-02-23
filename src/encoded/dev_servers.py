@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 
+from dcicutils.misc_utils import PRINT
 from pkg_resources import resource_filename
 from pyramid.paster import get_app, get_appsettings
 from pyramid.path import DottedNameResolver
@@ -41,7 +42,7 @@ def nginx_server_process(prefix='', echo=False):
         process.stdout.close()
 
     if echo:
-        print('Started: http://localhost:8000')
+        PRINT('Started: http://localhost:8000')
 
     return process
 
@@ -143,7 +144,7 @@ def main():
         # now clear the queues and queue items for indexing
         create_mapping.run(app, check_first=True, strict=True, purge_queue=True)
 
-    print('Started. ^C to exit.')
+    PRINT('Started. ^C to exit.')
 
     stdouts = [p.stdout for p in processes]
 
