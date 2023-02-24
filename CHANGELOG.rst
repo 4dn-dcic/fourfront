@@ -11,13 +11,14 @@ Change Log
 
 * Changed ``deploy/docker/production/entrypoint.bash`` to include ``entrypoint_ingester``.
 * Added ``deploy/docker/production/entrypoint_ingester.bash``.
+* Added ``src/encoded/submit.py`` (verbatim from cgap-portal).
 * Added ``src/encoded/ingester/ingestion_listener_base.py`` (verbatim from cgap-portal).
 * Added ``src/encoded/ingester/ingestion_message.py`` (verbatim from cgap-portal).
 * Added ``src/encoded/ingester/ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
 * Added ``src/encoded/ingester/common.py`` (verbatim from cgap-portal).
 * Added ``src/encoded/ingester/exceptions.py`` (verbatim from cgap-portal).
 * Added ``src/encoded/ingester/queue_utils.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/processors.py`` (From cgap-portal except
+* Added ``src/encoded/ingester/processors.py`` (from cgap-portal except
   removed ``handle_genelist``, ``handle_variant_update``, ``handle_metadata_bundle``,
   ``handle_simulated_bundle`` ``simulated_processor`` and added ``handle_ontology_update``
   which (the latter) is from the ``fourfront`` ``ff_ingester`` branch).
