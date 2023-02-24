@@ -73,6 +73,7 @@ ITEM_INDEX_ORDER = [
     'ImageSetting',
 
     'HiglassViewConfig',
+    'IngestionSubmission',
     'QualityMetricAtacseq',
     'QualityMetricBamqc',
     'QualityMetricBamcheck',

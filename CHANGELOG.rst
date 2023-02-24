@@ -41,6 +41,7 @@ Change Log
 * Changed ``src/encoded/__init__.py`` to include in ``main``
   ``config.include('.ingestion_listener')`` and
   ``config.include('.ingestion.ingestion_message_handler_default')``.
+  * Changed ``src/encoded/appdefs.py`` to include ``IngestionSubmission`` in ``ITEM_INDEX_ORDER``.
 * Changed ``pyproject.toml`` to
   add ``ingester = "encoded.ingestion_listener:composite"``
   to ``[paste.composite_factory]`` section
@@ -48,7 +49,8 @@ Change Log
   to ``[tool.poetry.scripts]`` section.
 * Changed ``Makefile`` to include in ingestion code (from cgap-portal).
 * Changed ``src/encoded/dev_servers.py`` to include in ingestion code (from cgap-portal).
-* Added ``src/encoded/schemas/ingestion_submission.json`` (verbatim from cgap-portal).
+* Added ``src/encoded/schemas/ingestion_submission.json`` (from cgap-portal but
+  deleted ``institution`` and ``project`` from ``required`` list).
 
 
 5.1.1

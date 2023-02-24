@@ -5,9 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [
-        "ingestion_type",
-        "project",
-        "institution"
+        "ingestion_type"
     ],
     "additionalProperties": false,
     "identifyingProperties": [
