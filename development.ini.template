@@ -27,6 +27,7 @@ encoded_version = 100.200.300
 snovault_version = 200.300.400
 utils_version = 300.400.500
 eb_app_version = app-v-development-simulation
+env.name = fourfront-devlocal-${USER}
 
 [pipeline:debug]
 pipeline =
