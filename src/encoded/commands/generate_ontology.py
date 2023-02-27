@@ -803,14 +803,15 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
                 print("PREVIOUS={}; NEW={}".format(tid2uuid[tid], uuid))
             tid2uuid[tid] = uuid
             term['uuid'] = uuid
-
     # all terms have uuid - now add uuids to linked terms
     missing_from_idmap = []
     for term in terms.values():
-        puuids, missing = _get_uuids_for_linked(term, tid2uuid)
+        puuids, ext, missing = _get_uuids_for_linked(term, dbterms, tid2uuid)
+        tid2uuid.update(ext)
         missing_from_idmap.extend(missing)
         for rt, uuids in puuids.items():
-            term[rt] = list(set(uuids))  # to avoid redundant terms
+            uniq_uuids = list(set(uuids))  # to avoid redundant terms
+            term[rt] = uniq_uuids
     for p in set(missing_from_idmap):
         print('WARNING - ', p, ' MISSING FROM IDMAP')
 
@@ -838,8 +839,10 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
         for tid, term in use_terms.items():
             if tid not in terms and term['status'] != 'obsolete':
                 source_onts = [so.get('uuid') for so in term['source_ontologies']]
-                if not source_onts or not [o for o in ontids if o in source_onts]:
-                    # don't obsolete terms that aren't in one of the ontologies being processed
+                if not source_onts:
+                    continue  # should not happen
+                elif [o for o in source_onts if o not in ontids]:
+                    # don't obsolete terms that are in an ontology in addition to the ones being processed
                     continue
                 dbuid = term['uuid']
                 # add simple term with only status and uuid to to_patch
@@ -853,8 +856,9 @@ def id_post_and_patch(terms, dbterms, ontologies, rm_unchanged=True, set_obsolet
     return to_update, to_post
 
 
-def _get_uuids_for_linked(term, idmap):
+def _get_uuids_for_linked(term, dbterms, idmap):
     puuids = {}
+    ext = {}
     missing = []
     for rt in ['parents', 'slim_terms']:
         if term.get(rt):
@@ -862,9 +866,14 @@ def _get_uuids_for_linked(term, idmap):
             for p in term[rt]:
                 if p in idmap:
                     puuids[rt].append(idmap[p])
+                elif p in dbterms:
+                    # term exists linked to anohter ontology
+                    duid = dbterms[p].get('uuid')
+                    puuids[rt].append(duid)
+                    ext[p] = duid
                 else:
                     missing.append(p)
-    return puuids, missing
+    return puuids, ext, missing
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms, prefix='UNK'):
