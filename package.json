@@ -116,7 +116,7 @@
     "domready": "^1.0.8",
     "form-serialize": "^0.7.2",
     "higlass": "1.10.0",
-    "higlass-multivec": "0.2.4",
+    "higlass-multivec": "0.3.1",
     "higlass-register": "^0.3.0",
     "html-react-parser": "^1.2.8",
     "markdown-to-jsx": "^7.1.6",
@@ -140,7 +140,7 @@
     "underscore": "^1.13.3",
     "url": "^0.11.0",
     "uuid": "^8.3.2",
-    "vitessce": "^1.1.20",
+    "vitessce": "^2.0.3",
     "jsonwebtoken": "^8.5.1"
   },
   "optionalDependencies": {
