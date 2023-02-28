@@ -5,6 +5,8 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [
+        "lab",
+        "award",
         "ingestion_type"
     ],
     "additionalProperties": false,
@@ -68,6 +70,7 @@
                 "data_bundle",
                 "accessioning",
                 "metadata_bundle",
+                "ontology",
                 "simulated_bundle",
                 "vcf",
                 "genelist",

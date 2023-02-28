@@ -52,6 +52,9 @@ Change Log
 * Changed ``src/encoded/dev_servers.py`` to include in ingestion code (from cgap-portal).
 * Added ``src/encoded/schemas/ingestion_submission.json`` (from cgap-portal but
   deleted ``institution`` and ``project`` from ``required`` list).
+* Added ``ontology`` to ``properties.ingestion_type.enum`` list in ``src/encoded/schemas/ingestion_submission.json``.
+* Added ``metadata_bundles_bucket = cgap-unit-testing-metadata-bundles`` to ``development.ini.template``
+  and ``deploy/docker/local/docker_development.ini.template``. Actually make that ``metadata-bundles-fourfront-cgaplocal-test``.
 
 
 5.1.1
