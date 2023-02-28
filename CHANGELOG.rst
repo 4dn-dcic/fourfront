@@ -6,6 +6,11 @@ fourfront
 Change Log
 ----------
 
+5.1.2
+======
+
+* Added 'external_submission' mixin to experiment_set_replicate schema to support tracking GEO submission status more fully
+
 5.1.1
 ======
 
