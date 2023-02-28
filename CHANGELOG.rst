@@ -6,6 +6,12 @@ fourfront
 Change Log
 ----------
 
+5.1.3
+======
+
+* Added corresponding 'cfde term' to the experiment type
+
+
 5.1.2
 ======
 

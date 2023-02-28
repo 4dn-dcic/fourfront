@@ -10,7 +10,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "bulk Hi-C assay"
     },
     {
         "title": "Dilution Hi-C",
@@ -23,7 +24,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "bulk Hi-C assay"
     },
     {
         "title": "DNase Hi-C",
@@ -36,7 +38,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "DNase Hi-C assay"
     },
     {
         "title": "Micro-C",
@@ -49,7 +52,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "micro-C assay (provisional term)"
     },
     {
         "title": "ATAC-seq",
@@ -61,7 +65,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "c17b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentAtacseq"]
+        "valid_item_types": ["ExperimentAtacseq"],
+        "cfde_term": "bulk assay for transposase-accessible chromatin using sequencing"
     },
     {
         "title": "Capture Hi-C",
@@ -73,7 +78,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "d17b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentCaptureC"]
+        "valid_item_types": ["ExperimentCaptureC"],
+        "cfde_term": "capture Hi-C assay"
     },
     {
         "title": "ChIA-PET",
@@ -86,7 +92,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentChiapet"]
+        "valid_item_types": ["ExperimentChiapet"],
+        "cfde_term": "chromatin interaction analysis by paired-end tag sequencing assay"
     },
     {
         "title": "PLAC-seq",
@@ -99,7 +106,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA"],
-        "valid_item_types": ["ExperimentChiapet"]
+        "valid_item_types": ["ExperimentChiapet"],
+        "cfde_term": "chromatin interaction analysis by paired-end tag sequencing assay"
     },
     {
         "title": "DamID-seq",
@@ -111,7 +119,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "a27b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentDamid"]
+        "valid_item_types": ["ExperimentDamid"],
+        "cfde_term": "DamID-seq"
     },
     {
         "title": "DNA FISH",
@@ -122,7 +131,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "b27b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentMic"]
+        "valid_item_types": ["ExperimentMic"],
+        "cfde_term": "fluorescence in-situ hybridization assay"
     },
     {
         "title": "2-stage Repli-seq",
@@ -134,7 +144,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "c27b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentRepliseq"]
+        "valid_item_types": ["ExperimentRepliseq"],
+        "cfde_term": "DNA replication timing by sequencing assay"
     },
     {
         "title": "Multi-stage Repli-seq",
@@ -146,7 +157,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "c12b17cd-354a-3a7b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentRepliseq"]
+        "valid_item_types": ["ExperimentRepliseq"],
+        "cfde_term": "DNA replication timing by sequencing assay"
     },
     {
         "title": "TSA-seq",
@@ -158,7 +170,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "d27b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentTsaseq"]
+        "valid_item_types": ["ExperimentTsaseq"],
+        "cfde_term": "tyramide signal amplification sequencing assay (provisional term)"
     },
     {
         "title": "ChIP-seq",
@@ -170,7 +183,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "e27b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "ChIP-seq assay"
     },
     {
         "title": "RNA-seq",
@@ -183,7 +197,8 @@
         "award": "1U01CA200059-01",
         "uuid": "19f848e6-7c52-4b8b-8aa8-e82ea0a968ce",
         "other_tags": ["1D"],
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "RNA-seq assay"
     },
     {
         "title": "CUT&RUN",
@@ -199,7 +214,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "uuid": "f27b17cd-544a-3a3b-abc3-17a544544b3c",
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "cleavage under targets and release using nuclease assay"
     },
     {
         "title": "MC-Hi-C",
@@ -212,7 +228,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA", "Multi-contact"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "multi-contact Hi-C assay"
     },
     {
         "title": "DNA SPRITE",
@@ -225,7 +242,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA", "Multi-contact"],
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "DNA split-pool recognition of interactions and tag extension assay"
     },
     {
         "title": "RNA-DNA SPRITE",
@@ -238,7 +256,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["RNA-DNA", "Multi-contact"],
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "RNA-DNA split-pool recognition of interactions and tag extension assay (provisional term)"
     },
     {
         "title": "SPT",
@@ -250,7 +269,8 @@
         "uuid": "a98e17cd-544a-3a3b-fed3-17a658544f3c",
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
-        "valid_item_types": ["ExperimentMic"]
+        "valid_item_types": ["ExperimentMic"],
+        "cfde_term": "imaging assay"
     },
     {
         "title": "single cell Hi-C",
@@ -263,7 +283,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA", "Single cell"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "single cell Hi-C assay (provisional term)"
     },
     {
         "title": "sci-Hi-C",
@@ -276,7 +297,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA", "Single cell"],
-        "valid_item_types": ["ExperimentHiC"]
+        "valid_item_types": ["ExperimentHiC"],
+        "cfde_term": "single cell combinatorial indexing Hi-C assay (provisional term)"
     },
     {
         "title": "GAM",
@@ -289,7 +311,8 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["DNA-DNA", "Multi-contact"],
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "genome architecture mapping assay"
     },
     {
         "title": "MARGI",
@@ -302,6 +325,7 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "other_tags": ["RNA-DNA"],
-        "valid_item_types": ["ExperimentSeq"]
+        "valid_item_types": ["ExperimentSeq"],
+        "cfde_term": "mapping RNA-genome interactions assay (provisional term)"
     }
 ]
