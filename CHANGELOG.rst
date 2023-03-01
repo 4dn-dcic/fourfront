@@ -12,20 +12,20 @@ Change Log
 Adding ingestion support (from cgap-portal as initial guide):
 * Changed ``deploy/docker/production/entrypoint.bash`` to include ``entrypoint_ingester``.
 * Added ``deploy/docker/production/entrypoint_ingester.bash``.
-* Added ``src/encoded/submit.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/ingestion_listener_base.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/ingestion_message.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/common.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/exceptions.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/queue_utils.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/ingester/processors.py`` (from cgap-portal except
+* Added ``encoded/submit.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/ingestion_listener_base.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/ingestion_message.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/common.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/exceptions.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/queue_utils.py`` (verbatim from cgap-portal).
+* Added ``encoded/ingester/processors.py`` (from cgap-portal except
   removed ``handle_genelist``, ``handle_variant_update``, ``handle_metadata_bundle``,
   ``handle_simulated_bundle`` ``simulated_processor`` and added ``handle_ontology_update``
   which (the latter) is from the ``fourfront`` ``ff_ingester`` branch).
-* Added ``src/encoded/ingestion_listener.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/types/ingestion.py`` (verbatim from cgap-portal).
-* Changed ``src/encoded/utils.py``:
+* Added ``encoded/ingestion_listener.py`` (verbatim from cgap-portal).
+* Added ``encoded/types/ingestion.py`` (verbatim from cgap-portal).
+* Changed ``encoded/utils.py``:
   * Changed ``print`` to ``PRINT`` throughout. Added ``log``.
   * Changed ``s3_output_stream`` to add arg (and extra kwargs) for ``s3_encrypt_key_id``.
   * Added ``extra_kwargs_for_s3_encrypt_key_id`` function (verbatim from cgap-portal).
@@ -40,26 +40,26 @@ Adding ingestion support (from cgap-portal as initial guide):
   * Added ``make_s3_client`` function (verbatim from cgap-portal except log.info not log.warning).
   * Added ``build_s3_presigned_get_url`` function (verbatim from cgap-portal).
   * Added ``convert_integer_to_comma_string`` function (verbatim from cgap-portal).
-* Changed ``src/encoded/__init__.py`` to include in ``main``
+* Changed ``encoded/__init__.py`` to include in ``main``
   ``config.include('.ingestion_listener')`` and
   ``config.include('.ingestion.ingestion_message_handler_default')``.
-  * Changed ``src/encoded/appdefs.py`` to include ``IngestionSubmission`` in ``ITEM_INDEX_ORDER``.
+  * Changed ``encoded/appdefs.py`` to include ``IngestionSubmission`` in ``ITEM_INDEX_ORDER``.
 * Changed ``pyproject.toml`` to
   add ``ingester = "encoded.ingestion_listener:composite"``
   to ``[paste.composite_factory]`` section
   and ``ingestion-listener = "encoded.ingestion_listener:main"``
-  to ``[tool.poetry.scripts]`` section.
+  to ``[tool.poetry.scripts]`` section, and added ``generate-ontology``.
 * Changed ``Makefile`` to include in ingestion code (from cgap-portal).
-* Changed ``src/encoded/dev_servers.py`` to include in ingestion code (from cgap-portal).
-* Added to check for unknown ingestion type for @ingestion_processor decorator in ``src/encoded/ingestion/processor.py``,
-  via ``IngestionSubmission.supports_type`` defined in ``src/encoded/types/ingestion.py``.
-* Added ``src/encoded/schemas/ingestion_submission.json`` (from cgap-portal but
+* Changed ``encoded/dev_servers.py`` to include in ingestion code (from cgap-portal).
+* Added to check for unknown ingestion type for @ingestion_processor decorator in ``encoded/ingestion/processor.py``,
+  via ``IngestionSubmission.supports_type`` defined in ``encoded/types/ingestion.py``.
+* Added ``encoded/schemas/ingestion_submission.json`` (from cgap-portal but
   deleted ``institution`` and ``project`` from ``required`` list).
-* Added ``ontology`` to ``properties.ingestion_type.enum`` list in ``src/encoded/schemas/ingestion_submission.json``.
+* Added ``ontology`` to ``properties.ingestion_type.enum`` list in ``encoded/schemas/ingestion_submission.json``.
 * Added ``metadata_bundles_bucket = cgap-unit-testing-metadata-bundles`` to ``development.ini.template``
   and ``deploy/docker/local/docker_development.ini.template``. Actually make that ``metadata-bundles-fourfront-cgaplocal-test``.
-* Added ``src/encoded/tests/test_ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
-* Added ``src/encoded/tests/test_ingestion_processor.py`` (verbatim from cgap-portal).
+* Added ``encoded/tests/test_ingestion_message_handler_decorator.py`` (verbatim from cgap-portal).
+* Added ``encoded/tests/test_ingestion_processor.py`` (verbatim from cgap-portal).
 
 
 5.1.2
