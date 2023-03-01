@@ -7,8 +7,9 @@ Change Log
 ----------
 
 5.2.0
-======
+=====
 
+Adding ingestion support (from cgap-portal as initial guide):
 * Changed ``deploy/docker/production/entrypoint.bash`` to include ``entrypoint_ingester``.
 * Added ``deploy/docker/production/entrypoint_ingester.bash``.
 * Added ``src/encoded/submit.py`` (verbatim from cgap-portal).
@@ -56,6 +57,11 @@ Change Log
 * Added ``metadata_bundles_bucket = cgap-unit-testing-metadata-bundles`` to ``development.ini.template``
   and ``deploy/docker/local/docker_development.ini.template``. Actually make that ``metadata-bundles-fourfront-cgaplocal-test``.
 
+
+5.1.2
+======
+
+* Added 'external_submission' mixin to experiment_set_replicate schema to support tracking GEO submission status more fully
 
 5.1.1
 ======
