@@ -180,7 +180,8 @@ def call_ingestion_message_handler(message: Union[IngestionMessage, dict], liste
     else:
         # If NO message handler is registered for the given message type AND if there
         # is NO default message handler registered then we regard this as a (runtime) error.
-        raise RuntimeError(f"No ingestion message handler defined for ingestion message type: {message.type}")
+        raise RuntimeError(f"No ingestion message handler defined for ingestion message type: {message.type}"
+                           f" -> Message: {message.body}")
 
 
 def clear_ingestion_message_handlers_for_testing():

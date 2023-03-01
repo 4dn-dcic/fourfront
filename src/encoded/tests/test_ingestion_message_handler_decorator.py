@@ -1,4 +1,5 @@
 import pytest
+import re
 from ..ingestion.ingestion_message import IngestionMessage
 from ..ingestion.ingestion_listener_base import IngestionListenerBase
 from ..ingestion.ingestion_message_handler_decorator import (
@@ -146,6 +147,11 @@ def test_error_undefined_handler():
 
         ingestion_message = create_raw_message(ingestion_type="some-third-message-type")
         # This should throw exception because no relevant handler found.
+        call_ingestion_message_handler(ingestion_message, INGESTION_LISTENER)
+
+    exception_message = (f".*No.*ingestion.*message.*handler.*defined.*"
+                         f" ->.*{{'uuid': 'some-uuid-xyzzy', 'ingestion_type': 'some-third-message-type'}}.*")
+    with pytest.raises(Exception, match=re.compile(exception_message)):
         call_ingestion_message_handler(ingestion_message, INGESTION_LISTENER)
 
 
