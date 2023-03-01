@@ -6,10 +6,20 @@ fourfront
 Change Log
 ----------
 
+5.1.3
+=====
+
+`PR HiGlass core + multivec lib upgrades  <https://github.com/4dn-dcic/fourfront/pull/1772>`_
+
+* Higlass core + multivec libraries including some dependencies having critical security warnings upgraded
+* HiGlass version added to /Health page
+
+
 5.1.2
 ======
 
 * Added 'external_submission' mixin to experiment_set_replicate schema to support tracking GEO submission status more fully
+
 
 5.1.1
 ======
