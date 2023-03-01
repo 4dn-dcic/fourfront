@@ -236,3 +236,9 @@ class IngestionSubmission(Item):
     item_type = 'ingestion_submission'
     schema = load_schema('encoded:schemas/ingestion_submission.json')
     # embedded_list = [...] + Item.embedded_list
+
+    schema_json = json.loads(json.dumps(schema))
+
+    @classmethod
+    def supports_type(cls, ingestion_type: str) -> bool:
+        return ingestion_type in cls.schema_json["properties"]["ingestion_type"]["enum"]

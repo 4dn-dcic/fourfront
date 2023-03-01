@@ -1,5 +1,5 @@
 from .exceptions import UndefinedIngestionProcessorType
-from ..types.ingestion import SubmissionFolio
+from ..types.ingestion import IngestionSubmission, SubmissionFolio
 
 
 INGESTION_UPLOADERS = {}
@@ -9,6 +9,11 @@ def ingestion_processor(processor_type):
     """
     @ingestion_uploader(<ingestion-type-name>) is a decorator that declares the upload handler for an ingestion type.
     """
+
+    # Make sure the ingestion type specified for the decorated function is supported by
+    # our IngestionSubmission type; this info comes from schemas/ingestion_submission.json.
+    if not IngestionSubmission.supports_type(processor_type):
+        raise UndefinedIngestionProcessorType(processor_type)
 
     def ingestion_type_decorator(fn):
         if processor_type in INGESTION_UPLOADERS:
