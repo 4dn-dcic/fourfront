@@ -1455,6 +1455,8 @@ def format_facets(es_results, facets, total, additional_facets, search_frame='em
             'total' : 0
             # To be added depending on facet['aggregation_type']: 'terms', 'min', 'max', 'min_as_string', 'max_as_string', ...
         }
+        if facet.get('group_by') is not None:
+            result_facet['group_by'] = facet.get('group_by')
 
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)

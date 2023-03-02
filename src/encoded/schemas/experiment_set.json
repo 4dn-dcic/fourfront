@@ -151,7 +151,8 @@
             "description" : "The categorization of experiments within these Experiment Sets"
         },
         "experiments_in_set.experiment_type.display_title": {
-            "title": "Experiment Type"
+            "title": "Experiment Type",
+            "group_by": "experiments_in_set.experiment_type.assay_subclass_short"
         },
         "dataset_label" : {
             "title" : "Dataset"
