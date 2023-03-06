@@ -96,11 +96,33 @@ class IngestionConnection:
         """
         return list(self.get_ontology_terms_set(category=category, limit=limit, ignore=ignore))
 
+    def get_ontology_terms_dict(self,
+                                limit: Optional[int] = None,
+                                ignore: Optional[Callable] = None) -> dict:
+        """
+        Same as get_ontology_terms but returns that list as a dictionary indexed by name (term_id).
+        """
+        terms = self.get_ontology_terms(limit=limit, ignore=ignore)
+        return {term["term_id"]: term for term in terms}
+
     def get_ontology_term(self, ontology_term_uuid: str) -> Optional[dict]:
         """
         Returns the ontology term (dictionary) for the given uuid or None if not found.
         """
         return self.get_result(f"search/?type=OntologyTerm&uuid={ontology_term_uuid}")
+
+    def get_ontology_slim_terms(self, limit: Optional[int] = None) -> list:
+        """
+        """
+        slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
+        slim_terms = []
+        for category in slim_categories:
+            try:
+                terms = self.get_ontology_terms_set(category=category, limit=limit)
+                slim_terms.extend(terms)
+            except TypeError:
+                pass
+        return slim_terms
 
     def get_ontology_term_links(self, ontology_term_uuid: str) -> Optional[dict]:
         """
@@ -155,7 +177,7 @@ class IngestionConnection:
 
     def get_result(self, query: str) -> Optional[Union[dict]]:
         """
-        Returns a single result for the given query.
+        Returns a single result for the given query or None if no result.
         """
         query = self._normalize_query(query)
         try:

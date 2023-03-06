@@ -39,6 +39,14 @@ ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
 
 ontregex = re.compile(r'( +\(((EFO|SO|UBERON|4DN|OBI), )*(EFO|SO|UBERON|4DN|OBI)\))')
 
+ONTOLOGY_TERMS_TO_IGNORE = [
+    "111112bc-8535-4448-903e-854af460a233",
+    "111113bc-8535-4448-903e-854af460a233",
+    "111114bc-8535-4448-903e-854af460a233",
+    "111116bc-8535-4448-903e-854af460a233",
+    "111117bc-8535-4448-903e-854af460a233"
+]
+
 
 def iterative_parents(nodes, terms, data):
     """returns all the parents traversing the term graph structure
@@ -384,32 +392,35 @@ def get_slim_terms(connection, limit: Optional[int] = None):
     """Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
     """
-    # currently need to hard code the categories of slims but once the ability
-    # to search all can add parameters to retrieve all or just the terms in the
-    # categories passed as a list
-    slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
-    slim_terms = []
-    for cat in slim_categories:
-        try:
-            terms = IngestionConnection(connection).get_ontology_terms_set(category=cat, limit=limit)
-            slim_terms.extend(terms)
-        except TypeError as e:
-            print(e)
-            continue
-    return slim_terms
+#   # currently need to hard code the categories of slims but once the ability
+#   # to search all can add parameters to retrieve all or just the terms in the
+#   # categories passed as a list
+#   slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
+#   slim_terms = []
+#   for cat in slim_categories:
+#       try:
+#           terms = IngestionConnection(connection).get_ontology_terms_set(category=cat, limit=limit)
+#           slim_terms.extend(terms)
+#       except TypeError as e:
+#           print(e)
+#           continue
+#   return slim_terms
+    return IngestionConnection(connection).get_ontology_slim_terms(limit=limit)
 
 
 def get_existing_ontology_terms(connection, limit: Optional[int] = None):  # , ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
-    ignore = [
-        "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
-        "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
-        "111117bc-8535-4448-903e-854af460a233"
-    ]
-    db_terms = IngestionConnection(connection).get_ontology_terms_set(limit=limit,
-                                                                      ignore=lambda item: item["uuid"] in ignore)
-    return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
+#   ignore = [
+#       "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
+#       "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
+#       "111117bc-8535-4448-903e-854af460a233"
+#   ]
+#   db_terms = IngestionConnection(connection).get_ontology_terms_set(limit=limit,
+#                                                                     ignore=lambda item: item["uuid"] in ignore)
+#   return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
+    connection = IngestionConnection(connection)
+    return connection.get_ontology_terms_dict(limit=limit, ignore=lambda term: term["uuid"] in ONTOLOGY_TERMS_TO_IGNORE)
 
 
 def get_ontologies(connection, ont_list):

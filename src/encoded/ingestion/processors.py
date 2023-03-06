@@ -52,10 +52,11 @@ def handle_ontology_update(submission: SubmissionFolio):
     """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology
         term update.
     """
+    print("FETCHING ONTOLOGIES FOR EXAMPLE")
+    ontologies = IngestionConnection(submission.vapp).get_ontologies()
+    print("DONE FETCHING ONTOLOGIES FOR EXAMPLE")
+    print(ontologies)
     with submission.processing_context():
         # TODO: implement me (stub from Will's ff_ingester branch)
         # Retrieve ontologies like the generate-ontology command ...
-        print("TODO")
-        print("FETCHING ONTOLOGIES FOR EXAMPLE")
-        ontologies = IngestionConnection(submission.vapp).get_ontologies()
-        print(ontologies)
+        pass
