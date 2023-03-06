@@ -5,6 +5,7 @@ import pkg_resources
 import re
 import requests
 import sys
+from typing import Optional
 
 from collections import Counter
 from dcicutils.ff_utils import get_authentication_with_server, get_metadata, search_metadata, unified_authentication
@@ -25,6 +26,7 @@ from ..commands.owltools import (
     OnProperty,
     Deprecated
 )
+from ..ingestion.ingestion_connection import IngestionConnection
 
 
 EPILOG = __doc__
@@ -378,7 +380,7 @@ def get_definition_term_uris(ontology, as_rdf=True):
     return get_syndef_terms_as_uri(ontology, 'definition_terms', as_rdf)
 
 
-def get_slim_terms(connection):
+def get_slim_terms(connection, limit: Optional[int] = None):
     """Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
     """
@@ -386,11 +388,10 @@ def get_slim_terms(connection):
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
     slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
-    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
         try:
-            terms = search_metadata(search_suffix + cat, connection)
+            terms = IngestionConnection(connection).get_ontology_terms_set(category=cat, limit=limit)
             slim_terms.extend(terms)
         except TypeError as e:
             print(e)
@@ -398,16 +399,16 @@ def get_slim_terms(connection):
     return slim_terms
 
 
-def get_existing_ontology_terms(connection):  # , ontologies=None):
+def get_existing_ontology_terms(connection, limit: Optional[int] = None):  # , ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
-    search_suffix = 'search/?type=OntologyTerm&status=released&status=obsolete'  # + ont_list
-    db_terms = search_metadata(search_suffix, connection, page_limit=200, is_generator=True)
     ignore = [
         "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
         "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
         "111117bc-8535-4448-903e-854af460a233"
     ]
+    db_terms = IngestionConnection(connection).get_ontology_terms_set(limit=limit,
+                                                                      ignore=lambda item: item["uuid"] in ignore)
     return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
 
 
@@ -417,11 +418,12 @@ def get_ontologies(connection, ont_list):
     """
     ontologies = []
     if ont_list == 'all':
-        ontologies = search_metadata('search/?type=Ontology', connection)
+        ontologies = IngestionConnection(connection).get_ontologies()
     else:
-        ontologies = [get_metadata('ontologys/' + ont_list, connection)]
+        ontologies = [IngestionConnection(connection).get_ontology(ont_list)]
     # removing item not found cases with reporting
     if not isinstance(ontologies, (list, tuple)):
+        print(type(ontologies))
         print("we must not have got ontologies... bailing")
         sys.exit()
     for i, ontology in enumerate(ontologies):
@@ -630,7 +632,7 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
     dpmeta = dparents
     if not dpmeta or 'source_ontologies' not in dpmeta[0] or 'term_id' not in dpmeta[0]:
         # make sure we have the required fields - should be embedded but maybe not
-        dpmeta = [get_metadata(p.get('uuid'), connection) for p in dparents]
+        dpmeta = [IngestionConnection(connection).get_ontology_term(p.get('uuid')) for p in dparents]
     for dp in dpmeta:
         donts = [o.get('uuid') for o in dp.get('source_ontologies')]
     dp2chk = [p.get('uuid') for p in dpmeta if ontid in donts]
@@ -1003,6 +1005,7 @@ def parse_args(args):
                         help="The name of the key to use in the keyfile.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
+    parser.add_argument('--limit-terms', type=int, default=None, help="Limit the number of ontology terms to fetch.")
 
     return parser.parse_args(args)
 
@@ -1042,9 +1045,9 @@ def main():
         if o['ontology_name'].startswith('4DN') or o['ontology_name'].startswith('CGAP'):
             ontologies.pop(i)
     print('HAVE ONTOLOGY INFO')
-    slim_terms = get_slim_terms(connection)
+    slim_terms = get_slim_terms(connection, limit=args.limit_terms)
     print('HAVE SLIM TERMS')
-    db_terms = get_existing_ontology_terms(connection)
+    db_terms = get_existing_ontology_terms(connection, limit=args.limit_terms)
     print('HAVE DB TERMS')
     terms = {}
     deprecated = []
@@ -1104,7 +1107,7 @@ def main():
         if obsoletes:
             problems = []
             for obsolete in obsoletes:
-                result = get_metadata(obsolete['uuid'] + '/@@links', connection)
+                result = IngestionConnection(connection).get_ontology_term_links(obsolete['uuid'])
                 if result.get('uuids_linking_to'):
                     for item in result['uuids_linking_to']:
                         if 'parents' not in item.get('field', ''):

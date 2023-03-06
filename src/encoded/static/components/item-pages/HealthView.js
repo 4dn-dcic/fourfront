@@ -131,6 +131,10 @@ export default class HealthView extends React.PureComponent {
                 title : "MicroMeta Version",
                 description : "Software version of MicroMeta package being used."
             },
+            'higlass_version': {
+                title : "HiGlass Version",
+                description : "Software version of HiGlass package being used."
+            },
             'vitessce_version': {
                 title : "Vitessce Version",
                 description : "Software version of Vitessce package being used."
@@ -235,18 +239,15 @@ export default class HealthView extends React.PureComponent {
         if (microMetaFrom && microMetaFrom.indexOf('#') > -1) {
             [ microMetaVersionUsed ] = microMetaFrom.split('#').splice(-1);
         }
-        //extend context to include vitessce version
-        const { dependencies } = installedPackageLockJson;
-        let vitessceVersion;
-        if (dependencies && dependencies.vitessce) {
-            vitessceVersion = dependencies.vitessce.version;
-        }
+        //extend context to include higlass & vitessce version
+        const { dependencies: { 'higlass': { version: higlassVersion } = {}, 'vitessce': { version: vitessceVersion } } } = installedPackageLockJson;
 
         const spcVersionDetailed = getDetailedVersion(spcVersionUsed, spcVersion, spcInstallVersion);
         const context = {
             ...propContext,
             'spc_version': spcVersionDetailed,
             'micro_meta_version': microMetaVersionUsed || microMetaVersion || "-",
+            'higlass_version': higlassVersion || "-",
             'vitessce_version': vitessceVersion || "-"
         };
 

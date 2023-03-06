@@ -1,4 +1,5 @@
 from .exceptions import UndefinedIngestionProcessorType
+from .ingestion_connection import IngestionConnection
 from ..types.ingestion import IngestionSubmission, SubmissionFolio
 
 
@@ -52,4 +53,9 @@ def handle_ontology_update(submission: SubmissionFolio):
         term update.
     """
     with submission.processing_context():
-        pass  # TODO: implement me (from Will's ff_ingester branch)
+        # TODO: implement me (stub from Will's ff_ingester branch)
+        # Retrieve ontologies like the generate-ontology command ...
+        print("TODO")
+        print("FETCHING ONTOLOGIES FOR EXAMPLE")
+        ontologies = IngestionConnection(submission.vapp).get_ontologies()
+        print(ontologies)

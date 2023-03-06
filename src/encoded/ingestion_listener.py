@@ -26,6 +26,7 @@ from pyramid.view import view_config
 from snovault.util import debug_log
 from .ingestion.common import metadata_bundles_bucket, get_parameter, IngestionReport
 from .ingestion.exceptions import UnspecifiedFormParameter, SubmissionFailure  # , BadParameter
+from .ingestion.ingestion_connection import IngestionConnection
 from .ingestion.ingestion_listener_base import (
     STATUS_QUEUED,
     STATUS_INGESTED,
@@ -626,6 +627,10 @@ def main():
     parser.add_argument('--username', '-u', default='IMPORT', help='Import username')
     parser.add_argument('--dry-run', action='store_true', help='Do not post variants, just validate')
     parser.add_argument('config_uri', help="path to configfile")
+    # For testing/troubleshooting.
+    parser.add_argument('--generate-ontologies', action='store_true')
+    parser.add_argument('--generate-ontology-terms', action='store_true')
+    parser.add_argument('--limit-ontology-terms', type=int, default=None)
     args = parser.parse_args()
 
     app = paster.get_app(args.config_uri, args.app_name)
@@ -635,6 +640,17 @@ def main():
     }
 
     vapp = VirtualApp(app, config)
+
+    # For testing/troubleshooting.
+    if args.generate_ontologies or args.generate_ontology_terms:
+        if args.generate_ontologies:
+            print("ONTOLOGIES:")
+            print(IngestionConnection(vapp).get_ontologies())
+        if args.generate_ontology_terms:
+            print("ONTOLOGY TERMS:")
+            print(IngestionConnection(vapp).get_ontology_terms(limit=args.limit_ontology_terms))
+        return
+
     return run(vapp)
 
 
