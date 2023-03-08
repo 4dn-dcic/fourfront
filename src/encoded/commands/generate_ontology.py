@@ -1021,10 +1021,10 @@ def parse_args(args):
                         action='store_true',
                         help="Default False - set True to generate full file to load"
                              " - do not filter out existing unchanged terms")
-    parser.add_argument('--nophasing',
+    parser.add_argument('--phase',
                         default=False,
                         action='store_true',
-                        help="Default False - set True to not phase the result into posts of only required fields \
+                        help="Default False - set True to phase the result into posts of only required fields \
                                 and then patches of all else")
     parser.add_argument('--env',
                         default='data',
@@ -1131,11 +1131,11 @@ def main():
         print("DONE FINDING UPDATES")
 
         pretty = False
-        phasing = True
+        phasing = False
         if args.pretty:
             pretty = True
-        if args.nophasing:
-            phasing = False
+        if args.phase:
+            phasing = True
         out_dict = {
             'ontologies': {
                 o['uuid']: {k: o[k] for k in ['current_ontology_version', 'ontology_versions'] if k in o}
