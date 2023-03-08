@@ -17,6 +17,7 @@ utils_version = 333.444.555
 eb_app_version = app-v-test-simulation
 create_tables = true
 load_test_data = encoded.loadxl:load_test_data
+env.name = fourfront-test-${USER}
 
 [composite:indexer]
 use = config:base.ini#indexer
