@@ -61,7 +61,8 @@ def create_sample_ontology_from_ontology_file(ontology_file: str, count: Optiona
 def get_unique_sample_ontology_term_uuids(count: Optional[int], uuids: Optional[str], quiet: bool, source_ontology_terms: dict) -> list:
     """
     Returns a set of ontology term uuids for the given number of (initial) ontology term records in
-    the give source ontology, INCLUDING uuids for any/all referenced parent (recursively) ontology terms.
+    the give source ontology, OR the for the ontology terms specified in the given list of ontology
+    term uuids. This will also INCLUDE uuids for any/all referenced parent (recursively) ontology terms.
     """
     ontology_term_uuids = set()
     if uuids:

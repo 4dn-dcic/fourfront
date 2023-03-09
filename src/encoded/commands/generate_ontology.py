@@ -443,11 +443,18 @@ def get_ontologies(connection, ont_list):
     return ontologies
 
 
-def connect2server(env=None, key=None):
+def connect2server(env=None, key=None, args=None):
     """Sets up credentials for accessing the server.  Generates a key using info
        from the named keyname in the keyfile and checks that the server can be
        reached with that key.
        Also handles keyfiles stored in s3"""
+
+    if env == "local":
+        local_id = args.local_key if args.local_key else input('[local access key ID] ')
+        local_secret = args.local_secret if args.local_secret else input('[local access key secret] ')
+        local_server = "http://localhost:8000"
+        print(f"Running in local mode: {local_server} (key: {local_id})")
+        return {'key': local_id, 'secret': local_secret, 'server': 'http://localhost:8000'}
 
     if key and all([v in key for v in ['key', 'secret', 'server']]):
         key = ast.literal_eval(key)
@@ -1020,6 +1027,8 @@ def parse_args(args):
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
     parser.add_argument('--limit-terms', type=int, default=None, help="Limit the number of ontology terms to fetch.")
+    parser.add_argument('--local-key', help='Local access key ID if using local env.')
+    parser.add_argument('--local-secret', help='Local access key secret if using local env.')
 
     return parser.parse_args(args)
 
@@ -1049,7 +1058,7 @@ def main():
         key = str(keys[args.keyname])
     else:
         key = args.key
-    connection = connect2server(args.env, key)
+    connection = connect2server(env=args.env, key=key, args=args)
     print("Pre-processing")
     ontologies = get_ontologies(connection, args.ontology)
     if len(ontologies) > 1 and args.simple:
@@ -1079,6 +1088,7 @@ def main():
                 except Exception:
                     print('Unable to fetch Uberon version')
             if v and v != ontology.get('current_ontology_version', ''):
+                prev = []
                 if ontology.get('current_ontology_version'):
                     if not ontology.get('ontology_versions'):
                         prev = [ontology['current_ontology_version']]

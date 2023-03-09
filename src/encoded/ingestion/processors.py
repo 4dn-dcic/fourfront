@@ -1,12 +1,9 @@
-from dcicutils.misc_utils import PRINT
 from .exceptions import UndefinedIngestionProcessorType
-from .ingestion_connection import IngestionConnection
+from ..loadxl import load_data_via_ingester
 from ..types.ingestion import IngestionSubmission, SubmissionFolio
-from ..util import temporary_file, make_vapp_for_email, make_vapp_for_ingestion, s3_local_file
-import json
-import io
-import shutil
+import structlog
 
+log = structlog.getLogger(__name__)
 
 INGESTION_UPLOADERS = {}
 
@@ -57,17 +54,17 @@ def handle_ontology_update(submission: SubmissionFolio):
     """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology
         term update.
     """
-    from ..loadxl import load_data_via_ingester
-    PRINT(f"Ingestion ontology update handler: {submission.bucket}/{submission.object_name}")
+    log.warning(f"Ontology ingestion handler invoked: {submission.bucket}/{submission.object_name}")
     with submission.processing_context():
-        PRINT(f"Ingestion ontology update handler; entered processing context.")
-        # import pdb ; pdb.set_trace()
+        # The following context manager downloads from S3 the payload/data file, opens it, and loads its
+        # contents (assumed to be JSON), and returns it as a dictionary; the location of this data file in
+        # S3 is assumed to be the bucket named by submission.bucket and the key named by submission.object_name.
         with submission.s3_input_json() as ontology_json:
             ontology_json["ontology_term"] = ontology_json.pop("terms", [])
             ontology_term_count = len(ontology_json["ontology_term"])
-            PRINT(f"Ingestion ontology update handler; downloaded ontology file; term count: {ontology_term_count}")
+            log.warning(f"Ontology ingestion handler downloaded ontology file. Term count: {ontology_term_count}")
+            # Call into the loadx module to do the actual load of the ontology data.
             load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
-            PRINT(f"Ingestion ontology update handler; loaded ontology.")
-            PRINT(load_data_response)
-        PRINT(f"Ingestion ontology update handler; exiting processing context.")
-    PRINT("Ingestion ontology update handler; returning.")
+            log.warning(f"Ontology ingestion handler loaded ontology. Summary below.")
+            log.warning(load_data_response)
+    log.warning(f"Ontology ingestion handler done.")
