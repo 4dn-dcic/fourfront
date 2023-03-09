@@ -152,7 +152,11 @@
         },
         "experiments_in_set.experiment_type.display_title": {
             "title": "Experiment Type",
-            "group_by": "experiments_in_set.experiment_type.assay_subclass_short"
+            "persist_selected_terms": false,
+            "group_by_field": "experiments_in_set.experiment_type.assay_subclass_short",
+            "group_by_item_type": "ExperimentType",
+            "group_by_key_field": "display_title",
+            "group_by_value_field": "assay_subclass_short"
         },
         "dataset_label" : {
             "title" : "Dataset"

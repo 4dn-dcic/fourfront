@@ -1455,8 +1455,9 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
             'total' : 0
             # To be added depending on facet['aggregation_type']: 'terms', 'min', 'max', 'min_as_string', 'max_as_string', ...
         }
-        if facet.get('group_by') is not None:
-            result_facet['group_by'] = facet.get('group_by')
+        if (facet.get('group_by_field') is not None and  facet.get('group_by_item_type') is not None and
+            facet.get('group_by_key_field') is not None and  facet.get('group_by_value_field') is not None):
+            result_facet['group_by'] = facet.get('group_by_field')
 
         result_facet.update({ k:v for k,v in facet.items() if k not in result_facet.keys() })
         used_facets.add(field)
@@ -1489,11 +1490,9 @@ def format_facets(es_results, facets, total, additional_facets, request, doc_typ
                 # Default - terms, range, or histogram buckets. Buckets may not be present
                 result_facet['terms'] = aggregations[full_agg_name]["primary_agg"]["buckets"]
                 if 'group_by' in result_facet:
-                    exp_type_grouping_dict = {'ChIP-seq':'DNA binding', 'CUT&RUN':'DNA binding', 'CUT&Tag':'DNA binding', 'BLISS':'DNA damage detection', 'DNA FISH':'DNA FISH', 'multiplexed FISH':'DNA FISH', 'Capture Hi-C':'Enrichment Hi-C', 'in situ Hi-C':'Hi-C', 'Dilution Hi-C':'Hi-C', 'Micro-C':'Hi-C', 'DNase Hi-C':'Hi-C', 'TCC':'Hi-C', 'Methyl Hi-C':'Hi-C', 'MC-Hi-C':'Hi-C (multi-contact)', 'MC-3C':'Hi-C (multi-contact)', 'sci-Hi-C':'Hi-C (single cell)', 'sn-Hi-C':'Hi-C (single cell)', 'single cell Hi-C':'Hi-C (single cell)', 'single cell Methyl Hi-C':'Hi-C (single cell)', 'Immunofluorescence':'Immunofluorescence', 'PLAC-seq':'IP-based 3C', 'in situ ChIA-PET':'IP-based 3C', 'ChIA-PET':'IP-based 3C', 'HiChIP':'IP-based 3C', 'GAM':'Ligation-free 3C', 'DNA SPRITE':'Ligation-free 3C', 'ChIA-Drop':'Ligation-free 3C', 'TrAC-loop':'Ligation-free 3C', 'RNA-DNA SPRITE':'Ligation-free 3C', 'ATAC-seq':'Open Chromatin', 'RE-seq':'Open Chromatin', 'sci-ATAC-seq':'Open Chromatin', 'single cell ATAC-seq':'Open Chromatin', 'OptoDroplet':'OptoDroplet', 'TSA-seq':'Proximity-seq', 'pA-DamID':'Proximity-seq', 'DamID-seq':'Proximity-seq', 'NAD-seq':'Proximity-seq', '2-stage Repli-seq':'Replication timing', 'Multi-stage Repli-seq':'Replication timing', 'TRIP':'Reporter Expression', 'RNA FISH':'RNA FISH', 'MARGI':'RNA-DNA HiC', 'SPT':'SPT', 'Electron Tomography':'TEM', 'RNA-seq':'Transcription', 'sci-RNA-seq':'Transcription', 'single cell RNA-seq':'Transcription', 'Bru-seq':'Transcription'}
-                    field_schema = schema_for_field(result_facet['group_by'], request, doc_types, should_log=True)
-                    # import pdb; pdb.set_trace()
+                    group_by_dict = get_facet_group_by_dict(request, facet.get('group_by_item_type'), facet.get('group_by_key_field'), facet.get('group_by_value_field'))
                     for t in result_facet['terms']:
-                        t['grouping_key'] = exp_type_grouping_dict[t['key']]
+                        t['grouping_key'] = group_by_dict[t['key']][0]
                         t['is_group_item'] = True
                 # Choosing to show facets with one term for summary info on search it provides
                 if len(result_facet.get('terms', [])) < 1:
@@ -1607,6 +1606,37 @@ def get_total_from_facets(facets, total):
 
     #fallback
     return total
+
+def get_facet_group_by_dict(request, item_type, key_field, value_field):
+
+    # default parameters
+    search_param_lists = {'type': [item_type]}
+
+    primary_agg = {
+        "field_0" : {
+            "terms" : {
+                "field" : "embedded." + key_field + ".raw",
+                "size" : 100
+            },
+            "aggs" : { "group_by" : {
+                            "terms" : {
+                                "field": "embedded." + value_field + ".raw"
+                            }
+                    }
+            }
+        }
+    }
+
+    search_param_lists['limit'] = [0]
+    search_param_lists['from'] = [0]
+    subreq          = make_search_subreq(request, '{}?{}'.format('/search/', urlencode(search_param_lists, True)) )
+    search_result   = search(None, subreq, custom_aggregations=primary_agg)
+
+    ret_result = { }
+    for bucket in search_result['aggregations']['field_0']['buckets']:
+        ret_result[bucket['key']] = [str(item['key']) for item in bucket['group_by']['buckets']]
+
+    return ret_result
 
 # Update? used in ./batch_download.py
 def iter_search_results(context, request, **kwargs):
