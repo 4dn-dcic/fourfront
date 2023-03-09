@@ -62,6 +62,11 @@ Adding ingestion support (from cgap-portal as initial guide):
 * Added ``encoded/tests/test_ingestion_processor.py`` (verbatim from cgap-portal).
 * Added ``encoded/ingestion/ingestion_connection.py`` (totally new).
 * Updated ``encoded/commands/generate_ontology.py`` (to use new IngestionConnection).
+* Updated ``download_url`` in ``encoded/tests/data/master-inserts/ontology.json``
+  from ``https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/so.owl``
+  to ``https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/Ontology_Files/so.owl``.
+* Updated ``groupfinder`` in ``encoded/autorization.py`` to include ``INGESTION`` in ``localname``
+  check for return of ``group.admin``.
 
 
 5.1.3

@@ -1,6 +1,11 @@
+from dcicutils.misc_utils import PRINT
 from .exceptions import UndefinedIngestionProcessorType
 from .ingestion_connection import IngestionConnection
 from ..types.ingestion import IngestionSubmission, SubmissionFolio
+from ..util import temporary_file, make_vapp_for_email, make_vapp_for_ingestion, s3_local_file
+import json
+import io
+import shutil
 
 
 INGESTION_UPLOADERS = {}
@@ -52,11 +57,17 @@ def handle_ontology_update(submission: SubmissionFolio):
     """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology
         term update.
     """
-    print("FETCHING ONTOLOGIES FOR EXAMPLE")
-    ontologies = IngestionConnection(submission.vapp).get_ontologies()
-    print("DONE FETCHING ONTOLOGIES FOR EXAMPLE")
-    print(ontologies)
+    from ..loadxl import load_data_via_ingester
+    PRINT(f"Ingestion ontology update handler: {submission.bucket}/{submission.object_name}")
     with submission.processing_context():
-        # TODO: implement me (stub from Will's ff_ingester branch)
-        # Retrieve ontologies like the generate-ontology command ...
-        pass
+        PRINT(f"Ingestion ontology update handler; entered processing context.")
+        # import pdb ; pdb.set_trace()
+        with submission.s3_input_json() as ontology_json:
+            ontology_json["ontology_term"] = ontology_json.pop("terms", [])
+            ontology_term_count = len(ontology_json["ontology_term"])
+            PRINT(f"Ingestion ontology update handler; downloaded ontology file; term count: {ontology_term_count}")
+            load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
+            PRINT(f"Ingestion ontology update handler; loaded ontology.")
+            PRINT(load_data_response)
+        PRINT(f"Ingestion ontology update handler; exiting processing context.")
+    PRINT("Ingestion ontology update handler; returning.")

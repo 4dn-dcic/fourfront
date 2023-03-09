@@ -81,6 +81,19 @@ class LoadGenWrapper(object):
             logger.error('load_data: failed to load with iter_response', error=self.caught)
 
 
+def load_data_via_ingester(vapp, ontology_json):
+    """
+    Entry point for call from encoded.ingester.processors.handle_ontology_update (2023-03-08).
+    """
+    return Response(
+        content_type="text/plain",
+        app_iter=LoadGenWrapper(
+            load_all_gen(vapp, ontology_json, None, overwrite=True,
+                         itype="ontology_term", from_json=True, patch_only=False)
+        )
+    )
+
+
 @view_config(route_name='load_data', request_method='POST', permission='add')
 @debug_log
 def load_data_view(context, request):
@@ -102,7 +115,7 @@ def load_data_view(context, request):
        item_type should be same as insert file names i.e. file_fastq
     """
     ignored(context)
-    # this is a bit wierd but want to reuse load_data functionality so I'm rolling with it
+    # this is a bit weird but want to reuse load_data functionality so I'm rolling with it
     config_uri = request.json.get('config_uri', 'production.ini')
     patch_only = request.json.get('patch_only', False)
     app = get_app(config_uri, 'app')

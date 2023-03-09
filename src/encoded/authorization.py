@@ -12,7 +12,7 @@ def groupfinder(login, request):
     if namespace == 'remoteuser':
         if localname in ['EMBED', 'INDEXER']:
             return []
-        elif localname in ['TEST', 'IMPORT', 'UPGRADE']:
+        elif localname in ['TEST', 'IMPORT', 'UPGRADE', 'INGESTION']:
             return ['group.admin']
         elif localname in ['TEST_SUBMITTER']:
             return ['group.submitter']

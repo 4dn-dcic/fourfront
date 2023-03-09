@@ -4,8 +4,10 @@ Collection for objects related to ingestion submissions.
 
 import boto3
 import contextlib
+import io
 import json
 import logging
+from typing import Optional
 # import os
 # import re
 import traceback
@@ -24,7 +26,7 @@ from .base import (
     # ONLY_ADMIN_VIEW_ACL,
 )
 from ..util import (
-    debuglog, beanstalk_env_from_registry, create_empty_s3_file, s3_output_stream,  # subrequest_item_creation,
+    debuglog, beanstalk_env_from_registry, create_empty_s3_file, s3_local_file, s3_output_stream,  # subrequest_item_creation,
     make_vapp_for_ingestion,  # vapp_for_email,
 )
 from ..ingestion.common import metadata_bundles_bucket  # , get_parameter
@@ -99,6 +101,21 @@ class SubmissionFolio:
         with s3_output_stream(self.s3_client, bucket=self.bucket, key=key,
                               s3_encrypt_key_id=self.s3_encrypt_key_id) as fp:
             yield fp
+
+    @contextlib.contextmanager
+    def s3_input(self, bucket: Optional[str] = None, key: Optional[str] = None):
+        if not bucket:
+            bucket = self.bucket
+        if not key:
+            key = self.object_name
+        with s3_local_file(s3_client=self.s3_client, bucket=bucket, key=key) as filename:
+            with io.open(filename, "r") as fp:
+                yield fp
+
+    @contextlib.contextmanager
+    def s3_input_json(self, bucket: Optional[str] = None, key: Optional[str] = None):
+        with self.s3_input(bucket=bucket, key=key) as fp:
+            yield json.load(fp)
 
     def fail(self):
         self.outcome = 'failure'

@@ -10,10 +10,19 @@ from dcicutils.misc_utils import VirtualApp
 # which will call directly back into this process. The former is (typically) used when
 # called via command-line (e.g. generate-ontology); the latter (typically) when called
 # from the ingester process (i.e. ingestion_listener) itself.
+#
+# N.B. Not actually used now/yet. Initially created to call into commands.generate_ontology
+# code from ingestion service, but for now, not generating ontology on the fly from
+# ingestion service because currently requires manual steps to get a proper ontology
+# file anyways; so submit-ontology in SubmitCGAP (sic) will require specification of
+# this such a manually generated (mostly vai generate-ontology script) ontology file.
+# Aspirationally, we'd like to eventually be able to do this (generate ontology
+# on the fly as part of ontology ingestion process).
+
 class IngestionConnection:
 
     # The maximum number of records to retrieve at a time via get_result_set.
-    _MAX_RESULTS_PER_PAGE = 2000
+    _MAX_RESULTS_PER_PAGE = 4000
 
     def __init__(self, connection_or_vapp: Union[dict, VirtualApp]) -> None:
         if isinstance(connection_or_vapp, dict):
@@ -42,7 +51,6 @@ class IngestionConnection:
         """
         Same as get_ontologies_set but executes the returned generator and returns as a list.
         """
-        # TODO: cache/memoize this?
         return list(self.get_ontologies_set(limit=limit, ignore=ignore))
 
     def get_ontology(self, ontology_uuid: str) -> Optional[dict]:

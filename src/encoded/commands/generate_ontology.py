@@ -454,6 +454,9 @@ def connect2server(env=None, key=None):
 
     try:
         auth = get_authentication_with_server(key, env)
+        # TODO
+        # Add option to use local credentials, e.g. end up with something like:
+        # auth = {'secret': 'your-localhost-secret', 'key': 'your-localhost-key', 'server': 'http://localhost:8000'}
     except Exception:
         print("Authentication failed")
         sys.exit(1)

@@ -15,7 +15,7 @@ import re
 import structlog
 import tempfile
 import time
-from typing import Optional
+from typing import Any, Generator, Optional
 
 from dcicutils.ecs_utils import ECSUtils
 from dcicutils.misc_utils import check_true, url_path_join, ignored, find_association, VirtualApp, count_if, identity, PRINT
@@ -255,6 +255,27 @@ def s3_input_stream(s3_client, bucket: str, key: str, mode: str = 'r'):
     with s3_local_file(s3_client, bucket, key) as file:
         with io.open(file, mode=mode) as fp:
             yield fp
+
+
+@contextlib.contextmanager
+def temporary_file(*, extension: Optional[str] = None) -> Generator[Any, None, None]:
+    """
+    Context manager allowing something like this:
+        with temporary_file(extension=".json") as filename:
+            with io.open(filename, "w") as fp:
+                put_something_in_the_temporary_file(fp)
+            with io.open(filename, "r") as fp:
+                process_the_temporary_file(fp)
+    :param extension: Optional filename extension (with the dot prefix if desired, e.g. ".json").
+    """
+    temporary_filename = tempfile.mktemp() + (extension if extension else "")
+    try:
+        yield temporary_filename
+    finally:
+        try:
+            os.remove(temporary_filename)
+        except Exception:
+            pass
 
 
 class SettingsKey:
