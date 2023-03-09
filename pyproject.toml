@@ -1,7 +1,7 @@
 [tool.poetry]
 # Note: Various modules refer to this system as "encoded", not "fourfront".
 name = "encoded"
-version = "5.0.3"
+version = "6.0.0.0b0"
 description = "4DN-DCIC Fourfront"
 authors = ["4DN-DCIC Team <support@4dnucleome.org>"]
 license = "MIT"
@@ -194,7 +194,8 @@ owl-to-items = "encoded.commands.generate_items_from_owl:main"
 profile = "encoded.commands.profile:main"
 # Will asks that there be some better doc for prepare-docker.
 # https://hms-dbmi.atlassian.net/browse/C4-781
-prepare-docker = "encoded.commands.prepare_docker:main"
+prepare-docker = "encoded.commands.prepare_template:prepare_docker_main"
+prepare-local-dev = "encoded.commands.prepare_template:prepare_local_dev_main"
 run-upgrade-on-inserts = "encoded.commands.run_upgrader_on_inserts:main"
 spreadsheet-to-json = "encoded.commands.spreadsheet_to_json:main"
 update-inserts-from-server = "encoded.commands.update_inserts_from_server:main"
