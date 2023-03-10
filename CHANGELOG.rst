@@ -65,7 +65,8 @@ Adding ingestion support (from cgap-portal as initial guide):
 * Updated ``download_url`` in ``encoded/tests/data/master-inserts/ontology.json``
   from ``https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/so.owl``
   to ``https://raw.githubusercontent.com/The-Sequence-Ontology/SO-Ontologies/master/Ontology_Files/so.owl``.
-* Updated ``groupfinder`` in ``encoded/autorization.py`` to include ``INGESTION`` in ``localname``
+  and from ``https://www.ebi.ac.uk/efo/efo.owl`` to ``https://github.com/EBISPOT/efo/releases/download/current/efo.owl"``.
+* Updated ``groupfinder`` in ``encoded/authorization.py`` to include ``INGESTION`` in ``localname``
   check for return of ``group.admin``.
 
 
