@@ -28,7 +28,7 @@ echo "Resolving which entrypoint is desired"
 if [ "$application_type" = $deployment ]; then
   /bin/bash entrypoint_deployment.bash
 elif [ "$application_type" = $ingester ]; then
-  sh entrypoint_ingester.sh
+  sh entrypoint_ingester.bash
 elif [ "$application_type" = $indexer ]; then
   /bin/bash entrypoint_indexer.bash
 elif [ "$application_type" = $portal ]; then
