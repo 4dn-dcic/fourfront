@@ -112,10 +112,9 @@ class SubmissionFolio:
             with io.open(filename, "r") as fp:
                 yield fp
 
-    @contextlib.contextmanager
-    def s3_input_json(self, bucket: Optional[str] = None, key: Optional[str] = None):
+    def get_s3_input_json(self, bucket: Optional[str] = None, key: Optional[str] = None):
         with self.s3_input(bucket=bucket, key=key) as fp:
-            yield json.load(fp)
+            return json.load(fp)
 
     def fail(self):
         self.outcome = 'failure'

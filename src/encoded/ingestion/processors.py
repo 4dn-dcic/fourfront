@@ -54,17 +54,18 @@ def handle_ontology_update(submission: SubmissionFolio):
     """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology
         term update.
     """
-    log.warning(f"Ontology ingestion handler invoked: {submission.bucket}/{submission.object_name}")
+    log.warning("Ontology ingestion handler starting.")
     with submission.processing_context():
+        log.warning(f"Ontology ingestion handler invoked: {submission.bucket}/{submission.object_name}")
         # The following context manager downloads from S3 the payload/data file, opens it, and loads its
         # contents (assumed to be JSON), and returns it as a dictionary; the location of this data file in
         # S3 is assumed to be the bucket named by submission.bucket and the key named by submission.object_name.
-        with submission.s3_input_json() as ontology_json:
-            ontology_json["ontology_term"] = ontology_json.pop("terms", [])
-            ontology_term_count = len(ontology_json["ontology_term"])
-            log.warning(f"Ontology ingestion handler downloaded ontology file. Term count: {ontology_term_count}")
-            # Call into the loadx module to do the actual load of the ontology data.
-            load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
-            log.warning(f"Ontology ingestion handler loaded ontology. Summary below.")
-            log.warning(load_data_response)
-    log.warning(f"Ontology ingestion handler done.")
+        ontology_json = submission.get_s3_input_json()
+        ontology_json["ontology_term"] = ontology_json.pop("terms", [])
+        ontology_term_count = len(ontology_json["ontology_term"])
+        log.warning(f"Ontology ingestion handler downloaded ontology file. Term count: {ontology_term_count}")
+        # Call into the loadx module to do the actual load of the ontology data.
+        load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
+        log.warning("Ontology ingestion handler loaded ontology. Summary below.")
+        log.warning(load_data_response)
+    log.warning("Ontology ingestion handler done.")
