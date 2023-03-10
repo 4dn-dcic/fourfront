@@ -4,7 +4,10 @@
 # uuids. Also INCLUDED in the sample will be ALL parent ontology term records (RECURSIVELY) upon which
 # each chosen ontology term record DEPENDS (this is the important/value-add bit).
 #
-# Usage: python create_sample_ontology_file_from_ontology_file.py source_ontology_file.json > output_file.json
+# Example Usage:
+# python create_sample_ontology_file_from_ontology_file.py --help
+# python create_sample_ontology_file_from_ontology_file.py ontology_file.json --count NUMBER > output.json
+# python create_sample_ontology_file_from_ontology_file.py ontology_file.json --uuids COMMA-SEPARATED-UUIDS > output.json
 
 import argparse
 import copy
