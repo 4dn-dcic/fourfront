@@ -100,8 +100,7 @@ class SettingsKey:
     INDEXER_NAMESPACE = 'indexer.namespace'
     INDEX_SERVER = 'index_server'
     LOAD_TEST_DATA = 'load_test_data'
-    # cgap-only:
-    # METADATA_BUNDLES_BUCKET = 'metadata_bundles_bucket'
+    METADATA_BUNDLES_BUCKET = 'metadata_bundles_bucket'
     S3_ENCRYPT_KEY_ID = 's3_encrypt_key_id'
     SNOVAULT_VERSION = 'snovault_version'
     SQLALCHEMY_URL = 'sqlalchemy.url'
