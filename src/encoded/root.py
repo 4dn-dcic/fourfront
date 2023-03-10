@@ -164,7 +164,7 @@ def health_check(config):
             h.INDEXER: settings.get(s.INDEXER),
             h.INDEX_SERVER: settings.get(s.INDEX_SERVER),
             h.LOAD_DATA: settings.get(s.LOAD_TEST_DATA),
-            # h.METADATA_BUNDLES_BUCKET: settings.get(s.METADATA_BUNDLES_BUCKET),  # cgap-only
+            h.METADATA_BUNDLES_BUCKET: settings.get(s.METADATA_BUNDLES_BUCKET),
             h.NAMESPACE: settings.get(s.INDEXER_NAMESPACE),
             h.PROCESSED_FILE_BUCKET: settings.get(s.FILE_WFOUT_BUCKET),
             h.PROJECT_VERSION: settings.get(s.ENCODED_VERSION),
