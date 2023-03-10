@@ -57,8 +57,8 @@ def handle_ontology_update(submission: SubmissionFolio):
     log.warning("Ontology ingestion handler starting.")
     with submission.processing_context():
         log.warning(f"Ontology ingestion handler invoked: {submission.bucket}/{submission.object_name}")
-        # The following context manager downloads from S3 the payload/data file, opens it, and loads its
-        # contents (assumed to be JSON), and returns it as a dictionary; the location of this data file in
+        # The following get_s3_input_json call downloads from S3 the payload/data file, opens it, and loads
+        # its contents (assumed to be JSON), and returns it as a dictionary; the location of this data file in
         # S3 is assumed to be the bucket named by submission.bucket and the key named by submission.object_name.
         ontology_json = submission.get_s3_input_json()
         ontology_json["ontology_term"] = ontology_json.pop("terms", [])
