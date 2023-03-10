@@ -74,7 +74,7 @@ def handle_ontology_update(submission: SubmissionFolio):
         load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
         INFO(f"Ontology ingestion handler initiated load.")
         # The response is a generate so we need to dereference if to actually cause it to do its work.
-        dereferenced_load_data_response = list(load_data_response)
+        dereferenced_load_data_response = str(load_data_response)
         INFO(f"Ontology ingestion handler load done. Summary below.")
         INFO(dereferenced_load_data_response)
     log.warning("Ontology ingestion handler done.")
