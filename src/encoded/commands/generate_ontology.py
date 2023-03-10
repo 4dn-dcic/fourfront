@@ -392,33 +392,12 @@ def get_slim_terms(connection, limit: Optional[int] = None):
     """Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
     """
-#   # currently need to hard code the categories of slims but once the ability
-#   # to search all can add parameters to retrieve all or just the terms in the
-#   # categories passed as a list
-#   slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
-#   slim_terms = []
-#   for cat in slim_categories:
-#       try:
-#           terms = IngestionConnection(connection).get_ontology_terms_set(category=cat, limit=limit)
-#           slim_terms.extend(terms)
-#       except TypeError as e:
-#           print(e)
-#           continue
-#   return slim_terms
     return IngestionConnection(connection).get_ontology_slim_terms(limit=limit)
 
 
 def get_existing_ontology_terms(connection, limit: Optional[int] = None):  # , ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
-#   ignore = [
-#       "111112bc-8535-4448-903e-854af460a233", "111113bc-8535-4448-903e-854af460a233",
-#       "111114bc-8535-4448-903e-854af460a233", "111116bc-8535-4448-903e-854af460a233",
-#       "111117bc-8535-4448-903e-854af460a233"
-#   ]
-#   db_terms = IngestionConnection(connection).get_ontology_terms_set(limit=limit,
-#                                                                     ignore=lambda item: item["uuid"] in ignore)
-#   return {t['term_id']: t for t in db_terms if t['uuid'] not in ignore}
     connection = IngestionConnection(connection)
     return connection.get_ontology_terms_dict(limit=limit, ignore=lambda term: term["uuid"] in ONTOLOGY_TERMS_TO_IGNORE)
 
@@ -1026,7 +1005,7 @@ def parse_args(args):
                         help="The name of the key to use in the keyfile.")
     parser.add_argument('--app-name', help="Pyramid app name in configfile - needed to load terms directly")
     parser.add_argument('--config-uri', help="path to configfile - needed to load terms directly")
-    parser.add_argument('--limit-terms', type=int, default=None, help="Limit the number of ontology terms to fetch.")
+    parser.add_argument('--limit-terms', type=int, default=None, help="Limit the number of ontology terms to fetch; for testing.")
     parser.add_argument('--local-key', help='Local access key ID if using local env.')
     parser.add_argument('--local-secret', help='Local access key secret if using local env.')
 
