@@ -1009,7 +1009,8 @@ def parse_args(args):
                              " and skip terms imported from other ontologies")
     parser.add_argument('--owlfile',
                         default=None,
-                        help="Path to local owl file to use instead of downloading - can only be used to process a single ontology")
+                        help="Path to local owl file to use instead of downloading - can only be used \
+                        to process a single ontology")
     parser.add_argument('--outfile',
                         help="the optional path and file to write output default is src/encoded/ontology_term.json ")
     parser.add_argument('--pretty',
@@ -1095,7 +1096,8 @@ def main():
         print('Processing: ', ontology['ontology_name'])
         if ontology.get('download_url', None) is not None:
             # get all the terms for an ontology
-            terms, v, deprecated = download_and_process_owl(ontology, terms, deprecated, simple=args.simple, owlfile=args.owlfile)
+            terms, v, deprecated = download_and_process_owl(
+                    ontology, terms, deprecated, simple=args.simple, owlfile=args.owlfile)
             if not v and ontology.get('ontology_name').upper() == 'UBERON':
                 try:
                     result = requests.get('https://api.github.com/repos/obophenotype/uberon/git/refs/tags')
