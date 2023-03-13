@@ -2,6 +2,7 @@ import base64
 import os
 from operator import itemgetter
 import jwt
+import json
 from base64 import b64decode
 
 from passlib.context import CryptContext
@@ -40,6 +41,8 @@ from snovault.validators import no_validate_item_content_post
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.schema_utils import validate_request
 from snovault.util import debug_log
+from snovault.redis.interfaces import REDIS
+from dcicutils.redis_tools import RedisSessionToken
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -65,6 +68,11 @@ JWT_ALL_ALGORITHMS = ['ES512', 'RS384', 'HS512', 'ES256', 'none',
 JWT_DECODING_ALGORITHMS = [JWT_ENCODING_ALGORITHM]
 
 
+CONTENT_TYPE = "Content-Type"
+JSON_CONTENT_TYPE = "application/json"
+STANDARD_HEADERS = {CONTENT_TYPE: JSON_CONTENT_TYPE}
+
+
 def includeme(config):
     config.include('.edw_hash')
     setting_prefix = 'passlib.'
@@ -85,7 +93,64 @@ def includeme(config):
     config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
     config.add_route('create-unauthorized-user', '/create-unauthorized-user')
+    if 'redis.server' in config.registry.settings:  # enable callback only when Redis in use
+        config.add_route('callback', '/callback')
     config.scan(__name__)
+
+
+@view_config(route_name='callback', request_method='POST', permission=NO_PERMISSION_REQUIRED)
+def redis_authentication_callback(context, request):
+    """ /callback for Fourfront that will result in a session token
+        Note that this sets jwtToken as to not break the front-end
+    """
+    auth0_code = request.json_body.get('code', None)
+    is_https = request.scheme == "https"
+
+    # Acquire Auth0 configuration
+    registry = request.registry
+    auth0_domain = registry.settings.get('auth0.domain')
+    auth0_client = registry.settings.get('auth0.client')
+    auth0_secret = registry.settings.get('auth0.secret')
+    if not (auth0_code and auth0_domain and auth0_client and auth0_secret):
+        raise HTTPForbidden('Auth0 not configured, no callback possible')
+
+    # Create auth0 payload, send and get JWT back
+    auth0_redirect_uri = request.path  # redirect to the resource at which we logged in
+    auth0_payload = {
+        'grant_type': 'authorization_code',
+        'client_id': auth0_client,
+        'client_secret': auth0_secret,
+        'code': auth0_code,
+        'redirect_uri': auth0_redirect_uri
+    }
+    auth0_post_url = f'https://{auth0_domain}/oauth/token'
+    auth0_payload_json = json.dumps(auth0_payload)
+    auth0_headers = STANDARD_HEADERS
+    auth0_response = requests.post(auth0_post_url, data=auth0_payload_json, headers=auth0_headers)
+    auth0_response_json = auth0_response.json()
+    auth0_jwt = auth0_response_json.get('id_token')
+    if not auth0_jwt:
+        raise HTTPUnauthorized('No JWT returned from Auth0, check Auth0 configuration')
+
+    # Generate a session from Redis
+    redis_handler = registry[REDIS]
+    env_name = registry.settings['env.name']
+    redis_session_token = RedisSessionToken(
+        namespace=env_name,
+        jwt=auth0_jwt
+    )
+    redis_session_token.store_session_token(redis_handler=redis_handler)
+    request.response.set_cookie(
+        'jwtToken',  # note that although we are setting jwtToken, it is NOT a JWT when going through this route
+        value=redis_session_token.get_session_token(),
+        domain=request.domain,
+        path='/',
+        httponly=True,
+        samesite='lax',
+        overwrite=True,
+        secure=is_https
+    )
+    return {'saved_cookie': True}
 
 
 class NamespacedAuthenticationPolicy(object):
