@@ -20,7 +20,7 @@ class IngestionQueueManager:
     but now the Ingestion functionality is generic and can be extended to arbitrary processing on
     any type.
     """
-    BUCKET_EXTENSION = '-ingestion-queue'  # XXX: breaking change, matches 4dn-cloud-infra resources
+    QUEUE_NAME_EXTENSION = '-ingestion-queue'  # XXX: breaking change, matches 4dn-cloud-infra resources
 
     def __init__(self, registry, override_name=None):
         """ Does initial setup for interacting with SQS """
@@ -33,7 +33,7 @@ class IngestionQueueManager:
             'region_name': 'us-east-1'
         }
         self.client = boto3.client('sqs', **kwargs)
-        self.queue_name = override_name or (self.env_name + self.BUCKET_EXTENSION)
+        self.queue_name = override_name or (self.env_name + self.QUEUE_NAME_EXTENSION)
         self.queue_attrs = {
             self.queue_name: {
                 'DelaySeconds': '1',  # messages initially invisible for 1 sec
