@@ -626,12 +626,6 @@ def main():
     parser.add_argument('--username', '-u', default='IMPORT', help='Import username')
     parser.add_argument('--dry-run', action='store_true', help='Do not post variants, just validate')
     parser.add_argument('config_uri', help="path to configfile")
-    # For testing/troubleshooting.
-    parser.add_argument('--generate-ontologies', action='store_true')
-    parser.add_argument('--generate-ontology-terms', action='store_true')
-    parser.add_argument('--generate-ontology-terms-dict', action='store_true')
-    parser.add_argument('--generate-ontology-slim-terms', action='store_true')
-    parser.add_argument('--limit-ontology-terms', type=int, default=None)
     args = parser.parse_args()
 
     app = paster.get_app(args.config_uri, args.app_name)
@@ -641,26 +635,6 @@ def main():
     }
 
     vapp = VirtualApp(app, config)
-
-    # For testing/troubleshooting.
-    if args.generate_ontologies or args.generate_ontology_terms or args.generate_ontology_terms_dict or args.generate_ontology_slim_terms:
-        if args.generate_ontologies:
-            print("ONTOLOGIES:")
-            ontologies = IngestionConnection(vapp).get_ontologies()
-            print(ontologies)
-            #for ontology in ontologies:
-            #    download_url = ontology.get('download_url')
-            #    terms, v, deprecated = download_and_process_owl(ontology, connection, terms, deprecated, simple=args.simple)
-        if args.generate_ontology_terms:
-            print("ONTOLOGY TERMS:")
-            print(IngestionConnection(vapp).get_ontology_terms(limit=args.limit_ontology_terms))
-        if args.generate_ontology_terms_dict:
-            print("ONTOLOGY TERMS DICTIONARY:")
-            print(IngestionConnection(vapp).get_ontology_terms_dict(limit=args.limit_ontology_terms))
-        if args.generate_ontology_slim_terms:
-            print("ONTOLOGY SLIM TERMS:")
-            print(IngestionConnection(vapp).get_ontology_slim_terms(limit=args.limit_ontology_terms))
-        return
 
     return run(vapp)
 
