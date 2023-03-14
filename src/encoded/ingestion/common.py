@@ -13,15 +13,6 @@ def metadata_bundles_bucket(registry):
 # ==================================================
 
 
-# Guaranteed to exist
-CGAP_CORE_PROJECT = '/projects/cgap-core'
-CGAP_CORE_INSTITUTION = '/institutions/hms-dbmi/'
-
-
-# NOT guaranteed to exist, but we need to know about it
-CGAP_TRAINING_PROJECT = '/projects/cgap-training'
-
-
 def register_path_content_type(*, path, content_type):
     """
     Registers that endpoints that begin with the specified path use the indicated content_type.
