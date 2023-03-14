@@ -26,7 +26,7 @@ from ..commands.owltools import (
     OnProperty,
     Deprecated
 )
-from ..ingestion.ingestion_connection import EncodedAPIConnection
+from ..ingestion.encoded_api_connection import EncodedAPIConnection
 
 
 EPILOG = __doc__
