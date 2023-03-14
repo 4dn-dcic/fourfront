@@ -104,7 +104,7 @@ def submit_for_ingestion(context, request):
 
     submission_id, instance = extract_submission_info(request)
 
-    # The three arguments institution, project, and ingestion_type were needed in the old protocol
+    # The three arguments award, lab, and ingestion_type were needed in the old protocol
     # but are not needed in the new protocol because someone will have set up the IngestionSubmission
     # object already with the right values. We tolerate them here, but we insist they be consistent (redundant).
     # Note, too, that we use the 'update=True' option that causes them to be added to our parameters if they are
@@ -113,19 +113,19 @@ def submit_for_ingestion(context, request):
     # I just went with path of least resistance for now.)
     # -kmp 2-Dec-2020
 
-    if instance.get("institution"):
-        institution = instance['institution']['@id']
-        institution_arg = get_parameter(parameters, "institution", default=institution, update=True)
-        if institution_arg != institution:
-            # If the "institution" argument was passed, which we no longer require, make sure it's consistent.
-            raise SubmissionFailure("'institution' was supplied inconsistently for submit_for_ingestion.")
+    if instance.get("award"):
+        award = instance['award']['@id']
+        award_arg = get_parameter(parameters, "award", default=award, update=True)
+        if award_arg != award:
+            # If the "award" argument was passed, which we no longer require, make sure it's consistent.
+            raise SubmissionFailure("'award' was supplied inconsistently for submit_for_ingestion.")
 
-    if instance.get("project"):
-        project = instance['project']['@id']
-        project_arg = get_parameter(parameters, "project", default=project, update=True)
-        if project_arg != project:
-            # If the "project" argument was passed, which we no longer require, make sure it's consistent.
-            raise SubmissionFailure("'project' was supplied inconsistently for submit_for_ingestion.")
+    if instance.get("lab"):
+        lab = instance['lab']['@id']
+        lab_arg = get_parameter(parameters, "lab", default=lab, update=True)
+        if lab_arg != lab:
+            # If the "lab" argument was passed, which we no longer require, make sure it's consistent.
+            raise SubmissionFailure("'lab' was supplied inconsistently for submit_for_ingestion.")
 
     ingestion_type = instance['ingestion_type']
     ingestion_type_arg = get_parameter(parameters, "ingestion_type", default=ingestion_type, update=True)
@@ -258,7 +258,6 @@ def process_submission(*, submission_id, ingestion_type, app, bundles_bucket=Non
         debuglog("Manifest data is missing 'email' field.")
         if DEBUG_SUBMISSIONS:
             pass
-            # import pdb; pdb.set_trace()
     debuglog("processing submission %s with email %s" % (submission_id, email))
     with vapp_for_email(email=email, app=app) as vapp:
         if DEBUG_SUBMISSIONS:
