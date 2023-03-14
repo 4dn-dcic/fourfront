@@ -311,14 +311,14 @@ def extra_kwargs_for_s3_encrypt_key_id(s3_encrypt_key_id, client_name):
 
     extra_kwargs = {}
     if s3_encrypt_key_id:
-        log.error(f"{client_name} adding SSEKMSKeyId ({s3_encrypt_key_id}) arguments in upload_fileobj call.")
+        log.warning(f"{client_name} adding SSEKMSKeyId ({s3_encrypt_key_id}) arguments in upload_fileobj call.")
         extra_kwargs["ExtraArgs"] = {
             ExtraArgs.SERVER_SIDE_ENCRYPTION: "aws:kms",
             ExtraArgs.SSE_KMS_KEY_ID: s3_encrypt_key_id,
         }
     else:
-        log.error(f"{client_name} found no s3 encrypt key id ({SettingsKey.S3_ENCRYPT_KEY_ID})"
-                  f" in request.registry.settings.")
+        log.warning(f"{client_name} found no s3 encrypt key id ({SettingsKey.S3_ENCRYPT_KEY_ID})"
+                    f" in request.registry.settings.")
 
     return extra_kwargs
 
