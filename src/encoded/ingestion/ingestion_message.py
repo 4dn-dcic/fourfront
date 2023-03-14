@@ -8,8 +8,6 @@ class IngestionMessage:
     the ingestion_message_handler decorator. Note that the ingestion type name
     string is trimmed and treated as case-insensitive.
     """
-    TYPE_VCF = "vcf"
-
     def __init__(self, raw_message: dict) -> None:
         self.body = json.loads(raw_message["Body"]) or {}
         self.uuid = self.body["uuid"] or ""
@@ -17,6 +15,3 @@ class IngestionMessage:
 
     def is_type(self, value: str) -> bool:
         return isinstance(value, str) and self.type == value.lower()
-
-    def is_vcf(self) -> bool:
-        return self.is_type(self.TYPE_VCF)
