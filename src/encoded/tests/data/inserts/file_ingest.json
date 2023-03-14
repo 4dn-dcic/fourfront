@@ -1,0 +1,14 @@
+[
+ {
+    "uuid": "d042027a-b885-4ffa-9182-18c1b1d25e42",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "file_format": "d1311111-218e-4f61-aaf0-91f226248b2c",
+    "filename": "ENCFF798HCY.bigWig",
+    "lab": "encode-dcc-lab",
+    "award": "encode-award",
+    "accession": "4DNFIENCODEDV",
+    "description": "bigWig file of fold change values on H3K79me2 ChIP-seq in H1-hESC cells",
+    "file_type": "fold change over control"
+ }
+]

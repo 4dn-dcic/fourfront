@@ -1340,6 +1340,25 @@ class FileMicroscopy(ItemWithAttachment, File):
     name_key = 'accession'
 
 
+@collection(
+    name='files-ingest',
+    unique_key='accession',
+    properties={
+        'title': 'Ingestion Files',
+        'description': 'Listing of Files for Ingestion',
+    })
+class FileIngest(File):
+    """Collection for general files for ingestion."""
+    item_type = 'file_ingest'
+    schema = load_schema('encoded:schemas/file_ingest.json')
+    embedded_list = File.embedded_list
+    name_key = 'accession'
+
+    @classmethod
+    def get_bucket(cls, registry):
+        return registry.settings['blob_bucket']
+
+
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
 @debug_log
