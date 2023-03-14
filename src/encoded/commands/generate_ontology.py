@@ -392,14 +392,14 @@ def get_slim_terms(connection, limit: Optional[int] = None):
     """Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
     """
-    return EncodedAPIConnection(connection).get_ontology_slim_terms(limit=limit)
+    return EncodedAPIConnection(connection).search_ontology_slim_terms(limit=limit)
 
 
 def get_existing_ontology_terms(connection, limit: Optional[int] = None):  # , ontologies=None):
     """Retrieves all existing ontology terms from the db
     """
     connection = EncodedAPIConnection(connection)
-    return connection.get_ontology_terms_dict(limit=limit, ignore=lambda term: term["uuid"] in ONTOLOGY_TERMS_TO_IGNORE)
+    return connection.search_ontology_terms_as_dict(limit=limit, ignore=lambda term: term["uuid"] in ONTOLOGY_TERMS_TO_IGNORE)
 
 
 def get_ontologies(connection, ont_list):
@@ -408,7 +408,7 @@ def get_ontologies(connection, ont_list):
     """
     ontologies = []
     if ont_list == 'all':
-        ontologies = EncodedAPIConnection(connection).get_ontologies()
+        ontologies = EncodedAPIConnection(connection).search_ontologies()
     else:
         ontologies = [EncodedAPIConnection(connection).get_ontology(ont_list)]
     # removing item not found cases with reporting
@@ -632,7 +632,7 @@ def update_parents(termid, ontid, tparents, dparents, simple, connection):
     dpmeta = dparents
     if not dpmeta or 'source_ontologies' not in dpmeta[0] or 'term_id' not in dpmeta[0]:
         # make sure we have the required fields - should be embedded but maybe not
-        dpmeta = [EncodedAPIConnection(connection).get_ontology_term(p.get('uuid')) for p in dparents]
+        dpmeta = [EncodedAPIConnection(connection).search_ontology_term(p.get('uuid')) for p in dparents]
     for dp in dpmeta:
         donts = [o.get('uuid') for o in dp.get('source_ontologies')]
     dp2chk = [p.get('uuid') for p in dpmeta if ontid in donts]

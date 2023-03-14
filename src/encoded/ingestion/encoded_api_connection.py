@@ -11,17 +11,22 @@ from dcicutils.misc_utils import VirtualApp
 # called via command-line (e.g. generate-ontology); the latter (typically) when called
 # from the ingester process (i.e. ingestion_listener) itself.
 #
-# N.B. Not actually used now/yet. Initially created to call into commands.generate_ontology
-# code from ingestion service, but for now, not generating ontology on the fly from
-# ingestion service because currently requires manual steps to get a proper ontology
-# file anyways; so submit-ontology in SubmitCGAP (sic) will require specification of
-# this such a manually generated (mostly vai generate-ontology script) ontology file.
-# Aspirationally, we'd like to eventually be able to do this (generate ontology
-# on the fly as part of ontology ingestion process).
+# WRT naming convension for methods in this class, methods begining with "search_"
+# indicate that a search result is being returned, and those beginning with "get_"
+# indicate that a single specific result is being returned; and methods ending
+# in "_set" indicate that a generator (which can be iterated on) is being returned.
+#
+# N.B. Not actually substantively used yet, except for in commands.generate_ontology.
+# Orginally WAS going to generate ontology on the fly from the ingestion service, but
+# now NOT doing that because the ontology file generation process still as yet requires
+# manual steps to get a proper ontology file; so submit-ontology in SubmitCGAP (sic) will
+# require specification of this such a manually generated (mostly via generate-ontology
+# script) ontology file. Ideally, aspirationally, we'd like to eventually be able to do
+# generate the ontology on the fly as part of ontology ingestion process.
 
 class EncodedAPIConnection:
 
-    # The maximum number of records to retrieve at a time via get_result_set.
+    # The maximum number of records to retrieve at a time via search_result_set.
     _MAX_RESULTS_PER_PAGE = 4000
 
     def __init__(self, connection_or_vapp: Union[dict, VirtualApp]) -> None:
@@ -34,24 +39,24 @@ class EncodedAPIConnection:
         else:
             raise Exception("Error creating EncodedAPIConnection")
 
-    def get_ontologies_set(self,
-                           limit: Optional[int] = None,
-                           ignore: Optional[Callable] = None) -> Generator:
+    def search_ontologies_set(self,
+                              limit: Optional[int] = None,
+                              ignore: Optional[Callable] = None) -> Generator:
         """
         Returns a generator for paging through all available ontologies.
         N.B. The limit argument is really only for testing/troublshooting to limits
         the TOTAL number of results returned; not related to the limit variable
         used internally in this module to limit results per page for paging.
         """
-        return self.get_result_set("search/?type=Ontology", limit, ignore)
+        return self.search_result_set("search/?type=Ontology", limit, ignore)
 
-    def get_ontologies(self,
-                       limit: Optional[int] = None,
-                       ignore: Optional[Callable] = None) -> list:
+    def search_ontologies(self,
+                          limit: Optional[int] = None,
+                          ignore: Optional[Callable] = None) -> list:
         """
-        Same as get_ontologies_set but executes the returned generator and returns as a list.
+        Same as search_ontologies_set but executes the returned generator and returns as a list.
         """
-        return list(self.get_ontologies_set(limit=limit, ignore=ignore))
+        return list(self.search_ontologies_set(limit=limit, ignore=ignore))
 
     def get_ontology(self, ontology_uuid: str) -> Optional[dict]:
         """
@@ -62,8 +67,8 @@ class EncodedAPIConnection:
             return self.get_result(query)
         else:
             # Looks like the given ontology is a actually name rather than a uuid.
-            # look it up its uuid in the list of all ontologies (via get_ontologies;
-            ontologies = self.get_ontologies()
+            # look it up its uuid in the list of all ontologies (via search_ontologies;
+            ontologies = self.search_ontologies()
             if not ontologies:
                 return None
             ontology_uuid = [ontology["uuid"] for ontology in ontologies if ontology["ontology_prefix"] == ontology_uuid]
@@ -76,10 +81,10 @@ class EncodedAPIConnection:
                 raise Exception(f"Invalid uuid for ontology: {ontology_uuid}")
             return self.get_ontology(ontology_uuid)
 
-    def get_ontology_terms_set(self,
-                               category: Optional[str] = None,
-                               limit: Optional[int] = None,
-                               ignore: Optional[Callable] = None) -> Generator:
+    def search_ontology_terms_set(self,
+                                  category: Optional[str] = None,
+                                  limit: Optional[int] = None,
+                                  ignore: Optional[Callable] = None) -> Generator:
         """
         Returns a generator for paging through all available ontology terms.
         N.B. The limit argument is really only for testing/troublshooting to limits
@@ -87,30 +92,30 @@ class EncodedAPIConnection:
         used internally in this module to limit results per page for paging.
         """
         if category:
-            return self.get_result_set(f"search/?type=OntologyTerm&is_slim_for={category}", limit, ignore)
+            return self.search_result_set(f"search/?type=OntologyTerm&is_slim_for={category}", limit, ignore)
         else:
             # TODO: What exactly do status=released and status=obsolete do?
-            return self.get_result_set(f"search/?type=OntologyTerm&status=released&status=obsolete", limit, ignore)
+            return self.search_result_set(f"search/?type=OntologyTerm&status=released&status=obsolete", limit, ignore)
 
-    def get_ontology_terms(self,
-                           category: Optional[str] = None,
-                           limit: Optional[int] = None,
-                           ignore: Optional[Callable] = None) -> list:
+    def search_ontology_terms(self,
+                              category: Optional[str] = None,
+                              limit: Optional[int] = None,
+                              ignore: Optional[Callable] = None) -> list:
         """
-        Same as get_ontology_terms_set but executes the returned generator and returns as a list.
+        Same as search_ontology_terms_set but executes the returned generator and returns as a list.
         N.B. The limit argument is really only for testing/troublshooting to limits
         the TOTAL number of results returned; not related to the limit variable
         used internally in this module to limit results per page for paging.
         """
-        return list(self.get_ontology_terms_set(category=category, limit=limit, ignore=ignore))
+        return list(self.search_ontology_terms_set(category=category, limit=limit, ignore=ignore))
 
-    def get_ontology_terms_dict(self,
-                                limit: Optional[int] = None,
-                                ignore: Optional[Callable] = None) -> dict:
+    def search_ontology_terms_as_dict(self,
+                                      limit: Optional[int] = None,
+                                      ignore: Optional[Callable] = None) -> dict:
         """
-        Same as get_ontology_terms but returns that list as a dictionary indexed by name (term_id).
+        Same as search_ontology_terms but returns that list as a dictionary indexed by name (term_id).
         """
-        terms = self.get_ontology_terms(limit=limit, ignore=ignore)
+        terms = self.search_ontology_terms(limit=limit, ignore=ignore)
         return {term["term_id"]: term for term in terms}
 
     def get_ontology_term(self, ontology_term_uuid: str) -> Optional[dict]:
@@ -119,14 +124,14 @@ class EncodedAPIConnection:
         """
         return self.get_result(f"search/?type=OntologyTerm&uuid={ontology_term_uuid}")
 
-    def get_ontology_slim_terms(self, limit: Optional[int] = None) -> list:
+    def search_ontology_slim_terms(self, limit: Optional[int] = None) -> list:
         """
         """
         slim_categories = ['developmental', 'assay', 'organ', 'system', 'cell']
         slim_terms = []
         for category in slim_categories:
             try:
-                terms = self.get_ontology_terms_set(category=category, limit=limit)
+                terms = self.search_ontology_terms_set(category=category, limit=limit)
                 slim_terms.extend(terms)
             except TypeError:
                 pass
@@ -138,9 +143,9 @@ class EncodedAPIConnection:
         """
         return self.get_result(f"ontology-terms/{ontology_term_uuid}/@@links")
 
-    def get_result_set(self, query: str,
-                       limit: Optional[int] = None,
-                       ignore: Optional[Callable] = None) -> Generator:
+    def search_result_set(self, query: str,
+                          limit: Optional[int] = None,
+                          ignore: Optional[Callable] = None) -> Generator:
         """
         Returns a generator for paging through a list of results for the given query.
         N.B. The limit argument is really only for testing/troublshooting to limits
@@ -150,7 +155,7 @@ class EncodedAPIConnection:
         limit = self._parse_limit_or_offset(limit)
         offset = 0
         while True:
-            query = self._create_result_set_query(query, limit, offset)
+            query = self._create_search_result_set_query(query, limit, offset)
             try:
                 if self.connection:
                     response = search_metadata(query, self.connection, page_limit=self._MAX_RESULTS_PER_PAGE, is_generator=True)
@@ -172,16 +177,16 @@ class EncodedAPIConnection:
                 # No results in this result set (page); we are done.
                 break
 
-    def get_results(self, query: str,
-                    limit: Optional[int] = None,
-                    ignore: Optional[Callable] = None) -> list:
+    def search_results(self, query: str,
+                       limit: Optional[int] = None,
+                       ignore: Optional[Callable] = None) -> list:
         """
-        Same as get_result_set but executes the returned generator and returns as a list.
+        Same as search_result_set but executes the returned generator and returns as a list.
         N.B. The limit argument is really only for testing/troublshooting to limits
         the TOTAL number of results returned; not related to the limit variable
         used internally in this module to limit results per page for paging.
         """
-        return list(self.get_result_set(query, limit, ignore))
+        return list(self.search_result_set(query, limit, ignore))
 
     def get_result(self, query: str) -> Optional[Union[dict]]:
         """
@@ -209,10 +214,10 @@ class EncodedAPIConnection:
             raise Exception(f"Unexpected result type: {type(response)}")
         return response
 
-    def _create_result_set_query(self,
-                                 query: str,
-                                 limit: Optional[int] = None, offset: Optional[int] = None,
-                                 sort: Optional[str] = "uuid") -> str:
+    def _create_search_result_set_query(self,
+                                        query: str,
+                                        limit: Optional[int] = None, offset: Optional[int] = None,
+                                        sort: Optional[str] = "uuid") -> str:
         """
         Returns the given URL-style query (could be a full URL or just the path) augmented with
         the given limit, offset (i.e. from), and/or sort query string arguments if they are set.
