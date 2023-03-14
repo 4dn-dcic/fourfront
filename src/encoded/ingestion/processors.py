@@ -57,8 +57,7 @@ def handle_data_bundle(submission: SubmissionFolio):
 
 @ingestion_processor('ontology')
 def handle_ontology_update(submission: SubmissionFolio):
-    """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology
-        term update.
+    """ Idea being you can submit a SubmissionFolio item that corresponds to an ontology term update.
     """
     log.warning("Ontology ingestion handler starting.")
     with submission.processing_context():
@@ -67,13 +66,16 @@ def handle_ontology_update(submission: SubmissionFolio):
         # its contents (assumed to be JSON), and returns it as a dictionary; the location of this data file in
         # S3 is assumed to be the bucket named by submission.bucket and the key named by submission.object_name.
         ontology_json = submission.get_s3_input_json()
+        # The loadx module expects to see the terms in the "ontology_terms" key.
         ontology_json["ontology_term"] = ontology_json.pop("terms", [])
+        # Get the number of ontology terms just for logging purposes.
         ontology_term_count = len(ontology_json["ontology_term"])
         INFO(f"Ontology ingestion handler downloaded ontology file. Term count: {ontology_term_count}")
         # Call into the loadx module to do the actual load of the ontology data.
         load_data_response = load_data_via_ingester(submission.vapp, ontology_json)
         INFO(f"Ontology ingestion handler initiated load.")
-        # The response is a generate so we need to dereference if to actually cause it to do its work.
+        # The response is a generate so we need to dereference it to actually cause it to do its work;
+        # and its string value is a text summary of what was done.
         dereferenced_load_data_response = str(load_data_response)
         INFO(f"Ontology ingestion handler load done. Summary below.")
         INFO(dereferenced_load_data_response)

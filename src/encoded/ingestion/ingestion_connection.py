@@ -5,7 +5,7 @@ import uuid
 from dcicutils.ff_utils import get_metadata, search_metadata
 from dcicutils.misc_utils import VirtualApp
 
-# IngestionConnection encapsulates some basic ontology related queries.
+# EncodedAPIConnection encapsulates some basic ontology related queries.
 # Works via either (HTTP) connection to the portal via ff_utils, or with a VirtualApp
 # which will call directly back into this process. The former is (typically) used when
 # called via command-line (e.g. generate-ontology); the latter (typically) when called
@@ -19,7 +19,7 @@ from dcicutils.misc_utils import VirtualApp
 # Aspirationally, we'd like to eventually be able to do this (generate ontology
 # on the fly as part of ontology ingestion process).
 
-class IngestionConnection:
+class EncodedAPIConnection:
 
     # The maximum number of records to retrieve at a time via get_result_set.
     _MAX_RESULTS_PER_PAGE = 4000
@@ -32,7 +32,7 @@ class IngestionConnection:
             self.connection = None
             self.vapp = connection_or_vapp
         else:
-            raise Exception("Error creating IngestionConnection")
+            raise Exception("Error creating EncodedAPIConnection")
 
     def get_ontologies_set(self,
                            limit: Optional[int] = None,
