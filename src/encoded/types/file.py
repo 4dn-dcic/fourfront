@@ -1341,16 +1341,16 @@ class FileMicroscopy(ItemWithAttachment, File):
 
 
 @collection(
-    name='files-ingest',
+    name='files-any',
     unique_key='accession',
     properties={
-        'title': 'Ingestion Files',
-        'description': 'Listing of Files for Ingestion',
+        'title': 'Any Files',
+        'description': 'Listing of Any Files for Ingestion',
     })
-class FileIngest(File):
-    """Collection for general files for ingestion."""
-    item_type = 'file_ingest'
-    schema = load_schema('encoded:schemas/file_ingest.json')
+class FileAny(File):
+    """Collection for any files for ingestion."""
+    item_type = 'file_any'
+    schema = load_schema('encoded:schemas/file_any.json')
     embedded_list = File.embedded_list
     name_key = 'accession'
 

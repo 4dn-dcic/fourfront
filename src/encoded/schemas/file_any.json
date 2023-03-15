@@ -1,7 +1,7 @@
 {
-    "title": "Ingestion file",
-    "description": "Files to ingest.",
-    "id": "/profiles/file_ingest.json",
+    "title": "Any file",
+    "description": "Any files to ingest.",
+    "id": "/profiles/file_any.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["file_format", "award", "lab"],
