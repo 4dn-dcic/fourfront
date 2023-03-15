@@ -3,10 +3,9 @@ import os
 from operator import itemgetter
 import jwt
 import json
-from base64 import b64decode
 
 from passlib.context import CryptContext
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy
@@ -18,21 +17,17 @@ from pyramid.path import (
 )
 from pyramid.security import (
     NO_PERMISSION_REQUIRED,
-    remember,
-    forget,
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
     HTTPUnauthorized,
-    HTTPFound
+    HTTPTemporaryRedirect
 )
 from pyramid.view import (
     view_config,
 )
-from pyramid.settings import asbool
 from snovault import (
     ROOT,
-    CONNECTION,
     COLLECTIONS
 )
 from snovault.validation import ValidationFailure
@@ -98,12 +93,14 @@ def includeme(config):
     config.scan(__name__)
 
 
-@view_config(route_name='callback', request_method='POST', permission=NO_PERMISSION_REQUIRED)
-def redis_authentication_callback(context, request):
+@view_config(route_name='callback', request_method='GET', permission=NO_PERMISSION_REQUIRED)
+def callback(context, request):
     """ /callback for Fourfront that will result in a session token
         Note that this sets jwtToken as to not break the front-end
     """
-    auth0_code = request.json_body.get('code', None)
+    auth0_code = request.params.get('code', None)
+    if not auth0_code:
+        raise HTTPForbidden('No code sent back from Auth0')
     is_https = request.scheme == "https"
 
     # Acquire Auth0 configuration
@@ -115,7 +112,7 @@ def redis_authentication_callback(context, request):
         raise HTTPForbidden('Auth0 not configured, no callback possible')
 
     # Create auth0 payload, send and get JWT back
-    auth0_redirect_uri = request.path  # redirect to the resource at which we logged in
+    auth0_redirect_uri = request.host_url  # redirect to /
     auth0_payload = {
         'grant_type': 'authorization_code',
         'client_id': auth0_client,
@@ -150,7 +147,7 @@ def redis_authentication_callback(context, request):
         overwrite=True,
         secure=is_https
     )
-    return {'saved_cookie': True}
+    raise HTTPTemporaryRedirect(location=auth0_redirect_uri, headers=request.response.headers)
 
 
 class NamespacedAuthenticationPolicy(object):
@@ -252,7 +249,20 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             # print('Missing assertion.', 'unauthenticated_userid', request)
             return None
 
-        jwt_info = self.get_token_info(id_token, request)
+        if 'redis.server' in request.registry.settings:
+            session_token = RedisSessionToken.from_redis(
+                redis_handler=request.registry[REDIS],
+                namespace=request.registry.settings['env.name'],
+                token=id_token
+            )
+            if not session_token:
+                return None
+            jwt_info = session_token.decode_jwt(
+                audience=request.registry.settings['auth0.client'],
+                secret=request.registry.settings['auth0.secret']
+            )
+        else:
+            jwt_info = self.get_token_info(id_token, request)
         if not jwt_info:
             return None
 
@@ -296,9 +306,9 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                     request.set_property(lambda r: False, 'auth0_expired')
                     return payload
 
-            else: # we don't have the key, let auth0 do the work for us
+            else:  # we don't have the key, let auth0 do the work for us
                 user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
-                resp  = requests.post(user_url, {'id_token':token})
+                resp = requests.post(user_url, {'id_token':token})
                 payload = resp.json()
                 if 'email' in payload and payload.get('email_verified') is True:
                     request.set_property(lambda r: False, 'auth0_expired')
@@ -652,7 +662,7 @@ def create_unauthorized_user(context, request):
     }
     data = urlencode(recap_values).encode()
     headers = {"Content-Type": "application/x-www-form-urlencoded; charset=utf-8"}
-    recap_res =  requests.get(recap_url, params=data, headers=headers).json()
+    recap_res = requests.get(recap_url, params=data, headers=headers).json()
 
     if recap_res['success']:
         sno_res = sno_collection_add(user_coll, request, False)  # POST User

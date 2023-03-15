@@ -6,8 +6,8 @@ import _ from 'underscore';
 import Nav from 'react-bootstrap/esm/Nav';
 
 import { JWT, isServerSide, object, console, memoizedUrlParse } from '@hms-dbmi-bgm/shared-portal-components/es/components/util';
+import { RedisLoginController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/RedisLoginController';
 import { LoginController, LogoutController } from '@hms-dbmi-bgm/shared-portal-components/es/components/navigation/components/LoginController';
-
 import { LoginNavItem } from './LoginNavItem';
 import { BigDropdownNavItem, BigDropdownIntroductionWrapper } from './BigDropdown';
 
@@ -54,9 +54,9 @@ export const AccountNav = React.memo(function AccountNav(props){
     if (!session) { // Render login button
         return (
             <Nav className="navbar-acct">
-                <LoginController {...{ updateAppSessionState, auth0Options }}>
+                <RedisLoginController {...{ updateAppSessionState, auth0Options }}>
                     <LoginNavItem {...{ schemas, session, href, windowWidth }} key="login-register" className="user-account-item" />
-                </LoginController>
+                </RedisLoginController>
             </Nav>
         );
     }

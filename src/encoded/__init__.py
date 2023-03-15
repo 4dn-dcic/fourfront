@@ -180,8 +180,8 @@ def main(global_config, **local_config):
     settings['auth0.options'] = {
         'auth': {
             'sso': False,
-            'redirect': False,
-            'responseType': 'token',
+            'redirect': True,
+            'responseType': 'code',
             'params': {
                 'scope': 'openid email',
                 'prompt': 'select_account'
